@@ -301,7 +301,7 @@ public class ErillishaunTuontiService {
         hakemus.setHakijaOid(henkilo.getOidHenkilo());
         hakemus.setHenkilotunnus(henkilo.getHetu());
         hakemus.setKansalaisuus(rivi.getKansalaisuus());
-        hakemus.setKotikunta(rivi.getKotikunta());
+        hakemus.setKotikunta(convertKuntaNimiToKuntaKoodi(rivi.getKotikunta()));
         hakemus.setOsoite(rivi.getOsoite());
         hakemus.setPostinumero(rivi.getPostinumero());
         hakemus.setPostitoimipaikka(rivi.getPostitoimipaikka());
@@ -320,6 +320,15 @@ public class ErillishaunTuontiService {
         } else {
             return kielisyys.getKieliKoodi();
         }
+    }
+
+    private String convertKuntaNimiToKuntaKoodi(String nimi) {
+        Map<String, Koodi> kuntaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA);
+        return kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream())
+                .map(Metadata::getNimi)
+                .filter(nimi::equalsIgnoreCase)
+                .findFirst()
+                .orElse(null);
     }
 
     private static boolean ainoastaanHakemuksenTilaPaivitys(ErillishaunHakijaDTO erillishakuRivi) {
@@ -552,13 +561,7 @@ public class ErillishaunTuontiService {
 
         String kotikunta = StringUtils.trimToEmpty(rivi.getKotikunta());
         if(!kotikunta.isEmpty()) {
-            Map<String, Koodi> kuntaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA);
-
-            boolean kotikuntaKoodistossa = kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream())
-                    .map(Metadata::getNimi)
-                    .anyMatch(x -> kotikunta.equalsIgnoreCase(x));
-
-            if (!kotikuntaKoodistossa) {
+            if (convertKuntaNimiToKuntaKoodi(kotikunta) == null) {
                 return "Virheellinen kotikunta (" + rivi.getKotikunta() + "). " + rivi.toString();
             }
         }
