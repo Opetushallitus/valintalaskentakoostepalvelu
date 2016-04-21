@@ -321,7 +321,7 @@ public class ErillishaunTuontiService {
 
     private String convertKuntaNimiToKuntaKoodi(String nimi) {
         Map<String, Koodi> kuntaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA);
-        return kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream().map(metadata -> new ImmutablePair<>(koodi.getKoodiArvo(), metadata.getNimi())))
+        return kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream().map(metadata -> new ImmutablePair<>(metadata.getNimi(), koodi.getKoodiArvo())))
                 .filter(x -> x.getLeft().equalsIgnoreCase(nimi))
                 .map(ImmutablePair::getRight)
                 .findFirst()
