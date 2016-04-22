@@ -40,4 +40,9 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
         callback.accept(oppijaRef.get());
         return Futures.immediateCancelledFuture();
     }
+
+    @Override
+    public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
+        return Observable.just(oppijaRef.get());
+    }
 }

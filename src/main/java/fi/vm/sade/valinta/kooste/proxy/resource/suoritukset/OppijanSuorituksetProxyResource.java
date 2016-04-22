@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import rx.Observable;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -63,65 +64,27 @@ public class OppijanSuorituksetProxyResource {
                     .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
                     .build());
         });
-
-        try {
-            PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
-                LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-                asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
-            });
-
-            AtomicReference<Oppija> oppijaRef = new AtomicReference<>();
-            AtomicReference<ParametritDTO> parametriRef = new AtomicReference<>();
-            AtomicReference<Hakemus> hakemusRef = new AtomicReference<>();
-            AtomicReference<HakuV1RDTO> tarjontaRef = new AtomicReference<>();
-
-            SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
-                    .setLaskurinAlkuarvo(4)
-                    .setSynkronoituToiminto(
-                            () -> {
-                                HakemusDTO hakemusDTO = HakemuksetConverterUtil.muodostaHakemuksetDTO(
-                                        tarjontaRef.get(),
-                                        "",
-                                        Collections.singletonList(hakemusRef.get()),
-                                        Collections.singletonList(oppijaRef.get()),
-                                        parametriRef.get()).get(0);
-                                asyncResponse.resume(Response
-                                        .ok()
-                                        .header("Content-Type", "application/json")
-                                        .entity(hakemusDTO.getAvaimet().stream()
-                                                .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
-                                                .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)))
-                                        .build());
-                            }
-                    ).build();
-
-            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(
-                    tarjonta -> {
-                        tarjontaRef.set(tarjonta);
-                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-
-                        suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, tarjonta.getOid(), opiskelija -> {
-                            oppijaRef.set(opiskelija);
-                            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                        }, poikkeuskasittelija);
-                    },
-                    poikkeuskasittelija);
-
-            applicationAsyncResource.getApplication(hakemusOid).subscribe(hakemus -> {
-                hakemusRef.set(hakemus);
-                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-            }, poikkeuskasittelija);
-
-            ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametritDTO -> {
-                        parametriRef.set(parametritDTO);
-                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                    },
-                    poikkeuskasittelija
-            );
-
-        } catch (Throwable t) {
-            LOG.error("OppijanSuorituksetProxyResource throws", t);
-            asyncResponse.resume(Response.serverError().entity(t.getMessage()).build());
-        }
+        Observable<Hakemus> hakemusObservable = applicationAsyncResource.getApplication(hakemusOid);
+        Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid);
+        Observable<Oppija> suorituksetByOppija = suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid);
+        Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
+                (haku, suoritukset, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
+                        haku,
+                        "",
+                        Collections.singletonList(hakemus),
+                        Collections.singletonList(suoritukset),
+                        ohjausparametrit).get(0)
+        ).subscribe(hakemusDTO -> {
+            asyncResponse.resume(Response
+                    .ok()
+                    .header("Content-Type", "application/json")
+                    .entity(hakemusDTO.getAvaimet().stream()
+                            .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
+                            .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)))
+                    .build());
+        }, poikkeus -> {
+            LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
+            asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
+        });
     }
 }

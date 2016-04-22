@@ -5,6 +5,7 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -22,6 +24,9 @@ public class OhjausparametritAsyncResourceImpl extends HttpResource implements O
     @Autowired
     public OhjausparametritAsyncResourceImpl(@Value("${host.scheme:https}://${host.virkailija}") String address) {
         super(address, TimeUnit.MINUTES.toMillis(10));
+    }
+    public Observable<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
+        return getAsObservable("/ohjausparametrit-service/api/v1/rest/parametri/" + hakuOid, ParametritDTO.class);
     }
 
     public Peruutettava haeHaunOhjausparametrit(String hakuOid, Consumer<ParametritDTO> callback, Consumer<Throwable> failureCallback) {

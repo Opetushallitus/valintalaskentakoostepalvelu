@@ -71,7 +71,12 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
             return TyhjaPeruutettava.tyhjaPeruutettava();
         }
     }
-
+    public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
+        return getAsObservable("/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid, Oppija.class, client -> {
+            client.query("haku", hakuOid);
+            return client;
+        });
+    }
     @Override
     public Future<Response> getSuorituksetByOppija(String opiskelijaOid,
                                                    String hakuOid,

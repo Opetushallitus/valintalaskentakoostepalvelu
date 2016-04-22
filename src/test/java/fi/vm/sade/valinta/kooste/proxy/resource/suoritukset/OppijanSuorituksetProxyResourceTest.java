@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import rx.Observable;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -152,6 +153,11 @@ public class OppijanSuorituksetProxyResourceTest {
                             return null;
                         }
                 );
+        Mockito.when(Mocks
+                .getOhjausparametritAsyncResource()
+                .haeHaunOhjausparametrit(Mockito.anyString()))
+                .thenAnswer(
+                        answer -> Observable.just(null));
     }
 
 }

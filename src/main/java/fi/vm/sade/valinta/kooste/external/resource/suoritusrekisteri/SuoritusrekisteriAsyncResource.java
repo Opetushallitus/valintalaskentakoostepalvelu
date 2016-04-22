@@ -19,10 +19,11 @@ public interface SuoritusrekisteriAsyncResource {
                                        String hakuOid,
                                        Consumer<List<Oppija>> callback,
                                        Consumer<Throwable> failureCallback);
-
+    @Deprecated
     Future<Response> getSuorituksetByOppija(String opiskelijaOid,
                                             String hakuOid,
                                             Consumer<Oppija> callback,
                                             Consumer<Throwable> failureCallback);
 
+    Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid);
 }
