@@ -5,6 +5,63 @@
     {
       "suoritus": {
         "henkiloOid": "1.2.246.562.24.71943835646",
+        "source": "1.2.246.562.24.17552525783",
+        "vahvistettu": false,
+        "komo": "valma",
+        "myontaja": "1.2.246.562.11.00000000262",
+        "tila": "VALMIS",
+        "valmistuminen": "31.05.2014",
+        "yksilollistaminen": "Ei",
+        "suoritusKieli": "FI",
+        "id": "b20038e9-d3d4-4e5a-8983-17bc674d97dc"
+      },
+      "arvosanat": [
+        {
+          "id": "48f05a42-a86f-4bd5-b1b2-a01e2f2a1a0b",
+          "suoritus": "b20038e9-d3d4-4e5a-8983-17bc674d97dc",
+          "arvio": {
+            "arvosana": "10",
+            "asteikko": "4-10"
+          },
+          "aine": "AI",
+          "source": "1.2.246.562.24.17552525783",
+          "lahdeArvot": {},
+          "valinnainen": false,
+          "lisatieto": "FI"
+        }
+      ]
+    },
+    {
+      "suoritus": {
+        "henkiloOid": "1.2.246.562.24.71943835646",
+        "source": "1.2.246.562.24.17552525783",
+        "vahvistettu": false,
+        "komo": "telma",
+        "myontaja": "1.2.246.562.11.00000000262",
+        "tila": "VALMIS",
+        "valmistuminen": "31.05.2014",
+        "yksilollistaminen": "Ei",
+        "suoritusKieli": "FI",
+        "id": "b20038e9-d3d4-4e5a-8983-17bc674d97dc"
+      },
+      "arvosanat": [
+        {
+          "id": "48f05a42-a86f-4bd5-b1b2-a01e2f2a1a0b",
+          "suoritus": "b20038e9-d3d4-4e5a-8983-17bc674d97dc",
+          "arvio": {
+            "arvosana": "9",
+            "asteikko": "4-10"
+          },
+          "aine": "GE",
+          "source": "1.2.246.562.24.17552525783",
+          "lahdeArvot": {},
+          "valinnainen": false
+        }
+      ]
+    },
+    {
+      "suoritus": {
+        "henkiloOid": "1.2.246.562.24.71943835646",
         "source": "1.2.246.562.24.71943835646",
         "vahvistettu": false,
         "komo": "1.2.246.562.13.62959769647",
