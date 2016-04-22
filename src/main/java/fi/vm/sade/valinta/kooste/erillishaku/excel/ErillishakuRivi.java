@@ -275,7 +275,7 @@ public class ErillishakuRivi {
     }
 
     public boolean isKesken() {
-        return "KESKEN".equalsIgnoreCase(hakemuksenTila);
+        return "KESKEN".equalsIgnoreCase(hakemuksenTila) || StringUtils.isBlank(hakemuksenTila);
     }
 
     public boolean isPoistetaankoRivi() {
