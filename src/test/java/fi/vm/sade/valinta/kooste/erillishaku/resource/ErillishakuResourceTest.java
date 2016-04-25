@@ -163,7 +163,7 @@ public class ErillishakuResourceTest {
                 HenkiloTyyppi.OPPIJA,
                 null,
                 null);
-        assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO());
+        assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO(null));
     }
 
     private void verifyCreatedExcelDocument2(final InputStream storedDocument) throws IOException {

@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 @Service
 public class KoodistoCachedAsyncResource {
     public static final String MAAT_JA_VALTIOT_1 = "maatjavaltiot1";
+    public static final String MAAT_JA_VALTIOT_2 = "maatjavaltiot2";
     public static final String POSTI = "posti";
     public static final String KIELI = "kieli";
     public static final String KUNTA = "kunta";

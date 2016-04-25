@@ -231,7 +231,7 @@ public class ErillishaunTuontiService {
             try {
                 henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(
                         lisattavatTaiKeskeneraiset.stream()
-                                .map(rivi -> rivi.toHenkiloCreateDTO())
+                                .map(rivi -> rivi.toHenkiloCreateDTO(convertKansalaisuusKoodi(rivi.getKansalaisuus())))
                                 .collect(Collectors.toList()))
                         .get();
                 LOG.info("Luotiin henkilot=" + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
@@ -248,6 +248,18 @@ public class ErillishaunTuontiService {
         }
         LOG.info("Viedaan hakijoita ohittaen rivit hakemuksentilalla kesken ({}/{}) jonoon {}", lisattavatTaiKeskeneraiset.stream().filter(r -> !r.isKesken()).count(), rivit.size(), haku.getValintatapajononNimi());
         tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset, prosessi);
+    }
+
+    private String convertKansalaisuusKoodi(String kansalaisuus) {
+        Map<String, Koodi> maaKoodit1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> maaKoodit2 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_2);
+
+        String maaNimi = KoodistoCachedAsyncResource.haeKoodistaArvo(maaKoodit1.get(kansalaisuus), "FI", null);
+        return maaKoodit2.values().stream().flatMap(koodi -> koodi.getMetadata().stream().map(metadata -> new ImmutablePair<>(metadata.getNimi(), koodi.getKoodiArvo())))
+                .filter(x -> x.getLeft().equalsIgnoreCase(maaNimi))
+                .map(ImmutablePair::getRight)
+                .findFirst()
+                .orElse(null);
     }
 
     private Map<String, ErillishakuRivi> createRivitHenkiloittain(List<ErillishakuRivi> lisattavatTaiKeskeneraiset) {

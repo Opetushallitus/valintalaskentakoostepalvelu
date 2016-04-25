@@ -31,8 +31,18 @@ public class MockKoodistoCachedAsyncResource extends KoodistoCachedAsyncResource
                     "99", new Koodi(),
                     "SV", new Koodi(),
                     "NO", new Koodi());
-            case KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1:
-                return ImmutableMap.of( "FIN", new Koodi());
+            case KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1: {
+                Koodi maakoodi = new Koodi();
+                maakoodi.setMetadata(Arrays.asList(createMetadata("Suomi", "FI"), createMetadata("Finland", "SV"), createMetadata("Finland", "EN")));
+                maakoodi.setKoodiArvo("FIN");
+                return ImmutableMap.of( "FIN", maakoodi);
+            }
+            case KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_2: {
+                Koodi maakoodi2 = new Koodi();
+                maakoodi2.setMetadata(Arrays.asList(createMetadata("Suomi", "FI"), createMetadata("Finland", "SV"), createMetadata("Finland", "EN")));
+                maakoodi2.setKoodiArvo("246");
+                return ImmutableMap.of( "246", maakoodi2);
+            }
             case KoodistoCachedAsyncResource.KUNTA: {
                 Koodi kuntaKoodi = new Koodi();
                 kuntaKoodi.setMetadata(Arrays.asList(createMetadata("Helsinki", "FI"), createMetadata("Helsingfors", "SV")));
