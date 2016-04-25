@@ -265,7 +265,8 @@ public class PistesyottoTuontiSoteliService {
                                         .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
                                         .build())
                         );
-                        successHandler.accept(additionalData.size(), virheet);
+                        int onnistuneet = additionalData.stream().map(ad -> ad.getOid()).collect(Collectors.toSet()).size();
+                        successHandler.accept(onnistuneet, virheet);
                     }, exception -> exceptionHandler.accept(exception));
                 } else {
                     successHandler.accept(0, virheet);
