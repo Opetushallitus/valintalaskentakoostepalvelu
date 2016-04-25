@@ -68,8 +68,8 @@ public class OppijanSuorituksetProxyResourceTest {
             Map<String, String> oppijanSuoritukset = GSON.
                     fromJson(getJsonFromResponse(response), new TypeToken<Map<String, String>>() {
                     }.getType());
-            assertEquals("7", oppijanSuoritukset.get("PK_GE"));
-            assertEquals("9", oppijanSuoritukset.get("PK_AI"));
+            assertEquals("9", oppijanSuoritukset.get("PK_GE"));
+            assertEquals("10", oppijanSuoritukset.get("PK_AI"));
             assertEquals("10", oppijanSuoritukset.get("PK_A1"));
             assertEquals("FI", oppijanSuoritukset.get("PK_AI_OPPIAINE"));
             assertEquals("EN", oppijanSuoritukset.get("PK_A1_OPPIAINE"));
