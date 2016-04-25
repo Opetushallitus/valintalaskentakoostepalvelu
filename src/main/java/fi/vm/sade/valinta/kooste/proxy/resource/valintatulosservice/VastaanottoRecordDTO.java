@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.util.Assert;
 
@@ -110,5 +111,18 @@ public class VastaanottoRecordDTO {
         v.setTila(valintatulos.getTila());
         v.setSelite(selite);
         return v;
+    }
+
+    public static VastaanottoRecordDTO of(ErillishaunHakijaDTO hakija, String muokkaaja, String selite) {
+        VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
+        dto.setValintatapajonoOid(hakija.getValintatapajonoOid());
+        dto.setHakemusOid(hakija.getHakemusOid());
+        dto.setHakukohdeOid(hakija.getHakukohdeOid());
+        dto.setHakuOid(hakija.getHakuOid());
+        dto.setHenkiloOid(hakija.getHakijaOid());
+        dto.setIlmoittaja(muokkaaja);
+        dto.setSelite(selite);
+        dto.setTila(hakija.getValintatuloksenTila());
+        return dto;
     }
 }

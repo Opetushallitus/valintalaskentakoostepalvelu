@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import com.google.common.collect.ImmutableMap;
-import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
+
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
@@ -9,7 +9,6 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,33 +152,11 @@ public class ValintaTulosServiceProxyResource {
     }
 
     private List<VastaanottoRecordDTO> createVastaanottoRecordsFrom(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
-        return valintatulokset.stream().map(v -> {
-            VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
-            dto.setValintatapajonoOid(v.getValintatapajonoOid());
-            dto.setHakemusOid(v.getHakemusOid());
-            dto.setHakukohdeOid(v.getHakukohdeOid());
-            dto.setHakuOid(v.getHakuOid());
-            dto.setHenkiloOid(v.getHakijaOid());
-            dto.setIlmoittaja(muokkaaja);
-            dto.setSelite(selite);
-            dto.setTila(v.getTila());
-            return dto;
-        }).collect(Collectors.toList());
+        return valintatulokset.stream().map(v -> VastaanottoRecordDTO.of(v, muokkaaja, selite)).collect(Collectors.toList());
     }
 
     private List<VastaanottoRecordDTO> erillishakuCreateVastaanottoRecordsFrom(List<ErillishaunHakijaDTO> hakijat, String muokkaaja, String selite) {
-        return hakijat.stream().map(hakija -> {
-            VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
-            dto.setValintatapajonoOid(hakija.getValintatapajonoOid());
-            dto.setHakemusOid(hakija.getHakemusOid());
-            dto.setHakukohdeOid(hakija.getHakukohdeOid());
-            dto.setHakuOid(hakija.getHakuOid());
-            dto.setHenkiloOid(hakija.getHakijaOid());
-            dto.setIlmoittaja(muokkaaja);
-            dto.setSelite(selite);
-            dto.setTila(hakija.getValintatuloksenTila());
-            return dto;
-        }).collect(Collectors.toList());
+        return hakijat.stream().map(hakija -> VastaanottoRecordDTO.of(hakija, muokkaaja, selite)).collect(Collectors.toList());
     }
 
     private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {

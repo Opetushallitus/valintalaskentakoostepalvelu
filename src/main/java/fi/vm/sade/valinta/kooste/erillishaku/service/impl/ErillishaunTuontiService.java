@@ -374,18 +374,9 @@ public class ErillishaunTuontiService {
     }
 
     private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja, String selite) {
-        return hakijatJaPoistettavat.stream().map(erillishaunHakijaDTO -> {
-            VastaanottoRecordDTO v = new VastaanottoRecordDTO();
-            v.setValintatapajonoOid(erillishaunHakijaDTO.getValintatapajonoOid());
-            v.setHakemusOid(erillishaunHakijaDTO.getHakemusOid());
-            v.setHakukohdeOid(erillishaunHakijaDTO.getHakukohdeOid());
-            v.setHakuOid(erillishaunHakijaDTO.getHakuOid());
-            v.setHenkiloOid(erillishaunHakijaDTO.hakijaOid);
-            v.setIlmoittaja(muokkaaja);
-            v.setTila(erillishaunHakijaDTO.getValintatuloksenTila());
-            v.setSelite(selite);
-            return v;
-        }).collect(Collectors.toList());
+        return hakijatJaPoistettavat.stream().map(erillishaunHakijaDTO ->
+            VastaanottoRecordDTO.of(erillishaunHakijaDTO, muokkaaja, selite)).
+            collect(Collectors.toList());
     }
 
 
