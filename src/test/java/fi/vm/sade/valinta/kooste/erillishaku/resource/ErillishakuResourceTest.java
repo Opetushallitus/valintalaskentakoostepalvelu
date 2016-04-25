@@ -161,6 +161,7 @@ public class ErillishakuResourceTest {
                 ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(),
                 henkiloOid,
                 HenkiloTyyppi.OPPIJA,
+                null,
                 null);
         assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO());
     }

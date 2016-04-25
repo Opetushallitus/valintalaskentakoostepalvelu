@@ -257,7 +257,7 @@ public class ErillishakuRivi {
 
     public HenkiloCreateDTO toHenkiloCreateDTO() {
         return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().name(), getEtunimi(), getSukunimi(),
-                getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli());
+                getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli(), getKansalaisuus());
     }
 
     public Date parseSyntymaAika() {

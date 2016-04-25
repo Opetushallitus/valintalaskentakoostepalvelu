@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.authentication.dto;
 
 import java.util.Date;
 
+import fi.vm.sade.authentication.model.Kansalaisuus;
 import fi.vm.sade.authentication.model.Kielisyys;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -21,9 +22,11 @@ public class HenkiloCreateDTO {
     public final String sukupuoli; //MIES tai NAINEN
     public final Kielisyys aidinkieli;
     public final Kielisyys asiointiKieli;
+    public final Kansalaisuus kansalaisuus;
+
 
     public HenkiloCreateDTO(String aidinkieli, String sukupuoli, String etunimet, String sukunimi, String hetu, Date syntymaaika, String oidHenkilo,
-                            HenkiloTyyppi henkiloTyyppi, String asiointiKieli) {
+                            HenkiloTyyppi henkiloTyyppi, String asiointiKieli, String kansalaisuus) {
         this.aidinkieli = createKielisyys(aidinkieli);
         this.sukupuoli = sukupuoli;
         this.etunimet = etunimet;
@@ -34,6 +37,7 @@ public class HenkiloCreateDTO {
         this.oidHenkilo = oidHenkilo;
         this.henkiloTyyppi = henkiloTyyppi;
         this.asiointiKieli = createKielisyys(asiointiKieli);
+        this.kansalaisuus = createKansalaisuus(kansalaisuus);
     }
 
     private Kielisyys createKielisyys(String kielikoodi) {
@@ -43,6 +47,16 @@ public class HenkiloCreateDTO {
             Kielisyys kielisyys = new Kielisyys();
             kielisyys.setKieliKoodi(kielikoodi.toLowerCase());
             return kielisyys;
+        }
+    }
+
+    private Kansalaisuus createKansalaisuus(String maakoodi) {
+        if (null == StringUtils.trimToNull(maakoodi)) {
+            return null;
+        } else {
+            Kansalaisuus kansalaisuus = new Kansalaisuus();
+            kansalaisuus.setKansalaisuusKoodi(maakoodi.toLowerCase());
+            return kansalaisuus;
         }
     }
 
