@@ -205,7 +205,7 @@ public class ErillishaunTuontiServiceTest {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(failingResource, applicationAsyncResource, henkiloAsyncResource, valintaTulosServiceAsyncResource, Schedulers.immediate());
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
-            tuontiService.tuoExcelistä(null,prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä("bob", prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
             Mockito.verify(prosessi).keskeyta((Collection<Poikkeus>)Matchers.any());
         }
 
@@ -249,7 +249,7 @@ class ErillisHakuTuontiTestCase {
 
     protected void importData(InputStream data) {
         final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, valintaTulosServiceAsyncResource, Schedulers.immediate());
-        tuontiService.tuoExcelistä(null, prosessi, erillisHaku, data);
+        tuontiService.tuoExcelistä("frank", prosessi, erillisHaku, data);
         Mockito.verify(prosessi).valmistui("ok");
     }
 }

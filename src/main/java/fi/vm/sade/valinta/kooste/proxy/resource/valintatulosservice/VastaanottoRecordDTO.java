@@ -3,6 +3,9 @@ package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.util.Assert;
+
+import javax.validation.constraints.NotNull;
 
 public class VastaanottoRecordDTO {
     private String valintatapajonoOid;
@@ -23,6 +26,7 @@ public class VastaanottoRecordDTO {
     }
 
     public void setHenkiloOid(String henkiloOid) {
+        assertNotNull(henkiloOid, "henkiloOid");
         this.henkiloOid = henkiloOid;
     }
 
@@ -31,6 +35,7 @@ public class VastaanottoRecordDTO {
     }
 
     public void setHakemusOid(String hakemusOid) {
+        assertNotNull(hakemusOid, "hakemusOid");
         this.hakemusOid = hakemusOid;
     }
 
@@ -39,6 +44,7 @@ public class VastaanottoRecordDTO {
     }
 
     public void setHakuOid(String hakuOid) {
+        assertNotNull(hakuOid, "hakuOid");
         this.hakuOid = hakuOid;
     }
 
@@ -47,6 +53,7 @@ public class VastaanottoRecordDTO {
     }
 
     public void setHakukohdeOid(String hakukohdeOid) {
+        assertNotNull(hakukohdeOid, "hakukohdeOid");
         this.hakukohdeOid = hakukohdeOid;
     }
 
@@ -55,6 +62,7 @@ public class VastaanottoRecordDTO {
     }
 
     public void setIlmoittaja(String ilmoittaja) {
+        assertNotNull(ilmoittaja, "ilmoittaja");
         this.ilmoittaja = ilmoittaja;
     }
 
@@ -63,6 +71,7 @@ public class VastaanottoRecordDTO {
     }
 
     public void setTila(ValintatuloksenTila tila) {
+        assertNotNull(tila, "tila");
         this.tila = tila;
     }
 
@@ -70,17 +79,24 @@ public class VastaanottoRecordDTO {
         return selite;
     }
 
+    @NotNull
     public void setSelite(String selite) {
+        assertNotNull(selite, "selite");
         this.selite = selite;
     }
 
     public void setValintatapajonoOid(String valintatapajonoOid) {
+        assertNotNull(valintatapajonoOid, "valintatapajonoOid");
         this.valintatapajonoOid = valintatapajonoOid;
     }
 
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    private void assertNotNull(Object value, String name) {
+        Assert.notNull(value, name + " may not be null");
     }
 
     public static VastaanottoRecordDTO of(Valintatulos valintatulos, String muokkaaja, String selite) {
