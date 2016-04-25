@@ -4,6 +4,8 @@ import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import javax.validation.constraints.NotNull;
@@ -17,6 +19,8 @@ public class VastaanottoRecordDTO {
     private String ilmoittaja;
     private ValintatuloksenTila tila;
     private String selite;
+
+    private static final Logger LOG = LoggerFactory.getLogger(VastaanottoRecordDTO.class);
 
     public String getValintatapajonoOid() {
         return valintatapajonoOid;
@@ -101,28 +105,38 @@ public class VastaanottoRecordDTO {
     }
 
     public static VastaanottoRecordDTO of(Valintatulos valintatulos, String muokkaaja, String selite) {
-        VastaanottoRecordDTO v = new VastaanottoRecordDTO();
-        v.setValintatapajonoOid(valintatulos.getValintatapajonoOid());
-        v.setHenkiloOid(valintatulos.getHakijaOid());
-        v.setHakemusOid(valintatulos.getHakemusOid());
-        v.setHakuOid(valintatulos.getHakuOid());
-        v.setHakukohdeOid(valintatulos.getHakukohdeOid());
-        v.setIlmoittaja(muokkaaja);
-        v.setTila(valintatulos.getTila());
-        v.setSelite(selite);
-        return v;
+        try {
+            VastaanottoRecordDTO v = new VastaanottoRecordDTO();
+            v.setValintatapajonoOid(valintatulos.getValintatapajonoOid());
+            v.setHenkiloOid(valintatulos.getHakijaOid());
+            v.setHakemusOid(valintatulos.getHakemusOid());
+            v.setHakuOid(valintatulos.getHakuOid());
+            v.setHakukohdeOid(valintatulos.getHakukohdeOid());
+            v.setIlmoittaja(muokkaaja);
+            v.setTila(valintatulos.getTila());
+            v.setSelite(selite);
+            return v;
+        } catch (IllegalArgumentException e) {
+            LOG.error(String.format("Problem when creating %s from valintatulos %s", VastaanottoRecordDTO.class.getSimpleName(), valintatulos), e);
+            throw e;
+        }
     }
 
     public static VastaanottoRecordDTO of(ErillishaunHakijaDTO hakija, String muokkaaja, String selite) {
-        VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
-        dto.setValintatapajonoOid(hakija.getValintatapajonoOid());
-        dto.setHakemusOid(hakija.getHakemusOid());
-        dto.setHakukohdeOid(hakija.getHakukohdeOid());
-        dto.setHakuOid(hakija.getHakuOid());
-        dto.setHenkiloOid(hakija.getHakijaOid());
-        dto.setIlmoittaja(muokkaaja);
-        dto.setSelite(selite);
-        dto.setTila(hakija.getValintatuloksenTila());
-        return dto;
+        try {
+            VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
+            dto.setValintatapajonoOid(hakija.getValintatapajonoOid());
+            dto.setHakemusOid(hakija.getHakemusOid());
+            dto.setHakukohdeOid(hakija.getHakukohdeOid());
+            dto.setHakuOid(hakija.getHakuOid());
+            dto.setHenkiloOid(hakija.getHakijaOid());
+            dto.setIlmoittaja(muokkaaja);
+            dto.setSelite(selite);
+            dto.setTila(hakija.getValintatuloksenTila());
+            return dto;
+        } catch (IllegalArgumentException e) {
+            LOG.error(String.format("Problem when creating %s from erillishaun hakija %s", VastaanottoRecordDTO.class.getSimpleName(), hakija), e);
+            throw e;
+        }
     }
 }
