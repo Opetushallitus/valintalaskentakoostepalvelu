@@ -1537,7 +1537,7 @@ public class HakemuksetConverterUtilTest {
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus);
         assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(hakemus, "POHJAKOULUTUS"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
-        assertEquals("not 13:" + hakemus.getAvaimet(), 13, hakemus.getAvaimet().size());
+        assertEquals("not 15:" + hakemus.getAvaimet(), 15, hakemus.getAvaimet().size());
     }
 
     @Test
