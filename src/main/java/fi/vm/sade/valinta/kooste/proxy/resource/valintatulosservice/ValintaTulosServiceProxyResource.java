@@ -90,7 +90,14 @@ public class ValintaTulosServiceProxyResource {
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s?selite=%s",
                         hakuOid, hakukohdeOid, selite));
 
-        Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(createVastaanottoRecordsFrom(valintatulokset, username(), selite));
+        List<VastaanottoRecordDTO> tallennettavat = null;
+        try {
+            tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
+        } catch (Exception e) {
+            asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(e.getMessage(), Collections.emptyList())).build());
+            return;
+        }
+        Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
         vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
         Observable<HakukohteenValintatulosUpdateStatuses> tilojenTallennusSijoitteluun = sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite).doOnError(
             throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
@@ -127,7 +134,14 @@ public class ValintaTulosServiceProxyResource {
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /erillishaku/haku/%s/hakukohde/%s?selite=%s",
                         hakuOid, hakukohdeOid, selite));
 
-        Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(erillishakuCreateVastaanottoRecordsFrom(erillishaunHakijaDtos, username(), selite));
+        List<VastaanottoRecordDTO> tallennettavat = null;
+        try {
+            tallennettavat = erillishakuCreateVastaanottoRecordsFrom(erillishaunHakijaDtos, username(), selite);
+        } catch (Exception e) {
+            asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(e.getMessage(), Collections.emptyList())).build());
+            return;
+        }
+        Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
         vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
         Observable<HakukohteenValintatulosUpdateStatuses> tilojenTallennusSijoitteluun = sijoitteluResource.muutaErillishaunHakemuksenTilaa(hakuOid, hakukohdeOid, erillishaunHakijaDtos).doOnError(
                 throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
