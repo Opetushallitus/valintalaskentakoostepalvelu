@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -116,7 +117,7 @@ public class ValintalaskentaExcelResource {
     }
 
     @Autowired
-    private TilaAsyncResource tilaAsyncResource;
+    private ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     @Autowired
     private SijoitteluAsyncResource sijoitteluAsyncResource;
     @Autowired
@@ -140,7 +141,7 @@ public class ValintalaskentaExcelResource {
             p.setKokonaistyo(1);
             Observable.combineLatest(
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
-                    tilaAsyncResource.getValintatuloksetHakukohteelle(hakukohdeOid),
+                    valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
                     sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
                     (tarjonta, valintatulokset, hakukohde, hakemukset) -> {
