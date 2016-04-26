@@ -2,11 +2,13 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.client.Entity;
@@ -18,7 +20,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
@@ -32,9 +34,9 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
-import fi.vm.sade.valinta.kooste.mocks.MockData;
-import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import org.mockito.Mockito;
+import rx.Observable;
 
 public class ErillishakuResourceTest {
     String hakuOid = "1.2.246.562.5.2013080813081926341928";
@@ -73,7 +75,6 @@ public class ErillishakuResourceTest {
     @Test
     public void vientiExcelTiedostoon2() throws IOException {
         MockApplicationAsyncResource.setResult(createVientiHakemus());
-
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
                 .query("hakutyyppi", "KORKEAKOULU")
@@ -179,9 +180,9 @@ public class ErillishakuResourceTest {
                 "MIES",
                 "",
                 "SV",
-                "HYLATTY",
+                "KESKEN",
                 "",
-                "EI_TEHTY",
+                "",
                 false,
                 false,
                 "SV",
