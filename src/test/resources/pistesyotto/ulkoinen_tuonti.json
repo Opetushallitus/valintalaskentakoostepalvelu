@@ -15,6 +15,39 @@
     ]
   },
   {
+    "hakemusOid":"12316.7.7.997",
+    "henkiloOid":"1.2.4124.83218",
+    "valintakokeet": [
+      {
+        "tunniste":"1234",
+        "osallistuminen":"OSALLISTUI",
+        "pisteet":"8.34"
+      }
+    ]
+  },
+  {
+    "hakemusOid":"12316.7.7.995",
+    "henkiloOid":"1.2.4124.83141",
+    "valintakokeet": [
+      {
+        "tunniste":"doesNotExists",
+        "osallistuminen":"OSALLISTUI",
+        "pisteet":"8.34"
+      }
+    ]
+  },
+  {
+    "hakemusOid":"12316.7.7.996",
+    "henkiloOid":"1.2.4124.83142",
+    "valintakokeet": [
+      {
+        "tunniste":"1234",
+        "osallistuminen":"EI_OSALLISTUNUT",
+        "pisteet":"8.34"
+      }
+    ]
+  },
+  {
     "hakemusOid":"12316.7.7.998",
     "henkiloOid":"1.2.4124.83219",
     "valintakokeet": [

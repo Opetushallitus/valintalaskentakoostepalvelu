@@ -61,6 +61,11 @@ public class HakemusSpec extends ConstantsSpec {
             hakemus.setOid(oid);
             return this;
         }
+
+        public HakemusBuilder setPersonOid(String personOid) {
+            hakemus.setPersonOid(personOid);
+            return this;
+        }
         public HakemusBuilder setAsiointikieli(String asiointikieli) {
             hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.ASIOINTIKIELI, asiointikieli);
             return this;

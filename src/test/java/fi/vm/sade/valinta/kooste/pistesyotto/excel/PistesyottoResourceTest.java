@@ -96,12 +96,26 @@ public class PistesyottoResourceTest {
         final String tunniste1 = "1234";
         final String tunniste2 = "1235";
         final String hakemusOid1 = "12316.7.7.74";
+        final String hakemusPersonOid1 = "1.2.4124.41214";
         final String hakemusOid2 = "12316.7.7.998";
+        final String hakemusPersonOid2 = "1.2.4124.83219";
+        final String hakemusOid3 = "12316.7.7.997";
+        final String hakemusInvalidPersonOid3 = "1.2.4124.83215";
         final String hakukohdeOid1 = "1.2.3.4";
+        final String hakemusOid4 = "12316.7.7.996";
+        final String hakemusPersonOid4 = "1.2.4124.83142";
+        final String hakemusOid5 = "12316.7.7.995";
+        final String hakemusPersonOid5 = "1.2.4124.83141";
+
         cleanMocks();
-        Hakemus hakemus1 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).addHakutoive("1.2.3.4").build();
-        Hakemus hakemus2 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid2).addHakutoive(hakukohdeOid1).addHakutoive("1.2.3.4").build();
-        List<Hakemus> hakemuses = Arrays.asList(hakemus1, hakemus2);
+        Hakemus hakemus1 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).addHakutoive("1.2.3.4").build();
+        Hakemus hakemus2 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid2).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid2).addHakutoive("1.2.3.4").build();
+        Hakemus hakemus3 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid3).addHakutoive(hakukohdeOid1).setPersonOid(hakemusInvalidPersonOid3).addHakutoive("1.2.3.4").build();
+        Hakemus hakemus4 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid4).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid4).addHakutoive("1.2.3.4").build();
+        Hakemus hakemus5 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid5).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid5).addHakutoive("1.2.3.4").build();
+
+
+        List<Hakemus> hakemuses = Arrays.asList(hakemus1, hakemus2, hakemus3, hakemus4, hakemus5);
         MockApplicationAsyncResource.setResult(hakemuses);
 
         HakukohdeJaValintaperusteDTO vp = new HakukohdeJaValintaperusteDTO(hakukohdeOid1,
@@ -122,7 +136,7 @@ public class PistesyottoResourceTest {
 
         String requestBody = IOUtils.toString(new ClassPathResource("pistesyotto/ulkoinen_tuonti.json").getInputStream());
         List<HakemusDTO> hakemusDTOs  = HttpResource.GSON.fromJson(requestBody, new TypeToken<List<HakemusDTO>>() {}.getType());
-        assertEquals(3, hakemusDTOs.size());
+        assertEquals(6, hakemusDTOs.size());
         Response response = pistesyottoUlkoinenTuontiResource.getWebClient()
                 .query("hakuOid", "HAKUOID")
                 .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON_TYPE));
