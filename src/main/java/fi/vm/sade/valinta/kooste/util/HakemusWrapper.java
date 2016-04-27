@@ -282,9 +282,9 @@ public class HakemusWrapper {
         return hakutoiveet;
     }
 
-    public List<String> getHakutoiveOids() {
+    public Collection<String> getHakutoiveOids() {
         return getHakutoiveet().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
-                .map(entry -> StringUtils.trimToEmpty(entry.getValue())).filter(e -> !StringUtils.isBlank(e)).collect(Collectors.toList());
+                .map(entry -> StringUtils.trimToEmpty(entry.getValue())).filter(e -> !StringUtils.isBlank(e)).collect(Collectors.toSet());
     }
 }
