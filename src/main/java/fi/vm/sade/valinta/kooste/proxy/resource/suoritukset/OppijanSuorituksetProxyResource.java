@@ -57,7 +57,7 @@ public class OppijanSuorituksetProxyResource {
             @PathParam("opiskeljaOid") String opiskeljaOid,
             @PathParam("hakemusOid") String hakemusOid,
             @Suspended final AsyncResponse asyncResponse) {
-        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}", opiskeljaOid);
             handler.resume(Response.serverError()
@@ -85,7 +85,7 @@ public class OppijanSuorituksetProxyResource {
             @PathParam("opiskeljaOid") String opiskeljaOid,
             Hakemus hakemus,
             @Suspended final AsyncResponse asyncResponse) {
-        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}", opiskeljaOid);
             handler.resume(Response.serverError()
