@@ -142,7 +142,7 @@ public class ErillishakuExcel {
             //a.add(new MonivalintaArvo(rivi.getAidinkieli(), ErillishakuDataRivi.KIELITYYPIN_ARVOT));
             // HUOM! AIDINKIELESTÄ EI VOI TEHDÄ DROPDOWNIA KOSKA EXCEL EI TUE NIIN PITKÄÄ DROPDOWNIA
             a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
-            a.add(ErillishakuDataRivi.hakemuksenTila(rivi.getHakemuksenTila()));
+            a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));

@@ -84,6 +84,10 @@ public class ErillishakuDataRivi extends DataRivi {
                             "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg").split("\\|"));
     private static final Collection<String> HAKEMUKSENTILA_ARVOT = Stream.concat(Stream.of("KESKEN"),
             Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString())).collect(Collectors.toList());
+    private static final Collection<String> HAKEMUKSENTILA_ARVOT_TOINEN_ASTE = Stream.concat(Stream.of("KESKEN"),
+            Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString())).collect(Collectors.toList());
+    private static final Collection<String> HAKEMUKSENTILA_ARVOT_KK = Stream.concat(Stream.of("KESKEN"),
+            Arrays.asList(HakemuksenTila.values()).stream().filter(t -> !HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY.equals(t)).map(t -> t.toString())).collect(Collectors.toList());
     private static final Collection<String> VASTAANOTTOTILA_ARVOT = Arrays.asList(ValintatuloksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList());
     private static final Collection<String> VASTAANOTTOTILA_ARVOT_KK =
             Arrays.asList(
@@ -112,8 +116,14 @@ public class ErillishakuDataRivi extends DataRivi {
             Arrays.asList(LUPA_JULKAISUUN, StringUtils.EMPTY, EI_LUPAA_JULKAISUUN);
     public static final Collection<String> ASIONTIKIELEN_ARVOT = Arrays.asList("fi", "sv", "en");
 
-    public static MonivalintaArvo hakemuksenTila(String arvo) {
-        return new MonivalintaArvo(arvo, HAKEMUKSENTILA_ARVOT);
+    public static MonivalintaArvo hakemuksenTila(Hakutyyppi hakutyyppi, String arvo) {
+        if (Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS.equals(hakutyyppi)) {
+            return new MonivalintaArvo(arvo, HAKEMUKSENTILA_ARVOT_TOINEN_ASTE);
+        } else if (Hakutyyppi.KORKEAKOULU.equals(hakutyyppi)) {
+            return new MonivalintaArvo(arvo, HAKEMUKSENTILA_ARVOT_KK);
+        } else {
+            return new MonivalintaArvo(arvo, HAKEMUKSENTILA_ARVOT);
+        }
     }
 
     public static MonivalintaArvo vastaanottoTila(Hakutyyppi hakutyyppi, String arvo) {
