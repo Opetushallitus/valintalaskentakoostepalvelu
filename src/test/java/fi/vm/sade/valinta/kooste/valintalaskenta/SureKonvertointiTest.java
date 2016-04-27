@@ -1,13 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
@@ -190,5 +188,22 @@ public class SureKonvertointiTest {
         assertEquals("21", va.getMetatiedot().stream().filter(m -> m.containsKey("ROOLI")).findFirst().get().get("ROOLI"));
 
     }
+
+	@Test
+	public void testMontaKertaaSamaKielikoodiYhdistetaan() throws IOException {
+		List<Oppija> oppijat = new Gson().fromJson(IOUtils
+				.toString(new ClassPathResource("monta_kielta.json")
+						.getInputStream()), new TypeToken<List<Oppija>>() {
+		}.getType());
+
+		Oppija o = oppijat.get(0);
+
+		List<AvainArvoDTO> arvot = OppijaToAvainArvoDTOConverter.convert(o.getOppijanumero(), o.getSuoritukset(), new HakemusDTO(), null);
+
+		assertEquals(ImmutableList.of(
+				new AvainArvoDTO("PK_B12", "9"), new AvainArvoDTO("PK_B12_OPPIAINE", "SV"),
+				new AvainArvoDTO("PK_B13", "10"), new AvainArvoDTO("PK_B13_OPPIAINE", "EN")
+		), arvot);
+	}
 
 }

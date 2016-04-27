@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.util.sure;
 import com.codepoetics.protonpack.StreamUtils;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.Fraction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,9 @@ public class ArvosanaToAvainArvoDTOConverter {
     }
 
     private static Stream<List<Arvosana>> ryhmitaSamatArvosanatKeskenaan(Stream<Arvosana> suoritukset) {
-        return suoritukset.collect(Collectors.groupingBy(Arvosana::getAine)).values().stream();
+        return suoritukset.collect(Collectors.groupingBy(a ->
+                // BUG-856 yhdistä kielet, jos sama kielikoodi esiintyy monta kertaa saman tason eri ainekoodeissa, esim B1 ja B12
+                String.format("%s:%s", StringUtils.left(a.getAine(), 2), (a.getLisatieto() != null ? a.getLisatieto() : "")))).values().stream();
     }
 
     private static Stream<Arvosana> arvosanat(Stream<SuoritusJaArvosanat> suoritukset) {
