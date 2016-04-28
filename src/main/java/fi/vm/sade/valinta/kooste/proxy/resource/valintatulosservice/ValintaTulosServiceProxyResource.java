@@ -174,7 +174,7 @@ public class ValintaTulosServiceProxyResource {
     }
 
     private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
-        response.setTimeout(2L, TimeUnit.MINUTES);
+        response.setTimeout(5L, TimeUnit.MINUTES);
         response.setTimeoutHandler(asyncResponse -> {
             LOG.error(timeoutMessage);
             respondWithError(asyncResponse, "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu");
