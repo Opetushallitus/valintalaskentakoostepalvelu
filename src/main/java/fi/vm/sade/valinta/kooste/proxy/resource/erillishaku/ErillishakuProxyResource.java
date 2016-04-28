@@ -77,7 +77,7 @@ public class ErillishakuProxyResource {
             @PathParam("hakuOid") String hakuOid,
             @PathParam("hakukohdeOid") String hakukohdeOid,
             @Suspended AsyncResponse asyncResponse) {
-        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(5L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(asyncResponse1 -> {
             LOG.error("Erillishakuproxy -palvelukutsu on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
             asyncResponse1.resume(Response.serverError().entity("Erillishakuproxy -palvelukutsu on aikakatkaistu").build());
