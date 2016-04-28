@@ -25,71 +25,71 @@ import java.util.concurrent.TimeUnit;
 public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implements ValintaTulosServiceAsyncResource {
 
     @Autowired
-    public ValintaTulosServiceAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.valintatulosservice.url:${host.ilb}}") String address) {
+    public ValintaTulosServiceAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.valintatulosservice.rest.url:${host.ilb}/valinta-tulos-service}") String address) {
         super(address, TimeUnit.MINUTES.toMillis(30));
     }
 
     @Override
     public Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid) {
-        return getAsObservable("/valinta-tulos-service/haku/" + hakuOid, new GenericType<List<ValintaTulosServiceDto>>() {}.getType());
+        return getAsObservable("/haku/" + hakuOid, new GenericType<List<ValintaTulosServiceDto>>() {}.getType());
     }
 
     @Override
     public Observable<ValintaTulosServiceDto> getHakemuksenValintatulos(String hakuOid, String hakemusOid) {
-        return getAsObservable("/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid, ValintaTulosServiceDto.class);
+        return getAsObservable("/haku/" + hakuOid + "/hakemus/" + hakemusOid, ValintaTulosServiceDto.class);
     }
 
     @Override
     public Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid) {
-        String url = "/valinta-tulos-service/virkailija/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
+        String url = "/virkailija/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
         return getAsObservable(url, new GenericType<List<HakemuksenVastaanottotila>>(){}.getType());
     }
 
     @Override
     public Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid) {
-        return getStringAsObservable("/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid);
+        return getStringAsObservable("/haku/" + hakuOid + "/hakemus/" + hakemusOid);
     }
 
     @Override
     public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
-        return getAsObservable("/valinta-tulos-service/virkailija/valintatulos/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid, new GenericType<List<Valintatulos>>() {}.getType());
+        return getAsObservable("/virkailija/valintatulos/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid, new GenericType<List<Valintatulos>>() {}.getType());
     }
 
     @Override
     public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid) {
-        return getAsObservable("/valinta-tulos-service/virkailija/valintatulos/ilmanhakijantilaa/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid, new GenericType<List<Valintatulos>>() {}.getType());
+        return getAsObservable("/virkailija/valintatulos/ilmanhakijantilaa/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid, new GenericType<List<Valintatulos>>() {}.getType());
     }
 
     @Override
     public Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid) {
-        return getAsObservable("/valinta-tulos-service/virkailija/valintatulos/haku/" + hakuOid +  "/hakemus/" + hakemusOid,
+        return getAsObservable("/virkailija/valintatulos/haku/" + hakuOid +  "/hakemus/" + hakemusOid,
                 new GenericType<List<Valintatulos>>() {}.getType());
     }
 
     @Override
     public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
-        return postAsObservable("/valinta-tulos-service/virkailija/myohastyneet/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid,
+        return postAsObservable("virkailija/myohastyneet/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid,
             new GenericType<List<VastaanottoAikarajaMennytDTO>>() {}.getType(), Entity.json(hakemusOids));
     }
 
     @Override
     public Observable<List<TilaHakijalleDto>> findTilahakijalle(String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids) {
-        return postAsObservable("/valinta-tulos-service/virkailija/tilahakijalle/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid + "/valintatapajono/" + valintatapajonoOid,
+        return postAsObservable("/virkailija/tilahakijalle/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid + "/valintatapajono/" + valintatapajonoOid,
             new GenericType<List<TilaHakijalleDto>>() {}.getType(), Entity.json(hakemusOids));
     }
 
     @Override
     public Observable<List<VastaanottoRecordDTO>> hakukohteenVastaanotot(String hakukohdeOid) {
-        return getAsObservable("/valinta-tulos-service/virkailija/vastaanotto/hakukohde/" + hakukohdeOid, new GenericType<List<VastaanottoRecordDTO>>() {}.getType());
+        return getAsObservable("/virkailija/vastaanotto/hakukohde/" + hakukohdeOid, new GenericType<List<VastaanottoRecordDTO>>() {}.getType());
     }
 
     @Override
     public Observable<Void> poista(PoistaVastaanottoDTO poistaVastaanottoDTO) {
-        return postAsObservable("/valinta-tulos-service/virkailija/vastaanotto/poista", Void.class, Entity.json(poistaVastaanottoDTO));
+        return postAsObservable("/virkailija/vastaanotto/poista", Void.class, Entity.json(poistaVastaanottoDTO));
     }
 
     @Override
     public Observable<List<VastaanottoResultDTO>> tallenna(List<VastaanottoRecordDTO> tallennettavat) {
-        return postAsObservable("/valinta-tulos-service/virkailija/vastaanotto", new GenericType<List<VastaanottoResultDTO>>() {}.getType(), Entity.json(tallennettavat));
+        return postAsObservable("/virkailija/vastaanotto", new GenericType<List<VastaanottoResultDTO>>() {}.getType(), Entity.json(tallennettavat));
     }
 }
