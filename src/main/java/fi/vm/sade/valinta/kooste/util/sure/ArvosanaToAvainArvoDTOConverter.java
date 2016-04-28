@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste.util.sure;
 
 import com.codepoetics.protonpack.StreamUtils;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.Fraction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang.StringUtils.defaultString;
+import static org.apache.commons.lang.StringUtils.left;
 
 /**
  *         Prefiksi PK_
@@ -89,9 +91,10 @@ public class ArvosanaToAvainArvoDTOConverter {
 
     private static Stream<List<Arvosana>> ryhmitaSamatArvosanatKeskenaan(Stream<Arvosana> suoritukset) {
         return suoritukset.collect(Collectors.groupingBy(a -> {
-            if (a.getArvio() != null && a.getArvio().getAsteikko() != null && a.getArvio().getAsteikko().equals("4-10")) {
+            if (a.getArvio() != null && a.getArvio().getAsteikko() != null
+                    && (a.getArvio().getAsteikko().equals("4-10") || a.getArvio().getAsteikko().equals("1-5"))) {
                 // BUG-856 yhdistä kielet, jos sama kielikoodi esiintyy monta kertaa saman tason eri ainekoodeissa, esim B1 ja B12
-                return String.format("%s:%s", StringUtils.left(a.getAine(), 2), (a.getLisatieto() != null ? a.getLisatieto() : ""));
+                return left(defaultString(a.getAine()), 2) + defaultString(a.getLisatieto());
             } else {
                 return a.getAine();
             }
