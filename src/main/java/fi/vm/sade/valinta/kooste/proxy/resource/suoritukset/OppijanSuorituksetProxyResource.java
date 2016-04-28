@@ -109,13 +109,13 @@ public class OppijanSuorituksetProxyResource {
         long start = System.currentTimeMillis();
         hakemusObservable.doOnError(throwableConsumer);
         Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid)
-                .doOnEach(a -> { LOG.info(String.format("%s alkanut suorituksetByOpiskelijaOid tarjonta kutsu kesti %s ms", start, (System.currentTimeMillis() - start))); })
+                .doOnEach(a -> { LOG.info(String.format("{} alkanut suorituksetByOpiskelijaOid tarjonta kutsu kesti {} ms", start, (System.currentTimeMillis() - start))); })
                 .doOnError(throwableConsumer);
         Observable<Oppija> suorituksetByOppija = suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid)
-                .doOnEach(a -> { LOG.info(String.format("%s alkanut suorituksetByOpiskelijaOid suoritusrekisteri kutsu kesti %s ms", start, (System.currentTimeMillis() - start))); })
+                .doOnEach(a -> { LOG.info(String.format("{} alkanut suorituksetByOpiskelijaOid suoritusrekisteri kutsu kesti {} ms", start, (System.currentTimeMillis() - start))); })
                 .doOnError(throwableConsumer);
         Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)
-                .doOnEach(a -> { LOG.info(String.format("%s alkanut suorituksetByOpiskelijaOid ohjausparametrit kutsu kesti %s ms", start, (System.currentTimeMillis() - start))); })
+                .doOnEach(a -> { LOG.info(String.format("{} alkanut suorituksetByOpiskelijaOid ohjausparametrit kutsu kesti {} ms", start, (System.currentTimeMillis() - start))); })
                 .doOnError(throwableConsumer);
         Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable,
                 (haku, suoritukset, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
