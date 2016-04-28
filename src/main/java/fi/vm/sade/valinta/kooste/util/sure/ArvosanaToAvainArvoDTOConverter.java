@@ -89,7 +89,7 @@ public class ArvosanaToAvainArvoDTOConverter {
 
     private static Stream<List<Arvosana>> ryhmitaSamatArvosanatKeskenaan(Stream<Arvosana> suoritukset) {
         return suoritukset.collect(Collectors.groupingBy(a -> {
-            if (a.getArvio().getAsteikko().equals("4-10")) {
+            if (a.getArvio() != null && a.getArvio().getAsteikko() != null && a.getArvio().getAsteikko().equals("4-10")) {
                 // BUG-856 yhdistä kielet, jos sama kielikoodi esiintyy monta kertaa saman tason eri ainekoodeissa, esim B1 ja B12
                 return String.format("%s:%s", StringUtils.left(a.getAine(), 2), (a.getLisatieto() != null ? a.getLisatieto() : ""));
             } else {
