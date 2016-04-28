@@ -91,8 +91,7 @@ public class ArvosanaToAvainArvoDTOConverter {
 
     private static Stream<List<Arvosana>> ryhmitaSamatArvosanatKeskenaan(Stream<Arvosana> suoritukset) {
         return suoritukset.collect(Collectors.groupingBy(a -> {
-            if (a.getArvio() != null && a.getArvio().getAsteikko() != null
-                    && (a.getArvio().getAsteikko().equals("4-10") || a.getArvio().getAsteikko().equals("1-5"))) {
+            if (a.getAine() != null && a.getAine().matches("[AB][123]+")) {
                 // BUG-856 yhdistä kielet, jos sama kielikoodi esiintyy monta kertaa saman tason eri ainekoodeissa, esim B1 ja B12
                 return left(defaultString(a.getAine()), 2) + defaultString(a.getLisatieto());
             } else {
