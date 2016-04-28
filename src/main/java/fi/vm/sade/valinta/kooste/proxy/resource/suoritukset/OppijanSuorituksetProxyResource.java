@@ -106,10 +106,17 @@ public class OppijanSuorituksetProxyResource {
         });
     }
     private void resolveHakemusDTO(String hakuOid, String opiskeljaOid, Observable<Hakemus> hakemusObservable, Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
+        long start = System.currentTimeMillis();
         hakemusObservable.doOnError(throwableConsumer);
-        Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).doOnError(throwableConsumer);
-        Observable<Oppija> suorituksetByOppija = suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid).doOnError(throwableConsumer);
-        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(throwableConsumer);
+        Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid)
+                .doOnEach(a -> { LOG.info(String.format("{} alkanut suorituksetByOpiskelijaOid tarjonta kutsu kesti {} ms", start, (System.currentTimeMillis() - start))); })
+                .doOnError(throwableConsumer);
+        Observable<Oppija> suorituksetByOppija = suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid)
+                .doOnEach(a -> { LOG.info(String.format("{} alkanut suorituksetByOpiskelijaOid suoritusrekisteri kutsu kesti {} ms", start, (System.currentTimeMillis() - start))); })
+                .doOnError(throwableConsumer);
+        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)
+                .doOnEach(a -> { LOG.info(String.format("{} alkanut suorituksetByOpiskelijaOid ohjausparametrit kutsu kesti {} ms", start, (System.currentTimeMillis() - start))); })
+                .doOnError(throwableConsumer);
         Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable,
                 (haku, suoritukset, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
                         haku,
