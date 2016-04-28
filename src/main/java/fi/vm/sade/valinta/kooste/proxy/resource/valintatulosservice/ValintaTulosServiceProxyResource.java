@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
+import static fi.vm.sade.valinta.kooste.KoosteAudit.username;
 import com.google.common.collect.ImmutableMap;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
@@ -17,7 +18,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import rx.Observable;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
@@ -28,8 +35,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fi.vm.sade.valinta.kooste.KoosteAudit.username;
 
 @Controller("ValintaTulosServiceProxyResource")
 @Path("/proxy/valintatulosservice")
@@ -54,6 +59,10 @@ public class ValintaTulosServiceProxyResource {
             @PathParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             @Suspended AsyncResponse asyncResponse) {
+        if (true) {
+            respondWithError(asyncResponse, "Palvelu on toistaiseksi poissa käytöstä.");
+        }
+
         setAsyncTimeout(asyncResponse,
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s",
                         hakuOid, hakukohdeOid));
