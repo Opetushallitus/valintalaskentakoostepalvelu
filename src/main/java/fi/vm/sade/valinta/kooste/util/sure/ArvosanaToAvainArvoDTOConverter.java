@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang.StringUtils.defaultString;
-import static org.apache.commons.lang.StringUtils.left;
 
 /**
  *         Prefiksi PK_
@@ -91,12 +89,13 @@ public class ArvosanaToAvainArvoDTOConverter {
 
     private static Stream<List<Arvosana>> ryhmitaSamatArvosanatKeskenaan(Stream<Arvosana> suoritukset) {
         return suoritukset.collect(Collectors.groupingBy(a -> {
-            if (a.getAine() != null && a.getAine().matches("[AB][123]+")) {
-                // BUG-856 yhdistä kielet, jos sama kielikoodi esiintyy monta kertaa saman tason eri ainekoodeissa, esim B1 ja B12
-                return left(defaultString(a.getAine()), 2) + defaultString(a.getLisatieto());
-            } else {
+            // FIXME korjataan myöhemmin...
+            //if (a.getAine() != null && a.getAine().matches("[AB][123]+")) {
+            //    // BUG-856 yhdistä kielet, jos sama kielikoodi esiintyy monta kertaa saman tason eri ainekoodeissa, esim B1 ja B12
+            //    return left(defaultString(a.getAine()), 2) + defaultString(a.getLisatieto());
+            //} else {
                 return a.getAine();
-            }
+            //}
         })).values().stream();
     }
 
