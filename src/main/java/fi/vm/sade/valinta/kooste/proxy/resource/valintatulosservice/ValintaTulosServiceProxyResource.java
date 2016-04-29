@@ -61,8 +61,13 @@ public class ValintaTulosServiceProxyResource {
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             @Suspended AsyncResponse asyncResponse) {
 
-        List<String> amkOpet = Arrays.asList("1.2.246.562.29.35195004656", "1.2.246.562.29.458950780910", "1.2.246.562.29.62858726037");
-        if (!amkOpet.contains(hakuOid)) {
+        List<String> avatutHaut = Arrays.asList(
+                "1.2.246.562.29.52085106996",
+                "1.2.246.562.29.35195004656",
+                "1.2.246.562.29.458950780910",
+                "1.2.246.562.29.62858726037"
+        );
+        if (!avatutHaut.contains(hakuOid)) {
             respondWithError(asyncResponse, "Palvelu on toistaiseksi poissa käytöstä.");
         }
 
