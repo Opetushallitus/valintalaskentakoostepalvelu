@@ -30,6 +30,7 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +60,9 @@ public class ValintaTulosServiceProxyResource {
             @PathParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             @Suspended AsyncResponse asyncResponse) {
-        if (true) {
+
+        List<String> amkOpet = Arrays.asList("1.2.246.562.29.35195004656", "1.2.246.562.29.458950780910", "1.2.246.562.29.62858726037");
+        if (!amkOpet.contains(hakuOid)) {
             respondWithError(asyncResponse, "Palvelu on toistaiseksi poissa käytöstä.");
         }
 
