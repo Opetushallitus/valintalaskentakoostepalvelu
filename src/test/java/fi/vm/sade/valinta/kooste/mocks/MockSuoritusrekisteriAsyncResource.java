@@ -47,7 +47,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public Observable<Oppija> getSuorituksetByRekisteritiedot(String opiskelijaOid) {
+    public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
         return Observable.just(oppijaRef.get());
     }
 }

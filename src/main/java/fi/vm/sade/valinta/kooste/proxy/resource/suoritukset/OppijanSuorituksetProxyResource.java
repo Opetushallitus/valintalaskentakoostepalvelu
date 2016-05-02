@@ -25,7 +25,6 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Controller("SuorituksenArvosanatProxyResource")
@@ -109,7 +108,7 @@ public class OppijanSuorituksetProxyResource {
         Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).doOnError(throwableConsumer);
         Observable<Oppija> suorituksetByOppija = fetchEnsikertalaisuus ?
                 suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid).doOnError(throwableConsumer) :
-                suoritusrekisteriAsyncResource.getSuorituksetByRekisteritiedot(opiskeljaOid);
+                suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskeljaOid);
         Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(throwableConsumer);
         Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable,
                 (haku, suoritukset, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(

@@ -27,5 +27,5 @@ public interface SuoritusrekisteriAsyncResource {
 
     Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid);
 
-    Observable<Oppija> getSuorituksetByRekisteritiedot(String opiskelijaOid);
+    Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid);
 }

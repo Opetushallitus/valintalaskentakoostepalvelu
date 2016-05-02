@@ -80,8 +80,8 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     }
 
     @Override
-    public Observable<Oppija> getSuorituksetByRekisteritiedot(String opiskelijaOid) {
-        return getAsObservable("/suoritusrekisteri/rest/v1/rekisteritiedot/" + opiskelijaOid, Oppija.class, client -> {
+    public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
+        return getAsObservable("/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid, Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
             return client;
         });
