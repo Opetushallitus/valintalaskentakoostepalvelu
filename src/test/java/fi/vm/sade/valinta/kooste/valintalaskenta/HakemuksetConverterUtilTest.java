@@ -705,7 +705,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", parametrit, new HashMap<>(), oppija, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", parametrit, new HashMap<>(), oppija, hakemus, true);
         final String pk_arvosana = hakemus.getAvaimet().stream()
                 .filter(a -> a.getAvain().equals("PK_AI"))
                 .map(AvainArvoDTO::getArvo)
@@ -726,7 +726,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistamatonPerusopetusValmisHakukaudella);
             add(vahvistettuYOKeskeytynytHakukaudella);
         }});
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), o, h);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), o, h, true);
         Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(h, "POHJAKOULUTUS"));
         Assert.assertEquals("2015", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
     }
@@ -744,7 +744,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistamatonYksilollistettuPerusopetusValmisHakukaudella);
             add(vahvistettuYOKeskenHakukaudella);
         }});
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), o, h);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), o, h, true);
         Assert.assertEquals(PohjakoulutusToinenAste.YKSILOLLISTETTY, getFirstHakemusArvo(h, "POHJAKOULUTUS"));
         Assert.assertEquals("2015", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
     }
@@ -763,7 +763,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuAmmattistarttiValmisHakukaudella);
             add(vahvistamatonPerusopetusValmisEiHakukaudella);
         }});
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), o, h);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), o, h, true);
         Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(h, "POHJAKOULUTUS"));
         Assert.assertEquals("2012", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
         Assert.assertEquals("true", getFirstHakemusArvo(h, Lisapistekoulutus.LISAKOULUTUS_AMMATTISTARTTI.name()));
@@ -821,7 +821,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
             final String pk_arvosana = hakemus.getAvaimet().stream()
                     .filter(a -> a.getAvain().equals("PK_AI"))
                     .map(AvainArvoDTO::getArvo)
@@ -864,7 +864,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
             final String pk_arvosana = hakemus.getAvaimet().stream()
                     .filter(a -> a.getAvain().equals("PK_AI"))
                     .map(AvainArvoDTO::getArvo)
@@ -898,7 +898,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
             final String pk_arvosana = hakemus.getAvaimet().stream()
                     .filter(a -> a.getAvain().equals("PK_AI"))
                     .map(a -> a.getArvo())
@@ -932,7 +932,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
             final String pk_arvosana = hakemus.getAvaimet().stream()
                     .filter(a -> a.getAvain().equals("PK_AI"))
                     .map(a -> a.getArvo())
@@ -950,7 +950,7 @@ public class HakemuksetConverterUtilTest {
         Oppija oppija = new Oppija();
         oppija.setEnsikertalainen(true);
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
     }
 
@@ -971,7 +971,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
         assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.PERUSOPETUS_KIELI));
@@ -1003,7 +1003,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
         assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.PERUSOPETUS_KIELI));
@@ -1027,7 +1027,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
         assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.LUKIO_KIELI));
     }
 
@@ -1055,7 +1055,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
         assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.PERUSOPETUS_KIELI));
@@ -1085,7 +1085,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
         assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.PERUSOPETUS_KIELI));
@@ -1106,7 +1106,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
     }
@@ -1136,7 +1136,7 @@ public class HakemuksetConverterUtilTest {
                 .setValmis()
                 .build()
                 .build();
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), virheellinenKoskaUseampiSuoritus, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), virheellinenKoskaUseampiSuoritus, hakemus, true);
     }
 
     @Test
@@ -1159,7 +1159,7 @@ public class HakemuksetConverterUtilTest {
                 .setKeskeytynyt()
                 .build()
                 .build();
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaVainValmisSuoritusJaKeskeytyneitaSuorituksia, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaVainValmisSuoritusJaKeskeytyneitaSuorituksia, hakemus, true);
     }
 
     @Test
@@ -1180,7 +1180,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2015",
                     hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo())).count() == 1L);
             Assert.assertEquals("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
@@ -1200,7 +1200,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2015",
                     hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo())).count() == 1L);
             Assert.assertEquals("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
@@ -1220,7 +1220,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku_syksy, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku_syksy, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2015",
                     hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo())).count() == 1L);
             assertTrue("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1",
@@ -1239,7 +1239,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("PK_SUORITUSVUOSI ei löydy",
                     hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain())).count() == 0L);
             assertTrue("PK_SUORITUSLUKUKAUSI ei löydy",
@@ -1261,7 +1261,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaVainValmisSuoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaVainValmisSuoritus, hakemus, true);
             Assert.assertEquals("PK_TILA löytyy ja sen arvo on true",
                     new AvainArvoDTO("PK_TILA", "true"),
                     hakemus.getAvaimet().stream().filter(a -> "PK_TILA".equals(a.getAvain())).findFirst().get());
@@ -1278,7 +1278,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaEiSuorituksia, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaEiSuorituksia, hakemus, true);
             Assert.assertTrue("PK_TILA löytyy ja sen arvo on false",
                     hakemus.getAvaimet().stream().filter(a -> "PK_TILA".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
     }
@@ -1302,7 +1302,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", laskennanalkamisparametri(nyt.plusDays(1)), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", laskennanalkamisparametri(nyt.plusDays(1)), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("PK_AI ei löydy ja sen arvo ei ole S",
                     hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "S".equals(a.getArvo())).count() == 0L);
             Assert.assertTrue("PK_AI_SUORITETTU löytyy arvolla true",
@@ -1340,7 +1340,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
         {
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", laskennanalkamisparametri(nyt.plusDays(1)), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", laskennanalkamisparametri(nyt.plusDays(1)), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("PK_AI löytyy ja sen arvo on 8",
                     hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "8".equals(a.getArvo())).count() == 1L);
         }
@@ -1380,7 +1380,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
         {
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", laskennanalkamisparametri(nyt.plusDays(1)), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", laskennanalkamisparametri(nyt.plusDays(1)), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("PK_AI löytyy ja sen arvo on 6",
                     hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "6".equals(a.getArvo())).count() == 1L);
         }
@@ -1424,7 +1424,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("PK_AI löytyy ja sen arvo on 6",
                     hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "6".equals(a.getArvo())).count() == 1L);
             Assert.assertTrue("PK_AI_VAL1 löytyy",
@@ -1460,7 +1460,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
         expected.expectMessage("Asteikot ei täsmää: 1-5 4-10");
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), samaArvoMuttaAsteikotEiTasmaa, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), samaArvoMuttaAsteikotEiTasmaa, hakemus, true);
     }
 
     @Test
@@ -1485,7 +1485,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tuntematonAsteikkoMuttaTunnistetaanNumeroksi, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tuntematonAsteikkoMuttaTunnistetaanNumeroksi, hakemus, true);
             Assert.assertTrue("PK_AI löytyy ja sen arvo on 8",
                     hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "8".equals(a.getArvo())).count() == 1L);
     }
@@ -1515,7 +1515,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
         expected.expect(NumberFormatException.class);
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus, true);
     }
 
     @Test
@@ -1534,7 +1534,7 @@ public class HakemuksetConverterUtilTest {
                         .setValmis()
                         .build()
                     .build();
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus, true);
         assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(hakemus, "POHJAKOULUTUS"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
         assertEquals("not 15:" + hakemus.getAvaimet(), 15, hakemus.getAvaimet().size());
@@ -1568,7 +1568,7 @@ public class HakemuksetConverterUtilTest {
                             .build()
                         .build()
                     .build();
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus, true);
         assertEquals(8, hakemus.getAvaimet().size());
         assertEquals("6", getFirstHakemusArvo(hakemus, "PK_AI"));
     }
@@ -1589,7 +1589,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaEiSuorituksia, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaEiSuorituksia, hakemus, true);
             Assert.assertEquals("LK_TILA on false",
                     new AvainArvoDTO("LK_TILA", "false"),
                     hakemus.getAvaimet().stream().filter(a -> "LK_TILA".equals(a.getAvain())).findFirst().get());
@@ -1614,7 +1614,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), virheellinenKoskaUseampiSuoritus, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), virheellinenKoskaUseampiSuoritus, hakemus, true);
         Assert.assertTrue("LK_TILA löytyy ja sen arvo on true",
                 hakemus.getAvaimet().stream().filter(a -> "LK_TILA".equals(a.getAvain()) && "true".equals(a.getArvo())).count() == 1L);
     }
@@ -1652,7 +1652,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build()
                 .build();
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), toisellaHakemuksellaKorkeampiArvosana, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), toisellaHakemuksellaKorkeampiArvosana, hakemus, true);
         Assert.assertTrue("LK_AI löytyy ja sen arvo on 6",
                 hakemus.getAvaimet().stream().filter(a -> "LK_AI".equals(a.getAvain()) && "6".equals(a.getArvo())).count() == 1L);
     }
@@ -1676,7 +1676,7 @@ public class HakemuksetConverterUtilTest {
                 .setVahvistettu(false)
                 .build()
                 .build();
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), toisellaHakemuksellaKorkeampiArvosana, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), toisellaHakemuksellaKorkeampiArvosana, hakemus, true);
         Assert.assertTrue("LK_TILA löytyy ja sen arvo on false",
                 hakemus.getAvaimet().stream().filter(a -> "LK_TILA".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
     }
@@ -1702,7 +1702,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tuntematonAsteikkoMuttaTunnistetaanNumeroksi, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tuntematonAsteikkoMuttaTunnistetaanNumeroksi, hakemus, true);
             Assert.assertTrue("LK_AI löytyy ja sen arvo on 8",
                     hakemus.getAvaimet().stream().filter(a -> "LK_AI".equals(a.getAvain()) && "8".equals(a.getArvo())).count() == 1L);
     }
@@ -1727,7 +1727,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build();
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaKeskenerainenSuoritus, hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaKeskenerainenSuoritus, hakemus, true);
         Assert.assertTrue("PK_AI löytyy ja sen arvo on 7",
                 hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "7".equals(a.getArvo())).count() == 1L);
     }
@@ -1773,7 +1773,7 @@ public class HakemuksetConverterUtilTest {
                     .build();
 
             // YO-tila tulee edelleen merkitä vaikka yo-arvosanat laitetaan uuteen tietueeseen AvainSuoritusTietoDTO
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertEquals("YO_TILA löytyy ja sen arvo on true",
                     new AvainArvoDTO("YO_TILA", "true"),
                     hakemus.getAvaimet().stream().filter(a -> "YO_TILA".equals(a.getAvain())).findFirst().get());
@@ -1806,7 +1806,7 @@ public class HakemuksetConverterUtilTest {
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
             Assert.assertTrue("YO_TILA löytyy ja sen arvo on false",
                     hakemus.getAvaimet().stream().filter(a -> "YO_TILA".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
         }
@@ -1821,7 +1821,7 @@ public class HakemuksetConverterUtilTest {
             Oppija oppija = new Oppija();
             oppija.setEnsikertalainen(true);
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
             Assert.assertTrue("Ensikertalaisuus asetettu", Boolean.valueOf(hakemus.getAvaimet().stream()
                     .filter(a -> a.getAvain().equals("ensikertalainen")).findFirst().get().getArvo()));
         }
@@ -1833,7 +1833,7 @@ public class HakemuksetConverterUtilTest {
             Oppija oppija = new Oppija();
             oppija.setEnsikertalainen(false);
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
             Assert.assertFalse("Ensikertalaisuus asetettu", Boolean.valueOf(hakemus.getAvaimet().stream()
                     .filter(a -> a.getAvain().equals("ensikertalainen")).findFirst().get().getArvo()));
         }
@@ -1991,7 +1991,7 @@ public class HakemuksetConverterUtilTest {
                 "PK_FY_VAL3", "10"
         );
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppijaBuilder.build(), hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppijaBuilder.build(), hakemus, true);
         Assert.assertEquals("Odotettiin paras arvosana ensimmäisestä suorituksesta ja parhaat valinnaiset jälkimmäisestä suorituksesta",
                 kiinnostavatAvainParit,
                 hakemus.getAvaimet().stream()
@@ -2077,7 +2077,7 @@ public class HakemuksetConverterUtilTest {
                 "PK_AI_VAL2",
                 "PK_AI_VAL3");
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppijaBuilder.build(), hakemus);
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppijaBuilder.build(), hakemus, true);
         Assert.assertEquals("Odotettiin paras arvosana ensimmäisestä suorituksesta ja parhaat valinnaiset ensimmäisestä suorituksesta",
                 hakemus.getAvaimet().stream()
                         .filter(a -> kiinnostavatAvainParit.containsKey(a.getAvain()))

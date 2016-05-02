@@ -26,4 +26,6 @@ public interface SuoritusrekisteriAsyncResource {
                                             Consumer<Throwable> failureCallback);
 
     Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid);
+
+    Observable<Oppija> getSuorituksetByRekisteritiedot(String opiskelijaOid);
 }

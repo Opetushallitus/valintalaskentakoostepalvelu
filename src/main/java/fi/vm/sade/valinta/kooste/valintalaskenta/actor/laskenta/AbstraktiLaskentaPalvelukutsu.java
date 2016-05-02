@@ -119,6 +119,6 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends AbstraktiPalvelukuts
     }
 
     protected List<HakemusDTO> muodostaHakemuksetDTO(String hakukohdeOid, List<Hakemus> hakemukset, List<Oppija> oppijat) {
-        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, hakemukset, oppijat, parametritDTO);
+        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, hakemukset, oppijat, parametritDTO, true);
     }
 }

@@ -179,7 +179,7 @@ public class LaskentaActorFactory {
                                                 actorParams.getUuid(),
                                                 actorParams.isErillishaku(),
                                                 hakukohdeOid,
-                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v));
+                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO(), true), v));
                                 l.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                                 return l;
                             }
@@ -217,7 +217,7 @@ public class LaskentaActorFactory {
                                                 actorParams.getUuid(),
                                                 actorParams.isErillishaku(),
                                                 hakukohdeOid,
-                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr));
+                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO(), true), v, hr));
                                 l.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                                 return l;
                             }
@@ -257,7 +257,7 @@ public class LaskentaActorFactory {
                                                 actorParams.getUuid(),
                                                 actorParams.isErillishaku(),
                                                 hakukohdeOid,
-                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr));
+                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO(), true), v, hr));
                                 l.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                                 return l;
                             }

@@ -39,7 +39,7 @@ public class HakemuksetConverterUtil {
     public static final String KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO = "haunkohdejoukko_11";
 
     public static List<HakemusDTO> muodostaHakemuksetDTO(HakuV1RDTO haku, String hakukohdeOid, List<Hakemus> hakemukset,
-                                                         List<Oppija> oppijat, ParametritDTO parametritDTO) {
+                                                         List<Oppija> oppijat, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
         ensurePersonOids(hakemukset, hakukohdeOid);
         List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset);
         Map<String, Exception> errors = Maps.newHashMap();
@@ -52,7 +52,7 @@ public class HakemuksetConverterUtil {
                         String personOid = h.getHakijaOid();
                         if (personOidToOppija.containsKey(personOid)) {
                             Oppija oppija = personOidToOppija.get(personOid);
-                            mergeKeysOfOppijaAndHakemus(hasHetu.get(h.getHakemusoid()), haku, hakukohdeOid, parametritDTO, errors, oppija, h);
+                            mergeKeysOfOppijaAndHakemus(hasHetu.get(h.getHakemusoid()), haku, hakukohdeOid, parametritDTO, errors, oppija, h, fetchEnsikertalaisuus);
                         }
                     } catch (Exception e) {
                         errors.put(h.getHakemusoid(), e);
@@ -74,14 +74,15 @@ public class HakemuksetConverterUtil {
 
     public static void mergeKeysOfOppijaAndHakemus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid,
                                                    ParametritDTO parametritDTO, Map<String, Exception> errors, Oppija oppija,
-                                                   HakemusDTO hakemusDTO) {
+                                                   HakemusDTO hakemusDTO, Boolean fetchEnsikertalaisuus) {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
         Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         Map<String, AvainArvoDTO> surenArvosanat = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
 
         Map<String, AvainArvoDTO> merge = Maps.newHashMap();
         merge.putAll(hakemuksenArvot);
-        ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
+        if (fetchEnsikertalaisuus)
+            ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
         merge.putAll(suoritustenTiedot(haku, hakemusDTO, oppija.getSuoritukset()).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
         merge.putAll(surenArvosanat);
         hakemusDTO.setAvaimet(merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));

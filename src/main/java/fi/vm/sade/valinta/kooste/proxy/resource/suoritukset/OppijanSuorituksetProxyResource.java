@@ -19,10 +19,7 @@ import org.springframework.stereotype.Controller;
 import rx.Observable;
 import rx.functions.Action1;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
@@ -64,7 +61,7 @@ public class OppijanSuorituksetProxyResource {
                     .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
                     .build());
         });
-        resolveHakemusDTO(hakuOid, opiskeljaOid, applicationAsyncResource.getApplication(hakemusOid), hakemusDTO -> {
+        resolveHakemusDTO(hakuOid, opiskeljaOid, applicationAsyncResource.getApplication(hakemusOid), true, hakemusDTO -> {
             asyncResponse.resume(Response
                     .ok()
                     .header("Content-Type", "application/json")
@@ -83,6 +80,7 @@ public class OppijanSuorituksetProxyResource {
     public void getSuoritukset(
             @PathParam("hakuOid") String hakuOid,
             @PathParam("opiskeljaOid") String opiskeljaOid,
+            @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             Hakemus hakemus,
             @Suspended final AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
@@ -92,7 +90,7 @@ public class OppijanSuorituksetProxyResource {
                     .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
                     .build());
         });
-        resolveHakemusDTO(hakuOid, opiskeljaOid, Observable.just(hakemus), hakemusDTO -> {
+        resolveHakemusDTO(hakuOid, opiskeljaOid, Observable.just(hakemus), fetchEnsikertalaisuus, hakemusDTO -> {
             asyncResponse.resume(Response
                     .ok()
                     .header("Content-Type", "application/json")
@@ -105,10 +103,13 @@ public class OppijanSuorituksetProxyResource {
             asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
         });
     }
-    private void resolveHakemusDTO(String hakuOid, String opiskeljaOid, Observable<Hakemus> hakemusObservable, Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
+    private void resolveHakemusDTO(String hakuOid, String opiskeljaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
+                                   Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
         hakemusObservable.doOnError(throwableConsumer);
         Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).doOnError(throwableConsumer);
-        Observable<Oppija> suorituksetByOppija = suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid).doOnError(throwableConsumer);
+        Observable<Oppija> suorituksetByOppija = fetchEnsikertalaisuus ?
+                suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid).doOnError(throwableConsumer) :
+                suoritusrekisteriAsyncResource.getSuorituksetByRekisteritiedot(opiskeljaOid);
         Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(throwableConsumer);
         Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable,
                 (haku, suoritukset, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
@@ -116,7 +117,8 @@ public class OppijanSuorituksetProxyResource {
                         "",
                         Collections.singletonList(hakemus),
                         Collections.singletonList(suoritukset),
-                        ohjausparametrit).get(0)
+                        ohjausparametrit,
+                        fetchEnsikertalaisuus).get(0)
         ).subscribe(hakemusDTOConsumer, throwableConsumer);
     }
 }
