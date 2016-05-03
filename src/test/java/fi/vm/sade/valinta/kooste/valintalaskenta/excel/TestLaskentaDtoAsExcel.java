@@ -4,16 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import fi.vm.sade.valinta.seuranta.dto.*;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
-
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 
 public class TestLaskentaDtoAsExcel {
 
@@ -28,7 +25,7 @@ public class TestLaskentaDtoAsExcel {
 		Integer valinnanvaihe = null;
 		Boolean valintakoelaskenta = null;
 		LaskentaDto l = new LaskentaDto(uuid, hakuOid, new Date().getTime(),
-				tila, LaskentaTyyppi.HAKUKOHDE, hakukohteet, false, valinnanvaihe,
+				tila, LaskentaTyyppi.HAKUKOHDE, new IlmoitusDto(IlmoitusTyyppi.VIRHE, "Joku virhe", Arrays.asList("A", "B", "C")), hakukohteet, false, valinnanvaihe,
 				valintakoelaskenta);
 		LaskentaDtoAsExcel.laskentaDtoAsExcel(l);
 	}

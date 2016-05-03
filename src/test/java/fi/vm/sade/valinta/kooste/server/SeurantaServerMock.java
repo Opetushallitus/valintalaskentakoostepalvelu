@@ -73,7 +73,7 @@ public class SeurantaServerMock extends MockServer {
             Boolean valintakoelaskenta =
             Boolean.parseBoolean(Optional.ofNullable(queryParams.get("valintakoelaskenta")).map(Object::toString).orElse("false"));
             LaskentaDto l = new LaskentaDto(UUID1, HAKU1, 0,
-                    LaskentaTila.ALOITTAMATTA, LaskentaTyyppi.HAKU,
+                    LaskentaTila.ALOITTAMATTA, LaskentaTyyppi.HAKU, null,
                     ll,
                     false,
                     null,

@@ -10,9 +10,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
+import fi.vm.sade.valinta.seuranta.dto.*;
 
 public class LaskentaDtoAsExcel {
 
@@ -20,6 +18,15 @@ public class LaskentaDtoAsExcel {
         Map<String, Object[][]> sheetAndGrid = Maps.newHashMap();
         {
             List<Object[]> grid = Lists.newArrayList();
+            if(laskenta.getIlmoitus() != null) {
+                IlmoitusDto ilmoitus = laskenta.getIlmoitus();
+                if(IlmoitusTyyppi.VIRHE.equals(ilmoitus.getTyyppi())) {
+                    grid.add(new Object[]{"Virheilmoitus:", ilmoitus.getOtsikko()});
+                } else {
+                    grid.add(new Object[]{"Ilmoitus:", ilmoitus.getOtsikko()});
+                }
+            }
+            grid.add(new Object[]{""});
             grid.add(new Object[]{"Suorittamattomat hakukohteet"});
             if (laskenta.getHakukohteet() != null) {
                 for (HakukohdeDto hakukohde : laskenta.getHakukohteet()
