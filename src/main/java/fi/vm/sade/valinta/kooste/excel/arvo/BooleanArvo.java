@@ -8,7 +8,11 @@ public class BooleanArvo extends MonivalintaArvo {
         super(asString(asBoolean(arvo), tosi, epatosi, tyhja), valinnat);
     }
 
-    public static String asString(Boolean arvo, String tosi, String epatosi, String tyhja) {
+    public BooleanArvo(Boolean arvo, Collection<String> valinnat, String tosi, String epatosi, String tyhja) {
+        super(asString(arvo, tosi, epatosi, tyhja), valinnat);
+    }
+
+    private static String asString(Boolean arvo, String tosi, String epatosi, String tyhja) {
         if (Boolean.TRUE.equals(arvo)) {
             return tosi;
         } else if (Boolean.FALSE.equals(arvo)) {
@@ -18,11 +22,7 @@ public class BooleanArvo extends MonivalintaArvo {
         }
     }
 
-    public static Boolean asBoolean(String arvo) {
+    private static Boolean asBoolean(String arvo) {
         return Boolean.valueOf(arvo);
-    }
-
-    public Boolean asBoolean() {
-        return asBoolean(getArvo());
     }
 }

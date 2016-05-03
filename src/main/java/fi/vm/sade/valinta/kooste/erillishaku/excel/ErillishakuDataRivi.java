@@ -42,7 +42,7 @@ public class ErillishakuDataRivi extends DataRivi {
         String aidinkieli = lukija.getArvoAt(7);
 
         String hakemuksenTila = lukija.getArvoAt(8);
-        boolean hyvaksyttyEhdollisesti = "true".equals(lukija.getArvoAt(9));
+        boolean hyvaksyttyEhdollisesti = TOSI.equals(lukija.getArvoAt(9));
         String vastaanottoTila = lukija.getArvoAt(10);
         String ilmoittautumisTila = lukija.getArvoAt(11);
         boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(12));
@@ -74,6 +74,10 @@ public class ErillishakuDataRivi extends DataRivi {
                 && rivi.getSolut().size() >= 12 //Copy-paste easily creates extra columns for excel doc
                 && !"Syntymäaika".equals(syntymaAika);
     }
+
+    final static String TOSI = "Kyllä";
+    final static String EPATOSI = "Ei";
+    final static Collection<String> TOTUUSARVO = Arrays.asList(EPATOSI, TOSI);
 
     public static final Collection<String> SUKUPUOLEN_ARVOT = Arrays.asList(Sukupuoli.values()).stream().map(Object::toString).collect(Collectors.toList());
     public static final Collection<String> KIELITYYPIN_ARVOT =
