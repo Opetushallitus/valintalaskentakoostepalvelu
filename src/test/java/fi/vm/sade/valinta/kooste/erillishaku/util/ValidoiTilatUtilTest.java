@@ -20,6 +20,10 @@ public class ValidoiTilatUtilTest {
         assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA, IlmoittautumisTila.LASNA),is(nullValue()));
         assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI, IlmoittautumisTila.POISSA),is(nullValue()));
         assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.EHDOLLISESTI_VASTAANOTTANUT, IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI),is(nullValue()));
+        assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.PERUNUT, null),is(nullValue()));
+        assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.PERUUTETTU, null),is(nullValue()));
+        assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA, null),is(nullValue()));
+        assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.KESKEN, null),is(nullValue()));
 
         // NOK SYOTTEET
         assertThat(validoi(HakemuksenTila.VARALLA, null, IlmoittautumisTila.LASNA),is(notNullValue()));

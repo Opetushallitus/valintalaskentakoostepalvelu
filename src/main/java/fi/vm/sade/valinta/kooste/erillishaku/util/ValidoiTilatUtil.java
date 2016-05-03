@@ -37,6 +37,11 @@ public class ValidoiTilatUtil {
         if (hakemuksenTila != null && (valintatuloksenTila == null && ilmoittautumisTila == null)) {
             return null; // OK
         }
+        if (HYVAKSYTTYNA.contains(hakemuksenTila) &&
+            (KESKEN_TAI_PERUNUT_VASTAANOTTAJA.contains(valintatuloksenTila) || ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA.equals(valintatuloksenTila)) &&
+            ilmoittautumisTila == null) {
+                return null; // OK
+        }
         if (hakemuksenTila == null || valintatuloksenTila == null || ilmoittautumisTila == null) {
             return virheellinenTilaYhdistelma(new StringBuilder("Tila ei saa olla tyhjä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
