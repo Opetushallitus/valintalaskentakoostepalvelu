@@ -19,6 +19,9 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.KORKEAKOULU;
+import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS;
+
 public class ErillishakuDataRivi extends DataRivi {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
     public static final DateTimeFormatter SYNTYMAAIKA = DateTimeFormat.forPattern("dd.MM.yyyy");
@@ -123,14 +126,11 @@ public class ErillishakuDataRivi extends DataRivi {
     }
 
     private static MonivalintaArvo getMonivalintaArvo(Hakutyyppi hakutyyppi, String arvo, Collection<String> toinenAste, Collection<String> kk, Collection<String> other) {
-        switch (hakutyyppi) {
-            case TOISEN_ASTEEN_OPPILAITOS:
-                return new MonivalintaArvo(arvo, toinenAste);
-            case KORKEAKOULU:
-                return new MonivalintaArvo(arvo, kk);
-            default:
-                return new MonivalintaArvo(arvo, other);
-        }
+        if (TOISEN_ASTEEN_OPPILAITOS.equals(hakutyyppi))
+            return new MonivalintaArvo(arvo, toinenAste);
+        if (KORKEAKOULU.equals(hakutyyppi))
+            return new MonivalintaArvo(arvo, kk);
+        return new MonivalintaArvo(arvo, other);
     }
 
     static MonivalintaArvo julkaisuLupa(boolean arvo) {
