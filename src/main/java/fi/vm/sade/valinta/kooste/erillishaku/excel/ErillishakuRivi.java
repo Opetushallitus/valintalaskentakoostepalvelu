@@ -35,8 +35,8 @@ public class ErillishakuRivi {
     private final String personOid;
     @ApiModelProperty(required = true)
     private final String hakemuksenTila;
-    private final String vastaanottoTila;
     private final boolean ehdollisestiHyvaksytty;
+    private final String vastaanottoTila;
     private final String ilmoittautumisTila;
     @ApiModelProperty(required = true)
     private final boolean julkaistaankoTiedot;
@@ -91,8 +91,8 @@ public class ErillishakuRivi {
         this.aidinkieli = aidinkieli;
         this.personOid = personOid;
         this.hakemuksenTila = hakemuksenTila;
-        this.vastaanottoTila = vastaanottoTila;
         this.ehdollisestiHyvaksytty = ehdollisestiHyvaksytty;
+        this.vastaanottoTila = vastaanottoTila;
         this.ilmoittautumisTila = ilmoittautumisTila;
         this.julkaistaankoTiedot = julkaistaankoTiedot;
         this.poistetaankoRivi = poistetaankoRivi;
@@ -155,6 +155,10 @@ public class ErillishakuRivi {
         return trimToEmpty(hakemuksenTila);
     }
 
+    public boolean getEhdollisestiHyvaksytty() {
+        return ehdollisestiHyvaksytty;
+    }
+
     public String getIlmoittautumisTila() {
         return trimToEmpty(ilmoittautumisTila);
     }
@@ -162,11 +166,6 @@ public class ErillishakuRivi {
     public String getVastaanottoTila() {
         return trimToEmpty(vastaanottoTila);
     }
-
-    public boolean getEhdollisestiHyvaksytty() {
-        return ehdollisestiHyvaksytty;
-    }
-
 
     private String suojaaHenkilotunnusLogeilta(String hetu) {
         if (trimToNull(hetu) == null) {
@@ -214,48 +213,27 @@ public class ErillishakuRivi {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-                .append(etunimi)
-                .append(", ")
-                .append(sukunimi)
-                .append(", ")
-                .append(sahkoposti)
-                .append(", ")
-                .append(hakemuksenTila)
-                .append(", ")
-                .append(suojaaHenkilotunnusLogeilta(henkilotunnus))
-                .append(", ")
-                .append(syntymaAika)
-                .append(", ")
-                .append(sukupuoli)
-                .append(", ")
-                .append(aidinkieli)
-                .append(", ")
-                .append(ilmoittautumisTila)
-                .append(", ")
-                .append(vastaanottoTila)
-                .append(", ")
-                .append(ehdollisestiHyvaksytty)
-                .append(", ")
-                .append(julkaistaankoTiedot)
-                .append(", ")
-                .append(asiointikieli)
-                .append(", ")
-                .append(puhelinnumero)
-                .append(", ")
-                .append(osoite)
-                .append(", ")
-                .append(postinumero)
-                .append(", ")
-                .append(postitoimipaikka)
-                .append(", ")
-                .append(asuinmaa)
-                .append(", ")
-                .append(kansalaisuus)
-                .append(", ")
-                .append(kotikunta)
-                .append(", ")
-                .append(pohjakoulutusMaaToinenAste).toString();
+        return etunimi + ", " +
+                sukunimi + ", " +
+                sahkoposti + ", " +
+                hakemuksenTila + ", " +
+                ErillishakuDataRivi.getTotuusarvoString(ehdollisestiHyvaksytty) + ", " +
+                suojaaHenkilotunnusLogeilta(henkilotunnus) + ", " +
+                syntymaAika + ", " +
+                sukupuoli + ", " +
+                aidinkieli + ", " +
+                ilmoittautumisTila + ", " +
+                vastaanottoTila + ", " +
+                julkaistaankoTiedot + ", " +
+                asiointikieli + ", " +
+                puhelinnumero + ", " +
+                osoite + ", " +
+                postinumero + ", " +
+                postitoimipaikka + ", " +
+                asuinmaa + ", " +
+                kansalaisuus + ", " +
+                kotikunta + ", " +
+                pohjakoulutusMaaToinenAste;
     }
 
     public ErillishakuRivi withAidinkieli(String aidinkieli) {

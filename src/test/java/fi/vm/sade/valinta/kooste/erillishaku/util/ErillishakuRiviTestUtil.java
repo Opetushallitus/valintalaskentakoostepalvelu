@@ -44,7 +44,7 @@ public class ErillishakuRiviTestUtil {
                 "{\"etunimi\":\"Etunimi\",\"sukunimi\":\"Sukunimi\"," +
                 "\"henkilotunnus\":\"\",\"sahkoposti\":\"\",\"syntymaAika\"" +
                 ":\"\",\"sukupuoli\":\"2\",\"aidinkieli\":\"\",\"personOid\"" +
-                ":\"\",\"hakemuksenTila\":\"HYVAKSYTTY\",\"vastaanottoTila\"" +
+                ":\"\",\"hakemuksenTila\":\"HYVAKSYTTY\", \"ehdollisestiHyvaksytty\":\"false\", \"vastaanottoTila\"" +
                 ":\"VASTAANOTTANUT_SITOVASTI\",\"ilmoittautumisTila\"" +
                 ":\"EI_ILMOITTAUTUNUT\",\"julkaistaankoTiedot\":true,\"poistetaankoRivi\":false}"
                 +"]}";

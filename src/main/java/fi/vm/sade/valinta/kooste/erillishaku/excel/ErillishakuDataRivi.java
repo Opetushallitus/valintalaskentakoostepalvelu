@@ -45,7 +45,7 @@ public class ErillishakuDataRivi extends DataRivi {
         String aidinkieli = lukija.getArvoAt(7);
 
         String hakemuksenTila = lukija.getArvoAt(8);
-        boolean hyvaksyttyEhdollisesti = TOSI.equals(lukija.getArvoAt(9));
+        boolean ehdollisestiHyvaksytty = TOSI.equals(lukija.getArvoAt(9));
         String vastaanottoTila = lukija.getArvoAt(10);
         String ilmoittautumisTila = lukija.getArvoAt(11);
         boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(12));
@@ -63,7 +63,7 @@ public class ErillishakuDataRivi extends DataRivi {
         if (isNewRow(rivi, syntymaAika)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
                     sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
-                    sukupuoli, oid, aidinkieli, hakemuksenTila, hyvaksyttyEhdollisesti,
+                    sukupuoli, oid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksytty,
                     vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot,
                     false, asiointikieli, puhelinnumero,
                     osoite, postinumero, postitoimipaikka, asuinmaa,
@@ -81,6 +81,10 @@ public class ErillishakuDataRivi extends DataRivi {
     final static String TOSI = "Kyllä";
     final static String EPATOSI = "Ei";
     final static Collection<String> TOTUUSARVO = Arrays.asList(EPATOSI, TOSI);
+
+    static String getTotuusarvoString(boolean b){
+        return b ? TOSI : EPATOSI;
+    }
 
     static final Collection<String> SUKUPUOLEN_ARVOT = Arrays.asList(Sukupuoli.values()).stream().map(Object::toString).collect(Collectors.toList());
     private static final Collection<String> HAKEMUKSENTILA_ARVOT = Stream.concat(Stream.of("KESKEN"),

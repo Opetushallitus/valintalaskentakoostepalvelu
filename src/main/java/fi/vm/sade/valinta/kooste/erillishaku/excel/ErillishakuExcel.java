@@ -53,8 +53,8 @@ public class ErillishakuExcel {
                 new TekstiArvo("Hakija-oid"),
                 new TekstiArvo("Äidinkieli"),
                 new TekstiArvo("Hakemuksentila"),
-                new TekstiArvo("Vastaanottotila"),
                 new TekstiArvo("Ehdollisesti hyväksytty"),
+                new TekstiArvo("Vastaanottotila"),
                 new TekstiArvo("Ilmoittautumistila"),
                 new TekstiArvo("Julkaistavissa"),
                 new TekstiArvo("Asiointikieli"),
@@ -138,8 +138,8 @@ public class ErillishakuExcel {
             // HUOM! AIDINKIELESTÄ EI VOI TEHDÄ DROPDOWNIA KOSKA EXCEL EI TUE NIIN PITKÄÄ DROPDOWNIA
             a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
-            a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksytty(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
+            a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
             a.add(ErillishakuDataRivi.asiointiKieli(rivi.getAsiointikieli()));
