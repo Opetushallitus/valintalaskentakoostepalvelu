@@ -42,24 +42,25 @@ public class ErillishakuDataRivi extends DataRivi {
         String aidinkieli = lukija.getArvoAt(7);
 
         String hakemuksenTila = lukija.getArvoAt(8);
-        String vastaanottoTila = lukija.getArvoAt(9);
-        String ilmoittautumisTila = lukija.getArvoAt(10);
-        boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(11));
+        boolean hyvaksyttyEhdollisesti = "true".equals(lukija.getArvoAt(9));
+        String vastaanottoTila = lukija.getArvoAt(10);
+        String ilmoittautumisTila = lukija.getArvoAt(11);
+        boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(12));
 
-        String asiointikieli = lukija.getArvoAt(12);
-        String puhelinnumero = lukija.getArvoAt(13);
-        String osoite = lukija.getArvoAt(14);
-        String postinumero = lukija.getArvoAt(15);
-        String postitoimipaikka = lukija.getArvoAt(16);
-        String asuinmaa = lukija.getArvoAt(17);
-        String kansalaisuus = lukija.getArvoAt(18);
-        String kotikunta = lukija.getArvoAt(19);
-        String pohjakoulutusMaaToinenAste = lukija.getArvoAt(20);
+        String asiointikieli = lukija.getArvoAt(13);
+        String puhelinnumero = lukija.getArvoAt(14);
+        String osoite = lukija.getArvoAt(15);
+        String postinumero = lukija.getArvoAt(16);
+        String postitoimipaikka = lukija.getArvoAt(17);
+        String asuinmaa = lukija.getArvoAt(18);
+        String kansalaisuus = lukija.getArvoAt(19);
+        String kotikunta = lukija.getArvoAt(20);
+        String pohjakoulutusMaaToinenAste = lukija.getArvoAt(21);
 
         if (isNewRow(rivi, syntymaAika)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
                     sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
-                    sukupuoli, oid, aidinkieli, hakemuksenTila,
+                    sukupuoli, oid, aidinkieli, hakemuksenTila, hyvaksyttyEhdollisesti,
                     vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot,
                     false, asiointikieli, puhelinnumero,
                     osoite, postinumero, postitoimipaikka, asuinmaa,

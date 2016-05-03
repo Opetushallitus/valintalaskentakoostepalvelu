@@ -178,6 +178,7 @@ public class ErillishaunVientiService {
                 wrapper.getPersonOid(),
                 wrapper.getAidinkieli(),
                 hakemuksenTila,
+                false, // FIXME! Tähän todellinen arvo
                 vastaanottoTila,
                 ilmoittautumisTila,
                 julkaistaankoTiedot,

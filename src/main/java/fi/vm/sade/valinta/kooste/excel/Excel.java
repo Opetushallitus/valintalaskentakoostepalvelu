@@ -103,7 +103,7 @@ public class Excel {
         CellStyle textStyle = workbook.createCellStyle();
         textStyle.setDataFormat(fmt.getFormat("@"));
         textStyle.setAlignment(CellStyle.ALIGN_LEFT);
-        for (int i = 0; i < 20; ++i) {
+        for (int i = 0; i < 22; ++i) {
             sheet.setDefaultColumnStyle(i, textStyle);
         }
         XSSFCellStyle hiddenStyle = workbook.createCellStyle();

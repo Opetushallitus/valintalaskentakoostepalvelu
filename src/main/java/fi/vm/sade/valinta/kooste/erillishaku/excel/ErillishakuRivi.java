@@ -36,6 +36,7 @@ public class ErillishakuRivi {
     @ApiModelProperty(required = true)
     private final String hakemuksenTila;
     private final String vastaanottoTila;
+    private final boolean ehdollisestiHyvaksytty;
     private final String ilmoittautumisTila;
     @ApiModelProperty(required = true)
     private final boolean julkaistaankoTiedot;
@@ -52,31 +53,31 @@ public class ErillishakuRivi {
     private final String pohjakoulutusMaaToinenAste;
 
     public static ErillishakuRivi emptyErillishakuRivi() {
-        return new ErillishakuRivi(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null,
+        return new ErillishakuRivi(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
                 null, null, false, false, null, null, null, null, null, null, null, null, null);
     }
 
     public ErillishakuRivi() {
-        this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null,
+        this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
                 null, null, false, false, null, null, null, null, null, null, null, null, null);
     }
 
     public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
                            String syntymaAika, String sukupuoli, String personOid, String aidinkieli,
-                           String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila,
+                           String hakemuksenTila, boolean ehdollisestiHyvaksytty, String vastaanottoTila, String ilmoittautumisTila,
                            boolean julkaistaankoTiedot, boolean poistetaankoRivi, String asiointikieli,
                            String puhelinnumero, String osoite, String postinumero, String postitoimipaikka,
                            String asuinmaa, String kansalaisuus, String kotikunta, String pohjakoulutusMaaToinenAste) {
         this(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
                 Sukupuoli.fromString(sukupuoli), personOid, aidinkieli,
-                hakemuksenTila, vastaanottoTila, ilmoittautumisTila,
+                hakemuksenTila, ehdollisestiHyvaksytty, vastaanottoTila, ilmoittautumisTila,
                 julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
                 osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, pohjakoulutusMaaToinenAste);
     }
 
     public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
                            String syntymaAika, Sukupuoli sukupuoli, String personOid, String aidinkieli,
-                           String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila,
+                           String hakemuksenTila, boolean ehdollisestiHyvaksytty, String vastaanottoTila, String ilmoittautumisTila,
                            boolean julkaistaankoTiedot, boolean poistetaankoRivi, String asiointikieli,
                            String puhelinnumero, String osoite, String postinumero, String postitoimipaikka,
                            String asuinmaa, String kansalaisuus, String kotikunta, String pohjakoulutusMaaToinenAste) {
@@ -91,6 +92,7 @@ public class ErillishakuRivi {
         this.personOid = personOid;
         this.hakemuksenTila = hakemuksenTila;
         this.vastaanottoTila = vastaanottoTila;
+        this.ehdollisestiHyvaksytty = ehdollisestiHyvaksytty;
         this.ilmoittautumisTila = ilmoittautumisTila;
         this.julkaistaankoTiedot = julkaistaankoTiedot;
         this.poistetaankoRivi = poistetaankoRivi;
@@ -161,6 +163,11 @@ public class ErillishakuRivi {
         return trimToEmpty(vastaanottoTila);
     }
 
+    public boolean getEhdollisestiHyvaksytty() {
+        return ehdollisestiHyvaksytty;
+    }
+
+
     private String suojaaHenkilotunnusLogeilta(String hetu) {
         if (trimToNull(hetu) == null) {
             return "***HENKILOTUNNUS***";
@@ -228,6 +235,8 @@ public class ErillishakuRivi {
                 .append(", ")
                 .append(vastaanottoTila)
                 .append(", ")
+                .append(ehdollisestiHyvaksytty)
+                .append(", ")
                 .append(julkaistaankoTiedot)
                 .append(", ")
                 .append(asiointikieli)
@@ -251,7 +260,7 @@ public class ErillishakuRivi {
 
     public ErillishakuRivi withAidinkieli(String aidinkieli) {
         return new ErillishakuRivi(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, sukupuoli, personOid, aidinkieli,
-                hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
+                hakemuksenTila, ehdollisestiHyvaksytty, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
                 osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, pohjakoulutusMaaToinenAste);
     }
 

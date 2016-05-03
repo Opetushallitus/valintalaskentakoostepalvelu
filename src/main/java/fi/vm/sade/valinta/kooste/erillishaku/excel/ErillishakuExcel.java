@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
+import fi.vm.sade.valinta.kooste.excel.arvo.BooleanArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +30,11 @@ import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.emptyE
 public class ErillishakuExcel {
     private final static Logger LOG = LoggerFactory.getLogger(ErillishakuExcel.class);
     private final Excel excel;
+
+    public final static String TOSI = "Kyllä";
+    public final static String EPATOSI = "Ei";
+    private final static Collection<String> TOTUUSARVO = Arrays.asList(EPATOSI, TOSI);
+
 
     public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija) {
         this(tyyppi, "", "", "", Collections.emptyList(), kuuntelija);
@@ -60,6 +66,7 @@ public class ErillishakuExcel {
                 new TekstiArvo("Äidinkieli"),
                 new TekstiArvo("Hakemuksentila"),
                 new TekstiArvo("Vastaanottotila"),
+                new TekstiArvo("Ehdollisesti hyväksytty"),
                 new TekstiArvo("Ilmoittautumistila"),
                 new TekstiArvo("Julkaistavissa"),
                 new TekstiArvo("Asiointikieli"),
@@ -110,6 +117,7 @@ public class ErillishakuExcel {
                             "",
                             "FI",
                             "HYVAKSYTTY",
+                            false,
                             "KESKEN",
                             "EI_TEHTY",
                             false,
@@ -144,6 +152,7 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
+            a.add(new BooleanArvo(Boolean.toString(rivi.getEhdollisestiHyvaksytty()), TOTUUSARVO, TOSI, EPATOSI, EPATOSI));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
             a.add(ErillishakuDataRivi.asiointiKieli(rivi.getAsiointikieli()));

@@ -24,14 +24,14 @@ public class ErillishakuRiviTestUtil {
     public static ErillishakuRivi laillinenRivi() {
         return new ErillishakuRivi(null, SUKUNIMI, ETUNIMI, HETU,
                 EMPTY, SYNTYMAAIKA, SUKUPUOLI, EMPTY,
-                AIDINKIELI, HakemuksenTila.HYVAKSYTTY.toString(),
+                AIDINKIELI, HakemuksenTila.HYVAKSYTTY.toString(), false,
                 ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false, "FI",
                 "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", "FIN");
     }
     public static ErillishakuRivi viallinenRiviPuuttuvillaTunnisteilla() {
         return new ErillishakuRivi(null, SUKUNIMI, ETUNIMI,
-                EMPTY, EMPTY, EMPTY, Sukupuoli.EI_SUKUPUOLTA, EMPTY, EMPTY, HakemuksenTila.HYVAKSYTTY.toString(),
+                EMPTY, EMPTY, EMPTY, Sukupuoli.EI_SUKUPUOLTA, EMPTY, EMPTY, HakemuksenTila.HYVAKSYTTY.toString(), false,
                 ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false, "FI",
                 "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", "FIN");
