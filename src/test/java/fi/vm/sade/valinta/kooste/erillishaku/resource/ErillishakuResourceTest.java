@@ -1,50 +1,43 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.*;
+import fi.vm.sade.authentication.model.HenkiloTyyppi;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
+import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockData;
+import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.FileOutputStream;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-
-import com.google.gson.GsonBuilder;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.mocks.*;
-import org.apache.commons.io.IOUtils;
-import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.Before;
-import org.junit.Test;
-
-import fi.vm.sade.authentication.model.HenkiloTyyppi;
-import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
-import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
-import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
-import org.mockito.Mockito;
-import rx.Observable;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ErillishakuResourceTest {
-    String hakuOid = "1.2.246.562.5.2013080813081926341928";
-    String hakukohdeOid = "1.2.246.562.5.72607738902";
-    String tarjoajaOid = "1.2.246.562.10.591352080610";
-    String valintatapajonoOid = "14090336922663576781797489829886";
-    String henkiloOid = "hakija1";
-    final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+    private String hakuOid = "1.2.246.562.5.2013080813081926341928";
+    private String hakukohdeOid = "1.2.246.562.5.72607738902";
+    private String tarjoajaOid = "1.2.246.562.10.591352080610";
+    private String valintatapajonoOid = "14090336922663576781797489829886";
+    private String henkiloOid = "hakija1";
+    private final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
 
     @Before
     public void startServer() {
@@ -85,7 +78,7 @@ public class ErillishakuResourceTest {
                 .query("valintatapajononNimi", "varsinainen jono")
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(Arrays.asList(), MediaType.APPLICATION_JSON), ProsessiId.class);
+                .post(Entity.entity(Collections.emptyList(), MediaType.APPLICATION_JSON), ProsessiId.class);
 
         String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
         final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
@@ -113,7 +106,7 @@ public class ErillishakuResourceTest {
         answers.getHenkilotiedot().put("kotikunta", "091");
         answers.getLisatiedot().put("asiointikieli", "ruotsi");
         hakemus.setAnswers(answers);
-        return Arrays.asList(hakemus);
+        return Collections.singletonList(hakemus);
     }
 
     @Test

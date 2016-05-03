@@ -33,16 +33,16 @@ public class ErillishakuExcel {
         this(tyyppi, hakuNimi, hakukohdeNimi, tarjoajaNimi, erillishakurivit, rivi -> {});
     }
 
-    public ErillishakuExcel(final Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
-                            String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit,
-                            ErillishakuRiviKuuntelija kuuntelija) {
+    ErillishakuExcel(final Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
+                     String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit,
+                     ErillishakuRiviKuuntelija kuuntelija) {
         erillishakurivit = Lists.newArrayList(erillishakurivit);
         List<Rivi> rivit = Lists.newArrayList();
         Collection<Collection<Arvo>> esittelyt = Lists.newArrayList();
-        esittelyt.add(Arrays.asList(new TekstiArvo(hakuNimi, true, false, 4)));
-        esittelyt.add(Arrays.asList(new TekstiArvo(hakukohdeNimi, true, false, 4)));
-        esittelyt.add(Arrays.asList(new TekstiArvo(tarjoajaNimi, true, false, 4)));
-        esittelyt.add(Arrays.asList(new TekstiArvo(StringUtils.EMPTY)));
+        esittelyt.add(Collections.singletonList(new TekstiArvo(hakuNimi, true, false, 4)));
+        esittelyt.add(Collections.singletonList(new TekstiArvo(hakukohdeNimi, true, false, 4)));
+        esittelyt.add(Collections.singletonList(new TekstiArvo(tarjoajaNimi, true, false, 4)));
+        esittelyt.add(Collections.singletonList(new TekstiArvo(StringUtils.EMPTY)));
         esittelyt.add(Arrays.asList(
                 new TekstiArvo("Sukunimi"),
                 new TekstiArvo("Etunimi"),
@@ -135,7 +135,6 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getSyntymaAika(), true, true));
             a.add(new MonivalintaArvo(rivi.getSukupuoli().toString(), ErillishakuDataRivi.SUKUPUOLEN_ARVOT));
             a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
-            //a.add(new MonivalintaArvo(rivi.getAidinkieli(), ErillishakuDataRivi.KIELITYYPIN_ARVOT));
             // HUOM! AIDINKIELESTÄ EI VOI TEHDÄ DROPDOWNIA KOSKA EXCEL EI TUE NIIN PITKÄÄ DROPDOWNIA
             a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));

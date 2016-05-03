@@ -67,9 +67,7 @@ public class Excel {
                 }
                 // LOG.error("{}", rivi);
                 // ottaako importteri viela vastaan dataa?
-                if (riviImportteri.validoi(rivi)) {
-                    continue;
-                } else {
+                if (!riviImportteri.validoi(rivi)) {
                     if (!riviIterator.hasNext()) { // onko seuraavaa
                         // importteria?
                         return; // ei ole joten importointi on valmis

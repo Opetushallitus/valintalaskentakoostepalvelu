@@ -1,22 +1,18 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import java.io.FileOutputStream;
+import com.google.common.collect.Lists;
+import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
+import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.io.IOUtils;
-
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.emptyErillishakuRivi;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
-
-import com.google.common.collect.Lists;
-
-import fi.vm.sade.valinta.kooste.excel.Excel;
-import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
+import static org.junit.Assert.assertEquals;
 
 /**
  * 
@@ -62,8 +58,7 @@ public class ErillishakuExcelTest {
 				2 // tavalliset rivit
 				+1 // tyhjärivi julkaisulupasyötteellä
 				, tarkistusTapahtui.get());
-		if (false) {
-			IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
-		}
+		// Tulosta tiedostoksi testausta varten
+		// IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
 	}
 }

@@ -21,11 +21,11 @@ import java.util.Optional;
 public class ImportedErillisHakuExcel {
     private static final Logger LOG = LoggerFactory.getLogger(ImportedErillisHakuExcel.class);
     private final static org.joda.time.format.DateTimeFormatter dtf = DateTimeFormat.forPattern("dd.MM.yyyy");
-    public final List<HenkiloCreateDTO> henkiloPrototyypit;
+    private final List<HenkiloCreateDTO> henkiloPrototyypit;
     public final List<ErillishakuRivi> rivit;
-    public final Map<String, ErillishakuRivi> hetuToRivi;
+    private final Map<String, ErillishakuRivi> hetuToRivi;
 
-    public ImportedErillisHakuExcel(List<ErillishakuRivi> erillishakuRivi) {
+    ImportedErillisHakuExcel(List<ErillishakuRivi> erillishakuRivi) {
         hetuToRivi = Maps.newHashMap();
         henkiloPrototyypit = Lists.newArrayList();
         this.rivit = erillishakuRivi;
