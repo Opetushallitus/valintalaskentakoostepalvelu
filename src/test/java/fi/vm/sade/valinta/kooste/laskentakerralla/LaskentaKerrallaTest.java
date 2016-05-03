@@ -32,6 +32,7 @@ import rx.Observable;
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -97,7 +98,7 @@ public class LaskentaKerrallaTest {
         assertEquals(PERSON_OID, laskeDTO.getHakemus().get(0).getHakijaOid());
         assertEquals(HAKUKOHDE_OID, laskeDTO.getHakukohdeOid());
 
-        verify(Mocks.laskentaSeurantaAsyncResource, times(1)).merkkaaHakukohteenTila(LASKENTASEURANTA_ID, HAKUKOHDE_OID, HakukohdeTila.VALMIS);
+        verify(Mocks.laskentaSeurantaAsyncResource, times(1)).merkkaaHakukohteenTila(LASKENTASEURANTA_ID, HAKUKOHDE_OID, HakukohdeTila.VALMIS, Optional.empty());
     }
 
     private void releaseWorkerAfterStartupReservesThemAll() {

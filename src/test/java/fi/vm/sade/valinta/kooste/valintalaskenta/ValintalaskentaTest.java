@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -97,7 +98,7 @@ public class ValintalaskentaTest {
 		})
 				.when(asyncResource)
 				.merkkaaHakukohteenTila(anyString(), anyString(),
-						any(HakukohdeTila.class));
+						any(HakukohdeTila.class), any(Optional.class));
 		Mockito.doAnswer(new Answer<Object>() {
 			@Override
 			public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -105,7 +106,7 @@ public class ValintalaskentaTest {
 				return null;
 			}
 		}).when(asyncResource)
-				.merkkaaLaskennanTila(anyString(), any(LaskentaTila.class));
+				.merkkaaLaskennanTila(anyString(), any(LaskentaTila.class), any(Optional.class));
 
 		return asyncResource;
 	}

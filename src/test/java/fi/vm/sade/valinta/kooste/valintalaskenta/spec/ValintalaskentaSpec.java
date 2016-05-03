@@ -74,19 +74,19 @@ public class ValintalaskentaSpec {
 
                 return answer;
             }).when(laskentaSeurantaAsyncResource)
-                    .merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any(HakukohdeTila.class));
+                    .merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any(HakukohdeTila.class), Mockito.any(Optional.class));
             Mockito.doAnswer(answer -> {
 
                 return answer;
             }).when(laskentaSeurantaAsyncResource)
-                    .merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(LaskentaTila.class));
+                    .merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(LaskentaTila.class), Mockito.any(Optional.class));
             Mockito.doAnswer(answer -> {
 
                 return answer;
             }).when(laskentaSeurantaAsyncResource)
                     .merkkaaLaskennanTila(Mockito.anyString(),
                             Mockito.any(LaskentaTila.class),
-                            Mockito.any(HakukohdeTila.class));
+                            Mockito.any(HakukohdeTila.class), Mockito.any(Optional.class));
             return laskentaSeurantaAsyncResource;
         }
     }

@@ -13,9 +13,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaat
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valinta.seuranta.dto.*;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -140,7 +138,8 @@ public class LaskentaStarter {
     private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, Optional<Throwable> t,  String uuid) {
         if (t.isPresent()) LOG.error(msg, t);
         else LOG.error(msg);
-        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, HakukohdeTila.KESKEYTETTY);
+        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, HakukohdeTila.KESKEYTETTY,
+                t.map(poikkeus -> IlmoitusDto.virheilmoitus(poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()))));
         laskennanKaynnistajaActor.tell(new LaskentaStarterActor.WorkerAvailable(), ActorRef.noSender());
     }
 

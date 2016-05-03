@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -9,6 +10,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.slf4j.Logger;
@@ -163,7 +165,7 @@ public class ValintalaskentaKerrallaResource {
         final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
         if (l != null) {
             l.lopeta();
-            seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
+            seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Peruutettu käyttäjän toimesta")));
         }
         return Response.ok().build();
     }

@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.seuranta.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -93,38 +94,59 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
         }
     }
 
-    public void merkkaaLaskennanTila(String uuid, LaskentaTila tila) {
+    public void merkkaaLaskennanTila(String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
         String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid + "/tila/" + tila;
         try {
-            getWebClient()
-                    .path(url)
-                    .async()
-                    .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
+            if(ilmoitusDtoOptional.isPresent()) {
+                getWebClient()
+                        .path(url)
+                        .async()
+                        .post(Entity.entity(gson.toJson(ilmoitusDtoOptional.get()), MediaType.APPLICATION_JSON_TYPE), responseCallback);
+            } else {
+                getWebClient()
+                        .path(url)
+                        .async()
+                        .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
+            }
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu paatyi virheeseen!" + url, e);
         }
     }
 
-    public void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila) {
+    public void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
         String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid + "/tila/" + tila + "/hakukohde/" + hakukohdetila;
         try {
+        if(ilmoitusDtoOptional.isPresent()) {
+            getWebClient()
+                    .path(url)
+                    .async()
+                    .post(Entity.entity(gson.toJson(ilmoitusDtoOptional.get()), MediaType.APPLICATION_JSON_TYPE), responseCallback);
+        } else {
             getWebClient()
                     .path(url)
                     .async()
                     .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
+        }
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu " + url + " laskennalle " + uuid + " paatyi virheeseen", e);
         }
     }
 
     @Override
-    public void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila) {
+    public void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
         String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid + "/hakukohde/" + hakukohdeOid + "/tila/" + tila;
         try {
-            getWebClient()
-                    .path(url)
-                    .async()
-                    .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
+            if(ilmoitusDtoOptional.isPresent()) {
+                getWebClient()
+                        .path(url)
+                        .async()
+                        .post(Entity.entity(gson.toJson(ilmoitusDtoOptional.get()), MediaType.APPLICATION_JSON_TYPE), responseCallback);
+            } else {
+                getWebClient()
+                        .path(url)
+                        .async()
+                        .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
+            }
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu " + url + " laskennalle " + uuid + " ja hakukohteelle " + hakukohdeOid + " paatyi virheeseen", e);
         }

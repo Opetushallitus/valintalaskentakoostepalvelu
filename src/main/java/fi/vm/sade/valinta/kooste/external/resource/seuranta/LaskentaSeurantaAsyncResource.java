@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.seuranta;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.LaskentaParams;
@@ -21,9 +22,9 @@ public interface LaskentaSeurantaAsyncResource {
 
     void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<String> callback, Consumer<Throwable> failureCallback);
 
-    void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila);
+    void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional);
 
-    void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila);
+    void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila, Optional<IlmoitusDto> ilmoitusDtoOptional);
 
-    void merkkaaLaskennanTila(String uuid, LaskentaTila tila);
+    void merkkaaLaskennanTila(String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional);
 }

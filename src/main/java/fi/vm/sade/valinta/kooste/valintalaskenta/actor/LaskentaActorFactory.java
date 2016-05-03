@@ -34,6 +34,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.Palvel
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPalvelukutsuKerrallaPalvelukutsuStrategia;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.slf4j.Logger;
@@ -49,6 +50,9 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observables.ConnectableObservable;
+
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
 
 @Service
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
@@ -320,7 +324,7 @@ public class LaskentaActorFactory {
                                 ).subscribe(
                                         s -> {
                                             try {
-                                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.VALMIS);
+                                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.VALMIS, Optional.empty());
                                                 LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, h.getHakukohdeOid());
                                             } catch (Throwable t) {
                                                 LOG.error("(Uuid={}) Hakukohteen {} laskenta on valmis mutta ei saatu merkattua", uuid, h.getHakukohdeOid(), t);
@@ -329,7 +333,8 @@ public class LaskentaActorFactory {
                                         },
                                         e -> {
                                             try {
-                                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY);
+                                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY,
+                                                        Optional.of(virheilmoitus(e.getMessage(), Arrays.toString(e.getStackTrace()))));
                                                 LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, h.getHakukohdeOid(), e);
                                             } catch (Throwable e1) {
                                                 LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui mutta ei saatu merkattua", uuid, h.getHakukohdeOid(), e1);
@@ -351,10 +356,10 @@ public class LaskentaActorFactory {
                 active.set(false);
                 if (!done.get()) {
                     LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid);
-                    laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
+                    laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
                 } else {
                     LOG.info("#### (Uuid={}) Laskenta valmis koska ei enää hakukohteita käsiteltävänä", uuid);
-                    laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS);
+                    laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
                 }
                 laskentaSupervisor.ready(uuid);
             }

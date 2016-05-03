@@ -21,7 +21,10 @@ import org.mockito.Mockito;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.mockito.Matchers.any;
 
 /**
  * @author Jussi Jartamo
@@ -84,9 +87,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         actor.start();
 
         Assert.assertTrue(actor.isValmis());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS));
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any(), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), any(Optional.class));
     }
 
     @Test
@@ -145,9 +148,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         actor.start();
 
         Assert.assertTrue(actor.isValmis());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any(), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), any(Optional.class));
     }
 
     @Test
@@ -206,9 +209,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         actor.start();
 
         Assert.assertTrue(actor.isValmis());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any(), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), any(Optional.class));
     }
 
     @Test
@@ -268,9 +271,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         actor.start();
         Assert.assertTrue(actor.isValmis());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS));
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any(), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), any(Optional.class));
     }
 
     @Test
@@ -330,9 +333,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         actor.start();
         Assert.assertTrue(actor.isValmis());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any(), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), any(Optional.class));
     }
 
     @Test
@@ -397,9 +400,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         actor.start();
         Assert.assertTrue(actor.isValmis());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.atMost(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.atLeast(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
-        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any(), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.atMost(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.atLeast(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY), any(Optional.class));
+        Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), any(Optional.class));
     }
 }

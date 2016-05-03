@@ -1,8 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +59,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
             if (!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
                 try {
                     HakukohdeTila hakukohdetila = HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY;
-                    laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, hakukohdetila);
+                    laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, hakukohdetila, Optional.empty());
                 } finally {
                     viimeistele();
                 }
@@ -72,7 +74,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
         if (!valmis.get()) {
             try {
                 LOG.info("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
-                laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
+                laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(IlmoitusDto.ilmoitus("Laskenta on keskeytetty")));
             } catch (Exception e) {
                 LOG.error("Laskennan (" + uuid + ") tilan merkkaaminen peruutetuksi epaonnistui", e);
             }
@@ -133,7 +135,9 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
             LOG.error("Strategioiden peruuttaminen epaonnistui laskennalle (" + uuid + ") ", e);
         }
         try {
-            laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
+            laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY,
+                    // Laskenta sammutettu. Syy ylatasolla.
+                    Optional.empty());
         } catch (Exception e) {
             LOG.error("Laskennan tilan merkkaaminen peruutetuksi ja hakukohteet keskeytetyksi epaonnistui laskennalle (" + uuid + ")", e);
         }
