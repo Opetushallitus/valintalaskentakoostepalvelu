@@ -6,6 +6,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import rx.Observable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -53,9 +55,20 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
     }
 
     @Override
+    public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid) {
+        return getAsObservable("/valinta-tulos-service/virkailija/valintatulos/ilmanhakijantilaa/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid, new GenericType<List<Valintatulos>>() {}.getType());
+    }
+
+    @Override
     public Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid) {
         return getAsObservable("/valinta-tulos-service/virkailija/valintatulos/haku/" + hakuOid +  "/hakemus/" + hakemusOid,
                 new GenericType<List<Valintatulos>>() {}.getType());
+    }
+
+    @Override
+    public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
+        return postAsObservable("/valinta-tulos-service/virkailija/myohastyneet/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid,
+            new GenericType<List<VastaanottoAikarajaMennytDTO>>() {}.getType(), Entity.json(hakemusOids));
     }
 
     @Override

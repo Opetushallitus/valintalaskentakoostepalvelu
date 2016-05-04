@@ -4,11 +4,13 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import rx.Observable;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ValintaTulosServiceAsyncResource {
     Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid);
@@ -27,5 +29,9 @@ public interface ValintaTulosServiceAsyncResource {
 
     Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid);
 
+    Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid);
+
     Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid);
+
+    Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid, String hakukohdeOid, Set<String> hakemusOids);
 }

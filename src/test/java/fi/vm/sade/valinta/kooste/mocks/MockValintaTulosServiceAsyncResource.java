@@ -6,12 +6,14 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class MockValintaTulosServiceAsyncResource implements ValintaTulosServiceAsyncResource {
@@ -57,7 +59,17 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     }
 
     @Override
+    public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid) {
+        return Observable.just(Lists.newArrayList());
+    }
+
+    @Override
     public Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid) {
+        return Observable.just(Lists.newArrayList());
+    }
+
+    @Override
+    public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
         return Observable.just(Lists.newArrayList());
     }
 }
