@@ -140,7 +140,7 @@ public class PistesyottoResource {
         if(hakemukset == null || hakemukset.isEmpty()) {
             asyncResponse.resume(Response.serverError().entity("Ulkoinen pistesyotto API requires at least one hakemus").build());
         } else {
-            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+            asyncResponse.setTimeout(30L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler(asyncResponse1 -> {
                 LOG.error("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu: /haku/{}", hakuOid);
                 asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
