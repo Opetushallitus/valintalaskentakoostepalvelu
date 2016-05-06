@@ -682,6 +682,11 @@
 			<artifactId>ehcache-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-spring-security</artifactId>
 			<version>${camel.version}</version>
