@@ -218,20 +218,6 @@ public class PistesyottoTuontiSoteliService {
 
     private Stream<OsallistuminenHakutoiveeseen> validoi(final HakemusJaHakutoiveet hakemusJaHakutoiveet, List<Hakutoive> hakutoives) {
         final HakemusDTO hakemusDTO = hakemusJaHakutoiveet.hakemusDTO;
-        final HakemusWrapper hakemus = hakemusJaHakutoiveet.hakemus;
-        if (hakemus == null) {
-            VirheDTO applicationNotFound = new VirheDTO();
-            applicationNotFound.setHakemusOid(hakemusDTO.getHakemusOid());
-            applicationNotFound.setVirhe("Hakemusta ei löydy");
-            return Arrays.asList(new OsallistuminenHakutoiveeseen(null, null, applicationNotFound)).stream();
-        }
-        if (! hakemusDTO.getHenkiloOid().equals(hakemus.getPersonOid())) {
-            VirheDTO conflictingPersonOid = new VirheDTO();
-            conflictingPersonOid.setHakemusOid(hakemusDTO.getHakemusOid());
-            conflictingPersonOid.setVirhe("Annettu henkilö OID ("+ hakemusDTO.getHenkiloOid() +") ei vastaa hakemukselta löytyvää henkilö OID:a ("+ hakemus.getPersonOid() +")");
-            return Arrays.asList(new OsallistuminenHakutoiveeseen(null, null, conflictingPersonOid)).stream();
-        }
-
         List<OsallistuminenHakutoiveeseen> hakemuksenKokeetStream = hakemusDTO.getValintakokeet().stream().flatMap(koe ->
             hakutoives.stream().flatMap(h -> {
                 // Valintakokeen tunnistetta ei löydy valintaperusteet
@@ -239,7 +225,7 @@ public class PistesyottoTuontiSoteliService {
                     VirheDTO invalidIdentifier = new VirheDTO();
                     invalidIdentifier.setHakemusOid(hakemusDTO.getHakemusOid());
                     invalidIdentifier.setVirhe("Valintakoetta ei löydy annetulle tunnisteelle (" + koe.getTunniste() + ").");
-                    return Arrays.asList(new OsallistuminenHakutoiveeseen(null, null, invalidIdentifier)).stream();
+                    return Arrays.asList(new OsallistuminenHakutoiveeseen(koe.getTunniste(), h.hakukohdeOid, invalidIdentifier)).stream();
                 }
                 Stream<ValintaperusteDTO> valintaperusteStream = h.valintaperusteetDTO.stream().filter(v -> v.getTunniste().equals(koe.getTunniste()));
                 return valintaperusteStream.flatMap(v -> {
@@ -288,12 +274,24 @@ public class PistesyottoTuontiSoteliService {
 
                 return hakemusJaHakutoiveets.stream().flatMap(
                         h -> {
+                            final HakemusDTO hakemusDTO = h.hakemusDTO;
+                            final HakemusWrapper hakemus = h.hakemus;
+                            if (hakemus == null) {
+                                VirheDTO applicationNotFound = new VirheDTO();
+                                applicationNotFound.setHakemusOid(hakemusDTO.getHakemusOid());
+                                applicationNotFound.setVirhe("Hakemusta ei löydy");
+                                return Stream.of(new OsallistuminenHakutoiveeseen(null, null, applicationNotFound));
+                            }
+                            if (! hakemusDTO.getHenkiloOid().equals(hakemus.getPersonOid())) {
+                                VirheDTO conflictingPersonOid = new VirheDTO();
+                                conflictingPersonOid.setHakemusOid(hakemusDTO.getHakemusOid());
+                                conflictingPersonOid.setVirhe("Annettu henkilö OID ("+ hakemusDTO.getHenkiloOid() +") ei vastaa hakemukselta löytyvää henkilö OID:a ("+ hakemus.getPersonOid() +")");
+                                return Stream.of(new OsallistuminenHakutoiveeseen(null, null, conflictingPersonOid));
+                            }
                             List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().map(oid -> new Hakutoive(
                                     oid,
                                     valintaperusteDTOMap.get(oid).getValintaperusteDTO(),
                                     Optional.ofNullable(osallistuminenDTOMap.get(oid)).orElse(Collections.emptyList()))).collect(Collectors.toList());
-
-
                             return validoi(h, hakutoiveetList).map(o -> {
                                 boolean isAuthorized = authorityCheck.test(o.hakukohdeOid);
                                 if(isAuthorized) {

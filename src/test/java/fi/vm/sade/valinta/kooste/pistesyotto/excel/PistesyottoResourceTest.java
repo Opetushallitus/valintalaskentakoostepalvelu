@@ -102,17 +102,24 @@ public class PistesyottoResourceTest {
         final String hakemusOid3 = "12316.7.7.997";
         final String hakemusInvalidPersonOid3 = "1.2.4124.83215";
         final String hakukohdeOid1 = "1.2.3.4";
+        final String hakukohdeOid2 = "1.2.3.5";
         final String hakemusOid4 = "12316.7.7.996";
         final String hakemusPersonOid4 = "1.2.4124.83142";
         final String hakemusOid5 = "12316.7.7.995";
         final String hakemusPersonOid5 = "1.2.4124.83141";
 
         cleanMocks();
-        Hakemus hakemus1 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).addHakutoive("1.2.3.4").build();
-        Hakemus hakemus2 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid2).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid2).addHakutoive("1.2.3.4").build();
-        Hakemus hakemus3 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid3).addHakutoive(hakukohdeOid1).setPersonOid(hakemusInvalidPersonOid3).addHakutoive("1.2.3.4").build();
-        Hakemus hakemus4 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid4).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid4).addHakutoive("1.2.3.4").build();
-        Hakemus hakemus5 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid5).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid5).addHakutoive("1.2.3.4").build();
+        Mockito.doAnswer(invocation -> {
+            Consumer<HakukohdeOIDAuthorityCheck> authChecker = (Consumer<HakukohdeOIDAuthorityCheck>)invocation.getArguments()[1];
+            authChecker.accept(h -> !hakukohdeOid2.equals(h));
+            return null;
+        }).when(Mocks.getAuthorityCheckService()).getAuthorityCheckForRoles(Mockito.anyCollection(), Mockito.any(), Mockito.any());
+
+        Hakemus hakemus1 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).build();
+        Hakemus hakemus2 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid2).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid2).build();
+        Hakemus hakemus3 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid3).addHakutoive(hakukohdeOid1).setPersonOid(hakemusInvalidPersonOid3).build();
+        Hakemus hakemus4 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid4).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid4).build();
+        Hakemus hakemus5 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid5).addHakutoive(hakukohdeOid2).setPersonOid(hakemusPersonOid5).build();
 
 
         List<Hakemus> hakemuses = Arrays.asList(hakemus1, hakemus2, hakemus3, hakemus4, hakemus5);
@@ -122,7 +129,11 @@ public class PistesyottoResourceTest {
                 Arrays.asList(
                         new ValintaperusteetSpec.ValintaperusteBuilder().setTunniste(tunniste1).setLukuarvofunktio().setArvot("8.34", "5.00").build(),
                         new ValintaperusteetSpec.ValintaperusteBuilder().setTunniste(tunniste2).setLukuarvofunktio().setMax("9.00").setMin("5.00").build()));
-        MockValintaperusteetAsyncResource.setHakukohdeValintaperusteResult(Arrays.asList(vp));
+        HakukohdeJaValintaperusteDTO vp2 = new HakukohdeJaValintaperusteDTO(hakukohdeOid2,
+                Arrays.asList(
+                        new ValintaperusteetSpec.ValintaperusteBuilder().setTunniste(tunniste1).setLukuarvofunktio().setArvot("8.34", "5.00").build(),
+                        new ValintaperusteetSpec.ValintaperusteBuilder().setTunniste(tunniste2).setLukuarvofunktio().setMax("9.00").setMin("5.00").build()));
+        MockValintaperusteetAsyncResource.setHakukohdeValintaperusteResult(Arrays.asList(vp, vp2));
 
         HakukohdeJaValintakoeDTO vk = new HakukohdeJaValintakoeDTO(hakukohdeOid1,
                 Arrays.asList(
@@ -148,6 +159,7 @@ public class PistesyottoResourceTest {
         JsonParser jp = new JsonParser();
         JsonElement je = jp.parse(responseAsString);
         String prettyJsonString = gson.toJson(je);
+
 
         System.out.println(prettyJsonString);
     }
