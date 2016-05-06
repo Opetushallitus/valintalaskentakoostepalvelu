@@ -183,13 +183,14 @@ public class PistesyottoExcel {
             rivit.add(new RiviBuilder().addOid(tarjoajaOid).addTeksti(tarjoajaNimi, 4).build());
         }
         rivit.add(Rivi.tyhjaRivi());
-        rivit.add(new RiviBuilder().addTyhja().addTyhja().addTyhja().addRivi(new OidRivi(tunnisteet, 2, true)).build());
+        rivit.add(new RiviBuilder().addTyhja().addTyhja().addTyhja().addTyhja().addRivi(new OidRivi(tunnisteet, 2, true)).build());
         final RiviBuilder valintakoeOtsikkoRiviBuilder = new RiviBuilder();
         final RiviBuilder otsikkoRiviBuilder = new RiviBuilder()
                 .addKeskitettyTeksti("Hakemus OID")
                 .addKeskitettyTeksti("Tiedot")
-                .addKeskitettyTeksti("Henkilötunnus");
-        valintakoeOtsikkoRiviBuilder.addTyhja().addTyhja().addTyhja();
+                .addKeskitettyTeksti("Henkilötunnus")
+                .addKeskitettyTeksti("Syntymäaika");
+        valintakoeOtsikkoRiviBuilder.addTyhja().addTyhja().addTyhja().addTyhja();
 
         for (String valintakoe : createValintakokeet(valintaperusteet)) {
             otsikkoRiviBuilder.addTyhja().addKeskitettyTeksti("Osallistuminen");
@@ -206,7 +207,7 @@ public class PistesyottoExcel {
         Collection<PistesyottoDataArvo> dataArvot = getPistesyotonDataArvot(valintaperusteet);
         Predicate<ValintakoeDTO> osallistuuValintakokeeseen = valintakoe ->
                 (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()));
-        Map<String, String> oidToHetu = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> new HakemusWrapper(h).getHenkilotunnusTaiSyntymaaika()));
+        Map<String, HakemusWrapper> oidToWrapper = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> new HakemusWrapper(h)));
         for (ApplicationAdditionalDataDTO data : pistetiedot) {
             final String hakemusOid = data.getOid();
             final boolean mahdollinenOsallistuja = osallistujat.contains(hakemusOid);
@@ -215,7 +216,9 @@ public class PistesyottoExcel {
             Collection<Arvo> s = Lists.newArrayList();
             s.add(new TekstiArvo(data.getOid()));
             s.add(new TekstiArvo(additionalDataToNimi(data)));
-            s.add(new TekstiArvo(Optional.ofNullable(oidToHetu.get(data.getOid())).orElse("")));
+            HakemusWrapper wrapper = oidToWrapper.get(data.getOid());
+            s.add(new TekstiArvo(null == wrapper || null == wrapper.getHenkilotunnus() ? "" : wrapper.getHenkilotunnus()));
+            s.add(new TekstiArvo(null == wrapper || null == wrapper.getSyntymaaika() ? "" : wrapper.getSyntymaaika()));
             boolean syote = false;
             for (ValintaperusteDTO valintaperuste : valintaperusteet) {
                 ValintakoeDTO valintakoe = Optional.ofNullable(tunnisteDTO.get(valintaperuste.getTunniste())).orElse(new ValintakoeDTO());

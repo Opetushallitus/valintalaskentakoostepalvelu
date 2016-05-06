@@ -23,6 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
+import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
@@ -56,13 +57,13 @@ import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import junit.framework.Assert;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.Assert.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @author Jussi Jartamo
@@ -216,20 +217,24 @@ public class PistesyottoResourceTest {
             MockApplicationAsyncResource.setResult(Arrays.asList(
                     hakemus()
                             .setOid(HAKEMUS1)
+                            .setHenkilotunnus("123456-789x")
                             .build()
             ));
             MockApplicationAsyncResource.setResultByOid(Arrays.asList(
                     hakemus()
                             .setOid(HAKEMUS2)
+                            .setSyntymaaika("1.1.1900")
                             .build()
             ));
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
                             .setOid(HAKEMUS1)
+                            .setEtunimiJaSukunimi("Hilla", "Hiiri")
                             .build()));
             MockApplicationAsyncResource.setAdditionalDataResultByOid(Arrays.asList(
                     lisatiedot()
                             .setOid(HAKEMUS2)
+                            .setEtunimiJaSukunimi("Hellevi", "Hiiri")
                             .build()));
 
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
@@ -245,14 +250,30 @@ public class PistesyottoResourceTest {
                             .query("hakukohdeOid", HAKUKOHDE1)
                             .post(Entity.entity("",
                                     "application/json"));
-            Assert.assertEquals(200, r.getStatus());
+            assertEquals(200, r.getStatus());
             InputStream excelData = inputStreamArgumentCaptor.getValue();
-            Assert.assertTrue(excelData != null);
+            assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
-        } finally {
+
+            Rivi hakemus1Rivi = rivit.stream().filter(rivi -> rivi.getSolut().stream().anyMatch(solu -> HAKEMUS1.equals(solu.toTeksti().getTeksti()))).findFirst().get();
+            assertRivi(hakemus1Rivi, new String[]{HAKEMUS1, "Hiiri, Hilla", "123456-789x", null, null, "Merkitsemättä"});
+            Rivi hakemus2Rivi = rivit.stream().filter(rivi -> rivi.getSolut().stream().anyMatch(solu -> HAKEMUS2.equals(solu.toTeksti().getTeksti()))).findFirst().get();
+            assertRivi(hakemus2Rivi, new String[]{HAKEMUS2, "Hiiri, Hellevi", null, "1.1.1900", null, "Merkitsemättä"});
+
+            } finally {
             cleanMocks();
+        }
+    }
+
+    private void assertRivi(Rivi rivi, String[] expectedSolut) {
+        Solu[] solut = rivi.getSolut().toArray(new Solu[rivi.getSolut().size()]);
+        assertTrue(solut.length == expectedSolut.length);
+        for(int i = 0; i < solut.length; i++) {
+            if(isBlank(expectedSolut[i])) {
+                assertTrue(isBlank(solut[i].toTeksti().getTeksti()));
+            } else {
+                assertTrue(expectedSolut[i].equals(solut[i].toTeksti().getTeksti()));
+            }
         }
     }
 
@@ -369,16 +390,15 @@ public class PistesyottoResourceTest {
                         .query("hakukohdeOid",HAKUKOHDE1)
                         .post(Entity.entity(excel.getExcel().vieXlsx(),
                                 MediaType.APPLICATION_OCTET_STREAM));
-        Assert.assertEquals(200, r.getStatus());
-        List<ApplicationAdditionalDataDTO> tuodutLisatiedot =
-        MockApplicationAsyncResource.
-        getAdditionalDataInput();
+        assertEquals(200, r.getStatus());
+        List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
         LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
-        Assert.assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!", 3, tuodutLisatiedot.size());
+        assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!", 3, tuodutLisatiedot.size());
         } finally {
             cleanMocks();
         }
     }
+
     public void cleanMocks() {
         Mocks.reset();
         Mockito.doAnswer(invocation -> {
@@ -389,6 +409,7 @@ public class PistesyottoResourceTest {
                 .getAuthorityCheckForRoles(Mockito.<String>anyCollection(), Mockito.<Consumer<HakukohdeOIDAuthorityCheck> >any(), Mockito.<Consumer<Throwable> >any());
         MockApplicationAsyncResource.clear();
     }
+
     @Test
     public void pistesyottoTuontiVirheellisestiSortatuillaHakemuksillaTest() throws Throwable {
         cleanMocks();
@@ -474,11 +495,9 @@ public class PistesyottoResourceTest {
                         .post(Entity.entity(
                                 PistesyottoResourceTest.class.getResourceAsStream("/virheellisesti_sortattu_excel.xlsx"),
                                 MediaType.APPLICATION_OCTET_STREAM));
-        Assert.assertEquals(200, r.getStatus());
-        List<ApplicationAdditionalDataDTO> tuodutLisatiedot =
-                MockApplicationAsyncResource.
-                        getAdditionalDataInput();
-        Assert.assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!",null, tuodutLisatiedot);
+        assertEquals(200, r.getStatus());
+        List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
+        assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!",null, tuodutLisatiedot);
         } finally {
             cleanMocks();
         }

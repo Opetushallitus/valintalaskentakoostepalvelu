@@ -28,16 +28,17 @@ public class PistesyottoDataRivi extends DataRivi {
         String oid = lukija.getArvoAt(0);
         String nimi = lukija.getArvoAt(1);
         String hetu = lukija.getArvoAt(2);
+        String pvm = lukija.getArvoAt(3);
         Collection<PistesyottoArvo> arvot = Lists.newArrayList();
         {
-            int i = 3;
+            int i = 4;
             for (PistesyottoDataArvo dataArvo : dataArvot) {
                 arvot.add(dataArvo.asPistesyottoArvo(lukija.getArvoAt(i),
                         lukija.getArvoAt(i + 1)));
                 i += 2;
             }
         }
-        PistesyottoRivi pistesyottorivi = new PistesyottoRivi(oid, nimi, hetu, arvot);
+        PistesyottoRivi pistesyottorivi = new PistesyottoRivi(oid, nimi, hetu, pvm, arvot);
         for (PistesyottoDataRiviKuuntelija kuuntelija : kuuntelijat) {
             kuuntelija.pistesyottoDataRiviTapahtuma(pistesyottorivi);
         }

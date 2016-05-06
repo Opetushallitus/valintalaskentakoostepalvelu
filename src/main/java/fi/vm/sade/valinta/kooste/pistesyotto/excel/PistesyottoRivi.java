@@ -19,12 +19,14 @@ public class PistesyottoRivi {
     private final String oid;
     private final String nimi;
     private final String hetu;
+    private final String pvm;
     private final Collection<PistesyottoArvo> arvot;
 
-    public PistesyottoRivi(String oid, String nimi, String hetu, Collection<PistesyottoArvo> arvot) {
+    public PistesyottoRivi(String oid, String nimi, String hetu, String pvm, Collection<PistesyottoArvo> arvot) {
         this.oid = oid;
         this.nimi = nimi;
         this.hetu = hetu;
+        this.pvm = pvm;
         this.arvot = arvot;
     }
 
@@ -76,7 +78,8 @@ public class PistesyottoRivi {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("[oid=").append(oid).append(",nimi=").append(nimi).append(",hetu=").append(hetu).append(",");
+        sb.append("[oid=").append(oid).append(",nimi=").append(nimi).append(",hetu=").append(hetu)
+                .append(",pvm=").append(pvm).append(",");
         for (PistesyottoArvo arvo : arvot) {
             sb.append("\r\n\t[tunniste=").append(arvo.getTunniste()).append(",arvo=").append(arvo.getArvo())
                     .append(",tila=").append(arvo.getTila())

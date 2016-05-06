@@ -2,10 +2,9 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 
 public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestBase {
 
@@ -37,7 +37,7 @@ public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestB
 				"",
 				"",
 				"",
-				Collections.emptyList(),
+				createHakemukse(pistetiedot),
 				Collections.<String>emptySet(),
 				Arrays.asList(
 						"1_2_246_562_5_85532589612_urheilija_lisapiste",
@@ -49,5 +49,23 @@ public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestB
 		excel.tuoXlsx(excel.vieXlsx());
 
 		// tallenna(excel);
+	}
+
+	private Collection<Hakemus> createHakemukse(List<ApplicationAdditionalDataDTO> pistetiedot) {
+		List<Hakemus> hakemukset = new ArrayList<Hakemus>();
+		for(int i = 0; i < pistetiedot.size(); i++) {
+			hakemukset.add(createHakemus(pistetiedot.get(i), i));
+		}
+		return hakemukset;
+	}
+
+	private Hakemus createHakemus(ApplicationAdditionalDataDTO pistetieto, int i) {
+		if( i % 2== 0 ) {
+			return hakemus().setOid(pistetieto.getOid()).setSyntymaaika("1.1.1900").build();
+		} else {
+			return hakemus()
+					.setOid(pistetieto.getOid())
+					.setHenkilotunnus("010101-100x").build();
+		}
 	}
 }
