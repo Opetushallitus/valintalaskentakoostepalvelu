@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.ws.rs.client.Entity;
@@ -51,7 +52,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 
     @Autowired
     public ValintaperusteetAsyncResourceImpl(@Value("${host.ilb}") String address) {
-        super(address);
+        super(address, TimeUnit.HOURS.toMillis(1L));
     }
     // /valintaperusteet/hakijaryhmä/{hakukohdeoid}
     public Peruutettava haeHakijaryhmat(String hakukohdeOid, Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback, Consumer<Throwable> failureCallback) {
