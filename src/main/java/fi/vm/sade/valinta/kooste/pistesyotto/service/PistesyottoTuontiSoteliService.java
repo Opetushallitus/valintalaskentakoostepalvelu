@@ -288,7 +288,7 @@ public class PistesyottoTuontiSoteliService {
 
                 return hakemusJaHakutoiveets.stream().flatMap(
                         h -> {
-                            List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().filter(authorityCheck).map(oid -> new Hakutoive(
+                            List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().map(oid -> new Hakutoive(
                                     oid,
                                     valintaperusteDTOMap.get(oid).getValintaperusteDTO(),
                                     Optional.ofNullable(osallistuminenDTOMap.get(oid)).orElse(Collections.emptyList()))).collect(Collectors.toList());

@@ -285,6 +285,6 @@ public class HakemusWrapper {
     public Collection<String> getHakutoiveOids() {
         return getHakutoiveet().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
-                .map(entry -> StringUtils.trimToEmpty(entry.getValue())).filter(e -> !StringUtils.isBlank(e)).collect(Collectors.toSet());
+                .map(entry -> StringUtils.trimToNull(entry.getValue())).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 }
