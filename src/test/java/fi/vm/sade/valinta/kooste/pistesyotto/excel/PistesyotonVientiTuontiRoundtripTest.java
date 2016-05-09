@@ -37,7 +37,7 @@ public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestB
 				"",
 				"",
 				"",
-				createHakemukse(pistetiedot),
+				createHakemukset(pistetiedot),
 				Collections.<String>emptySet(),
 				Arrays.asList(
 						"1_2_246_562_5_85532589612_urheilija_lisapiste",
@@ -51,7 +51,7 @@ public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestB
 		// tallenna(excel);
 	}
 
-	private Collection<Hakemus> createHakemukse(List<ApplicationAdditionalDataDTO> pistetiedot) {
+	private Collection<Hakemus> createHakemukset(List<ApplicationAdditionalDataDTO> pistetiedot) {
 		List<Hakemus> hakemukset = new ArrayList<Hakemus>();
 		for(int i = 0; i < pistetiedot.size(); i++) {
 			hakemukset.add(createHakemus(pistetiedot.get(i), i));

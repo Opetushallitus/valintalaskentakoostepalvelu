@@ -153,7 +153,7 @@ public class PistesyotonTuontiTestBase {
     }
 
     void tallenna(final Excel excel) throws IOException {
-        IOUtils.copy(excel.vieXlsx(), new FileOutputStream("pistesyottobar.xlsx"));
+        IOUtils.copy(excel.vieXlsx(), new FileOutputStream("pistesyotto.xlsx"));
     }
 
 }
