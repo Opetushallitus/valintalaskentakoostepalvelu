@@ -7,7 +7,6 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +29,6 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -44,58 +42,10 @@ public class ValintaTulosServiceProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(ValintaTulosServiceProxyResource.class);
 
     @Autowired
-    private TilaAsyncResource tilaResource;
-
-    @Autowired
     private SijoitteluAsyncResource sijoitteluResource;
 
     @Autowired
     private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
-
-    @GET
-    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-    @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-    @Consumes("application/json")
-    public void sijoittelunTulokset(
-            @PathParam("hakuOid") String hakuOid,
-            @PathParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-            @Suspended AsyncResponse asyncResponse) {
-
-        List<String> suljetutHaut = Arrays.asList(
-                "1.2.246.562.29.90697286251",
-                "1.2.246.562.29.10714450698",
-                "1.2.246.562.29.173465377510",
-                "1.2.246.562.29.95390561488",
-                "1.2.246.562.5.2013060313080811526781",
-                "1.2.246.562.5.2013080813081926341927"
-        );
-        if (suljetutHaut.contains(hakuOid)) {
-            respondWithError(asyncResponse, "Palvelu on toistaiseksi poissa käytöstä.");
-        }
-
-        setAsyncTimeout(asyncResponse,
-                String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s",
-                        hakuOid, hakukohdeOid));
-        valintaTulosServiceResource.findValintatulokset(hakuOid, hakukohdeOid)
-                .map(valintatulokset -> {
-                    if (StringUtils.isBlank(valintatapajonoOid)) {
-                        return valintatulokset;
-                    } else {
-                        return valintatulokset.stream()
-                                .filter(v -> valintatapajonoOid.equals(v.getValintatapajonoOid()))
-                                .collect(Collectors.toList());
-                    }
-                })
-                .map(valintatulokset -> Response.ok(valintatulokset).type(MediaType.APPLICATION_JSON_TYPE).build())
-                .subscribe(
-                        asyncResponse::resume,
-                        error -> {
-                            LOG.error("Valintatulosten haku valinta-tulos-servicestä epäonnistui", error);
-                            respondWithError(asyncResponse, "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage());
-                        }
-                );
-    }
 
     @GET
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
