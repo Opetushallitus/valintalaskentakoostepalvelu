@@ -153,6 +153,31 @@ public class ValintaTulosServiceProxyResource {
             );
     }
 
+    @POST
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
+    @Path("/tilahakijalle/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid}")
+    @Consumes("application/json")
+    public void vastaanottotilaHakijalle(
+            @PathParam("hakuOid") String hakuOid,
+            @PathParam("hakukohdeOid") String hakukohdeOid,
+            @PathParam("valintatapajonoOid") String valintatapajonoOid,
+            Set<String> hakemusOids,
+            @Suspended AsyncResponse asyncResponse) {
+        setAsyncTimeout(asyncResponse,
+            String.format("ValintatulosserviceProxy -palvelukutsu tila hakijalle -tiedon hakemiseksi on aikakatkaistu: /tilahakijalle/haku/%s/hakukohde/%s/valintatapajono/%s",
+                hakuOid, hakukohdeOid, valintatapajonoOid));
+
+        valintaTulosServiceResource.findTilahakijalle(hakuOid, hakukohdeOid, valintatapajonoOid, hakemusOids)
+            .map(tilaHakijalleDtos -> Response.ok(tilaHakijalleDtos).type(MediaType.APPLICATION_JSON_TYPE).build())
+            .subscribe(
+                asyncResponse::resume,
+                error -> {
+                    LOG.error("Hakijan tilojen haku valinta-tulos-servicestä haun " + hakuOid + " hakukohteen " + hakukohdeOid + " valintatapajonolle " + valintatapajonoOid + " epäonnistui", error);
+                    respondWithError(asyncResponse, "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage());
+                }
+            );
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @POST
     @Produces(MediaType.APPLICATION_JSON)

@@ -6,6 +6,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
@@ -69,6 +70,12 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
     public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
         return postAsObservable("/valinta-tulos-service/virkailija/myohastyneet/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid,
             new GenericType<List<VastaanottoAikarajaMennytDTO>>() {}.getType(), Entity.json(hakemusOids));
+    }
+
+    @Override
+    public Observable<List<TilaHakijalleDto>> findTilahakijalle(String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids) {
+        return postAsObservable("/valinta-tulos-service/virkailija/tilahakijalle/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid + "/valintatapajono/" + valintatapajonoOid,
+            new GenericType<List<TilaHakijalleDto>>() {}.getType(), Entity.json(hakemusOids));
     }
 
     @Override
