@@ -95,7 +95,7 @@ public class ErillishaunVientiService {
                     LOG.info("Aloitetaan dokumenttipalveluun tallennus");
                     String uuid = UUID.randomUUID().toString();
                     dokumenttiResource.tallenna(uuid, "erillishaku.xlsx", DateTime.now().plusHours(1).toDate().getTime(),
-                            Arrays.asList("erillishaku"), "application/octet-stream", excel.getExcel().vieXlsx());
+                            Collections.singletonList("erillishaku"), "application/octet-stream", excel.getExcel().vieXlsx());
                     prosessi.vaiheValmistui();
                     prosessi.valmistui(uuid);
                 },
@@ -121,10 +121,10 @@ public class ErillishaunVientiService {
         LOG.info("Muodostetaan Excel valintaperusteista!");
         Map<String, HakemusDTO> oidToHakemus = hakukohde
                 .getValintatapajonot().stream()
-                .flatMap(v -> v.getHakemukset().stream()).collect(Collectors.toMap(h -> h.getHakemusOid(), h -> h));
+                .flatMap(v -> v.getHakemukset().stream()).collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h));
         List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(hakemus -> {
             Optional<HakemusDTO> hakemusDTO = Optional.ofNullable(oidToHakemus.get(hakemus.getOid()));
-            Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(h0 -> h0.getTila());
+            Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(HakemusDTO::getTila);
             Valintatulos tulos = Optional.ofNullable(valintatulokset.get(hakemus.getOid())).orElse(new Valintatulos());
             return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus),
                     hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"),
@@ -142,11 +142,11 @@ public class ErillishaunVientiService {
         LOG.info("Muodostetaan Excel valintaperusteista!");
         Map<String, HakemusDTO> oidToHakemus = hakukohde
                 .getValintatapajonot().stream()
-                .flatMap(v -> v.getHakemukset().stream()).collect(Collectors.toMap(h -> h.getHakemusOid(), h -> h));
+                .flatMap(v -> v.getHakemukset().stream()).collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h));
         List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(hakemus -> {
                 Optional<HakemusDTO> hakemusDTO = Optional.ofNullable(oidToHakemus.get(hakemus.getOid()));
-                Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(h0 -> h0.getTila());
-                return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"), "", "", false);
+            Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(HakemusDTO::getTila);
+            return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"), "", false, "", false);
             }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
     }
@@ -228,7 +228,7 @@ public class ErillishaunVientiService {
         try {
             return valintatulos.stream()
                     .filter(v -> erillishaku.getValintatapajonoOid().equals(v.getValintatapajonoOid()))
-                    .collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v));
+                    .collect(Collectors.toMap(Valintatulos::getHakemusOid, v -> v));
         } catch (Exception e1) {
             LOG.error("Sijoittelusta ei saatu tietoja hakukohteelle vientia varten! Resurssi /sijoittelu/{}/sijoitteluajo/{}/hakukohde/{} ",
                     erillishaku.getHakuOid(), erillishaku.getHakukohdeOid(), SijoitteluResource.LATEST);
