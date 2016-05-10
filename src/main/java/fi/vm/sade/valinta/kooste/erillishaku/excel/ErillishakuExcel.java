@@ -53,7 +53,7 @@ public class ErillishakuExcel {
                 new TekstiArvo("Hakija-oid"),
                 new TekstiArvo("Äidinkieli"),
                 new TekstiArvo("Hakemuksentila"),
-                new TekstiArvo("Ehdollisesti hyväksytty"),
+                new TekstiArvo("Ehdollinen valinta"),
                 new TekstiArvo("Vastaanottotila"),
                 new TekstiArvo("Ilmoittautumistila"),
                 new TekstiArvo("Julkaistavissa"),
