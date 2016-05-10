@@ -13,7 +13,6 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.http.HttpExceptionWithStatus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -334,14 +333,8 @@ public class LaskentaActorFactory {
                                         },
                                         e -> {
                                             try {
-                                                if(e instanceof HttpExceptionWithStatus) {
-                                                    HttpExceptionWithStatus httpExceptionWithStatus = (HttpExceptionWithStatus)e;
-                                                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY,
-                                                            Optional.of(virheilmoitus(e.getMessage(), httpExceptionWithStatus.serverException)));
-                                                } else {
-                                                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY,
-                                                            Optional.of(virheilmoitus(e.getMessage(), Arrays.toString(e.getStackTrace()))));
-                                                }
+                                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY,
+                                                        Optional.of(virheilmoitus(e.getMessage(), Arrays.toString(e.getStackTrace()))));
                                                 LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, h.getHakukohdeOid(), e);
                                             } catch (Throwable e1) {
                                                 LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui mutta ei saatu merkattua", uuid, h.getHakukohdeOid(), e1);

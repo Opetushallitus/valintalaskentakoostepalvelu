@@ -1,8 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.excel;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -36,8 +37,7 @@ public class LaskentaDtoAsExcel {
                     rivi.add(hakukohde.getHakukohdeOid());
                     if (hakukohde.getIlmoitukset() != null) {
                         rivi.addAll(hakukohde.getIlmoitukset().stream()
-                                .flatMap(i -> Stream.concat(Stream.of(i.getOtsikko()),
-                                        Optional.ofNullable(i.getData()).orElse(Collections.emptyList()).stream()))
+                                .map(i -> i.getOtsikko())
                                 .collect(Collectors.toList()));
                     }
                     grid.add(rivi.toArray());
