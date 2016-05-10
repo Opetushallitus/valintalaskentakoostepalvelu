@@ -28,6 +28,7 @@ public class MergeHakemusDTO {
     private BigDecimal pisteet;
     private BigDecimal paasyJaSoveltuvuusKokeenTulos;
     private HakemuksenTila hakemuksentila;
+    private boolean ehdollisestiHyvaksyttavissa;
     private ValintatuloksenTila valintatuloksenTilaHakijalle;
     private ValintatuloksenTila valintatuloksentila;
     private IlmoittautumisTila ilmoittautumistila;
@@ -260,5 +261,13 @@ public class MergeHakemusDTO {
 
     public void setValintatuloksenTilaHakijalle(ValintatuloksenTila valintatuloksenTilaHakijalle) {
         this.valintatuloksenTilaHakijalle = valintatuloksenTilaHakijalle;
+    }
+
+    public boolean isEhdollisestiHyvaksyttavissa() {
+        return ehdollisestiHyvaksyttavissa;
+    }
+
+    public void setEhdollisestiHyvaksyttavissa(boolean ehdollisestiHyvaksytty) {
+        this.ehdollisestiHyvaksyttavissa = ehdollisestiHyvaksytty;
     }
 }
