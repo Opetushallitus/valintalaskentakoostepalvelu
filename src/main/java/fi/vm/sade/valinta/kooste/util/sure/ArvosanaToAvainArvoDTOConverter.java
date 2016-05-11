@@ -4,15 +4,19 @@ import com.codepoetics.protonpack.StreamUtils;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.Fraction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
  *         Prefiksi PK_
@@ -71,11 +75,26 @@ public class ArvosanaToAvainArvoDTOConverter {
         return valinnaisetArvosanat.flatMap(ArvosanaToAvainArvoDTOConverter::valinnaistenArvosanojenParasArvosanaSekvenssi);
     }
 
+    private static Function<Arvosana, String> groupArvosanat(final List<Arvosana> arvosanat) {
+        return a -> {
+            String aine = a.getAine();
+            String lisatieto = a.getLisatieto();
+            // BUG-856 yhdistä kielet, esim B1 ja B12, jos samalla kielikoodilla löytyy monta arvosanaa samantasoisilla ainekoodeilla
+            if (aine != null && lisatieto != null && aine.matches("[AB][123]+") && arvosanat.stream().filter(arvosana ->
+                    left(aine, 2).equals(left(arvosana.getAine(), 2)) &&
+                            StringUtils.equals(lisatieto, arvosana.getLisatieto())).collect(Collectors.toList()).size() > 1) {
+                return left(defaultString(a.getAine()), 2);
+            } else {
+                return a.getAine();
+            }
+        };
+    }
+
     private static Stream<List<List<Arvosana>>> valinnaisetAineittain(List<SuoritusJaArvosanat> suoritukset) {
         return suoritukset.stream()
                 .flatMap(s -> s.getArvosanat().stream()
                         .filter(Arvosana::isValinnainen)
-                        .collect(Collectors.groupingBy(Arvosana::getAine))
+                        .collect(Collectors.groupingBy(groupArvosanat(s.getArvosanat())))
                         .values().stream().map(a -> {
                             // Normalisoi indeksin
                             StreamUtils.zipWithIndex(a.stream()
@@ -88,15 +107,8 @@ public class ArvosanaToAvainArvoDTOConverter {
     }
 
     private static Stream<List<Arvosana>> ryhmitaSamatArvosanatKeskenaan(Stream<Arvosana> suoritukset) {
-        return suoritukset.collect(Collectors.groupingBy(a -> {
-            // FIXME korjataan myöhemmin...
-            //if (a.getAine() != null && a.getAine().matches("[AB][123]+")) {
-            //    // BUG-856 yhdistä kielet, jos sama kielikoodi esiintyy monta kertaa saman tason eri ainekoodeissa, esim B1 ja B12
-            //    return left(defaultString(a.getAine()), 2) + defaultString(a.getLisatieto());
-            //} else {
-                return a.getAine();
-            //}
-        })).values().stream();
+        final List<Arvosana> arvosanat = suoritukset.collect(Collectors.toList());
+        return arvosanat.stream().collect(Collectors.groupingBy(groupArvosanat(arvosanat))).values().stream();
     }
 
     private static Stream<Arvosana> arvosanat(Stream<SuoritusJaArvosanat> suoritukset) {

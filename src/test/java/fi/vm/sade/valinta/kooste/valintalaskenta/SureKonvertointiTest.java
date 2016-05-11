@@ -203,8 +203,7 @@ public class SureKonvertointiTest {
 
 		assertEquals(ImmutableSet.of(
 				new AvainArvoDTO("PK_B12", "9"), new AvainArvoDTO("PK_B12_OPPIAINE", "SV"),
-				new AvainArvoDTO("PK_B13", "10"), new AvainArvoDTO("PK_B13_OPPIAINE", "EN"),
-				new AvainArvoDTO("PK_B1", "8"), new AvainArvoDTO("PK_B1_OPPIAINE", "SV") // FIXME BUG-856 tämän ei pitäisi olla täällä
+				new AvainArvoDTO("PK_B13", "10"), new AvainArvoDTO("PK_B13_OPPIAINE", "EN")
 		), ImmutableSet.copyOf(arvot));
 	}
 
