@@ -1,20 +1,8 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.*;
-import static javax.ws.rs.core.Response.Status.OK;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.gson.Gson;
-
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
@@ -33,7 +21,6 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
@@ -45,9 +32,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoR
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import junit.framework.Assert;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
-import org.apache.cxf.message.MessageImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -63,6 +48,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.*;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(Enclosed.class)
 public class ErillishaunTuontiServiceTest {
@@ -142,6 +134,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals("hakemus1", hakija.hakemusOid);
             assertEquals("hakija1", hakija.hakijaOid);
             assertEquals(true, hakija.julkaistavissa);
+            assertEquals(true, hakija.ehdollisestiHyvaksyttavissa);
             System.out.println(new Gson().toJson(tilaAsyncResource.results));
         }
     }
