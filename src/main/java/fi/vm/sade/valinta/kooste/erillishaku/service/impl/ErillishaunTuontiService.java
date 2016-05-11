@@ -362,7 +362,7 @@ public class ErillishaunTuontiService {
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), rivi.getHakemusOid(),
                         haku.getHakukohdeOid(), rivi.isJulkaistaankoTiedot(), rivi.getPersonOid(), haku.getHakuOid(),
-                        haku.getTarjoajaOid(), null, null, null, rivi.getEtunimi(), rivi.getSukunimi(),
+                        haku.getTarjoajaOid(), null, false, null, null, rivi.getEtunimi(), rivi.getSukunimi(),
                         Optional.of(true))).collect(Collectors.toList());
         try {
             if (!poistettavatDtos.isEmpty()) {
@@ -456,7 +456,7 @@ public class ErillishaunTuontiService {
             return Stream.of(new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
                     rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
                     haku.getTarjoajaOid(),
-                    valintatuloksenTila(rivi), ilmoittautumisTila(rivi),
+                    valintatuloksenTila(rivi), rivi.getEhdollisestiHyvaksyttavissa(), ilmoittautumisTila(rivi),
                     hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi())));
         }
     }
