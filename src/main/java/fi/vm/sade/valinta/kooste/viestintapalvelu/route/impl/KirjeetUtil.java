@@ -74,7 +74,7 @@ public class KirjeetUtil {
                 tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(firstValintatapajono.getVarasijanNumero(), preferoituKielikoodi));
             }
             tulokset.put("hylkaysperuste", hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot));
-            tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
+            tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti(), firstValintatapajono.isEhdollisestiHyvaksyttavissa()));
         }
     }
 

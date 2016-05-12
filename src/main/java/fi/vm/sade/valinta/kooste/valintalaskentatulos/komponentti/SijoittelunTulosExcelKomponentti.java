@@ -210,6 +210,7 @@ public class SijoittelunTulosExcelKomponentti {
                                     hakemusDto.getTila(),
                                     preferoitukielikoodi,
                                     hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
+                                    false,
                                     true,
                                     hakemusDto.getVarasijanNumero()
                             ),

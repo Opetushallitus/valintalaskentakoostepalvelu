@@ -27,6 +27,7 @@ public class HakemusUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HakemusUtil.class);
     private final static Map<String, Map<HakemuksenTila, String>> TILAT = valmistaTilat();
     private final static Map<String, String> VARASIJAT = varasijaTekstinTilat();
+    private final static Map<String, String> EHDOLLINEN = ehdollinenTekstinTilat();
     private final static Map<String, Map<IlmoittautumisTila, String>> ILMOITTAUTUMISTILAT = ilmoittautumisTilat();
     private final static Map<String, Map<ValintatuloksenTila, String>> VALINTATULOKSEN_TILAT = valintatulostenTilat();
 
@@ -36,6 +37,14 @@ public class HakemusUtil {
         varasijaTekstinTilat.put(KieliUtil.RUOTSI, "Reservplatsens nummer är ");
         varasijaTekstinTilat.put(KieliUtil.ENGLANTI, "Waiting list number is ");
         return varasijaTekstinTilat;
+    }
+
+    private static Map<String, String> ehdollinenTekstinTilat() {
+        Map<String, String> ehdollinenTekstinTilat = Maps.newHashMap();
+        ehdollinenTekstinTilat.put(KieliUtil.SUOMI, " (Ehdollinen)");
+        ehdollinenTekstinTilat.put(KieliUtil.RUOTSI, " (Villkorlig)");
+        ehdollinenTekstinTilat.put(KieliUtil.ENGLANTI, " (Conditionally)");
+        return ehdollinenTekstinTilat;
     }
 
     private static Map<String, Map<ValintatuloksenTila, String>> valintatulostenTilat() {
@@ -121,8 +130,8 @@ public class HakemusUtil {
         return VARASIJAT.get(preferoitukielikoodi) + numero;
     }
 
-    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen) {
-        return tilaConverter(tila, preferoitukielikoodi, harkinnanvarainen, false, null);
+    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean ehdollinen) {
+        return tilaConverter(tila, preferoitukielikoodi, harkinnanvarainen, ehdollinen, false, null);
     }
 
     public static String tilaConverter(IlmoittautumisTila tila, String preferoitukielikoodi) {
@@ -156,7 +165,8 @@ public class HakemusUtil {
         }
     }
 
-    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean lisaaVarasijanNumero, Integer varasijanNumero) {
+
+    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean ehdollinen, boolean lisaaVarasijanNumero, Integer varasijanNumero) {
         if (tila == null) {
             return StringUtils.EMPTY;
         }
@@ -165,12 +175,14 @@ public class HakemusUtil {
             lopullinenTila = HARKINNANVARAISESTI_HYVAKSYTTY;
         }
         try {
+            String baseTila = TILAT.get(preferoitukielikoodi).get(lopullinenTila);
             if (lisaaVarasijanNumero && VARALLA.equals(lopullinenTila) && varasijanNumero != null) {
-                return new StringBuilder().append(TILAT.get(preferoitukielikoodi).get(lopullinenTila)).append(" (")
-                        .append(varasijanNumero).append(")").toString();
-            } else {
-                return TILAT.get(preferoitukielikoodi).get(lopullinenTila);
+                return new StringBuilder().append(baseTila).append(" (").append(varasijanNumero).append(")").toString();
             }
+            if(lopullinenTila.isHyvaksytty() && ehdollinen) {
+                return baseTila + EHDOLLINEN.get(preferoitukielikoodi);
+            }
+            return baseTila;
         } catch (Exception e) {
             LOG.error("Hakemuksen tila utiliteetilla ei ole konversiota hakemustilalle: {}", tila);
             return tila.toString();
