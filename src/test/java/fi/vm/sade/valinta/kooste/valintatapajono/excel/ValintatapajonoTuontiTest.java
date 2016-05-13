@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
+import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.valintatapajono.ValintatapajonoTestTools;
 
 import static fi.vm.sade.valinta.http.DateDeserializer.GSON;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -46,11 +48,12 @@ public class ValintatapajonoTuontiTest extends ValintatapajonoTestTools {
             LOG.info("{} {} {} {}", r.getJonosija(), r.getNimi(), r.isValidi(), r.getTila());
         }
         assertLines(listaus.getRivit());
-        // Excel excel = valintatapajonoExcel.getExcel();
-        // if (false) {
-        // IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
-        // "valintatapajono.xlsx"));
-        // }
+
+        /*Excel excel = valintatapajonoExcel.getExcel();
+        if (true) {
+        IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
+        "valintatapajonofii.xlsx"));
+        }*/
     }
 
     private void assertLines(List<ValintatapajonoRivi> rivit) {
