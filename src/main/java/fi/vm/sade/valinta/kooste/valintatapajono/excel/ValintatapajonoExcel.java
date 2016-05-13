@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang.StringUtils;
@@ -30,7 +32,6 @@ import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 
 public class ValintatapajonoExcel {
     private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoExcel.class);
@@ -81,6 +82,7 @@ public class ValintatapajonoExcel {
                 .addKeskitettyTeksti("Jonosija (" + hakemukset.size() + ")")
                 .addKeskitettyTeksti("Hakija")
                 .addKeskitettyTeksti("Valintatieto")
+                .addKeskitettyTeksti("Kokonaispisteet")
                 .addKeskitettyTeksti("Kuvaus (FI)")
                 .addKeskitettyTeksti("Kuvaus (SV)")
                 .addKeskitettyTeksti("Kuvaus (EN)");
@@ -90,6 +92,7 @@ public class ValintatapajonoExcel {
         final Map<String, Integer> jonosijat = Maps.newHashMap();
         final Map<String, String> valintatiedot = Maps.newHashMap();
         final Map<String, Map<String, String>> avaimet = Maps.newHashMap();
+        final Map<String, BigDecimal> kokonaispisteet = Maps.newHashMap();
         for (ValintatietoValinnanvaiheDTO vaihe : valinnanvaihe) {
             for (ValintatapajonoDTO jono : vaihe.getValintatapajonot()) {
                 if (valintatapajonoOid.equals(jono.getOid())) {
@@ -99,6 +102,7 @@ public class ValintatapajonoExcel {
                         valintatiedot.put(hakemusOid, jonosija.getTuloksenTila().toString());
                         if (!jonosija.getJarjestyskriteerit().isEmpty()) {
                             avaimet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getKuvaus());
+                            kokonaispisteet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getArvo());
                         }
                     }
                 }
@@ -133,6 +137,9 @@ public class ValintatapajonoExcel {
             Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(data, null, null);
             s.add(new TekstiArvo(osoite.getLastName() + " " + osoite.getFirstName()));
             s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))), VAIHTOEHDOT));
+            if(null != kokonaispisteet.get(hakemusOid) && 0 <= kokonaispisteet.get(hakemusOid).compareTo(new BigDecimal(0))) {
+                s.add(new NumeroArvo(kokonaispisteet.get(hakemusOid)));
+            }
             if (avaimet.containsKey(hakemusOid)) {
                 Map<String, String> a = avaimet.get(hakemusOid);
                 s.add(new TekstiArvo(StringUtils.trimToEmpty(a.get("FI")), false, true));

@@ -64,14 +64,14 @@ public class ValintatapajonoTest extends ValintatapajonoTestTools{
         List<ValintatapajonoRivi> rivit = listaus.getRivit();
         assertEquals(1, rivit.size());
         assertRivi(new ValintatapajonoRivi("1.2.246.562.11.00000000181", "1", "Ilman Laskentaa",
-                        ValintatapajonoExcel.HYVAKSYTTAVISSA, null, null, null),
+                        ValintatapajonoExcel.HYVAKSYTTAVISSA, "55.45", null, null, null),
                    rivit.get(0));
     }
 
     @Test
     public void testaaValintatapajononTuontia() throws Exception {
         String valintatapajonoOid = "14229501603804360431186491391519";
-        ValintatapajonoRivi rivi = new ValintatapajonoRivi("1.2.246.562.11.00000000181", "1", "Ilman laskentaa", "HYVAKSYTTAVISSA", "", "", "");
+        ValintatapajonoRivi rivi = new ValintatapajonoRivi("1.2.246.562.11.00000000181", "1", "Ilman laskentaa", "HYVAKSYTTAVISSA", "20", "", "", "");
         ValintatapajonoRivit rivit = new ValintatapajonoRivit(Arrays.asList(rivi));
         LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(rivit));
         List<ValinnanVaiheJonoillaDTO> valintaperusteet = GSON.fromJson(

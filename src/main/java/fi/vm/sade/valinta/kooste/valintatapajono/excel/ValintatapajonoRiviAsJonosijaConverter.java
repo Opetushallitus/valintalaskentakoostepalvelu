@@ -28,7 +28,11 @@ public class ValintatapajonoRiviAsJonosijaConverter {
         }
         j.setPrioriteetti(prioriteetti);
         JarjestyskriteeritulosDTO kriteeri = new JarjestyskriteeritulosDTO();
-        kriteeri.setArvo(new BigDecimal(rivi.asJonosija()).negate());
+        if(StringUtils.isNotBlank(rivi.getPisteet())) {
+            kriteeri.setArvo(new BigDecimal(rivi.getPisteet()));
+        } else {
+            kriteeri.setArvo(new BigDecimal(rivi.asJonosija()).negate());
+        }
         kriteeri.setNimi(StringUtils.EMPTY);
         kriteeri.setTila(rivi.asTila());
         kriteeri.setKuvaus(rivi.getKuvaus());

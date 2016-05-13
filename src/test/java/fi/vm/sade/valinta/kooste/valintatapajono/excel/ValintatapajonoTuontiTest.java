@@ -59,16 +59,16 @@ public class ValintatapajonoTuontiTest extends ValintatapajonoTestTools {
     private void assertLines(List<ValintatapajonoRivi> rivit) {
         assertEquals(46, rivit.size());
         assertRivi(new ValintatapajonoRivi("1.2.246.562.11.00000860732", "1.0", "Huisnen Elina",
-                ValintatapajonoExcel.HYVAKSYTTAVISSA, null, null, null),
+                ValintatapajonoExcel.HYVAKSYTTAVISSA, "50", null, null, null),
                 rivit.stream().filter(r -> "Huisnen Elina".equals(r.getNimi())).findFirst().get());
         assertRivi(new ValintatapajonoRivi("1.2.246.562.11.00000873703", "5.0", "Hoppusalo Pinja",
-                        ValintatapajonoExcel.HYLATTY, "fuyf", "uyf", "ft"),
+                        ValintatapajonoExcel.HYLATTY, "43", "fuyf", "uyf", "ft"),
                 rivit.stream().filter(r -> "Hoppusalo Pinja".equals(r.getNimi())).findFirst().get());
         assertRivi(new ValintatapajonoRivi("1.2.246.562.11.00000856717", "", "Huisvaara Eveliina",
-                        ValintatapajonoExcel.HYLATTY, "msfhgm", "asfdgv", "sd"),
+                        ValintatapajonoExcel.HYLATTY, "", "msfhgm", "asfdgv", "sd"),
                 rivit.stream().filter(r -> "Huisvaara Eveliina".equals(r.getNimi())).findFirst().get());
         assertRivi(new ValintatapajonoRivi("1.2.246.562.11.00000846727", "", "Kaksilahti Kasper",
-                        ValintatapajonoExcel.MAARITTELEMATON, null, null, null),
+                        ValintatapajonoExcel.MAARITTELEMATON, "", null, null, null),
                 rivit.stream().filter(r -> "Kaksilahti Kasper".equals(r.getNimi())).findFirst().get());
     }
 
