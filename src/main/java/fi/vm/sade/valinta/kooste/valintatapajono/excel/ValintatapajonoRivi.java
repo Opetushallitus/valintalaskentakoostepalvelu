@@ -110,4 +110,5 @@ public class ValintatapajonoRivi {
     public String getOid() {
         return oid;
     }
+
 }

@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 
+import fi.vm.sade.valinta.kooste.valintatapajono.ValintatapajonoTestTools;
+
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 
@@ -23,12 +25,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import static fi.vm.sade.valinta.http.DateDeserializer.GSON;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Jussi Jartamo
  */
-public class ValintatapajonoTest {
+public class ValintatapajonoTest extends ValintatapajonoTestTools{
     final static Logger LOG = LoggerFactory.getLogger(ValintatapajonoTest.class);
 
     @Test
@@ -58,7 +61,11 @@ public class ValintatapajonoTest {
         } catch(Throwable t) {
             throw new RuntimeException(t);
         }
-        LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(listaus.getRivit()));
+        List<ValintatapajonoRivi> rivit = listaus.getRivit();
+        assertEquals(1, rivit.size());
+        assertRivi(new ValintatapajonoRivi("1.2.246.562.11.00000000181", "1", "Ilman Laskentaa",
+                        ValintatapajonoExcel.HYVAKSYTTAVISSA, null, null, null),
+                   rivit.get(0));
     }
 
     @Test
