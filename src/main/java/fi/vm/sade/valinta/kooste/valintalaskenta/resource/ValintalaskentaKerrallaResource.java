@@ -165,8 +165,8 @@ public class ValintalaskentaKerrallaResource {
         final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
         if (l != null) {
             l.lopeta();
-            seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Peruutettu käyttäjän toimesta")));
         }
+        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Peruutettu käyttäjän toimesta")));
         return Response.ok().build();
     }
 
