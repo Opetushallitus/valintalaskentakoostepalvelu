@@ -69,8 +69,8 @@ public class ErillishaunTuontiServiceTest {
             tilaAsyncResource.results.stream()
                     .flatMap(r -> r.erillishaunHakijat.stream())
                     .forEach(r -> {
-                        Assert.assertTrue(ValintatuloksenTila.KESKEN.equals(r.getValintatuloksenTila()));
-                        Assert.assertTrue(IlmoittautumisTila.EI_TEHTY.equals(r.getIlmoittautumisTila()));
+                        assertEquals(ValintatuloksenTila.KESKEN, r.getValintatuloksenTila());
+                        assertEquals(IlmoittautumisTila.EI_TEHTY, r.getIlmoittautumisTila());
                     });
         }
     }
