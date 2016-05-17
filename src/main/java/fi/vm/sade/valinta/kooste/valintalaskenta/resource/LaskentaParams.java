@@ -8,6 +8,7 @@ import java.util.Optional;
 
 
 public class LaskentaParams {
+    private final String userOID;
     private final LaskentaTyyppi laskentatyyppi;
     private final Boolean isValintakoelaskenta;
     private final Integer valinnanvaihe;
@@ -15,7 +16,8 @@ public class LaskentaParams {
     private final Optional<Maski> maski;
     private final boolean isErillishaku;
 
-    public LaskentaParams(LaskentaTyyppi laskentatyyppi, Boolean isValintakoelaskenta, Integer valinnanvaihe, String hakuOid, Optional<Maski> maski, boolean isErillishaku) {
+    public LaskentaParams(String userOID, LaskentaTyyppi laskentatyyppi, Boolean isValintakoelaskenta, Integer valinnanvaihe, String hakuOid, Optional<Maski> maski, boolean isErillishaku) {
+        this.userOID = userOID;
         this.laskentatyyppi = laskentatyyppi;
         this.isValintakoelaskenta = isValintakoelaskenta;
         this.valinnanvaihe = valinnanvaihe;
@@ -30,6 +32,10 @@ public class LaskentaParams {
         }
         this.maski = maski;
         this.isErillishaku = isErillishaku;
+    }
+
+    public String getUserOID() {
+        return userOID;
     }
 
     public LaskentaTyyppi getLaskentatyyppi() {

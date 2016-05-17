@@ -5,7 +5,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.security.service.authz.util.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
@@ -67,8 +69,8 @@ public class ValintalaskentaKerrallaResource {
                 LOG.error("Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/HAKU?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, valinnanvaihe, valintakoelaskenta);
                 asyncResponse.resume(errorResponce("Ajo laskennalle aikakatkaistu!"));
             });
-
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
+            final String userOID = AuthorizationUtil.getCurrentUser();
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
@@ -98,7 +100,8 @@ public class ValintalaskentaKerrallaResource {
             });
 
             Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
+            final String userOID = AuthorizationUtil.getCurrentUser();
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
