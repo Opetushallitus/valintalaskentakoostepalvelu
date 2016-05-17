@@ -74,7 +74,7 @@ public class ErillishakuDataRivi extends DataRivi {
 
     private boolean isNewRow(Rivi rivi, String syntymaAika) {
         return !rivi.isTyhja()
-                && rivi.getSolut().size() >= 12 //Copy-paste easily creates extra columns for excel doc
+                && rivi.getSolut().size() >= 13 //Copy-paste easily creates extra columns for excel doc
                 && !"Syntymäaika".equals(syntymaAika);
     }
 
