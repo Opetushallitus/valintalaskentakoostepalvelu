@@ -15,8 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.service.valintaperusteet.dto.model.Koekutsu.*;
-
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -26,17 +24,15 @@ import org.springframework.stereotype.Service;
 
 import rx.Observable;
 import rx.functions.Action1;
-import rx.functions.Func2;
 import rx.observables.BlockingObservable;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
 import com.google.common.collect.Sets;
-import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;

@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakemus.komponentti;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

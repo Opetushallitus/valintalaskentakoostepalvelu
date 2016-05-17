@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.util;
 
 import java.util.Comparator;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 
 public class HakemusComparator implements Comparator<Hakemus> {
 

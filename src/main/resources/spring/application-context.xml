@@ -105,7 +105,7 @@
 		</jaxrs-client:client>
 		<jaxrs-client:client id="HakemusServiceRestClientAsAdmin"
 							 address="${valintalaskentakoostepalvelu.hakemus.rest.url}"
-							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource"
+							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource"
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
 				<ref bean="HakemusServiceRestClientAsAdminCasInterceptor"/>

@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.function;
 
 import com.google.common.base.Function;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
 
 public class SuppeaHakemusFunction implements Function<SuppeaHakemus, String> {
 

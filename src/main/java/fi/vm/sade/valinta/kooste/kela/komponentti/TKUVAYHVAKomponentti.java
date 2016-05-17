@@ -2,12 +2,10 @@ package fi.vm.sade.valinta.kooste.kela.komponentti;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY;
-import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
-import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.SYNTYMAAIKA;
+import static fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource.HENKILOTUNNUS;
+import static fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource.SYNTYMAAIKA;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -26,8 +24,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.tarjonta.route.LinjakoodiRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.route.OrganisaatioRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaHakuRoute;

@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 
 public class PistesyotonTuonti5Test extends PistesyotonTuontiTestBase {

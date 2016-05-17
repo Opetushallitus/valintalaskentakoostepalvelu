@@ -16,10 +16,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
-
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 @Configuration
 @Import({KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class, JaxrsConfiguration.class})

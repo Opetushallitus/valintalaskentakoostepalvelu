@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Lists;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 
 public class Yhteystiedot {
 

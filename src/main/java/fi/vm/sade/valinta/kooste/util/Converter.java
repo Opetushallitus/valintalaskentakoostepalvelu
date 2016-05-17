@@ -1,8 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Eligibility;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;

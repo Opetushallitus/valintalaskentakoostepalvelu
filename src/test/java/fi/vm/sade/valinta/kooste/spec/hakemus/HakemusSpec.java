@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste.spec.hakemus;
 
 import com.google.common.collect.Maps;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 

@@ -25,16 +25,12 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.Kieli;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.NimiJaOpetuskieli;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 

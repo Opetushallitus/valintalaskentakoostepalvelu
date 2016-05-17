@@ -1,11 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import rx.Observable;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 public interface OhjausparametritAsyncResource {

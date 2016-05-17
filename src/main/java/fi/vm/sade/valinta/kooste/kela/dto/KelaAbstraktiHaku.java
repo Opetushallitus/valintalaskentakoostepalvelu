@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;

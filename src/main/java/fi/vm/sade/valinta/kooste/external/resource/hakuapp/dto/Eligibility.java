@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
+package fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto;
 
 public class Eligibility {
     private String aoId;

@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import org.apache.commons.lang.StringUtils;

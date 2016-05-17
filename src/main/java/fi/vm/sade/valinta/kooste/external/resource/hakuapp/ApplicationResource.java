@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.external.resource.haku;
+package fi.vm.sade.valinta.kooste.external.resource.hakuapp;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,11 +15,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 
 @Path("/applications")
 public interface ApplicationResource {
