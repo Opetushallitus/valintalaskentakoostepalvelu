@@ -62,7 +62,7 @@ public class HakemuksetResourceTest {
 
         Mocks.reset();
         String listFull = IOUtils.toString(new ClassPathResource("listSingleApplication.json").getInputStream());
-        List<Hakemus> hakemukset  = HttpResource.GSON.fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
+        List<Hakemus> hakemukset  = hakemuksetValinnanvaiheResource.gson().fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
 
         MockApplicationAsyncResource.setResult(hakemukset);
         MockApplicationAsyncResource.setResultByOid(hakemukset);

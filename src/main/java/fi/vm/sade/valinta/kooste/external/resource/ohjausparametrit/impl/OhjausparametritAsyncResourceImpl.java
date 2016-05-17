@@ -33,7 +33,7 @@ public class OhjausparametritAsyncResourceImpl extends HttpResource implements O
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
                     .async()
-                    .get(new GsonResponseCallback<ParametritDTO>(address, url, callback, failureCallback, new TypeToken<ParametritDTO>() {
+                    .get(new GsonResponseCallback<ParametritDTO>(gson(), address, url, callback, failureCallback, new TypeToken<ParametritDTO>() {
                     }.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);

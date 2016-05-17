@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
@@ -44,6 +45,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class ValintalaskentaTulosExcelTest {
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+    final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null, "", null);
     final HttpResource valintakoekutsutResource = new HttpResource(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi");
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
@@ -70,11 +72,11 @@ public class ValintalaskentaTulosExcelTest {
         String listFull = IOUtils.toString(new FileInputStream("listfull.json"));
         String osallistumiset = IOUtils.toString(new FileInputStream("osallistumiset.json"));
         String valintakoe = IOUtils.toString(new FileInputStream("valintakoe.json"));
-        List<Hakemus> hakemuses = HttpResource.GSON.fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
+        List<Hakemus> hakemuses = hakemusResource.gson().fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
 
-        List<HakemusOsallistuminenDTO> osallistuminenDTOs = HttpResource.GSON.fromJson(osallistumiset, new TypeToken<List<HakemusOsallistuminenDTO>>() { }.getType());
+        List<HakemusOsallistuminenDTO> osallistuminenDTOs = valintakoekutsutResource.gson().fromJson(osallistumiset, new TypeToken<List<HakemusOsallistuminenDTO>>() { }.getType());
 
-        List<ValintakoeDTO> valintakoeDTOs = HttpResource.GSON.fromJson(valintakoe, new TypeToken<List<ValintakoeDTO>>() {}.getType());
+        List<ValintakoeDTO> valintakoeDTOs = valintakoekutsutResource.gson().fromJson(valintakoe, new TypeToken<List<ValintakoeDTO>>() {}.getType());
         Set<String> h = hakemuses.stream().map(h0 -> h0.getOid()).collect(Collectors.toSet());
         Set<String> o = osallistuminenDTOs.stream().map(h0 -> h0.getHakemusOid()).collect(Collectors.toSet());
         Mocks.reset();

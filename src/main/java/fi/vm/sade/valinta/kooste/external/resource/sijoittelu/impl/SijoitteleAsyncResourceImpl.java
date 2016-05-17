@@ -30,7 +30,7 @@ public class SijoitteleAsyncResourceImpl extends HttpResource implements Sijoitt
                     .path(url)
                     .accept(MediaType.WILDCARD_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<String>(address, url, callback,
+                    .get(new GsonResponseCallback<String>(gson(), address, url, callback,
                             failureCallback, new TypeToken<String>() {
                     }.getType()));
         } catch (Exception e) {

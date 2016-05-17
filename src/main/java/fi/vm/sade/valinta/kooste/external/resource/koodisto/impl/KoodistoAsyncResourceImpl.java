@@ -39,7 +39,7 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
                             //.query("koodistoVersio", 1)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<List<Koodi>>(address, url, callback, failureCallback, new TypeToken<List<Koodi>>() {
+                    .get(new GsonResponseCallback<List<Koodi>>(gson(), address, url, callback, failureCallback, new TypeToken<List<Koodi>>() {
                     }.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);

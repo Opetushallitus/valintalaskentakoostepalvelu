@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource;
 import java.io.IOException;
 import java.util.List;
 
+import fi.vm.sade.valinta.http.HttpResource;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +25,11 @@ public class TestCallback {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TestCallback.class);
 
+	private static HttpResource httpResource = new HttpResource("");
+
 	@Test
 	public void testListOfHakemuksetCallback() throws IOException {
-		GsonResponseCallback<List<Hakemus>> cb = new GsonResponseCallback<List<Hakemus>>("", "",
+		GsonResponseCallback<List<Hakemus>> cb = new GsonResponseCallback<List<Hakemus>>(httpResource.gson(), "", "",
 				obj -> {
 					LOG.error("SUCCESS {}", obj);
 				}, poikkeus -> {
@@ -42,7 +45,7 @@ public class TestCallback {
 	@Test
 	public void testLaskentaDtoCallback() throws IOException {
 
-		GsonResponseCallback<LaskentaDto> cb2 = new GsonResponseCallback<LaskentaDto>("", "", obj -> {
+		GsonResponseCallback<LaskentaDto> cb2 = new GsonResponseCallback<LaskentaDto>(httpResource.gson(), "", "", obj -> {
 			LOG.error("SUCCESS {}", obj);
 		}, poikkeus -> {
 			LOG.error("POIKKEUS {}", poikkeus);

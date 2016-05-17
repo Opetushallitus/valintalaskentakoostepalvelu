@@ -63,7 +63,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                             .path(url)
                             .accept(MediaType.APPLICATION_JSON_TYPE)
                             .async()
-                            .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType())));
+                            .get(new GsonResponseCallback<>(gson(), address, url, callback, failureCallback, new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -80,7 +80,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                     .path(url)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType())));
+                    .get(new GsonResponseCallback<>(gson(), address, url, callback, failureCallback, new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -122,7 +122,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
             return new PeruutettavaImpl(wc
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<>(address, url + "?vaihe=" + valinnanVaiheJarjestysluku, callback, failureCallback, new TypeToken<List<ValintaperusteetDTO>>() {}.getType())));
+                    .get(new GsonResponseCallback<>(gson(), address, url + "?vaihe=" + valinnanVaiheJarjestysluku, callback, failureCallback, new TypeToken<List<ValintaperusteetDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -136,7 +136,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                     .path(url)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<HakukohdeViiteDTO>>() {}.getType())));
+                    .get(new GsonResponseCallback<>(gson(), address, url, callback, failureCallback, new TypeToken<List<HakukohdeViiteDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -204,7 +204,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE),
-                        new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType())));
+                        new GsonResponseCallback<>(gson(), address, url, callback, failureCallback, new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType())));
     }
 
     @Override
@@ -223,7 +223,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .path(url)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<ValintakoeDTO>>() {}.getType())));
+                .get(new GsonResponseCallback<>(gson(), address, url, callback, failureCallback, new TypeToken<List<ValintakoeDTO>>() {}.getType())));
     }
 
     @Override

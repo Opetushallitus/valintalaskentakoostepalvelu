@@ -77,7 +77,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
                     getWebClient()
                             .path(url)
                             .async()
-                            .post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
+                            .post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<String>(gson(), address, url, callback, failureCallback, new TypeToken<String>() {
                             }.getType())));
         } catch (Exception e) {
             LOG.error("Virhe laske ja sijoittele kutsussa", e);

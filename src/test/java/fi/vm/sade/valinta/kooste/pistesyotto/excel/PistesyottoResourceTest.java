@@ -141,7 +141,7 @@ public class PistesyottoResourceTest {
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistuminenDTOs);
 
         String requestBody = IOUtils.toString(new ClassPathResource("pistesyotto/ulkoinen_tuonti.json").getInputStream());
-        List<HakemusDTO> hakemusDTOs  = HttpResource.GSON.fromJson(requestBody, new TypeToken<List<HakemusDTO>>() {}.getType());
+        List<HakemusDTO> hakemusDTOs  = pistesyottoVientiResource.gson().fromJson(requestBody, new TypeToken<List<HakemusDTO>>() {}.getType());
         assertEquals(6, hakemusDTOs.size());
         Response response = pistesyottoUlkoinenTuontiResource.getWebClient()
                 .query("hakuOid", "HAKUOID")
