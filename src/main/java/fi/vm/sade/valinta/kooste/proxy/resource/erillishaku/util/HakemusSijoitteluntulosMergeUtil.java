@@ -5,7 +5,7 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeHakemusDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValintatapajonoDTO;

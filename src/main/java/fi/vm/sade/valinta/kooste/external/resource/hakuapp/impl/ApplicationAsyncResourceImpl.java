@@ -2,15 +2,14 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBatch;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -32,12 +31,21 @@ import java.util.function.Consumer;
 
 @Service
 public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implements ApplicationAsyncResource {
+
+    private static final Gson GSON = DateDeserializer.gsonBuilder()
+            .create();
+
     @Autowired
     public ApplicationAsyncResourceImpl(
             @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor,
             @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address,
             ApplicationContext context) {
         super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
+    }
+
+    @Override
+    public Gson gson() {
+        return GSON;
     }
 
     @Override
@@ -122,7 +130,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                 .query("rows", 100000)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<List<Hakemus>>(
+                .post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<List<Hakemus>>(gson(),
                         address,
                         url + "?rows=100000",
                         callback,
@@ -141,7 +149,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                             .query("asId", hakuOid)
                             .query("aoOid", hakukohdeOid)
                             .async()
-                            .get(new GsonResponseCallback<List<Hakemus>>(
+                            .get(new GsonResponseCallback<List<Hakemus>>(gson(),
                                     address,
                                     url + "?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=" + hakukohdeOid + "&asId=" + hakuOid,
                                     callback,
@@ -160,7 +168,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                     getWebClient()
                             .path(url)
                             .async()
-                            .get(new GsonResponseCallback<List<ApplicationAdditionalDataDTO>>(
+                            .get(new GsonResponseCallback<List<ApplicationAdditionalDataDTO>>(gson(),
                                     address,
                                     url,
                                     callback,
@@ -179,7 +187,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                     getWebClient()
                             .path(url)
                             .async()
-                            .post(Entity.json(hakemusOids), new GsonResponseCallback<List<ApplicationAdditionalDataDTO>>(
+                            .post(Entity.json(hakemusOids), new GsonResponseCallback<List<ApplicationAdditionalDataDTO>>(gson(),
                                     address,
                                     url,
                                     callback,

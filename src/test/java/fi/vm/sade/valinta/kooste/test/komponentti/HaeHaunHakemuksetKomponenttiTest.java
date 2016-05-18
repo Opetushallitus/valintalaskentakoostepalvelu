@@ -19,9 +19,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.gson.Gson;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHaunHakemuksetKomponentti;
 
 /**

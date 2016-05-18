@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
 
 @Component("haeHaunHakemuksetKomponentti")
 public class HaeHaunHakemuksetKomponentti {

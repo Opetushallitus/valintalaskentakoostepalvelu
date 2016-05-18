@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.converter;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.apache.camel.Exchange;

@@ -14,7 +14,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;

@@ -24,6 +24,7 @@ import static org.mockserver.model.HttpResponse.*;
 public class Integraatiopalvelimet {
 
     public static ClientAndServerWithHost mockServer = new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
+    private static HttpResource httpResource = new HttpResource("");
     static {
         ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(5));
     }
@@ -110,7 +111,7 @@ public class Integraatiopalvelimet {
     }
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;
-        mockToReturnValue(method, p, s = HttpResource.GSON.toJson(r));
+        mockToReturnValue(method, p, s = httpResource.gson().toJson(r));
         System.err.println(s);
     }
     public static void mockToReturnString(String method, String p, String r) {

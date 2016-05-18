@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
+package fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto;
 
 import java.util.Collection;
 

@@ -6,12 +6,10 @@ import fi.vm.sade.valinta.http.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import rx.Observable;
-import scala.reflect.internal.Trees;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;

@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.camel.Endpoint;
@@ -14,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;

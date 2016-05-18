@@ -24,7 +24,7 @@ import com.google.gson.JsonParser;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.excel.Solu;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
@@ -32,12 +32,9 @@ import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +47,7 @@ import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
@@ -58,9 +55,6 @@ import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.Assert.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -147,7 +141,7 @@ public class PistesyottoResourceTest {
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistuminenDTOs);
 
         String requestBody = IOUtils.toString(new ClassPathResource("pistesyotto/ulkoinen_tuonti.json").getInputStream());
-        List<HakemusDTO> hakemusDTOs  = HttpResource.GSON.fromJson(requestBody, new TypeToken<List<HakemusDTO>>() {}.getType());
+        List<HakemusDTO> hakemusDTOs  = pistesyottoVientiResource.gson().fromJson(requestBody, new TypeToken<List<HakemusDTO>>() {}.getType());
         assertEquals(6, hakemusDTOs.size());
         Response response = pistesyottoUlkoinenTuontiResource.getWebClient()
                 .query("hakuOid", "HAKUOID")

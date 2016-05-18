@@ -5,17 +5,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
@@ -33,8 +29,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import rx.Observable;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Service
 public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas implements ViestintapalveluAsyncResource {

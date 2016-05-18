@@ -43,7 +43,7 @@ public interface SijoitteluAsyncResource {
 
     Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);
 
-    Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) throws UnsupportedEncodingException;
+    Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite);
 
     Observable<HakukohteenValintatulosUpdateStatuses> muutaErillishaunHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<ErillishaunHakijaDTO> hakijat);
 }

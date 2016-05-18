@@ -58,7 +58,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
                     .query("hakukohde", hakukohdeOid)
                     .query("haku", hakuOid)
                     .async()
-                    .get(new GsonResponseCallback<>(
+                    .get(new GsonResponseCallback<>(gson(),
                             address,
                             url + "?hakukohde=" + hakukohdeOid + "&haku=" + hakuOid,
                             callback,
@@ -98,7 +98,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
                 .query("haku", hakuOid)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .get(new GsonResponseCallback<Oppija>(
+                .get(new GsonResponseCallback<Oppija>(gson(),
                         address,
                         url  + "?haku=" + hakuOid,
                         callback,

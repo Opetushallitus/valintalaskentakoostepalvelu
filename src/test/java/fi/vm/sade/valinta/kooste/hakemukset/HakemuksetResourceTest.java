@@ -9,7 +9,7 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
@@ -62,7 +62,7 @@ public class HakemuksetResourceTest {
 
         Mocks.reset();
         String listFull = IOUtils.toString(new ClassPathResource("listSingleApplication.json").getInputStream());
-        List<Hakemus> hakemukset  = HttpResource.GSON.fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
+        List<Hakemus> hakemukset  = hakemuksetValinnanvaiheResource.gson().fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
 
         MockApplicationAsyncResource.setResult(hakemukset);
         MockApplicationAsyncResource.setResultByOid(hakemukset);

@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.kela.dto;
 import com.google.common.collect.Lists;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.kela.komponentti.*;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.LogEntry;
@@ -15,8 +15,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
-import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.SYNTYMAAIKA;
+import static fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource.HENKILOTUNNUS;
+import static fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource.SYNTYMAAIKA;
 
 public class KelaHaku extends KelaAbstraktiHaku {
     private final static Logger LOG = LoggerFactory.getLogger(KelaHaku.class);

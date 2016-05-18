@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;

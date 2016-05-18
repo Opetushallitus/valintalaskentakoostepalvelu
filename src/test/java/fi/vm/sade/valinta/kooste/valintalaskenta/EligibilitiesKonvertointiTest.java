@@ -18,14 +18,11 @@ import org.springframework.core.io.ClassPathResource;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Eligibility;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.Converter;
-import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 /**

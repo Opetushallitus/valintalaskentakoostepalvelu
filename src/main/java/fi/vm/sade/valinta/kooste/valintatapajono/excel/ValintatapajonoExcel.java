@@ -24,7 +24,7 @@ import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.HakemusComparator;
 import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;

@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -18,7 +15,6 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapte
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.Laskuri;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -29,10 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

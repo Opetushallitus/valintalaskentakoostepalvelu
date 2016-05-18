@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.EnumConverter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRiviAsJonosijaConverter;

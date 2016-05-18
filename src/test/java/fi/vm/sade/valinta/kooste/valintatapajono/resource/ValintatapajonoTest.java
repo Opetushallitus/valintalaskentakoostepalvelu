@@ -4,8 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
