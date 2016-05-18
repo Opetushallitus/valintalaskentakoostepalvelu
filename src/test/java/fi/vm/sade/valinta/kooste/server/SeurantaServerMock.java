@@ -77,7 +77,7 @@ public class SeurantaServerMock extends MockServer {
                     ll,
                     false,
                     null,
-                    valintakoelaskenta);
+                    valintakoelaskenta, null);
             laskentaQueue.add(l);
             httpExchange.sendResponseHeaders(200, UUID1.length());
             httpExchange.getResponseBody().write(UUID1.getBytes());

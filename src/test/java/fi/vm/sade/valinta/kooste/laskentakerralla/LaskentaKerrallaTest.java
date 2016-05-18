@@ -163,7 +163,7 @@ public class LaskentaKerrallaTest {
 
         doAnswer(invocation -> {
                     Consumer<LaskentaDto> laskentaDtoConsumer = (Consumer<LaskentaDto>) invocation.getArguments()[1];
-                    laskentaDtoConsumer.accept(new LaskentaDto(LASKENTASEURANTA_ID, "", HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, null, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false));
+                    laskentaDtoConsumer.accept(new LaskentaDto(LASKENTASEURANTA_ID, "", HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, null, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false, null));
                     return null;
                 }
         ).when(Mocks.laskentaSeurantaAsyncResource).laskenta(eq(LASKENTASEURANTA_ID), any(), any());
