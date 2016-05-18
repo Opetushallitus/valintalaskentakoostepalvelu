@@ -63,10 +63,14 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
     }
 
     @Override
-    public Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) throws UnsupportedEncodingException {
+    public Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) {
         String url = "/tila/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
-        String encodedSelite = URLEncoder.encode(selite, "UTF-8");
-        return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset), (webclient) -> webclient.query("selite", encodedSelite));
+        try {
+            String encodedSelite = URLEncoder.encode(selite, "UTF-8");
+            return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset), (webclient) -> webclient.query("selite", encodedSelite));
+        } catch (UnsupportedEncodingException e) {
+            return Observable.error(e);
+        }
     }
 
     @Override

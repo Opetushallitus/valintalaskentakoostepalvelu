@@ -150,8 +150,6 @@ public class ValintaTulosServiceProxyResource {
         }
         Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
         vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
-        Observable<HakukohteenValintatulosUpdateStatuses> tilojenTallennusSijoitteluun = sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite).doOnError(
-            throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
         vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
             Stream<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed);
             List<ValintatulosUpdateStatus> failedUpdateStatuses = epaonnistuneet.map(v -> {
@@ -159,7 +157,8 @@ public class ValintaTulosServiceProxyResource {
                 return new ValintatulosUpdateStatus(Response.Status.FORBIDDEN.getStatusCode(), v.getResult().getMessage(), null, v.getHakemusOid());
             }).collect(Collectors.toList());
             if (failedUpdateStatuses.isEmpty()) {
-                return tilojenTallennusSijoitteluun;
+                return sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite)
+                        .doOnError(throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
             } else {
               return Observable.error(new VastaanottoUpdateFailuresException(failedUpdateStatuses));
             }
@@ -194,8 +193,6 @@ public class ValintaTulosServiceProxyResource {
         }
         Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
         vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
-        Observable<HakukohteenValintatulosUpdateStatuses> tilojenTallennusSijoitteluun = sijoitteluResource.muutaErillishaunHakemuksenTilaa(hakuOid, hakukohdeOid, erillishaunHakijaDtos).doOnError(
-                throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
         vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
             Stream<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed);
             List<ValintatulosUpdateStatus> failedUpdateStatuses = epaonnistuneet.map(v -> {
@@ -203,7 +200,8 @@ public class ValintaTulosServiceProxyResource {
                 return new ValintatulosUpdateStatus(Response.Status.FORBIDDEN.getStatusCode(), v.getResult().getMessage(), null, v.getHakemusOid());
             }).collect(Collectors.toList());
             if (failedUpdateStatuses.isEmpty()) {
-                return tilojenTallennusSijoitteluun;
+                return sijoitteluResource.muutaErillishaunHakemuksenTilaa(hakuOid, hakukohdeOid, erillishaunHakijaDtos)
+                        .doOnError(throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
             } else {
                 return Observable.error(new VastaanottoUpdateFailuresException(failedUpdateStatuses));
             }
