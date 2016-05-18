@@ -52,10 +52,16 @@ final public class LaskentaStarterActor extends UntypedActor {
     }
 
     private void startLaskentaIfWorkersAvailable() {
-        LOG.info("Process; maxWorkers: {}, workerCount: {}", maxWorkers, workerCount.get());
-        if (workerCount.get() < maxWorkers) {
-            int numberOfWorkers = workerCount.incrementAndGet();
-            LOG.info("Reserving a new worker, workerCount: {}", numberOfWorkers);
+        int wasNumberOfWorkers = workerCount.getAndUpdate(current -> {
+            if(current < maxWorkers) {
+                return ++current;
+            } else {
+                return current;
+            }
+        });
+        LOG.info("Process; maxWorkers: {}, workerCount: {}", maxWorkers, wasNumberOfWorkers);
+        if (wasNumberOfWorkers < maxWorkers) { // if it was less than maxWorkers then it was incremented
+            LOG.info("Reserving a new worker, workerCount: {}", (wasNumberOfWorkers  + 1));
             laskentaSupervisor.fetchAndStartLaskenta();
         }
     }
