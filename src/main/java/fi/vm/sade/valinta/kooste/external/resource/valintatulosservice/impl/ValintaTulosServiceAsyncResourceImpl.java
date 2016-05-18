@@ -1,6 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
@@ -10,6 +20,9 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijall
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,12 +30,19 @@ import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implements ValintaTulosServiceAsyncResource {
+    private static final Gson GSON = DateDeserializer.gsonBuilder().registerTypeAdapter(DateTime.class, new VtsDateTimeJsonMapper()).create();
+
+    @Override
+    public Gson gson() {
+        return GSON;
+    }
 
     @Autowired
     public ValintaTulosServiceAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.valintatulosservice.rest.url:${host.ilb}/valinta-tulos-service}") String address) {
@@ -91,5 +111,20 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
     @Override
     public Observable<List<VastaanottoResultDTO>> tallenna(List<VastaanottoRecordDTO> tallennettavat) {
         return postAsObservable("/virkailija/vastaanotto", new GenericType<List<VastaanottoResultDTO>>() {}.getType(), Entity.json(tallennettavat));
+    }
+
+    private static class VtsDateTimeJsonMapper implements JsonDeserializer<DateTime>, JsonSerializer<DateTime> {
+        private static DateTimeFormatter valintaTulosServiceCompatibleFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZoneUTC();
+
+        @Override
+        public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            String dateAsString = json.getAsString();
+            return DateTime.parse(dateAsString, valintaTulosServiceCompatibleFormatter);
+        }
+
+        @Override
+        public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(valintaTulosServiceCompatibleFormatter.print(src));
+        }
     }
 }
