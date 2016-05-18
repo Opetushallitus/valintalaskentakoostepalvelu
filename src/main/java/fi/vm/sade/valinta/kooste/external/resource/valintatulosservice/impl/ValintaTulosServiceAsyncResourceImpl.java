@@ -5,6 +5,9 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.http.DateDeserializer;
@@ -34,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implements ValintaTulosServiceAsyncResource {
-    private static final Gson GSON = DateDeserializer.gsonBuilder().registerTypeAdapter(DateTime.class, new VtsDateTimeJsonDeserializer()).create();
+    private static final Gson GSON = DateDeserializer.gsonBuilder().registerTypeAdapter(DateTime.class, new VtsDateTimeJsonMapper()).create();
 
     @Override
     public Gson gson() {
@@ -110,13 +113,18 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
         return postAsObservable("/virkailija/vastaanotto", new GenericType<List<VastaanottoResultDTO>>() {}.getType(), Entity.json(tallennettavat));
     }
 
-    private static class VtsDateTimeJsonDeserializer implements JsonDeserializer<DateTime> {
+    private static class VtsDateTimeJsonMapper implements JsonDeserializer<DateTime>, JsonSerializer<DateTime> {
         private static DateTimeFormatter valintaTulosServiceCompatibleFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZoneUTC();
 
         @Override
         public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             String dateAsString = json.getAsString();
             return DateTime.parse(dateAsString, valintaTulosServiceCompatibleFormatter);
+        }
+
+        @Override
+        public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(valintaTulosServiceCompatibleFormatter.print(src));
         }
     }
 }
