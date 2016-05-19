@@ -5,9 +5,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.http.DateDeserializer;
@@ -21,8 +18,6 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoA
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implements ValintaTulosServiceAsyncResource {
-    private static final Gson GSON = DateDeserializer.gsonBuilder().registerTypeAdapter(DateTime.class, new VtsDateTimeJsonMapper()).create();
+    private static final Gson GSON = DateDeserializer.gsonBuilder().registerTypeAdapter(DateTime.class, new VtsDateTimeJsonDeserializer()).create();
 
     @Override
     public Gson gson() {
@@ -113,18 +108,11 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
         return postAsObservable("/virkailija/vastaanotto", new GenericType<List<VastaanottoResultDTO>>() {}.getType(), Entity.json(tallennettavat));
     }
 
-    private static class VtsDateTimeJsonMapper implements JsonDeserializer<DateTime>, JsonSerializer<DateTime> {
-        private static DateTimeFormatter valintaTulosServiceCompatibleFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZoneUTC();
-
+    private static class VtsDateTimeJsonDeserializer implements JsonDeserializer<DateTime> {
         @Override
         public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             String dateAsString = json.getAsString();
             return DateTime.parse(dateAsString, valintaTulosServiceCompatibleFormatter);
-        }
-
-        @Override
-        public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(valintaTulosServiceCompatibleFormatter.print(src));
         }
     }
 }
