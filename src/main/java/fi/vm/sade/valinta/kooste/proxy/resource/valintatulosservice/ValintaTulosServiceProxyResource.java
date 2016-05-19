@@ -1,6 +1,10 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import static fi.vm.sade.valinta.kooste.KoosteAudit.username;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.ImmutableMap;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
@@ -10,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +33,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
@@ -290,5 +296,20 @@ public class ValintaTulosServiceProxyResource {
                             respondWithError(asyncResponse, "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage());
                         }
                 );
+    }
+
+    public static class ValintaTulosServiceSerializersModule extends SimpleModule {
+        public ValintaTulosServiceSerializersModule() {
+            super(ValintaTulosServiceSerializersModule.class.getSimpleName());
+            addSerializer(DateTime.class, new DateTimeJsonSerializer());
+        }
+    }
+
+    private static class DateTimeJsonSerializer extends JsonSerializer<DateTime> {
+        @Override
+        public void serialize(DateTime dateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            String timestampAsString = ValintaTulosServiceAsyncResource.valintaTulosServiceCompatibleFormatter.print(dateTime);
+            jsonGenerator.writeString(timestampAsString);
+        }
     }
 }

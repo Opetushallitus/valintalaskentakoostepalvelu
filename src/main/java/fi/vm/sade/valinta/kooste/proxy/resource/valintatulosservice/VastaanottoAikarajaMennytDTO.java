@@ -1,9 +1,12 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import org.joda.time.DateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VastaanottoAikarajaMennytDTO {
     private String hakemusOid;
     private boolean mennyt;
