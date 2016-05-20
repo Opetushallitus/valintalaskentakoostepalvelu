@@ -40,6 +40,12 @@ public class ValintatapajonoTuontiConverter {
         if (jono == null) {
             throw new RuntimeException("Valintatapajono == null. JonoId=" + valintatapajonoOid + ", vaihe=" + vaihe);
         }
+        boolean hasJonosijoja = rivit.stream().anyMatch(rivi -> StringUtils.isNotBlank(rivi.getJonosija()));
+        boolean hasKokonaispisteita = rivit.stream().anyMatch(rivi -> StringUtils.isNotBlank(rivi.getPisteet()));
+        if(hasJonosijoja && hasKokonaispisteita) {
+            throw new RuntimeException("Samassa valintatapajonossa ei voida käyttää sekä jonosijoja että kokonaispisteitä.");
+        }
+        jono.setKaytetaanKokonaispisteita(hasKokonaispisteita);
         vaihe.setValintatapajonot(Arrays.asList(jono));
         List<JonosijaDTO> jonosijat = Lists.newArrayList();
         Map<String, Hakemus> hakemusmappaus = mapHakemukset(hakemukset);

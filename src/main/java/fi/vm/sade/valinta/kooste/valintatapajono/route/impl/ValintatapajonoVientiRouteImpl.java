@@ -114,7 +114,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                         }
                         InputStream xlsx;
                         try {
-                            ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(hakuOid, hakukohdeOid, valintatapajonoOid,
+                            ValintatapajonoExcel valintatapajonoExcel = new ValintatapajoqnoExcel(hakuOid, hakukohdeOid, valintatapajonoOid,
                                     hakuNimi, hakukohdeNimi, valinnanvaiheet, hakemukset);
                             xlsx = valintatapajonoExcel.getExcel().vieXlsx();
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
