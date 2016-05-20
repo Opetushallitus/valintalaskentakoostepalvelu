@@ -199,10 +199,12 @@ public class SureKonvertointiTest {
 
 		Oppija o = oppijat.get(0);
 
-		List<AvainArvoDTO> arvot = OppijaToAvainArvoDTOConverter.convert(o.getOppijanumero(), o.getSuoritukset(), new HakemusDTO(), null);
+		HakemusDTO hakemus = new HakemusDTO();
+		hakemus.setHakemusoid("1.2.246.562.11.00000000001");
+		List<AvainArvoDTO> arvot = OppijaToAvainArvoDTOConverter.convert(o.getOppijanumero(), o.getSuoritukset(), hakemus, null);
 
 		assertEquals(ImmutableSet.of(
-				new AvainArvoDTO("PK_B12", "9"), new AvainArvoDTO("PK_B12_OPPIAINE", "SV"),
+				new AvainArvoDTO("PK_B1", "10"), new AvainArvoDTO("PK_B1_OPPIAINE", "SV"),
 				new AvainArvoDTO("PK_B13", "10"), new AvainArvoDTO("PK_B13_OPPIAINE", "EN")
 		), ImmutableSet.copyOf(arvot));
 	}
