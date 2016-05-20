@@ -161,16 +161,24 @@ public class ValintalaskentaKerrallaResource {
 
     @DELETE
     @Path("/haku/{uuid}")
-    public Response lopetaLaskenta(@PathParam("uuid") String uuid) {
+    public Response lopetaLaskenta(@PathParam("uuid") String uuid, @QueryParam("lopetaVainJonossaOlevaLaskenta") Boolean lopetaVainJonossaOlevaLaskenta) {
         if (uuid == null) {
             return errorResponce("Uuid on pakollinen");
         }
-        final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
-        if (l != null) {
-            l.lopeta();
+        if(Boolean.TRUE.equals(lopetaVainJonossaOlevaLaskenta)) {
+            boolean onkoLaskentaVielaJonossa = valintalaskentaValvomo.fetchLaskenta(uuid) == null;
+            if(!onkoLaskentaVielaJonossa) {
+                // Laskentaa suoritetaan jo joten ei pysayteta
+                return Response.ok().build();
+            }
         }
-        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Peruutettu käyttäjän toimesta")));
+        stop(uuid);
+        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Peruutettu käyttäjän toimesta"))).subscribe(ok -> stop(uuid), nok -> stop(uuid));
         return Response.ok().build();
+    }
+
+    private void stop(String uuid) {
+        Optional.ofNullable(valintalaskentaValvomo.fetchLaskenta(uuid)).ifPresent(Laskenta::lopeta);
     }
 
     private Response errorResponce(final String errorMessage) {

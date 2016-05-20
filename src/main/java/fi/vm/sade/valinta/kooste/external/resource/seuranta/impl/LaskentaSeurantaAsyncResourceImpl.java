@@ -2,11 +2,13 @@ package fi.vm.sade.valinta.kooste.external.resource.seuranta.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.LaskentaParams;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -26,6 +28,7 @@ import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import rx.Observable;
 
 
 @Service
@@ -95,22 +98,17 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
         }
     }
 
-    public void merkkaaLaskennanTila(String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
+    public Observable<Response> merkkaaLaskennanTila(String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
         String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid + "/tila/" + tila;
         try {
             if(ilmoitusDtoOptional.isPresent()) {
-                getWebClient()
-                        .path(url)
-                        .async()
-                        .post(Entity.entity(gson.toJson(ilmoitusDtoOptional.get()), MediaType.APPLICATION_JSON_TYPE), responseCallback);
+                return postAsObservable(url, Entity.entity(gson.toJson(ilmoitusDtoOptional.get()), MediaType.APPLICATION_JSON_TYPE));
             } else {
-                getWebClient()
-                        .path(url)
-                        .async()
-                        .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
+                return putAsObservable(url, Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE));
             }
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu paatyi virheeseen!" + url, e);
+            return Observable.error(e);
         }
     }
 
