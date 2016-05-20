@@ -102,7 +102,9 @@ public class ValintatapajonoExcel {
                         valintatiedot.put(hakemusOid, jonosija.getTuloksenTila().toString());
                         if (!jonosija.getJarjestyskriteerit().isEmpty()) {
                             avaimet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getKuvaus());
-                            kokonaispisteet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getArvo());
+                            if(jono.getKaytetaanKokonaispisteita()) {
+                                kokonaispisteet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getArvo());
+                            }
                         }
                     }
                 }
@@ -133,11 +135,13 @@ public class ValintatapajonoExcel {
             Collection<Arvo> s = Lists.newArrayList();
             s.add(new TekstiArvo(hakemusOid));
 
-            s.add(new NumeroArvo(jonosijat.get(hakemusOid), 0, hakemukset.size()));
+            if(!kokonaispisteet.containsKey(hakemusOid)) {
+                s.add(new NumeroArvo(jonosijat.get(hakemusOid), 0, hakemukset.size()));
+            }
             Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(data, null, null);
             s.add(new TekstiArvo(osoite.getLastName() + " " + osoite.getFirstName()));
             s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))), VAIHTOEHDOT));
-            if(null != kokonaispisteet.get(hakemusOid) && 0 <= kokonaispisteet.get(hakemusOid).compareTo(new BigDecimal(0))) {
+            if(kokonaispisteet.containsKey(hakemusOid) && null != kokonaispisteet.get(hakemusOid)) {
                 s.add(new NumeroArvo(kokonaispisteet.get(hakemusOid)));
             }
             if (avaimet.containsKey(hakemusOid)) {
