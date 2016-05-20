@@ -20,7 +20,7 @@
         "arvosanat": [
           {
             "id": "550fabf3-ba92-40e0-8749-6725c019bfb3",
-            "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+            "suoritus": "23189712-aabd-48c2-9df5-269f92194bf7",
             "arvio": {
               "arvosana": "8",
               "asteikko": "4-10"
@@ -33,7 +33,7 @@
           },
           {
             "id": "550fabf3-ba92-40e0-8749-6725c019bfb4",
-            "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+            "suoritus": "23189712-aabd-48c2-9df5-269f92194bf7",
             "arvio": {
               "arvosana": "9",
               "asteikko": "4-10"
@@ -46,13 +46,42 @@
           },
           {
             "id": "550fabf3-ba92-40e0-8749-6725c019bfb5",
-            "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+            "suoritus": "23189712-aabd-48c2-9df5-269f92194bf7",
             "arvio": {
               "arvosana": "10",
               "asteikko": "4-10"
             },
             "aine": "B13",
             "lisatieto": "EN",
+            "valinnainen": false,
+            "myonnetty": "01.01.2014",
+            "source": "1.2.246.562.24.30988735768"
+          }
+        ]
+      },
+      {
+        "suoritus": {
+          "henkiloOid": "1.2.246.562.24.99654294684",
+          "source": "1.2.246.562.24.33796645377",
+          "vahvistettu": false,
+          "komo": "1.2.246.562.13.62959769647",
+          "myontaja": "1.2.246.562.11.00000000001",
+          "tila": "VALMIS",
+          "valmistuminen": "31.05.2014",
+          "yksilollistaminen": "Ei",
+          "suoritusKieli": "FI",
+          "id": "23189712-aabd-48c2-9df5-269f92194bf8"
+        },
+        "arvosanat": [
+          {
+            "id": "550fabf3-ba92-40e0-8749-6725c019bfb6",
+            "suoritus": "23189712-aabd-48c2-9df5-269f92194bf8",
+            "arvio": {
+              "arvosana": "10",
+              "asteikko": "4-10"
+            },
+            "aine": "B1",
+            "lisatieto": "SV",
             "valinnainen": false,
             "myonnetty": "01.01.2014",
             "source": "1.2.246.562.24.30988735768"
