@@ -102,7 +102,7 @@ public class ValintatapajonoExcel {
                         valintatiedot.put(hakemusOid, jonosija.getTuloksenTila().toString());
                         if (!jonosija.getJarjestyskriteerit().isEmpty()) {
                             avaimet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getKuvaus());
-                            if(jono.getKaytetaanKokonaispisteita()) {
+                            if(null != jono.getKaytetaanKokonaispisteita() && jono.getKaytetaanKokonaispisteita()) {
                                 kokonaispisteet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getArvo());
                             }
                         }
