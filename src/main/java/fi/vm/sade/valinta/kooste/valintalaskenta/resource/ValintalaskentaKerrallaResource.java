@@ -62,6 +62,8 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("erillishaku") Boolean erillishaku,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe,
             @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
+            @QueryParam("haunnimi") String haunnimi,
+            @QueryParam("nimi") String nimi,
             @Suspended AsyncResponse asyncResponse) {
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
@@ -70,7 +72,7 @@ public class ValintalaskentaKerrallaResource {
                 asyncResponse.resume(errorResponce("Ajo laskennalle aikakatkaistu!"));
             });
             final String userOID = AuthorizationUtil.getCurrentUser();
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, haunnimi, nimi, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
@@ -87,6 +89,8 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("erillishaku") Boolean erillishaku,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe,
             @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
+            @QueryParam("haunnimi") String haunnimi,
+            @QueryParam("nimi") String nimi,
             @PathParam("tyyppi") LaskentaTyyppi laskentatyyppi,
             @PathParam("whitelist") boolean whitelist,
             List<String> stringMaski,
@@ -101,7 +105,7 @@ public class ValintalaskentaKerrallaResource {
 
             Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
             final String userOID = AuthorizationUtil.getCurrentUser();
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, haunnimi, nimi, laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
