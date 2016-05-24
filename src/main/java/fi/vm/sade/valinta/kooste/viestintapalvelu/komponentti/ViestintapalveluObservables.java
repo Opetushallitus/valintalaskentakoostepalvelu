@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -85,9 +86,16 @@ public class ViestintapalveluObservables {
         }
     }
 
-    public static Observable<HaunResurssit> haunResurssit(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset,
+    public static Observable<HaunResurssit> haunResurssitSahkoposti(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset,
                                                           Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
-        return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) -> filtteroiAsiointikielella(asiointikieli, hakijat, hakemukset));
+        return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
+                filtteroiLahetetaanSahkoposti(filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset))));
+    }
+
+    public static Observable<HaunResurssit> haunResurssitIPosti(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset,
+                                                                    Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
+        return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
+                filtteroiLahetetaanIPosti(filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset))));
     }
 
     public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Observable<HakijaPaginationObject> koulutuspaikalliset,
@@ -197,19 +205,39 @@ public class ViestintapalveluObservables {
                 hakijat.getResults().stream().collect(Collectors.groupingBy(ViestintapalveluObservables::hakutoiveMissaHakijaOnHyvaksyttyna)));
     }
 
-    private static HaunResurssit filtteroiAsiointikielella(String asiointkieli, HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
-        final Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna = hakemukset
+    private static HaunResurssit filtteroiAsiointikielella(String asiointkieli, HaunResurssit haunResurssit) {
+        HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> asiointkieli.equals(new HakemusWrapper(hakemus).getAsiointikieli()));
+        LOG.info("Asiointikielellä filtteröinnin jälkeen {} kpl", filteroidytResurssit.hakemukset.size());
+        return filteroidytResurssit;
+    }
+
+    private static HaunResurssit filtteroiLahetetaanSahkoposti(HaunResurssit haunResurssit) {
+        HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> StringUtils.isNotBlank(new HakemusWrapper(hakemus).getSahkopostiOsoite()));
+        LOG.info("Sähköpostin vastaanottajia on {} kpl", filteroidytResurssit.hakemukset.size());
+        return filteroidytResurssit;
+    }
+
+    private static HaunResurssit filtteroiLahetetaanIPosti(HaunResurssit haunResurssit) {
+        HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> {
+            HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+            return !hakemusWrapper.getVainSahkoinenViestinta() || StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite());
+        });
+        LOG.info("Kirjeen vastaanottajia on {} kpl", filteroidytResurssit.hakemukset.size());
+        return filteroidytResurssit;
+    }
+
+    private static HaunResurssit filtteroiHakemuksetJaHakijat(HaunResurssit haunResurssit, Function<Hakemus, Boolean> filter) {
+        final Map<String, Hakemus> hakemuksetFiltteroituna = haunResurssit.hakemukset
                 .stream()
-                .filter(h -> asiointkieli.equals(new HakemusWrapper(h).getAsiointikieli()))
+                .filter(h -> filter.apply(h))
                 .collect(Collectors.toMap(Hakemus::getOid, h0 -> h0));
 
-        final Set<String> oidit = hakemuksetAsiointikielellaFiltteroituna.keySet();
-        List<HakijaDTO> hakijatAsiointikielellaFiltteroituna = hakijat.getResults()
+        final Set<String> oidit = hakemuksetFiltteroituna.keySet();
+        List<HakijaDTO> hakijatFiltteroituna = haunResurssit.hakijat
                 .stream()
                 .filter(h -> oidit.contains(h.getHakemusOid())).collect(Collectors.toList());
-        LOG.info("Saatiin haun hakemukset {} kpl ja asiointkielellä filtteröinnin jälkeen {} kpl", hakemukset.size(), hakemuksetAsiointikielellaFiltteroituna.size());
 
-        return new HaunResurssit(hakijatAsiointikielellaFiltteroituna, hakemuksetAsiointikielellaFiltteroituna.values());
+        return new HaunResurssit(hakijatFiltteroituna, hakemuksetFiltteroituna.values());
     }
 
     private static List<HakukohdeJaResurssit> getHakukohteenResurssitHakemuksistaJaHakijoista(Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna, Map<String, List<HakijaDTO>> hyvaksytytHakutoiveittain) {
