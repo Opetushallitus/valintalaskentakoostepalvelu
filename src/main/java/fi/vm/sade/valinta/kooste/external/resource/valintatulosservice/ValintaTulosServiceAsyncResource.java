@@ -8,12 +8,16 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijall
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import rx.Observable;
 
 import java.util.List;
 import java.util.Set;
 
 public interface ValintaTulosServiceAsyncResource {
+    DateTimeFormatter valintaTulosServiceCompatibleFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZoneUTC();
+
     Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid);
 
     Observable<ValintaTulosServiceDto> getHakemuksenValintatulos(String hakuOid, String hakemusOid);
