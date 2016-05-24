@@ -10,6 +10,8 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import org.junit.Assert;
@@ -18,6 +20,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -55,7 +58,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulle() {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulle() throws InterruptedException {
         HttpResource http = new HttpResource(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet");
         HakuV1RDTO h = new HakuV1RDTO();
         h.setHakukohdeOids(IntStream.range(1, 100).mapToObj(i -> "HAKUKOHDE"+ i).collect(Collectors.toList()));
@@ -97,10 +100,44 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
 
-        Assert.assertEquals(200, http.getWebClient()
+        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
+        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
+
+        LetterResponse letterResponse = new LetterResponse();
+        letterResponse.setBatchId("testBatchId");
+        letterResponse.setStatus(LetterResponse.STATUS_SUCCESS);
+        mockToReturnJson(POST, "/viestintapalvelu/api/v1/letter/async/letter.*", letterResponse);
+
+        LetterBatchStatusDto letterStatus = new LetterBatchStatusDto();
+        letterStatus.setStatus("ready");
+        mockToReturnJson(GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
+
+        Response response = http.getWebClient()
                 .query("hakuOid", HAKU1)
                 .query("asiointikieli", "SV")
                 .query("letterBodyText","letterBodyText")
-                .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2))).getStatus());
+                .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2)));
+
+        String body = response.readEntity(String.class);
+
+        String dokumenttiId = body.substring(7, body.length()-2);
+
+        Assert.assertEquals(200, response.getStatus());
+
+        HttpResource http2 = new HttpResource(resourcesAddress + "/dokumenttiprosessi/" + dokumenttiId);
+        String body2 = "";
+        for(int i = 0; i < 10; i++) {
+            Response response2 = http2.getWebClient().get();
+            Assert.assertEquals(200, response2.getStatus());
+            body2 = response2.readEntity(String.class);
+            if(body2.contains("\"valmis\":false")) {
+                Thread.sleep(2000);
+            } else {
+                break;
+            }
+        }
+        Assert.assertTrue("valmis!=true " + body2, body2.contains("\"valmis\":true"));
+        Assert.assertTrue("ohitettu!=0 " + body2, body2.contains("\"ohitettu\":0"));
+        Assert.assertTrue("keskeytetty!=false " + body2, body2.contains("\"keskeytetty\":false"));
     }
 }
