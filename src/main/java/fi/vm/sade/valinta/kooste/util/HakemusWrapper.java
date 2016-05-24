@@ -43,6 +43,7 @@ public class HakemusWrapper {
     private final static String NAINEN = "2";
     private final static String MIES = "1";
     private final static String POHJAKOULUTUSMAA_TOINEN_ASTE = "pohjakoulutusmaa_toinen_aste";
+    private final static String VAIN_SAHKOINEN_VIESTINTA = "lupatiedot-sahkoinen-viestinta";
 
     private Yhteystiedot yhteystiedot = null;
 
@@ -228,9 +229,18 @@ public class HakemusWrapper {
     }
 
     public boolean getLupaJulkaisuun() {
-        getLisatiedot(); // lazy load henkilotiedot
+        getLisatiedot(); // lazy load lisätiedot
         if (lisatiedot.containsKey(LUPAJULKAISUUN)) {
             String l = lisatiedot.get(LUPAJULKAISUUN);
+            return Boolean.TRUE.equals(Boolean.valueOf(l));
+        }
+        return false;
+    }
+
+    public boolean getVainSahkoinenViestinta() {
+        getLisatiedot(); // lazy load lisätiedot
+        if (lisatiedot.containsKey(VAIN_SAHKOINEN_VIESTINTA)) {
+            String l = lisatiedot.get(VAIN_SAHKOINEN_VIESTINTA);
             return Boolean.TRUE.equals(Boolean.valueOf(l));
         }
         return false;

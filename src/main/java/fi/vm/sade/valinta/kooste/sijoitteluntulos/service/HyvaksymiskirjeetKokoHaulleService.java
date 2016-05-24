@@ -25,6 +25,8 @@ import rx.Observable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Service
 public class HyvaksymiskirjeetKokoHaulleService {
@@ -56,10 +58,22 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.hakuParametritService = hakuParametritService;
     }
 
-    public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
+    public void muodostaSahkopostiHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
+        muodostaHyvaksymiskirjeetKokoHaulle(() ->
+                ViestintapalveluObservables.haunResurssitSahkoposti(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
+                        applicationAsyncResource::getApplicationsByHakemusOids), hakuOid, asiointikieli, prosessi, defaultValue);
+    }
+
+    public void muodostaIPostiHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
+        muodostaHyvaksymiskirjeetKokoHaulle(() ->
+                ViestintapalveluObservables.haunResurssitIPosti(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
+                        applicationAsyncResource::getApplicationsByHakemusOids), hakuOid, asiointikieli, prosessi, defaultValue);
+    }
+
+    private void muodostaHyvaksymiskirjeetKokoHaulle(Supplier<Observable<HaunResurssit>> haeHaunResurssit, String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
 
-        ViestintapalveluObservables.haunResurssit(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), applicationAsyncResource::getApplicationsByHakemusOids)
+        haeHaunResurssit.get()
                 .doOnError(error -> {
                     LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
                 })

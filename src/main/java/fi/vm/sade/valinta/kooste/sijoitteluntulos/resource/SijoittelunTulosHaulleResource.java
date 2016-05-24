@@ -81,14 +81,19 @@ public class SijoittelunTulosHaulleResource {
     @ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
     public ProsessiId hyvaksymiskirjeetKokoHaulle(@QueryParam("hakuOid") String hakuOid,
                                                   @QueryParam("letterBodyText") String letterBodyText,
-                                                  @QueryParam("asiointikieli") String asiointikieli) {
+                                                  @QueryParam("asiointikieli") String asiointikieli,
+                                                  @QueryParam("sahkoposti") @DefaultValue("false") boolean sahkoposti) {
         try {
             SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
                     Optional.ofNullable(asiointikieli).map(KieliUtil::normalisoiKielikoodi),
                     "hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null, Arrays.asList("hyvaksymiskirjeet", "haulle"));
 
-            if(asiointikieli != null) {
-                hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, asiointikieli, prosessi, Optional.ofNullable(letterBodyText));
+            if(asiointikieli != null ) {
+                if(sahkoposti) {
+                    hyvaksymiskirjeetKokoHaulleService.muodostaSahkopostiHyvaksymiskirjeetKokoHaulle(hakuOid, asiointikieli, prosessi, Optional.ofNullable(letterBodyText));
+                } else {
+                    hyvaksymiskirjeetKokoHaulleService.muodostaIPostiHyvaksymiskirjeetKokoHaulle(hakuOid, asiointikieli, prosessi, Optional.ofNullable(letterBodyText));
+                }
             } else {
                 hyvaksymiskirjeetHakukohteittain.muodostaKirjeet(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
             }
