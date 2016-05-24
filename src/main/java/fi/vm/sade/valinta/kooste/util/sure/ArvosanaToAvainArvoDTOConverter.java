@@ -28,11 +28,11 @@ public class ArvosanaToAvainArvoDTOConverter {
     private static final String SUORITETTU = "_SUORITETTU";
     private static final String VALINNAINEN = "_VAL";
 
-    public static List<AvainArvoDTO> convert(List<SuoritusJaArvosanat> suoritukset, String prefix, String suffix, String oppijaOid) {
+    public static Set<AvainArvoDTO> convert(List<SuoritusJaArvosanat> suoritukset, String prefix, String suffix, String oppijaOid) {
         tarkistaOppiaineetSuorituksissa(suoritukset, prefix, suffix, oppijaOid);
         return Stream.concat(arvosanaToAvainArvo(bestArvosanaInValinnaisetArvosanat(valinnaisetAineittain(suoritukset)), prefix, suffix),
                 ryhmitaSamatArvosanatKeskenaan(arvosanatIlmanValinnaisiaArvosanoja(suoritukset)).flatMap(arvosanat -> arvosanaToAvainArvo(bestArvosana(arvosanat), prefix, suffix)))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     private static void tarkistaOppiaineetSuorituksissa(List<SuoritusJaArvosanat> suoritukset, String prefix, String suffix, String oppijaOid) {
@@ -132,7 +132,7 @@ public class ArvosanaToAvainArvoDTOConverter {
                 a0.setArvo("true");
             }
             if (arvosana.getLisatieto() != null) {
-                return Stream.of(a0, new AvainArvoDTO(a0.getAvain() + OPPIAINE, arvosana.getLisatieto()));
+                return Stream.of(a0, new AvainArvoDTO(prefix + arvosana.getAine() + suffix + OPPIAINE, arvosana.getLisatieto()));
             }
             return Stream.of(a0);
         });
