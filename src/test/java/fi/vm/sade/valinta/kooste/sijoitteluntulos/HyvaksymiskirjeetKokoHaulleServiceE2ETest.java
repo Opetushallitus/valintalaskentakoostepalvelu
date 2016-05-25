@@ -60,15 +60,12 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     @Test
     public void testaaHyvaksymiskirjeenLuontiaKokoHaulle() throws InterruptedException {
         HttpResource http = new HttpResource(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet");
-        HakuV1RDTO h = new HakuV1RDTO();
-        h.setHakukohdeOids(IntStream.range(1, 100).mapToObj(i -> "HAKUKOHDE"+ i).collect(Collectors.toList()));
-        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(h));
-        {
+
         HakukohdeV1RDTO hk = new HakukohdeV1RDTO();
-            hk.setOpetusKielet(Sets.newHashSet("FI"));
+        hk.setOpetusKielet(Sets.newHashSet("FI"));
         hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
-        mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1", new Result(hk));
-        }
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1/", new Result(hk));
+
         HakijaDTO hakija1 = new HakijaDTO();
         hakija1.setHakemusOid(HAKEMUS1);
         HakutoiveDTO hakutoiveDTO = new HakutoiveDTO();
