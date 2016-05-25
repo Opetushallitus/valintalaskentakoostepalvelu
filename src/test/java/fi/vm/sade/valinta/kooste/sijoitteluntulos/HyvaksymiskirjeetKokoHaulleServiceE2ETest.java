@@ -67,13 +67,16 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         HakukohdeV1RDTO hk = new HakukohdeV1RDTO();
             hk.setOpetusKielet(Sets.newHashSet("FI"));
         hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
-        mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/.*", new Result(hk));
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1", new Result(hk));
         }
         HakijaDTO hakija1 = new HakijaDTO();
+        hakija1.setHakemusOid(HAKEMUS1);
         HakutoiveDTO hakutoiveDTO = new HakutoiveDTO();
         hakutoiveDTO.setHakukohdeOid(HAKUKOHDE1);
         HakutoiveenValintatapajonoDTO jono = new HakutoiveenValintatapajonoDTO();
         jono.setTila(HakemuksenTila.HYVAKSYTTY);
+        jono.setHyvaksytty(50);
+        jono.setHakeneet(100);
         hakutoiveDTO.setHakutoiveenValintatapajonot(Collections.singletonList(jono));
         hakija1.setHakutoiveet(Sets.newTreeSet(Collections.singletonList(hakutoiveDTO)));
         HakijaPaginationObject hp = new HakijaPaginationObject();
@@ -95,7 +98,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .build(),
                 hakemus()
-                        .setOid(HAKEMUS1)
+                        .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .build()
         ));
@@ -106,7 +109,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         LetterResponse letterResponse = new LetterResponse();
         letterResponse.setBatchId("testBatchId");
         letterResponse.setStatus(LetterResponse.STATUS_SUCCESS);
-        mockToReturnJson(POST, "/viestintapalvelu/api/v1/letter/async/letter.*", letterResponse);
+        mockToReturnJson(POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse);
 
         LetterBatchStatusDto letterStatus = new LetterBatchStatusDto();
         letterStatus.setStatus("ready");

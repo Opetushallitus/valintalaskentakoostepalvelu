@@ -171,7 +171,7 @@ public class HyvaksymiskirjeetKomponentti {
                     KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
                     KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
                     if (valintatapajono.getHyvaksytty() == null) {
-                        throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
+                        throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksytty.");
                     }
                     if (valintatapajono.getHakeneet() == null) {
                         throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");

@@ -67,7 +67,7 @@ public class HakemusSpec extends ConstantsSpec {
             return this;
         }
         public HakemusBuilder setAsiointikieli(String asiointikieli) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.ASIOINTIKIELI, asiointikieli);
+            hakemus.getAnswers().getLisatiedot().put(HakemusWrapper.ASIOINTIKIELI, asiointikieli);
             return this;
         }
         public HakemusBuilder addHakutoive(String hakukohdeOid) {
