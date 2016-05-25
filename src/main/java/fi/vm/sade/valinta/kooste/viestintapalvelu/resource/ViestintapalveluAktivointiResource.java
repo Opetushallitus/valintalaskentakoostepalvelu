@@ -4,11 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Sets;
@@ -166,8 +162,8 @@ public class ViestintapalveluAktivointiResource {
             DokumentinLisatiedot hakemuksillaRajaus,
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("templateName") String templateName,
-            @QueryParam("tarjoajaOid")
-            String tarjoajaOid,
+            @QueryParam("sahkoposti") @DefaultValue("false") boolean sahkoposti,
+            @QueryParam("tarjoajaOid") String tarjoajaOid,
             @QueryParam("tag") String tag) {
         try {
             if (hakemuksillaRajaus == null) {
