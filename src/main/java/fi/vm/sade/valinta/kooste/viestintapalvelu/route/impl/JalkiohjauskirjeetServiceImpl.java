@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.functions.Action4;
+import static rx.observables.BlockingObservable.from;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
@@ -111,7 +112,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
             Collection<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
             try {
                 LOG.info("Haetaan hakemukset!");
-                hakemukset = applicationAsyncResource.getApplicationsByOids(hakemusOids).get(240L, TimeUnit.MINUTES);
+                //TODO: Muuta aidosti asynkroniseksi
+                hakemukset = from(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)).first();
             } catch (Throwable e) {
                 LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
                 throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
@@ -133,7 +135,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     return;
                 }
                 LOG.error("Aloitetaan jalkiohjauskirjeiden vienti! Kirjeita {}kpl", letterBatch.getLetters().size());
-                LetterResponse batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(letterBatch).get(240L, TimeUnit.MINUTES);
+                //TODO: Muuta aidosti asynkroniseksi
+                LetterResponse batchId = from(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)).first();
                 LOG.error("Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)", batchId.getBatchId());
                 prosessi.vaiheValmistui();
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
@@ -147,7 +150,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                     pulse -> {
                                         try {
                                             LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
-                                            LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatus(batchId.getBatchId()).get(10000L, TimeUnit.MILLISECONDS);
+                                            //TODO: Muuta aidosti asynkroniseksi
+                                            LetterBatchStatusDto status = from(viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())).first();
                                             if (prosessi.isKeskeytetty()) {
                                                 LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta!");
                                                 stop.onNext(null);
