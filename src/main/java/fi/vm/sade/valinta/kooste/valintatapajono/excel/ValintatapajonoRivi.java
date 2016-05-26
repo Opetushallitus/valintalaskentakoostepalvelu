@@ -64,7 +64,13 @@ public class ValintatapajonoRivi {
 
     @ApiModelProperty(hidden = true)
     public boolean isValidi() {
-        return asTila() != JarjestyskriteerituloksenTila.MAARITTELEMATON;
+        boolean hasPisteetTaiJonosija = StringUtils.isNotBlank(getJonosija()) || StringUtils.isNotBlank(getPisteet());
+        return !isMaarittelematon() || hasPisteetTaiJonosija;
+    }
+
+    @ApiModelProperty(hidden = true)
+    public boolean isMaarittelematon() {
+        return asTila() == JarjestyskriteerituloksenTila.MAARITTELEMATON;
     }
 
     public JarjestyskriteerituloksenTila asTila() {

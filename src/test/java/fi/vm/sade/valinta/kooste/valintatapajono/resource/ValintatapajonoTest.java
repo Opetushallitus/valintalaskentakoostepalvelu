@@ -91,7 +91,73 @@ public class ValintatapajonoTest extends ValintatapajonoTestTools{
         ValinnanvaiheDTO generoitu_valinnanvaihe =
         ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet, hakemukset, valinnanvaihe, rivit.getRivit());
 
-        LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(generoitu_valinnanvaihe));
+        String json = new GsonBuilder().setPrettyPrinting().create().toJson(generoitu_valinnanvaihe);
+        LOG.error("{}", json);
+        assertTrue(json.contains("\"arvo\": -1"));
+        assertTrue(json.contains("\"tila\": \"HYVAKSYTTAVISSA\""));
+        assertFalse(generoitu_valinnanvaihe.getValintatapajonot().isEmpty());
+        for(ValintatietoValintatapajonoDTO jono : generoitu_valinnanvaihe.getValintatapajonot()) {
+            assertEquals(jono.getOid(), valintatapajonoOid);
+        }
+    }
+
+    @Test
+    public void testaaValintatapajononTuontiaPisteitaJaMaarittelematonTila() throws Exception {
+        String valintatapajonoOid = "14229501603804360431186491391519";
+        ValintatapajonoRivi rivi = new ValintatapajonoRivi("1.2.246.562.11.00000000181", "", "Ilman laskentaa", "MAARITTELEMATON", "20", "", "", "");
+        ValintatapajonoRivit rivit = new ValintatapajonoRivit(Arrays.asList(rivi));
+        LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(rivit));
+        List<ValinnanVaiheJonoillaDTO> valintaperusteet = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_valinnanvaihe.json"),
+                new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType()
+        );
+        List<Hakemus> hakemukset = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_listfull.json"),
+                new TypeToken<List<Hakemus>>() {}.getType()
+        );
+        List<ValintatietoValinnanvaiheDTO> valinnanvaihe = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_laskenta_valinnanvaihe.json"),
+                new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
+        );
+
+        ValinnanvaiheDTO generoitu_valinnanvaihe =
+                ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet, hakemukset, valinnanvaihe, rivit.getRivit());
+
+        String json = new GsonBuilder().setPrettyPrinting().create().toJson(generoitu_valinnanvaihe);
+        LOG.error("{}", json);
+        assertTrue(json.contains("\"arvo\": 20"));
+        assertTrue(json.contains("\"tila\": \"HYVAKSYTTAVISSA\""));
+        assertFalse(generoitu_valinnanvaihe.getValintatapajonot().isEmpty());
+        for(ValintatietoValintatapajonoDTO jono : generoitu_valinnanvaihe.getValintatapajonot()) {
+            assertEquals(jono.getOid(), valintatapajonoOid);
+        }
+    }
+
+    @Test
+    public void testaaValintatapajononTuontiaEiPisteitaJaMaarittelematonTila() throws Exception {
+        String valintatapajonoOid = "14229501603804360431186491391519";
+        ValintatapajonoRivi rivi = new ValintatapajonoRivi("1.2.246.562.11.00000000181", "", "Ilman laskentaa", "MAARITTELEMATON", "", "", "", "");
+        ValintatapajonoRivit rivit = new ValintatapajonoRivit(Arrays.asList(rivi));
+        LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(rivit));
+        List<ValinnanVaiheJonoillaDTO> valintaperusteet = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_valinnanvaihe.json"),
+                new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType()
+        );
+        List<Hakemus> hakemukset = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_listfull.json"),
+                new TypeToken<List<Hakemus>>() {}.getType()
+        );
+        List<ValintatietoValinnanvaiheDTO> valinnanvaihe = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_laskenta_valinnanvaihe.json"),
+                new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
+        );
+
+        ValinnanvaiheDTO generoitu_valinnanvaihe =
+                ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet, hakemukset, valinnanvaihe, rivit.getRivit());
+
+        String json = new GsonBuilder().setPrettyPrinting().create().toJson(generoitu_valinnanvaihe);
+        LOG.error("{}", json);
+        assertFalse(json.contains("\"tila\""));
         assertFalse(generoitu_valinnanvaihe.getValintatapajonot().isEmpty());
         for(ValintatietoValintatapajonoDTO jono : generoitu_valinnanvaihe.getValintatapajonot()) {
             assertEquals(jono.getOid(), valintatapajonoOid);

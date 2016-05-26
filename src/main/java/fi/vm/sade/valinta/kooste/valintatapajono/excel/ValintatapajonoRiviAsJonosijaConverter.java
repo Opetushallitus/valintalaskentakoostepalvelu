@@ -33,8 +33,8 @@ public class ValintatapajonoRiviAsJonosijaConverter {
         } else {
             kriteeri.setArvo(new BigDecimal(rivi.asJonosija()).negate());
         }
+        kriteeri.setTila(rivi.isMaarittelematon() ? JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA : rivi.asTila());
         kriteeri.setNimi(StringUtils.EMPTY);
-        kriteeri.setTila(rivi.asTila());
         kriteeri.setKuvaus(rivi.getKuvaus());
         kriteeri.setPrioriteetti(0);
         j.getJarjestyskriteerit().add(kriteeri);
