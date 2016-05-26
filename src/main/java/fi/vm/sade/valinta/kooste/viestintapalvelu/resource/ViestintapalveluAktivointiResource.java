@@ -174,7 +174,7 @@ public class ViestintapalveluAktivointiResource {
             LOG.warn("Luodaan jälkiohjauskirjeet kielellä {}. Onko {} == {}", hakemuksillaRajaus.getLanguageCode(), KieliUtil.RUOTSI, KieliUtil.RUOTSI.equals(hakemuksillaRajaus.getLanguageCode()));
             JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(), templateName, tag, hakuOid, hakemuksillaRajaus.getLanguageCode());
             if (hakemuksillaRajaus.getHakemusOids() == null) {
-                jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO);
+                jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO, sahkoposti);
             } else {
                 jalkiohjauskirjeService.jalkiohjauskirjeetHakemuksille(prosessi, jalkiohjauskirjeDTO, hakemuksillaRajaus.getHakemusOids());
             }
