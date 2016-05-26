@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
@@ -106,7 +107,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         LetterResponse letterResponse = new LetterResponse();
         letterResponse.setBatchId("testBatchId");
         letterResponse.setStatus(LetterResponse.STATUS_SUCCESS);
-        mockToReturnJson(POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse);
+        mockToReturnJsonAndCheckBody(POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse, "^(?!.*HAKEMUS2).*HAKEMUS1.*$");
 
         LetterBatchStatusDto letterStatus = new LetterBatchStatusDto();
         letterStatus.setStatus("ready");

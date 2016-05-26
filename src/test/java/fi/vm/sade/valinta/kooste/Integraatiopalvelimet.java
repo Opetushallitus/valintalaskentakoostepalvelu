@@ -7,6 +7,8 @@ import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.Body;
+import org.mockserver.model.RegexBody;
 
 import java.util.concurrent.TimeUnit;
 
@@ -70,6 +72,21 @@ public class Integraatiopalvelimet {
 
                 );
     }
+    private static void mockToReturnValueAndCheckBody(String method, String p, String r, String regex) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                                .withBody(new RegexBody(regex))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(r)
+
+                );
+    }
     public static void mockToNoContent(String method, String p) {
         mockServer
                 .when(
@@ -112,6 +129,11 @@ public class Integraatiopalvelimet {
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;
         mockToReturnValue(method, p, s = httpResource.gson().toJson(r));
+        System.err.println(s);
+    }
+    public static void mockToReturnJsonAndCheckBody(String method, String p, Object r, String regex) {
+        String s;
+        mockToReturnValueAndCheckBody(method, p, s = httpResource.gson().toJson(r), regex);
         System.err.println(s);
     }
     public static void mockToReturnString(String method, String p, String r) {
