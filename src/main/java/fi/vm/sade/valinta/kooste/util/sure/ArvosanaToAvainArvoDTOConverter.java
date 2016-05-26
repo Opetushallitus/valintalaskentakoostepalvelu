@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.util.sure;
 
 import com.codepoetics.protonpack.StreamUtils;
+import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -30,13 +32,17 @@ public class ArvosanaToAvainArvoDTOConverter {
 
     public static Set<AvainArvoDTO> convert(List<SuoritusJaArvosanat> suoritukset, String prefix, String suffix, String oppijaOid) {
         tarkistaOppiaineetSuorituksissa(suoritukset, prefix, suffix, oppijaOid);
-        return Stream.concat(arvosanaToAvainArvo(bestArvosanaInValinnaisetArvosanat(valinnaisetAineittain(suoritukset)), prefix, suffix),
-                ryhmitaSamatArvosanatKeskenaan(arvosanatIlmanValinnaisiaArvosanoja(suoritukset)).flatMap(arvosanat -> arvosanaToAvainArvo(bestArvosana(arvosanat), prefix, suffix)))
+        return Stream.concat(
+                aineidenValinnaisetArvosanatSuorituksittain(suoritukset.stream()).values().stream()
+                        .flatMap(aineenArvosanatSuorituksittain -> parhaanSuorituksenArvosanat(aineenArvosanatSuorituksittain))
+                        .flatMap(a -> arvosanaToAvainArvo(a, prefix, suffix)),
+                arvosanatAineittain(varsinaisetArvosanat(suoritukset.stream())).values().stream()
+                        .flatMap(aineenArvosanat -> arvosanaToAvainArvo(parasArvosana(aineenArvosanat), prefix, suffix)))
                 .collect(Collectors.toSet());
     }
 
     private static void tarkistaOppiaineetSuorituksissa(List<SuoritusJaArvosanat> suoritukset, String prefix, String suffix, String oppijaOid) {
-        ryhmitaSamatArvosanatKeskenaan(arvosanatIlmanValinnaisiaArvosanoja(suoritukset)).forEach(
+        arvosanatAineittain(varsinaisetArvosanat(suoritukset.stream())).values().forEach(
                 arvosanaJoukko -> {
                     Set<String> oppiaineet = arvosanaJoukko.stream().map(a -> Optional.ofNullable(a.getLisatieto()).orElse("")).collect(Collectors.toSet());
                     if (oppiaineet.size() > 1) {
@@ -47,15 +53,16 @@ public class ArvosanaToAvainArvoDTOConverter {
     }
 
     private static Optional<Fraction> keskiarvo(List<Arvosana> arvosanat) {
-        List<Arvosana> numeeriset = filtteroiVainNumeerisetArvot(arvosanat);
+        List<Integer> numeeriset = numeerisetArvosanat(arvosanat);
         if (numeeriset.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(Fraction.getFraction(numeeriset.stream().mapToInt(a -> Integer.parseInt(a.getArvio().getArvosana())).sum(), numeeriset.size()));
+        int summa = numeeriset.stream().mapToInt(i -> i).sum();
+        return Optional.of(Fraction.getFraction(summa, numeeriset.size()));
     }
 
-    private static Stream<Arvosana> valinnaistenArvosanojenParasArvosanaSekvenssi(List<List<Arvosana>> vaihtoehdot) {
-        return vaihtoehdot.stream()
+    private static Stream<Arvosana> parhaanSuorituksenArvosanat(List<List<Arvosana>> suoritustenArvosanat) {
+        return suoritustenArvosanat.stream()
                 .sorted((v, w) -> {
                     Fraction minusOne = Fraction.ONE.negate();
                     int r = keskiarvo(w).orElse(minusOne).compareTo(keskiarvo(v).orElse(minusOne));
@@ -65,14 +72,11 @@ public class ArvosanaToAvainArvoDTOConverter {
                 .findFirst().get().stream();
     }
 
-    private static List<Arvosana> filtteroiVainNumeerisetArvot(List<Arvosana> l) {
+    private static List<Integer> numeerisetArvosanat(List<Arvosana> l) {
         return l.stream()
                 .filter(a -> !SUORITUSMERKINTA.equalsIgnoreCase(a.getArvio().getArvosana()))
+                .map(a -> Integer.parseInt(a.getArvio().getArvosana()))
                 .collect(Collectors.toList());
-    }
-
-    private static Stream<Arvosana> bestArvosanaInValinnaisetArvosanat(Stream<List<List<Arvosana>>> valinnaisetArvosanat) {
-        return valinnaisetArvosanat.flatMap(ArvosanaToAvainArvoDTOConverter::valinnaistenArvosanojenParasArvosanaSekvenssi);
     }
 
     private static Function<Arvosana, String> groupArvosanat(final List<Arvosana> arvosanat) {
@@ -90,55 +94,52 @@ public class ArvosanaToAvainArvoDTOConverter {
         };
     }
 
-    private static Stream<List<List<Arvosana>>> valinnaisetAineittain(List<SuoritusJaArvosanat> suoritukset) {
-        return suoritukset.stream()
-                .flatMap(s -> s.getArvosanat().stream()
-                        .filter(Arvosana::isValinnainen)
-                        .collect(Collectors.groupingBy(groupArvosanat(s.getArvosanat())))
-                        .values().stream().map(a -> {
-                            // Normalisoi indeksin
-                            StreamUtils.zipWithIndex(a.stream()
-                                    .sorted((a0, a1) -> a0.getJarjestys().compareTo(a1.getJarjestys())))
-                                    .forEach(zip -> zip.getValue().setJarjestys((int) zip.getIndex() + 1));
-                            return a;
-                        }))
-                .collect(Collectors.groupingBy(l -> l.iterator().next().getAine()))
-                .values().stream();
+    private static Map<String, List<List<Arvosana>>> aineidenValinnaisetArvosanatSuorituksittain(Stream<SuoritusJaArvosanat> suoritukset) {
+        return suoritukset
+                .flatMap(s -> {
+                    Map<String, List<Arvosana>> aineittain = arvosanatAineittain(valinnaisetArvosanat(s));
+                    aineittain.values().forEach(aineenArvosanat -> normalisoiJarjestys(aineenArvosanat));
+                    return aineittain.entrySet().stream();
+                })
+                .collect(Collectors.groupingBy(e -> e.getKey(), Collectors.mapping(e -> e.getValue(), Collectors.toList())));
     }
 
-    private static Stream<List<Arvosana>> ryhmitaSamatArvosanatKeskenaan(Stream<Arvosana> suoritukset) {
-        final List<Arvosana> arvosanat = suoritukset.collect(Collectors.toList());
-        return arvosanat.stream().collect(Collectors.groupingBy(groupArvosanat(arvosanat))).values().stream();
+    private static void normalisoiJarjestys(List<Arvosana> arvosanat) {
+        StreamUtils.zipWithIndex(arvosanat.stream().sorted((a0, a1) -> a0.getJarjestys().compareTo(a1.getJarjestys())))
+                .forEach(zip -> zip.getValue().setJarjestys((int) zip.getIndex() + 1));
     }
 
-    private static Stream<Arvosana> arvosanat(Stream<SuoritusJaArvosanat> suoritukset) {
-        return suoritukset.flatMap(s -> s.getArvosanat().stream());
+    private static Map<String, List<Arvosana>> arvosanatAineittain(Stream<Arvosana> arvosanatS) {
+        List<Arvosana> arvosanat = arvosanatS.collect(Collectors.toList());
+        return arvosanat.stream().collect(Collectors.groupingBy(groupArvosanat(arvosanat)));
     }
 
-    private static Stream<Arvosana> arvosanatIlmanValinnaisiaArvosanoja(List<SuoritusJaArvosanat> suoritukset) {
-        return arvosanat(suoritukset.stream()).filter(a -> !a.isValinnainen());
+    private static Stream<Arvosana> varsinaisetArvosanat(Stream<SuoritusJaArvosanat> suoritukset) {
+        return suoritukset.flatMap(s -> s.getArvosanat().stream()).filter(a -> !a.isValinnainen());
     }
 
-    private static Stream<AvainArvoDTO> arvosanaToAvainArvo(Stream<Arvosana> arvosanat, String prefix, String suffix) {
-        return arvosanat.flatMap(arvosana -> {
-            AvainArvoDTO a0;
-            if (arvosana.isValinnainen()) {
-                a0 = new AvainArvoDTO(prefix + arvosana.getAine() + VALINNAINEN + arvosana.getJarjestys() + suffix, arvosana.getArvio().getArvosana());
-            } else {
-                a0 = new AvainArvoDTO(prefix + arvosana.getAine() + suffix, arvosana.getArvio().getArvosana());
-            }
-            if (SUORITUSMERKINTA.equals(a0.getArvo())) {
-                a0.setAvain(a0.getAvain() + SUORITETTU);
-                a0.setArvo("true");
-            }
-            if (arvosana.getLisatieto() != null) {
-                return Stream.of(a0, new AvainArvoDTO(prefix + arvosana.getAine() + suffix + OPPIAINE, arvosana.getLisatieto()));
-            }
-            return Stream.of(a0);
-        });
+    private static Stream<Arvosana> valinnaisetArvosanat(SuoritusJaArvosanat suoritus) {
+        return suoritus.getArvosanat().stream().filter(Arvosana::isValinnainen);
     }
 
-    private static Stream<Arvosana> bestArvosana(List<Arvosana> arvosanat) {
+    private static Stream<AvainArvoDTO> arvosanaToAvainArvo(Arvosana arvosana, String prefix, String suffix) {
+        AvainArvoDTO a;
+        if (arvosana.isValinnainen()) {
+            a = new AvainArvoDTO(prefix + arvosana.getAine() + VALINNAINEN + arvosana.getJarjestys() + suffix, arvosana.getArvio().getArvosana());
+        } else {
+            a = new AvainArvoDTO(prefix + arvosana.getAine() + suffix, arvosana.getArvio().getArvosana());
+        }
+        if (SUORITUSMERKINTA.equals(a.getArvo())) {
+            a.setAvain(a.getAvain() + SUORITETTU);
+            a.setArvo("true");
+        }
+        if (arvosana.getLisatieto() != null) {
+            return Stream.of(a, new AvainArvoDTO(prefix + arvosana.getAine() + suffix + OPPIAINE, arvosana.getLisatieto()));
+        }
+        return Stream.of(a);
+    }
+
+    private static Arvosana parasArvosana(List<Arvosana> arvosanat) {
         TreeSet<Arvosana> arvosanaSet = new TreeSet<>((c0, c1) -> {
             if (!ofNullable(c0.getArvio().getAsteikko()).equals(ofNullable(c1.getArvio().getAsteikko()))) {
                 RuntimeException asteikotEiTasmaa = new RuntimeException(String.format("Asteikot ei täsmää: %s %s", c0.getArvio().getAsteikko(), c1.getArvio().getAsteikko()));
@@ -158,6 +159,6 @@ public class ArvosanaToAvainArvoDTOConverter {
             return i1.compareTo(i0);
         });
         arvosanaSet.addAll(arvosanat);
-        return Stream.of(arvosanaSet.first());
+        return arvosanaSet.first();
     }
 }
