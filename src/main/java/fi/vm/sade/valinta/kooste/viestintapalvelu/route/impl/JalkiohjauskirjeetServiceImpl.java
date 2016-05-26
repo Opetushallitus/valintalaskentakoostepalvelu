@@ -32,14 +32,14 @@ import static rx.observables.BlockingObservable.from;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiAsiointikielella;
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiLahetetaanSahkoposti;
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiLahetetaanIPosti;
 
 @Service
 public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
@@ -101,34 +101,45 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
 
+    private HaunResurssit filteroiSahkopostiVastaanottajat(String asiointikieli, HaunResurssit haunResurssit) {
+        return filtteroiLahetetaanSahkoposti(filtteroiAsiointikielella(asiointikieli, haunResurssit));
+    }
+
+    private HaunResurssit filteroiIPostiVastaanottajat(String asiointikieli, HaunResurssit haunResurssit) {
+        return filtteroiLahetetaanIPosti(filtteroiAsiointikielella(asiointikieli, haunResurssit));
+    }
+
+    private HaunResurssit haeHaunResurssit(Collection<HakijaDTO> hakijat, JalkiohjauskirjeDTO kirje, boolean sahkoposti) {
+        if (hakijat.isEmpty()) {
+            LOG.error("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
+            throw new RuntimeException("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
+        }
+
+        List<Hakemus> hakemukset;
+        Collection<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
+        try {
+            LOG.info("Haetaan hakemukset!");
+            //TODO: Muuta aidosti asynkroniseksi
+            hakemukset = from(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)).first();
+        } catch (Throwable e) {
+            LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
+            throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
+        }
+        String kieli = KieliUtil.normalisoiKielikoodi(Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
+        if(sahkoposti) {
+            return filteroiSahkopostiVastaanottajat(kieli, new HaunResurssit(new ArrayList<>(hakijat), hakemukset));
+        } else {
+            return filteroiIPostiVastaanottajat(kieli, new HaunResurssit(new ArrayList<>(hakijat), hakemukset));
+        }
+    }
+
+
     private Action4<HakijaPaginationObject, Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {
         return (kaikkiHakijat, hakijat, prosessi, kirje) -> {
-            if (hakijat.isEmpty()) {
-                LOG.error("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
-                throw new RuntimeException("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
-            }
-
-            List<Hakemus> hakemukset;
-            Collection<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
-            try {
-                LOG.info("Haetaan hakemukset!");
-                //TODO: Muuta aidosti asynkroniseksi
-                hakemukset = from(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)).first();
-            } catch (Throwable e) {
-                LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
-                throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
-            }
-            String kieli = KieliUtil.normalisoiKielikoodi(Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
-            Collection<Hakemus> yksikielisetHakemukset = hakemukset.stream()
-                    .filter(h -> kieli.equals(new HakemusWrapper(h).getAsiointikieli()))
-                    .collect(Collectors.toList());
-            Set<String> yksikielisetHakemusOids = yksikielisetHakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet());
-            Collection<HakijaDTO> yksikielisetHakijat = hakijat.stream()
-                    .filter(h -> yksikielisetHakemusOids.contains(h.getHakemusOid()))
-                    .collect(Collectors.toList());
-            final Map<String, MetaHakukohde> metaKohteet = getStringMetaHakukohdeMap(yksikielisetHakijat);
-            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(kirje.getKielikoodi(), yksikielisetHakijat,
-                    yksikielisetHakemukset, metaKohteet, kirje.getHakuOid(), kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag());
+            HaunResurssit haunResurssit = haeHaunResurssit(hakijat, kirje, false);
+            final Map<String, MetaHakukohde> metaKohteet = getStringMetaHakukohdeMap(haunResurssit.hakijat);
+            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(kirje.getKielikoodi(), haunResurssit.hakijat,
+                    haunResurssit.hakemukset, metaKohteet, kirje.getHakuOid(), kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag());
             try {
                 if (prosessi.isKeskeytetty()) {
                     LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta! (Timeout 30min)");
