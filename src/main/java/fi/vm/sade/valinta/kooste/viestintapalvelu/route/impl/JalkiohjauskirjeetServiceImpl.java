@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import static rx.Observable.from;
 import com.google.common.collect.Sets;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
@@ -66,22 +65,21 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     @Override
     public void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids) {
-        from(
-                sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid()))
-                .subscribeOn(Schedulers.newThread())
-                .subscribe(
-                        hakijat -> {
-                            // VIALLISET DATA POIS FILTTEROINTI
-                            Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
-                            //WHITELIST FILTTEROINTI
-                            Set<String> whitelist = Sets.newHashSet(hakemusOids);
-                            Collection<HakijaDTO> whitelistinJalkeen = vainHakeneetJalkiohjattavat
-                                    .stream()
-                                    .filter(h -> whitelist.contains(h.getHakemusOid()))
-                                    .collect(Collectors.toList());
-                            muodostaKirjeet().call(hakijat, whitelistinJalkeen, prosessi, jalkiohjauskirjeDTO);
-                        },
-                        throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
+            sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
+            .subscribeOn(Schedulers.newThread())
+            .subscribe(
+                    hakijat -> {
+                        // VIALLISET DATA POIS FILTTEROINTI
+                        Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
+                        //WHITELIST FILTTEROINTI
+                        Set<String> whitelist = Sets.newHashSet(hakemusOids);
+                        Collection<HakijaDTO> whitelistinJalkeen = vainHakeneetJalkiohjattavat
+                                .stream()
+                                .filter(h -> whitelist.contains(h.getHakemusOid()))
+                                .collect(Collectors.toList());
+                        muodostaKirjeet().call(hakijat, whitelistinJalkeen, prosessi, jalkiohjauskirjeDTO);
+                    },
+                    throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
 
     void handleKoulutuspaikattomienHakuError(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, Throwable throwable) {
@@ -91,16 +89,15 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     @Override
     public void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
-        from(
-                sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid()))
-                .subscribeOn(Schedulers.newThread())
-                .subscribe(
-                        hakijat -> {
-                            //VIALLISET DATA POIS FILTTEROINTI
-                            Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
-                            muodostaKirjeet().call(hakijat, vainHakeneetJalkiohjattavat, prosessi, jalkiohjauskirjeDTO);
-                        },
-                        throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
+            sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
+            .subscribeOn(Schedulers.newThread())
+            .subscribe(
+                    hakijat -> {
+                        //VIALLISET DATA POIS FILTTEROINTI
+                        Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
+                        muodostaKirjeet().call(hakijat, vainHakeneetJalkiohjattavat, prosessi, jalkiohjauskirjeDTO);
+                    },
+                    throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
 
     private Action4<HakijaPaginationObject, Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {

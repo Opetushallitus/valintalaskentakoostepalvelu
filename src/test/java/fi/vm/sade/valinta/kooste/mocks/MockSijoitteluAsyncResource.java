@@ -97,7 +97,7 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
-    public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
+    public Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
         throw new UnsupportedOperationException();
     }
 
