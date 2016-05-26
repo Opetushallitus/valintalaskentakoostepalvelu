@@ -140,25 +140,25 @@ public class ArvosanaToAvainArvoDTOConverter {
     }
 
     private static Arvosana parasArvosana(List<Arvosana> arvosanat) {
-        TreeSet<Arvosana> arvosanaSet = new TreeSet<>((c0, c1) -> {
-            if (!ofNullable(c0.getArvio().getAsteikko()).equals(ofNullable(c1.getArvio().getAsteikko()))) {
-                RuntimeException asteikotEiTasmaa = new RuntimeException(String.format("Asteikot ei täsmää: %s %s", c0.getArvio().getAsteikko(), c1.getArvio().getAsteikko()));
-                LOG.error("", asteikotEiTasmaa);
-                throw asteikotEiTasmaa;
-            }
+        return arvosanat.stream().sorted((c0, c1) -> {
+            varmistaYhteensopivatAsteikot(c0, c1);
             if (SUORITUSMERKINTA.equals(c0.getArvio().getArvosana())) {
                 return 1;
             }
             if (SUORITUSMERKINTA.equals(c1.getArvio().getArvosana())) {
                 return -1;
             }
-            Integer i0 = 0;
-            Integer i1 = 0;
-            i0 = Integer.parseInt(c0.getArvio().getArvosana());
-            i1 = Integer.parseInt(c1.getArvio().getArvosana());
+            Integer i0 = Integer.parseInt(c0.getArvio().getArvosana());
+            Integer i1 = Integer.parseInt(c1.getArvio().getArvosana());
             return i1.compareTo(i0);
-        });
-        arvosanaSet.addAll(arvosanat);
-        return arvosanaSet.first();
+        }).findFirst().get();
+    }
+
+    private static void varmistaYhteensopivatAsteikot(Arvosana c0, Arvosana c1) {
+        if (!StringUtils.equals(c0.getArvio().getAsteikko(), c1.getArvio().getAsteikko())) {
+            String msg = String.format("Asteikot ei täsmää: %s %s", c0.getArvio().getAsteikko(), c1.getArvio().getAsteikko());
+            LOG.error(msg);
+            throw new RuntimeException(msg);
+        }
     }
 }
