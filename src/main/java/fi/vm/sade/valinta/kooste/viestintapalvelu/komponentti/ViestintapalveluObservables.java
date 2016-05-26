@@ -205,19 +205,19 @@ public class ViestintapalveluObservables {
                 hakijat.getResults().stream().collect(Collectors.groupingBy(ViestintapalveluObservables::hakutoiveMissaHakijaOnHyvaksyttyna)));
     }
 
-    private static HaunResurssit filtteroiAsiointikielella(String asiointkieli, HaunResurssit haunResurssit) {
+    public static HaunResurssit filtteroiAsiointikielella(String asiointkieli, HaunResurssit haunResurssit) {
         HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> asiointkieli.equals(new HakemusWrapper(hakemus).getAsiointikieli()));
         LOG.info("Asiointikielellä filtteröinnin jälkeen {} kpl", filteroidytResurssit.hakemukset.size());
         return filteroidytResurssit;
     }
 
-    private static HaunResurssit filtteroiLahetetaanSahkoposti(HaunResurssit haunResurssit) {
+    public static HaunResurssit filtteroiLahetetaanSahkoposti(HaunResurssit haunResurssit) {
         HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> StringUtils.isNotBlank(new HakemusWrapper(hakemus).getSahkopostiOsoite()));
         LOG.info("Sähköpostin vastaanottajia on {} kpl", filteroidytResurssit.hakemukset.size());
         return filteroidytResurssit;
     }
 
-    private static HaunResurssit filtteroiLahetetaanIPosti(HaunResurssit haunResurssit) {
+    public static HaunResurssit filtteroiLahetetaanIPosti(HaunResurssit haunResurssit) {
         HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> {
             HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
             return !hakemusWrapper.getVainSahkoinenViestinta() || StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite());
