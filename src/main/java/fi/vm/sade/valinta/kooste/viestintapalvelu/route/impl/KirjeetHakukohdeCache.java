@@ -25,9 +25,6 @@ public class KirjeetHakukohdeCache {
     private final Logger LOG = LoggerFactory.getLogger(KirjeetHakukohdeCache.class);
     private final Cache<String, MetaHakukohde> metaHakukohdeCache = CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
 
-    //@Autowired
-    //private fi.vm.sade.valinta.kooste.external.resource.haku.HakukohdeV1Resource hakukohdeV1Resource;
-
     @Autowired
     private TarjontaAsyncResource hakuV1AsyncResource;
 
@@ -37,7 +34,6 @@ public class KirjeetHakukohdeCache {
                 () -> {
                     //TODO Tee tästä aidosti asynkroninen!
                     HakukohdeV1RDTO hakukohde = from(hakuV1AsyncResource.haeHakukohde(hakukohdeOid)).first();
-                    //HakukohdeV1RDTO hakukohde = hakukohdeV1Resource.findByOid(hakukohdeOid).getResult();
                     Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
                     String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
                     LOG.debug("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
