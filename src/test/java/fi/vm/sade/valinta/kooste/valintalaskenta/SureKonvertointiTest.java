@@ -33,11 +33,6 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class SureKonvertointiTest {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SureKonvertointiTest.class);
@@ -60,10 +55,6 @@ public class SureKonvertointiTest {
 
 		List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(o.getOppijanumero(), o.getSuoritukset(), new HakemusDTO(), pmetrit);
 
-		aa.stream().forEach(a -> {
-			LOG.info("{}\t\t{}", a.getAvain(), a.getArvo());
-		});
-
 		String a1ESAinetunniste = aa.stream()
 				.filter((AvainArvoDTO a) -> a.getAvain().startsWith("PK_A1") && "ES".equals(a.getArvo()))
 				.findAny().get()
@@ -79,54 +70,6 @@ public class SureKonvertointiTest {
 		Assert.assertTrue("PK_A12_VAL1 löytyy",
 				aa.stream().filter(a -> a.getAvain().equals("PK_A12_VAL1")).count() == 1L);
 	}
-
-	@Ignore
-	@Test
-	public void testaaSureKonvertointi() throws JsonSyntaxException,
-			IOException {
-		List<Oppija> oppijat = new Gson().fromJson(IOUtils
-				.toString(new ClassPathResource("oppijat.json")
-						.getInputStream()), new TypeToken<List<Oppija>>() {
-		}.getType());
-		for (Oppija o : oppijat) {
-			if (!o.getSuoritukset().isEmpty()) {
-				LOG.info("{}", new GsonBuilder().setPrettyPrinting().create()
-						.toJson(o.getSuoritukset()));
-				LOG.info(
-						"###\r\n{}",
-						new GsonBuilder()
-								.setPrettyPrinting()
-								.create()
-								.toJson(OppijaToAvainArvoDTOConverter
-										.convert(o.getOppijanumero(), o.getSuoritukset(), new HakemusDTO(),null)));
-
-			}
-		}
-	}
-
-    @Test
-    public void testaaUseampiLisaopetusKonvertointi() throws JsonSyntaxException,
-            IOException {
-        List<Oppija> oppijat = new Gson().fromJson(IOUtils
-                .toString(new ClassPathResource("monta_lisaopetusta.json")
-                        .getInputStream()), new TypeToken<List<Oppija>>() {
-        }.getType());
-        for (Oppija o : oppijat) {
-            if (!o.getSuoritukset().isEmpty()) {
-                LOG.info("{}", new GsonBuilder().setPrettyPrinting().create()
-                        .toJson(o.getSuoritukset()));
-                LOG.info(
-                        "###\r\n{}",
-                        new GsonBuilder()
-                                .setPrettyPrinting()
-                                .create()
-                                .toJson(OppijaToAvainArvoDTOConverter
-                                        .convert(o.getOppijanumero(), o.getSuoritukset(), new HakemusDTO(),null)));
-
-            }
-        }
-    }
-
 
     @Test
     public void testaaSureKonvertointiKaikkiAIneet() throws JsonSyntaxException,
