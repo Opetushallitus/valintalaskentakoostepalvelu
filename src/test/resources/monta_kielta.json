@@ -85,6 +85,19 @@
             "valinnainen": false,
             "myonnetty": "01.01.2014",
             "source": "1.2.246.562.24.30988735768"
+          },
+          {
+            "id": "550fabf3-ba92-40e0-8749-6725c019bfb8",
+            "suoritus": "23189712-aabd-48c2-9df5-269f92194bf8",
+            "arvio": {
+              "arvosana": "10",
+              "asteikko": "4-10"
+            },
+            "aine": "B13",
+            "lisatieto": "EN",
+            "valinnainen": false,
+            "myonnetty": "01.01.2014",
+            "source": "1.2.246.562.24.30988735768"
           }
         ]
       }

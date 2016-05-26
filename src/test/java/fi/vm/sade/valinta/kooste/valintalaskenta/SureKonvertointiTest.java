@@ -64,8 +64,14 @@ public class SureKonvertointiTest {
 			LOG.info("{}\t\t{}", a.getAvain(), a.getArvo());
 		});
 
-		Assert.assertTrue("Peruskoulutuksen A12 oppiaine on ES",
-				aa.stream().filter(a -> "PK_A12_OPPIAINE".equals(a.getAvain()) && "ES".equals(a.getArvo())).count() == 1L);
+		String a1ESAinetunniste = aa.stream()
+				.filter((AvainArvoDTO a) -> a.getAvain().startsWith("PK_A1") && "ES".equals(a.getArvo()))
+				.findAny().get()
+				.getAvain().replace("_OPPIAINE", "");
+		Assert.assertEquals("5",
+				aa.stream().filter(a -> a1ESAinetunniste.equals(a.getAvain())).findAny().get().getArvo());
+		Assert.assertEquals("6",
+				aa.stream().filter(a -> (a1ESAinetunniste + "_VAL1").equals(a.getAvain())).findAny().get().getArvo());
 
 		Assert.assertEquals("HI:lla on lisäksi kaksi valinnaista", 3L,
 				aa.stream().filter(a -> a.getAvain().startsWith("PK_HI")).count());
@@ -203,10 +209,23 @@ public class SureKonvertointiTest {
 		hakemus.setHakemusoid("1.2.246.562.11.00000000001");
 		List<AvainArvoDTO> arvot = OppijaToAvainArvoDTOConverter.convert(o.getOppijanumero(), o.getSuoritukset(), hakemus, null);
 
-		assertEquals(ImmutableSet.of(
-				new AvainArvoDTO("PK_B1", "10"), new AvainArvoDTO("PK_B1_OPPIAINE", "SV"),
-				new AvainArvoDTO("PK_B13", "10"), new AvainArvoDTO("PK_B13_OPPIAINE", "EN")
-		), ImmutableSet.copyOf(arvot));
+		Assert.assertEquals(4, arvot.size());
+		String b1SVAinetunniste = arvot.stream()
+				.filter(a -> a.getAvain().startsWith("PK_B1") && "SV".equals(a.getArvo()))
+				.findAny().get()
+				.getAvain().replace("_OPPIAINE", "");
+		String b1ENAinetunniste = arvot.stream()
+				.filter(a -> a.getAvain().startsWith("PK_B1") && "EN".equals(a.getArvo()))
+				.findAny().get()
+				.getAvain().replace("_OPPIAINE", "");
+		assertEquals("10",
+				arvot.stream().filter(a -> b1SVAinetunniste.equals(a.getAvain())).findAny().get().getArvo());
+		assertEquals("10",
+				arvot.stream().filter(a -> b1ENAinetunniste.equals(a.getAvain())).findAny().get().getArvo());
 	}
 
+	@Test
+	public void testEriAlinumeroillaOlevatSamatKieletYhdistetään() {
+
+	}
 }
