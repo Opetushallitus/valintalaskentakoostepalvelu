@@ -217,7 +217,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         HttpResource http = new HttpResource(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet");
         WebClient client = http.getWebClient()
                 .query("hakuOid", HAKU1)
-                .query("asiointikieli", "SV")
+                .query("asiointikieli", asiointikieli)
                 .query("letterBodyText","letterBodyText");
         if(null != sahkoposti) {
             client.query("sahkoposti", sahkoposti);
