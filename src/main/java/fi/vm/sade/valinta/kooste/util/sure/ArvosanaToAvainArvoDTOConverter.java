@@ -34,10 +34,10 @@ public class ArvosanaToAvainArvoDTOConverter {
         tarkistaOppiaineetSuorituksissa(suoritukset, prefix, suffix, oppijaOid);
         return Stream.concat(
                 aineidenValinnaisetArvosanatSuorituksittain(suoritukset.stream()).values().stream()
-                        .flatMap(aineenArvosanatSuorituksittain -> parhaanSuorituksenArvosanat(aineenArvosanatSuorituksittain))
-                        .flatMap(a -> arvosanaToAvainArvo(a, prefix, suffix)),
+                        .flatMap(aineenArvosanatSuorituksittain -> parhaanSuorituksenArvosanat(aineenArvosanatSuorituksittain)),
                 arvosanatAineittain(varsinaisetArvosanat(suoritukset.stream())).values().stream()
-                        .flatMap(aineenArvosanat -> arvosanaToAvainArvo(parasArvosana(aineenArvosanat), prefix, suffix)))
+                        .map(aineenArvosanat -> parasArvosana(aineenArvosanat)))
+                .flatMap(a -> arvosanaToAvainArvo(a, prefix, suffix))
                 .collect(Collectors.toSet());
     }
 
