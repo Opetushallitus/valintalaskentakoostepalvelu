@@ -161,7 +161,7 @@ public class SureKonvertointiTest {
 				.filter(a -> a.getAvain().startsWith("PK_B1") && "EN".equals(a.getArvo()))
 				.findAny().get()
 				.getAvain().replace("_OPPIAINE", "");
-		assertEquals("10",
+		assertEquals("9",
 				arvot.stream().filter(a -> b1SVAinetunniste.equals(a.getAvain())).findAny().get().getArvo());
 		assertEquals("10",
 				arvot.stream().filter(a -> b1ENAinetunniste.equals(a.getAvain())).findAny().get().getArvo());
