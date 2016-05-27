@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -11,6 +12,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
+import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
@@ -168,7 +170,29 @@ public class SureKonvertointiTest {
 	}
 
 	@Test
-	public void testEriAlinumeroillaOlevatSamatKieletYhdistetään() {
+	public void testSuoritusmerkintaHuononpiKuinNumeerinen() {
+		ArvosanaToAvainArvoDTOConverter.OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
+				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "4", "4-10"),
+				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "S", "4-10")
+		));
+		assertEquals("4", a.arvosana);
+	}
 
+	@Test(expected = RuntimeException.class)
+	public void testEriAsteikkojenArvosanojaEiVertailla() {
+		ArvosanaToAvainArvoDTOConverter.OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
+				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "4", "4-10"),
+				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "4", "0-5")
+		));
+	}
+
+	@Test
+	public void testParasArvosanaNumeerisestiIsoin() {
+		ArvosanaToAvainArvoDTOConverter.OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
+				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "4", "4-10"),
+				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "6", "4-10"),
+				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "5", "4-10")
+		));
+		assertEquals("6", a.arvosana);
 	}
 }

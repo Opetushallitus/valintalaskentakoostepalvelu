@@ -114,7 +114,7 @@ public class ArvosanaToAvainArvoDTOConverter {
         return suoritus.stream().filter(a -> a.valinnainen);
     }
 
-    private static OppiaineArvosana parasArvosana(List<OppiaineArvosana> arvosanat) {
+    public static OppiaineArvosana parasArvosana(List<OppiaineArvosana> arvosanat) {
         return arvosanat.stream().sorted((c0, c1) -> {
             varmistaYhteensopivatAsteikot(c0, c1);
             if (SUORITUSMERKINTA.equals(c0.arvosana)) {
@@ -154,7 +154,7 @@ public class ArvosanaToAvainArvoDTOConverter {
         return Stream.of(a);
     }
 
-    private static class OppiaineArvosana {
+    public static class OppiaineArvosana {
         public final String aine;
         public final String lisatieto;
         public final boolean valinnainen;
