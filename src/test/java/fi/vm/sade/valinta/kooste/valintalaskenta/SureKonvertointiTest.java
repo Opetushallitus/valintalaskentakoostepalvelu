@@ -1,18 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
+import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter.OppiaineArvosana;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
@@ -20,7 +17,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +24,13 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class SureKonvertointiTest {
 	private static final Logger LOG = LoggerFactory
@@ -171,28 +168,68 @@ public class SureKonvertointiTest {
 
 	@Test
 	public void testSuoritusmerkintaHuononpiKuinNumeerinen() {
-		ArvosanaToAvainArvoDTOConverter.OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
-				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "4", "4-10"),
-				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "S", "4-10")
+		OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
+				new OppiaineArvosana("", "", false, 1, "4", "4-10"),
+				new OppiaineArvosana("", "", false, 1, "S", "4-10")
 		));
 		assertEquals("4", a.arvosana);
 	}
 
 	@Test(expected = RuntimeException.class)
 	public void testEriAsteikkojenArvosanojaEiVertailla() {
-		ArvosanaToAvainArvoDTOConverter.OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
-				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "4", "4-10"),
-				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "4", "0-5")
+		OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
+				new OppiaineArvosana("", "", false, 1, "4", "4-10"),
+				new OppiaineArvosana("", "", false, 1, "4", "0-5")
 		));
 	}
 
 	@Test
 	public void testParasArvosanaNumeerisestiIsoin() {
-		ArvosanaToAvainArvoDTOConverter.OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
-				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "4", "4-10"),
-				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "6", "4-10"),
-				new ArvosanaToAvainArvoDTOConverter.OppiaineArvosana("", "", false, 1, "5", "4-10")
+		OppiaineArvosana a = ArvosanaToAvainArvoDTOConverter.parasArvosana(ImmutableList.of(
+				new OppiaineArvosana("", "", false, 1, "4", "4-10"),
+				new OppiaineArvosana("", "", false, 1, "6", "4-10"),
+				new OppiaineArvosana("", "", false, 1, "5", "4-10")
 		));
 		assertEquals("6", a.arvosana);
+	}
+
+	@Test
+	public void testOppiainenumeroKorvataanOppiaineenNimellä() {
+		OppiaineArvosana a = new OppiaineArvosana(new Arvosana("testid", "testsuoritus", "B12", false, "testmyönnetty",
+				"testsource", new HashMap<>(), new Arvio(), "EN"));
+		OppiaineArvosana b = new OppiaineArvosana(new Arvosana("testid", "testsuoritus", "B1", false, "testmyönnetty",
+				"testsource", new HashMap<>(), new Arvio(), "SV"));
+		assertEquals("B1EN", a.aine);
+		assertEquals("B1SV", b.aine);
+	}
+
+	@Test
+	public void testOppiainenumeroinninPalautusAntaaSamanNumeronSamanAineenArvosanoille() {
+		OppiaineArvosana a = new OppiaineArvosana(new Arvosana("testid", "testsuoritus", "B1", true, "testmyönnetty",
+				"testsource", new HashMap<>(), new Arvio(), "EN"));
+		OppiaineArvosana b = new OppiaineArvosana(new Arvosana("testid", "testsuoritus", "B12", true, "testmyönnetty",
+				"testsource", new HashMap<>(), new Arvio(), "EN"));
+		OppiaineArvosana c = new OppiaineArvosana(new Arvosana("testid", "testsuoritus", "B13", true, "testmyönnetty",
+				"testsource", new HashMap<>(), new Arvio(), "SV"));
+		OppiaineArvosana d = new OppiaineArvosana(new Arvosana("testid", "testsuoritus", "B14", true, "testmyönnetty",
+				"testsource", new HashMap<>(), new Arvio(), "SV"));
+		OppiaineArvosana e = new OppiaineArvosana(new Arvosana("testid", "testsuoritus", "A1", true, "testmyönnetty",
+				"testsource", new HashMap<>(), new Arvio(), "EN"));
+		List<OppiaineArvosana> r = ArvosanaToAvainArvoDTOConverter.palautaAinenumerointi(Stream.of(a, b, c, d, e))
+				.collect(Collectors.toList());
+		List<OppiaineArvosana> en = r.stream().filter(o -> o.aine.startsWith("B") && "EN".equals(o.lisatieto)).collect(Collectors.toList());
+		List<OppiaineArvosana> sv = r.stream().filter(o -> o.aine.startsWith("B") && "SV".equals(o.lisatieto)).collect(Collectors.toList());
+		List<OppiaineArvosana> aEn = r.stream().filter(o -> o.aine.startsWith("A") && "EN".equals(o.lisatieto)).collect(Collectors.toList());
+		assertEquals(2, en.size());
+		assertEquals(2, sv.size());
+		assertEquals(1, aEn.size());
+		String enAine = en.stream().findAny().get().aine;
+		String svAine = sv.stream().findAny().get().aine;
+		String aEnAine = aEn.stream().findAny().get().aine;
+		assertFalse(enAine.equals(svAine));
+		assertFalse(svAine.equals(aEnAine));
+		assertFalse(enAine.equals(aEnAine));
+		assertTrue(en.stream().allMatch(o -> enAine.equals(o.aine)));
+		assertTrue(sv.stream().allMatch(o -> svAine.equals(o.aine)));
 	}
 }

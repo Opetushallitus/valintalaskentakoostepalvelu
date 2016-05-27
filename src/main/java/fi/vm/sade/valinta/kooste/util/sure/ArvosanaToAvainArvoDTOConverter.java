@@ -39,7 +39,7 @@ public class ArvosanaToAvainArvoDTOConverter {
                 .collect(Collectors.toSet());
     }
 
-    private static Stream<OppiaineArvosana> palautaAinenumerointi(Stream<OppiaineArvosana> arvosanat) {
+    public static Stream<OppiaineArvosana> palautaAinenumerointi(Stream<OppiaineArvosana> arvosanat) {
         Map<String, String> oppiainenumero = new HashMap<>();
         Map<String, Integer> vapaaOppiainenumero = new HashMap<>();
 
