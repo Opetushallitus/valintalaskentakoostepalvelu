@@ -102,9 +102,8 @@ public class ArvosanaToAvainArvoDTOConverter {
                 .forEach(zip -> zip.getValue().jarjestys = Math.toIntExact(zip.getIndex() + 1));
     }
 
-    private static Map<String, List<OppiaineArvosana>> arvosanatAineittain(Stream<OppiaineArvosana> arvosanatS) {
-        List<OppiaineArvosana> arvosanat = arvosanatS.collect(Collectors.toList());
-        return arvosanat.stream().collect(Collectors.groupingBy(a -> a.aine));
+    private static Map<String, List<OppiaineArvosana>> arvosanatAineittain(Stream<OppiaineArvosana> arvosanat) {
+        return arvosanat.collect(Collectors.groupingBy(a -> a.aine));
     }
 
     private static Stream<OppiaineArvosana> varsinaisetArvosanat(Stream<List<OppiaineArvosana>> suoritukset) {
