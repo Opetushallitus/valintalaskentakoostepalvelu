@@ -6,6 +6,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
@@ -65,6 +66,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
         mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
         mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV", null);
         pollAndAssertDokumenttiProsessi(dokumenttiId);
@@ -86,6 +88,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
         mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
         mockLetterKutsut(".*010111A321.*010111A123.*|.*010111A123.*010111A321.*");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV", null);
         pollAndAssertDokumenttiProsessi(dokumenttiId);
@@ -107,6 +110,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
         mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
         mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV", null);
         pollAndAssertDokumenttiProsessi(dokumenttiId);
@@ -129,6 +133,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
         mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
         mockLetterKutsut("^(?!.*010111A123).*010111A321.*$");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV", true);
         pollAndAssertDokumenttiProsessi(dokumenttiId);
@@ -152,6 +157,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
         mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
         mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV", false);
         pollAndAssertDokumenttiProsessi(dokumenttiId);
@@ -175,6 +181,31 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
         mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
+        mockLetterKutsut(".*010111A321.*010111A123.*|.*010111A123.*010111A321.*");
+        String dokumenttiId = makeCallAndReturnDokumenttiId("SV", false);
+        pollAndAssertDokumenttiProsessi(dokumenttiId);
+    }
+
+    @Test
+    public void testJalkiohjauskirjeetIPostiToinenAste() throws InterruptedException {
+        mockMolemmatHylattyKutsu();
+        mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
+                hakemus()
+                        .setOid(HAKEMUS1)
+                        .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A123")
+                        .build(),
+                hakemus()
+                        .setOid(HAKEMUS2)
+                        .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A321")
+                        .setVainSahkoinenViestinta(true)
+                        .setSahkoposti("testi@sahkoposti.fi")
+                        .build()
+        ));
+        mockHakukohde1Kutsu();
+        mockHaku1KutsuToinenAste();
         mockLetterKutsut(".*010111A321.*010111A123.*|.*010111A123.*010111A321.*");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV", false);
         pollAndAssertDokumenttiProsessi(dokumenttiId);
@@ -236,6 +267,19 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         hk.setOpetusKielet(Sets.newHashSet("FI"));
         hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
         mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1/", new Result(hk));
+    }
+
+    private void mockHaku1Kutsu() {
+        HakuV1RDTO haku = new HakuV1RDTO();
+        haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(haku));
+
+    }
+
+    private void mockHaku1KutsuToinenAste() {
+        HakuV1RDTO haku = new HakuV1RDTO();
+        haku.setKohdejoukkoUri("haunkohdejoukko_11");
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(haku));
 
     }
 
