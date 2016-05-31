@@ -18,12 +18,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import rx.Observable;
 import rx.functions.Action1;
-
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -73,6 +74,47 @@ public class OppijanSuorituksetProxyResource {
             asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
         });
     }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+    @POST
+    @Path("/suorituksetByHakemusOids/hakuOid/{hakuOid}")
+    public void getSuoritukset(
+            @PathParam("hakuOid") String hakuOid,
+            @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
+            List<String> hakemusOids,
+            @Suspended final AsyncResponse asyncResponse) {
+
+        asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler(handler -> {
+            LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{hakuOid}", hakuOid);
+            handler.resume(Response.serverError()
+                    .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
+                    .build());
+        });
+
+        resolveHakemusDTOs(hakuOid, hakemusOids, fetchEnsikertalaisuus,
+                (hakemusDTOs -> {
+                    List<Map<String, String>> listOfMaps = hakemusDTOs.stream()
+                            .map(h -> h.getAvaimet().stream()
+                                    .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
+                                    .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)))
+                            .collect(Collectors.toList());
+
+                    Response resp = Response.ok()
+                                    .header("Content-Type", "application/json")
+                                    .entity(listOfMaps)
+                                    .build();
+
+                    asyncResponse.resume(resp);
+                }),
+                (exception -> {
+                    LOG.error("OppijanSuorituksetProxyResource exception", exception);
+                    asyncResponse.resume(Response.serverError().entity(exception.getMessage()).build());
+                })
+        );
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @POST
     @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskeljaOid/{opiskeljaOid}")
@@ -102,6 +144,7 @@ public class OppijanSuorituksetProxyResource {
             asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
         });
     }
+
     private void resolveHakemusDTO(String hakuOid, String opiskeljaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
                                    Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
         hakemusObservable.doOnError(throwableConsumer);
@@ -120,4 +163,56 @@ public class OppijanSuorituksetProxyResource {
                         fetchEnsikertalaisuus).get(0)
         ).subscribe(hakemusDTOConsumer, throwableConsumer);
     }
+
+    /**
+     * Fetch and combine data of Hakemus and Suoritus for a single Haku
+     *
+     * @param hakuOid Used for retrieving Haku from Tarjonta
+     * @param hakemusOids Used to limit Hakemukset from Hakuapp
+     * @param fetchEnsikertalaisuus Boolean flag if 'ensikertalaisuus' should be fetched
+     * @param onNext Action1 Handler for successful operation taking a List<HakemusDTO>
+     * @param onError Action1 Handler for exceptions
+     */
+    private void resolveHakemusDTOs(String hakuOid,
+                                    List<String> hakemusOids,
+                                    Boolean fetchEnsikertalaisuus,
+                                    Action1<List<HakemusDTO>> onNext,
+                                    Action1<Throwable> onError) {
+
+        Observable<HakuV1RDTO>    hakuObservable           = tarjontaAsyncResource.haeHaku(hakuOid).doOnError(onError);
+        Observable<List<Hakemus>> hakemuksetObservable     = applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids).doOnError(onError);
+        Observable<ParametritDTO> parametritObservable     = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(onError);
+
+        // Fetch Oppija (suoritusdata) for each personOid in hakemukset
+        Observable<List<String>>  opiskelijaOidsObservable = hakemuksetObservable.flatMap(Observable::from).map(Hakemus::getPersonOid).toList();
+        Observable<List<Oppija>>  suorituksetObservable    = opiskelijaOidsObservable.flatMap(Observable::from)
+                .flatMap(o -> {
+                            if (fetchEnsikertalaisuus) {
+                                return suoritusrekisteriAsyncResource.getSuorituksetByOppija(o, hakuOid).doOnError(onError);
+                            } else {
+                                return suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(o).doOnError(onError);
+                            }
+                        })
+                .toList();
+
+        /**
+         * Combine observables using zip
+         *
+         * When each have a value merge the data using a converter and return a list of HakemusDTOs
+         */
+        Observable.zip(hakuObservable, suorituksetObservable, hakemuksetObservable, parametritObservable,
+                (haku, suoritukset, hakemukset, parametrit) -> createHakemusDTOs(haku, suoritukset, hakemukset, parametrit, fetchEnsikertalaisuus)
+        ).subscribe(onNext, onError);
+    }
+
+    private List<HakemusDTO> createHakemusDTOs (HakuV1RDTO haku,
+                                                List<Oppija> suoritukset,
+                                                List<Hakemus> hakemukset,
+                                                ParametritDTO parametrit,
+                                                Boolean fetchEnsikertalaisuus) {
+
+        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, "", hakemukset, suoritukset, parametrit, fetchEnsikertalaisuus);
+    }
+
+
 }
