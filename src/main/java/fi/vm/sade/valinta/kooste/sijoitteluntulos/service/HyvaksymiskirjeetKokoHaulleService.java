@@ -4,6 +4,7 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
@@ -40,6 +41,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private final HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl;
     private final HakuParametritService hakuParametritService;
+    private final TarjontaAsyncResource hakuV1AsyncResource;
 
     @Autowired
     private HyvaksymiskirjeetKokoHaulleService(
@@ -48,7 +50,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
             SijoitteluAsyncResource sijoitteluAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             ViestintapalveluAsyncResource viestintapalveluAsyncResource,
-            HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl, HakuParametritService hakuParametritService) {
+            HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl, HakuParametritService hakuParametritService,
+            TarjontaAsyncResource hakuV1AsyncResource) {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
@@ -56,6 +59,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.hyvaksymiskirjeetServiceImpl = hyvaksymiskirjeetServiceImpl;
         this.hakuParametritService = hakuParametritService;
+        this.hakuV1AsyncResource = hakuV1AsyncResource;
     }
 
     public void muodostaSahkopostiHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
@@ -67,7 +71,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
     public void muodostaIPostiHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         muodostaHyvaksymiskirjeetKokoHaulle(() ->
                 ViestintapalveluObservables.haunResurssitIPosti(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
-                        (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(oids, ApplicationAsyncResource.DEFAULT_KEYS)),
+                        (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(oids, ApplicationAsyncResource.DEFAULT_KEYS),
+                        hakuV1AsyncResource.haeHaku(hakuOid)),
                 hakuOid, asiointikieli, prosessi, defaultValue);
     }
 

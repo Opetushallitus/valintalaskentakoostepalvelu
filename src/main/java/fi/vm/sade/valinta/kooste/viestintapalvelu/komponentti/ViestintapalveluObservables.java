@@ -5,6 +5,7 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -93,9 +94,20 @@ public class ViestintapalveluObservables {
     }
 
     public static Observable<HaunResurssit> haunResurssitIPosti(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset,
-                                                                    Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
-        return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
-                filtteroiLahetetaanIPosti(filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset))));
+                                                                Function<List<String>, Observable<List<Hakemus>>> haeHakemukset, Observable<HakuV1RDTO> haku) {
+        return haku.flatMap(haettuHaku -> {
+            if(isKorkeakouluhaku(haettuHaku)) {
+                return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
+                        filtteroiLahetetaanIPosti(filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset))));
+            } else {
+                return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
+                        filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset)));
+            }
+        });
+    }
+
+    private static boolean isKorkeakouluhaku(HakuV1RDTO haku) {
+        return haku.getKohdejoukkoUri().startsWith("haunkohdejoukko_12"); //"kohdejoukkoUri": "haunkohdejoukko_12#1"
     }
 
     public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Observable<HakijaPaginationObject> koulutuspaikalliset,
