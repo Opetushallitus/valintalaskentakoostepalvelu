@@ -6,6 +6,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
@@ -56,6 +57,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     public void testaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws InterruptedException {
 
         mockHakukohde1Kutsu();
+        mockKorkeakouluHaku1Kutsu();
         mockYksiHyvaksyttyKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
@@ -82,6 +84,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     public void testaaHyvaksymiskirjeenLuontiaKokoHaulleKaksiHyvaksyttyaHakija() throws InterruptedException {
 
         mockHakukohde1Kutsu();
+        mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
@@ -108,6 +111,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     public void testaaHyvaksymiskirjeenLuontiaKokoHaulleSuodataAsiointikielella() throws InterruptedException {
 
         mockHakukohde1Kutsu();
+        mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
@@ -161,6 +165,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     public void testaaHyvaksymiskirjeenLuontiaKokoHaulleIPosti1() throws InterruptedException {
 
         mockHakukohde1Kutsu();
+        mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
@@ -189,12 +194,44 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     public void testaaHyvaksymiskirjeenLuontiaKokoHaulleIPosti2() throws InterruptedException {
 
         mockHakukohde1Kutsu();
+        mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .build(),
+                hakemus()
+                        .setOid(HAKEMUS2)
+                        .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setVainSahkoinenViestinta(false)
+                        .setSahkoposti("testi@sahkoposti.fi")
+                        .build()
+        ));
+
+        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
+        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
+
+        mockLetterKutsut(".*HAKEMUS1.*HAKEMUS2.*|.*HAKEMUS2.*HAKEMUS1.*");
+        String dokumenttiId = makeCallAndReturnDokumenttiId("SV", false);
+        pollAndAssertDokumenttiProsessi(dokumenttiId);
+
+    }
+
+    @Test
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleIPostiToinenAste() throws InterruptedException {
+
+        mockHakukohde1Kutsu();
+        mockToinenAsteHaku1Kutsu();
+        mockMolemmatHyvaksyttyKutsu();
+
+        mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
+                hakemus()
+                        .setOid(HAKEMUS1)
+                        .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setVainSahkoinenViestinta(true)
+                        .setSahkoposti("testi2@sahkoposti.fi")
                         .build(),
                 hakemus()
                         .setOid(HAKEMUS2)
@@ -274,6 +311,18 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
         mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1/", new Result(hk));
 
+    }
+
+    private void mockKorkeakouluHaku1Kutsu() {
+        HakuV1RDTO haku = new HakuV1RDTO();
+        haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(haku));
+    }
+
+    private void mockToinenAsteHaku1Kutsu() {
+        HakuV1RDTO haku = new HakuV1RDTO();
+        haku.setKohdejoukkoUri("haunkohdejoukko_17#1");
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(haku));
     }
 
     private void mockLetterKutsut(String regex) {
