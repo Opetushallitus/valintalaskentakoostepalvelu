@@ -61,6 +61,12 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
     }
 
     @Override
+    public Observable<HakukohdeDTO> asetaJononValintaesitysHyvaksytyksi(String hakuOid, String hakukohdeOid, String valintatapajonoOid, Boolean hyvaksytty) {
+        String url = "/tila/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid + "/valintatapajono/" + valintatapajonoOid + "/valintaesitys";
+        return postAsObservable(url, HakukohdeDTO.class, Entity.json(""), (webclient) -> webclient.query("hyvaksytty", hyvaksytty));
+    }
+
+    @Override
     public Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) {
         String url = "/tila/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
         try {

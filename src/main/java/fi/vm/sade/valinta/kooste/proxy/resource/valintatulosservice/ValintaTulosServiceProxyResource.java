@@ -141,11 +141,12 @@ public class ValintaTulosServiceProxyResource {
     public void muutaHakemustenTilaa(@PathParam("hakuOid") String hakuOid,
                                      @PathParam("hakukohdeOid") String hakukohdeOid,
                                      List<Valintatulos> valintatulokset,
+                                     @QueryParam("hyvaksyttyJonoOid") String hyvaksyttyJonoOid,
                                      @QueryParam("selite") String selite,
                                      @Suspended AsyncResponse asyncResponse) throws UnsupportedEncodingException {
         setAsyncTimeout(asyncResponse,
-                String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s?selite=%s",
-                        hakuOid, hakukohdeOid, selite));
+                String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s?selite=%s&hyvaksyttyJonoOid=%s",
+                        hakuOid, hakukohdeOid, selite, hyvaksyttyJonoOid));
 
         sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(staleReadCheckResponse -> {
             if (staleReadCheckResponse.statuses.isEmpty()) {
@@ -169,8 +170,7 @@ public class ValintaTulosServiceProxyResource {
             }).collect(Collectors.toList());
             if (failedUpdateStatuses.isEmpty()) {
                 valintatulokset.forEach(valintatulos -> valintatulos.setRead(new Date()));
-                return sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite)
-                        .doOnError(throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
+                return muutaHakemustenTilaaSijoittelussa(hakuOid, hakukohdeOid, valintatulokset, hyvaksyttyJonoOid, selite);
             } else {
                 return Observable.error(new VastaanottoUpdateFailuresException(failedUpdateStatuses));
             }
@@ -184,6 +184,23 @@ public class ValintaTulosServiceProxyResource {
                                 ((VastaanottoUpdateFailuresException) poikkeus).failedUpdateStatuses : Collections.emptyList();
                         asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(poikkeus.getMessage(), failedUpdateStatuses)).build());
                     }
+                });
+    }
+
+    private Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemustenTilaaSijoittelussa(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, List<Valintatulos> valintatulokset, @QueryParam("hyvaksyttyJonoOid") String hyvaksyttyJonoOid, @QueryParam("selite") String selite) {
+        return sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite)
+                .doOnError(throwable -> LOG.error("Async call to sijoittelu-service failed", throwable))
+                .flatMap(updateStatuses -> {
+                    Observable<HakukohteenValintatulosUpdateStatuses> updateStatusesObservable = Observable.just(updateStatuses);
+                    if (StringUtils.isNotBlank(hyvaksyttyJonoOid)) {
+                        return sijoitteluResource.asetaJononValintaesitysHyvaksytyksi(hakuOid, hakukohdeOid, hyvaksyttyJonoOid, true)
+                                .doOnError(throwable -> LOG.error("Async call to sijoittelu-service failed", throwable))
+                                .flatMap(response -> {
+                                    LOG.info("Marked valintapajono {} of hakukohde {} in haku {} as hyvaksytty: {}", hyvaksyttyJonoOid, hakukohdeOid, hakuOid, response);
+                                    return updateStatusesObservable;
+                                });
+                    }
+                    return updateStatusesObservable;
                 });
     }
 
