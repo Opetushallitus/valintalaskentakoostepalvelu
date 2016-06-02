@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.excel;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.poi.POIXMLException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -50,7 +52,12 @@ public class Excel {
     }
 
     public void tuoXlsx(InputStream input) throws IOException, ExcelValidointiPoikkeus {
-        XSSFWorkbook workbook = new XSSFWorkbook(input);
+        XSSFWorkbook workbook;
+        try {
+            workbook = new XSSFWorkbook(input);
+        } catch (POIXMLException e) {
+            throw new RuntimeException("Excelin lukemisessa tapahtui poikkeus ("+e.getMessage()+"). Onhan Excel Workbook -muodossa (.xlsx)?");
+        }
         XSSFSheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
         int lastRowIndex = sheet.getLastRowNum();
         Iterator<Rivi> riviIterator = rivit.iterator();
