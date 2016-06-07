@@ -10,6 +10,8 @@ public class Letter {
     private Map<String, Object> templateReplacements;
     private LetterContent letterContent;
     private String emailAddress;
+    private String personOid;
+    private boolean skipIPosti = false;
 
     public Letter() {
     }
@@ -22,6 +24,13 @@ public class Letter {
     public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements) {
         this.addressLabel = addressLabel;
         this.templateReplacements = replacements;
+    }
+
+    public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements, String personOid, boolean skipIPosti) {
+        this.addressLabel = addressLabel;
+        this.templateReplacements = replacements;
+        this.personOid = personOid;
+        this.skipIPosti = skipIPosti;
     }
 
     public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements, String emailAddress) {
@@ -70,8 +79,25 @@ public class Letter {
         this.letterContent = letterContent;
     }
 
+    public String getPersonOid() {
+        return personOid;
+    }
+
+    public void setPersonOid(String personOid) {
+        this.personOid = personOid;
+    }
+
+    public boolean isSkipIPosti() {
+        return skipIPosti;
+    }
+
+    public void setSkipIPosti(boolean skipIPosti) {
+        this.skipIPosti = skipIPosti;
+    }
+
     @Override
     public String toString() {
-        return "Letter [addressLabel=" + addressLabel + ", templateReplacements=" + templateReplacements + "]";
+        return "Letter [addressLabel=" + addressLabel + ", templateReplacements=" + templateReplacements +
+                ", personOid=" + personOid + ", skipIPosti=" + skipIPosti + "]";
     }
 }

@@ -78,7 +78,40 @@ public class HyvaksymiskirjeetKomponentti {
                 templateName,
                 palautusPvm,
                 palautusAika,
-                iPosti);
+                iPosti,
+                false);
+    }
+
+    public LetterBatch teeHyvaksymiskirjeet(
+            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
+            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
+            Collection<HakijaDTO> hakukohteenHakijat,
+            Collection<Hakemus> hakemukset,
+            String hakuOid,
+            Optional<String> asiointikieli,
+            String sisalto,
+            String tag,
+            String templateName,
+            String palautusPvm,
+            String palautusAika,
+            boolean iPosti,
+            boolean sahkoinenKorkeakoulunMassaposti) {
+        return teeHyvaksymiskirjeet(
+                koodistoCachedAsyncResource::haeKoodisto,
+                hakukohdeJaHakijapalveluidenOsoite,
+                hyvaksymiskirjeessaKaytetytHakukohteet,
+                hakukohteenHakijat,
+                hakemukset,
+                null,
+                hakuOid,
+                asiointikieli,
+                sisalto,
+                tag,
+                templateName,
+                palautusPvm,
+                palautusAika,
+                iPosti,
+                sahkoinenKorkeakoulunMassaposti);
     }
 
     public LetterBatch teeJalkiohjauskirjeet(
@@ -109,14 +142,16 @@ public class HyvaksymiskirjeetKomponentti {
                 templateName,
                 palautusPvm,
                 palautusAika,
-                iPosti);
+                iPosti,
+                false);
     }
 
     public static LetterBatch teeHyvaksymiskirjeet(
             Function<String, Map<String, Koodi>> haeKoodisto,
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-            Collection<HakijaDTO> hakukohteenHakijat, Collection<Hakemus> hakemukset,
+            Collection<HakijaDTO> hakukohteenHakijat,
+            Collection<Hakemus> hakemukset,
             String hakukohdeOidFromRequest,
             String hakuOid,
             Optional<String> asiointikieli,
@@ -124,7 +159,8 @@ public class HyvaksymiskirjeetKomponentti {
             String templateName,
             String palautusPvm,
             String palautusAika,
-            boolean iPosti) {
+            boolean iPosti,
+            boolean sahkoinenKorkeakoulunMassaposti ) {
         LOG.debug("Hyvaksymiskirjeet for haku '{}'", hakuOid);
         assert (hakuOid != null);
         Map<String, Hakemus> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
@@ -202,7 +238,11 @@ public class HyvaksymiskirjeetKomponentti {
 
             replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
             replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)));
-            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements));
+            if(sahkoinenKorkeakoulunMassaposti) {
+                kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), !sendIPosti(hakija, hakemus)));
+            } else {
+                kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), !iPosti));
+            }
 
             viesti.setFetchTarget(hakukohdeOid);
             viesti.setOrganizationOid(tarjoajaOid);
@@ -221,10 +261,17 @@ public class HyvaksymiskirjeetKomponentti {
         viesti.setTag(tag);
         viesti.setTemplateName(templateName);
         viesti.setIposti(iPosti);
+        viesti.setSkipDokumenttipalvelu(sahkoinenKorkeakoulunMassaposti);
         Map<String, Object> templateReplacements = Maps.newHashMap();
         templateReplacements.put("sisalto", sisalto);
         viesti.setTemplateReplacements(templateReplacements);
         return viesti;
+    }
+
+    private static boolean sendIPosti(HakijaDTO hakija, Hakemus hakemus) {
+        HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+        return org.apache.commons.lang3.StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite()) ||
+           !hakemusWrapper.getVainSahkoinenViestinta();
     }
 
     private static String hyvaksytynHakutoiveenHakukohdeOid(HakijaDTO hakija) {

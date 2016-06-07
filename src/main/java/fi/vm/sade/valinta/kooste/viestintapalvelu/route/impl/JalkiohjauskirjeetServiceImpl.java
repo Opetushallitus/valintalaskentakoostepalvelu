@@ -41,8 +41,6 @@ import java.util.stream.Collectors;
 
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiAsiointikielella;
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiLahetetaanSahkoposti;
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiLahetetaanIPosti;
 
 @Service
 public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
@@ -84,7 +82,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                 .stream()
                                 .filter(h -> whitelist.contains(h.getHakemusOid()))
                                 .collect(Collectors.toList());
-                        muodostaKirjeet().call(prosessi, jalkiohjauskirjeDTO, () -> haeHakemustenResurssit(whitelistinJalkeen, jalkiohjauskirjeDTO));
+                        muodostaKirjeet(false).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(whitelistinJalkeen, jalkiohjauskirjeDTO));
                     },
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
@@ -95,43 +93,22 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
     }
 
     @Override
-    public void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, boolean sahkoposti) {
+    public void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
             sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
             .subscribeOn(Schedulers.newThread())
             .subscribe(
                     hakijat -> {
                         //VIALLISET DATA POIS FILTTEROINTI
                         Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
-                        muodostaKirjeet().call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(vainHakeneetJalkiohjattavat, jalkiohjauskirjeDTO, sahkoposti));
+                        muodostaKirjeet(isKorkeakouluhaku(jalkiohjauskirjeDTO.getHakuOid())).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(vainHakeneetJalkiohjattavat, jalkiohjauskirjeDTO));
                     },
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
 
-    private HaunResurssit filteroiSahkopostiVastaanottajat(String asiointikieli, HaunResurssit haunResurssit) {
-        return filtteroiLahetetaanSahkoposti(filtteroiAsiointikielella(asiointikieli, haunResurssit));
-    }
-
-    private HaunResurssit filteroiIPostiVastaanottajat(String asiointikieli, HaunResurssit haunResurssit) {
-        return filtteroiLahetetaanIPosti(filtteroiAsiointikielella(asiointikieli, haunResurssit));
-    }
-
-    private HaunResurssit haeHakemustenResurssit(Collection<HakijaDTO> hakijat, JalkiohjauskirjeDTO kirje) {
+    private HaunResurssit haeHaunResurssit(Collection<HakijaDTO> hakijat, JalkiohjauskirjeDTO kirje) {
         List<Hakemus> hakemukset = haeHakemukset(hakijat);
         String asiointikieli = lueAsiointikieliKirjeesta(kirje);
         return filtteroiAsiointikielella(asiointikieli, new HaunResurssit(new ArrayList<>(hakijat), hakemukset));
-    }
-
-    private HaunResurssit haeHaunResurssit(Collection<HakijaDTO> hakijat, JalkiohjauskirjeDTO kirje, boolean sahkoposti) {
-        List<Hakemus> hakemukset = haeHakemukset(hakijat);
-        String asiointikieli = lueAsiointikieliKirjeesta(kirje);
-
-        if(!isKorkeakouluhaku(kirje.getHakuOid()) && !sahkoposti) {
-            return filtteroiAsiointikielella(asiointikieli, new HaunResurssit(new ArrayList<>(hakijat), hakemukset));
-        } else if (sahkoposti) {
-            return filteroiSahkopostiVastaanottajat(asiointikieli, new HaunResurssit(new ArrayList<>(hakijat), hakemukset));
-        } else {
-            return filteroiIPostiVastaanottajat(asiointikieli, new HaunResurssit(new ArrayList<>(hakijat), hakemukset));
-        }
     }
 
     private List<Hakemus> haeHakemukset(Collection<HakijaDTO> hakijat) {
@@ -161,12 +138,13 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         return haunKohdejoukkoUri.startsWith("haunkohdejoukko_12"); //"kohdejoukkoUri": "haunkohdejoukko_12#1"
     }
 
-    private Action3<KirjeProsessi, JalkiohjauskirjeDTO, Supplier<HaunResurssit>> muodostaKirjeet() {
+    private Action3<KirjeProsessi, JalkiohjauskirjeDTO, Supplier<HaunResurssit>> muodostaKirjeet(boolean sahkoinenKorkeakoulunMassaposti) {
         return (prosessi, kirje, haeHaunResurssit) -> {
             HaunResurssit haunResurssit = haeHaunResurssit.get();
             final Map<String, MetaHakukohde> metaKohteet = getStringMetaHakukohdeMap(haunResurssit.hakijat);
-            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(kirje.getKielikoodi(), haunResurssit.hakijat,
-                    haunResurssit.hakemukset, metaKohteet, kirje.getHakuOid(), kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag());
+            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(
+                    kirje.getKielikoodi(), haunResurssit.hakijat, haunResurssit.hakemukset, metaKohteet, kirje.getHakuOid(),
+                    kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag(), sahkoinenKorkeakoulunMassaposti);
             try {
                 if (prosessi.isKeskeytetty()) {
                     LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta! (Timeout 30min)");

@@ -5,7 +5,6 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -16,7 +15,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -87,27 +85,12 @@ public class ViestintapalveluObservables {
         }
     }
 
-    public static Observable<HaunResurssit> haunResurssitSahkoposti(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset,
-                                                          Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
+    public static Observable<HaunResurssit> haunResurssit(String asiointikieli,
+                                                          Observable<HakijaPaginationObject> koulutuspaikalliset,
+                                                          Function<List<String>,
+                                                          Observable<List<Hakemus>>> haeHakemukset) {
         return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
-                filtteroiLahetetaanSahkoposti(filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset))));
-    }
-
-    public static Observable<HaunResurssit> haunResurssitIPosti(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset,
-                                                                Function<List<String>, Observable<List<Hakemus>>> haeHakemukset, Observable<HakuV1RDTO> haku) {
-        return haku.flatMap(haettuHaku -> {
-            if(isKorkeakouluhaku(haettuHaku)) {
-                return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
-                        filtteroiLahetetaanIPosti(filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset))));
-            } else {
-                return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
-                        filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset)));
-            }
-        });
-    }
-
-    private static boolean isKorkeakouluhaku(HakuV1RDTO haku) {
-        return haku.getKohdejoukkoUri().startsWith("haunkohdejoukko_12"); //"kohdejoukkoUri": "haunkohdejoukko_12#1"
+                filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset)));
     }
 
     public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Observable<HakijaPaginationObject> koulutuspaikalliset,
@@ -157,7 +140,7 @@ public class ViestintapalveluObservables {
     public static Observable<LetterBatch> kirjeet(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat,
                                                   Collection<Hakemus> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
                                                   Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti, HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl,
-                                                  ParametritParser haunParametrit) {
+                                                  ParametritParser haunParametrit, boolean sahkoinenKorkeakoulunMassaposti) {
         return addresses.map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
                 .teeHyvaksymiskirjeet(
                         hakijapalveluidenOsoite,
@@ -172,7 +155,8 @@ public class ViestintapalveluObservables {
                         "hyvaksymiskirje",
                         hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
                         hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
-                        asiointikieli.isPresent()));
+                        asiointikieli.isPresent(),
+                        sahkoinenKorkeakoulunMassaposti));
     }
 
     public static Observable<String> batchId(Observable<LetterBatch> hyvaksymiskirje,
@@ -220,21 +204,6 @@ public class ViestintapalveluObservables {
     public static HaunResurssit filtteroiAsiointikielella(String asiointkieli, HaunResurssit haunResurssit) {
         HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> asiointkieli.equals(new HakemusWrapper(hakemus).getAsiointikieli()));
         LOG.info("Asiointikielellä filtteröinnin jälkeen {} kpl", filteroidytResurssit.hakemukset.size());
-        return filteroidytResurssit;
-    }
-
-    public static HaunResurssit filtteroiLahetetaanSahkoposti(HaunResurssit haunResurssit) {
-        HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> StringUtils.isNotBlank(new HakemusWrapper(hakemus).getSahkopostiOsoite()));
-        LOG.info("Sähköpostin vastaanottajia on {} kpl", filteroidytResurssit.hakemukset.size());
-        return filteroidytResurssit;
-    }
-
-    public static HaunResurssit filtteroiLahetetaanIPosti(HaunResurssit haunResurssit) {
-        HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> {
-            HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
-            return !hakemusWrapper.getVainSahkoinenViestinta() || StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite());
-        });
-        LOG.info("Kirjeen vastaanottajia on {} kpl", filteroidytResurssit.hakemukset.size());
         return filteroidytResurssit;
     }
 

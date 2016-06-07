@@ -181,7 +181,8 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                             organisaatioAsyncResource::haeHakutoimisto),
                     hyvaksymiskirjeetKomponentti,
                     hyvaksymiskirjeetServiceImpl,
-                    haunParametrit);
+                    haunParametrit,
+                    false);
 
             return ViestintapalveluObservables.batchId(
                     kirjeet,

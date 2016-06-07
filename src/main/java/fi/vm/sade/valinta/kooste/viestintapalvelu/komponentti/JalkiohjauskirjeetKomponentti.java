@@ -57,7 +57,8 @@ public class JalkiohjauskirjeetKomponentti {
             final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
             @Simple("${property.hakuOid}") String hakuOid,
             @Property("templateName") String templateName,
-            @Property("sisalto") String sisalto, @Property("tag") String tag
+            @Property("sisalto") String sisalto, @Property("tag") String tag,
+            boolean sahkoinenKorkeakoulunMassaposti
     ) {
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
@@ -122,7 +123,11 @@ public class JalkiohjauskirjeetKomponentti {
             Map<String, Object> replacements = Maps.newHashMap();
             replacements.put("tulokset", tulosList);
             replacements.put("henkilotunnus", new HakemusWrapper(hakemus).getHenkilotunnus());
-            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements));
+            if(sahkoinenKorkeakoulunMassaposti) {
+                kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), !sendIPosti(hakija, hakemus)));
+            } else {
+                kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), false));
+            }
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
@@ -134,6 +139,7 @@ public class JalkiohjauskirjeetKomponentti {
         viesti.setTag(tag);
         viesti.setTemplateName(templateName);
         viesti.setIposti(true);
+        viesti.setSkipDokumenttipalvelu(sahkoinenKorkeakoulunMassaposti);
         Map<String, Object> templateReplacements = Maps.newHashMap();
         templateReplacements.put("sisalto", sisalto);
         viesti.setTemplateReplacements(templateReplacements);
@@ -141,4 +147,9 @@ public class JalkiohjauskirjeetKomponentti {
         return viesti;
     }
 
+    private static boolean sendIPosti(HakijaDTO hakija, Hakemus hakemus) {
+        HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+        return org.apache.commons.lang3.StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite()) ||
+                !hakemusWrapper.getVainSahkoinenViestinta();
+    }
 }

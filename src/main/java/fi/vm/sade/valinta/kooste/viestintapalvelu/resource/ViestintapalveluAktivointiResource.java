@@ -162,7 +162,6 @@ public class ViestintapalveluAktivointiResource {
             DokumentinLisatiedot hakemuksillaRajaus,
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("templateName") String templateName,
-            @QueryParam("sahkoposti") @DefaultValue("false") boolean sahkoposti,
             @QueryParam("tarjoajaOid") String tarjoajaOid,
             @QueryParam("tag") String tag) {
         try {
@@ -174,7 +173,7 @@ public class ViestintapalveluAktivointiResource {
             LOG.warn("Luodaan jälkiohjauskirjeet kielellä {}. Onko {} == {}", hakemuksillaRajaus.getLanguageCode(), KieliUtil.RUOTSI, KieliUtil.RUOTSI.equals(hakemuksillaRajaus.getLanguageCode()));
             JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(), templateName, tag, hakuOid, hakemuksillaRajaus.getLanguageCode());
             if (hakemuksillaRajaus.getHakemusOids() == null) {
-                jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO, sahkoposti);
+                jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO);
             } else {
                 jalkiohjauskirjeService.jalkiohjauskirjeetHakemuksille(prosessi, jalkiohjauskirjeDTO, hakemuksillaRajaus.getHakemusOids());
             }

@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -26,10 +27,7 @@ import rx.Observable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-<<<<<<< HEAD
-=======
 import java.util.function.Function;
->>>>>>> 0cd2f2ce43a57adda5194d399a4f093f6e59e06a
 import java.util.function.Supplier;
 
 @Service
@@ -65,22 +63,10 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.hakuV1AsyncResource = hakuV1AsyncResource;
     }
 
-    public void muodostaSahkopostiHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
+    public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         muodostaHyvaksymiskirjeetKokoHaulle(() ->
-                ViestintapalveluObservables.haunResurssitSahkoposti(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
-<<<<<<< HEAD
-                        (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(oids, ApplicationAsyncResource.DEFAULT_KEYS)),
-                hakuOid, asiointikieli, prosessi, defaultValue);
-=======
-                        applicationAsyncResource::getApplicationsByHakemusOids), hakuOid, asiointikieli, prosessi, defaultValue);
->>>>>>> 0cd2f2ce43a57adda5194d399a4f093f6e59e06a
-    }
-
-    public void muodostaIPostiHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
-        muodostaHyvaksymiskirjeetKokoHaulle(() ->
-                ViestintapalveluObservables.haunResurssitIPosti(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
-                        (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(oids, ApplicationAsyncResource.DEFAULT_KEYS),
-                        hakuV1AsyncResource.haeHaku(hakuOid)),
+                        ViestintapalveluObservables.haunResurssit(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
+                                (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(oids, ApplicationAsyncResource.DEFAULT_KEYS)),
                 hakuOid, asiointikieli, prosessi, defaultValue);
     }
 
@@ -116,13 +102,20 @@ public class HyvaksymiskirjeetKokoHaulleService {
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
         Observable<Map<String, Optional<Osoite>>> osoitteet = ViestintapalveluObservables.haunOsoitteet(asiointikieli, hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
-        Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, osoitteet,
-                hyvaksymiskirjeetKomponentti, hyvaksymiskirjeetServiceImpl, haunParametrit);
+        Observable<HakuV1RDTO> haku = hakuV1AsyncResource.haeHaku(hakuOid);
+        Observable<LetterBatch> kirjeet = haku.flatMap( (haettuHaku) ->
+            ViestintapalveluObservables.kirjeet(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, osoitteet,
+                    hyvaksymiskirjeetKomponentti, hyvaksymiskirjeetServiceImpl, haunParametrit, isKorkeakouluhaku(haettuHaku))
+        );
         return ViestintapalveluObservables.batchId(
                 kirjeet,
                 viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
                 viestintapalveluAsyncResource::haeStatusObservable,
                 ViestintapalveluObservables.getDelay(Optional.empty()),
                 status -> Observable.just(status.batchId));
+    }
+
+    private boolean isKorkeakouluhaku(HakuV1RDTO haku) {
+        return haku.getKohdejoukkoUri().startsWith("haunkohdejoukko_12"); //"kohdejoukkoUri": "haunkohdejoukko_12#1"
     }
 }

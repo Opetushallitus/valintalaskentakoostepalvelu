@@ -150,13 +150,6 @@ public class SureKonvertointiTest {
 		HakemusDTO hakemus = new HakemusDTO();
 		hakemus.setHakemusoid("1.2.246.562.11.00000000001");
 		List<AvainArvoDTO> arvot = OppijaToAvainArvoDTOConverter.convert(o.getOppijanumero(), o.getSuoritukset(), hakemus, null);
-<<<<<<< HEAD
-
-		assertEquals(ImmutableSet.of(
-				new AvainArvoDTO("PK_B1", "10"), new AvainArvoDTO("PK_B1_OPPIAINE", "SV"),
-				new AvainArvoDTO("PK_B13", "10"), new AvainArvoDTO("PK_B13_OPPIAINE", "EN")
-		), ImmutableSet.copyOf(arvot));
-=======
 
 		Assert.assertEquals(4, arvot.size());
 		String b1SVAinetunniste = arvot.stream()
@@ -198,7 +191,6 @@ public class SureKonvertointiTest {
 				new OppiaineArvosana("", "", false, 1, "5", "4-10")
 		));
 		assertEquals("6", a.arvosana);
->>>>>>> 0cd2f2ce43a57adda5194d399a4f093f6e59e06a
 	}
 
 	@Test
