@@ -26,7 +26,7 @@ public class Integraatiopalvelimet {
     public static ClientAndServerWithHost mockServer = new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
     private static HttpResource httpResource = new HttpResource("");
     static {
-        ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(5));
+        ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(15));
     }
     public static void mockForward(String method, MockServer server) {
         server.getPaths().forEach(
