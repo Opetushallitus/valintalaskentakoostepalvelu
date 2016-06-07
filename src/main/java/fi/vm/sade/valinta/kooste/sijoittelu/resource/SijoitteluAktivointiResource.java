@@ -11,6 +11,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,6 +32,9 @@ import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
+
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
 /**
  * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa.
@@ -87,6 +92,14 @@ public class SijoitteluAktivointiResource {
             LOG.error("Sijoittelua yritettiin käynnistää ilman hakuOidia!");
             throw new RuntimeException("Parametri hakuOid on pakollinen!");
         } else {
+            
+            final String username = KoosteAudit.username();
+            AUDIT.log(builder()
+                    .id(username)
+                    .hakuOid(hakuOid)
+                    .setOperaatio(ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS)
+                    .build());
+
             sijoitteluAktivointiProxy
                     .aktivoiSijoittelu(new Sijoittelu(hakuOid));
         }
