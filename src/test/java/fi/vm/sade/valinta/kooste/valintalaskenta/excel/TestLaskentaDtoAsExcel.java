@@ -26,7 +26,7 @@ public class TestLaskentaDtoAsExcel {
 		Boolean valintakoelaskenta = null;
 		LaskentaDto l = new LaskentaDto(uuid, "","","",hakuOid, new Date().getTime(),
 				tila, LaskentaTyyppi.HAKUKOHDE, new IlmoitusDto(IlmoitusTyyppi.VIRHE, "Joku virhe", Arrays.asList("A", "B", "C")), hakukohteet, false, valinnanvaihe,
-				valintakoelaskenta, null);
+				valintakoelaskenta, null,true);
 		LaskentaDtoAsExcel.laskentaDtoAsExcel(l);
 	}
 }

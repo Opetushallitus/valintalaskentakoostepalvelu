@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.LaskentaParams;
+import fi.vm.sade.valinta.seuranta.dto.*;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,11 +24,6 @@ import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.http.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import rx.Observable;
 
 
@@ -80,7 +76,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
         }
     }
 
-    public void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<String> callback, Consumer<Throwable> failureCallback) {
+    public void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<TunnisteDto> callback, Consumer<Throwable> failureCallback) {
         try {
             String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + laskentaParams.getHakuOid() + "/tyyppi/" + laskentaParams.getLaskentatyyppi();
             WebClient wc = getWebClient().path(url);
@@ -96,7 +92,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             if (laskentaParams.getIsValintakoelaskenta() != null) {
                 wc.query("valintakoelaskenta", laskentaParams.getIsValintakoelaskenta());
             }
-            wc.async().post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<>(gson(), address, url, callback, failureCallback, String.class));
+            wc.async().post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<>(gson(), address, url, callback, failureCallback, TunnisteDto.class));
         } catch (Exception e) {
             failureCallback.accept(e);
         }

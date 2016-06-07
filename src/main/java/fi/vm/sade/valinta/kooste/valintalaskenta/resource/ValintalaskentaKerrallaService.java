@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
+import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,13 +46,13 @@ public class ValintalaskentaKerrallaService {
         if (uuidForExistingNonMaskedLaskenta.isPresent()) {
             String uuid = uuidForExistingNonMaskedLaskenta.get();
             LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", uuid, uuid);
-            callback.accept(redirectResponse(uuid));
+            callback.accept(redirectResponse(new TunnisteDto(uuid, false)));
         } else {
             LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
             valintaperusteetAsyncResource.haunHakukohteet(hakuOid,
                     (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                         Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
-                        createLaskenta(haunHakukohteetOids, (String uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
+                        createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                     },
                     (Throwable poikkeus) -> {
                         LOG.error("kaynnistaLaskentaHaulle throws", poikkeus);
@@ -66,12 +67,12 @@ public class ValintalaskentaKerrallaService {
             final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
             if (l != null && !l.isValmis()) {
                 LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
-                callbackResponse.accept(redirectResponse(uuid));
+                callbackResponse.accept(redirectResponse(new TunnisteDto(uuid,false)));
             }
             seurantaAsyncResource.resetoiTilat(
                     uuid,
                     (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid(),
-                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> notifyWorkAvailable(laskenta.getUuid(), callbackResponse),
+                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> notifyWorkAvailable(new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()), callbackResponse),
                             (Throwable poikkeus) -> {
                                 LOG.error("seurantaAsyncResource throws", poikkeus);
                                 callbackResponse.accept(errorResponse(poikkeus.getMessage()));
@@ -124,15 +125,18 @@ public class ValintalaskentaKerrallaService {
         }
     }
 
-    private void notifyWorkAvailable(final String uuid, final Consumer<Response> callbackResponse) {
-        valintalaskentaRoute.workAvailable();
+    private void notifyWorkAvailable(final TunnisteDto uuid, final Consumer<Response> callbackResponse) {
+        // ohitetaan ajossa olevan laskennan kaynnistaminen
+        if(uuid.getLuotiinkoUusiLaskenta()) {
+            valintalaskentaRoute.workAvailable();
+        }
         callbackResponse.accept(redirectResponse(uuid));
     }
 
-    private void createLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
+    private void createLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<TunnisteDto> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = toHakukohdeDto(hakukohdeData);
         validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
-        seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos, (String uuid) -> laskennanAloitus.accept(uuid),
+        seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos, (TunnisteDto uuid) -> laskennanAloitus.accept(uuid),
                 (Throwable t) -> {
                     LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
                     callbackResponse.accept(errorResponse(t.getMessage()));
@@ -153,8 +157,8 @@ public class ValintalaskentaKerrallaService {
         }
     }
 
-    private static Response redirectResponse(final String target) {
-        return Response.ok(Vastaus.uudelleenOhjaus(target)).build();
+    private static Response redirectResponse(final TunnisteDto target) {
+        return Response.ok(Vastaus.laskennanSeuraus(target.getUuid(),target.getLuotiinkoUusiLaskenta())).build();
     }
 
     private static Response errorResponse(final String errorMessage) {

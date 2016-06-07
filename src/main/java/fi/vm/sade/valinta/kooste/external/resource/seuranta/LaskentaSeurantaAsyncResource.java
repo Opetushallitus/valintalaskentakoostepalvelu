@@ -5,12 +5,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.LaskentaParams;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
+import fi.vm.sade.valinta.seuranta.dto.*;
 import rx.Observable;
 
 import javax.ws.rs.core.Response;
@@ -23,7 +18,7 @@ public interface LaskentaSeurantaAsyncResource {
 
     void resetoiTilat(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
 
-    void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<String> callback, Consumer<Throwable> failureCallback);
+    void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<TunnisteDto> callback, Consumer<Throwable> failureCallback);
 
     void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional);
 
