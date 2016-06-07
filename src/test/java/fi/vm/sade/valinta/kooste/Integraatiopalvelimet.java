@@ -1,7 +1,13 @@
 package fi.vm.sade.valinta.kooste;
 
 
-import com.google.gson.Gson;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
+import static org.mockserver.model.HttpForward.forward;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.server.MockServer;
@@ -9,12 +15,6 @@ import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
 
 import java.util.concurrent.TimeUnit;
-
-import static javax.ws.rs.HttpMethod.*;
-
-import static org.mockserver.model.HttpRequest.*;
-import static org.mockserver.model.HttpForward.*;
-import static org.mockserver.model.HttpResponse.*;
 
 /**
  * @author Jussi Jartamo
@@ -28,20 +28,17 @@ public class Integraatiopalvelimet {
     static {
         ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(15));
     }
+
     public static void mockForward(String method, MockServer server) {
-        server.getPaths().forEach(
-                p -> {
-                    mockForward(method, p, server.getPort());
-                }
-        );
+        server.getPaths().forEach(p -> mockForward(method, p, server.getPort()));
     }
+
     public static void mockForward(MockServer server) {
-        server.getPaths().forEach(
-                p -> {
-                    mockForward(GET, p, server.getPort());
-                    mockForward(POST, p, server.getPort());
-                    mockForward(PUT, p, server.getPort());
-                }
+        server.getPaths().forEach(p -> {
+                mockForward(GET, p, server.getPort());
+                mockForward(POST, p, server.getPort());
+                mockForward(PUT, p, server.getPort());
+            }
         );
     }
     public static void mockForward(String method, String path, int port) {
