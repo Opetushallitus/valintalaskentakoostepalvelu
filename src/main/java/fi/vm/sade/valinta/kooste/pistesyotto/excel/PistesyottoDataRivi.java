@@ -9,6 +9,9 @@ import fi.vm.sade.valinta.kooste.excel.DataRivi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.SoluLukija;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
+import org.apache.commons.lang3.StringUtils;
+
+import static java.util.Arrays.*;
 
 public class PistesyottoDataRivi extends DataRivi {
 
@@ -29,6 +32,10 @@ public class PistesyottoDataRivi extends DataRivi {
         String nimi = lukija.getArvoAt(1);
         String hetu = lukija.getArvoAt(2);
         String pvm = lukija.getArvoAt(3);
+        final boolean isEmptyRow = asList(oid,nimi,hetu,pvm).stream().allMatch(String::isEmpty);
+        if(isEmptyRow) {
+            return true;
+        }
         Collection<PistesyottoArvo> arvot = Lists.newArrayList();
         {
             int i = 4;
