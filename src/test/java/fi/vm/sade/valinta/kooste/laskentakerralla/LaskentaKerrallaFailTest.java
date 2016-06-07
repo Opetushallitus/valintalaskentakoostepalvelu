@@ -75,6 +75,8 @@ public class LaskentaKerrallaFailTest {
                     false,
                     0,
                     false,
+                    "haun nimi",
+                    "nimi",
                     LaskentaTyyppi.HAKUKOHDE,
                     false,
                     new ArrayList(),

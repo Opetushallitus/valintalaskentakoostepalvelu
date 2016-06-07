@@ -28,6 +28,8 @@ public class ValintatapajonoRivi {
     private final String tila;
     @ApiModelProperty(required = true)
     private final String jonosija;
+    @ApiModelProperty(required = false)
+    private final String pisteet;
     @ApiModelProperty(required = false, value = "Kielikoodi ja kuvaus. Esim {\"FI\":\"Suomenkielinen kuvaus\",\"SV\":\"...\"}")
     private final Map<String, String> kuvaus;
 
@@ -40,17 +42,19 @@ public class ValintatapajonoRivi {
         this.oid = null;
         this.nimi = null;
         this.tila = null;
+        this.pisteet = null;
         this.kuvaus = null;
         this.jonosija = null;
     }
 
     public ValintatapajonoRivi(String oid, String jonosija, String nimi,
-                               String tila, String fi, String sv, String en) {
+                               String tila, String pisteet, String fi, String sv, String en) {
 
         this.oid = oid;
         this.jonosija = jonosija; //new BigDecimal(jonosija).intValue();
         this.nimi = nimi;
         this.tila = tila;
+        this.pisteet = pisteet;
         this.kuvaus = Arrays.asList(new Kuvaus(SUOMI, fi), new Kuvaus(RUOTSI, sv), new Kuvaus(ENGLANTI, en)).stream()
                 .filter(k -> StringUtils.trimToNull(k.getTeksti()) != null)
                 .collect(Collectors.toMap(
@@ -60,7 +64,13 @@ public class ValintatapajonoRivi {
 
     @ApiModelProperty(hidden = true)
     public boolean isValidi() {
-        return asTila() != JarjestyskriteerituloksenTila.MAARITTELEMATON;
+        boolean hasPisteetTaiJonosija = StringUtils.isNotBlank(getJonosija()) || StringUtils.isNotBlank(getPisteet());
+        return !isMaarittelematon() || hasPisteetTaiJonosija;
+    }
+
+    @ApiModelProperty(hidden = true)
+    public boolean isMaarittelematon() {
+        return asTila() == JarjestyskriteerituloksenTila.MAARITTELEMATON;
     }
 
     public JarjestyskriteerituloksenTila asTila() {
@@ -109,5 +119,9 @@ public class ValintatapajonoRivi {
 
     public String getOid() {
         return oid;
+    }
+
+    public String getPisteet() {
+        return pisteet;
     }
 }

@@ -26,6 +26,10 @@ import rx.Observable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+<<<<<<< HEAD
+=======
+import java.util.function.Function;
+>>>>>>> 0cd2f2ce43a57adda5194d399a4f093f6e59e06a
 import java.util.function.Supplier;
 
 @Service
@@ -64,8 +68,12 @@ public class HyvaksymiskirjeetKokoHaulleService {
     public void muodostaSahkopostiHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         muodostaHyvaksymiskirjeetKokoHaulle(() ->
                 ViestintapalveluObservables.haunResurssitSahkoposti(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
+<<<<<<< HEAD
                         (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(oids, ApplicationAsyncResource.DEFAULT_KEYS)),
                 hakuOid, asiointikieli, prosessi, defaultValue);
+=======
+                        applicationAsyncResource::getApplicationsByHakemusOids), hakuOid, asiointikieli, prosessi, defaultValue);
+>>>>>>> 0cd2f2ce43a57adda5194d399a4f093f6e59e06a
     }
 
     public void muodostaIPostiHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {

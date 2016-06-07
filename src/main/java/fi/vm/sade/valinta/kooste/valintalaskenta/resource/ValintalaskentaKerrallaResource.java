@@ -62,6 +62,8 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("erillishaku") Boolean erillishaku,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe,
             @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
+            @QueryParam("haunnimi") String haunnimi,
+            @QueryParam("nimi") String nimi,
             @Suspended AsyncResponse asyncResponse) {
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
@@ -70,7 +72,7 @@ public class ValintalaskentaKerrallaResource {
                 asyncResponse.resume(errorResponce("Ajo laskennalle aikakatkaistu!"));
             });
             final String userOID = AuthorizationUtil.getCurrentUser();
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, haunnimi, nimi, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
@@ -87,6 +89,8 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("erillishaku") Boolean erillishaku,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe,
             @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
+            @QueryParam("haunnimi") String haunnimi,
+            @QueryParam("nimi") String nimi,
             @PathParam("tyyppi") LaskentaTyyppi laskentatyyppi,
             @PathParam("whitelist") boolean whitelist,
             List<String> stringMaski,
@@ -101,7 +105,7 @@ public class ValintalaskentaKerrallaResource {
 
             Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
             final String userOID = AuthorizationUtil.getCurrentUser();
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, haunnimi, nimi, laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
@@ -161,16 +165,24 @@ public class ValintalaskentaKerrallaResource {
 
     @DELETE
     @Path("/haku/{uuid}")
-    public Response lopetaLaskenta(@PathParam("uuid") String uuid) {
+    public Response lopetaLaskenta(@PathParam("uuid") String uuid, @QueryParam("lopetaVainJonossaOlevaLaskenta") Boolean lopetaVainJonossaOlevaLaskenta) {
         if (uuid == null) {
             return errorResponce("Uuid on pakollinen");
         }
-        final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
-        if (l != null) {
-            l.lopeta();
+        if(Boolean.TRUE.equals(lopetaVainJonossaOlevaLaskenta)) {
+            boolean onkoLaskentaVielaJonossa = valintalaskentaValvomo.fetchLaskenta(uuid) == null;
+            if(!onkoLaskentaVielaJonossa) {
+                // Laskentaa suoritetaan jo joten ei pysayteta
+                return Response.ok().build();
+            }
         }
-        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Peruutettu käyttäjän toimesta")));
+        stop(uuid);
+        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Peruutettu käyttäjän toimesta"))).subscribe(ok -> stop(uuid), nok -> stop(uuid));
         return Response.ok().build();
+    }
+
+    private void stop(String uuid) {
+        Optional.ofNullable(valintalaskentaValvomo.fetchLaskenta(uuid)).ifPresent(Laskenta::lopeta);
     }
 
     private Response errorResponce(final String errorMessage) {

@@ -170,7 +170,7 @@ public class ErillishaunTuontiService {
     }
 
     private static final List<HakemuksenTila> VAIN_HAKEMUKSENTILALLISET_TILAT =
-            Arrays.asList(HakemuksenTila.PERUNUT, HakemuksenTila.PERUUTETTU, HakemuksenTila.HYLATTY,
+            Arrays.asList(HakemuksenTila.HYLATTY,
             HakemuksenTila.VARALLA,HakemuksenTila.PERUUNTUNUT);
 
     private static boolean isUusi(ErillishakuRivi rivi) {

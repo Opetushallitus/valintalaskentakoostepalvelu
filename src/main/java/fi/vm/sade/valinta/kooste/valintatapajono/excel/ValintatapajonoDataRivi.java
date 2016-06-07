@@ -21,10 +21,11 @@ public class ValintatapajonoDataRivi extends DataRivi {
         String jonosija = lukija.getArvoAt(1);
         String nimi = lukija.getArvoAt(2);
         String tila = lukija.getArvoAt(3);
-        String fi = lukija.getArvoAt(4);
-        String sv = lukija.getArvoAt(5);
-        String en = lukija.getArvoAt(6);
-        ValintatapajonoRivi valintatapajonoRivi = new ValintatapajonoRivi(oid, jonosija, nimi, tila, fi, sv, en);
+        String pisteet = lukija.getArvoAt(4);
+        String fi = lukija.getArvoAt(5);
+        String sv = lukija.getArvoAt(6);
+        String en = lukija.getArvoAt(7);
+        ValintatapajonoRivi valintatapajonoRivi = new ValintatapajonoRivi(oid, jonosija, nimi, tila, pisteet, fi, sv, en);
         for (ValintatapajonoDataRiviKuuntelija kuuntelija : kuuntelijat) {
             kuuntelija.valintatapajonoDataRiviTapahtuma(valintatapajonoRivi);
         }
