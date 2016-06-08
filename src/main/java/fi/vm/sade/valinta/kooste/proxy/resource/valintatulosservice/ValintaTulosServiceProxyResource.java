@@ -184,7 +184,7 @@ public class ValintaTulosServiceProxyResource {
     public void tuoErillishaunHakijat(@QueryParam("selite") String selite,
                                       @PathParam("hakuOid") String hakuOid,
                                       @PathParam("hakukohdeOid") String hakukohdeOid,
-                                      List<ErillishaunHakijaDTO> erillishaunHakijaDtos,
+                                      List<Valintatulos> valintatulokset,
                                       @Suspended AsyncResponse asyncResponse) throws UnsupportedEncodingException {
         setAsyncTimeout(asyncResponse,
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /erillishaku/haku/%s/hakukohde/%s?selite=%s",
@@ -192,7 +192,7 @@ public class ValintaTulosServiceProxyResource {
 
         List<VastaanottoRecordDTO> tallennettavat = null;
         try {
-            tallennettavat = erillishakuCreateVastaanottoRecordsFrom(erillishaunHakijaDtos, username(), selite);
+            tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
         } catch (Exception e) {
             asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(e.getMessage(), Collections.emptyList())).build());
             return;
@@ -206,7 +206,7 @@ public class ValintaTulosServiceProxyResource {
                 return new ValintatulosUpdateStatus(Response.Status.FORBIDDEN.getStatusCode(), v.getResult().getMessage(), null, v.getHakemusOid());
             }).collect(Collectors.toList());
             if (failedUpdateStatuses.isEmpty()) {
-                return sijoitteluResource.muutaErillishaunHakemuksenTilaa(hakuOid, hakukohdeOid, erillishaunHakijaDtos)
+                return sijoitteluResource.muutaErillishaunHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset)
                         .doOnError(throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
             } else {
                 return Observable.error(new VastaanottoUpdateFailuresException(failedUpdateStatuses));
@@ -222,10 +222,6 @@ public class ValintaTulosServiceProxyResource {
 
     private List<VastaanottoRecordDTO> createVastaanottoRecordsFrom(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
         return valintatulokset.stream().map(v -> VastaanottoRecordDTO.of(v, muokkaaja, selite)).collect(Collectors.toList());
-    }
-
-    private List<VastaanottoRecordDTO> erillishakuCreateVastaanottoRecordsFrom(List<ErillishaunHakijaDTO> hakijat, String muokkaaja, String selite) {
-        return hakijat.stream().map(hakija -> VastaanottoRecordDTO.of(hakija, muokkaaja, selite)).collect(Collectors.toList());
     }
 
     private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
