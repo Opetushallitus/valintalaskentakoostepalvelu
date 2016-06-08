@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 @Controller("SuorituksenArvosanatProxyResource")
 @Path("/proxy/suoritukset")
 @PreAuthorize("isAuthenticated()")
+@Api(value = "/proxy/suoritukset", description = "Käyttöliittymäkutsujen välityspalvelin suoritusrekisteriin")
 public class OppijanSuorituksetProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResource.class);
 
@@ -79,6 +82,8 @@ public class OppijanSuorituksetProxyResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @POST
     @Path("/suorituksetByHakemusOids/hakuOid/{hakuOid}")
+    @Consumes("application/json")
+    @ApiOperation(consumes = "application/json", value = "Hakemukset suoritustietoineen tietylle haulle", response = Response.class)
     public void getSuoritukset(
             @PathParam("hakuOid") String hakuOid,
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
