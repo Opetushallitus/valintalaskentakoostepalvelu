@@ -50,7 +50,7 @@ public class OppijaToAvainArvoDTOConverter {
 
         final Stream<SuoritusJaArvosanat> suorituksetFilteredByKoulutusType = concat(peruskoulu, concat(lukio, concat(lisaopetus, concat(ammatillinen, yo))));
         return suorituksetAvainArvoiksi(
-                oppijanumero,
+                hakemus.getHakemusoid(),
                 removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(removeHakijanMuillaHakemuksillaSyottamatTiedot(suorituksetFilteredByKoulutusType, hakemus), parametritDTO).collect(Collectors.toList())
         );
     }
@@ -74,7 +74,7 @@ public class OppijaToAvainArvoDTOConverter {
         }
     }
 
-    private static List<AvainArvoDTO> suorituksetAvainArvoiksi(String oppijanumero, List<SuoritusJaArvosanat> suoritukset) {
+    private static List<AvainArvoDTO> suorituksetAvainArvoiksi(String hakemusOid, List<SuoritusJaArvosanat> suoritukset) {
         List<SuoritusJaArvosanat> peruskoulunkaltaisetSuoritukset = suoritukset.stream()
                 .filter(s -> wrap(s).isSuoritusMistaSyntyyPeruskoulunArvosanoja())
                 .collect(Collectors.toList());
@@ -85,9 +85,9 @@ public class OppijaToAvainArvoDTOConverter {
                 .filter(s -> wrap(s).isAmmatillinen())
                 .collect(Collectors.toList());
         return new ArrayList<AvainArvoDTO>() {{
-            addAll(ArvosanaToAvainArvoDTOConverter.convert(peruskoulunkaltaisetSuoritukset, PK_PREFIX, "", oppijanumero));
-            addAll(ArvosanaToAvainArvoDTOConverter.convert(lukioSuoritukset, LK_PREFIX, "", oppijanumero));
-            addAll(ArvosanaToAvainArvoDTOConverter.convert(ammatillisetSuoritukset, AM_PREFIX, "", oppijanumero));
+            addAll(ArvosanaToAvainArvoDTOConverter.convert(peruskoulunkaltaisetSuoritukset, PK_PREFIX, "", hakemusOid));
+            addAll(ArvosanaToAvainArvoDTOConverter.convert(lukioSuoritukset, LK_PREFIX, "", hakemusOid));
+            addAll(ArvosanaToAvainArvoDTOConverter.convert(ammatillisetSuoritukset, AM_PREFIX, "", hakemusOid));
         }};
     }
 

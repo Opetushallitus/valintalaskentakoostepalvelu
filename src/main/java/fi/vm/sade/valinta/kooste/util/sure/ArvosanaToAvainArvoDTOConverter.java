@@ -25,9 +25,12 @@ public class ArvosanaToAvainArvoDTOConverter {
     private static final String SUORITETTU = "_SUORITETTU";
     private static final String VALINNAINEN = "_VAL";
 
-    public static Set<AvainArvoDTO> convert(List<SuoritusJaArvosanat> sureSuoritukset, String prefix, String suffix, String oppijaOid) {
+    public static Set<AvainArvoDTO> convert(List<SuoritusJaArvosanat> sureSuoritukset, String prefix, String suffix, final String hakemusOid) {
         List<List<OppiaineArvosana>> suoritukset = sureSuoritukset.stream()
-                .map(s -> s.getArvosanat().stream().map(a -> new OppiaineArvosana(a)).collect(Collectors.toList()))
+                .map(s -> s.getArvosanat().stream().map(arvosana -> {
+                    validateArvosanaForHakemus(hakemusOid, arvosana);
+                    return new OppiaineArvosana(arvosana);
+                }).collect(Collectors.toList()))
                 .collect(Collectors.toList());
         Stream<OppiaineArvosana> parhaatArvosanat = Stream.concat(
                 aineidenValinnaisetArvosanatSuorituksittain(suoritukset.stream())
@@ -37,6 +40,15 @@ public class ArvosanaToAvainArvoDTOConverter {
         return palautaAinenumerointi(parhaatArvosanat)
                 .flatMap(a -> arvosanaToAvainArvo(a, prefix, suffix))
                 .collect(Collectors.toSet());
+    }
+
+    private static void validateArvosanaForHakemus(String hakemusOid, Arvosana arvosana) {
+        if (arvosana.getAine().matches("[AB]\\d+")) {
+            String oppiaine = arvosana.getLisatieto();
+            if (oppiaine == null) {
+                throw new RuntimeException(String.format("(Hakemus %s) Arvosanalta %s puuttuu oppiaine", hakemusOid, arvosana.getAine()));
+            }
+        }
     }
 
     public static Stream<OppiaineArvosana> palautaAinenumerointi(Stream<OppiaineArvosana> arvosanat) {
@@ -173,11 +185,7 @@ public class ArvosanaToAvainArvoDTOConverter {
 
         public OppiaineArvosana(Arvosana arvosana) {
             if (arvosana.getAine().matches("[AB]\\d+")) {
-                String oppiaine = arvosana.getLisatieto();
-                if (oppiaine == null) {
-                    throw new RuntimeException(String.format("Arvosanalta %s puuttuu oppiaine", arvosana.getAine()));
-                }
-                this.aine = arvosana.getAine().substring(0, 2) + oppiaine;
+                this.aine = arvosana.getAine().substring(0, 2) + arvosana.getLisatieto();
             } else {
                 this.aine = arvosana.getAine();
             }
