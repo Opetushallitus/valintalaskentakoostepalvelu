@@ -74,6 +74,12 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
     }
 
     @Override
+    public Observable<Void> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset) {
+        String url = "/tila/checkStaleRead";
+        return postAsObservable(url, Entity.json(valintatulokset)).map(r -> null);
+    }
+
+    @Override
     public Observable<HakukohteenValintatulosUpdateStatuses> muutaErillishaunHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset) {
         String url = "/tila/erillishaku/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
         return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset));

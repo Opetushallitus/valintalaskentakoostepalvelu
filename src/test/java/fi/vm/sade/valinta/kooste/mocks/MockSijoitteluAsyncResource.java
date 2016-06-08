@@ -52,6 +52,11 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
+    public Observable<Void> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Observable<HakukohteenValintatulosUpdateStatuses> muutaErillishaunHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset) {
         throw new UnsupportedOperationException();
     }
