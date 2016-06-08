@@ -193,22 +193,24 @@ public class ValintaTulosServiceProxyResource {
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /erillishaku/haku/%s/hakukohde/%s?selite=%s",
                         hakuOid, hakukohdeOid, selite));
 
-        List<VastaanottoRecordDTO> tallennettavat = null;
-        try {
-            tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
-        } catch (Exception e) {
-            asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(e.getMessage(), Collections.emptyList())).build());
-            return;
-        }
-        Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
-        vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
-        vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
+        sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(r -> {
+            List<VastaanottoRecordDTO> tallennettavat = null;
+            try {
+                tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
+            } catch (Exception e) {
+                return Observable.error(e);
+            }
+            Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
+            vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
+            return vastaanottoTilojenTallennus;
+        }).flatMap(vastaanottoResponse -> {
             Stream<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed);
             List<ValintatulosUpdateStatus> failedUpdateStatuses = epaonnistuneet.map(v -> {
                 LOG.warn(v.toString());
                 return new ValintatulosUpdateStatus(Response.Status.FORBIDDEN.getStatusCode(), v.getResult().getMessage(), null, v.getHakemusOid());
             }).collect(Collectors.toList());
             if (failedUpdateStatuses.isEmpty()) {
+                valintatulokset.forEach(valintatulos -> valintatulos.setRead(new Date()));
                 return sijoitteluResource.muutaErillishaunHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset)
                         .doOnError(throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
             } else {
