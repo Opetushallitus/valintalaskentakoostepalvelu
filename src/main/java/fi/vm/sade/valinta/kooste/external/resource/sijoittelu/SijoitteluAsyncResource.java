@@ -1,16 +1,15 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 /**
  * @Deprecated Use RX API, Observable<...>
@@ -47,5 +46,5 @@ public interface SijoitteluAsyncResource {
 
     Observable<HakukohteenValintatulosUpdateStatuses> muutaErillishaunHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset);
 
-    Observable<Void> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset);
+    Observable<Map<String, String>> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset);
 }
