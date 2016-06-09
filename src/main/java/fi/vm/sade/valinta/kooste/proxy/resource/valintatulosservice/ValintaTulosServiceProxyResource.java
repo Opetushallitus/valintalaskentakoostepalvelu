@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.ImmutableMap;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
@@ -148,16 +147,20 @@ public class ValintaTulosServiceProxyResource {
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s?selite=%s",
                         hakuOid, hakukohdeOid, selite));
 
-        sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(r -> {
-            List<VastaanottoRecordDTO> tallennettavat = null;
-            try {
-                tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
-            } catch (Exception e) {
-                return Observable.error(e);
+        sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(staleReadCheckResponse -> {
+            if (staleReadCheckResponse.statuses.isEmpty()) {
+                List<VastaanottoRecordDTO> tallennettavat = null;
+                try {
+                    tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
+                } catch (Exception e) {
+                    return Observable.error(e);
+                }
+                Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
+                vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
+                return vastaanottoTilojenTallennus;
+            } else {
+                return Observable.error(new StaleReadCheckFailureException(staleReadCheckResponse));
             }
-            Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
-            vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
-            return vastaanottoTilojenTallennus;
         }).flatMap(vastaanottoResponse -> {
             Stream<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed);
             List<ValintatulosUpdateStatus> failedUpdateStatuses = epaonnistuneet.map(v -> {
@@ -174,9 +177,13 @@ public class ValintaTulosServiceProxyResource {
         }).subscribe(
                 updateStatuses -> asyncResponse.resume(Response.ok(updateStatuses).build()),
                 poikkeus -> {
-                    List<ValintatulosUpdateStatus> failedUpdateStatuses = poikkeus instanceof VastaanottoUpdateFailuresException ?
-                            ((VastaanottoUpdateFailuresException) poikkeus).failedUpdateStatuses : Collections.emptyList();
-                    asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(poikkeus.getMessage(), failedUpdateStatuses)).build());
+                    if (poikkeus instanceof  StaleReadCheckFailureException) {
+                        asyncResponse.resume(Response.serverError().entity(((StaleReadCheckFailureException) poikkeus).updateStatuses).build());
+                    } else {
+                        List<ValintatulosUpdateStatus> failedUpdateStatuses = poikkeus instanceof VastaanottoUpdateFailuresException ?
+                                ((VastaanottoUpdateFailuresException) poikkeus).failedUpdateStatuses : Collections.emptyList();
+                        asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(poikkeus.getMessage(), failedUpdateStatuses)).build());
+                    }
                 });
     }
 
@@ -193,16 +200,20 @@ public class ValintaTulosServiceProxyResource {
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /erillishaku/haku/%s/hakukohde/%s?selite=%s",
                         hakuOid, hakukohdeOid, selite));
 
-        sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(r -> {
-            List<VastaanottoRecordDTO> tallennettavat = null;
-            try {
-                tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
-            } catch (Exception e) {
-                return Observable.error(e);
+        sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(staleReadCheckResponse -> {
+            if (staleReadCheckResponse.statuses.isEmpty()) {
+                List<VastaanottoRecordDTO> tallennettavat = null;
+                try {
+                    tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
+                } catch (Exception e) {
+                    return Observable.error(e);
+                }
+                Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
+                vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
+                return vastaanottoTilojenTallennus;
+            } else {
+                return Observable.error(new StaleReadCheckFailureException(staleReadCheckResponse));
             }
-            Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
-            vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
-            return vastaanottoTilojenTallennus;
         }).flatMap(vastaanottoResponse -> {
             Stream<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed);
             List<ValintatulosUpdateStatus> failedUpdateStatuses = epaonnistuneet.map(v -> {
@@ -219,9 +230,13 @@ public class ValintaTulosServiceProxyResource {
         }).subscribe(
                 updateStatuses -> asyncResponse.resume(Response.ok(updateStatuses).build()),
                 poikkeus -> {
-                    List<ValintatulosUpdateStatus> failedUpdateStatuses = poikkeus instanceof VastaanottoUpdateFailuresException ?
+                    if (poikkeus instanceof  StaleReadCheckFailureException) {
+                        asyncResponse.resume(Response.serverError().entity(((StaleReadCheckFailureException) poikkeus).updateStatuses).build());
+                    } else {
+                        List<ValintatulosUpdateStatus> failedUpdateStatuses = poikkeus instanceof VastaanottoUpdateFailuresException ?
                             ((VastaanottoUpdateFailuresException) poikkeus).failedUpdateStatuses : Collections.emptyList();
-                    asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(poikkeus.getMessage(), failedUpdateStatuses)).build());
+                        asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(poikkeus.getMessage(), failedUpdateStatuses)).build());
+                    }
                 });
     }
 
