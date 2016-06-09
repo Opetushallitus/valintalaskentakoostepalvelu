@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -46,5 +45,5 @@ public interface SijoitteluAsyncResource {
 
     Observable<HakukohteenValintatulosUpdateStatuses> muutaErillishaunHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset);
 
-    Observable<Map<String, String>> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset);
+    Observable<HakukohteenValintatulosUpdateStatuses> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset);
 }

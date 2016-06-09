@@ -28,7 +28,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -73,9 +72,9 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
     }
 
     @Override
-    public Observable<Map<String,String>> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset) {
+    public Observable<HakukohteenValintatulosUpdateStatuses> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset) {
         String url = "/tila/checkStaleRead";
-        return postAsObservable(url, Map.class, Entity.json(valintatulokset));
+        return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset));
     }
 
     @Override
