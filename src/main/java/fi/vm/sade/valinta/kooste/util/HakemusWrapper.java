@@ -43,6 +43,7 @@ public class HakemusWrapper {
     private final static String NAINEN                          = "2";
     private final static String MIES                            = "1";
     private final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
+    private final static String LUPA_SAHKOISESTI                = "lupaSahkoisesti";
 
     private Yhteystiedot yhteystiedot = null;
 
@@ -228,7 +229,7 @@ public class HakemusWrapper {
     }
 
     public boolean getLupaJulkaisuun() {
-        getLisatiedot(); // lazy load henkilotiedot
+        getLisatiedot(); // lazy load lisatiedot
         if (lisatiedot.containsKey(LUPAJULKAISUUN)) {
             String l = lisatiedot.get(LUPAJULKAISUUN);
             return Boolean.TRUE.equals(Boolean.valueOf(l));
@@ -242,12 +243,21 @@ public class HakemusWrapper {
     }
 
     public String getAsiointikieli() {
-        getLisatiedot(); // lazy load henkilotiedot
+        getLisatiedot(); // lazy load lisatiedot
         if (lisatiedot.containsKey(ASIOINTIKIELI)) {
             return KieliUtil.normalisoiKielikoodi(lisatiedot.get(ASIOINTIKIELI));
         } else {
             return KieliUtil.SUOMI;
         }
+    }
+
+    public boolean getLupaSahkoiseenAsiointiin() {
+        getLisatiedot(); // lazy load lisatiedot
+        if (lisatiedot.containsKey(LUPA_SAHKOISESTI)) {
+            String lupa = lisatiedot.get(LUPA_SAHKOISESTI);
+            return Boolean.TRUE.equals(Boolean.valueOf(lupa));
+        }
+        return false;
     }
 
     public Map<String, String> getLisatiedot() {

@@ -132,6 +132,7 @@ public class SijoittelunTulosExcelKomponentti {
                 "Sähköposti",
                 "Puhelinnumero",
                 "Lupa julkaisuun",
+                "Lupa sähköiseen asiointiin",
                 "Hakutoive"
         ));
         {
@@ -181,6 +182,7 @@ public class SijoittelunTulosExcelKomponentti {
                     wrapper.getSahkopostiOsoite(),
                     wrapper.getPuhelinnumero(),
                     HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()),
+                    HakemusUtil.lupaSahkoiseenAsiointiin(wrapper.getLupaSahkoiseenAsiointiin()),
                     wrapper.getHakutoiveenPrioriteetti(hakukohdeOid)
             ));
             int index = 0;

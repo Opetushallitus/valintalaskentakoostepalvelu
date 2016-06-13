@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -103,9 +104,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 hakukohde
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertEquals(39, solut(HAKEMUS1, rivit).size());
-        assertEquals(39, solut(HAKEMUS2, rivit).size());
-        assertEquals(39, solut(HAKEMUS3, rivit).size());
+        assertEquals(40, solut(HAKEMUS1, rivit).size());
+        assertEquals(40, solut(HAKEMUS2, rivit).size());
+        assertEquals(40, solut(HAKEMUS3, rivit).size());
     }
 
     @Test
@@ -125,6 +126,63 @@ public class SijoittelunTulosExcelKomponenttiTest {
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         List<String> texts = cellTexts(rivit, HAKEMUS1);
         assertTrue("Cell texts should contain text 'SV'", cellTexts(rivit, HAKEMUS1).contains("SV"));
+    }
+
+    @Test
+    public void defaultAsiointikieliWhenNoAnswer() throws Throwable {
+        HakukohdeDTO hakukohde = new HakukohdeDTO();
+        ValintatapajonoDTO jono = new ValintatapajonoDTO();
+        HakemusDTO hakemusDTO = new HakemusDTO();
+        hakemusDTO.setHakemusOid(HAKEMUS1);
+        jono.setHakemukset(Arrays.asList(hakemusDTO));
+        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        Answers answers = new Answers();
+        HashMap<String, String> lisatiedot = new HashMap<>();
+        answers.setLisatiedot(lisatiedot);
+        Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
+        List<String> texts = cellTexts(rivit, HAKEMUS1);
+        assertTrue("Cell texts should contain text 'FI'", cellTexts(rivit, HAKEMUS1).contains("FI"));
+    }
+
+    @Test
+    public void addsLupaSahkoiseenAsiointiinFromAnswers() throws Throwable {
+        HakukohdeDTO hakukohde = new HakukohdeDTO();
+        ValintatapajonoDTO jono = new ValintatapajonoDTO();
+        HakemusDTO hakemusDTO = new HakemusDTO();
+        hakemusDTO.setHakemusOid(HAKEMUS1);
+        jono.setHakemukset(Arrays.asList(hakemusDTO));
+        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        Answers answers = new Answers();
+        HashMap<String, String> lisatiedot = new HashMap<>();
+        lisatiedot.put("lupaSahkoisesti", "true");
+        answers.setLisatiedot(lisatiedot);
+        Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
+        List<String> texts = cellTexts(rivit, HAKEMUS1);
+        assertTrue("Cell texts should contain text 'Lupa sähköiseen asiointiin'",
+                cellTexts(rivit, HAKEMUS1).contains("Lupa sähköiseen asiointiin"));
+    }
+
+    @Test
+    public void noLupaSahkoiseenAsiointiinFromAnswers() throws Throwable {
+        HakukohdeDTO hakukohde = new HakukohdeDTO();
+        ValintatapajonoDTO jono = new ValintatapajonoDTO();
+        HakemusDTO hakemusDTO = new HakemusDTO();
+        hakemusDTO.setHakemusOid(HAKEMUS1);
+        jono.setHakemukset(Arrays.asList(hakemusDTO));
+        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        Answers answers = new Answers();
+        HashMap<String, String> lisatiedot = new HashMap<>();
+        answers.setLisatiedot(lisatiedot);
+        Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
+        List<String> texts = cellTexts(rivit, HAKEMUS1);
+        assertFalse("Cell texts should not contain text 'Lupa sähköiseen asiointiin'",
+                cellTexts(rivit, HAKEMUS1).contains("Lupa sähköiseen asiointiin"));
     }
 
     private List<String> cellTexts(Collection<Rivi> rivit, String oid) {

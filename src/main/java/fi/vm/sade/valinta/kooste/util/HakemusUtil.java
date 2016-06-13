@@ -153,6 +153,13 @@ public class HakemusUtil {
         return StringUtils.EMPTY;
     }
 
+    public static String lupaSahkoiseenAsiointiin(boolean lupa) {
+        if (lupa) {
+            return "Lupa sähköiseen asiointiin";
+        }
+        return StringUtils.EMPTY;
+    }
+
     public static String tilaConverter(ValintatuloksenTila tila, String preferoitukielikoodi) {
         if (tila == null) {
             return StringUtils.EMPTY;
