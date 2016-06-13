@@ -103,9 +103,28 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 hakukohde
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertEquals(38, solut(HAKEMUS1, rivit).size());
-        assertEquals(38, solut(HAKEMUS2, rivit).size());
-        assertEquals(38, solut(HAKEMUS3, rivit).size());
+        assertEquals(39, solut(HAKEMUS1, rivit).size());
+        assertEquals(39, solut(HAKEMUS2, rivit).size());
+        assertEquals(39, solut(HAKEMUS3, rivit).size());
+    }
+
+    @Test
+    public void addsAsiointikieliFromAnswers() throws Throwable {
+        HakukohdeDTO hakukohde = new HakukohdeDTO();
+        ValintatapajonoDTO jono = new ValintatapajonoDTO();
+        HakemusDTO hakemusDTO = new HakemusDTO();
+        hakemusDTO.setHakemusOid(HAKEMUS1);
+        jono.setHakemukset(Arrays.asList(hakemusDTO));
+        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        Answers answers = new Answers();
+        HashMap<String, String> lisatiedot = new HashMap<>();
+        lisatiedot.put("asiointikieli", "SV");
+        answers.setLisatiedot(lisatiedot);
+        Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
+        List<String> texts = cellTexts(rivit, HAKEMUS1);
+        assertTrue("Cell texts should contain text 'SV'", cellTexts(rivit, HAKEMUS1).contains("SV"));
     }
 
     private List<String> cellTexts(Collection<Rivi> rivit, String oid) {
