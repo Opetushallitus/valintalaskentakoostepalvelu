@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
@@ -86,6 +87,11 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE), LetterResponse.class);
+    }
+
+    public Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli) {
+        String url = String.format("/api/v1/luotettu/letter/count/%s/type/%s/language/%s", hakuOid, tyyppi, kieli);
+        return getAsObservable(url, LetterBatchCountDto.class, client -> { client.accept(MediaType.APPLICATION_JSON_TYPE);return client; });
     }
 
     @Override

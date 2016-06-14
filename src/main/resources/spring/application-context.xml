@@ -453,6 +453,8 @@
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.suoritukset.OppijanSuorituksetProxyResource"/>
 		<bean id="ValintaTulosServiceProxyResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.ValintaTulosServiceProxyResource"/>
+		<bean id="ViestintapalveluProxyResource"
+			  class="fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu.ViestintapalveluProxyResource"/>
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice" />
 		<!-- Swagger -->
 		<!-- Swagger API listing resource -->
@@ -501,6 +503,7 @@
 				<ref bean="DokumenttiProsessiResource"/>
 				<ref bean="ViestintapalveluAktivointiResource"/>
 				<ref bean="ValintaTulosServiceProxyResource"/>
+				<ref bean="ViestintapalveluProxyResource"/>
 				<ref bean="SessionResource"/>
 				<ref bean="swaggerResourceJSON"/>
 				<ref bean="HakemuksetResource"/>
