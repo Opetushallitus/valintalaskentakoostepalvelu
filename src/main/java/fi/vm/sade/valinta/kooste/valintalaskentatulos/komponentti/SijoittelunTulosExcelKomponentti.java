@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.tulos.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.*;
@@ -19,10 +20,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.TilaHistoriaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.util.excel.Highlight;
@@ -61,6 +58,21 @@ public class SijoittelunTulosExcelKomponentti {
                     }
                     return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
                 });
+
+        // Hakijaryhmän nimeä varten tarvitaan hakijaryhmän tiedot
+        List<HakijaryhmaDTO> hakijaryhmat = Optional.ofNullable(
+                hakukohde.getHakijaryhmat()).orElse(Collections.emptyList())
+                .stream()
+                    .filter(h -> h.getHakemusOid() != null && !h.getHakemusOid().isEmpty())
+                    .collect(Collectors.toList());
+
+        // Tehdään mäppäys hakemusOid -> Hakijaryhmän nimi
+        Map<String, String> mapHakemusOidToHakijaryhmaNimi = new HashMap<>();
+        for (HakijaryhmaDTO hakijaryhma : hakijaryhmat) {
+            for (String hakemusOid : hakijaryhma.getHakemusOid()) {
+                mapHakemusOidToHakijaryhmaNimi.put(hakemusOid, hakijaryhma.getNimi());
+            }
+        }
 
         Set<String> hakemusOids = new HashSet<>();
         List<HakemusDTO> distinctHakemuksetFromAllQueues = new ArrayList<>();
@@ -133,7 +145,8 @@ public class SijoittelunTulosExcelKomponentti {
                 "Puhelinnumero",
                 "Lupa julkaisuun",
                 "Lupa sähköiseen asiointiin",
-                "Hakutoive"
+                "Hakutoive",
+                "Hakijaryhmä"
         ));
         {
             int index = 0;
@@ -183,7 +196,8 @@ public class SijoittelunTulosExcelKomponentti {
                     wrapper.getPuhelinnumero(),
                     HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()),
                     HakemusUtil.lupaSahkoiseenAsiointiin(wrapper.getLupaSahkoiseenAsiointiin()),
-                    wrapper.getHakutoiveenPrioriteetti(hakukohdeOid)
+                    wrapper.getHakutoiveenPrioriteetti(hakukohdeOid),
+                    mapHakemusOidToHakijaryhmaNimi.getOrDefault(hDto.getHakemusOid(), "")
             ));
             int index = 0;
             for (ValintatapajonoDTO jono : valintatapajonot) {
