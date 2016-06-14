@@ -131,6 +131,7 @@ public class ParametritParser {
     }
 
     public Date opiskelijanPaikanVastaanottoPaattyy() {
+        if(this.parametrit.getPH_OPVP() == null) return null;
         return this.parametrit.getPH_OPVP().getDate();
     }
 
