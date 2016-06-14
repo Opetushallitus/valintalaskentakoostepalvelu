@@ -38,16 +38,14 @@ public class ViestintapalveluProxyResource {
 
     @GET
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-    @Path("/count/haku/{hakuOid}/tyyppi/{tyyppi}/kieli/{kieli}")
+    @Path("/count/haku/{hakuOid}")
     @Consumes("application/json")
     public void valintatuloksetIlmanTilaaHakijalle(
             @PathParam("hakuOid") String hakuOid,
-            @PathParam("tyyppi") String tyyppi,
-            @PathParam("kieli") String kieli,
             @Suspended AsyncResponse asyncResponse) {
         setAsyncTimeout(asyncResponse,
-                String.format("ViestintapalveluProxyResource -palvelukutsu on aikakatkaistu: /viestintapalvelu/haku/%s/tyyppi/%s/kieli/%s",
-                        hakuOid, tyyppi, kieli));
+                String.format("ViestintapalveluProxyResource -palvelukutsu on aikakatkaistu: /viestintapalvelu/haku/%s/tyyppi/--/kieli/--",
+                        hakuOid));
 
         Observable<LetterBatchCountDto> hyvaksymiskirjeFi = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "fi");
         Observable<LetterBatchCountDto> hyvaksymiskirjeSv = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "sv");
