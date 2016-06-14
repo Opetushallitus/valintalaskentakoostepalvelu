@@ -243,7 +243,7 @@
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
-                <jaxrs-client:client id="TarjontaServiceKomotoRestClient"
+        <jaxrs-client:client id="TarjontaServiceKomotoRestClient"
 							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
 							 serviceClass="fi.vm.sade.tarjonta.service.resources.KomotoResource"
 							 inheritHeaders="true">
@@ -409,6 +409,9 @@
 		<!-- Tarjonta Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl" />
+		<!-- Oppijantunnistus Async -->
+		<bean
+				class="fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.impl.OppijantunnistusAsyncResourceImpl" />
 		<!-- Valintalaskenta Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl" />
