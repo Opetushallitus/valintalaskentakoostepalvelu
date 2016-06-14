@@ -37,7 +37,7 @@ public class ViestintapalveluProxyResource {
                         hakuOid, tyyppi, kieli));
         viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, tyyppi, kieli).subscribe(
                 letterCount -> {
-                    asyncResponse.resume(Response.ok(letterCount,MediaType.APPLICATION_JSON_TYPE));
+                    asyncResponse.resume(Response.ok(letterCount,MediaType.APPLICATION_JSON_TYPE).build());
                 },
                 error -> {
                     errorResponse(String.format("Viestintäpalvelukutsu epäonnistui! %s",error.getMessage()), asyncResponse);
