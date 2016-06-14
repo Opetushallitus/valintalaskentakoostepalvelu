@@ -25,7 +25,7 @@ public class ViestintapalveluProxyResource {
 
     @GET
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-    @Path("/viestintapalvelu/haku/{hakuOid}/tyyppi/{tyyppi}/kieli/{kieli}")
+    @Path("/count/haku/{hakuOid}/tyyppi/{tyyppi}/kieli/{kieli}")
     @Consumes("application/json")
     public void valintatuloksetIlmanTilaaHakijalle(
             @PathParam("hakuOid") String hakuOid,
