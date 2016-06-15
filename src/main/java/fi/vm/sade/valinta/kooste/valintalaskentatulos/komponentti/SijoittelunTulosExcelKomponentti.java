@@ -59,18 +59,23 @@ public class SijoittelunTulosExcelKomponentti {
                     return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
                 });
 
-        // Hakijaryhmän nimeä varten tarvitaan hakijaryhmän tiedot
+        // Hakijaryhmät (tarvitaan hakijaryhmien nimet)
         List<HakijaryhmaDTO> hakijaryhmat = Optional.ofNullable(
                 hakukohde.getHakijaryhmat()).orElse(Collections.emptyList())
                 .stream()
                     .filter(h -> h.getHakemusOid() != null && !h.getHakemusOid().isEmpty())
                     .collect(Collectors.toList());
 
-        // Tehdään mäppäys hakemusOid -> Hakijaryhmän nimi
-        Map<String, String> mapHakemusOidToHakijaryhmaNimi = new HashMap<>();
+        // Tehdään mäppäys hakemusOid:t -> hakijaryhmien nimet
+        Map<String, List<String>> mapHakemusOidToHakijaryhmaNimet = new HashMap<>();
         for (HakijaryhmaDTO hakijaryhma : hakijaryhmat) {
             for (String hakemusOid : hakijaryhma.getHakemusOid()) {
-                mapHakemusOidToHakijaryhmaNimi.put(hakemusOid, hakijaryhma.getNimi());
+                List<String> currentHakemusHakijaryhmat = mapHakemusOidToHakijaryhmaNimet.get(hakemusOid);
+                if (currentHakemusHakijaryhmat == null) {
+                    currentHakemusHakijaryhmat = new ArrayList<>();
+                }
+                currentHakemusHakijaryhmat.add(hakijaryhma.getNimi());
+                mapHakemusOidToHakijaryhmaNimet.put(hakemusOid, currentHakemusHakijaryhmat);
             }
         }
 
@@ -146,7 +151,7 @@ public class SijoittelunTulosExcelKomponentti {
                 "Lupa julkaisuun",
                 "Lupa sähköiseen asiointiin",
                 "Hakutoive",
-                "Hakijaryhmä"
+                "Hakijaryhmät"
         ));
         {
             int index = 0;
@@ -197,7 +202,7 @@ public class SijoittelunTulosExcelKomponentti {
                     HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()),
                     HakemusUtil.lupaSahkoiseenAsiointiin(wrapper.getLupaSahkoiseenAsiointiin()),
                     wrapper.getHakutoiveenPrioriteetti(hakukohdeOid),
-                    mapHakemusOidToHakijaryhmaNimi.getOrDefault(hDto.getHakemusOid(), "")
+                    StringUtils.join(mapHakemusOidToHakijaryhmaNimet.get(hDto.getHakemusOid()), ", ")
             ));
             int index = 0;
             for (ValintatapajonoDTO jono : valintatapajonot) {
