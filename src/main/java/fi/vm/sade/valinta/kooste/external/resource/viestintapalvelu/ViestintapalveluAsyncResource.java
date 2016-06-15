@@ -1,8 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu;
 
-import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -16,14 +15,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import rx.Observable;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
 public interface ViestintapalveluAsyncResource {
 
@@ -46,4 +38,8 @@ public interface ViestintapalveluAsyncResource {
     Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid);
 
     Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli);
+
+    Observable<Optional<Long>> haeJulkaistuKirjelahetys(String hakuOid, String kirjeenTyyppi, String kieli);
+
+    Observable<List<String>> haeEPostiOsoitteet(Long batchId);
 }

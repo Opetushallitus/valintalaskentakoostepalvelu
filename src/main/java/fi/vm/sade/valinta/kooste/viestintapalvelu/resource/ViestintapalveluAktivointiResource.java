@@ -1,19 +1,17 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.Lists;
@@ -304,6 +302,43 @@ public class ViestintapalveluAktivointiResource {
             throw new RuntimeException(e);
         }
         return new ProsessiId(prosessi.getId());// Response.ok().build();
+    }
+
+    @POST
+    @Path("/securelinkit/aktivoi")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Lähettää Secure Linkit ryhmäsähköpostilla", response = Response.class)
+    public ProsessiId secureLinkkienLahetys(@QueryParam("hakuOid") String hakuOid,
+                                            @QueryParam("asiointikieli") String asiointikieli,
+                                            @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
+                                            @QueryParam("templateName") @DefaultValue("opiskelijavalinnan_tulos_securelink") String templateName) {
+
+        if(StringUtils.isBlank(hakuOid) || StringUtils.isBlank(kirjeenTyyppi) || StringUtils.isBlank(asiointikieli) ) {
+            LOG.error("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.");
+            throw new RuntimeException("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.");
+        }
+        if(!("jalkiohjauskirje".equals(kirjeenTyyppi) || "hyvaksymiskirje".equals(kirjeenTyyppi))){
+            LOG.error("{} ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.", kirjeenTyyppi);
+            throw new RuntimeException(kirjeenTyyppi + " ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.");
+        }
+        if(!( "fi".equals(asiointikieli) || "sv".equals(asiointikieli) || "en".equals(asiointikieli))) {
+            LOG.error("{} ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.", asiointikieli);
+            throw new RuntimeException(asiointikieli + " ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.");
+        }
+
+        KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(1);
+        try {
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+
+
+
+
+        } catch (Exception e) {
+            LOG.error("Securelink-lähetys epäonnistui!", e);
+            throw new RuntimeException(e);
+        }
+        return new ProsessiId(prosessi.getId());
     }
 
     private List<String> tags(String... tag) {

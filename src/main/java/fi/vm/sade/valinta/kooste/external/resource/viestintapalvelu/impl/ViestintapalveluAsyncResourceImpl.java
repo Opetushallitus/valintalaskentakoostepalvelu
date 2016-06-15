@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -16,6 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBa
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -129,5 +132,35 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
         }
+    }
+
+    @Override
+    public Observable<Optional<Long>> haeJulkaistuKirjelahetys(String hakuOid, String kirjeenTyyppi, String asiointikieli) {
+        return getAsObservable(
+                "/api/v1/letter/getBatchId",
+                (batchIdAsString) ->
+                    StringUtils.isNumeric(batchIdAsString) ? Optional.of(Long.parseLong(batchIdAsString)) : Optional.empty(),
+                client -> {
+                    client.accept(MediaType.TEXT_PLAIN_TYPE);
+                    client.query("hakuOid", hakuOid);
+                    client.query("type", kirjeenTyyppi);
+                    client.query("language", asiointikieli);
+                    client.query("published", true);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Observable<List<String>> haeEPostiOsoitteet(Long batchId) {
+        return getAsObservable(
+                "/api/v1/letter/getEPostiAddressesForLetterBatch/" + batchId,
+                new TypeToken<List<String>>() {
+                }.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
     }
 }
