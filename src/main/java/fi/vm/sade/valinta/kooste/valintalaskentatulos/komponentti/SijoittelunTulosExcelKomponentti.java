@@ -59,25 +59,9 @@ public class SijoittelunTulosExcelKomponentti {
                     return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
                 });
 
-        // Hakijaryhmät (tarvitaan hakijaryhmien nimet)
-        List<HakijaryhmaDTO> hakijaryhmat = Optional.ofNullable(
-                hakukohde.getHakijaryhmat()).orElse(Collections.emptyList())
-                .stream()
-                    .filter(h -> h.getHakemusOid() != null && !h.getHakemusOid().isEmpty())
-                    .collect(Collectors.toList());
-
-        // Tehdään mäppäys hakemusOid:t -> hakijaryhmien nimet
-        Map<String, List<String>> mapHakemusOidToHakijaryhmaNimet = new HashMap<>();
-        for (HakijaryhmaDTO hakijaryhma : hakijaryhmat) {
-            for (String hakemusOid : hakijaryhma.getHakemusOid()) {
-                List<String> currentHakemusHakijaryhmat = mapHakemusOidToHakijaryhmaNimet.get(hakemusOid);
-                if (currentHakemusHakijaryhmat == null) {
-                    currentHakemusHakijaryhmat = new ArrayList<>();
-                }
-                currentHakemusHakijaryhmat.add(hakijaryhma.getNimi());
-                mapHakemusOidToHakijaryhmaNimet.put(hakemusOid, currentHakemusHakijaryhmat);
-            }
-        }
+        // Hakijaryhmien nimet
+        List<HakijaryhmaDTO> hakijaryhmat = getHakijaryhmatWithHakemuksia(hakukohde);
+        Map<String, List<String>> mapHakemusOidToHakijaryhmaNimet = mapHakemusOidToHakijaryhmaNimet(hakijaryhmat);
 
         Set<String> hakemusOids = new HashSet<>();
         List<HakemusDTO> distinctHakemuksetFromAllQueues = new ArrayList<>();
@@ -94,37 +78,9 @@ public class SijoittelunTulosExcelKomponentti {
         rivit.add(new Object[]{hakukohdeNimi});
         rivit.add(new Object[]{});
 
-        Collections.sort(distinctHakemuksetFromAllQueues,
-                new Comparator<HakemusDTO>() {
-                    private int ordinal(HakemusDTO h) {
-                        switch (h.getTila()) {
-                            case HARKINNANVARAISESTI_HYVAKSYTTY:
-                                return 0;
-                            case HYVAKSYTTY:
-                                return h.isHyvaksyttyHarkinnanvaraisesti() ?  0 : 1;
-                            case VARASIJALTA_HYVAKSYTTY:
-                                return h.isHyvaksyttyHarkinnanvaraisesti() ? 0 : 1;
-                            case VARALLA:
-                                return 2;
-                            case PERUUNTUNUT:
-                                return 3;
-                            case PERUNUT:
-                                return 4;
-                            case PERUUTETTU:
-                                return 5;
-                            case HYLATTY:
-                                return 6;
-                            default:
-                                return 7;
-                        }
-                    }
+        // Järjestetään hakemukset tilan mukaan
+        sortHakemuksetByTila(distinctHakemuksetFromAllQueues);
 
-                    @Override
-                    public int compare(HakemusDTO o1, HakemusDTO o2) {
-                        return new Integer(ordinal(o1)).compareTo(ordinal(o2));
-                    }
-                }
-        );
         List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
         valintatapajonoOtsikkoRivi.addAll(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
         List<Object> otsikkoRivi = Lists.newArrayList();
@@ -293,5 +249,78 @@ public class SijoittelunTulosExcelKomponentti {
 
     private String countryNameInEnglish(Map<String, Koodi> countryCodes, HakemusWrapper wrapper) {
         return KoodistoCachedAsyncResource.haeKoodistaArvo(countryCodes.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa());
+    }
+
+    /**
+     * Palauttaa hakukohteen hakijaryhmät, joilla on hakemuksia.
+     *
+     * @param hakukohde HakukohdeDTO
+     * @return Lista HakijaryhmaDTO-olioita
+     */
+    private List<HakijaryhmaDTO> getHakijaryhmatWithHakemuksia(HakukohdeDTO hakukohde) {
+        return Optional.ofNullable(hakukohde.getHakijaryhmat()).orElse(Collections.emptyList())
+                .stream()
+                .filter(h -> h.getHakemusOid() != null && !h.getHakemusOid().isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Palauttaa mäppäyksen Hakijaryhmän hakemusOid:n ja siihen liittyvien hakijaryhmien nimien välillä.
+     *
+     * @param hakijaryhmat Lista HakijaryhmaDTO-olioita
+     * @return Map, jossa hakemusOid mäpätty listaan, jossa valintaryhmien nimet
+     */
+    private Map<String,List<String>> mapHakemusOidToHakijaryhmaNimet(List<HakijaryhmaDTO> hakijaryhmat) {
+        Map<String, List<String>> mapHakemusOidToHakijaryhmaNimet = new HashMap<>();
+        for (HakijaryhmaDTO hakijaryhma : hakijaryhmat) {
+            for (String hakemusOid : hakijaryhma.getHakemusOid()) {
+                List<String> currentHakemusHakijaryhmat = mapHakemusOidToHakijaryhmaNimet.get(hakemusOid);
+                if (currentHakemusHakijaryhmat == null) {
+                    currentHakemusHakijaryhmat = new ArrayList<>();
+                }
+                currentHakemusHakijaryhmat.add(hakijaryhma.getNimi());
+                mapHakemusOidToHakijaryhmaNimet.put(hakemusOid, currentHakemusHakijaryhmat);
+            }
+        }
+        return mapHakemusOidToHakijaryhmaNimet;
+    }
+
+    /**
+     * Järjestää listan hakemuksia niiden tilan mukaan.
+     *
+     * @param hakemukset Lista HakemusDTO-olioita
+     */
+    private void sortHakemuksetByTila(List<HakemusDTO> hakemukset) {
+        Collections.sort(hakemukset,
+                new Comparator<HakemusDTO>() {
+                    private int ordinal(HakemusDTO h) {
+                        switch (h.getTila()) {
+                            case HARKINNANVARAISESTI_HYVAKSYTTY:
+                                return 0;
+                            case HYVAKSYTTY:
+                                return h.isHyvaksyttyHarkinnanvaraisesti() ?  0 : 1;
+                            case VARASIJALTA_HYVAKSYTTY:
+                                return h.isHyvaksyttyHarkinnanvaraisesti() ? 0 : 1;
+                            case VARALLA:
+                                return 2;
+                            case PERUUNTUNUT:
+                                return 3;
+                            case PERUNUT:
+                                return 4;
+                            case PERUUTETTU:
+                                return 5;
+                            case HYLATTY:
+                                return 6;
+                            default:
+                                return 7;
+                        }
+                    }
+
+                    @Override
+                    public int compare(HakemusDTO o1, HakemusDTO o2) {
+                        return new Integer(ordinal(o1)).compareTo(ordinal(o2));
+                    }
+                }
+        );
     }
 }
