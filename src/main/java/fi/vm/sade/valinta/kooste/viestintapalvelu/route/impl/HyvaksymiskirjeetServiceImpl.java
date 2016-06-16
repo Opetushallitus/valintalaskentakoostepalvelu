@@ -127,7 +127,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
                         letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
-                        throwable -> logErrorAndKeskeyta(prosessi, throwable));
+                        throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()));
     }
 
     @Override
@@ -174,7 +174,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
                         letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
-                        throwable -> logErrorAndKeskeyta(prosessi, throwable));
+                        throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()));
     }
 
     private static boolean haussaHylatty(HakijaDTO hakija) {
@@ -225,11 +225,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
                         letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
-                        throwable -> logErrorAndKeskeyta(prosessi, throwable));
+                        throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hakukohdeOid));
     }
 
-    void logErrorAndKeskeyta(KirjeProsessi prosessi, Throwable throwable) {
-        LOG.error("Sijoittelu tai hakemuspalvelukutsu epaonnistui", throwable);
+    void logErrorAndKeskeyta(KirjeProsessi prosessi, Throwable throwable, String hakuOid, String hakukohdeOid) {
+        LOG.error(String.format("Sijoittelu tai hakemuspalvelukutsu epaonnistui (haku %s, hakukohde %s)",hakuOid, hakukohdeOid), throwable);
         prosessi.keskeyta();
     }
 
