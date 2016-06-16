@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public interface ApplicationAsyncResource {
-    Collection<String> DEFAULT_KEYS = Arrays.asList("applicationSystemId", "oid", "personOid", "answers.henkilotiedot", "answers.hakutoiveet");
+    List<String> DEFAULT_KEYS = Arrays.asList("applicationSystemId", "oid", "personOid", "answers.henkilotiedot", "answers.hakutoiveet", "hakutapa", "maxApplicationOptions");
 
     Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 
