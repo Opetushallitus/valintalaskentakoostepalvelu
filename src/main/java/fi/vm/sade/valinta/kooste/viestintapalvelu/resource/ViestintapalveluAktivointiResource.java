@@ -1,11 +1,18 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,13 +27,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
@@ -55,6 +55,8 @@ public class ViestintapalveluAktivointiResource {
     private HyvaksymiskirjeetService hyvaksymiskirjeetService;
     @Autowired
     private JalkiohjauskirjeService jalkiohjauskirjeService;
+    @Autowired
+    private EPostiService ePostiService;
 
     @POST
     @Path("/osoitetarrat/aktivoi")
@@ -308,37 +310,49 @@ public class ViestintapalveluAktivointiResource {
     @Path("/securelinkit/aktivoi")
     @Produces("application/json")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-    @ApiOperation(value = "Lähettää Secure Linkit ryhmäsähköpostilla", response = Response.class)
-    public ProsessiId secureLinkkienLahetys(@QueryParam("hakuOid") String hakuOid,
-                                            @QueryParam("asiointikieli") String asiointikieli,
-                                            @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
-                                            @QueryParam("templateName") @DefaultValue("opiskelijavalinnan_tulos_securelink") String templateName) {
+    @ApiOperation(value = "Lähettää Secure Linkit ryhmäsähköpostilla", response = AsyncResponse.class)
+    public void secureLinkkienLahetys(EPostiRequest ePostiRequest,
+                                      @Suspended AsyncResponse asyncResponse) {
+
+        setAsyncTimeout(asyncResponse, "Securelinkien lähetys -palvelukutsu on aikakatkaistu: /viestintapalvelu/securelinkit/aktivoi/");
+
+        validateEPostiRequest(ePostiRequest, asyncResponse);
+
+        ePostiService.lahetaSecurelinkit(ePostiRequest,
+                (response) -> asyncResponse.resume(Response.ok(response,MediaType.APPLICATION_JSON_TYPE).build()),
+                (errorMessage) -> errorResponse(String.format("Securelinkien lähetys epäonnistui! %s",errorMessage), asyncResponse)
+        );
+    }
+
+    private void validateEPostiRequest(EPostiRequest ePostiRequest, AsyncResponse asyncResponse) {
+        String hakuOid = ePostiRequest.getHakuOid();
+        String kirjeenTyyppi = ePostiRequest.getKirjeenTyyppi();
+        String asiointikieli = ePostiRequest.getAsiointikieli();
 
         if(StringUtils.isBlank(hakuOid) || StringUtils.isBlank(kirjeenTyyppi) || StringUtils.isBlank(asiointikieli) ) {
             LOG.error("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.");
-            throw new RuntimeException("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.");
+            errorResponse("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.", asyncResponse);
         }
         if(!("jalkiohjauskirje".equals(kirjeenTyyppi) || "hyvaksymiskirje".equals(kirjeenTyyppi))){
             LOG.error("{} ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.", kirjeenTyyppi);
-            throw new RuntimeException(kirjeenTyyppi + " ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.");
+            errorResponse(kirjeenTyyppi + " ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.", asyncResponse);
         }
         if(!( "fi".equals(asiointikieli) || "sv".equals(asiointikieli) || "en".equals(asiointikieli))) {
             LOG.error("{} ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.", asiointikieli);
-            throw new RuntimeException(asiointikieli + " ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.");
+            errorResponse(asiointikieli + " ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.", asyncResponse);
         }
+    }
 
-        KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(1);
-        try {
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+    private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
+        response.setTimeout(5L, TimeUnit.MINUTES);
+        response.setTimeoutHandler(asyncResponse -> errorResponse(timeoutMessage, asyncResponse));
+    }
 
-
-
-
-        } catch (Exception e) {
-            LOG.error("Securelink-lähetys epäonnistui!", e);
-            throw new RuntimeException(e);
-        }
-        return new ProsessiId(prosessi.getId());
+    private void errorResponse(String timeoutMessage, AsyncResponse asyncResponse) {
+        asyncResponse.resume(Response.serverError()
+                .entity(ImmutableMap.of("error", timeoutMessage))
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
     }
 
     private List<String> tags(String... tag) {

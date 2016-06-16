@@ -46,7 +46,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.koodisto.url", "https://itest-virkailija.oph.ware.fi/");
         p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.valintaperusteet.rest.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.oppijantunnistus.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.oppijantunnistus.rest.url", "http://" + proxyServer + "/oppijan-tunnistus");
         p0.setProperty("root.organisaatio.oid", "");
         p0.setProperty("kela.ftp.protocol", "ftp");
         p0.setProperty("kela.ftp.username", "username");

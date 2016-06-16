@@ -113,6 +113,19 @@ public class Integraatiopalvelimet {
 
                 );
     }
+    public static void mockToInternalServerError(String method, String p) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(500)
+
+                );
+    }
     public static void mockToAccept(String method, String p) {
         mockServer
                 .when(

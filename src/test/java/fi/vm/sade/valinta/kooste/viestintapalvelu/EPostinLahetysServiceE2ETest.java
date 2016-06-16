@@ -1,0 +1,150 @@
+package fi.vm.sade.valinta.kooste.viestintapalvelu;
+
+import com.google.gson.Gson;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.Recipient;
+import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiResponse;
+import org.apache.cxf.helpers.IOUtils;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.junit.Before;
+import org.junit.Test;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNotFound;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToInternalServerError;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class EPostinLahetysServiceE2ETest {
+    @Before
+    public void startServer() throws Throwable{
+        startShared();
+    }
+
+    @Test
+    public void testEPostinLahetysKaikkiOnnistuu() {
+        mockGetBatchIdResponse();
+        mockGetEPostiOsoitteetResponse();
+        mockPostSecurelinksResponse(".*http:\\/\\/www\\.google\\.com\\/.*opiskelijavalinnan_tulos_securelink"
+                + ".*fi.*testi1@testi\\.fi.*testi2@testi\\.fi.*testi3@testi\\.fi.*");
+        EPostiResponse status = sendEPostiExpectSuccess("hyvaksymiskirje", "fi");
+        assertEquals(1234l, status.getBatchId().longValue());
+        assertEquals(3, status.getNumberOfRecipients().intValue());
+    }
+
+    @Test
+    public void testNoBatchIdFound1() throws Exception {
+        mockToNotFound("GET", "/viestintapalvelu/api/v1/letter/getBatchId");
+        String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+        assertTrue(message.contains("getBatchId HTTP 404"));
+    }
+
+    @Test
+    public void testNoBatchIdFound2() throws Exception {
+        mockToReturnString("GET", "/viestintapalvelu/api/v1/letter/getBatchId", null);
+        String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+        assertTrue(message.contains("Ei löydetty sopivaa kirjelähetyksen ID:tä"));
+    }
+
+    @Test
+    public void testNoEmailsFound1() throws Exception {
+        mockGetBatchIdResponse();
+        mockToNotFound("GET", "/viestintapalvelu/api/v1/letter/getEPostiAddressesForLetterBatch/1234");
+        String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+        assertTrue(message.contains("getEPostiAddressesForLetterBatch/1234 HTTP 404"));
+    }
+
+    @Test
+    public void testNoEmailsFound2() throws Exception {
+        mockGetBatchIdResponse();
+        mockToReturnJson("GET", "/viestintapalvelu/api/v1/letter/getEPostiAddressesForLetterBatch/1234", Arrays.asList());
+        String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+        assertTrue(message.contains("Ei löydetty sähköpostiosoitteita."));
+    }
+
+    @Test
+    public void testSecurelinkError() throws Exception {
+        mockGetBatchIdResponse();
+        mockGetEPostiOsoitteetResponse();
+        mockToInternalServerError("POST", "/oppijan-tunnistus/api/v1/tokens");
+        String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+        assertTrue(message.contains("tokens HTTP 500"));
+    }
+
+    @Test
+    public void testInvalidParameters() throws Exception {
+        String message = sendEPostiExpectFailure("hyvaksymiskirje", "foo");
+        assertTrue(message.contains("ei ole validi asiointikieli"));
+        message = sendEPostiExpectFailure("kirje", "sv");
+        assertTrue(message.contains("ei ole validi kirjeen tyyppi"));
+        message = sendEPostiExpectFailure("hyvaksymiskirje", null);
+        assertTrue(message.contains("ovat pakollisia parametreja"));
+    }
+
+    private Response sendEPosti(String kirjeenTyyppi, String asiointikieli) {
+        HttpResource http = new HttpResource(resourcesAddress + "/viestintapalvelu/securelinkit/aktivoi");
+        EPostiRequest request = new EPostiRequest();
+        request.setAsiointikieli(asiointikieli);
+        request.setHakuOid(HAKU1);
+        request.setKirjeenTyyppi(kirjeenTyyppi);
+        WebClient client = http.getWebClient()
+                .accept(MediaType.APPLICATION_JSON_TYPE);
+        return client.post(Entity.json(request));
+    }
+
+    private String sendEPostiExpectFailure(String kirjeenTyyppi, String asiointikieli) throws IOException {
+        Response response = sendEPosti(kirjeenTyyppi, asiointikieli);
+        assertEquals(500, response.getStatus());
+        return IOUtils.toString((InputStream)response.getEntity());
+    }
+
+    private EPostiResponse sendEPostiExpectSuccess(String kirjeenTyyppi, String asiointikieli) {
+        Response response = sendEPosti(kirjeenTyyppi, asiointikieli);
+        assertEquals(200, response.getStatus());
+        return new Gson().fromJson(new InputStreamReader((InputStream)response.getEntity()), EPostiResponse.class);
+    }
+
+    private void mockGetBatchIdResponse() {
+        mockToReturnString("GET", "/viestintapalvelu/api/v1/letter/getBatchId", "1234");
+    }
+
+    private void mockGetEPostiOsoitteetResponse() {
+        mockToReturnJson("GET", "/viestintapalvelu/api/v1/letter/getEPostiAddressesForLetterBatch/1234",
+                Arrays.asList("testi1@testi.fi", "testi2@testi.fi", "testi3@testi.fi"));
+    }
+
+    private void mockPostSecurelinksResponse(String bodyRegexp) {
+        mockToReturnJsonAndCheckBody("POST", "/oppijan-tunnistus/api/v1/tokens", createTokensResponse(), bodyRegexp);
+    }
+
+    private TokensResponse createTokensResponse() {
+        TokensResponse response = new TokensResponse();
+        Recipient recipient1 = new Recipient();
+        recipient1.setEmail("testi1@testi.fi");
+        recipient1.setSecurelink("http://www.opintopolku.fi/1111111");
+        Recipient recipient2 = new Recipient();
+        recipient2.setEmail("testi2@testi.fi");
+        recipient2.setSecurelink("http://www.opintopolku.fi/2222222");
+        Recipient recipient3 = new Recipient();
+        recipient3.setEmail("testi3@testi.fi");
+        recipient3.setSecurelink("http://www.opintopolku.fi/3333333");
+        response.setRecipients(Arrays.asList(recipient1, recipient2, recipient3));
+        return response;
+    }
+}
