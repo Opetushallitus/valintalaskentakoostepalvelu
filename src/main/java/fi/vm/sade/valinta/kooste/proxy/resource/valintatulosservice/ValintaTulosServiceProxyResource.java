@@ -148,11 +148,12 @@ public class ValintaTulosServiceProxyResource {
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s?selite=%s&hyvaksyttyJonoOid=%s",
                         hakuOid, hakukohdeOid, selite, hyvaksyttyJonoOid));
 
+        String muokkaaja = username();
         sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(staleReadCheckResponse -> {
             if (staleReadCheckResponse.statuses.isEmpty()) {
                 List<VastaanottoRecordDTO> tallennettavat = null;
                 try {
-                    tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
+                    tallennettavat = createVastaanottoRecordsFrom(valintatulokset, muokkaaja, selite);
                 } catch (Exception e) {
                     return Observable.error(e);
                 }
@@ -217,11 +218,12 @@ public class ValintaTulosServiceProxyResource {
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /erillishaku/haku/%s/hakukohde/%s?selite=%s",
                         hakuOid, hakukohdeOid, selite));
 
+        String muokkaaja = username();
         sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(staleReadCheckResponse -> {
             if (staleReadCheckResponse.statuses.isEmpty()) {
                 List<VastaanottoRecordDTO> tallennettavat = null;
                 try {
-                    tallennettavat = createVastaanottoRecordsFrom(valintatulokset, username(), selite);
+                    tallennettavat = createVastaanottoRecordsFrom(valintatulokset, muokkaaja, selite);
                 } catch (Exception e) {
                     return Observable.error(e);
                 }
