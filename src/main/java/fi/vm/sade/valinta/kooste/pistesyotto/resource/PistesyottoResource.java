@@ -146,10 +146,10 @@ public class PistesyottoResource {
                 asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
             });
 
+            final String username = KoosteAudit.username();
             authorityCheckService.getAuthorityCheckForRoles(asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
                     authorityCheck -> {
                         LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
-                        final String username = KoosteAudit.username();
                         tuontiSoteliService.tuo(authorityCheck, hakemukset,username, hakuOid, valinnanvaiheOid,
                                 (onnistuneet, validointivirheet) -> {
                                     UlkoinenResponseDTO response = new UlkoinenResponseDTO();
