@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto;
 
 import java.util.Date;
 
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 
 public class HakemusPrototyyppi {
 
@@ -166,6 +166,6 @@ public class HakemusPrototyyppi {
 
     public static String parseDate(final Date syntymaAika) {
         if (syntymaAika == null) return null;
-        return ErillishakuDataRivi.SYNTYMAAIKA.print(syntymaAika.getTime());
+        return ErillishakuRivi.SYNTYMAAIKAFORMAT.print(syntymaAika.getTime());
     }
 }

@@ -24,7 +24,6 @@ import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.TOISEN_ASTEEN
 
 public class ErillishakuDataRivi extends DataRivi {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
-    public static final DateTimeFormatter SYNTYMAAIKA = DateTimeFormat.forPattern("dd.MM.yyyy");
     private final ErillishakuRiviKuuntelija kuuntelija;
 
     ErillishakuDataRivi(ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {

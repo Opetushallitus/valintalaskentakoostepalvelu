@@ -152,7 +152,7 @@ public class ErillishakuResourceTest {
                 "Tuomas",
                 "Hakkarainen",
                 MockData.hetu,
-                ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(),
+                ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime("1.1.1901").toDate(),
                 henkiloOid,
                 HenkiloTyyppi.OPPIJA,
                 null,
