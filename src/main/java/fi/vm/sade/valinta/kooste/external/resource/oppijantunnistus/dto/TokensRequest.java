@@ -9,6 +9,10 @@ public class TokensRequest {
     private List<String> emails;
     private Long expires;
 
+    public TokensRequest() {
+
+    }
+
     public TokensRequest(String url, String templatename, String lang, List<String> emails, Long expires) {
         this.url = url;
         this.templatename = templatename;

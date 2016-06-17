@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.OppijantunnistusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensRequest;
-import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiResponse;
@@ -24,12 +24,15 @@ public class EPostiServiceImpl implements EPostiService {
 
     private OppijantunnistusAsyncResource oppijantunnistusAsyncResource;
     private ViestintapalveluAsyncResource viestintapalveluAsyncResource;
+    private OhjausparametritAsyncResource ohjausparametritAsyncResource;
 
     @Autowired
     public EPostiServiceImpl(OppijantunnistusAsyncResource oppijantunnistusAsyncResource,
-                             ViestintapalveluAsyncResource viestintapalveluAsyncResource) {
+                             ViestintapalveluAsyncResource viestintapalveluAsyncResource,
+                             OhjausparametritAsyncResource ohjausparametritAsyncResource) {
         this.oppijantunnistusAsyncResource = oppijantunnistusAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
+        this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
     }
 
     @Override
@@ -47,7 +50,8 @@ public class EPostiServiceImpl implements EPostiService {
         EPostiResponse response = new EPostiResponse();
         viestintapalveluAsyncResource.haeJulkaistuKirjelahetys(ePostiRequest.getHakuOid(), ePostiRequest.getKirjeenTyyppi(), ePostiRequest.getAsiointikieli())
                 .flatMap( batchIdOptional -> haeEPostiOsoitteet(batchIdOptional, hakuMessage, response) )
-                .flatMap( ePostiOsoitteet -> lahetaSecureLinkit(ePostiOsoitteet, ePostiRequest, hakuMessage, response))
+                .flatMap( ePostiOsoitteet -> teeTokensRequest(ePostiRequest, response, ePostiOsoitteet, hakuMessage) )
+                .flatMap( tokensRequest -> oppijantunnistusAsyncResource.sendSecureLinks(tokensRequest))
                 .subscribe(
 
                         tokensResponse -> {
@@ -64,6 +68,30 @@ public class EPostiServiceImpl implements EPostiService {
                 );
     }
 
+    private Observable<TokensRequest> teeTokensRequest(EPostiRequest ePostiRequest, EPostiResponse ePostiResponse, List<String> ePostiOsoitteet, String hakuMessage) {
+        if(!ePostiOsoitteet.isEmpty()) {
+            LOG.info("Saatiin sähköpostiosoitteet {} kpl. Lähetetään oppijan tunnistukseen." + hakuMessage, ePostiOsoitteet.size());
+            ePostiResponse.setNumberOfRecipients(ePostiOsoitteet.size());
+            return haeExpirationTime(ePostiRequest.getHakuOid())
+                    .map( expirationTime -> {
+                        TokensRequest request = new TokensRequest();
+                        request.setEmails(ePostiOsoitteet);
+                        request.setExpires(expirationTime);
+                        request.setTemplatename(ePostiRequest.getTemplateName());
+                        request.setLang(ePostiRequest.getAsiointikieli());
+                        request.setUrl("http://www.google.com/");
+                        return request;
+                    });
+        }
+        throw new RuntimeException("Ei löydetty sähköpostiosoitteita.");
+    }
+
+    private Observable<Long> haeExpirationTime(String hakuOid) {
+        return ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).map(
+                (parametritDTO) -> parametritDTO.getPH_HKP().getDate().getTime()
+        );
+    }
+
     private Observable<List<String>> haeEPostiOsoitteet(Optional<Long> batchIdOptional, String hakuMessage, EPostiResponse response) {
         if(batchIdOptional.isPresent()) {
             LOG.info("Saatiin kirjelähetyksen id {}. Haetaan sähköpostiosoitteet. " + hakuMessage, batchIdOptional.get());
@@ -71,15 +99,5 @@ public class EPostiServiceImpl implements EPostiService {
             return viestintapalveluAsyncResource.haeEPostiOsoitteet(batchIdOptional.get());
         }
         throw new RuntimeException("Ei löydetty sopivaa kirjelähetyksen ID:tä.");
-    }
-
-    private Observable<TokensResponse> lahetaSecureLinkit(List<String> ePostiOsoitteet, EPostiRequest ePostiRequest, String hakuMessage, EPostiResponse response) {
-        if(!ePostiOsoitteet.isEmpty()) {
-            LOG.info("Saatiin sähköpostiosoitteet {} kpl. Lähetetään oppijan tunnistukseen." + hakuMessage, ePostiOsoitteet.size());
-            response.setNumberOfRecipients(ePostiOsoitteet.size());
-            return oppijantunnistusAsyncResource.sendSecureLinks(
-                    new TokensRequest("http://www.google.com/", ePostiRequest.getTemplateName(), ePostiRequest.getAsiointikieli(), ePostiOsoitteet, System.currentTimeMillis()));
-        }
-        throw new RuntimeException("Ei löydetty sähköpostiosoitteita.");
     }
 }

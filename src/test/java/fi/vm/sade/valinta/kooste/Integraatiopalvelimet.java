@@ -1,8 +1,9 @@
 package fi.vm.sade.valinta.kooste;
 
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import fi.vm.sade.integrationtest.util.PortChecker;
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.mockserver.configuration.ConfigurationProperties;
@@ -10,6 +11,9 @@ import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Body;
 import org.mockserver.model.RegexBody;
 
+import java.lang.reflect.*;
+import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static javax.ws.rs.HttpMethod.*;
@@ -26,7 +30,6 @@ import static org.mockserver.model.HttpResponse.*;
 public class Integraatiopalvelimet {
 
     public static ClientAndServerWithHost mockServer = new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
-    private static HttpResource httpResource = new HttpResource("");
     static {
         ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(5));
     }
@@ -141,12 +144,12 @@ public class Integraatiopalvelimet {
     }
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;
-        mockToReturnValue(method, p, s = httpResource.gson().toJson(r));
+        mockToReturnValue(method, p, s = gson().toJson(r));
         System.err.println(s);
     }
     public static void mockToReturnJsonAndCheckBody(String method, String p, Object r, String regex) {
         String s;
-        mockToReturnValueAndCheckBody(method, p, s = httpResource.gson().toJson(r), regex);
+        mockToReturnValueAndCheckBody(method, p, s = gson().toJson(r), regex);
         System.err.println(s);
     }
     public static void mockToReturnString(String method, String p, String r) {
@@ -166,4 +169,14 @@ public class Integraatiopalvelimet {
             return new StringBuilder("http://").append(super.host).append(":").append(port).toString();
         }
     }
+
+    private static JsonSerializer<Date> dateJsonSerializer = (Date src, Type typeOfSrc, JsonSerializationContext context)
+            -> src == null ? null : new JsonPrimitive(src.getTime());
+
+    private static Gson gson = DateDeserializer.gsonBuilder().registerTypeAdapter(Date.class, dateJsonSerializer).create();
+
+    public static Gson gson() {
+        return gson;
+    }
+
 }

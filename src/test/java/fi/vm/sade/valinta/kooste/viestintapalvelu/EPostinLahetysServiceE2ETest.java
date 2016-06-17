@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.Recipient;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
@@ -32,6 +34,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class EPostinLahetysServiceE2ETest {
+
+    private static final long EXPIRATION_TIME = System.currentTimeMillis() + 9999999;
+
     @Before
     public void startServer() throws Throwable{
         startShared();
@@ -41,6 +46,7 @@ public class EPostinLahetysServiceE2ETest {
     public void testEPostinLahetysKaikkiOnnistuu() {
         mockGetBatchIdResponse();
         mockGetEPostiOsoitteetResponse();
+        mockGetOhjausparametrit();
         mockPostSecurelinksResponse(".*http:\\/\\/www\\.google\\.com\\/.*opiskelijavalinnan_tulos_securelink"
                 + ".*fi.*testi1@testi\\.fi.*testi2@testi\\.fi.*testi3@testi\\.fi.*");
         EPostiResponse status = sendEPostiExpectSuccess("hyvaksymiskirje", "fi");
@@ -82,6 +88,7 @@ public class EPostinLahetysServiceE2ETest {
     public void testSecurelinkError() throws Exception {
         mockGetBatchIdResponse();
         mockGetEPostiOsoitteetResponse();
+        mockGetOhjausparametrit();
         mockToInternalServerError("POST", "/oppijan-tunnistus/api/v1/tokens");
         String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
         assertTrue(message.contains("tokens HTTP 500"));
@@ -131,6 +138,14 @@ public class EPostinLahetysServiceE2ETest {
 
     private void mockPostSecurelinksResponse(String bodyRegexp) {
         mockToReturnJsonAndCheckBody("POST", "/oppijan-tunnistus/api/v1/tokens", createTokensResponse(), bodyRegexp);
+    }
+
+    private void mockGetOhjausparametrit() {
+        ParametritDTO parametrit = new ParametritDTO();
+        ParametriDTO parametri = new ParametriDTO();
+        parametri.setDate(new java.util.Date(EXPIRATION_TIME));
+        parametrit.setPH_HKP(parametri);
+        mockToReturnJson("GET", "/ohjausparametrit-service/api/v1/rest/parametri/HAKU1", parametrit);
     }
 
     private TokensResponse createTokensResponse() {
