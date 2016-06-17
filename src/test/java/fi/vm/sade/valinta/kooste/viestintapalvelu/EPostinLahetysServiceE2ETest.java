@@ -47,7 +47,7 @@ public class EPostinLahetysServiceE2ETest {
         mockGetBatchIdResponse();
         mockGetEPostiOsoitteetResponse();
         mockGetOhjausparametrit();
-        mockPostSecurelinksResponse(".*http:\\/\\/www\\.google\\.com\\/.*opiskelijavalinnan_tulos_securelink"
+        mockPostSecurelinksResponse(".*https:\\/\\/fi\\.test\\.domain\\/token\\/.*opiskelijavalinnan_tulos_securelink"
                 + ".*fi.*testi1@testi\\.fi.*testi2@testi\\.fi.*testi3@testi\\.fi.*");
         EPostiResponse status = sendEPostiExpectSuccess("hyvaksymiskirje", "fi");
         assertEquals(1234l, status.getBatchId().longValue());

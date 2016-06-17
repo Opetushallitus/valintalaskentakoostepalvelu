@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.OppijantunnistusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensRequest;
@@ -11,11 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service
@@ -25,14 +27,19 @@ public class EPostiServiceImpl implements EPostiService {
     private OppijantunnistusAsyncResource oppijantunnistusAsyncResource;
     private ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private OhjausparametritAsyncResource ohjausparametritAsyncResource;
+    private Map<String, String> secureLinkUrls;
 
     @Autowired
     public EPostiServiceImpl(OppijantunnistusAsyncResource oppijantunnistusAsyncResource,
                              ViestintapalveluAsyncResource viestintapalveluAsyncResource,
-                             OhjausparametritAsyncResource ohjausparametritAsyncResource) {
+                             OhjausparametritAsyncResource ohjausparametritAsyncResource,
+                             @Value("${omatsivut.email.application.modify.link.en}") String secureLinkUrlEn,
+                             @Value("${omatsivut.email.application.modify.link.fi}") String secureLinkUrlFi,
+                             @Value("${omatsivut.email.application.modify.link.sv}") String secureLinkUrlSv) {
         this.oppijantunnistusAsyncResource = oppijantunnistusAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
+        secureLinkUrls = ImmutableMap.of("fi", secureLinkUrlFi, "sv", secureLinkUrlSv, "en", secureLinkUrlEn);
     }
 
     @Override
@@ -79,7 +86,7 @@ public class EPostiServiceImpl implements EPostiService {
                         request.setExpires(expirationTime);
                         request.setTemplatename(ePostiRequest.getTemplateName());
                         request.setLang(ePostiRequest.getAsiointikieli());
-                        request.setUrl("http://www.google.com/");
+                        request.setUrl(secureLinkUrls.get(ePostiRequest.getAsiointikieli()));
                         return request;
                     });
         }

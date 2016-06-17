@@ -81,6 +81,9 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.app.password.to.valintaperusteet", "");
         p0.setProperty("valintalaskentakoostepalvelu.maxWorkerCount", "0");
 
+        p0.setProperty("omatsivut.email.application.modify.link.en", "https://en.test.domain/token/");
+        p0.setProperty("omatsivut.email.application.modify.link.fi", "https://fi.test.domain/token/");
+        p0.setProperty("omatsivut.email.application.modify.link.sv", "https://sv.test.domain/token/");
 
         org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
         defaultProps.setProperties(p0);
