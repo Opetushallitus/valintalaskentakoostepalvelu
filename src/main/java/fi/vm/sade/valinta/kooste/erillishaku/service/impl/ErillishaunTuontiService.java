@@ -199,6 +199,7 @@ public class ErillishaunTuontiService {
                         rivi.getAidinkieli(),
                         rivi.getHakemuksenTila(),
                         rivi.getEhdollisestiHyvaksyttavissa(),
+                        rivi.getHyvaksymiskirjeLahetetty(),
                         "KESKEN", "EI_TEHTY",
                         rivi.isJulkaistaankoTiedot(),
                         rivi.isPoistetaankoRivi(),

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +25,7 @@ import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.TOISEN_ASTEEN
 
 public class ErillishakuDataRivi extends DataRivi {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
+    public final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
     private final ErillishakuRiviKuuntelija kuuntelija;
 
     ErillishakuDataRivi(ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {
@@ -45,24 +47,25 @@ public class ErillishakuDataRivi extends DataRivi {
 
         String hakemuksenTila = lukija.getArvoAt(8);
         boolean ehdollisestiHyvaksytty = TOSI.equals(lukija.getArvoAt(9));
-        String vastaanottoTila = lukija.getArvoAt(10);
-        String ilmoittautumisTila = lukija.getArvoAt(11);
-        boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(12));
+        Date hyvaksymiskirjeLahetetty = parseLahetettyDate(lukija.getArvoAt(10));
+        String vastaanottoTila = lukija.getArvoAt(11);
+        String ilmoittautumisTila = lukija.getArvoAt(12);
+        boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(13));
 
-        String asiointikieli = lukija.getArvoAt(13);
-        String puhelinnumero = lukija.getArvoAt(14);
-        String osoite = lukija.getArvoAt(15);
-        String postinumero = lukija.getArvoAt(16);
-        String postitoimipaikka = lukija.getArvoAt(17);
-        String asuinmaa = lukija.getArvoAt(18);
-        String kansalaisuus = lukija.getArvoAt(19);
-        String kotikunta = lukija.getArvoAt(20);
-        String pohjakoulutusMaaToinenAste = lukija.getArvoAt(21);
+        String asiointikieli = lukija.getArvoAt(14);
+        String puhelinnumero = lukija.getArvoAt(15);
+        String osoite = lukija.getArvoAt(16);
+        String postinumero = lukija.getArvoAt(17);
+        String postitoimipaikka = lukija.getArvoAt(18);
+        String asuinmaa = lukija.getArvoAt(19);
+        String kansalaisuus = lukija.getArvoAt(20);
+        String kotikunta = lukija.getArvoAt(21);
+        String pohjakoulutusMaaToinenAste = lukija.getArvoAt(22);
 
         if (isNewRow(rivi, syntymaAika)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
                     sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
-                    sukupuoli, oid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksytty,
+                    sukupuoli, oid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksytty, hyvaksymiskirjeLahetetty,
                     vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot,
                     false, asiointikieli, puhelinnumero,
                     osoite, postinumero, postitoimipaikka, asuinmaa,
@@ -71,9 +74,21 @@ public class ErillishakuDataRivi extends DataRivi {
         return true;
     }
 
+    private Date parseLahetettyDate(String arvo) {
+        if (StringUtils.isNotEmpty(arvo) && !ErillishakuExcel.HEADER_HYVAKSYMISKIRJE_LAHETETTY.equals(arvo)) {
+            try {
+                return LAHETETTYFORMAT.parseDateTime(arvo).toDate();
+            }
+            catch (Exception e) {
+                LOG.warn("Could not parse hyvaksymiskirjeLahetetty '{}'", arvo);
+            }
+        }
+        return null;
+    }
+
     private boolean isNewRow(Rivi rivi, String syntymaAika) {
         return !rivi.isTyhja()
-                && rivi.getSolut().size() >= 13 //Copy-paste easily creates extra columns for excel doc
+                && rivi.getSolut().size() >= 14 //Copy-paste easily creates extra columns for excel doc
                 && !"Syntymäaika".equals(syntymaAika);
     }
 

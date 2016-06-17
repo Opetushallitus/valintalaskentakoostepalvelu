@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -175,6 +176,7 @@ public class ErillishakuResourceTest {
                 "SV",
                 "KESKEN",
                 false,
+                null,
                 "",
                 "",
                 false,

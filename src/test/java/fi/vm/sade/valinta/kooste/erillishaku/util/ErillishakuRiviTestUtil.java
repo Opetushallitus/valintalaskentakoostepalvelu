@@ -7,6 +7,8 @@ import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 
+import java.util.Date;
+
 import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
@@ -24,14 +26,14 @@ public class ErillishakuRiviTestUtil {
     public static ErillishakuRivi laillinenRivi() {
         return new ErillishakuRivi(null, SUKUNIMI, ETUNIMI, HETU,
                 EMPTY, SYNTYMAAIKA, SUKUPUOLI, EMPTY,
-                AIDINKIELI, HakemuksenTila.HYVAKSYTTY.toString(), false,
+                AIDINKIELI, HakemuksenTila.HYVAKSYTTY.toString(), false, new Date(),
                 ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false, "FI",
                 "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", "FIN");
     }
     public static ErillishakuRivi viallinenRiviPuuttuvillaTunnisteilla() {
         return new ErillishakuRivi(null, SUKUNIMI, ETUNIMI,
-                EMPTY, EMPTY, EMPTY, Sukupuoli.EI_SUKUPUOLTA, EMPTY, EMPTY, HakemuksenTila.HYVAKSYTTY.toString(), false,
+                EMPTY, EMPTY, EMPTY, Sukupuoli.EI_SUKUPUOLTA, EMPTY, EMPTY, HakemuksenTila.HYVAKSYTTY.toString(), false, null,
                 ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false, "FI",
                 "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", "FIN");
@@ -39,7 +41,7 @@ public class ErillishakuRiviTestUtil {
 
     public static String viallinenJsonRiviPuuttuvillaTunnisteilla() {
 
-        return "{\"rivit\":["+new GsonBuilder().create().toJson(laillinenRivi())+ ","+
+        return "{\"rivit\":["+new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").create().toJson(laillinenRivi())+ ","+
 
                 "{\"etunimi\":\"Etunimi\",\"sukunimi\":\"Sukunimi\"," +
                 "\"henkilotunnus\":\"\",\"sahkoposti\":\"\",\"syntymaAika\"" +

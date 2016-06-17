@@ -22,6 +22,7 @@ import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.emptyE
 
 public class ErillishakuExcel {
     private final static Logger LOG = LoggerFactory.getLogger(ErillishakuExcel.class);
+    public static final String HEADER_HYVAKSYMISKIRJE_LAHETETTY = "Hyväksymiskirje lähetetty";
     private final Excel excel;
 
     public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija) {
@@ -54,6 +55,7 @@ public class ErillishakuExcel {
                 new TekstiArvo("Äidinkieli"),
                 new TekstiArvo("Hakemuksentila"),
                 new TekstiArvo("Ehdollinen valinta"),
+                new TekstiArvo(HEADER_HYVAKSYMISKIRJE_LAHETETTY),
                 new TekstiArvo("Vastaanottotila"),
                 new TekstiArvo("Ilmoittautumistila"),
                 new TekstiArvo("Julkaistavissa"),
@@ -106,6 +108,7 @@ public class ErillishakuExcel {
                             "FI",
                             "HYVAKSYTTY",
                             false,
+                            new Date(),
                             "KESKEN",
                             "EI_TEHTY",
                             false,
@@ -139,6 +142,7 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
             a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
+            a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null ? "" : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
