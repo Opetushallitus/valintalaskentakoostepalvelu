@@ -37,7 +37,8 @@ public class ViestintapalveluProxyResource {
     @POST
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @Path("/publish/haku/{hakuOid}")
-    @Consumes("text/plain")
+    @Consumes("application/json")
+    @Produces("text/plain")
     public void julkaiseKirjeetOmillaSivuilla(@PathParam("hakuOid") String hakuOid,
                                               @QueryParam("asiointikieli") String asiointikieli,
                                               @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
