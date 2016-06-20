@@ -192,7 +192,7 @@ public class LaskentaActorFactory {
     }
 
     private static final BiFunction<String, String, Action1<? super Object>> resurssiOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Saatiin resurssi hakukohteelle {}", uuid, hakukohde);
-    private static final BiFunction<String, String, Action1<Throwable>> resurssiException = (uuid, hakukohde) -> error -> LOG.info("(Uuid={}) Resurssin lataus epäonnistui hakukohteelle {}", uuid, hakukohde, error);
+    private static final BiFunction<String, String, Action1<Throwable>> resurssiException = (uuid, hakukohde) -> error -> LOG.warn("(Uuid={}) Resurssin lataus epäonnistui hakukohteelle {}", uuid, hakukohde, error);
 
     public LaskentaActor createValintalaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
@@ -231,7 +231,7 @@ public class LaskentaActorFactory {
     }
 
     private static final BiFunction<String, String, Action1<? super Object>> laskentaOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Laskenta onnistui hakukohteelle {}", uuid, hakukohde);
-    private static final BiFunction<String, String, Action1<Throwable>> laskentaException = (uuid, hakukohde) -> error -> LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohde, error);
+    private static final BiFunction<String, String, Action1<Throwable>> laskentaException = (uuid, hakukohde) -> error -> LOG.warn("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohde, error);
 
     public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
