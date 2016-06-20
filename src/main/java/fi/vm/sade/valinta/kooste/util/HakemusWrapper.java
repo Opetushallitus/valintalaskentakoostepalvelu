@@ -43,7 +43,7 @@ public class HakemusWrapper {
     private final static String NAINEN                          = "2";
     private final static String MIES                            = "1";
     private final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
-    private final static String LUPA_SAHKOISESTI                = "lupaSahkoisesti";
+    private final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
 
     private Yhteystiedot yhteystiedot = null;
 
@@ -253,8 +253,8 @@ public class HakemusWrapper {
 
     public boolean getLupaSahkoiseenAsiointiin() {
         getLisatiedot(); // lazy load lisatiedot
-        if (lisatiedot.containsKey(LUPA_SAHKOISESTI)) {
-            String lupa = lisatiedot.get(LUPA_SAHKOISESTI);
+        if (lisatiedot.containsKey(LUPA_SAHKOISEEN_VIESTINTAAN)) {
+            String lupa = lisatiedot.get(LUPA_SAHKOISEEN_VIESTINTAAN);
             return Boolean.TRUE.equals(Boolean.valueOf(lupa));
         }
         return false;
