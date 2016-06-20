@@ -6,14 +6,12 @@ import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import rx.Observable;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
@@ -35,6 +33,27 @@ public class ViestintapalveluProxyResource {
 
     @Autowired
     private ViestintapalveluAsyncResource viestintapalveluAsyncResource;
+
+    @POST
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
+    @Path("/publish/haku/{hakuOid}")
+    @Consumes("text/plain")
+    public void julkaiseKirjeetOmillaSivuilla(@PathParam("hakuOid") String hakuOid,
+                                              @QueryParam("asiointikieli") String asiointikieli,
+                                              @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
+                                              @Suspended AsyncResponse asyncResponse) {
+        viestintapalveluAsyncResource.haeKirjelahetysJulkaistavaksi(hakuOid, kirjeenTyyppi, asiointikieli)
+            .flatMap(batchIdOptional -> {
+                if(batchIdOptional.isPresent()) {
+                    return viestintapalveluAsyncResource.julkaiseKirjelahetys(batchIdOptional.get());
+                } else {
+                    throw new RuntimeException("Kirjelähetyksen ID:tä ei löytynyt.");
+                }
+            }).subscribe(
+                batchIdOptional -> asyncResponse.resume(Response.ok(batchIdOptional.get()).build()),
+                throwable -> errorResponse(String.format("Viestintäpalvelukutsu epäonnistui! %s",throwable.getMessage()), asyncResponse)
+            );
+    }
 
     @GET
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")

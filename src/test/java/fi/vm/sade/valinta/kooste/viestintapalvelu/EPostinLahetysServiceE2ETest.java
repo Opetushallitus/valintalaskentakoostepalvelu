@@ -56,14 +56,14 @@ public class EPostinLahetysServiceE2ETest {
 
     @Test
     public void testNoBatchIdFound1() throws Exception {
-        mockToNotFound("GET", "/viestintapalvelu/api/v1/letter/getBatchId");
+        mockToNotFound("GET", "/viestintapalvelu/api/v1/letter/getBatchIdReadyForEPosti");
         String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
-        assertTrue(message.contains("getBatchId HTTP 404"));
+        assertTrue(message.contains("getBatchIdReadyForEPosti HTTP 404"));
     }
 
     @Test
     public void testNoBatchIdFound2() throws Exception {
-        mockToReturnString("GET", "/viestintapalvelu/api/v1/letter/getBatchId", null);
+        mockToReturnString("GET", "/viestintapalvelu/api/v1/letter/getBatchIdReadyForEPosti", null);
         String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
         assertTrue(message.contains("Ei löydetty sopivaa kirjelähetyksen ID:tä"));
     }
@@ -128,7 +128,7 @@ public class EPostinLahetysServiceE2ETest {
     }
 
     private void mockGetBatchIdResponse() {
-        mockToReturnString("GET", "/viestintapalvelu/api/v1/letter/getBatchId", "1234");
+        mockToReturnString("GET", "/viestintapalvelu/api/v1/letter/getBatchIdReadyForEPosti", "1234");
     }
 
     private void mockGetEPostiOsoitteetResponse() {

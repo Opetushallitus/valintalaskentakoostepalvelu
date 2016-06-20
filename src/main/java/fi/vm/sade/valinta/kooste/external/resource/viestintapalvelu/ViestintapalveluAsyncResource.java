@@ -39,7 +39,11 @@ public interface ViestintapalveluAsyncResource {
 
     Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli);
 
-    Observable<Optional<Long>> haeJulkaistuKirjelahetys(String hakuOid, String kirjeenTyyppi, String kieli);
+    Observable<Optional<Long>> haeKirjelahetysEPostille(String hakuOid, String kirjeenTyyppi, String kieli);
+
+    Observable<Optional<Long>> haeKirjelahetysJulkaistavaksi(String hakuOid, String kirjeenTyyppi, String kieli);
 
     Observable<List<String>> haeEPostiOsoitteet(Long batchId);
+
+    Observable<Optional<Long>> julkaiseKirjelahetys(Long batchId);
 }

@@ -55,7 +55,7 @@ public class EPostiServiceImpl implements EPostiService {
         }
 
         EPostiResponse response = new EPostiResponse();
-        viestintapalveluAsyncResource.haeJulkaistuKirjelahetys(ePostiRequest.getHakuOid(), ePostiRequest.getKirjeenTyyppi(), ePostiRequest.getAsiointikieli())
+        viestintapalveluAsyncResource.haeKirjelahetysEPostille(ePostiRequest.getHakuOid(), ePostiRequest.getKirjeenTyyppi(), ePostiRequest.getAsiointikieli())
                 .flatMap( batchIdOptional -> haeEPostiOsoitteet(batchIdOptional, hakuMessage, response) )
                 .flatMap( ePostiOsoitteet -> teeTokensRequest(ePostiRequest, response, ePostiOsoitteet, hakuMessage) )
                 .flatMap( tokensRequest -> oppijantunnistusAsyncResource.sendSecureLinks(tokensRequest))

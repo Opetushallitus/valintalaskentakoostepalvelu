@@ -135,17 +135,38 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
     }
 
     @Override
-    public Observable<Optional<Long>> haeJulkaistuKirjelahetys(String hakuOid, String kirjeenTyyppi, String asiointikieli) {
+    public Observable<Optional<Long>> haeKirjelahetysEPostille(String hakuOid, String kirjeenTyyppi, String asiointikieli) {
+        return haeKirjelahetys("/api/v1/letter/getBatchIdReadyForEPosti", hakuOid, kirjeenTyyppi, asiointikieli);
+    }
+
+    @Override
+    public Observable<Optional<Long>> haeKirjelahetysJulkaistavaksi(String hakuOid, String kirjeenTyyppi, String asiointikieli) {
+        return haeKirjelahetys("/api/v1/letter/getBatchIdReadyForPublish", hakuOid, kirjeenTyyppi, asiointikieli);
+    }
+
+    private Observable<Optional<Long>> haeKirjelahetys(String url, String hakuOid, String kirjeenTyyppi, String asiointikieli) {
         return getAsObservable(
-                "/api/v1/letter/getBatchId",
+                url,
                 (batchIdAsString) ->
-                    StringUtils.isNumeric(batchIdAsString) ? Optional.of(Long.parseLong(batchIdAsString)) : Optional.empty(),
+                        StringUtils.isNumeric(batchIdAsString) ? Optional.of(Long.parseLong(batchIdAsString)) : Optional.empty(),
                 client -> {
                     client.accept(MediaType.TEXT_PLAIN_TYPE);
                     client.query("hakuOid", hakuOid);
                     client.query("type", kirjeenTyyppi);
                     client.query("language", asiointikieli);
-                    client.query("published", true);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Observable<Optional<Long>> julkaiseKirjelahetys(Long batchId) {
+        return getAsObservable(
+                "/api/v1/letter/publishLetterBatch/" + batchId,
+                (batchIdAsString) ->
+                        StringUtils.isNumeric(batchIdAsString) ? Optional.of(Long.parseLong(batchIdAsString)) : Optional.empty(),
+                client -> {
+                    client.accept(MediaType.TEXT_PLAIN_TYPE);
                     return client;
                 }
         );
