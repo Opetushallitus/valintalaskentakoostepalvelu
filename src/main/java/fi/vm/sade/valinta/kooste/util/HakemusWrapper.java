@@ -15,34 +15,35 @@ import java.util.stream.Stream;
  *         Hakemustietojen luku hakemustietueesta vikasietoisesti
  */
 public class HakemusWrapper {
-    private final Hakemus hakemus;
-    private Map<String, String> henkilotiedot = null;
-    private Map<String, String> lisatiedot = null;
-    private Map<String, String> hakutoiveet = null;
-    private Map<String, String> koulutustausta = null;
-    public final static String ETUNIMET = "Etunimet";
-    private final static String KUTSUMANIMI = "Kutsumanimi";
-    public final static String SUKUNIMI = "Sukunimi";
-    public final static String ASIOINTIKIELI = "asiointikieli";
-    private final static String LUPAJULKAISUUN = "lupaJulkaisu";
-    public final static String HETU = "Henkilotunnus";
-    private final static String SAHKOPOSTI = "Sähköposti";
-    public final static String SYNTYMAAIKA = "syntymaaika";
-    private final static String KANSALLINEN_ID = "kansallinenIdTunnus";
-    private final static String PASSINNUMERO = "passinnumero";
-    private final static String KANSALAISUUS = "kansalaisuus";
-    private final static String POSTINUMERO_ULKOMAA = "postinumeroUlkomaa";
-    private final static String KAUPUNKI_ULKOMAA = "kaupunkiUlkomaa";
-    private final static String ASUINMAA = "asuinmaa";
-    private final static String SUOMALAINEN_LAHIOSOITE = "lahiosoite";
-    private final static String SUOMALAINEN_POSTINUMERO = "Postinumero";
-    private final static String OSOITE_ULKOMAA = "osoiteUlkomaa";
-    private final static String SUKUPUOLI = "sukupuoli";
-    private final static String AIDINKIELI = "aidinkieli";
-    private final static String KOTIKUNTA = "kotikunta";
-    private final static String NAINEN = "2";
-    private final static String MIES = "1";
-    private final static String POHJAKOULUTUSMAA_TOINEN_ASTE = "pohjakoulutusmaa_toinen_aste";
+    private final Hakemus       hakemus;
+    private Map<String, String> henkilotiedot                   = null;
+    private Map<String, String> lisatiedot                      = null;
+    private Map<String, String> hakutoiveet                     = null;
+    private Map<String, String> koulutustausta                  = null;
+    public final static String  ETUNIMET                        = "Etunimet";
+    private final static String KUTSUMANIMI                     = "Kutsumanimi";
+    public final static String  SUKUNIMI                        = "Sukunimi";
+    public final static String  ASIOINTIKIELI                   = "asiointikieli";
+    private final static String LUPAJULKAISUUN                  = "lupaJulkaisu";
+    public final static String  HETU                            = "Henkilotunnus";
+    private final static String SAHKOPOSTI                      = "Sähköposti";
+    public final static String  SYNTYMAAIKA                     = "syntymaaika";
+    private final static String KANSALLINEN_ID                  = "kansallinenIdTunnus";
+    private final static String PASSINNUMERO                    = "passinnumero";
+    private final static String KANSALAISUUS                    = "kansalaisuus";
+    private final static String POSTINUMERO_ULKOMAA             = "postinumeroUlkomaa";
+    private final static String KAUPUNKI_ULKOMAA                = "kaupunkiUlkomaa";
+    private final static String ASUINMAA                        = "asuinmaa";
+    private final static String SUOMALAINEN_LAHIOSOITE          = "lahiosoite";
+    private final static String SUOMALAINEN_POSTINUMERO         = "Postinumero";
+    private final static String OSOITE_ULKOMAA                  = "osoiteUlkomaa";
+    private final static String SUKUPUOLI                       = "sukupuoli";
+    private final static String AIDINKIELI                      = "aidinkieli";
+    private final static String KOTIKUNTA                       = "kotikunta";
+    private final static String NAINEN                          = "2";
+    private final static String MIES                            = "1";
+    private final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
+    private final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
 
     private Yhteystiedot yhteystiedot = null;
 
@@ -228,7 +229,7 @@ public class HakemusWrapper {
     }
 
     public boolean getLupaJulkaisuun() {
-        getLisatiedot(); // lazy load henkilotiedot
+        getLisatiedot(); // lazy load lisatiedot
         if (lisatiedot.containsKey(LUPAJULKAISUUN)) {
             String l = lisatiedot.get(LUPAJULKAISUUN);
             return Boolean.TRUE.equals(Boolean.valueOf(l));
@@ -242,12 +243,21 @@ public class HakemusWrapper {
     }
 
     public String getAsiointikieli() {
-        getLisatiedot(); // lazy load henkilotiedot
+        getLisatiedot(); // lazy load lisatiedot
         if (lisatiedot.containsKey(ASIOINTIKIELI)) {
             return KieliUtil.normalisoiKielikoodi(lisatiedot.get(ASIOINTIKIELI));
         } else {
             return KieliUtil.SUOMI;
         }
+    }
+
+    public boolean getLupaSahkoiseenAsiointiin() {
+        getLisatiedot(); // lazy load lisatiedot
+        if (lisatiedot.containsKey(LUPA_SAHKOISEEN_VIESTINTAAN)) {
+            String lupa = lisatiedot.get(LUPA_SAHKOISEEN_VIESTINTAAN);
+            return Boolean.TRUE.equals(Boolean.valueOf(lupa));
+        }
+        return false;
     }
 
     public Map<String, String> getLisatiedot() {
