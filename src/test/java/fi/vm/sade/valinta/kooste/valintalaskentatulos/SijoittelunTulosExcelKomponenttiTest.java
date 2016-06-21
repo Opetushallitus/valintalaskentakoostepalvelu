@@ -155,7 +155,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
         Answers answers = new Answers();
         HashMap<String, String> lisatiedot = new HashMap<>();
-        lisatiedot.put("lupaSahkoisesti", "true");
+        lisatiedot.put("lupatiedot-sahkoinen-viestinta", "true");
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
         InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
