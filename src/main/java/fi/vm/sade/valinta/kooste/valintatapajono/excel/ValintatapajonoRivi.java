@@ -75,7 +75,7 @@ public class ValintatapajonoRivi {
 
     public JarjestyskriteerituloksenTila asTila() {
         if (tilaEnumeraationa == null) {
-            if (tila == null) {
+            if (tila == null || StringUtils.isEmpty(tila)) {
                 tilaEnumeraationa = JarjestyskriteerituloksenTila.MAARITTELEMATON;
             } else if (ValintatapajonoExcel.VAIHTOEHDOT_KONVERSIO.containsKey(tila)) {
                 tilaEnumeraationa = JarjestyskriteerituloksenTila.valueOf(tila);
