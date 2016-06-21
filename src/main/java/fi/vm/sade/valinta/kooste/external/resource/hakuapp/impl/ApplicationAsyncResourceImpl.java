@@ -68,7 +68,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     @Override
     public Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
         return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), client -> {
-            client.query("appState", "ACTIVE", "INCOMPLETE");
+            client.query("appState", DEFAULT_STATES.toArray());
             client.query("rows", 100000).query("asId", hakuOid).query("aoOid", hakukohdeOids);
             LOG.info("Calling url {}", client.getCurrentURI());
             return client;
@@ -78,7 +78,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     @Override
     public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
         Map<String, List<String>> requestBody = new HashMap();
-        requestBody.put("states", Arrays.asList("ACTIVE", "INCOMPLETE"));
+        requestBody.put("states", DEFAULT_STATES);
         requestBody.put("asIds", Arrays.asList(hakuOid));
         requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
         requestBody.put("keys", ApplicationAsyncResource.DEFAULT_KEYS);
@@ -94,17 +94,19 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids) {
-        return getApplicationsByHakemusOids(hakemusOids, Collections.emptyList());
+        return getApplicationsByHakemusOids(null, hakemusOids, Collections.emptyList());
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids, Collection<String> keys) {
+    public Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
         return postAsObservable("/applications/list", new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("rows", 100000);
                     if(!keys.isEmpty()) {
+                        client.query("asIds", hakuOid);
+                        client.query("state", DEFAULT_STATES.toArray());
                         client.query("keys", keys.toArray());
                     }
                     return client;

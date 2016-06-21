@@ -66,7 +66,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         muodostaHyvaksymiskirjeetKokoHaulle(() ->
                         ViestintapalveluObservables.haunResurssit(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
-                                (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(oids, ApplicationAsyncResource.DEFAULT_KEYS)),
+                                (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)),
                 hakuOid, asiointikieli, prosessi, defaultValue);
     }
 

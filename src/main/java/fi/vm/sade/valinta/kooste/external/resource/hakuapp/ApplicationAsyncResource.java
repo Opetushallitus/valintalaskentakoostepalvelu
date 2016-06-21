@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 public interface ApplicationAsyncResource {
     List<String> DEFAULT_KEYS = Arrays.asList("applicationSystemId", "oid", "personOid", "answers.henkilotiedot", "answers.hakutoiveet", "hakutapa", "maxApplicationOptions");
+    List<String> DEFAULT_STATES = Arrays.asList("ACTIVE", "INCOMPLETE");
 
     Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 
@@ -23,7 +24,7 @@ public interface ApplicationAsyncResource {
     Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids);
 
     Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids);
-    Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids, Collection<String> keys);
+    Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys);
 
     Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);
 

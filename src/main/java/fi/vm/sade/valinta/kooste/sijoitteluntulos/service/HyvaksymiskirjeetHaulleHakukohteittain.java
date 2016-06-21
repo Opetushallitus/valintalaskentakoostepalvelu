@@ -69,7 +69,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
 
         Observable<List<HakukohdeJaResurssit>> hakukohdeJaResurssitObs =
                 ViestintapalveluObservables.hakukohteetJaResurssit(sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), (oids) ->
-                        applicationAsyncResource.getApplicationsByHakemusOids(oids, ApplicationAsyncResource.DEFAULT_KEYS))
+                        applicationAsyncResource.getApplicationsByHakemusOids(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS))
                         .doOnNext(list -> prosessi.setKokonaistyo(list.size()));
 
         hakukohdeJaResurssitObs.subscribe(

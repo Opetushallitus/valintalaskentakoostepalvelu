@@ -89,7 +89,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
 
-        Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids,applicationAsyncResource.DEFAULT_KEYS);
+        Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByHakemusOids(hyvaksymiskirjeDTO.getHakuOid(), hakemusOids,applicationAsyncResource.DEFAULT_KEYS);
         Observable<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
