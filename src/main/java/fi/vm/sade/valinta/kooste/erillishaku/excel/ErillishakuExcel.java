@@ -44,31 +44,36 @@ public class ErillishakuExcel {
         esittelyt.add(Collections.singletonList(new TekstiArvo(hakukohdeNimi, true, false, 4)));
         esittelyt.add(Collections.singletonList(new TekstiArvo(tarjoajaNimi, true, false, 4)));
         esittelyt.add(Collections.singletonList(new TekstiArvo(StringUtils.EMPTY)));
-        esittelyt.add(Arrays.asList(
-                new TekstiArvo("Sukunimi"),
-                new TekstiArvo("Etunimi"),
-                new TekstiArvo("Henkilötunnus"),
-                new TekstiArvo("Sähköposti"),
-                new TekstiArvo("Syntymäaika"),
-                new TekstiArvo("Sukupuoli"),
-                new TekstiArvo("Hakija-oid"),
-                new TekstiArvo("Äidinkieli"),
-                new TekstiArvo("Hakemuksentila"),
-                new TekstiArvo("Ehdollinen valinta"),
-                new TekstiArvo(HEADER_HYVAKSYMISKIRJE_LAHETETTY),
-                new TekstiArvo("Vastaanottotila"),
-                new TekstiArvo("Ilmoittautumistila"),
-                new TekstiArvo("Julkaistavissa"),
-                new TekstiArvo("Asiointikieli"),
-                new TekstiArvo("Puhelinnumero"),
-                new TekstiArvo("Osoite"),
-                new TekstiArvo("Postinumero"),
-                new TekstiArvo("Postitoimipaikka"),
-                new TekstiArvo("Asuinmaa"),
-                new TekstiArvo("Kansalaisuus"),
-                new TekstiArvo("Kotikunta"),
-                new TekstiArvo("Pohjakoulutuksen maa (toinen aste)"))
-        );
+
+        ImmutableList.Builder builder = ImmutableList.builder();
+        builder.add(new TekstiArvo("Sukunimi"));
+        builder.add(new TekstiArvo("Etunimi"));
+        builder.add(new TekstiArvo("Henkilötunnus"));
+        builder.add(new TekstiArvo("Sähköposti"));
+        builder.add(new TekstiArvo("Syntymäaika"));
+        builder.add(new TekstiArvo("Sukupuoli"));
+        builder.add(new TekstiArvo("Hakija-oid"));
+        builder.add(new TekstiArvo("Äidinkieli"));
+        builder.add(new TekstiArvo("Hakemuksentila"));
+        if (tyyppi == Hakutyyppi.KORKEAKOULU) {
+            // 'Ehdollinen valinta' -sarake halutaan näyttää vain jos kyseessä KK-haku
+            builder.add(new TekstiArvo("Ehdollinen valinta"));
+        }
+        builder.add(new TekstiArvo(HEADER_HYVAKSYMISKIRJE_LAHETETTY));
+        builder.add(new TekstiArvo("Vastaanottotila"));
+        builder.add(new TekstiArvo("Ilmoittautumistila"));
+        builder.add(new TekstiArvo("Julkaistavissa"));
+        builder.add(new TekstiArvo("Asiointikieli"));
+        builder.add(new TekstiArvo("Puhelinnumero"));
+        builder.add(new TekstiArvo("Osoite"));
+        builder.add(new TekstiArvo("Postinumero"));
+        builder.add(new TekstiArvo("Postitoimipaikka"));
+        builder.add(new TekstiArvo("Asuinmaa"));
+        builder.add(new TekstiArvo("Kansalaisuus"));
+        builder.add(new TekstiArvo("Kotikunta"));
+        builder.add(new TekstiArvo("Pohjakoulutuksen maa (toinen aste)"));
+        esittelyt.add(builder.build());
+
         Collections.sort(erillishakurivit, (h1, h2) -> {
             ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(emptyErillishakuRivi());
             ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(emptyErillishakuRivi());
@@ -141,7 +146,10 @@ public class ErillishakuExcel {
             // HUOM! AIDINKIELESTÄ EI VOI TEHDÄ DROPDOWNIA KOSKA EXCEL EI TUE NIIN PITKÄÄ DROPDOWNIA
             a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
-            a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
+            if (tyyppi == Hakutyyppi.KORKEAKOULU) {
+                // Ehdollinen valinta - sarake halutaan näyttää vain jos kyseessä KK-haku
+                a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
+            }
             a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null ? "" : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));

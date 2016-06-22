@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import org.junit.Test;
@@ -61,4 +62,58 @@ public class ErillishakuExcelTest {
 		// Tulosta tiedostoksi testausta varten
 		// IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
 	}
+
+	@Test
+    public void testaaVientiKK() throws IOException {
+        List<ErillishakuRivi> rivit = Lists.newArrayList();
+        String syntymaAika = "11.11.2011";
+        ErillishakuRivi rivi = new ErillishakuRivi(
+                null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, Sukupuoli.MIES.name(), "", "FI", "HYLATTY", false, null, "", "", false, false, "FI",
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", null);
+        rivit.add(rivi);
+        ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN.name(), "", "FI", "HYLATTY", false, null, "", "", true, false, "FI",
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", "FIN");
+        rivit.add(rivi2);
+        ErillishakuRivi rivi3 = emptyErillishakuRivi();
+        rivit.add(rivi3);
+        final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
+        ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
+        Excel excel = eExcel.getExcel();
+        excel.tuoXlsx(excel.vieXlsx());
+
+        assertEquals(
+                2 // tavalliset rivit
+                        +1 // tyhjärivi julkaisulupasyötteellä
+                , tarkistusTapahtui.get());
+
+        // Tulosta tiedostoksi testausta varten
+        // IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
+    }
+
+    @Test
+    public void testaaVientiToinenAste() throws IOException {
+        List<ErillishakuRivi> rivit = Lists.newArrayList();
+        String syntymaAika = "11.11.2011";
+        ErillishakuRivi rivi = new ErillishakuRivi(
+                null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, Sukupuoli.MIES.name(), "", "FI", "HYLATTY", false, null, "", "", false, false, "FI",
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", null);
+        rivit.add(rivi);
+        ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN.name(), "", "FI", "HYLATTY", false, null, "", "", true, false, "FI",
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", "FIN");
+        rivit.add(rivi2);
+        ErillishakuRivi rivi3 = emptyErillishakuRivi();
+        rivit.add(rivi3);
+        final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
+        ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
+        Excel excel = eExcel.getExcel();
+        excel.tuoXlsx(excel.vieXlsx());
+
+        assertEquals(
+                2 // tavalliset rivit
+                        +1 // tyhjärivi julkaisulupasyötteellä
+                , tarkistusTapahtui.get());
+
+        // Tulosta tiedostoksi testausta varten
+        // IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
+    }
 }
