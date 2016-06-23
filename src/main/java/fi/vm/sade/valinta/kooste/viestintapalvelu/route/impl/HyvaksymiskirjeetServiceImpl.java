@@ -1,14 +1,18 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static rx.Observable.from;
+import static rx.Observable.zip;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
@@ -39,14 +43,15 @@ import rx.subjects.PublishSubject;
 
 import javax.ws.rs.core.Response;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static rx.Observable.from;
-import static rx.Observable.zip;
 
 @Service
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
@@ -206,10 +211,12 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
                             .collect(Collectors.toList());
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
-                    MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
+                    String hakukohdeOidKirjeDtosta = hyvaksymiskirjeDTO.getHakukohdeOid();
+                    String hakukohteenKieli = resolveHakukohteenKieli(hyvaksymiskirjeessaKaytetytHakukohteet, hakukohdeOidKirjeDtosta);
                     final boolean iPosti = false;
+                    Optional<Osoite> toimistonOsoiteOptional = hakutoimisto.map(h -> Hakijapalvelu.osoite(h, hakukohteenKieli)).orElse(Optional.empty());
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            ImmutableMap.of(organisaatioOid,hakutoimisto.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.empty())),
+                            ImmutableMap.of(organisaatioOid, toimistonOsoiteOptional),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),
@@ -226,6 +233,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .subscribe(
                         letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
                         throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hakukohdeOid));
+    }
+
+    private String resolveHakukohteenKieli(Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet, String hakukohdeOidKirjeDtosta) {
+        MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOidKirjeDtosta);
+        if (kohdeHakukohde == null) {
+            LOG.warn("Ei löytynyt metahakukohdetta hakukohteelle " + hakukohdeOidKirjeDtosta + " ! Käytetään oletuskieltä " + MetaHakukohde.OLETUS_KIELI + ". hyväksymiskirjeessaKaytetytHakukohteet = " + hyvaksymiskirjeessaKaytetytHakukohteet);
+            return MetaHakukohde.OLETUS_KIELI;
+        }
+        return kohdeHakukohde.getHakukohteenKieli();
     }
 
     void logErrorAndKeskeyta(KirjeProsessi prosessi, Throwable throwable, String hakuOid, String hakukohdeOid) {
@@ -260,7 +276,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                     pulse -> {
                                         try {
                                             LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
-                                            LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatus(batchId.getBatchId()).get(900L, TimeUnit.MILLISECONDS);
+                                            String batchIdValue = batchId.getBatchId();
+                                            Future<LetterBatchStatusDto> letterBatchStatusDtoFuture = viestintapalveluAsyncResource.haeStatus(batchIdValue);
+                                            LetterBatchStatusDto status = letterBatchStatusDtoFuture.get(900L, TimeUnit.MILLISECONDS);
                                             if (prosessi.isKeskeytetty()) {
                                                 LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
                                                 stop.onNext(null);
@@ -274,7 +292,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                             if ("ready".equals(status.getStatus())) {
                                                 prosessi.vaiheValmistui();
                                                 LOG.error("Hyvaksymiskirjeet valmistui!");
-                                                prosessi.valmistui(batchId.getBatchId());
+                                                prosessi.valmistui(batchIdValue);
                                                 stop.onNext(null);
                                             }
                                         } catch (Exception e) {
