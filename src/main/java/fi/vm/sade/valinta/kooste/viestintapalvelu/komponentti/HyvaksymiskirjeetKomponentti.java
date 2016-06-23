@@ -238,11 +238,11 @@ public class HyvaksymiskirjeetKomponentti {
 
             replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
             replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)));
-            if(sahkoinenKorkeakoulunMassaposti) {
-                kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), !sendIPosti(hakija, hakemus)));
-            } else {
-                kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), !iPosti));
-            }
+
+            HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+            String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
+            boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
+            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), skipIPosti, sahkoposti));
 
             viesti.setFetchTarget(hakukohdeOid);
             viesti.setOrganizationOid(tarjoajaOid);
@@ -268,8 +268,7 @@ public class HyvaksymiskirjeetKomponentti {
         return viesti;
     }
 
-    private static boolean sendIPosti(HakijaDTO hakija, Hakemus hakemus) {
-        HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+    private static boolean sendIPosti(HakemusWrapper hakemusWrapper) {
         return org.apache.commons.lang3.StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite()) ||
            !hakemusWrapper.getVainSahkoinenViestinta();
     }

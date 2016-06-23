@@ -12,6 +12,7 @@ public class Letter {
     private String emailAddress;
     private String personOid;
     private boolean skipIPosti = false;
+    private String emailAddressEPosti;
 
     public Letter() {
     }
@@ -26,11 +27,12 @@ public class Letter {
         this.templateReplacements = replacements;
     }
 
-    public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements, String personOid, boolean skipIPosti) {
+    public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements, String personOid, boolean skipIPosti, String emailAddressEPosti) {
         this.addressLabel = addressLabel;
         this.templateReplacements = replacements;
         this.personOid = personOid;
         this.skipIPosti = skipIPosti;
+        this.emailAddressEPosti = emailAddressEPosti;
     }
 
     public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements, String emailAddress) {
