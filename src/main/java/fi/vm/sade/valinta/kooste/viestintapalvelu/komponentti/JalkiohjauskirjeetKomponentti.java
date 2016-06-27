@@ -93,26 +93,9 @@ public class JalkiohjauskirjeetKomponentti {
                 // VT-1036
                 //
                 List<Sijoitus> kkSijoitukset = Lists.newArrayList();
-                List<Pisteet> kkPisteet = Lists.newArrayList();
+                KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, false);
                 tulokset.put("sijoitukset", kkSijoitukset);
-                tulokset.put("pisteet", kkPisteet);
-                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                    String kkNimi = valintatapajono.getValintatapajonoNimi();
-                    KirjeetUtil.putSijoituksetData(kkSijoitukset, false, valintatapajono, kkNimi);
 
-                    BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
-                    BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
-                    KirjeetUtil.putPisteetData(kkPisteet, kkNimi, numeerisetPisteet, alinHyvaksyttyPistemaara);
-
-                    KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
-                    KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
-                    if (valintatapajono.getHyvaksytty() == null) {
-                        throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
-                    }
-                    if (valintatapajono.getHakeneet() == null) {
-                        throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
-                    }
-                }
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
                 KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);

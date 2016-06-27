@@ -194,26 +194,7 @@ public class HyvaksymiskirjeetKomponentti {
 
                 final boolean valittuHakukohteeseen = hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch((jono) -> jono.getTila().isHyvaksytty());
                 tulokset.put("hyvaksytty", valittuHakukohteeseen);
-                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                    BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
-                    BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
-                    BigDecimal ensikertalaisenMinimipisteet = null;
-                    Optional<Pisteet> jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
-
-                    String kkNimi = valintatapajono.getValintatapajonoNimi();
-                    kkSijoitukset.add(KirjeetUtil.asSijoituksetData(valittuHakukohteeseen, valintatapajono, kkNimi, jononPisteet));
-
-
-
-                    KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
-                    KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
-                    if (valintatapajono.getHyvaksytty() == null) {
-                        throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksytty.");
-                    }
-                    if (valintatapajono.getHakeneet() == null) {
-                        throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
-                    }
-                }
+                KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, valittuHakukohteeseen);
 
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
@@ -268,6 +249,8 @@ public class HyvaksymiskirjeetKomponentti {
         viesti.setTemplateReplacements(templateReplacements);
         return viesti;
     }
+
+
 
     private static boolean sendIPosti(HakemusWrapper hakemusWrapper) {
         return org.apache.commons.lang3.StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite()) ||
