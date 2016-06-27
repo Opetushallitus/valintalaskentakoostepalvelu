@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ import java.util.*;
 import static java.util.Optional.ofNullable;
 import static junit.framework.Assert.assertEquals;
 
+@Ignore
 public class HyvaksymiskirjeetKomponenttiTest {
     @Test
     public void testLaskennanKanssaPisteetTulevatMukaan() {
