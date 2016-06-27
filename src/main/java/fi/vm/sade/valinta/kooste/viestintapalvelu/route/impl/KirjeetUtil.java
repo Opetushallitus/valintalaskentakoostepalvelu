@@ -121,22 +121,26 @@ public class KirjeetUtil {
         return tulokset;
     }
 
-    public static void putSijoituksetData(List<Sijoitus> kkSijoitukset, boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi) {
+    public static Sijoitus asSijoituksetData(boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi, Optional<Pisteet> pisteet) {
         int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
         Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
-        kkSijoitukset.add(new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero));
+        return new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero, pisteet);
     }
 
-    public static void putPisteetData(List<Pisteet> kkPisteet, String kkNimi, BigDecimal numeerisetPisteet, BigDecimal alinHyvaksyttyPistemaara) {
+    public static Optional<Pisteet> asPisteetData(BigDecimal numeerisetPisteet, BigDecimal alinHyvaksyttyPistemaara, BigDecimal ensikertalaisenMinimipisteet) {
         String kkPiste = suomennaNumero(ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
         String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
+        String kkEnskertMinimi = suomennaNumero(ensikertalaisenMinimipisteet, "-");
         // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
         // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
         if (numeerisetPisteet != null
                 && numeerisetPisteet.signum() != -1
                 && alinHyvaksyttyPistemaara != null
                 && alinHyvaksyttyPistemaara.signum() != -1) {
-            kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
+            return Optional.of(new Pisteet(kkPiste, kkMinimi, kkEnskertMinimi));
+        } else {
+            return Optional.empty();
         }
+
     }
 }

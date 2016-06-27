@@ -190,19 +190,20 @@ public class HyvaksymiskirjeetKomponentti {
                 // VT-1036
                 //
                 List<Sijoitus> kkSijoitukset = Lists.newArrayList();
-                List<Pisteet> kkPisteet = Lists.newArrayList();
                 tulokset.put("sijoitukset", kkSijoitukset);
-                tulokset.put("pisteet", kkPisteet);
 
                 final boolean valittuHakukohteeseen = hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch((jono) -> jono.getTila().isHyvaksytty());
-
+                tulokset.put("hyvaksytty", valittuHakukohteeseen);
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                    String kkNimi = valintatapajono.getValintatapajonoNimi();
-                    KirjeetUtil.putSijoituksetData(kkSijoitukset, valittuHakukohteeseen, valintatapajono, kkNimi);
-
                     BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
                     BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
-                    KirjeetUtil.putPisteetData(kkPisteet, kkNimi, numeerisetPisteet, alinHyvaksyttyPistemaara);
+                    BigDecimal ensikertalaisenMinimipisteet = null;
+                    Optional<Pisteet> jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
+
+                    String kkNimi = valintatapajono.getValintatapajonoNimi();
+                    kkSijoitukset.add(KirjeetUtil.asSijoituksetData(valittuHakukohteeseen, valintatapajono, kkNimi, jononPisteet));
+
+
 
                     KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
                     KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);

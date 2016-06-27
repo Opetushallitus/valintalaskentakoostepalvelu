@@ -1,26 +1,26 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter;
 
 public class Pisteet {
-    private String nimi;
     private String oma;
     private String minimi;
+    private String ensikertMinimi;
 
     public Pisteet() {
 
     }
 
-    public Pisteet(String nimi, String oma, String minimi) {
-        this.nimi = nimi;
+    public Pisteet(String oma, String minimi, String ensikertMinimi) {
         this.oma = oma;
         this.minimi = minimi;
+        this.ensikertMinimi = ensikertMinimi;
+    }
+
+    public String getEnsikertMinimi() {
+        return ensikertMinimi;
     }
 
     public String getMinimi() {
         return minimi;
-    }
-
-    public String getNimi() {
-        return nimi;
     }
 
     public String getOma() {
@@ -30,9 +30,9 @@ public class Pisteet {
     @Override
     public String toString() {
         return "Pisteet{" +
-                "nimi='" + nimi + '\'' +
-                ", oma='" + oma + '\'' +
+                "oma='" + oma + '\'' +
                 ", minimi='" + minimi + '\'' +
+                ", ensikertalaisen minimipisteet='" + ensikertMinimi + '\'' +
                 '}';
     }
 }
