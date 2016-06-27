@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.util.KieliUtil;
  *         kaikkiin hakukohteen hakijoihin
  */
 public class MetaHakukohde {
-    public static final String OLETUS_KIELI = KieliUtil.SUOMI;
     private final Teksti hakukohdeNimi;
     private final Teksti tarjoajaNimi;
     private final String hakukohteenKieli;
@@ -44,7 +43,7 @@ public class MetaHakukohde {
     public String getHakukohteenKieli() {
         if (hakukohteenKieli == null) {
             if (hakukohdeNimi == null) {
-                return OLETUS_KIELI;
+                return KieliUtil.SUOMI;
             }
             return getHakukohdeNimi().getKieli();
         }
@@ -54,7 +53,7 @@ public class MetaHakukohde {
     public String getHakukohteenNonEmptyKieli() {
         if (hakukohteenKieli == null) {
             if (hakukohdeNimi == null) {
-                return OLETUS_KIELI;
+                return KieliUtil.SUOMI;
             }
             return getHakukohdeNimi().getNonEmptyKieli();
         }
