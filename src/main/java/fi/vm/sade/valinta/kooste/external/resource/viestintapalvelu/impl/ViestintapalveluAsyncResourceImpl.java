@@ -136,12 +136,12 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
 
     @Override
     public Observable<Optional<Long>> haeKirjelahetysEPostille(String hakuOid, String kirjeenTyyppi, String asiointikieli) {
-        return haeKirjelahetys("/api/v1/letter/getBatchIdReadyForEPosti", hakuOid, kirjeenTyyppi, asiointikieli);
+        return haeKirjelahetys("/api/v1/luotettu/letter/getBatchIdReadyForEPosti", hakuOid, kirjeenTyyppi, asiointikieli);
     }
 
     @Override
     public Observable<Optional<Long>> haeKirjelahetysJulkaistavaksi(String hakuOid, String kirjeenTyyppi, String asiointikieli) {
-        return haeKirjelahetys("/api/v1/letter/getBatchIdReadyForPublish", hakuOid, kirjeenTyyppi, asiointikieli);
+        return haeKirjelahetys("/api/v1/luotettu/letter/getBatchIdReadyForPublish", hakuOid, kirjeenTyyppi, asiointikieli);
     }
 
     private Observable<Optional<Long>> haeKirjelahetys(String url, String hakuOid, String kirjeenTyyppi, String asiointikieli) {
@@ -162,7 +162,7 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
     @Override
     public Observable<Optional<Long>> julkaiseKirjelahetys(Long batchId) {
         return getAsObservable(
-                "/api/v1/letter/publishLetterBatch/" + batchId,
+                "/api/v1/luotettu/letter/publishLetterBatch/" + batchId,
                 (batchIdAsString) ->
                         StringUtils.isNumeric(batchIdAsString) ? Optional.of(Long.parseLong(batchIdAsString)) : Optional.empty(),
                 client -> {
@@ -175,7 +175,7 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
     @Override
     public Observable<List<String>> haeEPostiOsoitteet(Long batchId) {
         return getAsObservable(
-                "/api/v1/letter/getEPostiAddressesForLetterBatch/" + batchId,
+                "/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/" + batchId,
                 new TypeToken<List<String>>() {
                 }.getType(),
                 client -> {

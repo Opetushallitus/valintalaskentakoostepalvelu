@@ -56,14 +56,14 @@ public class EPostinLahetysServiceE2ETest {
 
     @Test
     public void testNoBatchIdFound1() throws Exception {
-        mockToNotFound("GET", "/viestintapalvelu/api/v1/letter/getBatchIdReadyForEPosti");
+        mockToNotFound("GET", "/viestintapalvelu/api/v1/luotettu/letter/getBatchIdReadyForEPosti");
         String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
         assertTrue(message.contains("getBatchIdReadyForEPosti HTTP 404"));
     }
 
     @Test
     public void testNoBatchIdFound2() throws Exception {
-        mockToReturnString("GET", "/viestintapalvelu/api/v1/letter/getBatchIdReadyForEPosti", null);
+        mockToReturnString("GET", "/viestintapalvelu/api/v1/luotettu/letter/getBatchIdReadyForEPosti", null);
         String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
         assertTrue(message.contains("Ei löydetty sopivaa kirjelähetyksen ID:tä"));
     }
@@ -71,7 +71,7 @@ public class EPostinLahetysServiceE2ETest {
     @Test
     public void testNoEmailsFound1() throws Exception {
         mockGetBatchIdResponse();
-        mockToNotFound("GET", "/viestintapalvelu/api/v1/letter/getEPostiAddressesForLetterBatch/1234");
+        mockToNotFound("GET", "/viestintapalvelu/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/1234");
         String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
         assertTrue(message.contains("getEPostiAddressesForLetterBatch/1234 HTTP 404"));
     }
@@ -79,7 +79,7 @@ public class EPostinLahetysServiceE2ETest {
     @Test
     public void testNoEmailsFound2() throws Exception {
         mockGetBatchIdResponse();
-        mockToReturnJson("GET", "/viestintapalvelu/api/v1/letter/getEPostiAddressesForLetterBatch/1234", Arrays.asList());
+        mockToReturnJson("GET", "/viestintapalvelu/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/1234", Arrays.asList());
         String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
         assertTrue(message.contains("Ei löydetty sähköpostiosoitteita."));
     }
@@ -128,11 +128,11 @@ public class EPostinLahetysServiceE2ETest {
     }
 
     private void mockGetBatchIdResponse() {
-        mockToReturnString("GET", "/viestintapalvelu/api/v1/letter/getBatchIdReadyForEPosti", "1234");
+        mockToReturnString("GET", "/viestintapalvelu/api/v1/luotettu/letter/getBatchIdReadyForEPosti", "1234");
     }
 
     private void mockGetEPostiOsoitteetResponse() {
-        mockToReturnJson("GET", "/viestintapalvelu/api/v1/letter/getEPostiAddressesForLetterBatch/1234",
+        mockToReturnJson("GET", "/viestintapalvelu/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/1234",
                 Arrays.asList("testi1@testi.fi", "testi2@testi.fi", "testi3@testi.fi"));
     }
 
