@@ -4,6 +4,7 @@ import java.util.List;
 
 public class TokensRequest {
     private String url;
+    private String hakuOid;
     private String templatename;
     private String lang;
     private List<String> emails;
@@ -61,10 +62,19 @@ public class TokensRequest {
         this.expires = expires;
     }
 
+    public String getHakuOid() {
+        return hakuOid;
+    }
+
+    public void setHakuOid(String hakuOid) {
+        this.hakuOid = hakuOid;
+    }
+
     @Override
     public String toString() {
         return "TokensRequest{" +
                 "url='" + url + '\'' +
+                ", hakuOid='" + hakuOid + '\'' +
                 ", templatename='" + templatename + '\'' +
                 ", lang='" + lang + '\'' +
                 ", emails=" + emails +

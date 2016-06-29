@@ -85,6 +85,7 @@ public class EPostiServiceImpl implements EPostiService {
                         request.setEmails(ePostiOsoitteet);
                         request.setExpires(expirationTime);
                         request.setTemplatename(ePostiRequest.getTemplateName());
+                        request.setHakuOid(ePostiRequest.getHakuOid());
                         request.setLang(ePostiRequest.getAsiointikieli());
                         request.setUrl(secureLinkUrls.get(ePostiRequest.getAsiointikieli()));
                         return request;
