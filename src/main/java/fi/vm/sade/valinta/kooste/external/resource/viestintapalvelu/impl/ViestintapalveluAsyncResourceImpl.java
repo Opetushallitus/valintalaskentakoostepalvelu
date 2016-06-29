@@ -1,22 +1,18 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import fi.vm.sade.valinta.http.ResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
-
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -25,14 +21,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.Gson;
-
-import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import rx.Observable;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @Service
 public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas implements ViestintapalveluAsyncResource {
@@ -173,10 +172,10 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
     }
 
     @Override
-    public Observable<List<String>> haeEPostiOsoitteet(Long batchId) {
+    public Observable<Map<String, String>> haeEPostiOsoitteet(Long batchId) {
         return getAsObservable(
                 "/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/" + batchId,
-                new TypeToken<List<String>>() {
+                new TypeToken<Map<String, String>>() {
                 }.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);

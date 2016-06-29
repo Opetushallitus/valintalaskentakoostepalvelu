@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.OppijantunnistusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensRequest;
@@ -17,7 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 @Service
@@ -57,7 +57,7 @@ public class EPostiServiceImpl implements EPostiService {
         EPostiResponse response = new EPostiResponse();
         viestintapalveluAsyncResource.haeKirjelahetysEPostille(ePostiRequest.getHakuOid(), ePostiRequest.getKirjeenTyyppi(), ePostiRequest.getAsiointikieli())
                 .flatMap( batchIdOptional -> haeEPostiOsoitteet(batchIdOptional, hakuMessage, response) )
-                .flatMap( ePostiOsoitteet -> teeTokensRequest(ePostiRequest, response, ePostiOsoitteet, hakuMessage) )
+                .flatMap( hakemusOidToEmailAddress -> teeTokensRequest(ePostiRequest, response, hakemusOidToEmailAddress, hakuMessage) )
                 .flatMap( tokensRequest -> oppijantunnistusAsyncResource.sendSecureLinks(tokensRequest))
                 .subscribe(
 
@@ -75,14 +75,14 @@ public class EPostiServiceImpl implements EPostiService {
                 );
     }
 
-    private Observable<TokensRequest> teeTokensRequest(EPostiRequest ePostiRequest, EPostiResponse ePostiResponse, List<String> ePostiOsoitteet, String hakuMessage) {
-        if(!ePostiOsoitteet.isEmpty()) {
-            LOG.info("Saatiin sähköpostiosoitteet {} kpl. Lähetetään oppijan tunnistukseen." + hakuMessage, ePostiOsoitteet.size());
-            ePostiResponse.setNumberOfRecipients(ePostiOsoitteet.size());
+    private Observable<TokensRequest> teeTokensRequest(EPostiRequest ePostiRequest, EPostiResponse ePostiResponse, Map<String, String> applicationOidToEmailAddress, String hakuMessage) {
+        if(!applicationOidToEmailAddress.isEmpty()) {
+            LOG.info("Saatiin sähköpostiosoitteet {} kpl. Lähetetään oppijan tunnistukseen." + hakuMessage, applicationOidToEmailAddress.size());
+            ePostiResponse.setNumberOfRecipients(applicationOidToEmailAddress.size());
             return haeExpirationTime(ePostiRequest.getHakuOid())
                     .map( expirationTime -> {
                         TokensRequest request = new TokensRequest();
-                        request.setEmails(ePostiOsoitteet);
+                        request.setApplicationOidToEmailAddress(applicationOidToEmailAddress);
                         request.setExpires(expirationTime);
                         request.setTemplatename(ePostiRequest.getTemplateName());
                         request.setHakuOid(ePostiRequest.getHakuOid());
@@ -100,7 +100,7 @@ public class EPostiServiceImpl implements EPostiService {
         );
     }
 
-    private Observable<List<String>> haeEPostiOsoitteet(Optional<Long> batchIdOptional, String hakuMessage, EPostiResponse response) {
+    private Observable<Map<String, String>> haeEPostiOsoitteet(Optional<Long> batchIdOptional, String hakuMessage, EPostiResponse response) {
         if(batchIdOptional.isPresent()) {
             LOG.info("Saatiin kirjelähetyksen id {}. Haetaan sähköpostiosoitteet. " + hakuMessage, batchIdOptional.get());
             response.setBatchId(batchIdOptional.get());

@@ -1,24 +1,24 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto;
 
-import java.util.List;
+import java.util.Map;
 
 public class TokensRequest {
     private String url;
     private String hakuOid;
     private String templatename;
     private String lang;
-    private List<String> emails;
+    private Map<String, String> applicationOidToEmailAddress;
     private Long expires;
 
     public TokensRequest() {
 
     }
 
-    public TokensRequest(String url, String templatename, String lang, List<String> emails, Long expires) {
+    public TokensRequest(String url, String templatename, String lang, Map<String, String> applicationOidToEmailAddress, Long expires) {
         this.url = url;
         this.templatename = templatename;
         this.lang = lang;
-        this.emails = emails;
+        this.applicationOidToEmailAddress = applicationOidToEmailAddress;
         this.expires = expires;
     }
 
@@ -46,12 +46,12 @@ public class TokensRequest {
         this.lang = lang;
     }
 
-    public List<String> getEmails() {
-        return emails;
+    public Map<String, String> getApplicationOidToEmailAddress() {
+        return applicationOidToEmailAddress;
     }
 
-    public void setEmails(List<String> emails) {
-        this.emails = emails;
+    public void setApplicationOidToEmailAddress(Map<String, String> applicationOidToEmailAddress) {
+        this.applicationOidToEmailAddress = applicationOidToEmailAddress;
     }
 
     public Long getExpires() {
@@ -77,7 +77,7 @@ public class TokensRequest {
                 ", hakuOid='" + hakuOid + '\'' +
                 ", templatename='" + templatename + '\'' +
                 ", lang='" + lang + '\'' +
-                ", emails=" + emails +
+                ", applicationOidToEmailAddress=" + applicationOidToEmailAddress +
                 ", expires=" + expires +
                 '}';
     }

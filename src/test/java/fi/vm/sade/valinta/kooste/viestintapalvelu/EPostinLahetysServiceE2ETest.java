@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
@@ -133,7 +134,7 @@ public class EPostinLahetysServiceE2ETest {
 
     private void mockGetEPostiOsoitteetResponse() {
         mockToReturnJson("GET", "/viestintapalvelu/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/1234",
-                Arrays.asList("testi1@testi.fi", "testi2@testi.fi", "testi3@testi.fi"));
+                ImmutableMap.of("oid1", "testi1@testi.fi", "oid2", "testi2@testi.fi", "oid3", "testi3@testi.fi"));
     }
 
     private void mockPostSecurelinksResponse(String bodyRegexp) {

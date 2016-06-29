@@ -25,7 +25,7 @@ public class OppijantunnistusAsyncResourceImpl extends HttpResource implements O
 
     @Override
     public Observable<TokensResponse> sendSecureLinks(TokensRequest tokensRequest) {
-        LOG.info("Sending securelinks to {} recipients.", tokensRequest.getEmails().size());
+        LOG.info("Sending securelinks to {} recipients.", tokensRequest.getApplicationOidToEmailAddress().size());
         return postAsObservable(
                 "/api/v1/tokens",
                 new TypeToken<TokensResponse>(){

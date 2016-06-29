@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.Map;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
@@ -43,7 +44,7 @@ public interface ViestintapalveluAsyncResource {
 
     Observable<Optional<Long>> haeKirjelahetysJulkaistavaksi(String hakuOid, String kirjeenTyyppi, String kieli);
 
-    Observable<List<String>> haeEPostiOsoitteet(Long batchId);
+    Observable<Map<String, String>> haeEPostiOsoitteet(Long batchId);
 
     Observable<Optional<Long>> julkaiseKirjelahetys(Long batchId);
 }
