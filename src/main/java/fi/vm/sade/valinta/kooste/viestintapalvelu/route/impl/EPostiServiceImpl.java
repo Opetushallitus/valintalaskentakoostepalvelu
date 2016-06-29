@@ -51,7 +51,7 @@ public class EPostiServiceImpl implements EPostiService {
         LOG.info("Aloitetaan securelinkien muodostus ja lähetys, " + hakuMessage);
 
         if(StringUtils.isBlank(ePostiRequest.getTemplateName())) {
-            ePostiRequest.setTemplateName("opiskelijavalinnan_tulos_securelink");
+            ePostiRequest.setTemplateName(ePostiRequest.getKirjeenTyyppi());
         }
 
         EPostiResponse response = new EPostiResponse();
