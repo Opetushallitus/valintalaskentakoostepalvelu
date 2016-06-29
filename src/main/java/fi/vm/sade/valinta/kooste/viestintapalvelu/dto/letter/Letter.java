@@ -11,6 +11,7 @@ public class Letter {
     private LetterContent letterContent;
     private String emailAddress;
     private String personOid;
+    private String applicationOid;
     private boolean skipIPosti = false;
     private String emailAddressEPosti;
 
@@ -27,10 +28,12 @@ public class Letter {
         this.templateReplacements = replacements;
     }
 
-    public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements, String personOid, boolean skipIPosti, String emailAddressEPosti) {
+    public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements,
+                  String personOid, boolean skipIPosti, String emailAddressEPosti, String applicationOid) {
         this.addressLabel = addressLabel;
         this.templateReplacements = replacements;
         this.personOid = personOid;
+        this.applicationOid = applicationOid;
         this.skipIPosti = skipIPosti;
         this.emailAddressEPosti = emailAddressEPosti;
     }
@@ -89,6 +92,14 @@ public class Letter {
         this.personOid = personOid;
     }
 
+    public String getApplicationOid() {
+        return applicationOid;
+    }
+
+    public void setApplicationOid(String applicationOid) {
+        this.applicationOid = applicationOid;
+    }
+
     public boolean isSkipIPosti() {
         return skipIPosti;
     }
@@ -100,6 +111,6 @@ public class Letter {
     @Override
     public String toString() {
         return "Letter [addressLabel=" + addressLabel + ", templateReplacements=" + templateReplacements +
-                ", personOid=" + personOid + ", skipIPosti=" + skipIPosti + "]";
+                ", personOid=" + personOid + ", applicationOid=" + applicationOid + ", skipIPosti=" + skipIPosti + "]";
     }
 }

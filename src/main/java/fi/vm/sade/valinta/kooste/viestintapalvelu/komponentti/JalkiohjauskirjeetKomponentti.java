@@ -110,7 +110,8 @@ public class JalkiohjauskirjeetKomponentti {
             HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
             String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
             boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : false;
-            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), skipIPosti, sahkoposti));
+            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements,
+                    hakija.getHakijaOid(), skipIPosti, sahkoposti, hakija.getHakemusOid()));
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());

@@ -224,7 +224,8 @@ public class HyvaksymiskirjeetKomponentti {
             HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
             String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
             boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
-            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(), skipIPosti, sahkoposti));
+            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(),
+                    skipIPosti, sahkoposti, hakija.getHakemusOid()));
 
             viesti.setFetchTarget(hakukohdeOid);
             viesti.setOrganizationOid(tarjoajaOid);
