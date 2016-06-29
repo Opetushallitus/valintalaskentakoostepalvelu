@@ -21,7 +21,7 @@ public class OhjausparametritAsyncResourceImpl extends HttpResource implements O
 
     @Autowired
     public OhjausparametritAsyncResourceImpl(@Value("${host.scheme:https}://${host.virkailija}") String address) {
-        super(address, TimeUnit.MINUTES.toMillis(10));
+        super(address, TimeUnit.SECONDS.toMillis(10));
     }
     public Observable<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
         return getAsObservable("/ohjausparametrit-service/api/v1/rest/parametri/" + hakuOid, ParametritDTO.class);
