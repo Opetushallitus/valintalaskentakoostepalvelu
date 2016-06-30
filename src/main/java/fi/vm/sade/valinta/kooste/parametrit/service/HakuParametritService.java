@@ -1,5 +1,9 @@
 package fi.vm.sade.valinta.kooste.parametrit.service;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import fi.vm.sade.sijoittelu.domain.Hakukohde;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.HttpExceptionWithStatus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -13,8 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import rx.Observable;
 import rx.observables.BlockingObservable;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class HakuParametritService {
 
@@ -23,6 +29,8 @@ public class HakuParametritService {
     private String rootOrganisaatioOid;
     private OhjausparametritAsyncResource ohjausparametritAsyncResource;
 
+    private final Cache<String, ParametritParser> haunOhjausParametritCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
+
     @Autowired
     public HakuParametritService(OhjausparametritAsyncResource ohjausparametritAsyncResource, @Value("${root.organisaatio.oid:1.2.246.562.10.00000000001}") String rootOrganisaatioOid) {
         this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
@@ -30,7 +38,14 @@ public class HakuParametritService {
     }
 
     public ParametritParser getParametritForHaku(String hakuOid) {
+        try {
+            return haunOhjausParametritCache.get(hakuOid, () -> fetchParametrit(hakuOid));
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    private ParametritParser fetchParametrit(String hakuOid) {
         final CompletableFuture<ParametritDTO> promise = new CompletableFuture<>();
         // ohjausparametrit-service returns 404 for haku without parameters
         ohjausparametritAsyncResource.haeHaunOhjausparametrit(
