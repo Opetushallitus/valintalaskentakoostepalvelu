@@ -37,7 +37,7 @@ public class KirjeetUtil {
         for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
             BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
             BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
-            BigDecimal ensikertalaisenMinimipisteet = null;
+            BigDecimal ensikertalaisenMinimipisteet = hakutoive.getEnsikertalaisuusHakijaryhmanAlimmatHyvaksytytPisteet();
             Optional<Pisteet> jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
 
             String kkNimi = valintatapajono.getValintatapajonoNimi();
