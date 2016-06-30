@@ -146,11 +146,14 @@ public class KirjeetUtil {
         Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
         return new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero, pisteet);
     }
+    private static BigDecimal notNegative(BigDecimal bb) {
+        return Optional.ofNullable(bb).filter(b -> b.signum() != 1).orElse(null);
+    }
 
     public static Optional<Pisteet> asPisteetData(BigDecimal numeerisetPisteet, BigDecimal alinHyvaksyttyPistemaara, BigDecimal ensikertalaisenMinimipisteet) {
-        String kkPiste = suomennaNumero(ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
-        String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
-        String kkEnskertMinimi = suomennaNumero(ensikertalaisenMinimipisteet, "-");
+        String kkPiste = suomennaNumero(notNegative(numeerisetPisteet), null);
+        String kkMinimi = suomennaNumero(notNegative(alinHyvaksyttyPistemaara), null);
+        String kkEnskertMinimi = suomennaNumero(notNegative(ensikertalaisenMinimipisteet), null);
         // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
         // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
         if (numeerisetPisteet != null
