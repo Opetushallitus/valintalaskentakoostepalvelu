@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.sijoitteluntulos;
+package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
@@ -10,6 +10,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -27,12 +28,11 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAn
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.HAKEMUS1;
 import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 
-public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
+public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     @Before
     public void startServer() throws Throwable{
         startShared();
@@ -51,227 +51,187 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws InterruptedException {
-
-        mockHakukohde1Kutsu();
-        mockKorkeakouluHaku1Kutsu();
-        mockYksiHyvaksyttyKutsu();
-
+    public void testJalkiohjauskirjeetYksiHylatty() throws InterruptedException {
+        mockYksiHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A123")
                         .build(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A321")
                         .build()
         ));
-
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
-
-        mockLetterKutsut("^(?!.*HAKEMUS2).*HAKEMUS1.*$");
+        mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
+        mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
-
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleKaksiHyvaksyttyaHakija() throws InterruptedException {
-
-        mockHakukohde1Kutsu();
-        mockKorkeakouluHaku1Kutsu();
-        mockMolemmatHyvaksyttyKutsu();
-
+    public void testJalkiohjauskirjeetMolemmatHylatty() throws InterruptedException {
+        mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A123")
                         .build(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A321")
                         .build()
         ));
-
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
-
-        mockLetterKutsut(".*HAKEMUS1.*HAKEMUS2.*|.*HAKEMUS2.*HAKEMUS1.*");
+        mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
+        mockLetterKutsut(".*010111A321.*010111A123.*|.*010111A123.*010111A321.*");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
-
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleSuodataAsiointikielella() throws InterruptedException {
-
-        mockHakukohde1Kutsu();
-        mockKorkeakouluHaku1Kutsu();
-        mockMolemmatHyvaksyttyKutsu();
-
+    public void testJalkiohjauskirjeetSuodataAsiointikielella() throws InterruptedException {
+        mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A123")
                         .build(),
                 hakemus()
                         .setOid(HAKEMUS2)
-                        .setAsiointikieli(KieliUtil.SUOMI)
+                        .setAsiointikieli(KieliUtil.ENGLANTI)
+                        .setHenkilotunnus("010111A321")
                         .build()
         ));
-
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
-
-        mockLetterKutsut("^(?!.*HAKEMUS2).*HAKEMUS1.*$");
+        mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
+        mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
-
     }
 
-    //skipIPosti
-
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleVainSahkoposti() throws InterruptedException {
-
-        mockHakukohde1Kutsu();
-        mockKorkeakouluHaku1Kutsu();
-        mockMolemmatHyvaksyttyKutsu();
-
+    public void testJalkiohjauskirjeetMolemmilleVainSahkopostia() throws InterruptedException {
+        mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A123")
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi2@sahkoposti.fi")
                         .build(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A321")
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi@sahkoposti.fi")
                         .build()
         ));
-
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
-
-        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":true).*HAKEMUS2.*(?=skipIPosti\":true).*");
+        mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
+        mockLetterKutsut(".*010111A123.*(?=skipIPosti\":true).*010111A321.*(?=skipIPosti\":true).*");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
-
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleToiselleHakijalleEiIPostia() throws InterruptedException {
-
-        mockHakukohde1Kutsu();
-        mockKorkeakouluHaku1Kutsu();
-        mockMolemmatHyvaksyttyKutsu();
-
+    public void testJalkiohjauskirjeetLahetaIPostiToiselle() throws InterruptedException {
+        mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A123")
                         .build(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A321")
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi@sahkoposti.fi")
                         .build()
         ));
-
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
-
-        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":true).*");
+        mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
+        mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":true).*");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
-
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleIPostia() throws InterruptedException {
-
-        mockHakukohde1Kutsu();
-        mockKorkeakouluHaku1Kutsu();
-        mockMolemmatHyvaksyttyKutsu();
-
+    public void testJalkiohjauskirjeetLahetaIPostiMolemmille() throws InterruptedException {
+        mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A123")
                         .build(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
+                        .setHenkilotunnus("010111A321")
                         .setVainSahkoinenViestinta(false)
                         .setSahkoposti("testi@sahkoposti.fi")
                         .build()
         ));
-
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
-
-        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":false).*");
+        mockHakukohde1Kutsu();
+        mockHaku1Kutsu();
+        mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":false).*");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
-
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleIPostiToinenAste() throws InterruptedException {
-
-        mockHakukohde1Kutsu();
-        mockToinenAsteHaku1Kutsu();
-        mockMolemmatHyvaksyttyKutsu();
-
+    public void testJalkiohjauskirjeetIPostiToinenAste() throws InterruptedException {
+        mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .setVainSahkoinenViestinta(true)
-                        .setSahkoposti("testi2@sahkoposti.fi")
+                        .setHenkilotunnus("010111A123")
                         .build(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .setVainSahkoinenViestinta(false)
+                        .setHenkilotunnus("010111A321")
+                        .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi@sahkoposti.fi")
                         .build()
         ));
-
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
-
-        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":false).*");
+        mockHakukohde1Kutsu();
+        mockHaku1KutsuToinenAste();
+        mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":false).*");
         String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
-
     }
 
-    private String makeCallAndReturnDokumenttiId(String asiointikieli) {
-        HttpResource http = new HttpResource(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet");
-        WebClient client = http.getWebClient()
-                .query("hakuOid", HAKU1)
-                .query("asiointikieli", asiointikieli)
-                .query("letterBodyText","letterBodyText");
-        Response response = client.post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2)));
-        Assert.assertEquals(200, response.getStatus());
-        String body = response.readEntity(String.class);
-        return body.substring(7, body.length()-2);
+    private void mockLetterKutsut(String regex) {
+        LetterResponse letterResponse = new LetterResponse();
+        letterResponse.setBatchId("testBatchId");
+        letterResponse.setStatus(LetterResponse.STATUS_SUCCESS);
+        mockToReturnJsonAndCheckBody(POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse, regex);
+
+        LetterBatchStatusDto letterStatus = new LetterBatchStatusDto();
+        letterStatus.setStatus("ready");
+        mockToReturnJson(GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
     }
 
-    private void mockYksiHyvaksyttyKutsu() {
+    private void mockYksiHylattyKutsu() {
         HakijaDTO hakija1 = new HakijaDTO();
         hakija1.setHakemusOid(HAKEMUS1);
         HakutoiveDTO hakutoiveDTO = new HakutoiveDTO();
         hakutoiveDTO.setHakukohdeOid(HAKUKOHDE1);
         HakutoiveenValintatapajonoDTO jono = new HakutoiveenValintatapajonoDTO();
-        jono.setTila(HakemuksenTila.HYVAKSYTTY);
+        jono.setTila(HakemuksenTila.HYLATTY);
         jono.setHyvaksytty(50);
         jono.setHakeneet(100);
         hakutoiveDTO.setHakutoiveenValintatapajonot(Collections.singletonList(jono));
@@ -279,14 +239,14 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         HakijaPaginationObject hp = new HakijaPaginationObject();
         hp.setResults(Collections.singletonList(hakija1));
         hp.setTotalCount(hp.getResults().size());
-        mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/hyvaksytyt/.*", hp);
+        mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/sijoitteluajo/latest/hakemukset.*", hp);
     }
 
-    private void mockMolemmatHyvaksyttyKutsu() {
+    private void mockMolemmatHylattyKutsu() {
         HakutoiveDTO hakutoiveDTO = new HakutoiveDTO();
         hakutoiveDTO.setHakukohdeOid(HAKUKOHDE1);
         HakutoiveenValintatapajonoDTO jono = new HakutoiveenValintatapajonoDTO();
-        jono.setTila(HakemuksenTila.HYVAKSYTTY);
+        jono.setTila(HakemuksenTila.HYLATTY);
         jono.setHyvaksytty(50);
         jono.setHakeneet(100);
         hakutoiveDTO.setHakutoiveenValintatapajonot(Collections.singletonList(jono));
@@ -302,7 +262,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         HakijaPaginationObject hp = new HakijaPaginationObject();
         hp.setResults(Arrays.asList(hakija1, hakija2));
         hp.setTotalCount(hp.getResults().size());
-        mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/hyvaksytyt/.*", hp);
+        mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/sijoitteluajo/latest/hakemukset.*", hp);
     }
 
     private void mockHakukohde1Kutsu() {
@@ -310,30 +270,33 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         hk.setOpetusKielet(Sets.newHashSet("FI"));
         hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
         mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1/", new Result(hk));
-
     }
 
-    private void mockKorkeakouluHaku1Kutsu() {
+    private void mockHaku1Kutsu() {
         HakuV1RDTO haku = new HakuV1RDTO();
         haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
         mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(haku));
+
     }
 
-    private void mockToinenAsteHaku1Kutsu() {
+    private void mockHaku1KutsuToinenAste() {
         HakuV1RDTO haku = new HakuV1RDTO();
-        haku.setKohdejoukkoUri("haunkohdejoukko_17#1");
+        haku.setKohdejoukkoUri("haunkohdejoukko_11");
         mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(haku));
+
     }
 
-    private void mockLetterKutsut(String regex) {
-        LetterResponse letterResponse = new LetterResponse();
-        letterResponse.setBatchId("testBatchId");
-        letterResponse.setStatus(LetterResponse.STATUS_SUCCESS);
-        mockToReturnJsonAndCheckBody(POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse, regex);
-
-        LetterBatchStatusDto letterStatus = new LetterBatchStatusDto();
-        letterStatus.setStatus("ready");
-        mockToReturnJson(GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
+    private String makeCallAndReturnDokumenttiId(String asiointikieli) {
+        HttpResource http = new HttpResource(resourcesAddress + "/viestintapalvelu/jalkiohjauskirjeet/aktivoi");
+        WebClient client = http.getWebClient()
+                .query("hakuOid", HAKU1)
+                .query("templateName","jalkiohjauskirje")
+                .query("tag", "testTag");
+        DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot(null, "testTag", "letterBodyText", asiointikieli, null);
+        Response response = client.post(Entity.json(lisatiedot));
+        Assert.assertEquals(200, response.getStatus());
+        String body = response.readEntity(String.class);
+        return body.substring(7, body.length()-2);
     }
 
     private void pollAndAssertDokumenttiProsessi(String dokumenttiId) throws InterruptedException {

@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 
+import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
 public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoAsyncResource {
 
     @Autowired
-    public KoodistoAsyncResourceImpl(@Value("https://${host.virkailija}") String address) {
+    public KoodistoAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.koodisto.url:https://${host.virkailija}}") String address) {
         super(address, TimeUnit.HOURS.toMillis(20));
     }
 
@@ -50,6 +51,7 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
     @Override
     public Future<List<Koodi>> haeKoodisto(String koodistoUri) {
         try {
+            WebClient client = getWebClient();
             return getWebClient()
                     .path("/koodisto-service/rest/json/" + koodistoUri + "/koodi")
                     .query("onlyValidKoodis", true)

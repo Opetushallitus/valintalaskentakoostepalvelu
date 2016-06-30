@@ -54,6 +54,8 @@
   <!--Suorituksen arvosanat-->
   <bean id="SuorituksenArvosanatProxyResource"
         class="fi.vm.sade.valinta.kooste.proxy.resource.suoritukset.OppijanSuorituksetProxyResource"/>
+  <bean id="ViestintapalveluProxyResource"
+        class="fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu.ViestintapalveluProxyResource"/>
 
   <bean id="HakemuksetResource"
         class="fi.vm.sade.valinta.kooste.hakemukset.resource.HakemuksetResource"/>
@@ -65,11 +67,11 @@
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
     <mockito:mock id="valintatapajononVientiRoute" class="fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute" />
     <mockito:mock id="jalkiohjauskirjeService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService" />
+    <mockito:mock id="ePostiService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService" />
     <mockito:mock id="hyvaksymiskirjeetService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService" />
     <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />
     <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource" />
     <mockito:mock id="hakuV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource" />
-    <mockito:mock id="hakukohdeV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakukohdeV1Resource" />
     <mockito:mock id="hakokohdeResource" class="fi.vm.sade.tarjonta.service.resources.HakukohdeResource" />
     <mockito:mock id="komotoResource" class="fi.vm.sade.tarjonta.service.resources.KomotoResource" />
     <mockito:mock id="ohjausparametritAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource" />

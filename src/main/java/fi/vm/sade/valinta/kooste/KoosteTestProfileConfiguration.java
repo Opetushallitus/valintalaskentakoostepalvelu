@@ -43,8 +43,10 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.tarjonta.rest.url", "http://" + proxyServer + "/tarjonta-service/rest");
         p0.setProperty("valintalaskentakoostepalvelu.koodisto.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.koodisto.url", "https://itest-virkailija.oph.ware.fi/");
         p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.valintaperusteet.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.oppijantunnistus.rest.url", "http://" + proxyServer + "/oppijan-tunnistus");
         p0.setProperty("root.organisaatio.oid", "");
         p0.setProperty("kela.ftp.protocol", "ftp");
         p0.setProperty("kela.ftp.username", "username");
@@ -79,6 +81,9 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.app.password.to.valintaperusteet", "");
         p0.setProperty("valintalaskentakoostepalvelu.maxWorkerCount", "0");
 
+        p0.setProperty("omatsivut.email.application.modify.link.en", "https://en.test.domain/token/");
+        p0.setProperty("omatsivut.email.application.modify.link.fi", "https://fi.test.domain/token/");
+        p0.setProperty("omatsivut.email.application.modify.link.sv", "https://sv.test.domain/token/");
 
         org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
         defaultProps.setProperties(p0);

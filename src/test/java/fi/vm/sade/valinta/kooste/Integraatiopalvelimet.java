@@ -1,20 +1,24 @@
 package fi.vm.sade.valinta.kooste;
 
-
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
-import static org.mockserver.model.HttpForward.forward;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import fi.vm.sade.integrationtest.util.PortChecker;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.RegexBody;
 
+import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static javax.ws.rs.HttpMethod.*;
+import static org.mockserver.model.HttpForward.forward;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 /**
  * @author Jussi Jartamo
@@ -24,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 public class Integraatiopalvelimet {
 
     public static ClientAndServerWithHost mockServer = new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
-    private static HttpResource httpResource = new HttpResource("");
     static {
         ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(15));
     }
@@ -67,6 +70,21 @@ public class Integraatiopalvelimet {
 
                 );
     }
+    private static void mockToReturnValueAndCheckBody(String method, String p, String r, String regex) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                                .withBody(new RegexBody(regex))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(r)
+
+                );
+    }
     public static void mockToNoContent(String method, String p) {
         mockServer
                 .when(
@@ -93,6 +111,19 @@ public class Integraatiopalvelimet {
 
                 );
     }
+    public static void mockToInternalServerError(String method, String p) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(500)
+
+                );
+    }
     public static void mockToAccept(String method, String p) {
         mockServer
                 .when(
@@ -108,7 +139,12 @@ public class Integraatiopalvelimet {
     }
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;
-        mockToReturnValue(method, p, s = httpResource.gson().toJson(r));
+        mockToReturnValue(method, p, s = gson().toJson(r));
+        System.err.println(s);
+    }
+    public static void mockToReturnJsonAndCheckBody(String method, String p, Object r, String regex) {
+        String s;
+        mockToReturnValueAndCheckBody(method, p, s = gson().toJson(r), regex);
         System.err.println(s);
     }
     public static void mockToReturnString(String method, String p, String r) {
@@ -128,4 +164,14 @@ public class Integraatiopalvelimet {
             return new StringBuilder("http://").append(super.host).append(":").append(port).toString();
         }
     }
+
+    private static JsonSerializer<Date> dateJsonSerializer = (Date src, Type typeOfSrc, JsonSerializationContext context)
+            -> src == null ? null : new JsonPrimitive(src.getTime());
+
+    private static Gson gson = DateDeserializer.gsonBuilder().registerTypeAdapter(Date.class, dateJsonSerializer).create();
+
+    public static Gson gson() {
+        return gson;
+    }
+
 }

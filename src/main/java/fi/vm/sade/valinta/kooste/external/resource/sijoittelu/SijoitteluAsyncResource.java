@@ -21,8 +21,7 @@ public interface SijoitteluAsyncResource {
     @Deprecated
     Peruutettava getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback);
 
-    @Deprecated
-    Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
+    Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 
     @Deprecated
     Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid);

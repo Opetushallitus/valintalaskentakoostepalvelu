@@ -57,7 +57,8 @@ public class JalkiohjauskirjeetKomponentti {
             final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
             @Simple("${property.hakuOid}") String hakuOid,
             @Property("templateName") String templateName,
-            @Property("sisalto") String sisalto, @Property("tag") String tag
+            @Property("sisalto") String sisalto, @Property("tag") String tag,
+            boolean sahkoinenKorkeakoulunMassaposti
     ) {
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
@@ -92,26 +93,9 @@ public class JalkiohjauskirjeetKomponentti {
                 // VT-1036
                 //
                 List<Sijoitus> kkSijoitukset = Lists.newArrayList();
-                List<Pisteet> kkPisteet = Lists.newArrayList();
+                KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, false);
                 tulokset.put("sijoitukset", kkSijoitukset);
-                tulokset.put("pisteet", kkPisteet);
-                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                    String kkNimi = valintatapajono.getValintatapajonoNimi();
-                    KirjeetUtil.putSijoituksetData(kkSijoitukset, false, valintatapajono, kkNimi);
 
-                    BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
-                    BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
-                    KirjeetUtil.putPisteetData(kkPisteet, kkNimi, numeerisetPisteet, alinHyvaksyttyPistemaara);
-
-                    KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
-                    KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
-                    if (valintatapajono.getHyvaksytty() == null) {
-                        throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
-                    }
-                    if (valintatapajono.getHakeneet() == null) {
-                        throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
-                    }
-                }
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
                 KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
@@ -122,7 +106,12 @@ public class JalkiohjauskirjeetKomponentti {
             Map<String, Object> replacements = Maps.newHashMap();
             replacements.put("tulokset", tulosList);
             replacements.put("henkilotunnus", new HakemusWrapper(hakemus).getHenkilotunnus());
-            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements));
+
+            HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+            String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
+            boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : false;
+            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements,
+                    hakija.getHakijaOid(), skipIPosti, sahkoposti, hakija.getHakemusOid()));
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
@@ -134,6 +123,7 @@ public class JalkiohjauskirjeetKomponentti {
         viesti.setTag(tag);
         viesti.setTemplateName(templateName);
         viesti.setIposti(true);
+        viesti.setSkipDokumenttipalvelu(sahkoinenKorkeakoulunMassaposti);
         Map<String, Object> templateReplacements = Maps.newHashMap();
         templateReplacements.put("sisalto", sisalto);
         viesti.setTemplateReplacements(templateReplacements);
@@ -141,4 +131,8 @@ public class JalkiohjauskirjeetKomponentti {
         return viesti;
     }
 
+    private static boolean sendIPosti(HakemusWrapper hakemusWrapper) {
+        return org.apache.commons.lang3.StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite()) ||
+                !hakemusWrapper.getVainSahkoinenViestinta();
+    }
 }

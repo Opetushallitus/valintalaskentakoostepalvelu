@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
@@ -25,6 +27,8 @@ import rx.Observable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Service
 public class HyvaksymiskirjeetKokoHaulleService {
@@ -38,6 +42,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private final HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl;
     private final HakuParametritService hakuParametritService;
+    private final TarjontaAsyncResource hakuV1AsyncResource;
 
     @Autowired
     private HyvaksymiskirjeetKokoHaulleService(
@@ -46,7 +51,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
             SijoitteluAsyncResource sijoitteluAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             ViestintapalveluAsyncResource viestintapalveluAsyncResource,
-            HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl, HakuParametritService hakuParametritService) {
+            HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl, HakuParametritService hakuParametritService,
+            TarjontaAsyncResource hakuV1AsyncResource) {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
@@ -54,12 +60,20 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.hyvaksymiskirjeetServiceImpl = hyvaksymiskirjeetServiceImpl;
         this.hakuParametritService = hakuParametritService;
+        this.hakuV1AsyncResource = hakuV1AsyncResource;
     }
 
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
+        muodostaHyvaksymiskirjeetKokoHaulle(() ->
+                        ViestintapalveluObservables.haunResurssit(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid),
+                                (oids) -> applicationAsyncResource.getApplicationsByHakemusOids(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)),
+                hakuOid, asiointikieli, prosessi, defaultValue);
+    }
+
+    private void muodostaHyvaksymiskirjeetKokoHaulle(Supplier<Observable<HaunResurssit>> haeHaunResurssit, String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
 
-        ViestintapalveluObservables.haunResurssit(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), applicationAsyncResource::getApplicationsByHakemusOids)
+        haeHaunResurssit.get()
                 .doOnError(error -> {
                     LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
                 })
@@ -88,13 +102,20 @@ public class HyvaksymiskirjeetKokoHaulleService {
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
         Observable<Map<String, Optional<Osoite>>> osoitteet = ViestintapalveluObservables.haunOsoitteet(asiointikieli, hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
-        Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, osoitteet,
-                hyvaksymiskirjeetKomponentti, hyvaksymiskirjeetServiceImpl, haunParametrit);
+        Observable<HakuV1RDTO> haku = hakuV1AsyncResource.haeHaku(hakuOid);
+        Observable<LetterBatch> kirjeet = haku.flatMap( (haettuHaku) ->
+            ViestintapalveluObservables.kirjeet(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, osoitteet,
+                    hyvaksymiskirjeetKomponentti, hyvaksymiskirjeetServiceImpl, haunParametrit, isKorkeakouluhaku(haettuHaku))
+        );
         return ViestintapalveluObservables.batchId(
                 kirjeet,
                 viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
                 viestintapalveluAsyncResource::haeStatusObservable,
                 ViestintapalveluObservables.getDelay(Optional.empty()),
                 status -> Observable.just(status.batchId));
+    }
+
+    private boolean isKorkeakouluhaku(HakuV1RDTO haku) {
+        return haku.getKohdejoukkoUri().startsWith("haunkohdejoukko_12"); //"kohdejoukkoUri": "haunkohdejoukko_12#1"
     }
 }

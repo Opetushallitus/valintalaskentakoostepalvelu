@@ -87,7 +87,7 @@ public class SijoittelunTulosHaulleResource {
                     Optional.ofNullable(asiointikieli).map(KieliUtil::normalisoiKielikoodi),
                     "hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null, Arrays.asList("hyvaksymiskirjeet", "haulle"));
 
-            if(asiointikieli != null) {
+            if(asiointikieli != null ) {
                 hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, asiointikieli, prosessi, Optional.ofNullable(letterBodyText));
             } else {
                 hyvaksymiskirjeetHakukohteittain.muodostaKirjeet(hakuOid, prosessi, Optional.ofNullable(letterBodyText));

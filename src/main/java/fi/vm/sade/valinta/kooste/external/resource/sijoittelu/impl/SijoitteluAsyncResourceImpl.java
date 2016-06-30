@@ -110,15 +110,18 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
     }
 
     @Override
-    public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
+    public Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
         String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakemukset";
         LOG.info("Asynkroninen kutsu: {}{}?ilmanHyvaksyntaa=true", address, url);
-        return getWebClient()
-                .path(url)
-                .query("ilmanHyvaksyntaa", true)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .get(new GenericType<HakijaPaginationObject>() {});
+        return getAsObservable(
+                url,
+                new TypeToken<HakijaPaginationObject>() {}.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    client.query("ilmanHyvaksyntaa", true);
+                    return client;
+                }
+        );
     }
 
     public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {

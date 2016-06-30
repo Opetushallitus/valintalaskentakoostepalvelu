@@ -1,23 +1,24 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.Lists;
@@ -26,13 +27,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
@@ -61,6 +55,8 @@ public class ViestintapalveluAktivointiResource {
     private HyvaksymiskirjeetService hyvaksymiskirjeetService;
     @Autowired
     private JalkiohjauskirjeService jalkiohjauskirjeService;
+    @Autowired
+    private EPostiService ePostiService;
 
     @POST
     @Path("/osoitetarrat/aktivoi")
@@ -166,8 +162,7 @@ public class ViestintapalveluAktivointiResource {
             DokumentinLisatiedot hakemuksillaRajaus,
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("templateName") String templateName,
-            @QueryParam("tarjoajaOid")
-            String tarjoajaOid,
+            @QueryParam("tarjoajaOid") String tarjoajaOid,
             @QueryParam("tag") String tag) {
         try {
             if (hakemuksillaRajaus == null) {
@@ -309,6 +304,55 @@ public class ViestintapalveluAktivointiResource {
             throw new RuntimeException(e);
         }
         return new ProsessiId(prosessi.getId());// Response.ok().build();
+    }
+
+    @POST
+    @Path("/securelinkit/aktivoi")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Lähettää Secure Linkit ryhmäsähköpostilla", response = AsyncResponse.class)
+    public void secureLinkkienLahetys(EPostiRequest ePostiRequest,
+                                      @Suspended AsyncResponse asyncResponse) {
+
+        setAsyncTimeout(asyncResponse, "Securelinkien lähetys -palvelukutsu on aikakatkaistu: /viestintapalvelu/securelinkit/aktivoi/");
+
+        validateEPostiRequest(ePostiRequest, asyncResponse);
+
+        ePostiService.lahetaSecurelinkit(ePostiRequest,
+                (response) -> asyncResponse.resume(Response.ok(response,MediaType.APPLICATION_JSON_TYPE).build()),
+                (errorMessage) -> errorResponse(String.format("Securelinkien lähetys epäonnistui! %s",errorMessage), asyncResponse)
+        );
+    }
+
+    private void validateEPostiRequest(EPostiRequest ePostiRequest, AsyncResponse asyncResponse) {
+        String hakuOid = ePostiRequest.getHakuOid();
+        String kirjeenTyyppi = ePostiRequest.getKirjeenTyyppi();
+        String asiointikieli = ePostiRequest.getAsiointikieli();
+
+        if(StringUtils.isBlank(hakuOid) || StringUtils.isBlank(kirjeenTyyppi) || StringUtils.isBlank(asiointikieli) ) {
+            LOG.error("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.");
+            errorResponse("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.", asyncResponse);
+        }
+        if(!("jalkiohjauskirje".equals(kirjeenTyyppi) || "hyvaksymiskirje".equals(kirjeenTyyppi))){
+            LOG.error("{} ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.", kirjeenTyyppi);
+            errorResponse(kirjeenTyyppi + " ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.", asyncResponse);
+        }
+        if(!( "fi".equals(asiointikieli) || "sv".equals(asiointikieli) || "en".equals(asiointikieli))) {
+            LOG.error("{} ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.", asiointikieli);
+            errorResponse(asiointikieli + " ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.", asyncResponse);
+        }
+    }
+
+    private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
+        response.setTimeout(5L, TimeUnit.MINUTES);
+        response.setTimeoutHandler(asyncResponse -> errorResponse(timeoutMessage, asyncResponse));
+    }
+
+    private void errorResponse(String timeoutMessage, AsyncResponse asyncResponse) {
+        asyncResponse.resume(Response.serverError()
+                .entity(ImmutableMap.of("error", timeoutMessage))
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
     }
 
     private List<String> tags(String... tag) {

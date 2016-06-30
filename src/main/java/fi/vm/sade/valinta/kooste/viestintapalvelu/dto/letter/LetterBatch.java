@@ -15,6 +15,7 @@ public class LetterBatch {
     private String fetchTarget;
     private String tag;
     private boolean iposti = false;
+    private boolean skipDokumenttipalvelu = false;
 
     public Map<String, Object> getTemplateReplacements() {
         return templateReplacements;
@@ -95,6 +96,14 @@ public class LetterBatch {
         this.tag = tag;
     }
 
+    public boolean isSkipDokumenttipalvelu() {
+        return skipDokumenttipalvelu;
+    }
+
+    public void setSkipDokumenttipalvelu(boolean skipDokumenttipalvelu) {
+        this.skipDokumenttipalvelu = skipDokumenttipalvelu;
+    }
+
     public List<LetterBatch> split(int limit) {
         List<LetterBatch> batches = new ArrayList<LetterBatch>();
         split(letters, batches, limit);
@@ -132,7 +141,8 @@ public class LetterBatch {
                 + ", languageCode=" + languageCode + ", storingOid="
                 + storingOid + ", organizationOid=" + organizationOid
                 + ", applicationPeriod=" + applicationPeriod + ", fetchTarget="
-                + fetchTarget + ", tag=" + tag + "]";
+                + fetchTarget + ", tag=" + tag + ", skipDokumenttipalvelu="
+                + skipDokumenttipalvelu + "]";
     }
 
     public boolean isIposti() {

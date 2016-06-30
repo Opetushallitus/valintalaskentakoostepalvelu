@@ -57,6 +57,14 @@ public class HakemusSpec extends ConstantsSpec {
             hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SYNTYMAAIKA, syntymaaika);
             return this;
         }
+        public HakemusBuilder setSahkoposti(String sahkoposti) {
+            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SAHKOPOSTI, sahkoposti);
+            return this;
+        }
+        public HakemusBuilder setVainSahkoinenViestinta(boolean vainSahkoinenViestinta) {
+            hakemus.getAnswers().getLisatiedot().put(HakemusWrapper.LUPA_SAHKOISEEN_VIESTINTAAN, vainSahkoinenViestinta ? "true" : "false");
+            return this;
+        }
         public HakemusBuilder setOid(String oid) {
             hakemus.setOid(oid);
             return this;
@@ -67,7 +75,7 @@ public class HakemusSpec extends ConstantsSpec {
             return this;
         }
         public HakemusBuilder setAsiointikieli(String asiointikieli) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.ASIOINTIKIELI, asiointikieli);
+            hakemus.getAnswers().getLisatiedot().put(HakemusWrapper.ASIOINTIKIELI, asiointikieli);
             return this;
         }
         public HakemusBuilder addHakutoive(String hakukohdeOid) {

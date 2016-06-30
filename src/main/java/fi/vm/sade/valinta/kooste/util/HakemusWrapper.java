@@ -26,7 +26,7 @@ public class HakemusWrapper {
     public final static String  ASIOINTIKIELI                   = "asiointikieli";
     private final static String LUPAJULKAISUUN                  = "lupaJulkaisu";
     public final static String  HETU                            = "Henkilotunnus";
-    private final static String SAHKOPOSTI                      = "Sähköposti";
+    public final static String SAHKOPOSTI                      = "Sähköposti";
     public final static String  SYNTYMAAIKA                     = "syntymaaika";
     private final static String KANSALLINEN_ID                  = "kansallinenIdTunnus";
     private final static String PASSINNUMERO                    = "passinnumero";
@@ -43,7 +43,7 @@ public class HakemusWrapper {
     private final static String NAINEN                          = "2";
     private final static String MIES                            = "1";
     private final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
-    private final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
+    public final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
 
     private Yhteystiedot yhteystiedot = null;
 
@@ -232,6 +232,15 @@ public class HakemusWrapper {
         getLisatiedot(); // lazy load lisatiedot
         if (lisatiedot.containsKey(LUPAJULKAISUUN)) {
             String l = lisatiedot.get(LUPAJULKAISUUN);
+            return Boolean.TRUE.equals(Boolean.valueOf(l));
+        }
+        return false;
+    }
+
+    public boolean getVainSahkoinenViestinta() {
+        getLisatiedot(); // lazy load lisätiedot
+        if (lisatiedot.containsKey(LUPA_SAHKOISEEN_VIESTINTAAN)) {
+            String l = lisatiedot.get(LUPA_SAHKOISEEN_VIESTINTAAN);
             return Boolean.TRUE.equals(Boolean.valueOf(l));
         }
         return false;

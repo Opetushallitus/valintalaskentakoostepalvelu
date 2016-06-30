@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import java.util.Collection;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,16 +13,12 @@ import org.springframework.stereotype.Component;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
-import com.google.gson.GsonBuilder;
 
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import static rx.observables.BlockingObservable.from;
 
 @Component
 public class KirjeetHakukohdeCache {
@@ -30,13 +26,14 @@ public class KirjeetHakukohdeCache {
     private final Cache<String, MetaHakukohde> metaHakukohdeCache = CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
 
     @Autowired
-    private fi.vm.sade.valinta.kooste.external.resource.haku.HakukohdeV1Resource hakukohdeV1Resource;
+    private TarjontaAsyncResource hakuV1AsyncResource;
 
     public MetaHakukohde haeHakukohde(final String hakukohdeOid) throws Exception {
 
         return metaHakukohdeCache.get(hakukohdeOid,
                 () -> {
-                    HakukohdeV1RDTO hakukohde = hakukohdeV1Resource.findByOid(hakukohdeOid).getResult();
+                    //TODO Tee tästä aidosti asynkroninen!
+                    HakukohdeV1RDTO hakukohde = from(hakuV1AsyncResource.haeHakukohde(hakukohdeOid)).first();
                     Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
                     String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
                     LOG.debug("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);

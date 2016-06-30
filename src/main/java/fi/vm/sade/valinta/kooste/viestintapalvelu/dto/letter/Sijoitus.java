@@ -1,15 +1,18 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter;
 
+import java.util.Optional;
+
 public class Sijoitus {
     private String nimi;
     private String oma;
     private String hyvaksytyt;
+    private Pisteet pisteet;
 
     public Sijoitus() {
 
     }
 
-    public Sijoitus(String nimi, Integer om, Integer hyvaksyty) {
+    public Sijoitus(String nimi, Integer om, Integer hyvaksyty, Optional<Pisteet> pisteet) {
         this.nimi = nimi;
         if (om == null) {
             this.oma = "-";
@@ -21,6 +24,11 @@ public class Sijoitus {
         } else {
             this.hyvaksytyt = hyvaksyty.toString();
         }
+        this.pisteet = pisteet.orElse(null);
+    }
+
+    public Pisteet getPisteet() {
+        return pisteet;
     }
 
     public String getHyvaksytyt() {

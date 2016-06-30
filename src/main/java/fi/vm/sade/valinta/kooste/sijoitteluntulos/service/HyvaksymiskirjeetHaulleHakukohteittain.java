@@ -68,7 +68,8 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     public void muodostaKirjeet(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
 
         Observable<List<HakukohdeJaResurssit>> hakukohdeJaResurssitObs =
-                ViestintapalveluObservables.hakukohteetJaResurssit(sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), applicationAsyncResource::getApplicationsByHakemusOids)
+                ViestintapalveluObservables.hakukohteetJaResurssit(sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), (oids) ->
+                        applicationAsyncResource.getApplicationsByHakemusOids(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS))
                         .doOnNext(list -> prosessi.setKokonaistyo(list.size()));
 
         hakukohdeJaResurssitObs.subscribe(
@@ -180,7 +181,8 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                             organisaatioAsyncResource::haeHakutoimisto),
                     hyvaksymiskirjeetKomponentti,
                     hyvaksymiskirjeetServiceImpl,
-                    haunParametrit);
+                    haunParametrit,
+                    false);
 
             return ViestintapalveluObservables.batchId(
                     kirjeet,

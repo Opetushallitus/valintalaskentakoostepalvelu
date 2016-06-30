@@ -7,12 +7,16 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyypp
 import rx.Observable;
 
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public interface ApplicationAsyncResource {
+    List<String> DEFAULT_KEYS = Arrays.asList("applicationSystemId", "oid", "personOid", "answers.henkilotiedot", "answers.lisatiedot", "answers.hakutoiveet", "hakutapa", "maxApplicationOptions");
+    List<String> DEFAULT_STATES = Arrays.asList("ACTIVE", "INCOMPLETE");
+
     Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 
     Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
@@ -20,6 +24,7 @@ public interface ApplicationAsyncResource {
     Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids);
 
     Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids);
+    Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys);
 
     Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);
 
