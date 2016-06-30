@@ -12,21 +12,23 @@ public class MetaHakukohde {
     private final String hakukohteenKieli;
     private final String opetuskieli;
     private final String tarjoajaOid;
+    private final String ohjeetUudelleOpiskelijalle;
 
     public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi) {
-        this(tarjoajaOid, hakukohdeNimi, tarjoajaNimi, null, null);
+        this(tarjoajaOid, hakukohdeNimi, tarjoajaNimi, null, null, null);
     }
 
-    public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli, String opetuskieli) {
+    public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli, String opetuskieli, String ohjeetUudelleOpiskelijalle) {
         this.hakukohdeNimi = hakukohdeNimi;
         this.tarjoajaNimi = tarjoajaNimi;
         this.hakukohteenKieli = hakukohteenKieli;
         this.opetuskieli = opetuskieli;
         this.tarjoajaOid = tarjoajaOid;
+        this.ohjeetUudelleOpiskelijalle = ohjeetUudelleOpiskelijalle;
     }
 
     public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli) {
-        this(tarjoajaOid, hakukohdeNimi, tarjoajaNimi, hakukohteenKieli, null);
+        this(tarjoajaOid, hakukohdeNimi, tarjoajaNimi, hakukohteenKieli, null, null);
     }
 
     public String getTarjoajaOid() {
@@ -60,6 +62,9 @@ public class MetaHakukohde {
         return hakukohteenKieli;
     }
 
+    public String getOhjeetUudelleOpiskelijalle() {
+        return ohjeetUudelleOpiskelijalle;
+    }
 
     public Teksti getHakukohdeNimi() {
         return hakukohdeNimi;
