@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class HakuParametritService {
 
@@ -63,9 +64,11 @@ public class HakuParametritService {
         );
 
         try {
-            ParametritParser ret = new ParametritParser(promise.get(), this.rootOrganisaatioOid);
+            ParametritParser ret = new ParametritParser(promise.get(10, TimeUnit.SECONDS), this.rootOrganisaatioOid);
             return ret;
         } catch (InterruptedException e) {
+            LOG.error("Ohjausparametrien luku epäonnistui", e);
+        } catch (TimeoutException e) {
             LOG.error("Ohjausparametrien luku epäonnistui", e);
         } catch (ExecutionException e) {
             LOG.error("Ohjausparametrien luku epäonnistui", e);
