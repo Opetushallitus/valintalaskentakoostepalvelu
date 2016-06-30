@@ -40,7 +40,7 @@ public class KirjeetHakukohdeCache {
                     Teksti tarjoajaNimi = new Teksti(hakukohde.getTarjoajaNimet());
                     return new MetaHakukohde(
                             hakukohde.getTarjoajaOids().iterator().next(),
-                            hakukohdeNimi, tarjoajaNimi, hakukohdeNimi.getKieli(), opetuskieli);
+                            hakukohdeNimi, tarjoajaNimi, hakukohdeNimi.getKieli(), opetuskieli, hakukohde.getOhjeetUudelleOpiskelijalle());
                 });
     }
 

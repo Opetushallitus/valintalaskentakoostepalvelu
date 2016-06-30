@@ -220,6 +220,7 @@ public class HyvaksymiskirjeetKomponentti {
 
             replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
             replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)));
+            replacements.put("ohjeetUudelleOpiskelijalle", hyvaksyttyMeta.getOhjeetUudelleOpiskelijalle());
 
             HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
             String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
