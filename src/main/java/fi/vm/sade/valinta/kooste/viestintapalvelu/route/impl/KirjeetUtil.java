@@ -147,7 +147,7 @@ public class KirjeetUtil {
         return new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero, pisteet);
     }
     private static BigDecimal notNegative(BigDecimal bb) {
-        return Optional.ofNullable(bb).filter(b -> b.signum() != 1).orElse(null);
+        return Optional.ofNullable(bb).filter(b -> b.signum() != -1).orElse(null);
     }
 
     public static Optional<Pisteet> asPisteetData(BigDecimal numeerisetPisteet, BigDecimal alinHyvaksyttyPistemaara, BigDecimal ensikertalaisenMinimipisteet) {
