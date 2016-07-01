@@ -82,7 +82,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                 .stream()
                                 .filter(h -> whitelist.contains(h.getHakemusOid()))
                                 .collect(Collectors.toList());
-                        muodostaKirjeet(false).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(whitelistinJalkeen, jalkiohjauskirjeDTO));
+                        muodostaKirjeet(false).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), whitelistinJalkeen, jalkiohjauskirjeDTO));
                     },
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
@@ -100,18 +100,18 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     hakijat -> {
                         //VIALLISET DATA POIS FILTTEROINTI
                         Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
-                        muodostaKirjeet(isKorkeakouluhaku(jalkiohjauskirjeDTO.getHakuOid())).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(vainHakeneetJalkiohjattavat, jalkiohjauskirjeDTO));
+                        muodostaKirjeet(isKorkeakouluhaku(jalkiohjauskirjeDTO.getHakuOid())).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), vainHakeneetJalkiohjattavat, jalkiohjauskirjeDTO));
                     },
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
 
-    private HaunResurssit haeHaunResurssit(Collection<HakijaDTO> hakijat, JalkiohjauskirjeDTO kirje) {
-        List<Hakemus> hakemukset = haeHakemukset(hakijat);
+    private HaunResurssit haeHaunResurssit(String hakuOid, Collection<HakijaDTO> hakijat, JalkiohjauskirjeDTO kirje) {
+        List<Hakemus> hakemukset = haeHakemukset(hakuOid, hakijat);
         String asiointikieli = lueAsiointikieliKirjeesta(kirje);
         return filtteroiAsiointikielella(asiointikieli, new HaunResurssit(new ArrayList<>(hakijat), hakemukset));
     }
 
-    private List<Hakemus> haeHakemukset(Collection<HakijaDTO> hakijat) {
+    private List<Hakemus> haeHakemukset(String hakuOid, Collection<HakijaDTO> hakijat) {
         if (hakijat.isEmpty()) {
             LOG.error("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
             throw new RuntimeException("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
@@ -121,7 +121,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         try {
             LOG.info("Haetaan hakemukset!");
             //TODO: Muuta aidosti asynkroniseksi
-            return from(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)).first();
+            return from(applicationAsyncResource.getApplicationsByHakemusOids(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)).first();
         } catch (Throwable e) {
             LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
             throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
