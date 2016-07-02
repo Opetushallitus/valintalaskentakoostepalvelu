@@ -93,7 +93,7 @@ public class JalkiohjauskirjeetKomponentti {
                 // VT-1036
                 //
                 List<Sijoitus> kkSijoitukset = Lists.newArrayList();
-                KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, false);
+                KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, false, preferoituKielikoodi);
                 tulokset.put("sijoitukset", kkSijoitukset);
 
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());

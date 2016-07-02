@@ -33,7 +33,7 @@ public class KirjeetUtil {
         tilaToPrioriteetti.put(PERUUNTUNUT, 7);
         tilaToPrioriteetti.put(HYLATTY, 8);
     }
-    public static void jononTulokset(Osoite osoite, HakutoiveDTO hakutoive, StringBuilder omatPisteet, StringBuilder hyvaksytyt, List<Sijoitus> kkSijoitukset, boolean valittuHakukohteeseen) {
+    public static void jononTulokset(Osoite osoite, HakutoiveDTO hakutoive, StringBuilder omatPisteet, StringBuilder hyvaksytyt, List<Sijoitus> kkSijoitukset, boolean valittuHakukohteeseen, String preferoitukielikoodi) {
         for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
             BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
             BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
@@ -41,7 +41,7 @@ public class KirjeetUtil {
             Pisteet jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
 
             String kkNimi = valintatapajono.getValintatapajonoNimi();
-            kkSijoitukset.add(KirjeetUtil.asSijoituksetData(valittuHakukohteeseen, valintatapajono, kkNimi, jononPisteet));
+            kkSijoitukset.add(KirjeetUtil.asSijoituksetData(valittuHakukohteeseen, valintatapajono, kkNimi, preferoitukielikoodi, jononPisteet));
 
             KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
             KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
@@ -141,10 +141,14 @@ public class KirjeetUtil {
         return tulokset;
     }
 
-    public static Sijoitus asSijoituksetData(boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi, Pisteet pisteet) {
+    public static Sijoitus asSijoituksetData(boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi, String preferoituKielikoodi, Pisteet pisteet) {
         int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
         Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
-        return new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero, pisteet);
+        String varasijaTeksti = null;
+        if(varasijanumero != null) {
+            varasijaTeksti = HakemusUtil.varasijanNumeroConverter(varasijanumero, preferoituKielikoodi);
+        }
+        return new Sijoitus(kkNimi, kkHyvaksytyt, varasijaTeksti, pisteet);
     }
     private static BigDecimal notNegative(BigDecimal bb) {
         return Optional.ofNullable(bb).filter(b -> b.signum() != -1).orElse(null);

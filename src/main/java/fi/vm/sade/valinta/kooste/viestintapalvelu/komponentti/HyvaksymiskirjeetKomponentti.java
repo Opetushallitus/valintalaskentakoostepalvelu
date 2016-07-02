@@ -195,7 +195,7 @@ public class HyvaksymiskirjeetKomponentti {
 
                     final boolean valittuHakukohteeseen = hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch((jono) -> jono.getTila().isHyvaksytty());
                     tulokset.put("hyvaksytty", valittuHakukohteeseen);
-                    KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, valittuHakukohteeseen);
+                    KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, valittuHakukohteeseen, preferoituKielikoodi);
 
                     Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                     List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();

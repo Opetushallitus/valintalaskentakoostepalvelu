@@ -5,25 +5,21 @@ import java.util.Optional;
 public class Sijoitus {
     private String nimi;
     private String oma;
-    private String hyvaksytyt;
+    private String varasija;
     private Pisteet pisteet;
 
     public Sijoitus() {
 
     }
 
-    public Sijoitus(String nimi, Integer om, Integer hyvaksyty, Pisteet pisteet) {
+    public Sijoitus(String nimi, Integer om, String varasija, Pisteet pisteet) {
         this.nimi = nimi;
         if (om == null) {
             this.oma = "-";
         } else {
             this.oma = om.toString();
         }
-        if (hyvaksyty == null) {
-            this.hyvaksytyt = "-";
-        } else {
-            this.hyvaksytyt = hyvaksyty.toString();
-        }
+        this.varasija = varasija;
         this.pisteet = pisteet;
     }
 
@@ -31,8 +27,8 @@ public class Sijoitus {
         return pisteet;
     }
 
-    public String getHyvaksytyt() {
-        return hyvaksytyt;
+    public String getVarasija() {
+        return varasija;
     }
 
     public String getNimi() {
@@ -48,7 +44,7 @@ public class Sijoitus {
         return "Sijoitus{" +
                 "nimi='" + nimi + '\'' +
                 ", oma='" + oma + '\'' +
-                ", hyvaksytyt='" + hyvaksytyt + '\'' +
+                ", varasija='" + varasija + '\'' +
                 '}';
     }
 }
