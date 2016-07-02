@@ -38,7 +38,7 @@ public class KirjeetUtil {
             BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
             BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
             BigDecimal ensikertalaisenMinimipisteet = hakutoive.getEnsikertalaisuusHakijaryhmanAlimmatHyvaksytytPisteet();
-            Optional<Pisteet> jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
+            Pisteet jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
 
             String kkNimi = valintatapajono.getValintatapajonoNimi();
             kkSijoitukset.add(KirjeetUtil.asSijoituksetData(valittuHakukohteeseen, valintatapajono, kkNimi, jononPisteet));
@@ -141,7 +141,7 @@ public class KirjeetUtil {
         return tulokset;
     }
 
-    public static Sijoitus asSijoituksetData(boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi, Optional<Pisteet> pisteet) {
+    public static Sijoitus asSijoituksetData(boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi, Pisteet pisteet) {
         int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
         Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
         return new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero, pisteet);
@@ -150,20 +150,12 @@ public class KirjeetUtil {
         return Optional.ofNullable(bb).filter(b -> b.signum() != -1).orElse(null);
     }
 
-    public static Optional<Pisteet> asPisteetData(BigDecimal numeerisetPisteet, BigDecimal alinHyvaksyttyPistemaara, BigDecimal ensikertalaisenMinimipisteet) {
+    public static Pisteet asPisteetData(BigDecimal numeerisetPisteet, BigDecimal alinHyvaksyttyPistemaara, BigDecimal ensikertalaisenMinimipisteet) {
         String kkPiste = suomennaNumero(notNegative(numeerisetPisteet), null);
         String kkMinimi = suomennaNumero(notNegative(alinHyvaksyttyPistemaara), null);
         String kkEnskertMinimi = suomennaNumero(notNegative(ensikertalaisenMinimipisteet), null);
         // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
         // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
-        if (numeerisetPisteet != null
-                && numeerisetPisteet.signum() != -1
-                && alinHyvaksyttyPistemaara != null
-                && alinHyvaksyttyPistemaara.signum() != -1) {
-            return Optional.of(new Pisteet(kkPiste, kkMinimi, kkEnskertMinimi));
-        } else {
-            return Optional.empty();
-        }
-
+        return new Pisteet(kkPiste, kkMinimi, kkEnskertMinimi);
     }
 }

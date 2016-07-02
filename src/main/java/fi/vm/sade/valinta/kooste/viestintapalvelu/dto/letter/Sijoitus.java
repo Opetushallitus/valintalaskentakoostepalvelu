@@ -12,7 +12,7 @@ public class Sijoitus {
 
     }
 
-    public Sijoitus(String nimi, Integer om, Integer hyvaksyty, Optional<Pisteet> pisteet) {
+    public Sijoitus(String nimi, Integer om, Integer hyvaksyty, Pisteet pisteet) {
         this.nimi = nimi;
         if (om == null) {
             this.oma = "-";
@@ -24,7 +24,7 @@ public class Sijoitus {
         } else {
             this.hyvaksytyt = hyvaksyty.toString();
         }
-        this.pisteet = pisteet.orElse(null);
+        this.pisteet = pisteet;
     }
 
     public Pisteet getPisteet() {
