@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.OsoiteHaku;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
@@ -84,50 +85,54 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     public void hyvaksymiskirjeetHakemuksille(final KirjeProsessi prosessi,
                                               final HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
                                               final List<String> hakemusOids) {
+        try {
+            String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
 
-        String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
+            ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
 
-        ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
+            Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByHakemusOids(hyvaksymiskirjeDTO.getHakuOid(), hakemusOids, applicationAsyncResource.DEFAULT_KEYS);
+            Observable<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+            Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
+            final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
-        Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByHakemusOids(hyvaksymiskirjeDTO.getHakuOid(), hakemusOids,applicationAsyncResource.DEFAULT_KEYS);
-        Observable<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
-        final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
+            zip(
+                    hakemuksetFuture,
+                    hakijatFuture,
+                    hakutoimistoObservable,
+                    (hakemukset, hakijat, hakutoimisto) -> {
+                        LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
+                        final Set<String> kohdeHakijat = Sets.newHashSet(hakemusOids);
+                        Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
+                                .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
+                                .filter(h -> kohdeHakijat.contains(h.getHakemusOid()))
+                                .collect(Collectors.toList());
+                        Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
+                        MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
+                        final boolean iPosti = false;
 
-        zip(
-                hakemuksetFuture,
-                hakijatFuture,
-                hakutoimistoObservable,
-                (hakemukset, hakijat, hakutoimisto) -> {
-                    LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
-                    final Set<String> kohdeHakijat = Sets.newHashSet(hakemusOids);
-                    Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
-                            .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
-                            .filter(h -> kohdeHakijat.contains(h.getHakemusOid()))
-                            .collect(Collectors.toList());
-                    Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
-                    MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-                    final boolean iPosti = false;
-
-                    return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            ImmutableMap.of(organisaatioOid, hakutoimisto.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.empty())),
-                            hyvaksymiskirjeessaKaytetytHakukohteet,
-                            kohdeHakukohteessaHyvaksytyt, hakemukset,
-                            hyvaksymiskirjeDTO.getHakuOid(),
-                            Optional.empty(),
-                            hyvaksymiskirjeDTO.getSisalto(),
-                            hyvaksymiskirjeDTO.getTag(),
-                            hyvaksymiskirjeDTO.getTemplateName(),
-                            parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
-                            parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
-                            iPosti
-                    );
-                })
-                //
-                .subscribeOn(Schedulers.newThread())
-                .subscribe(
-                        letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
-                        throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()));
+                        return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                                ImmutableMap.of(organisaatioOid, hakutoimisto.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.empty())),
+                                hyvaksymiskirjeessaKaytetytHakukohteet,
+                                kohdeHakukohteessaHyvaksytyt, hakemukset,
+                                hyvaksymiskirjeDTO.getHakuOid(),
+                                Optional.empty(),
+                                hyvaksymiskirjeDTO.getSisalto(),
+                                hyvaksymiskirjeDTO.getTag(),
+                                hyvaksymiskirjeDTO.getTemplateName(),
+                                parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
+                                parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
+                                iPosti
+                        );
+                    })
+                    //
+                    .subscribeOn(Schedulers.newThread())
+                    .subscribe(
+                            letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
+                            throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()));
+        } catch (Throwable t) {
+            LOG.error("Hyväksymiskirjeiden luonti hakemuksille haussa {} keskeytyi poikkeukseen: ", hyvaksymiskirjeDTO.getHakuOid(), t);
+            prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(t.getMessage()));
+        }
     }
 
     @Override
