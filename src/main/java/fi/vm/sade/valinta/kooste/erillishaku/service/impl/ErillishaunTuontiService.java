@@ -373,10 +373,23 @@ public class ErillishaunTuontiService {
                 toErillishaunHakijaStream(haku, hakemus, rivi)).flatMap(s -> s).collect(Collectors.toList());
 
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
-                .map(rivi -> new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), rivi.getHakemusOid(),
-                        haku.getHakukohdeOid(), rivi.isJulkaistaankoTiedot(), rivi.getPersonOid(), haku.getHakuOid(),
-                        haku.getTarjoajaOid(), null, false, null, null, rivi.getEtunimi(), rivi.getSukunimi(),
-                        Optional.of(true))).collect(Collectors.toList());
+                .map(rivi -> new ErillishaunHakijaDTO(
+                        haku.getValintatapajonoOid(),
+                        rivi.getHakemusOid(),
+                        haku.getHakukohdeOid(),
+                        rivi.isJulkaistaankoTiedot(),
+                        rivi.getPersonOid(),
+                        haku.getHakuOid(),
+                        haku.getTarjoajaOid(),
+                        null,
+                        false,
+                        null,
+                        null,
+                        rivi.getEtunimi(),
+                        rivi.getSukunimi(),
+                        Optional.of(true),
+                        rivi.getHyvaksymiskirjeLahetetty()))
+                .collect(Collectors.toList());
         try {
             if (!poistettavatDtos.isEmpty()) {
                 List<String> hakemusOidit = poistettavatDtos.stream().map(ErillishaunHakijaDTO::getHakemusOid).collect(Collectors.toList());
@@ -466,11 +479,22 @@ public class ErillishaunTuontiService {
             return Stream.<ErillishaunHakijaDTO>empty(); // Keskeneräisiä ei viedä sijoitteluun
         } else {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-            return Stream.of(new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
-                    rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
+            return Stream.of(new ErillishaunHakijaDTO(
+                    haku.getValintatapajonoOid(),
+                    hakemus.getOid(),
+                    haku.getHakukohdeOid(),
+                    rivi.isJulkaistaankoTiedot(),
+                    hakemus.getPersonOid(),
+                    haku.getHakuOid(),
                     haku.getTarjoajaOid(),
-                    valintatuloksenTila(rivi), rivi.getEhdollisestiHyvaksyttavissa(), ilmoittautumisTila(rivi),
-                    hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi())));
+                    valintatuloksenTila(rivi),
+                    rivi.getEhdollisestiHyvaksyttavissa(),
+                    ilmoittautumisTila(rivi),
+                    hakemuksenTila(rivi),
+                    wrapper.getEtunimi(),
+                    wrapper.getSukunimi(),
+                    Optional.of(rivi.isPoistetaankoRivi()),
+                    rivi.getHyvaksymiskirjeLahetetty()));
         }
     }
 
