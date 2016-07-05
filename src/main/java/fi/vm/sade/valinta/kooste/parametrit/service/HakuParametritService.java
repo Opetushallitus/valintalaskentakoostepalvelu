@@ -66,12 +66,8 @@ public class HakuParametritService {
         try {
             ParametritParser ret = new ParametritParser(promise.get(1, TimeUnit.MINUTES), this.rootOrganisaatioOid);
             return ret;
-        } catch (InterruptedException e) {
-            LOG.error("Ohjausparametrien luku epäonnistui", e);
-        } catch (TimeoutException e) {
-            LOG.error("Ohjausparametrien luku epäonnistui", e);
-        } catch (ExecutionException e) {
-            LOG.error("Ohjausparametrien luku epäonnistui", e);
+        } catch (Throwable e) {
+            LOG.error("Ohjausparametrien luku epäonnistui haulle {}", hakuOid, e);
         }
         return null;
     }
