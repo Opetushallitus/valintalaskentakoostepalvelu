@@ -30,12 +30,18 @@ public class HakuParametritService {
     private String rootOrganisaatioOid;
     private OhjausparametritAsyncResource ohjausparametritAsyncResource;
 
-    private final Cache<String, ParametritParser> haunOhjausParametritCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
+    private final Cache<String, ParametritParser> haunOhjausParametritCache;
+    private final int requestTimeoutSeconds;
 
     @Autowired
-    public HakuParametritService(OhjausparametritAsyncResource ohjausparametritAsyncResource, @Value("${root.organisaatio.oid:1.2.246.562.10.00000000001}") String rootOrganisaatioOid) {
+    public HakuParametritService(OhjausparametritAsyncResource ohjausparametritAsyncResource, @Value("${root.organisaatio.oid:1.2.246.562.10.00000000001}") String rootOrganisaatioOid,
+                                 @Value("${valintalaskentakoostepalvelu.ohjausparametrit.cache.ttl.minutes:30}") int cacheTtlMinutes,
+                                 @Value("${valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds:20}") int requestTimeoutSeconds) {
         this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
         this.rootOrganisaatioOid = rootOrganisaatioOid;
+        haunOhjausParametritCache = CacheBuilder.newBuilder().expireAfterWrite(cacheTtlMinutes, TimeUnit.MINUTES).build();
+        this.requestTimeoutSeconds = requestTimeoutSeconds;
+        LOG.info("Initialized with haunOhjausParametritCache ttl minutes " + cacheTtlMinutes + "and request timeout seconds " + requestTimeoutSeconds);
     }
 
     public ParametritParser getParametritForHaku(String hakuOid) {
@@ -64,7 +70,7 @@ public class HakuParametritService {
         );
 
         try {
-            ParametritParser ret = new ParametritParser(promise.get(1, TimeUnit.MINUTES), this.rootOrganisaatioOid);
+            ParametritParser ret = new ParametritParser(promise.get(requestTimeoutSeconds, TimeUnit.SECONDS), this.rootOrganisaatioOid);
             return ret;
         } catch (Throwable e) {
             LOG.error("Ohjausparametrien luku epäonnistui haulle {}", hakuOid, e);

@@ -20,8 +20,9 @@ import java.util.function.Consumer;
 public class OhjausparametritAsyncResourceImpl extends HttpResource implements OhjausparametritAsyncResource {
 
     @Autowired
-    public OhjausparametritAsyncResourceImpl(@Value("${host.scheme:https}://${host.virkailija}") String address) {
-        super(address, TimeUnit.MINUTES.toMillis(1));
+    public OhjausparametritAsyncResourceImpl(@Value("${host.scheme:https}://${host.virkailija}") String address,
+                                             @Value("${valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds:20}") int requestTimeoutSeconds) {
+        super(address, TimeUnit.SECONDS.toMillis(requestTimeoutSeconds));
     }
     public Observable<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
         return getAsObservable("/ohjausparametrit-service/api/v1/rest/parametri/" + hakuOid, ParametritDTO.class);
