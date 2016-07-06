@@ -372,6 +372,7 @@ public class HakemusSijoitteluntulosMergeUtil {
             dto.setIlmoittautumistila(valintatulos.get().getIlmoittautumisTila());
             dto.setJulkaistavissa(valintatulos.get().getJulkaistavissa());
             dto.setHyvaksyttyVarasijalta(valintatulos.get().getHyvaksyttyVarasijalta());
+            dto.setHyvaksymiskirjeLahetetty(valintatulos.get().getHyvaksymiskirjeLahetetty());
         }
         return dto;
     }

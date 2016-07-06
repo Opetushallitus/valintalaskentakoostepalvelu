@@ -6,6 +6,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -39,6 +40,7 @@ public class MergeHakemusDTO {
     private int todellinenJonosija;
     private boolean julkaistavissa = false;
     private boolean hyvaksyttyVarasijalta = false;
+    private Date hyvaksymiskirjeLahetetty;
 
     // Laskennan tiedot
     private SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit = new TreeSet<JarjestyskriteeritulosDTO>();
@@ -269,5 +271,13 @@ public class MergeHakemusDTO {
 
     public void setEhdollisestiHyvaksyttavissa(boolean ehdollisestiHyvaksytty) {
         this.ehdollisestiHyvaksyttavissa = ehdollisestiHyvaksytty;
+    }
+
+    public Date getHyvaksymiskirjeLahetetty() {
+        return hyvaksymiskirjeLahetetty;
+    }
+
+    public void setHyvaksymiskirjeLahetetty(Date hyvaksymiskirjeLahetetty) {
+        this.hyvaksymiskirjeLahetetty = hyvaksymiskirjeLahetetty;
     }
 }
