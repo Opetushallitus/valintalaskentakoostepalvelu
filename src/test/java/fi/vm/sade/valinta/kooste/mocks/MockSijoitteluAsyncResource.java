@@ -8,6 +8,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -68,6 +69,11 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     @Override
     public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid) {
         return null;
+    }
+
+    @Override
+    public Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
+        throw new UnsupportedOperationException();
     }
 
     public static Map<Long, HakukohdeDTO> getResultMap() {

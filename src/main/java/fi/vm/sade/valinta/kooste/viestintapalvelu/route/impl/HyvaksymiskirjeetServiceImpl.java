@@ -89,9 +89,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
 
             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
-
-            Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByHakemusOids(hyvaksymiskirjeDTO.getHakuOid(), hakemusOids, applicationAsyncResource.DEFAULT_KEYS);
-            Observable<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+            String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
+            Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByHakemusOids(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS);
+            Observable<List<HakijaDTO>> hakijatFuture = Observable.from(hakemusOids).concatMap(hakemus -> sijoitteluAsyncResource.getHakijaByHakemus(hakuOid, hakemus)).toList();
             Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
             final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
@@ -102,7 +102,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     (hakemukset, hakijat, hakutoimisto) -> {
                         LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
                         final Set<String> kohdeHakijat = Sets.newHashSet(hakemusOids);
-                        Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
+                        Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.stream()
                                 .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
                                 .filter(h -> kohdeHakijat.contains(h.getHakemusOid()))
                                 .collect(Collectors.toList());

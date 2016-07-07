@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
@@ -37,6 +38,8 @@ public interface SijoitteluAsyncResource {
     Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid);
 
     Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid);
+
+    Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid);
 
     Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);
 

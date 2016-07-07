@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.http.DateDeserializer;
@@ -172,6 +173,19 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
         return getAsObservable(
                 url,
                 new TypeToken<HakijaPaginationObject>() {}.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/latest/hakemus/"+ hakemusOid;
+        return getAsObservable(
+                url,
+                new TypeToken<HakijaDTO>() {}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;
