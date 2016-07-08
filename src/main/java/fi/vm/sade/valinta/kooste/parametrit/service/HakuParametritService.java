@@ -3,25 +3,18 @@ package fi.vm.sade.valinta.kooste.parametrit.service;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import fi.vm.sade.sijoittelu.domain.Hakukohde;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.HttpExceptionWithStatus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import rx.Observable;
-import rx.observables.BlockingObservable;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class HakuParametritService {
 
