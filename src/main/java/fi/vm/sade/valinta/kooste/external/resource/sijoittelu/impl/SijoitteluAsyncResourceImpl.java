@@ -84,12 +84,6 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
         return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset));
     }
 
-    @Override
-    public Observable<HakukohteenValintatulosUpdateStatuses> muutaErillishaunHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset) {
-        String url = "/tila/erillishaku/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
-        return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset));
-    }
-
     public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
         ///erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
         String url = "/erillissijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
