@@ -1,13 +1,12 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class ImportedErillisHakuExcel {
@@ -23,17 +21,12 @@ public class ImportedErillisHakuExcel {
     private final static org.joda.time.format.DateTimeFormatter dtf = DateTimeFormat.forPattern("dd.MM.yyyy");
     private final List<HenkiloCreateDTO> henkiloPrototyypit;
     public final List<ErillishakuRivi> rivit;
-    private final Map<String, ErillishakuRivi> hetuToRivi;
 
     ImportedErillisHakuExcel(List<ErillishakuRivi> erillishakuRivi) {
-        hetuToRivi = Maps.newHashMap();
         henkiloPrototyypit = Lists.newArrayList();
         this.rivit = erillishakuRivi;
         try {
-            rivit.forEach(rivi -> {
-                hetuToRivi.put(Optional.ofNullable(StringUtils.trimToNull(rivi.getHenkilotunnus())).orElse(rivi.getSyntymaAika()), rivi);
-                henkiloPrototyypit.add(convert(rivi));
-            });
+            rivit.forEach(rivi -> henkiloPrototyypit.add(convert(rivi)));
         } catch (Exception e) {
             LOG.error("Erillishaunrivien muodostus epaonnistui!", e);
             throw e;
