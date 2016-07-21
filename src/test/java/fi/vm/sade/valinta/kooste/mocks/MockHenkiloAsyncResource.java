@@ -1,10 +1,14 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.util.concurrent.Futures;
+
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,10 +16,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
@@ -43,9 +43,7 @@ public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
     @Override
     public Future<List<Henkilo>> haeTaiLuoHenkilot(final List<HenkiloCreateDTO> hp) {
         return Optional.ofNullable(MockHenkiloAsyncResource.<List<Henkilo>>serviceAvailableCheck()).orElseGet(
-                () -> {
-                    return futureSupplier.apply(hp);
-                });
+                () -> futureSupplier.apply(hp));
     }
 
     private Henkilo toHenkilo(HenkiloCreateDTO proto) {
