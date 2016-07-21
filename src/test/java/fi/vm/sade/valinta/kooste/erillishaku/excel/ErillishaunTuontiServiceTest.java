@@ -189,7 +189,6 @@ public class ErillishaunTuontiServiceTest {
                 return Futures.immediateFuture(Collections.singletonList(henkiloJollaOnEriOid));
             });
             importRows(Collections.singletonList(erillishakuRivi), mockHenkiloAsyncResource);
-            //mockHenkiloAsyncResource.henkiloPrototyypit = henkiloPrototyypit;
 
             assertEquals(1, henkiloPrototyypit.size());
             final HenkiloCreateDTO henkilo = henkiloPrototyypit.get(0);
