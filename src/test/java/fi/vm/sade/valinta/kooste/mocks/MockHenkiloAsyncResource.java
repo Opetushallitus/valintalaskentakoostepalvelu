@@ -33,7 +33,7 @@ public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
             LOG.info("MockHenkilöAsyncResource sai {}kpl henkilöitä. Tehdään konversio ja palautetaan immediate future.", hp.size());
             henkiloPrototyypit = hp;
             return Futures.immediateFuture(henkiloPrototyypit.stream()
-                    .map(prototyyppi -> toHenkilo(prototyyppi))
+                    .map(this::toHenkilo)
                     .collect(Collectors.toList()));
         };
     }
