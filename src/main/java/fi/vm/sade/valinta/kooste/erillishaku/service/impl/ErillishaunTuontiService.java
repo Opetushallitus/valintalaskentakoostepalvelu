@@ -1,8 +1,18 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
-import com.google.common.collect.ImmutableMap;
+import static com.codepoetics.protonpack.StreamUtils.zip;
+import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
+import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static rx.schedulers.Schedulers.newThread;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.authentication.model.Kielisyys;
@@ -20,9 +30,9 @@ import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
@@ -48,23 +58,18 @@ import rx.Scheduler;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.codepoetics.protonpack.StreamUtils.zip;
-import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static rx.schedulers.Schedulers.newThread;
 
 @Service
 public class ErillishaunTuontiService {
@@ -240,8 +245,7 @@ public class ErillishaunTuontiService {
                 throw e;
             }
             LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
-            Map<String, ErillishakuRivi> rivitHenkiloittain = createRivitHenkiloittain(lisattavatTaiKeskeneraiset);
-            hakemukset = kasitteleHakemukset(haku, henkilot, rivitHenkiloittain, prosessi);
+            hakemukset = kasitteleHakemukset(haku, henkilot, lisattavatTaiKeskeneraiset, prosessi);
         } else {
             hakemukset = Collections.emptyList();
         }
@@ -261,27 +265,16 @@ public class ErillishaunTuontiService {
                 .orElse(null);
     }
 
-    private Map<String, ErillishakuRivi> createRivitHenkiloittain(List<ErillishakuRivi> lisattavatTaiKeskeneraiset) {
-        Map<String, ErillishakuRivi> rivitHenkiloittain = new HashMap<>();
-
-        for(ErillishakuRivi rivi : lisattavatTaiKeskeneraiset) {
-            if(isNotBlank(rivi.getPersonOid())) {
-                rivitHenkiloittain.put(rivi.getPersonOid(), rivi);
-            } else if(isNotBlank(rivi.getHenkilotunnus())) {
-                rivitHenkiloittain.put(rivi.getHenkilotunnus(), rivi);
-            } else {
-                rivitHenkiloittain.put(HakemusPrototyyppi.parseDate(rivi.parseSyntymaAika()) + rivi.getSukupuoli().name(), rivi);
-            }
-        }
-        return ImmutableMap.<String, ErillishakuRivi>builder().putAll(rivitHenkiloittain).build();
-    }
-
-    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, Map<String, ErillishakuRivi> rivitHenkiloittain, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
+    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
         try {
             final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
-                    .map(h -> createHakemusprototyyppi(h, rivitHenkiloittain))
-                    .collect(Collectors.toList());
+                .map(h -> createHakemusprototyyppi(h, lisattavatTaiKeskeneraiset))
+                .collect(Collectors.toList());
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+        } catch (HenkilonRivinPaattelyEpaonnistuiException e) {
+            LOG.error(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE, e);
+            prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE + " " + e.getMessage()));
+            throw e;
         } catch (Throwable e) { // temporary catch to avoid missing service dependencies
             LOG.error(POIKKEUS_HAKEMUSPALVELUN_VIRHE, e);
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE));
@@ -289,15 +282,34 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, Map<String, ErillishakuRivi> rivitHenkiloittain) {
-        ErillishakuRivi rivi = rivitHenkiloittain.get(henkilo.getOidHenkilo());
-        if(null == rivi) {
-            rivi = rivitHenkiloittain.get(henkilo.getHetu());
-        }
-        if(null == rivi) {
-            rivi = rivitHenkiloittain.get(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()) + Sukupuoli.fromString(henkilo.getSukupuoli()).name());
-        }
+    private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
+        ErillishakuRivi rivi = etsiHenkiloaVastaavaRivi(henkilo, kaikkiLisattavatTaiKeskeneraiset);
         return createHakemusprototyyppi(henkilo, rivi);
+    }
+
+    private ErillishakuRivi etsiHenkiloaVastaavaRivi(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
+        Optional<ErillishakuRivi> riviOidinMukaan = kaikkiLisattavatTaiKeskeneraiset.stream().filter(r ->
+            StringUtils.isNotBlank(r.getPersonOid()) && r.getPersonOid().equals(henkilo.getOidHenkilo())).findFirst();
+        if (riviOidinMukaan.isPresent()) {
+            return riviOidinMukaan.get();
+        }
+        Optional<ErillishakuRivi> riviHetunMukaan = kaikkiLisattavatTaiKeskeneraiset.stream().filter(r ->
+            StringUtils.isNotBlank(r.getHenkilotunnus()) && r.getHenkilotunnus().equals(henkilo.getHetu())).findFirst();
+        if (riviHetunMukaan.isPresent()) {
+            ErillishakuRivi loytynyt = riviHetunMukaan.get();
+            if (StringUtils.isNotBlank(loytynyt.getPersonOid()) && StringUtils.isNotBlank(henkilo.getOidHenkilo()) && !loytynyt.getPersonOid().equals(henkilo.getOidHenkilo())) {
+                LOG.warn(String.format("Henkilölle %s hetun mukaan löytyneellä rivillä %s on eri henkilöoid (%s vs %s)", henkilo, loytynyt, henkilo.getOidHenkilo(), loytynyt.getPersonOid()));
+            }
+            return loytynyt;
+        }
+        Optional<ErillishakuRivi> riviSyntymaajanJaSukupuolenMukaan = kaikkiLisattavatTaiKeskeneraiset.stream().filter(r ->
+            HakemusPrototyyppi.parseDate(r.parseSyntymaAika()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika())) &&
+                r.getSukupuoli().equals(Sukupuoli.fromString(henkilo.getSukupuoli()))
+        ).findFirst();
+        if (riviSyntymaajanJaSukupuolenMukaan.isPresent()) {
+            return riviSyntymaajanJaSukupuolenMukaan.get();
+        }
+        throw new HenkilonRivinPaattelyEpaonnistuiException("Ei löytynyt " + kaikkiLisattavatTaiKeskeneraiset.size() + " tuodusta rivistä henkilöä " + henkilo);
     }
 
     private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, ErillishakuRivi rivi) {
@@ -606,6 +618,12 @@ public class ErillishaunTuontiService {
         }
 
         return null;
+    }
+
+    public static class HenkilonRivinPaattelyEpaonnistuiException extends RuntimeException {
+        private HenkilonRivinPaattelyEpaonnistuiException(String message) {
+            super(message);
+        }
     }
 }
 

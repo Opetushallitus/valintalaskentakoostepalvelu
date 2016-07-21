@@ -33,7 +33,7 @@ public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
             LOG.info("MockHenkilöAsyncResource sai {}kpl henkilöitä. Tehdään konversio ja palautetaan immediate future.", hp.size());
             henkiloPrototyypit = hp;
             return Futures.immediateFuture(henkiloPrototyypit.stream()
-                    .map(this::toHenkilo)
+                    .map(MockHenkiloAsyncResource::toHenkilo)
                     .collect(Collectors.toList()));
         };
     }
@@ -46,7 +46,7 @@ public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
                 () -> futureSupplier.apply(hp));
     }
 
-    private Henkilo toHenkilo(HenkiloCreateDTO proto) {
+    public static Henkilo toHenkilo(HenkiloCreateDTO proto) {
         final Henkilo henkilo = new Henkilo();
         henkilo.setHenkiloTyyppi(proto.henkiloTyyppi);
         henkilo.setKutsumanimi(proto.kutsumanimi);

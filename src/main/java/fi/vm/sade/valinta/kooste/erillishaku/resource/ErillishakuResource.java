@@ -1,8 +1,12 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
+import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.oidHaustaJaHakukohteesta;
+import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
+import static rx.observables.BlockingObservable.from;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
+
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
@@ -20,20 +24,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Optional;
-
-import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.oidHaustaJaHakukohteesta;
-import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
-import static org.springframework.security.core.context.SecurityContextHolder.getContext;
-import static rx.observables.BlockingObservable.from;
 
 @Controller("ErillishakuResource")
 @Path("erillishaku")
@@ -48,6 +49,7 @@ public class ErillishakuResource {
     public static final String POIKKEUS_VIALLINEN_DATAJOUKKO = "Syötteessä oli virheitä!";
     public static final String POIKKEUS_HENKILOPALVELUN_VIRHE = "Henkilöpalvelukutsu epäonnistui!";
     public static final String POIKKEUS_HAKEMUSPALVELUN_VIRHE = "Hakemuspalvelukutsu epäonnistui!";
+    public static final String POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE = "Erillishakurivin hakeminen henkilön tiedoilla epäonnistui!";
     public static final String POIKKEUS_SIJOITTELUPALVELUN_VIRHE = "Sijoittelupalvelukutsu epäonnistui!";
 
     @Autowired
