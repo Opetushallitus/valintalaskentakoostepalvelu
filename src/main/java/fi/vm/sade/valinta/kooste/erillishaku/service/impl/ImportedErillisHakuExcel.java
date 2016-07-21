@@ -70,7 +70,7 @@ public class ImportedErillisHakuExcel {
         try {
             return dtf.parseDateTime(rivi.getSyntymaAika()).toDate();
         } catch (Exception e) {
-            LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", rivi.getSyntymaAika());
+            LOG.error("Syntymäaikaa \"{}\" ei voitu parsia muodossa dd.MM.yyyy", rivi.getSyntymaAika());
             return null;
         }
     }
