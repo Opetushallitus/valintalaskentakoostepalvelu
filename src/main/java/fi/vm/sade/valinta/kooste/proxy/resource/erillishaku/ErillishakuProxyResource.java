@@ -87,13 +87,12 @@ public class ErillishakuProxyResource {
         final AtomicReference<HakukohdeDTO> hakukohde = new AtomicReference<>();
         final AtomicReference<List<Valintatulos>> vtsValintatulokset = new AtomicReference<>();
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
-        final AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
-        AtomicInteger counter = new AtomicInteger(1 + 1 + 1 + 1 + 2);
+        AtomicInteger counter = new AtomicInteger(1 + 1 + 1 + 1 + 1);
 
         Supplier<Void> mergeSupplier = () -> {
             if (counter.decrementAndGet() == 0) {
                 LOG.info("Muodostetaan vastaus hakukohteelle {} haussa {}", hakukohdeOid, hakuOid);
-                r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), hakukohde.get(), valinnanvaiheet.get(), valintatulokset.get(), hakukohteetBySijoitteluAjoId.get(), vtsValintatulokset.get()));
+                r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), hakukohde.get(), valinnanvaiheet.get(), valintatulokset.get(), vtsValintatulokset.get()));
             }
             return null;
         };
@@ -106,52 +105,21 @@ public class ErillishakuProxyResource {
         ///sijoittelu-service/resources/tila/hakukohde/{hakukohdeOid}
         fetchValintatulos(hakuOid, hakukohdeOid, asyncResponse, vtsValintatulokset, mergeSupplier);
         ///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
-        fetchValinnanTulos(hakuOid, hakukohdeOid, asyncResponse, valintatulokset, hakukohteetBySijoitteluAjoId, mergeSupplier);
+        fetchValinnanTulos(hakuOid, hakukohdeOid, asyncResponse, valintatulokset, mergeSupplier);
     }
 
-    void fetchValinnanTulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSupplier) {
+    void fetchValinnanTulos(String hakuOid, String hakukohdeOid, AsyncResponse asyncResponse, AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset, Supplier<Void> mergeSupplier) {
         valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).subscribe(
                 valintatietoValinnanvaihes -> {
                     LOG.info("Haetaan valintalaskennasta tulokset");
                     valintatulokset.set(valintatietoValinnanvaihes);
-                    fetchSijoitteluAjoIds(hakuOid, hakukohdeOid, asyncResponse, hakukohteetBySijoitteluAjoId, mergeSupplier, valintatietoValinnanvaihes);
                     mergeSupplier.get();
                 },
                 poikkeus -> logAndReturnError("valintalaskenta", asyncResponse, poikkeus)
         );
     }
 
-    private void fetchSijoitteluAjoIds(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSupplier, List<ValintatietoValinnanvaiheDTO> valintatietoValinnanvaihes) {
-        Set<Long> sijoitteluAjoIdSetti = valintatietoValinnanvaihes.stream().flatMap(v0 -> v0.getValintatapajonot().stream())
-                .filter(v0 -> v0.getSijoitteluajoId() != null)
-                .map(ValintatietoValintatapajonoDTO::getSijoitteluajoId).collect(Collectors.toSet());
-        // erillinen vaihe missä haetaan vielä n-kappaletta hakukohteen tietoja eri sijoitteluajoid:eillä
-        if (!sijoitteluAjoIdSetti.isEmpty()) {
-            LOG.info("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
-            final Map<Long, HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
-            final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
-            ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
-            sijoitteluAjoIdSetti.forEach(id -> {
-                sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, new Long(id).toString(),
-                        hakukohde -> {
-                            LOG.info("Haettiin laskenta sijoitteluajoid:llä {}.", id);
-                            erillissijoittelutmp.put(id, hakukohde);
-                            if (erillissijoitteluCounter.decrementAndGet() == 0) {
-                                hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
-                                mergeSupplier.get();
-                            }
-                        },
-                        throwable -> logAndReturnError("valintalaskenta", asyncResponse, throwable)
-                );
-            });
-        } else {
-            LOG.info("Ei saatu erillisiä sijoitteluajoideitä.");
-            hakukohteetBySijoitteluAjoId.set(Collections.emptyMap());
-            mergeSupplier.get();
-        }
-    }
-
-    void fetchValintatulos(String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSupplier) {
+    void fetchValintatulos(String hakuOid, String hakukohdeOid, AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSupplier) {
         valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid).subscribe(valintatulokset -> {
             LOG.info("Haetaan valinta-tulos-service :stä valintatulokset");
             vtsValintatulokset.set(valintatulokset);
@@ -159,7 +127,7 @@ public class ErillishakuProxyResource {
         }, poikkeus -> logAndReturnError("valintatulosservice", asyncResponse, poikkeus));
     }
 
-    void fetchSijoittelu(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<HakukohdeDTO> hakukohde, Supplier<Void> mergeSupplier) {
+    void fetchSijoittelu(String hakuOid, String hakukohdeOid, AsyncResponse asyncResponse, AtomicReference<HakukohdeDTO> hakukohde, Supplier<Void> mergeSupplier) {
         sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(hakuOid, hakukohdeOid,
                 s -> {
                     LOG.info("Haetaan sijoittelusta hakukohteen tiedot");
@@ -170,7 +138,7 @@ public class ErillishakuProxyResource {
         );
     }
 
-    void fetchValinnanVaihes(@PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet, Supplier<Void> mergeSupplier) {
+    void fetchValinnanVaihes(String hakukohdeOid, AsyncResponse asyncResponse, AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet, Supplier<Void> mergeSupplier) {
         valintaperusteetAsyncResource.haeValinnanvaiheetHakukohteelle(hakukohdeOid,
                 v -> {
                     LOG.info("Haetaan valinnanvaiheita");
@@ -181,7 +149,7 @@ public class ErillishakuProxyResource {
         );
     }
 
-    void fetchHakemus(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Hakemus>> hakemukset, Supplier<Void> mergeSupplier) {
+    void fetchHakemus(String hakuOid, String hakukohdeOid, AsyncResponse asyncResponse, AtomicReference<List<Hakemus>> hakemukset, Supplier<Void> mergeSupplier) {
         applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(
                 h -> {
                     LOG.info("Haetaan hakemuksia");
@@ -192,7 +160,7 @@ public class ErillishakuProxyResource {
         );
     }
 
-    private void logAndReturnError(String appName, @Suspended AsyncResponse asyncResponse, Throwable poikkeus) {
+    private void logAndReturnError(String appName, AsyncResponse asyncResponse, Throwable poikkeus) {
         LOG.error("Erillishakuproxy -palvelukutsu epäonnistui " + appName + ":n virheeseen!", poikkeus);
         try {
             asyncResponse.resume(Response.serverError()
