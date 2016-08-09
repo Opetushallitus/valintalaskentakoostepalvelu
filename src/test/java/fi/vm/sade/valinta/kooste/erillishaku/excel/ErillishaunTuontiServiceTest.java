@@ -64,12 +64,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RunWith(Enclosed.class)
@@ -232,7 +227,7 @@ public class ErillishaunTuontiServiceTest {
 
     private static ErillishakuRivi createRow(String henkilotunnus, String personOid, String hakemusOid) {
         return new ErillishakuRivi(hakemusOid, "Toppurainen", "Joonas", henkilotunnus, "tuomas.toppurainen@example.com", "10.12.1975", "MIES", personOid,
-            "FI", "HYVAKSYTTY", false, "KESKEN", "EI_TEHTY", false, false, "FI", "045-6709709", "Kaisaniemenkatu 2 B", "00100", "Helsinki", "", "", "", "");
+            "FI", "HYVAKSYTTY", false, new Date(), "KESKEN", "EI_TEHTY", false, false, "FI", "045-6709709", "Kaisaniemenkatu 2 B", "00100", "Helsinki", "", "", "", "");
     }
 
     public final static class TuntemattomallaAidinkielella extends ErillisHakuTuontiTestCase {
