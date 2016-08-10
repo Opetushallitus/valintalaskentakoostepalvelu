@@ -62,6 +62,11 @@ public class KirjeetUtil {
                 Integer i2 = Optional.ofNullable(o2.getVarasijanNumero()).orElse(0);
                 return i1.compareTo(i2);
             }
+            if(h1.equals(h2)) {
+                Integer p1 = Optional.ofNullable(o1.getValintatapajonoPrioriteetti()).orElse(0);
+                Integer p2 = Optional.ofNullable(o2.getValintatapajonoPrioriteetti()).orElse(0);
+                p1.compareTo(p2);
+            }
             return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
         };
     }
