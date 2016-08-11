@@ -191,17 +191,6 @@
 		<dependency>
 			<groupId>fi.vm.sade.organisaatio</groupId>
 			<artifactId>organisaatio-api</artifactId>
-			<version>${organisaatio.api.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>jsr311-api</artifactId>
-					<groupId>javax.ws.rs</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>fi.vm.sade.rajapinnat</groupId>
