@@ -25,12 +25,12 @@
 		<property name="retryAttemptedLogLevel" value="ERROR" />
 	</bean>
     <bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
-        <property name="allowIfAllAbstainDecisions" value="true"/>
-        <property name="decisionVoters">
+        <constructor-arg>
             <list>
                 <bean class="org.springframework.security.access.vote.RoleVoter"/>
             </list>
-        </property>
+        </constructor-arg>
+        <property name="allowIfAllAbstainDecisions" value="true"/>
     </bean>
     <authorizationPolicy id="admin" access="permitAll"
                          xmlns="http://camel.apache.org/schema/spring-security"/>
