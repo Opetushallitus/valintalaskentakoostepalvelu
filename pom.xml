@@ -17,7 +17,6 @@
 	</parent>
 	<properties>
 		<organisaatio.api.version>2015-13</organisaatio.api.version>
-		<cxf.version>3.0.8</cxf.version> <!-- Higher than the version in parent pom.xml -->
 	</properties>
 
 	<dependencies>
