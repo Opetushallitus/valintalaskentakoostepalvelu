@@ -17,7 +17,7 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static javax.ws.rs.HttpMethod.GET;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class OmatSivutHakemusResourceTest {
     private static final String hakemusOid = "1.2.246.562.11.00003935855";

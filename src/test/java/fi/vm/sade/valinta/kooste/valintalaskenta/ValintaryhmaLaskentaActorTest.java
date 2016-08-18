@@ -14,7 +14,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaat
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.ValintalaskentaSpec;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 

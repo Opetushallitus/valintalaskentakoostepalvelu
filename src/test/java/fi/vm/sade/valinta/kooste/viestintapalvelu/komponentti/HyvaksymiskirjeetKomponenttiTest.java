@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static java.util.Optional.ofNullable;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 @Ignore
 public class HyvaksymiskirjeetKomponenttiTest {

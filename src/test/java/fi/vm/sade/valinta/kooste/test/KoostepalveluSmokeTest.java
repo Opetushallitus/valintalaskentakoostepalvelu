@@ -5,7 +5,7 @@ import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.valinta.http.HttpResource;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

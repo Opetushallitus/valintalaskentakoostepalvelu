@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class OppijanSuorituksetProxyResourceTest {
     private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResourceTest.class);

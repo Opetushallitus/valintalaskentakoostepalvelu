@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
 import java.util.function.Consumer;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

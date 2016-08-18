@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
