@@ -91,18 +91,18 @@
     <!-- Swagger -->
     <!-- Swagger API listing resource -->
     <bean id="swaggerResourceJSON"
-          class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON" />
+          class="io.swagger.jaxrs.listing.SwaggerSerializers" />
 
     <!-- Swagger writers -->
     <bean id="resourceWriter"
-          class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"
+          class="io.swagger.jaxrs.listing.ApiListingResource"
           scope="singleton" />
     <bean id="apiWriter"
-          class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"
+          class="io.swagger.jaxrs.listing.AcceptHeaderApiListingResource"
           scope="singleton" />
 
     <!-- Swagger configuration -->
-    <bean id="swaggerConfig" class="com.wordnik.swagger.jaxrs.config.BeanConfig">
+    <bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
       <property name="resourcePackage" value="fi.vm.sade.valinta.kooste" />
       <property name="version" value="1.0" />
       <property name="filterClass" value="fi.vm.sade.valinta.kooste.swagger.AsyncResponseFilter"/>

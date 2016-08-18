@@ -2,8 +2,8 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;

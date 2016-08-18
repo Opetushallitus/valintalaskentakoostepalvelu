@@ -22,8 +22,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.Lists;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;

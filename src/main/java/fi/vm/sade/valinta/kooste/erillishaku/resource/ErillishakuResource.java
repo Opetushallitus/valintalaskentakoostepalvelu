@@ -3,9 +3,9 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.oidHaustaJaHakukohteesta;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
 import static rx.observables.BlockingObservable.from;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.valinta.kooste.KoosteAudit;

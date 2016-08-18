@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.Kuvaus;
 import org.apache.commons.lang.StringUtils;
 

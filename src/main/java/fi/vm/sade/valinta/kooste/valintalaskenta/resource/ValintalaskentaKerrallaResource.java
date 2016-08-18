@@ -2,8 +2,8 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.security.service.authz.util.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;

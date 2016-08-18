@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import com.wordnik.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModel;
 
 import java.util.Collections;
 import java.util.List;

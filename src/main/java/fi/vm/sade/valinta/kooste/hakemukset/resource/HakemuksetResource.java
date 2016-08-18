@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.hakemukset.resource;
 
 import com.google.common.base.Preconditions;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;

@@ -45,8 +45,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;

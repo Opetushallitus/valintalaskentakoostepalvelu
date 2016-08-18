@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet;
 
-import com.wordnik.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiParam;
 import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;

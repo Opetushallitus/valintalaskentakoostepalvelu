@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;

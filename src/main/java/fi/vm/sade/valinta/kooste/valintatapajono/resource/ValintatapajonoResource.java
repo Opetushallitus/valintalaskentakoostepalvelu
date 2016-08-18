@@ -4,7 +4,6 @@ import static rx.observables.BlockingObservable.from;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -15,12 +14,9 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.container.TimeoutHandler;
 import javax.ws.rs.core.Response;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.config.FilterFactory;
+import io.swagger.annotations.Api;
 import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -35,14 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import com.wordnik.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
-import rx.observables.BlockingObservable;
 
 /**
  * @Autowired(required = false) Camelin pois refaktorointi

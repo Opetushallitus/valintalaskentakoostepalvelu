@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku;
 
 import com.google.common.collect.Maps;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.ValinnanVaiheTyyppi;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
