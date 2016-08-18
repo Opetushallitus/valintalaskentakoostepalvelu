@@ -49,16 +49,10 @@
 
   <!-- Swagger -->
   <!-- Swagger API listing resource -->
-  <bean id="swaggerResourceJSON"
-        class="io.swagger.jaxrs.listing.SwaggerSerializers" />
 
   <!-- Swagger writers -->
-  <bean id="resourceWriter"
-        class="io.swagger.jaxrs.listing.ApiListingResource"
-        scope="singleton" />
-  <bean id="apiWriter"
-        class="io.swagger.jaxrs.listing.AcceptHeaderApiListingResource"
-        scope="singleton" />
+  <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
+	<bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
 
   <!-- Swagger configuration -->
   <bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
@@ -76,12 +70,14 @@
   <jaxrs:server id="koostepalveluResurssit">
     <jaxrs:serviceBeans>
       <ref bean="SmoketestResource"/>
+
+      <ref bean="swaggerResource"/>
     </jaxrs:serviceBeans>
     <jaxrs:providers>
       <ref bean="jsonProvider"/>
       <ref bean="cors-filter"/>
-      <ref bean="resourceWriter"/>
-      <ref bean="apiWriter"/>
+
+      <ref bean="swaggerWriter"/>
     </jaxrs:providers>
   </jaxrs:server>
 
