@@ -102,7 +102,7 @@ public class ErillishakuProxyResource {
         fetchValinnanVaihes(hakukohdeOid, asyncResponse, valinnanvaiheet, mergeSupplier);
         ///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
         fetchSijoittelu(hakuOid, hakukohdeOid, asyncResponse, hakukohde, mergeSupplier);
-        ///sijoittelu-service/resources/tila/hakukohde/{hakukohdeOid}
+        ///virkailija/valintatulos/haku/{hakuOid}/hakukohde/{hakukohdeOid}
         fetchValintatulos(hakuOid, hakukohdeOid, asyncResponse, vtsValintatulokset, mergeSupplier);
         ///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         fetchValinnanTulos(hakuOid, hakukohdeOid, asyncResponse, valintatulokset, mergeSupplier);
