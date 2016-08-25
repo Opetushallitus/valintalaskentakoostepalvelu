@@ -17,7 +17,6 @@ import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 
-@PreAuthorize("isAuthenticated()")
 public class SuoritaHakukohdeImportKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
 

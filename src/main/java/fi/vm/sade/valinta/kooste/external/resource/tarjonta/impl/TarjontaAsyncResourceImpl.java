@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
@@ -83,6 +84,12 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
     @Override
     public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
         return this.<ResultV1RDTO<HakukohdeV1RDTO>>getAsObservable("/v1/hakukohde/" + hakukohdeOid + "/", new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {
+        }.getType()).map(result -> result.getResult());
+    }
+
+    @Override
+    public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
+        return this.<ResultV1RDTO<Set<String>>>getAsObservable("/v1/haku/findOidsToSyncTarjontaFor", new TypeToken<ResultV1RDTO<Set<String>>>() {
         }.getType()).map(result -> result.getResult());
     }
 }

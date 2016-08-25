@@ -5,6 +5,7 @@
 	   xmlns:jaxrs-client="http://cxf.apache.org/jaxrs-client" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
 	   xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
 	   xmlns:http="http://cxf.apache.org/transports/http/configuration"
+	   xmlns:task="http://www.springframework.org/schema/task"
 	   xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
@@ -13,7 +14,7 @@
            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
            http://cxf.apache.org/jaxrs-client http://cxf.apache.org/schemas/jaxrs-client.xsd
-           http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
+           http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
 	<ctx:annotation-config />
 	<ctx:mbean-export/>
@@ -388,7 +389,6 @@
 		<bean
 				class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl" />
 
-		<!--Koodisto -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.koodisto.impl.KoodistoAsyncResourceImpl" />
 		<bean id="KoodistoCachedAsyncResource"
@@ -515,5 +515,15 @@
 				<ref bean="apiWriter" />
 			</jaxrs:providers>
 		</jaxrs:server>
+
+		<!-- Tarjonnan ajastettu synkronointi -->
+		<bean id="tarjontaSyncService"
+			  class="fi.vm.sade.valinta.kooste.tarjonta.sync.impl.TarjontaSyncServiceImpl" />
+
+		<task:scheduled-tasks scheduler="TarjontaSyncScheduler">
+			<task:scheduled ref="tarjontaSyncService" method="syncHakukohteetFromTarjonta" cron="${valintalaskentakoostepalvelu.tarjonta.sync.cron}"/>
+		</task:scheduled-tasks>
+
+		<task:scheduler id="TarjontaSyncScheduler" pool-size="10"/>
 	</beans>
 </beans>

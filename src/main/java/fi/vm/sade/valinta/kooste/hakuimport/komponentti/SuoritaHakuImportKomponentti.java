@@ -17,7 +17,6 @@ import fi.vm.sade.valinta.kooste.OPH;
  * User: wuoti Date: 20.5.2013 Time: 10.46
  */
 @Component("suoritaHakuImportKomponentti")
-@PreAuthorize("isAuthenticated()")
 public class SuoritaHakuImportKomponentti {
 
     private static final Logger LOG = LoggerFactory

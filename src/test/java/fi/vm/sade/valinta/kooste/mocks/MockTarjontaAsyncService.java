@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
@@ -49,6 +46,14 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
         hakukohdeDTO.setHakuOid(MockData.hakuOid);
         hakukohdeDTO.setOid(hakukohdeOid);
         return Observable.just(hakukohdeDTO);
+    }
+
+    @Override
+    public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
+        Set<String> set = new HashSet<>();
+        set.add(MockData.hakuOid);
+        set.add(MockData.hakuOid + "-1");
+        return Observable.just(set);
     }
 
     public static void setMockHaku(HakuV1RDTO mockHaku) {

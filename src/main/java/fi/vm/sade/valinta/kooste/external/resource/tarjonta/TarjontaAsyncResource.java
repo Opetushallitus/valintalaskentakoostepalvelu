@@ -10,6 +10,7 @@ import rx.Observable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface TarjontaAsyncResource {
     Observable<HakuV1RDTO> haeHaku(String hakuOid);
@@ -18,4 +19,11 @@ public interface TarjontaAsyncResource {
     Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(Collection<String> organizationOids);
 
     Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid);
+
+    /**
+     * Fetch from tarjonta-service the hakuOids that should be synchronized.
+     *
+     * @return Set of hakuOids as strings.
+     */
+    Observable<Set<String>> findHakuOidsForAutosyncTarjonta();
 }

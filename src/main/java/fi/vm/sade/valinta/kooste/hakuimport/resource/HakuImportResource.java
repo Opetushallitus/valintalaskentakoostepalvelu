@@ -66,7 +66,7 @@ public class HakuImportResource {
             return "get parameter 'hakuOid' required";
         } else {
             LOG.info("Haku import haulle {}", hakuOid);
-            hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid, SecurityContextHolder.getContext().getAuthentication());
+            hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid);
             return "in progress";
         }
     }
