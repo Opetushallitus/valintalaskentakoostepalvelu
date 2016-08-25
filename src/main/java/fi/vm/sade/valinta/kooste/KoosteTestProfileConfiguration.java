@@ -85,6 +85,8 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("omatsivut.email.application.modify.link.fi", "https://fi.test.domain/token/");
         p0.setProperty("omatsivut.email.application.modify.link.sv", "https://sv.test.domain/token/");
 
+        p0.setProperty("valintalaskentakoostepalvelu.tarjonta.sync.cron", "0 0 0 * * SUN-SAT");
+
         org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
         defaultProps.setProperties(p0);
         defaultProps.setOrder(0);
