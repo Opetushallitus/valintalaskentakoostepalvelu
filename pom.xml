@@ -25,6 +25,10 @@
       <artifactId>generic-common</artifactId>
   	</dependency>
 		<dependency>
+      <groupId>fi.vm.sade.java-utils</groupId>
+      <artifactId>opintopolku-cas-servlet-filter</artifactId>
+	  </dependency>
+		<dependency>
 			<groupId>fi.vm.sade</groupId>
 			<artifactId>auditlogger</artifactId>
 		</dependency>
