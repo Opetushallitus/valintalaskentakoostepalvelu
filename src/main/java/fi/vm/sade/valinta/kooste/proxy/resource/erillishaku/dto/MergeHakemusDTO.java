@@ -7,6 +7,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -29,6 +30,7 @@ public class MergeHakemusDTO {
     private BigDecimal pisteet;
     private BigDecimal paasyJaSoveltuvuusKokeenTulos;
     private HakemuksenTila hakemuksentila;
+    private Map<String, String> hakemuksenTilaKuvaus;
     private boolean ehdollisestiHyvaksyttavissa;
     private ValintatuloksenTila valintatuloksenTilaHakijalle;
     private ValintatuloksenTila valintatuloksentila;
@@ -279,5 +281,13 @@ public class MergeHakemusDTO {
 
     public void setHyvaksymiskirjeLahetetty(Date hyvaksymiskirjeLahetetty) {
         this.hyvaksymiskirjeLahetetty = hyvaksymiskirjeLahetetty;
+    }
+
+    public Map<String, String> getHakemuksenTilaKuvaus() {
+        return hakemuksenTilaKuvaus;
+    }
+
+    public void setHakemuksenTilaKuvaus(Map<String, String> hakemuksenTilaKuvaus) {
+        this.hakemuksenTilaKuvaus = hakemuksenTilaKuvaus;
     }
 }
