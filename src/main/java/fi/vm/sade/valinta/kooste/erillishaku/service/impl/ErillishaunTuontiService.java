@@ -228,7 +228,7 @@ public class ErillishaunTuontiService {
                 .filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList());
         LOG.info("lisattavatTaiKeskeneraiset="+lisattavatTaiKeskeneraiset.size());
         List<ErillishakuRivi> poistettavat = rivit.stream()
-                .filter(rivi -> !rivi.isKesken() && rivi.isPoistetaankoRivi()).collect(Collectors.toList());
+                .filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
         final List<Hakemus> hakemukset;
         if(!lisattavatTaiKeskeneraiset.isEmpty()) {
             LOG.info("Haetaan/luodaan henkilöt");
