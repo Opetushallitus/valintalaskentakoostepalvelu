@@ -186,7 +186,7 @@ public class ErillishaunTuontiService {
         // jos hakemuksentila on hylatty tai varalla niin autotaytetaan loput tilat KESKEN, EI_TEHTY
 
         return rivit.stream().map(rivi -> {
-            if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi)) && !isUusi(rivi) ) {
+            if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi)) && !isUusi(rivi) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(rivi.getVastaanottoTila())) {
                 return new ErillishakuRivi(
                         rivi.getHakemusOid(),
                         rivi.getSukunimi(),
@@ -400,15 +400,12 @@ public class ErillishaunTuontiService {
             hakijatJaPoistettavat.addAll(hakijat);
             hakijatJaPoistettavat.addAll(poistettavatDtos);
             if (!hakijatJaPoistettavat.isEmpty()) {
-                final List<ErillishaunHakijaDTO> hakijatAinastaanHakemuksenTilaPaivityksella = hakijat.stream().filter(h -> ainoastaanHakemuksenTilaPaivitys(h)).collect(Collectors.toList());
-                final List<ErillishaunHakijaDTO> hakijatKaikillaTilaPaivityksilla = hakijat.stream().filter(h -> !ainoastaanHakemuksenTilaPaivitys(h)).collect(Collectors.toList());
+                final List<ErillishaunHakijaDTO> hakijatKaikillaTilaPaivityksilla = hakijat.stream()
+                        .filter(h -> !ainoastaanHakemuksenTilaPaivitys(h) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(h.valintatuloksenTila))
+                        .collect(Collectors.toList());
 
                 Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus =
-                        doTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla, prosessi)
-                                .map(o -> {
-                                    List<VastaanottoResultDTO> okResult = hakijatAinastaanHakemuksenTilaPaivityksella.stream().map(ErillishaunTuontiService::convertToHyvaksyttyResult).collect(Collectors.toList());
-                                    return Lists.newArrayList(Iterables.concat(o, okResult));
-                                });
+                        doTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla, prosessi);
                 vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
                     List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
                     epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
