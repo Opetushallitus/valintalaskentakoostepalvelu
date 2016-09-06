@@ -388,7 +388,8 @@ public class ErillishaunTuontiService {
                         rivi.getEtunimi(),
                         rivi.getSukunimi(),
                         Optional.of(true),
-                        rivi.getHyvaksymiskirjeLahetetty()))
+                        rivi.getHyvaksymiskirjeLahetetty(),
+                        Lists.newArrayList()))
                 .collect(Collectors.toList());
         try {
             if (!poistettavatDtos.isEmpty()) {
@@ -494,7 +495,8 @@ public class ErillishaunTuontiService {
                     wrapper.getEtunimi(),
                     wrapper.getSukunimi(),
                     Optional.of(rivi.isPoistetaankoRivi()),
-                    rivi.getHyvaksymiskirjeLahetetty()));
+                    rivi.getHyvaksymiskirjeLahetetty(),
+                    Lists.newArrayList()));
         }
     }
 
