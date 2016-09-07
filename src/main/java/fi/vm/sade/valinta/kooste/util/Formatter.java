@@ -15,6 +15,11 @@ public class Formatter {
     public static final String ARVO_VALI = " ";
     public static final String ARVO_VAKIO = "-";
 
+    static {
+        NUMERO_FORMAATTI.setMinimumFractionDigits(0);
+        NUMERO_FORMAATTI.setMaximumFractionDigits(Integer.MAX_VALUE);
+    }
+
     public static String suomennaNumero(BigDecimal arvo) {
         return suomennaNumero(arvo, StringUtils.EMPTY);
     }
