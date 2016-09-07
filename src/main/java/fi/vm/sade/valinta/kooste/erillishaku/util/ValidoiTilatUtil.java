@@ -26,7 +26,7 @@ public class ValidoiTilatUtil {
             Sets.newEnumSet(Arrays.asList(EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI, PERUNUT, PERUUTETTU),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> KESKEN_TAI_PERUNUT_VASTAANOTTAJA =
-            Sets.newHashSet(Arrays.asList(KESKEN, PERUUTETTU, PERUNUT));
+            Sets.newHashSet(Arrays.asList(KESKEN, PERUUTETTU, PERUNUT, OTTANUT_VASTAAN_TOISEN_PAIKAN));
     private static final Set<IlmoittautumisTila> EI_ILMOITTAUTUMISTA =
             Sets.newHashSet(Arrays.asList(IlmoittautumisTila.EI_TEHTY));
     /**
