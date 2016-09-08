@@ -73,13 +73,16 @@ public class PistesyottoResourceTest {
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String TARJOAJA1 = "TARJOAJA1";
     final String VALINTAKOE1 = "VALINTAKOE1";
+    final String KIELIKOE = "KIELIKOE";
     final String HAKEMUS1 = "HAKEMUS1";
     final String HAKEMUS2 = "HAKEMUS2";
     final String HAKEMUS3 = "HAKEMUS3";
     final String TUNNISTE1 = "TUNNISTE1";
     final String TUNNISTE2 = "TUNNISTE2";
+    final String KIELIKOE_TUNNISTE = "kielikoe_fi";
     final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
     final String OSALLISTUMISENTUNNISTE2 = TUNNISTE2 + "-OSALLISTUMINEN";
+    final String KIELIKOE_OSALLISTUMISENTUNNISTE = KIELIKOE_TUNNISTE + "-OSALLISTUMINEN";
 
     @Before
     public void startServer() {
@@ -258,6 +261,130 @@ public class PistesyottoResourceTest {
             cleanMocks();
         }
     }
+
+    @Test
+    public void pistesyottoVientiNotKielikoeTest() throws Throwable {
+        cleanMocks();
+        try {
+            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
+                    osallistuminen()
+                            .setHakemusOid(HAKEMUS1)
+                            .hakutoive()
+                            .valinnanvaihe()
+                            .valintakoe()
+                            .setValintakoeOid(VALINTAKOE1)
+                            .setTunniste(TUNNISTE1)
+                            .setOsallistuu()
+                            .build()
+                            .valintakoe()
+                            .setValintakoeOid(KIELIKOE)
+                            .setTunniste(KIELIKOE_TUNNISTE)
+                            .setOsallistuu()
+                            .build()
+                            .build()
+                            .build()
+                            .build(),
+                    osallistuminen()
+                            .setHakemusOid(HAKEMUS2)
+                            .hakutoive()
+                            .valinnanvaihe()
+                            .valintakoe()
+                            .setValintakoeOid(VALINTAKOE1)
+                            .setTunniste(TUNNISTE1)
+                            .setOsallistuu()
+                            .build()
+                            .valintakoe()
+                            .setValintakoeOid(KIELIKOE)
+                            .setTunniste(KIELIKOE_TUNNISTE)
+                            .setEiOsallistu()
+                            .build()
+                            .build()
+                            .build()
+                            .build());
+            List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
+                    valintaperuste()
+                            .setKuvaus(TUNNISTE1)
+                            .setTunniste(TUNNISTE1)
+                            .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE1)
+                            .setTotuusarvofunktio()
+                            .build(),
+                    valintaperuste()
+                            .setKuvaus(KIELIKOE_TUNNISTE)
+                            .setTunniste(KIELIKOE_TUNNISTE)
+                            .setOsallistumisenTunniste(KIELIKOE_OSALLISTUMISENTUNNISTE)
+                            .setTotuusarvofunktio()
+                            .build()
+            );
+
+            MockValintaperusteetAsyncResource.setValintaperusteetResultReference(
+                    valintaperusteet
+            );
+            MockValintaperusteetAsyncResource.setHakukohdeResult(
+                    Arrays.asList(
+                            hakukohdeJaValintakoe()
+                                    .addValintakoe(VALINTAKOE1)
+                                    .addValintakoe(KIELIKOE)
+                                    .build()
+                    )
+            );
+            MockApplicationAsyncResource.setResult(Arrays.asList(
+                    hakemus()
+                            .setOid(HAKEMUS1)
+                            .setHenkilotunnus("123456-789x")
+                            .build()
+            ));
+            MockApplicationAsyncResource.setResultByOid(Arrays.asList(
+                    hakemus()
+                            .setOid(HAKEMUS2)
+                            .setSyntymaaika("1.1.1900")
+                            .build()
+            ));
+            MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
+                    lisatiedot()
+                            .setOid(HAKEMUS1)
+                            .setEtunimiJaSukunimi("Hilla", "Hiiri")
+                            .addLisatieto(KIELIKOE_TUNNISTE, "true")
+                            .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                            .build()));
+            MockApplicationAsyncResource.setAdditionalDataResultByOid(Arrays.asList(
+                    lisatiedot()
+                            .setOid(HAKEMUS2)
+                            .setEtunimiJaSukunimi("Hellevi", "Hiiri")
+                            .addLisatieto(TUNNISTE1, "true")
+                            .addLisatieto(OSALLISTUMISENTUNNISTE1, "OSALLISTUI")
+                            .build()));
+
+            MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+
+            ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
+            Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
+                    Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
+                    inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+
+            Response r =
+                    pistesyottoVientiResource.getWebClient()
+                            .query("hakuOid", HAKU1)
+                            .query("hakukohdeOid", HAKUKOHDE1)
+                            .post(Entity.entity("",
+                                    "application/json"));
+            assertEquals(200, r.getStatus());
+            InputStream excelData = inputStreamArgumentCaptor.getValue();
+            assertTrue(excelData != null);
+            Collection<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
+
+            rivit.stream().forEach(rivi -> {
+                System.out.println("RIVI: " + rivi.toString());
+            });
+            Rivi hakemus1Rivi = rivit.stream().filter(rivi -> rivi.getSolut().stream().anyMatch(solu -> HAKEMUS1.equals(solu.toTeksti().getTeksti()))).findFirst().get();
+            assertRivi(hakemus1Rivi, new String[]{HAKEMUS1, "Hiiri, Hilla", "123456-789x", null, "Ei", "Merkitsemättä", "Hyväksytty", "Osallistui"});
+            Rivi hakemus2Rivi = rivit.stream().filter(rivi -> rivi.getSolut().stream().anyMatch(solu -> HAKEMUS2.equals(solu.toTeksti().getTeksti()))).findFirst().get();
+            assertRivi(hakemus2Rivi, new String[]{HAKEMUS2, "Hiiri, Hellevi", null, "1.1.1900", "Kyllä", "Osallistui", "Hylätty", "Merkitsemättä"});
+
+        } finally {
+            cleanMocks();
+        }
+    }
+
 
     private void assertRivi(Rivi rivi, String[] expectedSolut) {
         Solu[] solut = rivi.getSolut().toArray(new Solu[rivi.getSolut().size()]);

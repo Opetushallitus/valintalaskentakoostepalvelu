@@ -66,15 +66,29 @@ public class PistesyottoExcel {
             .addKonversio(EI_VAADITA, VAKIO_EI_VAADITA)
             .addKonversio(EI_OSALLISTUNUT, VAKIO_EI_OSALLISTUNUT)
             .build();
-    public final static String TOSI = "Hyväksytty";
-    public final static String EPATOSI = "Hylätty";
+
+    private static final String KIELIKOE_TUNNISTE = "kielikoe";
     public final static String TYHJA = "Tyhjä";
-    private final static Collection<String> TOTUUSARVO = Arrays.asList(TYHJA, TOSI, EPATOSI);
-    private final static Map<String, String> TOTUUSARVO_KONVERSIO = new KonversioBuilder()
-            .addKonversio(TOSI, Boolean.TRUE.toString())
-            .addKonversio(EPATOSI, Boolean.FALSE.toString())
+
+    public final static String HYVAKSYTTY = "Hyväksytty";
+    public final static String HYLATTY = "Hylätty";
+    private final static Collection<String> TOTUUSARVO_KIELIKOE = Arrays.asList(TYHJA, HYVAKSYTTY, HYLATTY);
+    private final static Map<String, String> TOTUUSARVO_KIELIKOE_KONVERSIO = new KonversioBuilder()
+            .addKonversio(HYVAKSYTTY, Boolean.TRUE.toString())
+            .addKonversio(HYLATTY, Boolean.FALSE.toString())
             .addKonversio(TYHJA, null)
             .build();
+
+    public final static String KYLLA = "Kyllä";
+    public final static String EI = "Ei";
+
+    private final static Collection<String> TOTUUSARVO = Arrays.asList(TYHJA, KYLLA, EI);
+    private final static Map<String, String> TOTUUSARVO_KONVERSIO = new KonversioBuilder()
+            .addKonversio(KYLLA, Boolean.TRUE.toString())
+            .addKonversio(EI, Boolean.FALSE.toString())
+            .addKonversio(TYHJA, null)
+            .build();
+
     private final Excel excel;
     private Map<String, Boolean> onkoHakijaOsallistuja = Maps.newHashMap();
     private String hakemusValintakoeYhdiste(String hakemus, String valintakoe) {
@@ -244,8 +258,13 @@ public class PistesyottoExcel {
                             s.add(new NumeroArvo(value, min, max));
                         }
                     } else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
-                        String value = StringUtils.trimToEmpty(data.getAdditionalData().get(valintaperuste.getTunniste()));
-                        s.add(new BooleanArvo(value, TOTUUSARVO, TOSI, EPATOSI, TYHJA));
+                        if(isKielikoe(valintaperuste)) {
+                            String value = StringUtils.trimToEmpty(data.getAdditionalData().get(valintaperuste.getTunniste()));
+                            s.add(new BooleanArvo(value, TOTUUSARVO_KIELIKOE, HYVAKSYTTY, HYLATTY, TYHJA));
+                        } else {
+                            String value = StringUtils.trimToEmpty(data.getAdditionalData().get(valintaperuste.getTunniste()));
+                            s.add(new BooleanArvo(value, TOTUUSARVO, KYLLA, EI, TYHJA));
+                        }
                     } else {
                         s.add(new TekstiArvo(data.getAdditionalData().get(StringUtils.trimToEmpty(valintaperuste.getTunniste())), false));
                     }
@@ -289,9 +308,15 @@ public class PistesyottoExcel {
                             VAKIO_OSALLISTUI, StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
                 }
             } else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
-                dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KONVERSIO,
-                        VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils.trimToEmpty(valintaperuste.getTunniste()),
-                        VAKIO_OSALLISTUI, StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
+                if(isKielikoe(valintaperuste)) {
+                    dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KIELIKOE_KONVERSIO,
+                            VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils.trimToEmpty(valintaperuste.getTunniste()),
+                            VAKIO_OSALLISTUI, StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
+                } else {
+                    dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KONVERSIO,
+                            VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils.trimToEmpty(valintaperuste.getTunniste()),
+                            VAKIO_OSALLISTUI, StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
+                }
             } else {
                 LOG.error("Tunnistamaton funktiotyyppi! Peruutetaan pistesyoton luonti!");
                 throw new RuntimeException("Tunnistamaton syote! Peruutetaan pistesyoton luonti!");
@@ -325,6 +350,12 @@ public class PistesyottoExcel {
             }
         }
     }
+
+    private boolean isKielikoe(ValintaperusteDTO valintaperuste) {
+        if(valintaperuste == null || valintaperuste.getTunniste() == null) return false;
+        return valintaperuste.getTunniste().contains(KIELIKOE_TUNNISTE);
+    }
+
     public Excel getExcel() {
         return excel;
     }
