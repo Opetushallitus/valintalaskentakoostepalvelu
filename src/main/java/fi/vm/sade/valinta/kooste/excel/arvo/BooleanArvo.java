@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.excel.arvo;
 
+import org.apache.commons.lang3.BooleanUtils;
+
 import java.util.Collection;
 
 public class BooleanArvo extends MonivalintaArvo {
@@ -23,6 +25,7 @@ public class BooleanArvo extends MonivalintaArvo {
     }
 
     private static Boolean asBoolean(String arvo) {
-        return Boolean.valueOf(arvo);
+        return BooleanUtils.toBooleanObject(arvo);
+        //return Boolean.valueOf(arvo);
     }
 }

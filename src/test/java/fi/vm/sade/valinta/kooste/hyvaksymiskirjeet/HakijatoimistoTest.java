@@ -13,10 +13,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import rx.Observable;
 
 import java.util.*;
@@ -139,7 +136,7 @@ public class HakijatoimistoTest {
                 );
 
         try {
-            Assert.assertTrue(counter.tryAcquire(3, 10, TimeUnit.SECONDS));
+            Assert.assertTrue(counter.tryAcquire(3, 20, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             Assert.fail();
         }
