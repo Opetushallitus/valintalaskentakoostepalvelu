@@ -46,6 +46,10 @@ public class ValintaperusteetSpec extends ConstantsSpec {
             valintaperusteDTO.setFunktiotyyppi(Funktiotyyppi.LUKUARVOFUNKTIO);
             return this;
         }
+        public ValintaperusteBuilder setTotuusarvofunktio() {
+            valintaperusteDTO.setFunktiotyyppi(Funktiotyyppi.TOTUUSARVOFUNKTIO);
+            return this;
+        }
         public ValintaperusteBuilder setArvot(String ... arvot) {
             valintaperusteDTO.setArvot(Arrays.asList(arvot));
             return this;
