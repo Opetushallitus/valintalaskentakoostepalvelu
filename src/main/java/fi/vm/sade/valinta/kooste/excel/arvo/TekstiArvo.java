@@ -11,27 +11,15 @@ public class TekstiArvo extends Arvo {
     private final int ulottuvuus;
 
     public TekstiArvo(String teksti) {
-        super(ArvoTyyppi.NIMIKE);
-        this.teksti = teksti;
-        this.nimike = true;
-        this.editoitava = false;
-        this.ulottuvuus = 1;
+        this(teksti, true);
     }
 
     public TekstiArvo(String teksti, boolean nimike) {
-        super(ArvoTyyppi.NIMIKE);
-        this.teksti = teksti;
-        this.nimike = nimike;
-        this.editoitava = false;
-        this.ulottuvuus = 1;
+        this(teksti, nimike, false);
     }
 
     public TekstiArvo(String teksti, boolean nimike, boolean editoitava) {
-        super(ArvoTyyppi.NIMIKE);
-        this.teksti = teksti;
-        this.nimike = nimike;
-        this.editoitava = editoitava;
-        this.ulottuvuus = 1;
+        this(teksti, nimike, editoitava, 1);
     }
 
     public TekstiArvo(String teksti, boolean nimike, boolean editoitava, int ulottuvuus) {
