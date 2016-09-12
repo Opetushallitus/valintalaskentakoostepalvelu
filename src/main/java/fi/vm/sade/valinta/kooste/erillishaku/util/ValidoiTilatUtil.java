@@ -14,21 +14,27 @@ import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.*;
 public class ValidoiTilatUtil {
     private static final Set<HakemuksenTila> HYVAKSYTTYNA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARASIJALTA_HYVAKSYTTY),HakemuksenTila.class);
+
     private static final Set<HakemuksenTila> HYLATTY_TAI_VARALLA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYLATTY,HakemuksenTila.VARALLA),HakemuksenTila.class);
 
     private static final Set<HakemuksenTila> PERUNEENA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.PERUNUT,HakemuksenTila.PERUUTETTU,HakemuksenTila.PERUUNTUNUT),HakemuksenTila.class);
+
     private static final Set<ValintatuloksenTila> VASTAANOTTANEENA =
             Sets.newEnumSet(Arrays.asList(EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI),ValintatuloksenTila.class);
+
     private static final Set<ValintatuloksenTila> VASTAANOTTANEENA_TAI_PERUNEENA =
             Sets.newEnumSet(Arrays.asList(EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI, PERUNUT, PERUUTETTU),ValintatuloksenTila.class);
+
     private static final Set<ValintatuloksenTila> VASTAANOTTANEENA_TAI_PERUNEENA_EI_MYOHASTYNYT =
             Sets.newEnumSet(Arrays.asList(EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI, PERUNUT, PERUUTETTU),ValintatuloksenTila.class);
+
     private static final Set<ValintatuloksenTila> KESKEN_TAI_PERUNUT_VASTAANOTTAJA =
-            Sets.newHashSet(Arrays.asList(KESKEN, PERUUTETTU, PERUNUT, OTTANUT_VASTAAN_TOISEN_PAIKAN));
+            Sets.newHashSet(Arrays.asList(KESKEN, PERUUTETTU, PERUNUT, OTTANUT_VASTAAN_TOISEN_PAIKAN, EI_VASTAANOTETTU_MAARA_AIKANA));
+    
     private static final Set<IlmoittautumisTila> EI_ILMOITTAUTUMISTA =
             Sets.newHashSet(Arrays.asList(IlmoittautumisTila.EI_TEHTY));
     /**
