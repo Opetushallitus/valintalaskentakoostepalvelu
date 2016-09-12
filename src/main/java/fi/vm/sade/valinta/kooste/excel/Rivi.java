@@ -39,7 +39,7 @@ public class Rivi {
         }
     }
 
-    public boolean validoi(Rivi rivi) {
+    public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
         return false;
     }
 

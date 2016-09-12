@@ -75,7 +75,7 @@ public class OidRivi extends Rivi {
         return oidit;
     }
 
-    public boolean validoi(Rivi rivi) {
+    public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
         Collection<Solu> soluja;
         if (vali != 0) {
             soluja = Lists.newArrayList();

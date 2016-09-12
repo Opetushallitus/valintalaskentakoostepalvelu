@@ -38,7 +38,7 @@ public class Kooste extends Rivi {
     }
 
     @Override
-    public boolean validoi(Rivi rivi) {
+    public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
         Iterator<Solu> soluIterator = rivi.getSolut().iterator();
         // LOG.error("KOOSTE VALIDOI");
         for (Rivi r : rivit) {

@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ErillishakuExcelTest {
 	@Test
-	public void testaaTuontiKustomistaTiedostosta() throws ExcelValidointiPoikkeus, IOException {
+	public void testaaTuontiKustomistaTiedostosta() throws Exception {
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
 		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", Collections.emptyList(), rivi -> tarkistusTapahtui.incrementAndGet());
 		eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku.xlsx").getInputStream());
@@ -30,7 +30,7 @@ public class ErillishakuExcelTest {
 	}
 
 	@Test
-	public void testaaTuontiKustomistaTiedostostaOtsikoilla() throws ExcelValidointiPoikkeus, IOException {
+	public void testaaTuontiKustomistaTiedostostaOtsikoilla() throws Exception {
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
 		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi",Collections.emptyList(), rivi -> tarkistusTapahtui.incrementAndGet());
 		eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku_otsikoilla.xlsx").getInputStream());
@@ -38,7 +38,7 @@ public class ErillishakuExcelTest {
 	}
     
 	@Test
-	public void testaaVienti() throws IOException {
+	public void testaaVienti() throws Exception {
 		List<ErillishakuRivi> rivit = Lists.newArrayList();
 		String syntymaAika = "11.11.2011";
 		ErillishakuRivi rivi = new ErillishakuRivi(
@@ -64,7 +64,7 @@ public class ErillishakuExcelTest {
 	}
 
 	@Test
-    public void testaaVientiKK() throws IOException {
+    public void testaaVientiKK() throws Exception {
         List<ErillishakuRivi> rivit = Lists.newArrayList();
         String syntymaAika = "11.11.2011";
         ErillishakuRivi rivi = new ErillishakuRivi(
@@ -91,7 +91,7 @@ public class ErillishakuExcelTest {
     }
 
     @Test
-    public void testaaVientiToinenAste() throws IOException {
+    public void testaaVientiToinenAste() throws Exception {
         List<ErillishakuRivi> rivit = Lists.newArrayList();
         String syntymaAika = "11.11.2011";
         ErillishakuRivi rivi = new ErillishakuRivi(
