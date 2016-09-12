@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.excel;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
 public class Rivi {
-    private final Collection<Solu> solut;
+    private final List<Solu> solut;
 
     public Rivi() {
         this.solut = Collections.emptyList();
@@ -23,7 +20,7 @@ public class Rivi {
         this.solut = Arrays.asList(solu);
     }
 
-    public Rivi(Collection<Solu> solut) {
+    public Rivi(List<Solu> solut) {
         this.solut = solut;
     }
 
@@ -49,22 +46,22 @@ public class Rivi {
         return TYHJA;
     }
 
-    public Collection<Solu> getSolut() {
+    public List<Solu> getSolut() {
         return solut;
     }
 
-    public static Rivi tekstiRivi(Collection<String> tekstit) {
-        Collection<Solu> solut = Lists.newArrayList();
+    public static Rivi tekstiRivi(List<String> tekstit) {
+        List<Solu> solut = Lists.newArrayList();
         for (String teksti : tekstit) {
             solut.add(new Teksti(teksti));
         }
         return new Rivi(solut);
     }
 
-    protected static Collection<Solu> valuta(Iterator<Solu> soluIterator,
+    protected static List<Solu> valuta(Iterator<Solu> soluIterator,
                                              int maara) {
         if (soluIterator.hasNext()) {
-            Collection<Solu> solut = Lists.newArrayList();
+            List<Solu> solut = Lists.newArrayList();
             for (int i = 0; i < maara; ++i) {
                 solut.add(soluIterator.next());
                 if (!soluIterator.hasNext()) {
@@ -74,6 +71,22 @@ public class Rivi {
             return solut;
         }
         return Collections.emptyList();
+    }
+
+    public String getArvoAt(int index) {
+        return StringUtils.trimToEmpty(get(index).toTeksti().getTeksti());
+    }
+
+    public Solu get(int index) {
+        if (solut.size() <= index) {
+            return Teksti.tyhja();
+        } else {
+            Solu solu = solut.get(index);
+            if (solu == null) {
+                return Teksti.tyhja();
+            }
+            return solu;
+        }
     }
 
     @Override

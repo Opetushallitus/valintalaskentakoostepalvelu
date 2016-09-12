@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import fi.vm.sade.valinta.kooste.excel.DataRivi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
-import fi.vm.sade.valinta.kooste.excel.SoluLukija;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 
 public class ValintatapajonoDataRivi extends DataRivi {
@@ -16,15 +15,14 @@ public class ValintatapajonoDataRivi extends DataRivi {
     }
 
     public boolean validoi(Rivi rivi) {
-        SoluLukija lukija = new SoluLukija(rivi.getSolut());
-        String oid = lukija.getArvoAt(0);
-        String jonosija = lukija.getArvoAt(1);
-        String nimi = lukija.getArvoAt(2);
-        String tila = lukija.getArvoAt(3);
-        String pisteet = lukija.getArvoAt(4);
-        String fi = lukija.getArvoAt(5);
-        String sv = lukija.getArvoAt(6);
-        String en = lukija.getArvoAt(7);
+        String oid = rivi.getArvoAt(0);
+        String jonosija = rivi.getArvoAt(1);
+        String nimi = rivi.getArvoAt(2);
+        String tila = rivi.getArvoAt(3);
+        String pisteet = rivi.getArvoAt(4);
+        String fi = rivi.getArvoAt(5);
+        String sv = rivi.getArvoAt(6);
+        String en = rivi.getArvoAt(7);
         ValintatapajonoRivi valintatapajonoRivi = new ValintatapajonoRivi(oid, jonosija, nimi, tila, pisteet, fi, sv, en);
         for (ValintatapajonoDataRiviKuuntelija kuuntelija : kuuntelijat) {
             kuuntelija.valintatapajonoDataRiviTapahtuma(valintatapajonoRivi);

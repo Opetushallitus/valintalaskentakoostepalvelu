@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste.excel;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,20 +30,20 @@ public class OidRivi extends Rivi {
         this.keskitetty = false;
     }
 
-    public OidRivi(Collection<String> oidit) {
+    public OidRivi(List<String> oidit) {
         this(oidit, Collections.<OidKuuntelija>emptyList(), 0, false);
     }
 
-    public OidRivi(Collection<String> oidit, int vali) {
+    public OidRivi(List<String> oidit, int vali) {
         this(oidit, Collections.<OidKuuntelija>emptyList(), vali, false);
     }
 
-    public OidRivi(Collection<String> oidit, int vali, boolean keskitetty) {
+    public OidRivi(List<String> oidit, int vali, boolean keskitetty) {
         this(oidit, Collections.<OidKuuntelija>emptyList(), vali, keskitetty);
     }
 
-    public static Collection<Solu> tekstiSolut(Collection<String> tekstit, int vali, boolean keskitetty) {
-        Collection<Solu> solut = Lists.newArrayList();
+    public static List<Solu> tekstiSolut(List<String> tekstit, int vali, boolean keskitetty) {
+        List<Solu> solut = Lists.newArrayList();
         for (String teksti : tekstit) {
             solut.add(new Teksti(teksti, keskitetty, keskitetty, false, 0,
                     vali, false));
@@ -57,7 +54,7 @@ public class OidRivi extends Rivi {
         return solut;
     }
 
-    public OidRivi(Collection<String> oidit, Collection<OidKuuntelija> kuuntelijat, int vali, boolean keskitetty) {
+    public OidRivi(List<String> oidit, Collection<OidKuuntelija> kuuntelijat, int vali, boolean keskitetty) {
         super(tekstiSolut(oidit, vali, keskitetty));
         if (oidit == null || oidit.isEmpty()) {
             throw new RuntimeException("Exceliin yritettiin oid tarkistusta null oidille. Tarkista datan eheys.");
@@ -71,12 +68,12 @@ public class OidRivi extends Rivi {
         this.keskitetty = keskitetty;
     }
 
-    public Collection<String> getOidit() {
+    public Set<String> getOidit() {
         return oidit;
     }
 
     public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
-        Collection<Solu> soluja;
+        List<Solu> soluja;
         if (vali != 0) {
             soluja = Lists.newArrayList();
             int i = 0;

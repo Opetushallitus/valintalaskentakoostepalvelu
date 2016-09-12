@@ -6,7 +6,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.DataRivi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
-import fi.vm.sade.valinta.kooste.excel.SoluLukija;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import org.apache.commons.lang.StringUtils;
@@ -35,32 +34,31 @@ public class ErillishakuDataRivi extends DataRivi {
 
     @Override
     public boolean validoi(Rivi rivi) {
-        SoluLukija lukija = new SoluLukija(rivi.getSolut());
-        String sukunimi = lukija.getArvoAt(0);
-        String etunimi = lukija.getArvoAt(1);
-        String henkilotunnus = lukija.getArvoAt(2);
-        String sahkoposti = lukija.getArvoAt(3);
-        String syntymaAika = lukija.getArvoAt(4);
-        Sukupuoli sukupuoli = Sukupuoli.fromString(lukija.getArvoAt(5));
-        String oid = lukija.getArvoAt(6);
-        String aidinkieli = lukija.getArvoAt(7);
+        String sukunimi = rivi.getArvoAt(0);
+        String etunimi = rivi.getArvoAt(1);
+        String henkilotunnus = rivi.getArvoAt(2);
+        String sahkoposti = rivi.getArvoAt(3);
+        String syntymaAika = rivi.getArvoAt(4);
+        Sukupuoli sukupuoli = Sukupuoli.fromString(rivi.getArvoAt(5));
+        String oid = rivi.getArvoAt(6);
+        String aidinkieli = rivi.getArvoAt(7);
 
-        String hakemuksenTila = lukija.getArvoAt(8);
-        boolean ehdollisestiHyvaksytty = TOSI.equals(lukija.getArvoAt(9));
-        Date hyvaksymiskirjeLahetetty = parseLahetettyDate(lukija.getArvoAt(10));
-        String vastaanottoTila = lukija.getArvoAt(11);
-        String ilmoittautumisTila = lukija.getArvoAt(12);
-        boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(13));
+        String hakemuksenTila = rivi.getArvoAt(8);
+        boolean ehdollisestiHyvaksytty = TOSI.equals(rivi.getArvoAt(9));
+        Date hyvaksymiskirjeLahetetty = parseLahetettyDate(rivi.getArvoAt(10));
+        String vastaanottoTila = rivi.getArvoAt(11);
+        String ilmoittautumisTila = rivi.getArvoAt(12);
+        boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(rivi.getArvoAt(13));
 
-        String asiointikieli = lukija.getArvoAt(14);
-        String puhelinnumero = lukija.getArvoAt(15);
-        String osoite = lukija.getArvoAt(16);
-        String postinumero = lukija.getArvoAt(17);
-        String postitoimipaikka = lukija.getArvoAt(18);
-        String asuinmaa = lukija.getArvoAt(19);
-        String kansalaisuus = lukija.getArvoAt(20);
-        String kotikunta = lukija.getArvoAt(21);
-        String pohjakoulutusMaaToinenAste = lukija.getArvoAt(22);
+        String asiointikieli = rivi.getArvoAt(14);
+        String puhelinnumero = rivi.getArvoAt(15);
+        String osoite = rivi.getArvoAt(16);
+        String postinumero = rivi.getArvoAt(17);
+        String postitoimipaikka = rivi.getArvoAt(18);
+        String asuinmaa = rivi.getArvoAt(19);
+        String kansalaisuus = rivi.getArvoAt(20);
+        String kotikunta = rivi.getArvoAt(21);
+        String pohjakoulutusMaaToinenAste = rivi.getArvoAt(22);
 
         if (isNewRow(rivi, syntymaAika)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,

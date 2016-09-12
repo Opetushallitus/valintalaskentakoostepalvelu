@@ -51,8 +51,8 @@ public class Kooste extends Rivi {
         return false;
     }
 
-    private static Collection<Solu> pura(Collection<Rivi> rivit) {
-        Collection<Solu> solut = Lists.newArrayList();
+    private static List<Solu> pura(Collection<Rivi> rivit) {
+        List<Solu> solut = Lists.newArrayList();
         for (Rivi rivi : rivit) {
             solut.addAll(rivi.getSolut());
         }
