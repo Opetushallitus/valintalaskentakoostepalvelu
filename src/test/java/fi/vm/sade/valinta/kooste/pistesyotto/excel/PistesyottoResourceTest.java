@@ -250,7 +250,7 @@ public class PistesyottoResourceTest {
             assertEquals(200, r.getStatus());
             InputStream excelData = inputStreamArgumentCaptor.getValue();
             assertTrue(excelData != null);
-            Collection<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
+            List<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
 
             Rivi hakemus1Rivi = rivit.stream().filter(rivi -> rivi.getSolut().stream().anyMatch(solu -> HAKEMUS1.equals(solu.toTeksti().getTeksti()))).findFirst().get();
             assertRivi(hakemus1Rivi, new String[]{HAKEMUS1, "Hiiri, Hilla", "123456-789x", null, null, "Merkitsemättä"});

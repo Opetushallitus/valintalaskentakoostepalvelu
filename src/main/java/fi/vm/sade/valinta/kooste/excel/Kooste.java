@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.excel;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,20 +14,20 @@ import com.google.common.collect.Lists;
  */
 public class Kooste extends Rivi {
     private static final Logger LOG = LoggerFactory.getLogger(Kooste.class);
-    private final Collection<Rivi> rivit;
+    private final List<Rivi> rivit;
     private final boolean nakyvissa;
 
     public Kooste(Rivi... rivit) {
         this(Lists.newArrayList(rivit));
     }
 
-    public Kooste(Collection<Rivi> rivit) {
+    public Kooste(List<Rivi> rivit) {
         super(pura(rivit));
         this.rivit = rivit;
         this.nakyvissa = true;
     }
 
-    public Kooste(Collection<Rivi> rivit, boolean nakyvissa) {
+    public Kooste(List<Rivi> rivit, boolean nakyvissa) {
         super(pura(rivit));
         this.rivit = rivit;
         this.nakyvissa = nakyvissa;
@@ -51,7 +52,7 @@ public class Kooste extends Rivi {
         return false;
     }
 
-    private static List<Solu> pura(Collection<Rivi> rivit) {
+    private static List<Solu> pura(List<Rivi> rivit) {
         List<Solu> solut = Lists.newArrayList();
         for (Rivi rivi : rivit) {
             solut.addAll(rivi.getSolut());

@@ -12,7 +12,7 @@ public class Rivi {
         this.solut = Collections.emptyList();
     }
 
-    public Collection<Rivi> getToisteisetRivit() {
+    public List<Rivi> getToisteisetRivit() {
         return Arrays.asList(this);
     }
 

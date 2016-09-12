@@ -188,7 +188,7 @@ public class PistesyottoExcel {
 
         final List<String> tunnisteet = valintaperusteet.stream().map(ValintaperusteDTO::getTunniste).collect(Collectors.toList());
 
-        Collection<Rivi> rivit = Lists.newArrayList();
+        List<Rivi> rivit = Lists.newArrayList();
         rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4).build());
         rivit.add(new RiviBuilder().addOid(hakukohdeOid).addTeksti(hakukohdeNimi, 4).build());
         if (StringUtils.isBlank(tarjoajaOid)) {

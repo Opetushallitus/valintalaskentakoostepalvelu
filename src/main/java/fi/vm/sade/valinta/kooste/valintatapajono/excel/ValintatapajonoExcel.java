@@ -72,7 +72,7 @@ public class ValintatapajonoExcel {
                                 List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<Hakemus> hakemukset,
                                 Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
         // Jonosija (13) Hakija Valintatieto Kuvaus (FI) Kuvaus (SV) Kuvaus (EN)
-        Collection<Rivi> rivit = Lists.newArrayList();
+        List<Rivi> rivit = Lists.newArrayList();
         rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4).build());
         rivit.add(new RiviBuilder().addOid(hakukohdeOid).addTeksti(hakukohdeNimi, 4).build());
         rivit.add(Rivi.tyhjaRivi());
