@@ -87,6 +87,7 @@ public class ErillishakuExcel {
             }
         });
         ErillishakuDataRivi dataRivit = new ErillishakuDataRivi(
+                tyyppi,
                 kuuntelija,
                 Stream.concat(
                         esittelyt.stream(),

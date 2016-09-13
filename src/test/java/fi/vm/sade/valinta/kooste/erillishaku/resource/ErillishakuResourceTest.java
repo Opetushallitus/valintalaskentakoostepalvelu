@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
@@ -106,6 +107,7 @@ public class ErillishakuResourceTest {
         answers.getHenkilotiedot().put("aidinkieli", "SV");
         answers.getHenkilotiedot().put("kotikunta", "091");
         answers.getLisatiedot().put("asiointikieli", "ruotsi");
+        answers.getKoulutustausta().put(HakemusWrapper.POHJAKOULUTUSMAA_TOINEN_ASTE, "FIN");
         hakemus.setAnswers(answers);
         return Collections.singletonList(hakemus);
     }
@@ -122,7 +124,7 @@ public class ErillishakuResourceTest {
             .query("valintatapajonoOid", valintatapajonoOid)
             .query("valintatapajononNimi", "varsinainen jono")
             .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(ExcelTestData.erillisHakuHetullaJaSyntymaAjalla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+            .post(Entity.entity(ExcelTestData.erillisHakuUusillaKentilla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
@@ -139,13 +141,13 @@ public class ErillishakuResourceTest {
                 .query("valintatapajonoOid", valintatapajonoOid)
                 .query("valintatapajononNimi", "varsinainen jono")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(ExcelTestData.erillisHakuHetullaJaSyntymaAjalla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+                .post(Entity.entity(ExcelTestData.erillisHakuUusillaKentilla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
 
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
+        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO(
                 "",
@@ -162,7 +164,7 @@ public class ErillishakuResourceTest {
     }
 
     private void verifyCreatedExcelDocument2(final InputStream storedDocument) throws IOException {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
+        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final ErillishakuRivi expectedRivi = new ErillishakuRivi(
                 MockData.hakemusOid,
@@ -189,7 +191,7 @@ public class ErillishakuResourceTest {
                 "FIN",
                 "FIN",
                 "Helsinki",
-                "");
+                "FIN");
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }
 

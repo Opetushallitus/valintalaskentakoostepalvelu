@@ -5,6 +5,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.DataRivi;
+import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
@@ -26,14 +27,16 @@ public class ErillishakuDataRivi extends DataRivi {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
     public final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
     private final ErillishakuRiviKuuntelija kuuntelija;
+    private final Hakutyyppi tyyppi;
 
-    ErillishakuDataRivi(ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {
+    ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {
         super(s);
+        this.tyyppi = tyyppi;
         this.kuuntelija = kuuntelija;
     }
 
     @Override
-    public boolean validoi(Rivi rivi) {
+    public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
         String sukunimi = rivi.getArvoAt(0);
         String etunimi = rivi.getArvoAt(1);
         String henkilotunnus = rivi.getArvoAt(2);
@@ -61,6 +64,13 @@ public class ErillishakuDataRivi extends DataRivi {
         String pohjakoulutusMaaToinenAste = rivi.getArvoAt(22);
 
         if (isNewRow(rivi, syntymaAika)) {
+            if(tyyppi == Hakutyyppi.KORKEAKOULU) {
+                validateRequiredValue(aidinkieli, "äidinkieli", rivi);
+                validateRequiredValue(asuinmaa, "asuinmaa", rivi);
+                validateRequiredValue(kansalaisuus, "kansalaisuus", rivi);
+                validateRequiredValue(kotikunta, "kotikunta", rivi);
+                validateRequiredValue(pohjakoulutusMaaToinenAste, "toisen asteen pohjakoulutuksen maa", rivi);
+            }
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
                     sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
                     sukupuoli, oid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksytty, hyvaksymiskirjeLahetetty,

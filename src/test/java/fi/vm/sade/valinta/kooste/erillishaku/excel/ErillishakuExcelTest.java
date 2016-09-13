@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ErillishakuExcelTest {
 
@@ -63,17 +64,36 @@ public class ErillishakuExcelTest {
 	}
 
 	@Test
-    public void testaaVientiKK() throws Exception {
-        ErillishakuRivi rivi3 = new ErillishakuRivi();
+	public void testaaVientiKKWithValidRows() throws Exception {
+		List<ErillishakuRivi> rivit = createErillishakuRivisWithTwoValidRows();
+		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
+		ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
+		Excel excel = eExcel.getExcel();
+		excel.tuoXlsx(excel.vieXlsx());
+
+		assertEquals(2, tarkistusTapahtui.get());
+
+		// Tulosta tiedostoksi testausta varten
+		// IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
+	}
+
+	@Test
+	public void testaaVientiKKWithInvalidRow() throws Exception {
+		List<ErillishakuRivi> rivit = createErillishakuRivisWithTwoValidRows();
+        ErillishakuRivi rivi3 = new ErillishakuRivi(null, "X-sukunimi", null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
+					null, null, null, false, false, null, null, null, null, null, null, null, null, null);
         rivit.add(rivi3);
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
         ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
         Excel excel = eExcel.getExcel();
-        excel.tuoXlsx(excel.vieXlsx());
+		try {
+			excel.tuoXlsx(excel.vieXlsx());
+		} catch (ExcelValidointiPoikkeus e) {
+			assertTrue(e.getMessage().contains("Pakollinen arvo äidinkieli puuttuu riviltä"));
+		}
 
         assertEquals(
                 2 // tavalliset rivit
-                        +1 // tyhjärivi julkaisulupasyötteellä
                 , tarkistusTapahtui.get());
 
         // Tulosta tiedostoksi testausta varten

@@ -42,7 +42,7 @@ public class HakemusWrapper {
     private final static String KOTIKUNTA                       = "kotikunta";
     private final static String NAINEN                          = "2";
     private final static String MIES                            = "1";
-    private final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
+    public final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
     public final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
 
     private Yhteystiedot yhteystiedot = null;

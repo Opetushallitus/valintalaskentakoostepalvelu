@@ -6,10 +6,6 @@ import java.io.InputStream;
 import org.springframework.core.io.ClassPathResource;
 
 public class ExcelTestData {
-    public static InputStream erillisHakuHetullaJaSyntymaAjalla() {
-        return getInputStream("kustom_erillishaku.xlsx");
-    }
-
     public static InputStream kkHakuToisenAsteenValintatuloksella() {
         return getInputStream("kkhaku_toisenasteen_valintatuloksella.xlsx");
     }

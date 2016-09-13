@@ -17,7 +17,7 @@ public class DataRivi extends Rivi {
     }
 
     @Override
-    public boolean validoi(Rivi rivi) {
+    public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
         return true;
     }
 

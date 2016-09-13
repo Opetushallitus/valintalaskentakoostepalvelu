@@ -40,6 +40,12 @@ public class Rivi {
         return false;
     }
 
+    protected static void validateRequiredValue(String value, String name, Rivi rivi) throws ExcelValidointiPoikkeus {
+        if(StringUtils.isEmpty(value)) {
+            throw new ExcelValidointiPoikkeus("Pakollinen arvo \"" + name + "\" puuttuu riviltä: " + rivi);
+        }
+    }
+
     private final static Rivi TYHJA = new Rivi();
 
     public static Rivi tyhjaRivi() {

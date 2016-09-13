@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHenkiloOidilla;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHetullaJaSyntymaAjalla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuSyntymaAjalla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuUusillaKentilla;
@@ -107,7 +106,7 @@ public class ErillishaunTuontiServiceTest {
     public final static class HetullaJaSyntymaAjalla extends ErillisHakuTuontiTestCase {
         @Test
         public void tuontiSuoritetaan() throws IOException, InterruptedException {
-            importData(erillisHakuHetullaJaSyntymaAjalla());
+            importData(erillisHakuUusillaKentilla());
 
             assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
             final HenkiloCreateDTO henkilo = henkiloAsyncResource.henkiloPrototyypit.get(0);
@@ -144,8 +143,8 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(MockData.valintatapajonoOid, hakija.valintatapajonoOid);
             assertEquals("hakemus1", hakija.hakemusOid);
             assertEquals("hakija1", hakija.hakijaOid);
-            assertEquals(true, hakija.julkaistavissa);
-            assertEquals(true, hakija.ehdollisestiHyvaksyttavissa);
+            assertEquals(false, hakija.julkaistavissa);
+            assertEquals(false, hakija.ehdollisestiHyvaksyttavissa);
             System.out.println(new Gson().toJson(tilaAsyncResource.results));
         }
     }
@@ -262,7 +261,7 @@ public class ErillishaunTuontiServiceTest {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, failingHenkiloResource, valintaTulosServiceAsyncResource, koodistoCachedAsyncResource, Schedulers.immediate());
             assertEquals(0, tilaAsyncResource.results.size());
             assertEquals(0, applicationAsyncResource.results.size());
-            tuontiService.tuoExcelistä(null, prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä(null, prosessi, erillisHaku, erillisHakuUusillaKentilla());
             Mockito.verify(prosessi).keskeyta();
         }
 
@@ -275,7 +274,7 @@ public class ErillishaunTuontiServiceTest {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(failingResource, applicationAsyncResource, henkiloAsyncResource, valintaTulosServiceAsyncResource, koodistoCachedAsyncResource, Schedulers.immediate());
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
-            tuontiService.tuoExcelistä("bob",prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä("bob",prosessi, erillisHaku, erillisHakuUusillaKentilla());
             Mockito.verify(prosessi).keskeyta((Collection<Poikkeus>)Matchers.any());
         }
 
@@ -288,7 +287,7 @@ public class ErillishaunTuontiServiceTest {
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             KirjeProsessi prosessi = new ErillishakuProsessiDTO(1);
 
-            tuontiService.tuoExcelistä(null,prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä(null,prosessi, erillisHaku, erillisHakuUusillaKentilla());
             assertTrue(prosessi.isKeskeytetty());
         }
     }
@@ -301,7 +300,7 @@ class ErillisHakuTuontiTestCase {
     final KirjeProsessi prosessi = mock(KirjeProsessi.class);
     final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource = mock(ValintaTulosServiceAsyncResource.class);
     final KoodistoCachedAsyncResource koodistoCachedAsyncResource = mock(KoodistoCachedAsyncResource.class);
-    final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1", "varsinainen jono");
+    final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, "haku1", "kohde1", "tarjoaja1", "jono1", "varsinainen jono");
 
     @Before
     public void before() {
