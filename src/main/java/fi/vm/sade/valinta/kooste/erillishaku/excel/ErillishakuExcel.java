@@ -18,8 +18,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.emptyErillishakuRivi;
-
 public class ErillishakuExcel {
     private final static Logger LOG = LoggerFactory.getLogger(ErillishakuExcel.class);
     public static final String HEADER_HYVAKSYMISKIRJE_LAHETETTY = "Hyväksymiskirje lähetetty";
@@ -75,8 +73,8 @@ public class ErillishakuExcel {
         esittelyt.add(builder.build());
 
         Collections.sort(erillishakurivit, (h1, h2) -> {
-            ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(emptyErillishakuRivi());
-            ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(emptyErillishakuRivi());
+            ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(new ErillishakuRivi());
+            ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(new ErillishakuRivi());
             String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
             String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
             int i = s1.compareTo(s2);

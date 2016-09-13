@@ -55,11 +55,6 @@ public class ErillishakuRivi {
     private final String kotikunta;
     private final String pohjakoulutusMaaToinenAste;
 
-    public static ErillishakuRivi emptyErillishakuRivi() {
-        return new ErillishakuRivi(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
-                null, null, null, false, false, null, null, null, null, null, null, null, null, null);
-    }
-
     public ErillishakuRivi() {
         this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
                 null, null, null, false, false, null, null, null, null, null, null, null, null, null);
