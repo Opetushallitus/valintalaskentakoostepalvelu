@@ -147,7 +147,7 @@ public class ErillishakuResourceTest {
     }
 
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, storedDocument);
+        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO(
                 "",
@@ -164,7 +164,7 @@ public class ErillishakuResourceTest {
     }
 
     private void verifyCreatedExcelDocument2(final InputStream storedDocument) throws IOException {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, storedDocument);
+        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final ErillishakuRivi expectedRivi = new ErillishakuRivi(
                 MockData.hakemusOid,
