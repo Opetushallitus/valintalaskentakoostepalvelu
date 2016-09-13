@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.excel;
 
-public class ExcelValidointiPoikkeus extends Exception {
+public class ExcelValidointiPoikkeus extends RuntimeException {
 
     public ExcelValidointiPoikkeus(String virhe) {
         super(virhe);

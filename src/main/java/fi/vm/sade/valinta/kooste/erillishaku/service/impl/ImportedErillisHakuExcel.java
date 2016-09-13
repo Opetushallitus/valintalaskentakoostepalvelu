@@ -6,6 +6,7 @@ import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
@@ -38,13 +39,15 @@ public class ImportedErillisHakuExcel {
         this(createExcel(hakutyyppi, inputStream));
     }
 
-    private static List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream) {
+    private static List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream) throws ExcelValidointiPoikkeus {
         try {
             final List<ErillishakuRivi> rivit = Lists.newArrayList();
             new ErillishakuExcel(hakutyyppi, rivi -> rivit.add(rivi.withAidinkieli(resolveAidinkieli(rivi.getAidinkieli()))))
                     .getExcel()
                     .tuoXlsx(inputStream);
             return rivit;
+        } catch (ExcelValidointiPoikkeus e) {
+            throw e;
         } catch (Throwable t) {
             LOG.error("Excelin muodostus epaonnistui!", t);
             throw new RuntimeException(t);
