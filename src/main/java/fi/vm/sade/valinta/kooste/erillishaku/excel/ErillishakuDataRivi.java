@@ -64,13 +64,6 @@ public class ErillishakuDataRivi extends DataRivi {
         String pohjakoulutusMaaToinenAste = rivi.getArvoAt(22);
 
         if (isNewRow(rivi, syntymaAika)) {
-            if(tyyppi == Hakutyyppi.KORKEAKOULU) {
-                validateRequiredValue(aidinkieli, "äidinkieli", rivi);
-                validateRequiredValue(asuinmaa, "asuinmaa", rivi);
-                validateRequiredValue(kansalaisuus, "kansalaisuus", rivi);
-                validateRequiredValue(kotikunta, "kotikunta", rivi);
-                validateRequiredValue(pohjakoulutusMaaToinenAste, "toisen asteen pohjakoulutuksen maa", rivi);
-            }
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
                     sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
                     sukupuoli, oid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksytty, hyvaksymiskirjeLahetetty,

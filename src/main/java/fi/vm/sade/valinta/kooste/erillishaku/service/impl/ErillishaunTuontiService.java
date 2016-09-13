@@ -647,7 +647,25 @@ public class ErillishaunTuontiService {
             return "Virheellinen puhelinnumero (" + rivi.getPuhelinnumero() + "). " + rivi.toString();
         }
 
+        if(tyyppi == Hakutyyppi.KORKEAKOULU) {
+            try {
+                validateRequiredValue(rivi.getAidinkieli(), "äidinkieli", rivi);
+                validateRequiredValue(asuinmaa, "asuinmaa", rivi);
+                validateRequiredValue(kansalaisuus, "kansalaisuus", rivi);
+                validateRequiredValue(kotikunta, "kotikunta", rivi);
+                validateRequiredValue(pohjakoulutusMaaToinenAste, "toisen asteen pohjakoulutuksen maa", rivi);
+            } catch (ExcelValidointiPoikkeus v) {
+                return v.getMessage();
+            }
+        }
+
         return null;
+    }
+
+    protected static void validateRequiredValue(String value, String name, ErillishakuRivi rivi) throws ExcelValidointiPoikkeus {
+        if(StringUtils.isEmpty(value)) {
+            throw new ExcelValidointiPoikkeus("Pakollinen arvo \"" + name + "\" puuttuu riviltä: " + rivi);
+        }
     }
 
     public static class HenkilonRivinPaattelyEpaonnistuiException extends RuntimeException {
