@@ -34,9 +34,10 @@ public class ValidoiTilatUtil {
 
     private static final Set<ValintatuloksenTila> KESKEN_TAI_PERUNUT_VASTAANOTTAJA =
             Sets.newHashSet(Arrays.asList(KESKEN, PERUUTETTU, PERUNUT, OTTANUT_VASTAAN_TOISEN_PAIKAN, EI_VASTAANOTETTU_MAARA_AIKANA));
-    
+
     private static final Set<IlmoittautumisTila> EI_ILMOITTAUTUMISTA =
             Sets.newHashSet(Arrays.asList(IlmoittautumisTila.EI_TEHTY));
+    
     /**
      *
      * @return (null if ok) validation error
@@ -84,7 +85,6 @@ public class ValidoiTilatUtil {
                 return virheellinenTilaYhdistelma(new StringBuilder("Peruneella vastaanottajalla ei voi olla vastaanottotilaa. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
             }
         }
-
 
         /* VTTILA
                 EI_VASTAANOTETTU_MAARA_AIKANA, // Hakija ei ole ilmoittanut paikkaa vastaanotetuksi maaraaikana ja on nain ollen hylatty
