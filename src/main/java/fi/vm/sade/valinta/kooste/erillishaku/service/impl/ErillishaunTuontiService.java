@@ -128,11 +128,15 @@ public class ErillishaunTuontiService {
             try {
                 erillishakuExcel = importer.apply(haku);
                 tuoHakijatJaLuoHakemukset(username, prosessi, erillishakuExcel, haku);
+            } catch(ErillishaunDataException dataException) {
+                LOG.warn("excel ei validi:", dataException);
+                prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
+                        dataException.getPoikkeusRivit().stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
             } catch(ExcelValidointiPoikkeus validointiPoikkeus) {
                 LOG.warn("excel ei validi", validointiPoikkeus);
                 prosessi.keskeyta(validointiPoikkeus.getMessage());
             } catch(Exception e) {
-                LOG.error("tuoData exception!", e);
+                LOG.error("unexpexted tuoData exception!", e);
                 prosessi.keskeyta();
             }
         }, poikkeus -> {
@@ -143,9 +147,8 @@ public class ErillishaunTuontiService {
 
     private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
         if (rivit.isEmpty()) {
-            LOG.error("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
             prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
-            throw new RuntimeException("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
+            throw new RuntimeException(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
         }
 
         Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
@@ -172,8 +175,6 @@ public class ErillishaunTuontiService {
                     }
                 });
         if(!poikkeusRivis.isEmpty()) {
-            prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
-                    poikkeusRivis.stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
             throw new ErillishaunDataException(poikkeusRivis);
         }
     }
