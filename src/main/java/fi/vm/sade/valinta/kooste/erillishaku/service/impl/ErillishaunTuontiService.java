@@ -28,6 +28,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
+import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -127,6 +128,9 @@ public class ErillishaunTuontiService {
             try {
                 erillishakuExcel = importer.apply(haku);
                 tuoHakijatJaLuoHakemukset(username, prosessi, erillishakuExcel, haku);
+            } catch(ExcelValidointiPoikkeus validointiPoikkeus) {
+                LOG.warn("excel ei validi", validointiPoikkeus);
+                prosessi.keskeyta(validointiPoikkeus.getMessage());
             } catch(Exception e) {
                 LOG.error("tuoData exception!", e);
                 prosessi.keskeyta();
