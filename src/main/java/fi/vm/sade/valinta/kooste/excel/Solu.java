@@ -41,18 +41,6 @@ public abstract class Solu {
         return false;
     }
 
-    public boolean isPakollinen() {
-        return false;
-    }
-
-    public boolean isValidi() {
-        if (isPakollinen()) {
-            return validoi();
-        } else {
-            return true;
-        }
-    }
-
     public int ulottuvuus() {
         return 1;
     }
@@ -60,8 +48,6 @@ public abstract class Solu {
     public int preferoituLeveys() {
         return 0; // Excel.VAKIO_LEVEYS;
     }
-
-    protected abstract boolean validoi();
 
     public abstract Monivalinta toMonivalinta();
 

@@ -94,11 +94,6 @@ public class Teksti extends Solu {
         return teksti;
     }
 
-    @Override
-    protected boolean validoi() {
-        return teksti != null;
-    }
-
     public boolean isTeksti() {
         return true;
     }

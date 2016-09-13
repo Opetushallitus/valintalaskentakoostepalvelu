@@ -19,11 +19,6 @@ public class Paivamaara extends Solu {
         return paivamaara;
     }
 
-    @Override
-    protected boolean validoi() {
-        return this.paivamaara != null;
-    }
-
     public Paivamaara(Date paivamaara) {
         this.paivamaara = paivamaara;
         this.muokattava = false;
