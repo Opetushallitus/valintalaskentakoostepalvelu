@@ -26,8 +26,8 @@ public class ExcelTestData {
         return getInputStream("erillishaku_tuntemattomalla_aidinkielella.xlsx");
     }
 
-    public static InputStream erillisHakuUusillaKentilla() {
-        return getInputStream("erillishaku_uusilla_kentilla.xlsx");
+    public static InputStream toisenAsteenErillisHaku() {
+        return getInputStream("erillishaku_toinen_aste.xlsx");
     }
 
     private static InputStream getInputStream(final String filename) {

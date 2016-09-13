@@ -37,31 +37,32 @@ public class ErillishakuDataRivi extends DataRivi {
 
     @Override
     public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
-        String sukunimi = rivi.getArvoAt(0);
-        String etunimi = rivi.getArvoAt(1);
-        String henkilotunnus = rivi.getArvoAt(2);
-        String sahkoposti = rivi.getArvoAt(3);
-        String syntymaAika = rivi.getArvoAt(4);
-        Sukupuoli sukupuoli = Sukupuoli.fromString(rivi.getArvoAt(5));
-        String oid = rivi.getArvoAt(6);
-        String aidinkieli = rivi.getArvoAt(7);
+        int index = 0;
+        String sukunimi = rivi.getArvoAt(index++);
+        String etunimi = rivi.getArvoAt(index++);
+        String henkilotunnus = rivi.getArvoAt(index++);
+        String sahkoposti = rivi.getArvoAt(index++);
+        String syntymaAika = rivi.getArvoAt(index++);
+        Sukupuoli sukupuoli = Sukupuoli.fromString(rivi.getArvoAt(index++));
+        String oid = rivi.getArvoAt(index++);
+        String aidinkieli = rivi.getArvoAt(index++);
 
-        String hakemuksenTila = rivi.getArvoAt(8);
-        boolean ehdollisestiHyvaksytty = TOSI.equals(rivi.getArvoAt(9));
-        Date hyvaksymiskirjeLahetetty = parseLahetettyDate(rivi.getArvoAt(10));
-        String vastaanottoTila = rivi.getArvoAt(11);
-        String ilmoittautumisTila = rivi.getArvoAt(12);
-        boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(rivi.getArvoAt(13));
+        String hakemuksenTila = rivi.getArvoAt(index++);
+        boolean ehdollisestiHyvaksytty = tyyppi == KORKEAKOULU ? TOSI.equals(rivi.getArvoAt(index++)) : false;
+        Date hyvaksymiskirjeLahetetty = parseLahetettyDate(rivi.getArvoAt(index++));
+        String vastaanottoTila = rivi.getArvoAt(index++);
+        String ilmoittautumisTila = rivi.getArvoAt(index++);
+        boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(rivi.getArvoAt(index++));
 
-        String asiointikieli = rivi.getArvoAt(14);
-        String puhelinnumero = rivi.getArvoAt(15);
-        String osoite = rivi.getArvoAt(16);
-        String postinumero = rivi.getArvoAt(17);
-        String postitoimipaikka = rivi.getArvoAt(18);
-        String asuinmaa = rivi.getArvoAt(19);
-        String kansalaisuus = rivi.getArvoAt(20);
-        String kotikunta = rivi.getArvoAt(21);
-        String pohjakoulutusMaaToinenAste = rivi.getArvoAt(22);
+        String asiointikieli = rivi.getArvoAt(index++);
+        String puhelinnumero = rivi.getArvoAt(index++);
+        String osoite = rivi.getArvoAt(index++);
+        String postinumero = rivi.getArvoAt(index++);
+        String postitoimipaikka = rivi.getArvoAt(index++);
+        String asuinmaa = rivi.getArvoAt(index++);
+        String kansalaisuus = rivi.getArvoAt(index++);
+        String kotikunta = rivi.getArvoAt(index++);
+        String pohjakoulutusMaaToinenAste = rivi.getArvoAt(index++);
 
         if (isNewRow(rivi, syntymaAika)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,

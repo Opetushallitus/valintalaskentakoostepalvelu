@@ -46,33 +46,11 @@ public class ErillishakuResourceTest {
         ValintaKoosteJetty.startShared();
     }
 
-    @Test
-    public void vientiExcelTiedostoon() throws IOException {
-        MockApplicationAsyncResource.setResult(null);
-        final String url = root + "/erillishaku/vienti";
-        final ProsessiId prosessiId = createClient(url)
-            .query("hakutyyppi", "KORKEAKOULU")
-            .query("hakuOid", hakuOid)
-            .query("hakukohdeOid", hakukohdeOid)
-            .query("tarjoajaOid", tarjoajaOid)
-            .query("valintatapajonoOid", valintatapajonoOid)
-            .query("valintatapajononNimi", "varsinainen jono")
-            .type(MediaType.APPLICATION_JSON_TYPE)
-            .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(Arrays.asList(), MediaType.APPLICATION_JSON), ProsessiId.class);
-
-        String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
-        final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
-        assertNotNull(storedDocument);
-        verifyCreatedExcelDocument(storedDocument);
-    }
-
-    @Test
-    public void vientiExcelTiedostoon2() throws IOException {
+    private void testTyhjanVientiExcelTiedostoon(Hakutyyppi hakutyyppi) throws IOException {
         MockApplicationAsyncResource.setResult(createVientiHakemus());
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
-                .query("hakutyyppi", "KORKEAKOULU")
+                .query("hakutyyppi", hakutyyppi)
                 .query("hakuOid", hakuOid)
                 .query("hakukohdeOid", hakukohdeOid)
                 .query("tarjoajaOid", tarjoajaOid)
@@ -85,7 +63,17 @@ public class ErillishakuResourceTest {
         String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
         final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
         assertNotNull(storedDocument);
-        verifyCreatedExcelDocument2(storedDocument);
+        verifyCreatedExcelDocumentTyhja(hakutyyppi, storedDocument);
+    }
+
+    @Test
+    public void vientiExcelTiedostoonTyhjaKK() throws IOException {
+        testTyhjanVientiExcelTiedostoon(Hakutyyppi.KORKEAKOULU);
+    }
+
+    @Test
+    public void vientiExcelTiedostoonTyhjaToinenAste() throws IOException {
+        testTyhjanVientiExcelTiedostoon(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS);
     }
 
     private List<Hakemus> createVientiHakemus() {
@@ -113,7 +101,7 @@ public class ErillishakuResourceTest {
     }
 
     @Test
-    public void tuontiExcelTiedostosta() {
+    public void tuontiExcelTiedostostaKK() {
         final String url = root + "/erillishaku/tuonti";
 
         final ProsessiId prosessiId = createClient(url)
@@ -124,48 +112,43 @@ public class ErillishakuResourceTest {
             .query("valintatapajonoOid", valintatapajonoOid)
             .query("valintatapajononNimi", "varsinainen jono")
             .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(ExcelTestData.erillisHakuUusillaKentilla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+            .post(Entity.entity(ExcelTestData.kkHakuToisenAsteenValintatuloksella(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
 
     @Test
-    public void tuontiExcelTiedostosta2() {
+    public void tuontiExcelTiedostostaToinenAste() {
         final String url = root + "/erillishaku/tuonti";
 
         final ProsessiId prosessiId = createClient(url)
-                .query("hakutyyppi", "KORKEAKOULU")
+                .query("hakutyyppi", "TOISEN_ASTEEN_OPPILAITOS")
                 .query("hakuOid", hakuOid)
                 .query("hakukohdeOid", hakukohdeOid)
                 .query("tarjoajaOid", tarjoajaOid)
                 .query("valintatapajonoOid", valintatapajonoOid)
                 .query("valintatapajononNimi", "varsinainen jono")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(ExcelTestData.erillisHakuUusillaKentilla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+                .post(Entity.entity(ExcelTestData.toisenAsteenErillisHaku(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
 
-    private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
+    private void verifyCreatedExcelDocumentTyhja(Hakutyyppi hakutyyppi, final InputStream storedDocument) throws IOException {
+        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(hakutyyppi, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO(
-                "",
+                "SV",
                 "MIES",
-                "Tuomas",
-                "Hakkarainen",
+                MockData.etunimi,
+                MockData.sukunimi,
                 MockData.hetu,
                 ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime("1.1.1901").toDate(),
                 henkiloOid,
                 HenkiloTyyppi.OPPIJA,
-                null,
+                "SV",
                 null);
         assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO(null));
-    }
-
-    private void verifyCreatedExcelDocument2(final InputStream storedDocument) throws IOException {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
-        assertEquals(1, tulos.rivit.size());
         final ErillishakuRivi expectedRivi = new ErillishakuRivi(
                 MockData.hakemusOid,
                 MockData.sukunimi,
