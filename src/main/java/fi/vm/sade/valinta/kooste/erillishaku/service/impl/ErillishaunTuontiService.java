@@ -163,9 +163,9 @@ public class ErillishaunTuontiService {
                     ErillishakuRivi rivi = riviJaIndeksi.getValue();
 
                     if (!rivi.isPoistetaankoRivi()) {
-                        String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
-                        if (validointiVirhe != null) {
-                            poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
+                        List<String> errors = validoi(haku.getHakutyyppi(), rivi);
+                        if(errors.size() > 0) {
+                            poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi,  StringUtils.join(errors, " ") + " : " + rivi));
                         }
                     } else {
                         // validoi poistettavaksi merkitty rivi
@@ -530,10 +530,8 @@ public class ErillishaunTuontiService {
         }
     }
 
-    /**
-     * @return Validointivirhe tai null jos kaikki ok
-     */
-    private String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
+    private List<String> validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
+        List<String> errors = new ArrayList<>();
         // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika+sukupuoli,henkilö-oid
         if (// mikään seuraavista ei ole totta:
                 !(// on syntymaika+sukupuoli tunnistus
@@ -543,76 +541,76 @@ public class ErillishaunTuontiService {
                         !isBlank(rivi.getHenkilotunnus()) ||
                         // on henkilo OID
                         !isBlank(rivi.getPersonOid()))) {
-            return "Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + rivi.toString();
+            errors.add("Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid olivat tyhjiä (vähintään yksi tunniste on syötettävä).");
         }
         // Syntymäaika oikeassa formaatissa
         if(!isBlank(rivi.getSyntymaAika())) {
             try {
                 ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime(rivi.getSyntymaAika());
             } catch(Exception e){
-                return "Syntymäaika '" + rivi.getSyntymaAika() + "' on väärin muotoiltu. Syntymäaika on syötettävä muodossa pp.mm.vvvv. " + rivi.toString();
+                errors.add("Syntymäaika '" + rivi.getSyntymaAika() + "' on väärin muotoiltu (syötettävä muodossa pp.mm.vvvv).");
             }
         }
         // Jos vahvatunniste puuttuu niin nimet on pakollisia tietoja
         if(isBlank(rivi.getPersonOid())) {
             if (isBlank(rivi.getEtunimi()) || isBlank(rivi.getSukunimi())) {
-                return "Etunimi ja sukunimi on pakollisia. " + rivi.toString();
+                errors.add("Etunimi ja sukunimi on pakollisia.");
             }
         }
         // Henkilötunnus on oikeassa formaatissa jos sellainen on syötetty
         if(!isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
-            return "Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen. " + rivi.toString();
+            errors.add("Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen.");
         }
         if (!"KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
             ValintatuloksenTila vt = valintatuloksenTila(rivi);
             String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vt, ilmoittautumisTila(rivi));
             if (tilaVirhe != null) {
-                return tilaVirhe + ". " + rivi.toString();
+                errors.add(tilaVirhe + ".");
             }
         }
         if((isBlank(rivi.getPersonOid()) && isBlank(rivi.getHenkilotunnus())) && Sukupuoli.EI_SUKUPUOLTA.equals(rivi.getSukupuoli())) {
-            return "Sukupuoli ("+rivi.getSukupuoli()+") on pakollinen kun henkilötunnus ja personOID puuttuu. " + rivi.toString();
+            errors.add("Sukupuoli ("+rivi.getSukupuoli()+") on pakollinen kun henkilötunnus ja personOID puuttuu.");
         }
 
         if (isBlank(rivi.getHenkilotunnus()) &&
                 isBlank(rivi.getPersonOid()) &&
                 StringUtils.trimToEmpty(rivi.getAidinkieli()).isEmpty()) {
-            return "Äidinkieli puuttuu. Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat";
+            errors.add("Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat.");
         }
 
         Map<String, Koodi> kieliKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KIELI);
         if (! StringUtils.trimToEmpty(rivi.getAidinkieli()).isEmpty() &&
                 ! kieliKoodit.keySet().contains(rivi.getAidinkieli().toUpperCase())) {
-            return "Äidinkielen kielikoodi ("+rivi.getAidinkieli()+") on virheellinen." + rivi.toString();
+            errors.add("Äidinkielen kielikoodi ("+rivi.getAidinkieli()+") on virheellinen.");
         }
 
         if (!isBlank(rivi.getAsiointikieli()) && !ErillishakuDataRivi.ASIONTIKIELEN_ARVOT.contains(StringUtils.trimToEmpty(rivi.getAsiointikieli()).toLowerCase())) {
-            return "Asiointikieli on virheellinen. Sallitut arvot ["+
+            errors.add("Asiointikieli (" + rivi.getAsiointikieli() + ") on virheellinen (sallitut arvot ["+
                     StringUtils.join(ErillishakuDataRivi.ASIONTIKIELEN_ARVOT, '|') +
-                    "] " + rivi.toString();
+                    "]).");
         }
 
 
         Map<String, Koodi> maaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         String asuinmaa = StringUtils.trimToEmpty(rivi.getAsuinmaa()).toUpperCase();
         if (!asuinmaa.isEmpty() && !maaKoodit.keySet().contains(asuinmaa)) {
-            return "Asuinmaan maakoodi (" +  rivi.getAsuinmaa() + ") on virheellinen. " + rivi.toString();
+            errors.add("Asuinmaan maakoodi (" +  rivi.getAsuinmaa() + ") on virheellinen.");
         }
 
         String kansalaisuus = StringUtils.trimToEmpty(rivi.getKansalaisuus()).toUpperCase();
         if (! kansalaisuus.isEmpty() && !maaKoodit.keySet().contains(kansalaisuus)) {
-            return "Kansalaisuuden maakoodi (" + rivi.getKansalaisuus() + ") on virheellinen. " + rivi.toString();
+            errors.add("Kansalaisuuden maakoodi (" + rivi.getKansalaisuus() + ") on virheellinen.");
         }
 
         String pohjakoulutusMaaToinenAste = StringUtils.trimToEmpty(rivi.getPohjakoulutusMaaToinenAste()).toUpperCase();
         if (! pohjakoulutusMaaToinenAste.isEmpty() && !maaKoodit.keySet().contains(pohjakoulutusMaaToinenAste)) {
-            return "Pohjakoulutuksen (toinen aste) maakoodi (" + rivi.getPohjakoulutusMaaToinenAste() + ") on virheellinen. " + rivi.toString();
+            errors.add("Pohjakoulutuksen (toinen aste) maakoodi (" + rivi.getPohjakoulutusMaaToinenAste() + ") on virheellinen.");
         }
 
         String kotikunta = StringUtils.trimToEmpty(rivi.getKotikunta());
         if(!kotikunta.isEmpty()) {
             if (convertKuntaNimiToKuntaKoodi(kotikunta) == null) {
-                return "Virheellinen kotikunta (" + rivi.getKotikunta() + "). " + rivi.toString();
+                errors.add("Virheellinen kotikunta (" + rivi.getKotikunta() + ").");
             }
         }
 
@@ -620,7 +618,7 @@ public class ErillishaunTuontiService {
             Map<String, Koodi> postiKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
             String postinumero = StringUtils.trimToEmpty(rivi.getPostinumero());
             if (!postinumero.isEmpty() && !postiKoodit.keySet().contains(postinumero)) {
-                return "Virheellinen suomalainen postinumero (" + rivi.getPostinumero() + "). " + rivi.toString();
+                errors.add("Virheellinen suomalainen postinumero (" + rivi.getPostinumero() + ").");
             }
 
             String postitoimipaikka = StringUtils.trimToEmpty(rivi.getPostitoimipaikka()).toUpperCase();
@@ -631,40 +629,35 @@ public class ErillishaunTuontiService {
                         .map(Metadata::getNimi)
                         .anyMatch(x -> x.equalsIgnoreCase(postitoimipaikka));
                 if (!postitoimipaikkaKoodistossa) {
-                    return "Virheellinen suomalainen postitoimipaikka (" + rivi.getPostinumero() + "). " + rivi.toString();
+                    errors.add("Virheellinen suomalainen postitoimipaikka (" + rivi.getPostinumero() + ").");
                 }
 
                 if (!postinumero.isEmpty() &&
                         !postiKoodit.get(postinumero).getMetadata().stream().anyMatch(m -> m.getNimi().equalsIgnoreCase(postitoimipaikka))) {
-                    return "Annettu suomalainen postinumero (" + rivi.getPostinumero() + ") ei vastaa annettua postitoimipaikkaa ("
-                            + rivi.getPostitoimipaikka() + "). " + rivi.toString();
+                    errors.add("Annettu suomalainen postinumero (" + rivi.getPostinumero() + ") ei vastaa annettua postitoimipaikkaa ("
+                            + rivi.getPostitoimipaikka() + ").");
                 }
             }
         }
 
         String puhelinnumero = StringUtils.trimToEmpty(rivi.getPuhelinnumero());
         if (! puhelinnumero.isEmpty() && !puhelinnumero.matches(PHONE_PATTERN)) {
-            return "Virheellinen puhelinnumero (" + rivi.getPuhelinnumero() + "). " + rivi.toString();
+            errors.add("Virheellinen puhelinnumero (" + rivi.getPuhelinnumero() + ").");
         }
 
         if(tyyppi == Hakutyyppi.KORKEAKOULU) {
-            try {
-                validateRequiredValue(rivi.getAidinkieli(), "äidinkieli", rivi);
-                validateRequiredValue(asuinmaa, "asuinmaa", rivi);
-                validateRequiredValue(kansalaisuus, "kansalaisuus", rivi);
-                validateRequiredValue(kotikunta, "kotikunta", rivi);
-                validateRequiredValue(pohjakoulutusMaaToinenAste, "toisen asteen pohjakoulutuksen maa", rivi);
-            } catch (ExcelValidointiPoikkeus v) {
-                return v.getMessage();
-            }
+            validateRequiredValue(rivi.getAidinkieli(), "äidinkieli", errors);
+            validateRequiredValue(asuinmaa, "asuinmaa", errors);
+            validateRequiredValue(kansalaisuus, "kansalaisuus", errors);
+            validateRequiredValue(kotikunta, "kotikunta", errors);
+            validateRequiredValue(pohjakoulutusMaaToinenAste, "toisen asteen pohjakoulutuksen maa", errors);
         }
-
-        return null;
+        return errors;
     }
 
-    protected static void validateRequiredValue(String value, String name, ErillishakuRivi rivi) throws ExcelValidointiPoikkeus {
-        if(StringUtils.isEmpty(value)) {
-            throw new ExcelValidointiPoikkeus("Pakollinen arvo \"" + name + "\" puuttuu riviltä: " + rivi);
+    private static void validateRequiredValue(String value, String name, List<String> errors) {
+        if(StringUtils.isBlank(value)) {
+            errors.add("Pakollinen tieto \"" + name + "\" puuttuu.");
         }
     }
 
