@@ -62,6 +62,7 @@ public class ErillishakuDataRivi extends DataRivi {
         String asuinmaa = rivi.getArvoAt(index++);
         String kansalaisuus = rivi.getArvoAt(index++);
         String kotikunta = rivi.getArvoAt(index++);
+        Boolean toisenAsteenSuoritus = getBoolean(rivi.getArvoAt(index++));
         String pohjakoulutusMaaToinenAste = rivi.getArvoAt(index++);
 
         if (isNewRow(rivi, syntymaAika)) {
@@ -71,7 +72,7 @@ public class ErillishakuDataRivi extends DataRivi {
                     vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot,
                     false, asiointikieli, puhelinnumero,
                     osoite, postinumero, postitoimipaikka, asuinmaa,
-                    kansalaisuus, kotikunta, pohjakoulutusMaaToinenAste));
+                    kansalaisuus, kotikunta, toisenAsteenSuoritus, pohjakoulutusMaaToinenAste));
         }
         return true;
     }
@@ -94,11 +95,28 @@ public class ErillishakuDataRivi extends DataRivi {
                 && !"Syntymäaika".equals(syntymaAika);
     }
 
-    final static String TOSI = "Kyllä";
-    final static String EPATOSI = "Ei";
+    public final static String TOSI = "Kyllä";
+    public final static String EPATOSI = "Ei";
     final static Collection<String> TOTUUSARVO = Arrays.asList(EPATOSI, TOSI);
 
-    static String getTotuusarvoString(boolean b){
+    public static String getTotuusarvoString(Boolean b){
+        if(b == null) {
+            return "";
+        }
+        return getTotuusarvoString(b.booleanValue());
+    }
+
+    public static Boolean getBoolean(String totuusarvo){
+        if(TOSI.equals(totuusarvo)) {
+            return Boolean.TRUE;
+        }
+        if(EPATOSI.equals(totuusarvo)) {
+            return Boolean.FALSE;
+        }
+        return null;
+    }
+
+    public static String getTotuusarvoString(boolean b){
         return b ? TOSI : EPATOSI;
     }
 

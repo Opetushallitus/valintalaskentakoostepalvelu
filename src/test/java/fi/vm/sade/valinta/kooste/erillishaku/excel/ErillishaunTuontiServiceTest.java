@@ -225,7 +225,7 @@ public class ErillishaunTuontiServiceTest {
 
     private static ErillishakuRivi createRow(String henkilotunnus, String personOid, String hakemusOid) {
         return new ErillishakuRivi(hakemusOid, "Toppurainen", "Joonas", henkilotunnus, "tuomas.toppurainen@example.com", "10.12.1975", "MIES", personOid,
-            "FI", "HYVAKSYTTY", false, new Date(), "KESKEN", "EI_TEHTY", false, false, "FI", "045-6709709", "Kaisaniemenkatu 2 B", "00100", "Helsinki", "FIN", "FIN", "Helsinki", "FIN");
+            "FI", "HYVAKSYTTY", false, new Date(), "KESKEN", "EI_TEHTY", false, false, "FI", "045-6709709", "Kaisaniemenkatu 2 B", "00100", "Helsinki", "FIN", "FIN", "Helsinki", true, "FIN");
     }
 
     public final static class TuntemattomallaAidinkielella extends ErillisHakuTuontiTestCase {

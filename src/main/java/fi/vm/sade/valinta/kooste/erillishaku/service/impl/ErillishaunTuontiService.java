@@ -216,6 +216,7 @@ public class ErillishaunTuontiService {
                         rivi.getAsuinmaa(),
                         rivi.getKansalaisuus(),
                         rivi.getKotikunta(),
+                        rivi.getToisenAsteenSuoritus(),
                         rivi.getPohjakoulutusMaaToinenAste());
             } else {
                 return rivi;
@@ -336,6 +337,7 @@ public class ErillishaunTuontiService {
         hakemus.setSukupuoli(henkilo.getSukupuoli());
         hakemus.setSahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()));
         hakemus.setSyntymaAika(henkilo.getSyntymaaika());
+        hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
         hakemus.setToinenAstePohjakoulutusMaa(rivi.getPohjakoulutusMaaToinenAste());
         return hakemus;
     }
@@ -650,7 +652,11 @@ public class ErillishaunTuontiService {
             validateRequiredValue(asuinmaa, "asuinmaa", errors);
             validateRequiredValue(kansalaisuus, "kansalaisuus", errors);
             validateRequiredValue(kotikunta, "kotikunta", errors);
-            validateRequiredValue(pohjakoulutusMaaToinenAste, "toisen asteen pohjakoulutuksen maa", errors);
+            Boolean toisenAsteenSuoritus = rivi.getToisenAsteenSuoritus();
+            validateRequiredValue(ErillishakuDataRivi.getTotuusarvoString(toisenAsteenSuoritus), "toisen asteen suoritus", errors);
+            if(toisenAsteenSuoritus!= null && toisenAsteenSuoritus.booleanValue()) {
+                validateRequiredValue(pohjakoulutusMaaToinenAste, "toisen asteen pohjakoulutuksen maa", errors);
+            }
         }
         return errors;
     }

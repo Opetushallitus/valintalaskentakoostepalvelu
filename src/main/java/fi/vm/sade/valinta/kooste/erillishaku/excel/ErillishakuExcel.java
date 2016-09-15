@@ -69,6 +69,7 @@ public class ErillishakuExcel {
         builder.add(new TekstiArvo("Asuinmaa"));
         builder.add(new TekstiArvo("Kansalaisuus"));
         builder.add(new TekstiArvo("Kotikunta"));
+        builder.add(new TekstiArvo("Toisen asteen pohjakoulutus suoritettu"));
         builder.add(new TekstiArvo("Pohjakoulutuksen maa (toinen aste)"));
         esittelyt.add(builder.build());
 
@@ -125,6 +126,7 @@ public class ErillishakuExcel {
                             "FIN",
                             "FIN",
                             "HELSINKI",
+                            true,
                             "FIN")).stream();
         } else {
             return erillishakurivit.stream();
@@ -161,6 +163,7 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getAsuinmaa(), true, true));
             a.add(new TekstiArvo(rivi.getKansalaisuus(), true, true));
             a.add(new TekstiArvo(rivi.getKotikunta(), true, true));
+            a.add(new BooleanArvo(rivi.getToisenAsteenSuoritus(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ""));
             a.add(new TekstiArvo(rivi.getPohjakoulutusMaaToinenAste(), true, true));
             return a;
         };

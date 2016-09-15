@@ -190,6 +190,7 @@ public class ErillishaunVientiService {
                 wrapper.getAsuinmaa(),
                 wrapper.getKansalaisuus(),
                 readKotikunta(wrapper),
+                wrapper.getToisenAsteenSuoritus(),
                 wrapper.getPohjakoulutusmaaToinenAste());
     }
 

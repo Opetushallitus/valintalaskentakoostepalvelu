@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.util;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
@@ -42,6 +43,7 @@ public class HakemusWrapper {
     private final static String KOTIKUNTA                       = "kotikunta";
     private final static String NAINEN                          = "2";
     private final static String MIES                            = "1";
+    public final static String TOISEN_ASTEEN_SUORITUS           = "toisen_asteen_suoritus";
     public final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
     public final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
 
@@ -185,6 +187,15 @@ public class HakemusWrapper {
                     return NumberUtils.isNumber(value) ? NumberUtils.toInt(value) : null;
                 }
             }
+        }
+        return null;
+    }
+
+    public Boolean getToisenAsteenSuoritus() {
+        getKoulutustausta();
+        if (koulutustausta.containsKey(TOISEN_ASTEEN_SUORITUS)) {
+            String l = koulutustausta.get(TOISEN_ASTEEN_SUORITUS);
+            return BooleanUtils.toBooleanObject(l);
         }
         return null;
     }

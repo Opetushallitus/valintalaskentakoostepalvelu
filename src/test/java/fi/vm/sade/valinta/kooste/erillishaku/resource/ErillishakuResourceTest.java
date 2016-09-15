@@ -4,7 +4,6 @@ import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
@@ -25,9 +24,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -46,7 +43,7 @@ public class ErillishakuResourceTest {
         ValintaKoosteJetty.startShared();
     }
 
-    private void testTyhjanVientiExcelTiedostoon(Hakutyyppi hakutyyppi) throws IOException {
+    private void testVientiExcelTiedostoon(Hakutyyppi hakutyyppi) throws IOException {
         MockApplicationAsyncResource.setResult(createVientiHakemus());
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
@@ -67,13 +64,13 @@ public class ErillishakuResourceTest {
     }
 
     @Test
-    public void vientiExcelTiedostoonTyhjaKK() throws IOException {
-        testTyhjanVientiExcelTiedostoon(Hakutyyppi.KORKEAKOULU);
+    public void vientiExcelTiedostoonKK() throws IOException {
+        testVientiExcelTiedostoon(Hakutyyppi.KORKEAKOULU);
     }
 
     @Test
-    public void vientiExcelTiedostoonTyhjaToinenAste() throws IOException {
-        testTyhjanVientiExcelTiedostoon(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS);
+    public void vientiExcelTiedostoonToinenAste() throws IOException {
+        testVientiExcelTiedostoon(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS);
     }
 
     private List<Hakemus> createVientiHakemus() {
@@ -95,6 +92,7 @@ public class ErillishakuResourceTest {
         answers.getHenkilotiedot().put("aidinkieli", "SV");
         answers.getHenkilotiedot().put("kotikunta", "091");
         answers.getLisatiedot().put("asiointikieli", "ruotsi");
+        answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
         answers.getKoulutustausta().put(HakemusWrapper.POHJAKOULUTUSMAA_TOINEN_ASTE, "FIN");
         hakemus.setAnswers(answers);
         return Collections.singletonList(hakemus);
@@ -174,6 +172,7 @@ public class ErillishakuResourceTest {
                 "FIN",
                 "FIN",
                 "Helsinki",
+                true,
                 "FIN");
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }
