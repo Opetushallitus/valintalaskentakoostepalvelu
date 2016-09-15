@@ -217,7 +217,7 @@ public class ErillishaunTuontiService {
                         rivi.getKansalaisuus(),
                         rivi.getKotikunta(),
                         rivi.getToisenAsteenSuoritus(),
-                        rivi.getPohjakoulutusMaaToinenAste());
+                        rivi.getToisenAsteenSuoritusmaa());
             } else {
                 return rivi;
                 }
@@ -338,7 +338,7 @@ public class ErillishaunTuontiService {
         hakemus.setSahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()));
         hakemus.setSyntymaAika(henkilo.getSyntymaaika());
         hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
-        hakemus.setToinenAstePohjakoulutusMaa(rivi.getPohjakoulutusMaaToinenAste());
+        hakemus.setToisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa());
         return hakemus;
     }
 
@@ -604,9 +604,9 @@ public class ErillishaunTuontiService {
             errors.add("Kansalaisuuden maakoodi (" + rivi.getKansalaisuus() + ") on virheellinen.");
         }
 
-        String pohjakoulutusMaaToinenAste = StringUtils.trimToEmpty(rivi.getPohjakoulutusMaaToinenAste()).toUpperCase();
-        if (! pohjakoulutusMaaToinenAste.isEmpty() && !maaKoodit.keySet().contains(pohjakoulutusMaaToinenAste)) {
-            errors.add("Pohjakoulutuksen (toinen aste) maakoodi (" + rivi.getPohjakoulutusMaaToinenAste() + ") on virheellinen.");
+        String toisenAsteenSuoritusmaa = StringUtils.trimToEmpty(rivi.getToisenAsteenSuoritusmaa()).toUpperCase();
+        if (! toisenAsteenSuoritusmaa.isEmpty() && !maaKoodit.keySet().contains(toisenAsteenSuoritusmaa)) {
+            errors.add("Toisen asteen pohjakoulutuksen suoritusmaan maakoodi (" + rivi.getToisenAsteenSuoritusmaa() + ") on virheellinen.");
         }
 
         String kotikunta = StringUtils.trimToEmpty(rivi.getKotikunta());
@@ -655,7 +655,7 @@ public class ErillishaunTuontiService {
             Boolean toisenAsteenSuoritus = rivi.getToisenAsteenSuoritus();
             validateRequiredValue(ErillishakuDataRivi.getTotuusarvoString(toisenAsteenSuoritus), "toisen asteen suoritus", errors);
             if(toisenAsteenSuoritus!= null && toisenAsteenSuoritus.booleanValue()) {
-                validateRequiredValue(pohjakoulutusMaaToinenAste, "toisen asteen pohjakoulutuksen maa", errors);
+                validateRequiredValue(toisenAsteenSuoritusmaa, "toisen asteen pohjakoulutuksen maa", errors);
             }
         }
         return errors;

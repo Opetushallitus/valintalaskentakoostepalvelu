@@ -23,7 +23,7 @@ public class HakemusPrototyyppi {
     private String kansalaisuus;
     private String kotikunta;
     private Boolean toisenAsteenSuoritus;
-    private String toinenAstePohjakoulutusMaa;
+    private String toisenAsteenSuoritusmaa;
 
     public String getHakijaOid() {
         return hakijaOid;
@@ -165,12 +165,12 @@ public class HakemusPrototyyppi {
         this.toisenAsteenSuoritus = toisenAsteenSuoritus;
     }
 
-    public String getToinenAstePohjakoulutusMaa() {
-        return toinenAstePohjakoulutusMaa;
+    public String getToisenAsteenSuoritusmaa() {
+        return toisenAsteenSuoritusmaa;
     }
 
-    public void setToinenAstePohjakoulutusMaa(String toinenAstePohjakoulutusMaa) {
-        this.toinenAstePohjakoulutusMaa = toinenAstePohjakoulutusMaa;
+    public void setToisenAsteenSuoritusmaa(String toisenAsteenSuoritusmaa) {
+        this.toisenAsteenSuoritusmaa = toisenAsteenSuoritusmaa;
     }
 
     public static String parseDate(final Date syntymaAika) {

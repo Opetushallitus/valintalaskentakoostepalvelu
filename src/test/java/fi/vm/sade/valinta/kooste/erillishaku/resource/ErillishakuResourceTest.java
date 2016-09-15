@@ -93,7 +93,7 @@ public class ErillishakuResourceTest {
         answers.getHenkilotiedot().put("kotikunta", "091");
         answers.getLisatiedot().put("asiointikieli", "ruotsi");
         answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
-        answers.getKoulutustausta().put(HakemusWrapper.POHJAKOULUTUSMAA_TOINEN_ASTE, "FIN");
+        answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUSMAA, "FIN");
         hakemus.setAnswers(answers);
         return Collections.singletonList(hakemus);
     }

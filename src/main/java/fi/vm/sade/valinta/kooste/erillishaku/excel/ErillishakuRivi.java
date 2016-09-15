@@ -54,7 +54,7 @@ public class ErillishakuRivi {
     private final String kansalaisuus;
     private final String kotikunta;
     private final Boolean toisenAsteenSuoritus;
-    private final String pohjakoulutusMaaToinenAste;
+    private final String toisenAsteenSuoritusmaa;
 
     public ErillishakuRivi() {
         this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
@@ -66,12 +66,12 @@ public class ErillishakuRivi {
                            String hakemuksenTila, boolean ehdollisestiHyvaksyttavissa, Date hyvaksymiskirjeLahetetty, String vastaanottoTila, String ilmoittautumisTila,
                            boolean julkaistaankoTiedot, boolean poistetaankoRivi, String asiointikieli,
                            String puhelinnumero, String osoite, String postinumero, String postitoimipaikka,
-                           String asuinmaa, String kansalaisuus, String kotikunta, Boolean toisenAsteenSuoritus, String pohjakoulutusMaaToinenAste) {
+                           String asuinmaa, String kansalaisuus, String kotikunta, Boolean toisenAsteenSuoritus, String toisenAsteenSuoritusmaa) {
         this(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
                 Sukupuoli.fromString(sukupuoli), personOid, aidinkieli,
                 hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty, vastaanottoTila, ilmoittautumisTila,
                 julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
-                osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus, pohjakoulutusMaaToinenAste);
+                osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus, toisenAsteenSuoritusmaa);
     }
 
     public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
@@ -79,7 +79,7 @@ public class ErillishakuRivi {
                            String hakemuksenTila, boolean ehdollisestiHyvaksyttavissa, Date hyvaksymiskirjeLahetetty, String vastaanottoTila, String ilmoittautumisTila,
                            boolean julkaistaankoTiedot, boolean poistetaankoRivi, String asiointikieli,
                            String puhelinnumero, String osoite, String postinumero, String postitoimipaikka,
-                           String asuinmaa, String kansalaisuus, String kotikunta, Boolean toisenAsteenSuoritus, String pohjakoulutusMaaToinenAste) {
+                           String asuinmaa, String kansalaisuus, String kotikunta, Boolean toisenAsteenSuoritus, String toisenAsteenSuoritusmaa) {
         this.hakemusOid = hakemusOid;
         this.etunimi = etunimi;
         this.sukunimi = sukunimi;
@@ -105,7 +105,7 @@ public class ErillishakuRivi {
         this.kansalaisuus = kansalaisuus;
         this.kotikunta = kotikunta;
         this.toisenAsteenSuoritus = toisenAsteenSuoritus;
-        this.pohjakoulutusMaaToinenAste = pohjakoulutusMaaToinenAste;
+        this.toisenAsteenSuoritusmaa = toisenAsteenSuoritusmaa;
     }
 
     public String getHakemusOid() {
@@ -216,8 +216,8 @@ public class ErillishakuRivi {
         return toisenAsteenSuoritus;
     }
 
-    public String getPohjakoulutusMaaToinenAste() {
-        return pohjakoulutusMaaToinenAste;
+    public String getToisenAsteenSuoritusmaa() {
+        return toisenAsteenSuoritusmaa;
     }
 
     @Override
@@ -245,13 +245,13 @@ public class ErillishakuRivi {
                 kansalaisuus + ", " +
                 kotikunta + ", " +
                 ErillishakuDataRivi.getTotuusarvoString(toisenAsteenSuoritus) + ", " +
-                pohjakoulutusMaaToinenAste;
+                toisenAsteenSuoritusmaa;
     }
 
     public ErillishakuRivi withAidinkieli(String aidinkieli) {
         return new ErillishakuRivi(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, sukupuoli, personOid, aidinkieli,
                 hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
-                osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus, pohjakoulutusMaaToinenAste);
+                osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus, toisenAsteenSuoritusmaa);
     }
 
     public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {

@@ -44,7 +44,7 @@ public class HakemusWrapper {
     private final static String NAINEN                          = "2";
     private final static String MIES                            = "1";
     public final static String TOISEN_ASTEEN_SUORITUS           = "toisen_asteen_suoritus";
-    public final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
+    public final static String TOISEN_ASTEEN_SUORITUSMAA        = "toisen_asteen_suoritusmaa";
     public final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
 
     private Yhteystiedot yhteystiedot = null;
@@ -200,10 +200,10 @@ public class HakemusWrapper {
         return null;
     }
 
-    public String getPohjakoulutusmaaToinenAste() {
+    public String getToisenAsteenSuoritusmaa() {
         getKoulutustausta();
-        if (koulutustausta.containsKey(POHJAKOULUTUSMAA_TOINEN_ASTE)) {
-            return koulutustausta.get(POHJAKOULUTUSMAA_TOINEN_ASTE);
+        if (koulutustausta.containsKey(TOISEN_ASTEEN_SUORITUSMAA)) {
+            return koulutustausta.get(TOISEN_ASTEEN_SUORITUSMAA);
         }
         return StringUtils.EMPTY;
     }

@@ -63,7 +63,7 @@ public class ErillishakuDataRivi extends DataRivi {
         String kansalaisuus = rivi.getArvoAt(index++);
         String kotikunta = rivi.getArvoAt(index++);
         Boolean toisenAsteenSuoritus = getBoolean(rivi.getArvoAt(index++));
-        String pohjakoulutusMaaToinenAste = rivi.getArvoAt(index++);
+        String toisenAsteenSuoritusmaa = rivi.getArvoAt(index++);
 
         if (isNewRow(rivi, syntymaAika)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
@@ -72,7 +72,7 @@ public class ErillishakuDataRivi extends DataRivi {
                     vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot,
                     false, asiointikieli, puhelinnumero,
                     osoite, postinumero, postitoimipaikka, asuinmaa,
-                    kansalaisuus, kotikunta, toisenAsteenSuoritus, pohjakoulutusMaaToinenAste));
+                    kansalaisuus, kotikunta, toisenAsteenSuoritus, toisenAsteenSuoritusmaa));
         }
         return true;
     }
