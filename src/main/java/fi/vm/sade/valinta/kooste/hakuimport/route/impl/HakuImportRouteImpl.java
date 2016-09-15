@@ -245,8 +245,10 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
             public void process(Exchange exchange) throws Exception {
                 HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
                 int t = prosessi.lisaaTuonti();
-                LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).",
-                        new Object[]{t, prosessi.getHakukohteita()});
+                if (t % 25 == 0 || t == prosessi.getHakukohteita()) {
+                    LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).",
+                            new Object[]{t, prosessi.getHakukohteita()});
+                }
             }
         };
     }
