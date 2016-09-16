@@ -55,10 +55,7 @@ public class ErillishakuExcelTest {
         Excel excel = eExcel.getExcel();
         excel.tuoXlsx(excel.vieXlsx());
 
-        assertEquals(
-                2 // tavalliset rivit
-                +1 // tyhjärivi julkaisulupasyötteellä
-                , tarkistusTapahtui.get());
+        assertEquals(2, tarkistusTapahtui.get());
         // Tulosta tiedostoksi testausta varten
         // IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
     }
@@ -107,10 +104,7 @@ public class ErillishakuExcelTest {
         Excel excel = eExcel.getExcel();
         excel.tuoXlsx(excel.vieXlsx());
 
-        assertEquals(
-                2 // tavalliset rivit
-                        +1 // tyhjärivi julkaisulupasyötteellä
-                , tarkistusTapahtui.get());
+        assertEquals(2, tarkistusTapahtui.get());
 
         // Tulosta tiedostoksi testausta varten
         // IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));

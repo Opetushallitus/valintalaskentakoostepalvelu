@@ -65,7 +65,7 @@ public class ErillishakuDataRivi extends DataRivi {
         Boolean toisenAsteenSuoritus = getBoolean(rivi.getArvoAt(index++));
         String toisenAsteenSuoritusmaa = rivi.getArvoAt(index++);
 
-        if (isNewRow(rivi, syntymaAika)) {
+        if (isDataRow(rivi, sukunimi, etunimi, oid)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
                     sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
                     sukupuoli, oid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksytty, hyvaksymiskirjeLahetetty,
@@ -89,10 +89,11 @@ public class ErillishakuDataRivi extends DataRivi {
         return null;
     }
 
-    private boolean isNewRow(Rivi rivi, String syntymaAika) {
+    private boolean isDataRow(Rivi rivi, String sukunimi, String etunimi, String oid) {
         return !rivi.isTyhja()
                 && rivi.getSolut().size() >= 14 //Copy-paste easily creates extra columns for excel doc
-                && !"Syntymäaika".equals(syntymaAika);
+                && !"Sukunimi".equals(sukunimi)
+                && ((StringUtils.isNotBlank(sukunimi) && StringUtils.isNotBlank(etunimi)) || StringUtils.isNotBlank(oid));
     }
 
     public final static String TOSI = "Kyllä";
