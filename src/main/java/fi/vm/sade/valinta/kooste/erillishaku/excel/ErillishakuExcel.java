@@ -69,8 +69,10 @@ public class ErillishakuExcel {
         builder.add(new TekstiArvo("Asuinmaa"));
         builder.add(new TekstiArvo("Kansalaisuus"));
         builder.add(new TekstiArvo("Kotikunta"));
-        builder.add(new TekstiArvo("Toisen asteen pohjakoulutus suoritettu"));
-        builder.add(new TekstiArvo("Toisen asteen pohjakoulutuksen suoritusmaa"));
+        if (tyyppi == Hakutyyppi.KORKEAKOULU) {
+            builder.add(new TekstiArvo("Toisen asteen pohjakoulutus suoritettu"));
+            builder.add(new TekstiArvo("Toisen asteen pohjakoulutuksen suoritusmaa"));
+        }
         esittelyt.add(builder.build());
 
         Collections.sort(erillishakurivit, (h1, h2) -> {
@@ -163,8 +165,10 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getAsuinmaa(), true, true));
             a.add(new TekstiArvo(rivi.getKansalaisuus(), true, true));
             a.add(new TekstiArvo(rivi.getKotikunta(), true, true));
-            a.add(new BooleanArvo(rivi.getToisenAsteenSuoritus(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ""));
-            a.add(new TekstiArvo(rivi.getToisenAsteenSuoritusmaa(), true, true));
+            if (tyyppi == Hakutyyppi.KORKEAKOULU) {
+                a.add(new BooleanArvo(rivi.getToisenAsteenSuoritus(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ""));
+                a.add(new TekstiArvo(rivi.getToisenAsteenSuoritusmaa(), true, true));
+            }
             return a;
         };
     }

@@ -44,7 +44,7 @@ public class ErillishakuResourceTest {
     }
 
     private void testVientiExcelTiedostoon(Hakutyyppi hakutyyppi) throws IOException {
-        MockApplicationAsyncResource.setResult(createVientiHakemus());
+        MockApplicationAsyncResource.setResult(createVientiHakemus(hakutyyppi));
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
                 .query("hakutyyppi", hakutyyppi)
@@ -60,7 +60,7 @@ public class ErillishakuResourceTest {
         String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
         final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
         assertNotNull(storedDocument);
-        verifyCreatedExcelDocumentTyhja(hakutyyppi, storedDocument);
+        verifyCreatedExcelDocument(hakutyyppi, storedDocument);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class ErillishakuResourceTest {
         testVientiExcelTiedostoon(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS);
     }
 
-    private List<Hakemus> createVientiHakemus() {
+    private List<Hakemus> createVientiHakemus(Hakutyyppi hakutyyppi) {
         Hakemus hakemus = new Hakemus();
         hakemus.setOid(MockData.hakemusOid);
         hakemus.setPersonOid(MockData.hakijaOid);
@@ -92,8 +92,10 @@ public class ErillishakuResourceTest {
         answers.getHenkilotiedot().put("aidinkieli", "SV");
         answers.getHenkilotiedot().put("kotikunta", "091");
         answers.getLisatiedot().put("asiointikieli", "ruotsi");
-        answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
-        answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUSMAA, "FIN");
+        if(hakutyyppi == Hakutyyppi.KORKEAKOULU) {
+            answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
+            answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUSMAA, "FIN");
+        }
         hakemus.setAnswers(answers);
         return Collections.singletonList(hakemus);
     }
@@ -132,7 +134,7 @@ public class ErillishakuResourceTest {
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
 
-    private void verifyCreatedExcelDocumentTyhja(Hakutyyppi hakutyyppi, final InputStream storedDocument) throws IOException {
+    private void verifyCreatedExcelDocument(Hakutyyppi hakutyyppi, final InputStream storedDocument) throws IOException {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(hakutyyppi, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO(
@@ -172,8 +174,8 @@ public class ErillishakuResourceTest {
                 "FIN",
                 "FIN",
                 "Helsinki",
-                true,
-                "FIN");
+                hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null,
+                hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "");
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }
 
