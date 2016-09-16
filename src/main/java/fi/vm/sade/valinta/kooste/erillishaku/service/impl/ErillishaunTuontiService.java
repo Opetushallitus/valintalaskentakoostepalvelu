@@ -48,6 +48,7 @@ import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
@@ -652,10 +653,13 @@ public class ErillishaunTuontiService {
             validateRequiredValue(asuinmaa, "asuinmaa", errors);
             validateRequiredValue(kansalaisuus, "kansalaisuus", errors);
             validateRequiredValue(kotikunta, "kotikunta", errors);
+
             Boolean toisenAsteenSuoritus = rivi.getToisenAsteenSuoritus();
             validateRequiredValue(ErillishakuDataRivi.getTotuusarvoString(toisenAsteenSuoritus), "toisen asteen suoritus", errors);
-            if(toisenAsteenSuoritus!= null && toisenAsteenSuoritus.booleanValue()) {
+            if(BooleanUtils.isTrue(toisenAsteenSuoritus)) {
                 validateRequiredValue(toisenAsteenSuoritusmaa, "toisen asteen pohjakoulutuksen maa", errors);
+            } else if(StringUtils.isNotBlank(toisenAsteenSuoritusmaa)) {
+                errors.add("Toisen asteen pohjakoulutuksen suoritusmaata (" + rivi.getToisenAsteenSuoritusmaa() + ") ei saa antaa, jos ei toisen asteen pohjakoulutusta ole suoritettu.");
             }
         }
         return errors;
