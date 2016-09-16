@@ -9,6 +9,7 @@ import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
 import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static rx.schedulers.Schedulers.newThread;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -322,8 +323,10 @@ public class ErillishaunTuontiService {
 
     private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, ErillishakuRivi rivi) {
         HakemusPrototyyppi hakemus = new HakemusPrototyyppi();
-        hakemus.setAidinkieli(kielisyysToString(henkilo.getAidinkieli()));
-        hakemus.setAsiointikieli(kielisyysToString(henkilo.getAsiointiKieli()));
+        String aidinkieli = kielisyysToString(henkilo.getAidinkieli());
+        hakemus.setAidinkieli(isNotBlank(aidinkieli) ? aidinkieli : rivi.getAidinkieli());
+        String asiointikieli = kielisyysToString(henkilo.getAsiointiKieli());
+        hakemus.setAsiointikieli(isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli());
         hakemus.setAsuinmaa(rivi.getAsuinmaa());
         hakemus.setEtunimi(henkilo.getEtunimet());
         hakemus.setHakijaOid(henkilo.getOidHenkilo());
@@ -335,7 +338,8 @@ public class ErillishaunTuontiService {
         hakemus.setPostitoimipaikka(rivi.getPostitoimipaikka());
         hakemus.setPuhelinnumero(rivi.getPuhelinnumero());
         hakemus.setSukunimi(henkilo.getSukunimi());
-        hakemus.setSukupuoli(henkilo.getSukupuoli());
+        String sukupuoli = henkilo.getSukupuoli();
+        hakemus.setSukupuoli(isNotBlank(sukupuoli) ? sukupuoli : Sukupuoli.toHenkiloString(rivi.getSukupuoli()));
         hakemus.setSahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()));
         hakemus.setSyntymaAika(henkilo.getSyntymaaika());
         hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
