@@ -649,7 +649,6 @@ public class ErillishaunTuontiService {
         }
 
         if(tyyppi == Hakutyyppi.KORKEAKOULU) {
-            validateRequiredValue(rivi.getAidinkieli(), "äidinkieli", errors);
             validateRequiredValue(asuinmaa, "asuinmaa", errors);
             validateRequiredValue(kansalaisuus, "kansalaisuus", errors);
             validateRequiredValue(kotikunta, "kotikunta", errors);
