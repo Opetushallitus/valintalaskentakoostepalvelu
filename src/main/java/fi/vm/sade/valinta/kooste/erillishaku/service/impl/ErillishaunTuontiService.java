@@ -147,7 +147,7 @@ public class ErillishaunTuontiService {
         }, () -> LOG.info("Tuonti lopetettiin"));
     }
 
-    private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
+    private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit, final boolean saveApplications) {
         if (rivit.isEmpty()) {
             prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
             throw new RuntimeException(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
@@ -165,7 +165,7 @@ public class ErillishaunTuontiService {
                     ErillishakuRivi rivi = riviJaIndeksi.getValue();
 
                     if (!rivi.isPoistetaankoRivi()) {
-                        List<String> errors = validoi(haku.getHakutyyppi(), rivi);
+                        List<String> errors = validoi(haku.getHakutyyppi(), rivi, saveApplications);
                         if(errors.size() > 0) {
                             poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi,  StringUtils.join(errors, " ") + " : " + rivi));
                         }
@@ -230,7 +230,7 @@ public class ErillishaunTuontiService {
         LOG.info("Aloitetaan tuonti. Rivit=" + erillishakuExcel.rivit.size());
         final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
 
-        validoiRivit(prosessi,haku,rivit);
+        validoiRivit(prosessi,haku,rivit,saveApplications);
 
         List<ErillishakuRivi> lisattavatTaiKeskeneraiset = rivit.stream()
                 .filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList());
@@ -570,7 +570,7 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private List<String> validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
+    private List<String> validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi, boolean saveApplications) {
         List<String> errors = new ArrayList<>();
         // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika+sukupuoli,henkilö-oid
         if (// mikään seuraavista ei ole totta:
@@ -685,7 +685,7 @@ public class ErillishaunTuontiService {
             errors.add("Virheellinen puhelinnumero (" + rivi.getPuhelinnumero() + ").");
         }
 
-        if(tyyppi == Hakutyyppi.KORKEAKOULU) {
+        if(saveApplications && tyyppi == Hakutyyppi.KORKEAKOULU) {
             validateRequiredValue(asuinmaa, "asuinmaa", errors);
             validateRequiredValue(kansalaisuus, "kansalaisuus", errors);
             validateRequiredValue(kotikunta, "kotikunta", errors);

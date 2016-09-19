@@ -9,6 +9,9 @@ public class ExcelTestData {
     public static InputStream kkHakuToisenAsteenValintatuloksella() {
         return getInputStream("kkhaku_toisenasteen_valintatuloksella.xlsx");
     }
+    public static InputStream kkHakuPuuttuviaPakollisiaTietoja() {
+        return getInputStream("kkhaku_puuttuvia_pakollisia_tietoja.xlsx");
+    }
 
     public static InputStream puutteellisiaTietojaAutotayttoaVarten() {
         return getInputStream("puutteellisiaTietojaAutotayttoaVarten.xlsx");

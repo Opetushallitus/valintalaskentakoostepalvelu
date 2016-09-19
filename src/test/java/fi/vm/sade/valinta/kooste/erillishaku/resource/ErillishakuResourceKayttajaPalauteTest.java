@@ -6,6 +6,7 @@ import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.*;
 import static org.hamcrest.CoreMatchers.*;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
 
@@ -77,22 +78,39 @@ public class ErillishakuResourceKayttajaPalauteTest {
                 // Odotetaan tyhjää datajoukko palautetta!
                 .poikkeukset, equalTo(asList(Poikkeus.koostepalvelupoikkeus(POIKKEUS_VIALLINEN_DATAJOUKKO, asList(
                 new Tunniste(
-                        "Rivi 2: Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid olivat tyhjiä (vähintään yksi tunniste on syötettävä). Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat. Pakollinen tieto \"äidinkieli\" puuttuu. Pakollinen tieto \"asuinmaa\" puuttuu. Pakollinen tieto \"kansalaisuus\" puuttuu. Pakollinen tieto \"kotikunta\" puuttuu. Pakollinen tieto \"toisen asteen suoritus\" puuttuu. : Etunimi, Sukunimi, , HYVAKSYTTY, Ei, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, false, null, VASTAANOTTANUT_SITOVASTI, true, null, null, null, null, null, null, null, null, , null",
+                        "Rivi 2: Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid olivat tyhjiä (vähintään yksi tunniste on syötettävä). Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat. : Etunimi, Sukunimi, , HYVAKSYTTY, Ei, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, false, null, VASTAANOTTANUT_SITOVASTI, true, null, null, null, null, null, null, null, null, , null",
                         ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
                 )
         )))));
     }
 
     @Test
+    public void tuontiVirheitaPuuttuviaPakollisiaKKExcelTietoja() {
+        final ProsessiId prosessiId =
+                excelClient()
+                        .post(Entity.entity(ExcelTestData.kkHakuPuuttuviaPakollisiaTietoja(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+
+        assertThat(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
+                // Odotetaan tyhjää datajoukko palautetta!
+                .poikkeukset, equalTo(asList(Poikkeus.koostepalvelupoikkeus(POIKKEUS_VIALLINEN_DATAJOUKKO, asList(
+                new Tunniste(
+                        "Rivi 1: Pakollinen tieto \"toisen asteen pohjakoulutuksen maa\" puuttuu. : Tuomas, Hakkarainen, hakkarainen@tuomas.com, HYVAKSYTTY, Kyllä, , 1.1.1901, MIES, FI, EI_TEHTY, true, Sat Jul 16 00:00:00 EEST 2016, VASTAANOTTANUT_SITOVASTI, true, FI, 045123456, Testitie 1, 00100, Helsinki, FIN, FIN, Helsinki, Kyllä, ",
+                        ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
+                ),
+                new Tunniste(
+                        "Rivi 2: Pakollinen tieto \"asuinmaa\" puuttuu. Pakollinen tieto \"kansalaisuus\" puuttuu. Pakollinen tieto \"kotikunta\" puuttuu. Pakollinen tieto \"toisen asteen suoritus\" puuttuu. : Sakari, Hakkarainen, sakari.hakkarainen@example.com, HYVAKSYTTY, Kyllä, , 1.1.2001, MIES, , EI_TEHTY, true, Sat Jul 16 00:00:00 EEST 2016, VASTAANOTTANUT_SITOVASTI, true, , , , , , , , , , ",
+                        ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
+                )
+        )))));
+    }
+
+
+    @Test
     public void tuontiVirheHakemuspalveluKutsussaPalaute() {
         try {
             MockApplicationAsyncResource.serviceIsAvailable.set(false);
-            final ProsessiId prosessiId =
-                    jsonClient()
-                            .post(Entity.json(new ErillishakuJson(asList(laillinenRivi())))
-                                    //
-                                    , ProsessiId.class);
-
+            final ProsessiId prosessiId = excelClient()
+                    .post(Entity.entity(ExcelTestData.kkHakuToisenAsteenValintatuloksella(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
             assertThat(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
                     // Odotetaan hakemuspalvelun epäonnistumisesta johtuvaa palautetta!
                     .poikkeukset, equalTo(asList(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE))));
@@ -156,6 +174,6 @@ public class ErillishakuResourceKayttajaPalauteTest {
                 .query("tarjoajaOid", tarjoajaOid)
                 .query("valintatapajonoOid", valintatapajonoOid)
                 .query("valintatapajononNimi", "varsinainen jono")
-                .accept(MediaType.APPLICATION_OCTET_STREAM);
+                .accept(MediaType.APPLICATION_JSON);
     }
 }
