@@ -17,6 +17,10 @@ public class HakemusSpec extends ConstantsSpec {
         public AdditionalDataBuilder() {
             applicationAdditionalDataDTO.setAdditionalData(Maps.newHashMap());
         }
+        public AdditionalDataBuilder setPersonOid(String personOid) {
+            applicationAdditionalDataDTO.setPersonOid(personOid);
+            return this;
+        }
         public AdditionalDataBuilder setOid(String oid) {
             applicationAdditionalDataDTO.setOid(oid);
             return this;

@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -25,10 +27,12 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
+import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,10 +51,6 @@ import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.springframework.core.io.ClassPathResource;
@@ -78,7 +78,10 @@ public class PistesyottoResourceTest {
     final String HAKEMUS3 = "HAKEMUS3";
     final String TUNNISTE1 = "TUNNISTE1";
     final String TUNNISTE2 = "TUNNISTE2";
+    final String PERSONOID1 = "1.2.3.4.111";
+    final String PERSONOID2 = "1.2.3.4.222";
     final String KIELIKOE_TUNNISTE = "kielikoe_fi";
+    final String AMMATILLINEN_KIELIKOE_TYYPPI = "ammatillisenKielikoe";
     final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
     final String OSALLISTUMISENTUNNISTE2 = TUNNISTE2 + "-OSALLISTUMINEN";
     final String KIELIKOE_OSALLISTUMISENTUNNISTE = KIELIKOE_TUNNISTE + "-OSALLISTUMINEN";
@@ -325,24 +328,53 @@ public class PistesyottoResourceTest {
                     hakemus()
                             .setOid(HAKEMUS1)
                             .setHenkilotunnus("123456-789x")
-                            .build()
-            ));
-            MockApplicationAsyncResource.setResultByOid(Arrays.asList(
+                            .build(),
                     hakemus()
                             .setOid(HAKEMUS2)
                             .setSyntymaaika("1.1.1900")
                             .build()
             ));
+            MockSuoritusrekisteriAsyncResource.setResult(
+                    new SuoritusrekisteriSpec.OppijaBuilder()
+                        .setOppijanumero(PERSONOID1)
+                        .suoritus()
+                        .setHenkiloOid(PERSONOID1)
+                        .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                        .arvosana()
+                        .setAine(KIELIKOE)
+                        .setLisatieto("FI")
+                        .setArvosana("true")
+                        .build()
+                        .build()
+                        .suoritus()
+                        .setHenkiloOid(PERSONOID1)
+                        .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                        .arvosana()
+                        .setAine(KIELIKOE)
+                        .setLisatieto("FI")
+                        .setArvosana("false")
+                        .build()
+                        .build()
+                        .suoritus()
+                        .setHenkiloOid(PERSONOID1)
+                        .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                        .arvosana()
+                        .setAine(KIELIKOE)
+                        .setLisatieto("SV")
+                        .setArvosana("false")
+                        .build()
+                        .build()
+                        .build());
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
                             .setOid(HAKEMUS1)
+                            .setPersonOid(PERSONOID1)
                             .setEtunimiJaSukunimi("Hilla", "Hiiri")
-                            .addLisatieto(KIELIKOE_TUNNISTE, "true")
                             .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
-                            .build()));
-            MockApplicationAsyncResource.setAdditionalDataResultByOid(Arrays.asList(
+                            .build(),
                     lisatiedot()
                             .setOid(HAKEMUS2)
+                            .setPersonOid(PERSONOID2)
                             .setEtunimiJaSukunimi("Hellevi", "Hiiri")
                             .addLisatieto(TUNNISTE1, "true")
                             .addLisatieto(OSALLISTUMISENTUNNISTE1, "OSALLISTUI")
@@ -497,7 +529,7 @@ public class PistesyottoResourceTest {
                                 .setOid(HAKEMUS3)
                                 .addLisatieto(TUNNISTE1, "")
                                 .build()
-                ));
+                ), null);
 
         Response r =
                 pistesyottoTuontiResource.getWebClient()
@@ -518,7 +550,7 @@ public class PistesyottoResourceTest {
     public void pistesyottoTuonti2Test() {
         cleanMocks();
         try {
-            List< ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
+            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
                     osallistuminen()
                             .setHakemusOid(HAKEMUS1)
                             .hakutoive()
@@ -647,7 +679,7 @@ public class PistesyottoResourceTest {
                                     .setOid(HAKEMUS3)
                                     .addLisatieto(TUNNISTE1, "")
                                     .build()
-                    ));
+                    ), null);
 
             Response r =
                     pistesyottoTuontiResource.getWebClient()

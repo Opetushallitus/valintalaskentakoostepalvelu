@@ -43,7 +43,7 @@ public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestB
 						"1_2_246_562_5_85532589612_urheilija_lisapiste",
 						"Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe",
 						"kielikoe_fi"), osallistumistiedot, valintaperusteet,
-				pistetiedot, kuuntelija);
+				pistetiedot, kuuntelija, null);
 		Excel excel = pistesyottoExcel.getExcel();
 
 		excel.tuoXlsx(excel.vieXlsx());

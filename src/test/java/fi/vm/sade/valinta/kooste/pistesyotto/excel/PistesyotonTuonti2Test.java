@@ -35,7 +35,7 @@ public class PistesyotonTuonti2Test extends PistesyotonTuontiTestBase {
 		PistesyottoExcel pistesyottoExcel = new PistesyottoExcel("testioidi1",
 				"1.2.246.562.20.61064567623", "jep", "", "", "",
 				hakemukset,Collections.<String>emptySet(), valintakoeTunnisteet,
-				osallistumistiedot, valintaperusteet, pistetiedot, kuuntelija);
+				osallistumistiedot, valintaperusteet, pistetiedot, kuuntelija, null);
 
 		//tallenna(pistesyottoExcel.getExcel());
 	}

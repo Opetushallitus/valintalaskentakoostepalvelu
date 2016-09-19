@@ -39,6 +39,10 @@ public class Oppija {
         return oppijanumero;
     }
 
+    public void setOppijanumero(String oppijanumero) {
+        this.oppijanumero = oppijanumero;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

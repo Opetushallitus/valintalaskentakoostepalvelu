@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
@@ -32,7 +33,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String hakuOid) {
-        return null;
+        return Observable.just(ImmutableList.of(oppijaRef.get()));
     }
 
     @Override
