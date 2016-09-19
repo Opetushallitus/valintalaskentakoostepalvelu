@@ -257,10 +257,6 @@ public class SuoritusrekisteriSpec {
             suoritus.setSuoritusKieli(suoritusKieli);
             return SuoritusBuilder.this;
         }
-        public SuoritusBuilder setTyyppi(String tyyppi) {
-            suoritus.setTyyppi(tyyppi);
-            return SuoritusBuilder.this;
-        }
         public ArvosanaBuilder arvosana() {
             return new ArvosanaBuilder(SuoritusBuilder.this);
         }
