@@ -254,6 +254,12 @@ public class ErillishakuRivi {
                 osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus, toisenAsteenSuoritusmaa);
     }
 
+    public ErillishakuRivi withHakemusOid(String hakemusOid) {
+        return new ErillishakuRivi(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, sukupuoli, personOid, aidinkieli,
+                hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
+                osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus, toisenAsteenSuoritusmaa);
+    }
+
     public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
         return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().name(), getEtunimi(), getSukunimi(),
                 getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli(), kansalaisuus);

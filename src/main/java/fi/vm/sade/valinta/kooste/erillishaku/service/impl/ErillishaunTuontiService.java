@@ -117,19 +117,19 @@ public class ErillishaunTuontiService {
     }
 
     public void tuoExcelistä(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
-        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data));
+        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data), true);
     }
 
     public void tuoJson(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit) {
-        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit));
+        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit), false);
     }
 
-    private void tuoData(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer) {
+    private void tuoData(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer, final boolean saveApplications) {
         Observable.just(erillishaku).subscribeOn(scheduler).subscribe(haku -> {
             final ImportedErillisHakuExcel erillishakuExcel;
             try {
                 erillishakuExcel = importer.apply(haku);
-                tuoHakijatJaLuoHakemukset(username, prosessi, erillishakuExcel, haku);
+                tuoHakijatJaLuoHakemukset(username, prosessi, erillishakuExcel, saveApplications, haku);
             } catch(ErillishaunDataException dataException) {
                 LOG.warn("excel ei validi:", dataException);
                 prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
@@ -226,7 +226,7 @@ public class ErillishaunTuontiService {
             }).collect(Collectors.toList());
         }
 
-    private void tuoHakijatJaLuoHakemukset(final String username, final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final ErillishakuDTO haku) throws Exception {
+    private void tuoHakijatJaLuoHakemukset(final String username, final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final boolean saveApplications, final ErillishakuDTO haku) throws Exception {
         LOG.info("Aloitetaan tuonti. Rivit=" + erillishakuExcel.rivit.size());
         final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
 
@@ -254,12 +254,10 @@ public class ErillishaunTuontiService {
                 throw e;
             }
             LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
-            hakemukset = kasitteleHakemukset(haku, henkilot, lisattavatTaiKeskeneraiset, prosessi);
-        } else {
-            hakemukset = Collections.emptyList();
+            lisattavatTaiKeskeneraiset = kasitteleHakemukset(haku, henkilot, lisattavatTaiKeskeneraiset, saveApplications, prosessi);
         }
         LOG.info("Viedaan hakijoita ohittaen rivit hakemuksentilalla kesken ({}/{}) jonoon {}", lisattavatTaiKeskeneraiset.stream().filter(r -> !r.isKesken()).count(), rivit.size(), haku.getValintatapajononNimi());
-        tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset, prosessi);
+        tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, prosessi);
     }
 
     private String convertKansalaisuusKoodi(String kansalaisuus) {
@@ -274,12 +272,19 @@ public class ErillishaunTuontiService {
                 .orElse(null);
     }
 
-    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
+    private List<ErillishakuRivi> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, boolean saveApplications, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
         try {
-            final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
-                .map(h -> createHakemusprototyyppi(h, lisattavatTaiKeskeneraiset))
-                .collect(Collectors.toList());
-            return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+            final List<ErillishakuRivi> rivitWithHenkiloData = henkilot.stream().map(h -> riviWithHenkiloData(h, lisattavatTaiKeskeneraiset)).collect(Collectors.toList());
+            if(saveApplications) {
+                List<HakemusPrototyyppi> hakemusPrototyypit = rivitWithHenkiloData.stream().map(rivi -> createHakemusprototyyppi(rivi)).collect(Collectors.toList());
+                LOG.info("Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
+                final List<Hakemus> hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+                assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
+                return zip(hakemukset.stream(), rivitWithHenkiloData.stream(), (hakemus, rivi) ->
+                        rivi.withHakemusOid(hakemus.getOid())).collect(Collectors.toList());
+            } else {
+                return rivitWithHenkiloData;
+            }
         } catch (HenkilonRivinPaattelyEpaonnistuiException e) {
             LOG.error(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE, e);
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE + " " + e.getMessage()));
@@ -291,9 +296,9 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
+    private ErillishakuRivi riviWithHenkiloData(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
         ErillishakuRivi rivi = etsiHenkiloaVastaavaRivi(henkilo, kaikkiLisattavatTaiKeskeneraiset);
-        return createHakemusprototyyppi(henkilo, rivi);
+        return riviWithHenkiloData(henkilo, rivi);
     }
 
     private ErillishakuRivi etsiHenkiloaVastaavaRivi(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
@@ -321,27 +326,58 @@ public class ErillishaunTuontiService {
         throw new HenkilonRivinPaattelyEpaonnistuiException("Ei löytynyt " + kaikkiLisattavatTaiKeskeneraiset.size() + " tuodusta rivistä henkilöä " + henkilo);
     }
 
-    private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, ErillishakuRivi rivi) {
-        HakemusPrototyyppi hakemus = new HakemusPrototyyppi();
+    private ErillishakuRivi riviWithHenkiloData(Henkilo henkilo, ErillishakuRivi rivi) {
         String aidinkieli = kielisyysToString(henkilo.getAidinkieli());
-        hakemus.setAidinkieli(isNotBlank(aidinkieli) ? aidinkieli : rivi.getAidinkieli());
         String asiointikieli = kielisyysToString(henkilo.getAsiointiKieli());
-        hakemus.setAsiointikieli(isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli());
+        String sukupuoli = henkilo.getSukupuoli();
+        return new ErillishakuRivi(
+                        rivi.getHakemusOid(),
+                        henkilo.getSukunimi(),
+                        henkilo.getEtunimet(),
+                        henkilo.getHetu(),
+                        StringUtils.trimToEmpty(rivi.getSahkoposti()),
+                        HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()),
+                        isNotBlank(sukupuoli) ? sukupuoli : Sukupuoli.toHenkiloString(rivi.getSukupuoli()),
+                        henkilo.getOidHenkilo(),
+                        isNotBlank(aidinkieli) ? aidinkieli : rivi.getAidinkieli(),
+                        rivi.getHakemuksenTila(),
+                        rivi.getEhdollisestiHyvaksyttavissa(),
+                        rivi.getHyvaksymiskirjeLahetetty(),
+                        rivi.getVastaanottoTila(),
+                        rivi.getIlmoittautumisTila(),
+                        rivi.isJulkaistaankoTiedot(),
+                        rivi.isPoistetaankoRivi(),
+                        isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli(),
+                        rivi.getPuhelinnumero(),
+                        rivi.getOsoite(),
+                        rivi.getPostinumero(),
+                        rivi.getPostitoimipaikka(),
+                        rivi.getAsuinmaa(),
+                        rivi.getKansalaisuus(),
+                        rivi.getKotikunta(),
+                        rivi.getToisenAsteenSuoritus(),
+                        rivi.getToisenAsteenSuoritusmaa()
+        );
+    }
+
+    private HakemusPrototyyppi createHakemusprototyyppi(ErillishakuRivi rivi) {
+        HakemusPrototyyppi hakemus = new HakemusPrototyyppi();
+        hakemus.setAidinkieli(rivi.getAidinkieli());
+        hakemus.setAsiointikieli(rivi.getAsiointikieli());
         hakemus.setAsuinmaa(rivi.getAsuinmaa());
-        hakemus.setEtunimi(henkilo.getEtunimet());
-        hakemus.setHakijaOid(henkilo.getOidHenkilo());
-        hakemus.setHenkilotunnus(henkilo.getHetu());
+        hakemus.setEtunimi(rivi.getEtunimi());
+        hakemus.setHakijaOid(rivi.getPersonOid());
+        hakemus.setHenkilotunnus(rivi.getHenkilotunnus());
         hakemus.setKansalaisuus(rivi.getKansalaisuus());
         hakemus.setKotikunta(convertKuntaNimiToKuntaKoodi(rivi.getKotikunta()));
         hakemus.setOsoite(rivi.getOsoite());
         hakemus.setPostinumero(rivi.getPostinumero());
         hakemus.setPostitoimipaikka(rivi.getPostitoimipaikka());
         hakemus.setPuhelinnumero(rivi.getPuhelinnumero());
-        hakemus.setSukunimi(henkilo.getSukunimi());
-        String sukupuoli = henkilo.getSukupuoli();
-        hakemus.setSukupuoli(isNotBlank(sukupuoli) ? sukupuoli : Sukupuoli.toHenkiloString(rivi.getSukupuoli()));
+        hakemus.setSukunimi(rivi.getSukunimi());
+        hakemus.setSukupuoli(Sukupuoli.toHenkiloString(rivi.getSukupuoli()));
         hakemus.setSahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()));
-        hakemus.setSyntymaAika(henkilo.getSyntymaaika());
+        hakemus.setSyntymaAika(rivi.getSyntymaAika());
         hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
         hakemus.setToisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa());
         return hakemus;
@@ -378,11 +414,9 @@ public class ErillishaunTuontiService {
         return resultDTO;
     }
 
-    private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset, final KirjeProsessi prosessi) {
-        assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
-
-        final List<ErillishaunHakijaDTO> hakijat = zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) ->
-                toErillishaunHakijaStream(haku, hakemus, rivi)).flatMap(s -> s).collect(Collectors.toList());
+    private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat, final KirjeProsessi prosessi) {
+        final List<ErillishaunHakijaDTO> hakijat = lisattavatTaiKeskeneraiset.stream().flatMap(rivi ->
+                toErillishaunHakijaStream(haku, rivi)).collect(Collectors.toList());
 
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(
@@ -486,25 +520,24 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private Stream<ErillishaunHakijaDTO> toErillishaunHakijaStream(ErillishakuDTO haku, Hakemus hakemus, ErillishakuRivi rivi) {
+    private Stream<ErillishaunHakijaDTO> toErillishaunHakijaStream(ErillishakuDTO haku, ErillishakuRivi rivi) {
         if (rivi.isKesken()) {
             return Stream.<ErillishaunHakijaDTO>empty(); // Keskeneräisiä ei viedä sijoitteluun
         } else {
-            HakemusWrapper wrapper = new HakemusWrapper(hakemus);
             return Stream.of(new ErillishaunHakijaDTO(
                     haku.getValintatapajonoOid(),
-                    hakemus.getOid(),
+                    rivi.getHakemusOid(),
                     haku.getHakukohdeOid(),
                     rivi.isJulkaistaankoTiedot(),
-                    hakemus.getPersonOid(),
+                    rivi.getPersonOid(),
                     haku.getHakuOid(),
                     haku.getTarjoajaOid(),
                     valintatuloksenTila(rivi),
                     rivi.getEhdollisestiHyvaksyttavissa(),
                     ilmoittautumisTila(rivi),
                     hakemuksenTila(rivi),
-                    wrapper.getEtunimi(),
-                    wrapper.getSukunimi(),
+                    rivi.getEtunimi(),
+                    rivi.getSukunimi(),
                     Optional.of(rivi.isPoistetaankoRivi()),
                     rivi.getHyvaksymiskirjeLahetetty()));
         }

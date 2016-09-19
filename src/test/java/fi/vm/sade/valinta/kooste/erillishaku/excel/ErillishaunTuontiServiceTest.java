@@ -192,20 +192,6 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(SYNTYMAAIKAFORMAT.parseDateTime(erillishakuRivi.getSyntymaAika()).toDate(), henkilo.syntymaaika);
             assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
 
-            assertEquals(1, applicationAsyncResource.results.size());
-            applicationAsyncResource.results.get(0);
-            final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
-            assertEquals("haku1", appResult.hakuOid);
-            assertEquals("kohde1", appResult.hakukohdeOid);
-            assertEquals("tarjoaja1", appResult.tarjoajaOid);
-            assertEquals(1, appResult.hakemusPrototyypit.size());
-            final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
-            assertEquals(personOidHenkiloPalvelusta, hakemusProto.getHakijaOid());
-            assertEquals(erillishakuRivi.getHenkilotunnus(), hakemusProto.getHenkilotunnus());
-            assertEquals(erillishakuRivi.getEtunimi(), hakemusProto.getEtunimi());
-            assertEquals(erillishakuRivi.getSukunimi(), hakemusProto.getSukunimi());
-            assertEquals(erillishakuRivi.getSyntymaAika(), hakemusProto.getSyntymaAika());
-
             assertEquals(1, tilaAsyncResource.results.size());
             final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
             assertEquals(MockData.hakuOid, tilaResult.hakuOid);
