@@ -720,6 +720,7 @@ public class PistesyottoResourceTest {
                                 null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("false", null, null), "FI"))
                     )
             );
+
             Response r =
                     pistesyottoTuontiResource.getWebClient()
                             .query("hakuOid", HAKU1)
