@@ -37,7 +37,7 @@ public class ValidoiTilatUtil {
 
     private static final Set<IlmoittautumisTila> EI_ILMOITTAUTUMISTA =
             Sets.newHashSet(Arrays.asList(IlmoittautumisTila.EI_TEHTY));
-    
+
     /**
      *
      * @return (null if ok) validation error
@@ -61,6 +61,9 @@ public class ValidoiTilatUtil {
                 return virheellinenTilaYhdistelma(new StringBuilder("Ilmoittautumistieto voi olla ainoastaan hyväksytyillä ja vastaanottaneilla hakijoilla. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
             }
         }
+
+        // Tallennetaan samalla kertaa hakijan vastaanoton peruminen ja siitä syntynyt perunut hakemuksentila.
+        if (HakemuksenTila.PERUNUT.equals(hakemuksenTila) && ValintatuloksenTila.PERUNUT.equals(valintatuloksenTila)) return null;
 
         if (VASTAANOTTANEENA_TAI_PERUNEENA_EI_MYOHASTYNYT.contains(valintatuloksenTila)) {
             if (HYVAKSYTTYNA.contains(hakemuksenTila)) {
