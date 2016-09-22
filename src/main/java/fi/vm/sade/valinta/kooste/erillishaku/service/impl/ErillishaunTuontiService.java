@@ -186,7 +186,8 @@ public class ErillishaunTuontiService {
         // jos hakemuksentila on hylatty tai varalla niin autotaytetaan loput tilat KESKEN, EI_TEHTY
 
         return rivit.stream().map(rivi -> {
-            if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi)) && !isUusi(rivi) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.name().equals(rivi.getVastaanottoTila())) {
+            if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi))
+                    && !isUusi(rivi) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.name().equals(rivi.getVastaanottoTila())) {
                 return new ErillishakuRivi(
                         rivi.getHakemusOid(),
                         rivi.getSukunimi(),
