@@ -62,8 +62,11 @@ public class ValidoiTilatUtil {
             }
         }
 
-        // Tallennetaan samalla kertaa hakijan vastaanoton peruminen ja siitä syntynyt perunut hakemuksentila.
-        if (HakemuksenTila.PERUNUT.equals(hakemuksenTila) && ValintatuloksenTila.PERUNUT.equals(valintatuloksenTila)) return null;
+        // Tallennetaan samalla kertaa hakijan vastaanoton peruminen ja siitä syntynyt perunut/peruunutunut hakemuksentila.
+        if ((HakemuksenTila.PERUNUT.equals(hakemuksenTila) && ValintatuloksenTila.PERUNUT.equals(valintatuloksenTila)) ||
+            (HakemuksenTila.PERUUTETTU.equals(hakemuksenTila) && ValintatuloksenTila.PERUUTETTU.equals(valintatuloksenTila))) {
+            return null; // OK
+        }
 
         if (VASTAANOTTANEENA_TAI_PERUNEENA_EI_MYOHASTYNYT.contains(valintatuloksenTila)) {
             if (HYVAKSYTTYNA.contains(hakemuksenTila)) {
