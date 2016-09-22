@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import rx.Observable;
 
 import javax.ws.rs.core.Response;
@@ -28,4 +30,8 @@ public interface SuoritusrekisteriAsyncResource {
     Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid);
 
     Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid);
+
+    Observable<Suoritus> postSuoritus(Suoritus suoritus);
+
+    Observable<Arvosana> postArvosana(Arvosana arvosana);
 }

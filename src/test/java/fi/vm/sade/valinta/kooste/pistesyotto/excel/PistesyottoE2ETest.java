@@ -1,9 +1,15 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -13,20 +19,23 @@ import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.List;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static javax.ws.rs.HttpMethod.*;
+import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 /**
  * @author Jussi Jartamo
  */
-public class PistesyottoE2ETest {
+public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     @Before
     public void startServer() throws Throwable{
@@ -41,17 +50,66 @@ public class PistesyottoE2ETest {
                 "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/1.2.246.562.5.85532589612/",
                 IOUtils.toString(new ClassPathResource("pistesyotto/List_ValintaperusteDTO.json").getInputStream())
         );
+
+        List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
+
+        pistetiedot.stream().forEach(p -> p.getAdditionalData().remove("kielikoe_fi"));
+
+        mockToReturnJsonWithParams(GET,
+                "/suoritusrekisteri/rest/v1/oppijat",
+                Arrays.asList(createOppija()),
+                ImmutableMap.of("haku", "testioidi1", "hakukohde", "1.2.246.562.5.85532589612")
+        );
+
         mockToReturnString(GET,
                 "/haku-app/applications/additionalData/testioidi1/1.2.246.562.5.85532589612",
-                IOUtils.toString(new ClassPathResource("pistesyotto/List_ApplicationAdditionalDataDTO.json").getInputStream())
+                new Gson().toJson(pistetiedot)
         );
         mockToReturnJson(POST,
                 "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe",
                 Collections.emptyList()
         );
 
+        mockTarjontaHakukohdeCall();
+
         HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tuonti");
 
+        MockServer fakeSure = new MockServer();
+        final Semaphore suoritusCounter = new Semaphore(0);
+        final Semaphore arvosanaCounter = new Semaphore(0);
+        mockForward(POST,
+                fakeSure.addHandler("/suoritusrekisteri/rest/v1/suoritukset/", exchange -> {
+                        try {
+                            Suoritus suoritus = new Gson().fromJson(
+                                    IOUtils.toString(exchange.getRequestBody()), new TypeToken<Suoritus>() {
+                                    }.getType()
+                            );
+                            System.out.println(suoritus);
+                            suoritus.setId("suoritus" + suoritus.getHenkiloOid());
+                            exchange.sendResponseHeaders(200, 0);
+                            OutputStream responseBody = exchange.getResponseBody();
+                            IOUtils.write(new Gson().toJson(suoritus), responseBody);
+                            responseBody.close();
+                            suoritusCounter.release();
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                }).addHandler("/suoritusrekisteri/rest/v1/arvosanat/", exchange -> {
+                        try {
+                            Arvosana arvosana = new Gson().fromJson(
+                                    IOUtils.toString(exchange.getRequestBody()), new TypeToken<Arvosana>() {
+                                    }.getType()
+                            );
+                            System.out.println(arvosana);
+                            exchange.sendResponseHeaders(200, 0);
+                            OutputStream responseBody = exchange.getResponseBody();
+                            IOUtils.write(new Gson().toJson(arvosana), responseBody);
+                            responseBody.close();
+                            arvosanaCounter.release();
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                }));
 
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);
@@ -67,7 +125,7 @@ public class PistesyottoE2ETest {
                                 .flatMap(a -> a.getAdditionalData().entrySet().stream())
                                 .count();
 
-                        Assert.assertEquals("Editoimattomat lisätietokentät ohitetaan, eli viedään vain 840/1260.", 840, count);
+                        Assert.assertEquals("Editoimattomat lisätietokentät ja kielikoetulokset ohitetaan, eli viedään vain 630/1260.", 630, count);
                         exchange.sendResponseHeaders(200, 0);
                         counter.release();
                     } catch (Throwable t) {
@@ -82,9 +140,57 @@ public class PistesyottoE2ETest {
                 .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
         Assert.assertEquals(200, r.getStatus());
         try {
+            Assert.assertTrue(suoritusCounter.tryAcquire(7, 10, TimeUnit.SECONDS));
+            Assert.assertTrue(arvosanaCounter.tryAcquire(7, 10, TimeUnit.SECONDS));
             Assert.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             Assert.fail();
+        }
+    }
+
+    private Oppija createOppija() {
+        String valmistuminen = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
+        Oppija oppija = new Oppija();
+        oppija.setOppijanumero("1.2.246.562.24.77642460905");
+        Suoritus suoritus = new Suoritus();
+        suoritus.setHenkiloOid("1.2.246.562.24.77642460905");
+        suoritus.setTila("VALMIS");
+        suoritus.setYksilollistaminen("Ei");
+        suoritus.setVahvistettu(true);
+        suoritus.setSuoritusKieli("FI");
+        suoritus.setMyontaja("1.2.3.4444.5");
+        suoritus.setKomo("ammatillisenKielikoe");
+        suoritus.setValmistuminen(valmistuminen);
+        Arvosana arvosana = new Arvosana();
+        arvosana.setAine("KIELIKOE");
+        arvosana.setLisatieto("FI");
+        arvosana.setArvio(new Arvio("TRUE", null, null));
+        SuoritusJaArvosanat suoritusJaArvosanat = new SuoritusJaArvosanat();
+        suoritusJaArvosanat.setSuoritus(suoritus);
+        suoritusJaArvosanat.setArvosanat(Arrays.asList(arvosana));
+        oppija.setSuoritukset(Arrays.asList(suoritusJaArvosanat));
+        return oppija;
+    }
+
+    private void mockTarjontaHakukohdeCall() {
+        HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
+        hakukohdeDTO.setHakuOid("testioidi1");
+        hakukohdeDTO.setOid("1.2.246.562.5.85532589612");
+        hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
+        mockToReturnJson(GET,
+                "/tarjonta-service/rest/v1/hakukohde/1.2.246.562.5.85532589612/",
+                new Result(hakukohdeDTO));
+    }
+
+    public static class Result<T> {
+        private T result;
+
+        public Result(T result) {
+            this.result = result;
+        }
+
+        public T getResult() {
+            return result;
         }
     }
 }

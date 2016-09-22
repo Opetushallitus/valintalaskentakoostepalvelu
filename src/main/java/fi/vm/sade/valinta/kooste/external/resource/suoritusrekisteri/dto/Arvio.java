@@ -48,4 +48,13 @@ public class Arvio {
     public Integer getPisteet() {
         return pisteet;
     }
+
+    @Override
+    public String toString() {
+        return "Arvio{" +
+                "arvosana='" + arvosana + '\'' +
+                ", asteikko='" + asteikko + '\'' +
+                ", pisteet=" + pisteet +
+                '}';
+    }
 }

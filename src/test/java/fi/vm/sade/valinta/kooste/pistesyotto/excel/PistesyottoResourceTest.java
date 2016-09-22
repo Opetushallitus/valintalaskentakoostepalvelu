@@ -7,18 +7,20 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintaperuste;
 
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -27,6 +29,10 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
@@ -80,6 +86,7 @@ public class PistesyottoResourceTest {
     final String TUNNISTE2 = "TUNNISTE2";
     final String PERSONOID1 = "1.2.3.4.111";
     final String PERSONOID2 = "1.2.3.4.222";
+    final String PERSONOID3 = "1.2.3.4.333";
     final String KIELIKOE_TUNNISTE = "kielikoe_fi";
     final String AMMATILLINEN_KIELIKOE_TYYPPI = "ammatillisenKielikoe";
     final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
@@ -640,6 +647,28 @@ public class PistesyottoResourceTest {
                                     .setOid(HAKEMUS3).build()
                     )
             );
+            MockSuoritusrekisteriAsyncResource.setResult(
+                new SuoritusrekisteriSpec.OppijaBuilder()
+                    .setOppijanumero(PERSONOID1)
+                    .suoritus()
+                    .setHenkiloOid(PERSONOID1)
+                    .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                    .arvosana()
+                    .setAine(KIELIKOE)
+                    .setLisatieto("FI")
+                    .setArvosana("true")
+                    .build()
+                    .build()
+                    .suoritus()
+                    .setHenkiloOid(PERSONOID1)
+                    .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                    .arvosana()
+                    .setAine(KIELIKOE)
+                    .setLisatieto("SV")
+                    .setArvosana("false")
+                    .build()
+                    .build()
+                    .build());
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                     TARJOAJA1, "", "", "",
@@ -661,26 +690,36 @@ public class PistesyottoResourceTest {
                     Arrays.asList(
                             lisatiedot()
                                     .setOid(HAKEMUS1)
+                                    .setPersonOid(PERSONOID1)
                                     .addLisatieto(TUNNISTE1, "3")
                                     .addLisatieto(TUNNISTE2, "true")
                                     .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
-                                    .addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                    //.addLisatieto(KIELIKOE_TUNNISTE, "true")
                                     .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
                                     .build(),
                             lisatiedot()
                                     .setOid(HAKEMUS2)
+                                    .setPersonOid(PERSONOID2)
                                     .addLisatieto(TUNNISTE1, "2")
                                     .addLisatieto(TUNNISTE2, "true")
                                     .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
-                                    .addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                    //.addLisatieto(KIELIKOE_TUNNISTE, "true")
                                     .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
                                     .build(),
                             lisatiedot()
                                     .setOid(HAKEMUS3)
+                                    .setPersonOid(PERSONOID3)
                                     .addLisatieto(TUNNISTE1, "")
                                     .build()
-                    ), null);
-
+                    ), ImmutableMap.of(
+                        PERSONOID1,
+                        Arrays.asList(new Arvosana(
+                                null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("true", null, null), "FI")),
+                        PERSONOID2,
+                        Arrays.asList(new Arvosana(
+                                null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("false", null, null), "FI"))
+                    )
+            );
             Response r =
                     pistesyottoTuontiResource.getWebClient()
                             .query("hakuOid", HAKU1)
@@ -691,6 +730,11 @@ public class PistesyottoResourceTest {
             List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
             LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
             assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!", 3, tuodutLisatiedot.size());
+            assertFalse("Kielikokeita ei saa löytyä hakemuksen lisätiedoista", tuodutLisatiedot.stream().anyMatch(a -> a.getAdditionalData().containsKey("kielikoe_fi")));
+            MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().forEach(s -> LOG.error(s.toString()));
+            MockSuoritusrekisteriAsyncResource.arvosanatRef.get().stream().forEach(a -> LOG.error(a.toString()));
+            assertEquals("Kielikokeiden suoritukset löytyvät suresta", 2, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size());
+            assertEquals("Kielikokeiden arvosanat löytyvät suresta", 2, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().size());
         } finally {
             cleanMocks();
         }

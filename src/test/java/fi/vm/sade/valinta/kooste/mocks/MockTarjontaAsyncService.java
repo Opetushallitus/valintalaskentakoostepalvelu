@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 import java.util.*;
 import java.util.function.Consumer;
 
+import com.google.common.collect.ImmutableSet;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,7 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
         HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
         hakukohdeDTO.setHakuOid(MockData.hakuOid);
         hakukohdeDTO.setOid(hakukohdeOid);
+        hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
         return Observable.just(hakukohdeDTO);
     }
 

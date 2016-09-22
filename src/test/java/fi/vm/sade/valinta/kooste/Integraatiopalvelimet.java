@@ -9,11 +9,15 @@ import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.Parameter;
 import org.mockserver.model.RegexBody;
 
 import java.lang.reflect.Type;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.HttpMethod.*;
 import static org.mockserver.model.HttpForward.forward;
@@ -62,6 +66,21 @@ public class Integraatiopalvelimet {
                         request()
                                 .withMethod(method)
                                 .withPath(p)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(r)
+
+                );
+    }
+    private static void mockToReturnValueWithParams(String method, String p, String r, List<Parameter> parameters) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                                .withQueryStringParameters(parameters)
                 )
                 .respond(
                         response()
@@ -136,6 +155,11 @@ public class Integraatiopalvelimet {
                                 .withStatusCode(200)
 
                 );
+    }
+    public static void mockToReturnJsonWithParams(String method, String p, Object r, Map<String, String> parameters) {
+        String s;
+        mockToReturnValueWithParams(method, p, s = gson().toJson(r), parameters.keySet().stream().map(name -> new Parameter(name, parameters.get(name))).collect(Collectors.toList()));
+        System.err.println(s);
     }
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;

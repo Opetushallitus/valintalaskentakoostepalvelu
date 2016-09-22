@@ -146,7 +146,6 @@ public class SuoritusrekisteriSpec {
                                         }
                                 ).count());
             }
-
             suoritus.suoritusJaArvosanat.getArvosanat().add(arvosana);
             return suoritus;
         }
@@ -172,7 +171,6 @@ public class SuoritusrekisteriSpec {
             suoritus.setHenkiloOid(henkiloOid);
             return SuoritusBuilder.this;
         }
-
         public SuoritusBuilder setVahvistettu(boolean vahvistettu) {
             suoritus.setVahvistettu(vahvistettu);
             return SuoritusBuilder.this;
