@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -11,11 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class SuoritusJaArvosanatWrapper {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritusJaArvosanatWrapper.class);
@@ -32,6 +28,7 @@ public class SuoritusJaArvosanatWrapper {
     public static final String PK_AMMATILLISEENVALMISTAVA = "1.2.246.562.5.2013112814572441001730";
     public static final String ULKOMAINENKORVAAVA = "1.2.246.562.13.86722481404";
     public static final String PK_LUKIOON_VALMISTAVA = "1.2.246.562.5.2013112814572429142840";
+    public static final String AMMATILLISEN_KIELIKOE = "ammatillisenKielikoe";
     private static final Map<String, String> KOMO_TO_STRING_MAPPER = createKomoToStringMapper();
     public static final String HAKEMUS_OID_PREFIX = "1.2.246.562.11";
 
@@ -47,6 +44,7 @@ public class SuoritusJaArvosanatWrapper {
         tmp.put(PK_VALMENTAVA, "valmentava");
         tmp.put(PK_AMMATTISTARTTI_KOMO, "ammattistartti");
         tmp.put(PK_LISAOPETUSTALOUS_KOMO, "lisäopetus(talous)");
+        tmp.put(AMMATILLISEN_KIELIKOE, "ammatillisen kielikoe");
         return Collections.unmodifiableMap(tmp);
     }
 
@@ -155,6 +153,15 @@ public class SuoritusJaArvosanatWrapper {
     public boolean isValmaOrTelma() {
         return VALMA_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo()) || TELMA_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
     }
+
+    public boolean isAmmatillisenKielikoe() {
+        return isAmmatillisenKielikoe(this.suoritusJaArvosanat);
+    }
+
+    public static boolean isAmmatillisenKielikoe(SuoritusJaArvosanat suoritusJaArvosanat) {
+        return AMMATILLISEN_KIELIKOE.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+
     public boolean isSuoritusMistaSyntyyPeruskoulunArvosanoja() {
         return isLisapistekoulutus() || isPerusopetus();
     }

@@ -2187,6 +2187,73 @@ public class HakemuksetConverterUtilTest {
         }
     }
 
+    @Test
+    public void ammatillisenKielikoeLuetaanSuoritusrekisteristaJaHyvaksyttyDominoi() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<>());
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("1.10.2015")
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").build()
+                .build()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("true").build()
+                .build()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("23.9.2016")
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").build()
+                .build()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("23.9.2016")
+                .arvosana().setAine("kielikoe").setLisatieto("SV").setAsteikko_hyvaksytty().setArvosana("false").build()
+                .build()
+            .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
+        Assert.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
+        Assert.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_sv"));
+    }
+
+    @Test
+    public void ammatillisenKielikoetietoHakemukseltaYlikirjoitetaanSuoritusrekisterista() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            add(new AvainArvoDTO("kielikoe_fi", "true"));
+        }});
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").build()
+                .build()
+            .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
+        Assert.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_fi"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void useampiAmmatillisenKielikoeArvosanatietoSamalleSuoritukselleSurestaAiheuttaaPoikkeuksen() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<>());
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("true").build()
+                .build()
+            .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void ammatillisenKielikoeArvosanatiedonAsteikkoTuleeOllaHyvaksytty() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<>());
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_Osakoe().setArvosana("false").build()
+                .build()
+            .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
+    }
+
     private static String getFirstHakemusArvo(HakemusDTO hakemusDTO, String avain) {
         return hakemusDTO
                 .getAvaimet()

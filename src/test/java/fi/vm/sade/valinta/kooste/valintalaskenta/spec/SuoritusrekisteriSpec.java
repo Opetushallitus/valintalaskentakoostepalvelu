@@ -112,6 +112,10 @@ public class SuoritusrekisteriSpec {
             arvosana.getArvio().setAsteikko("YO");
             return ArvosanaBuilder.this;
         }
+        public ArvosanaBuilder setAsteikko_hyvaksytty() {
+            arvosana.getArvio().setAsteikko("HYVAKSYTTY");
+            return ArvosanaBuilder.this;
+        }
         public ArvosanaBuilder setArvosana(String a) {
             arvosana.getArvio().setArvosana(a);
             return ArvosanaBuilder.this;
@@ -253,6 +257,10 @@ public class SuoritusrekisteriSpec {
         }
         public SuoritusBuilder setSuoritusKieli(String suoritusKieli) {
             suoritus.setSuoritusKieli(suoritusKieli);
+            return SuoritusBuilder.this;
+        }
+        public SuoritusBuilder setAmmatillisenKielikoe() {
+            suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
             return SuoritusBuilder.this;
         }
         public ArvosanaBuilder arvosana() {
