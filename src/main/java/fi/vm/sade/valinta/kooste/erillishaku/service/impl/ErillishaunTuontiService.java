@@ -371,14 +371,7 @@ public class ErillishaunTuontiService {
         assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
 
         final List<ErillishaunHakijaDTO> hakijat = zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) ->
-                toErillishaunHakijaStream(haku, hakemus, rivi)).flatMap(s -> s)
-                .map(h -> {
-                    if (h.getHakemuksenTila() == null) {
-                        h.setPoistetaankoTulokset(true);
-                    }
-                    return h;
-                })
-                .collect(Collectors.toList());
+                toErillishaunHakijaStream(haku, hakemus, rivi)).flatMap(s -> s).collect(Collectors.toList());
 
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(
@@ -499,7 +492,9 @@ public class ErillishaunTuontiService {
                     hakemuksenTila(rivi),
                     wrapper.getEtunimi(),
                     wrapper.getSukunimi(),
-                    Optional.of(rivi.isPoistetaankoRivi()),
+                    // Poistetaan rivi myös siinä tapauksessa että hakemuksen tila on tyhjä, muttei kuitenkaan
+                    // passivoida hakemusta!
+                    Optional.of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
                     rivi.getHyvaksymiskirjeLahetetty(),
                     Lists.newArrayList()));
         }
