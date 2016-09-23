@@ -13,11 +13,11 @@ import rx.Observable;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 @Service
 public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyncResource {
@@ -32,12 +32,18 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     private static AtomicInteger ids = new AtomicInteger(100);
 
+    private static Optional<RuntimeException> postException = Optional.empty();
+
     public static void clear() {
+        postException = Optional.empty();
         oppijaRef.set(null);
         suorituksetRef.set(new ArrayList<>());
         arvosanatRef.set(new ArrayList<>());
     }
 
+    public static void setPostException(Optional<RuntimeException> exception) {
+        MockSuoritusrekisteriAsyncResource.postException = exception;
+    }
 
 
     @Override
@@ -68,6 +74,9 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
+        if (postException.isPresent()) {
+            throw postException.get();
+        }
         suoritus.setId("" + ids.getAndIncrement());
         suorituksetRef.getAndUpdate((List<Suoritus> suoritukset) -> {
                 suoritukset.add(suoritus);
@@ -78,6 +87,9 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<Arvosana> postArvosana(Arvosana arvosana) {
+        if (postException.isPresent()) {
+            throw postException.get();
+        }
         arvosanatRef.getAndUpdate((List<Arvosana> arvosanat) -> {
             arvosanat.add(arvosana);
             return arvosanat;

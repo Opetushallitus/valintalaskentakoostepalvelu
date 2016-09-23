@@ -7,7 +7,7 @@ import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -39,6 +39,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
+
+import javax.ws.rs.core.Response;
 
 /**
  *         GET
@@ -82,7 +84,12 @@ public class PistesyottoTuontiService {
         String hakukohdeNimi = StringUtils.EMPTY;
         String tarjoajaNimi = StringUtils.EMPTY;
         PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
-            LOG.error("Pistesyötön tuonti epäonnistui", t);
+            if (t instanceof HttpExceptionWithResponse) {
+                Response response = ((HttpExceptionWithResponse) t).response;
+                LOG.error("Pistesyötön tuonti epäonnistui HTTP-virheilmoitukseen. Sisältö: " + response.getEntity(), t);
+            } else {
+                LOG.error("Pistesyötön tuonti epäonnistui", t);
+            }
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
         });
         try {

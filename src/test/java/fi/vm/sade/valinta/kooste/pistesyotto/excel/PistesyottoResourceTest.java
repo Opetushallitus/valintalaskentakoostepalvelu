@@ -21,6 +21,7 @@ import com.google.gson.JsonParser;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
@@ -60,6 +61,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -91,6 +93,130 @@ public class PistesyottoResourceTest {
     final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
     final String OSALLISTUMISENTUNNISTE2 = TUNNISTE2 + "-OSALLISTUMINEN";
     final String KIELIKOE_OSALLISTUMISENTUNNISTE = KIELIKOE_TUNNISTE + "-OSALLISTUMINEN";
+    private final List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
+            osallistuminen()
+                    .setHakemusOid(HAKEMUS1)
+                    .hakutoive()
+                    .valinnanvaihe()
+                    .valintakoe()
+                    .setValintakoeOid(VALINTAKOE1)
+                    .setTunniste(TUNNISTE1)
+                    .setOsallistuu()
+                    .build()
+                    .valintakoe()
+                    .setValintakoeOid(KIELIKOE)
+                    .setTunniste(KIELIKOE_TUNNISTE)
+                    .setOsallistuu()
+                    .build()
+                    .build()
+                    .build()
+                    .build(),
+            osallistuminen()
+                    .setHakemusOid(HAKEMUS2)
+                    .hakutoive()
+                    .valinnanvaihe()
+                    .valintakoe()
+                    .setValintakoeOid(VALINTAKOE1)
+                    .setTunniste(TUNNISTE1)
+                    .setOsallistuu()
+                    .build()
+                    .valintakoe()
+                    .setValintakoeOid(KIELIKOE)
+                    .setTunniste(KIELIKOE_TUNNISTE)
+                    .setOsallistuu()
+                    .build()
+                    .build()
+                    .build()
+                    .build(),
+            osallistuminen()
+                    .setHakemusOid(HAKEMUS3)
+                    .hakutoive()
+                    .valinnanvaihe()
+                    .valintakoe()
+                    .setValintakoeOid(VALINTAKOE1)
+                    .setTunniste(TUNNISTE1)
+                    .setEiOsallistu()
+                    .build()
+                    .valintakoe()
+                    .setValintakoeOid(KIELIKOE)
+                    .setTunniste(KIELIKOE_TUNNISTE)
+                    .setEiOsallistu()
+                    .build()
+                    .build()
+                    .build()
+                    .build()
+    );
+    private final List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
+        valintaperuste()
+            .setKuvaus(TUNNISTE1)
+            .setTunniste(TUNNISTE1)
+            .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE1)
+            .setLukuarvofunktio()
+            .setArvot("1", "2", "3")
+            .build(),
+        valintaperuste()
+            .setKuvaus(TUNNISTE2)
+            .setTunniste(TUNNISTE2)
+            .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE2)
+            .setTotuusarvofunktio()
+            .build(),
+        valintaperuste()
+            .setKuvaus(KIELIKOE_TUNNISTE)
+            .setTunniste(KIELIKOE_TUNNISTE)
+            .setOsallistumisenTunniste(KIELIKOE_OSALLISTUMISENTUNNISTE)
+            .setTotuusarvofunktio()
+            .build()
+    );
+    private PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
+                            TARJOAJA1, "", "", "",
+                            Arrays.asList(
+                                    hakemus()
+                                            .setOid(HAKEMUS1)
+                                            .build(),
+                                    hakemus()
+                                            .setOid(HAKEMUS2)
+                                            .build(),
+                                    hakemus()
+                                            .setOid(HAKEMUS3)
+                                            .build()
+                            ),
+                            Sets.newHashSet(Arrays.asList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
+                            Arrays.asList(VALINTAKOE1), // TUNNISTEET
+                            osallistumistiedot,
+                            valintaperusteet,
+                            Arrays.asList(
+                                    lisatiedot()
+                                            .setOid(HAKEMUS1)
+                                            .setPersonOid(PERSONOID1)
+                                            .addLisatieto(TUNNISTE1, "3")
+                                            .addLisatieto(TUNNISTE2, "true")
+                                            .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
+                                            //.addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                            .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                                            .build(),
+                                    lisatiedot()
+                                            .setOid(HAKEMUS2)
+                                            .setPersonOid(PERSONOID2)
+                                            .addLisatieto(TUNNISTE1, "2")
+                                            .addLisatieto(TUNNISTE2, "true")
+                                            .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
+                                            //.addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                            .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                                            .build(),
+                                    lisatiedot()
+                                            .setOid(HAKEMUS3)
+                                            .setPersonOid(PERSONOID3)
+                                            .addLisatieto(TUNNISTE1, "")
+                                            .build()
+                            ), ImmutableMap.of(
+                                PERSONOID1,
+                                Arrays.asList(new Arvosana(
+                                        null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("true", null, null), "FI")),
+                                PERSONOID2,
+                                Arrays.asList(new Arvosana(
+                                        null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("false", null, null), "FI"))
+                            )
+                    );
 
     @Before
     public void startServer() {
@@ -556,81 +682,6 @@ public class PistesyottoResourceTest {
     public void pistesyottoTuonti2Test() {
         cleanMocks();
         try {
-            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
-                    osallistuminen()
-                            .setHakemusOid(HAKEMUS1)
-                            .hakutoive()
-                            .valinnanvaihe()
-                            .valintakoe()
-                            .setValintakoeOid(VALINTAKOE1)
-                            .setTunniste(TUNNISTE1)
-                            .setOsallistuu()
-                            .build()
-                            .valintakoe()
-                            .setValintakoeOid(KIELIKOE)
-                            .setTunniste(KIELIKOE_TUNNISTE)
-                            .setOsallistuu()
-                            .build()
-                            .build()
-                            .build()
-                            .build(),
-                    osallistuminen()
-                            .setHakemusOid(HAKEMUS2)
-                            .hakutoive()
-                            .valinnanvaihe()
-                            .valintakoe()
-                            .setValintakoeOid(VALINTAKOE1)
-                            .setTunniste(TUNNISTE1)
-                            .setOsallistuu()
-                            .build()
-                            .valintakoe()
-                            .setValintakoeOid(KIELIKOE)
-                            .setTunniste(KIELIKOE_TUNNISTE)
-                            .setOsallistuu()
-                            .build()
-                            .build()
-                            .build()
-                            .build(),
-                    osallistuminen()
-                            .setHakemusOid(HAKEMUS3)
-                            .hakutoive()
-                            .valinnanvaihe()
-                            .valintakoe()
-                            .setValintakoeOid(VALINTAKOE1)
-                            .setTunniste(TUNNISTE1)
-                            .setEiOsallistu()
-                            .build()
-                            .valintakoe()
-                            .setValintakoeOid(KIELIKOE)
-                            .setTunniste(KIELIKOE_TUNNISTE)
-                            .setEiOsallistu()
-                            .build()
-                            .build()
-                            .build()
-                            .build()
-            );
-            List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
-                    valintaperuste()
-                            .setKuvaus(TUNNISTE1)
-                            .setTunniste(TUNNISTE1)
-                            .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE1)
-                            .setLukuarvofunktio()
-                            .setArvot("1", "2", "3")
-                            .build(),
-                    valintaperuste()
-                            .setKuvaus(TUNNISTE2)
-                            .setTunniste(TUNNISTE2)
-                            .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE2)
-                            .setTotuusarvofunktio()
-                            .build(),
-                    valintaperuste()
-                            .setKuvaus(KIELIKOE_TUNNISTE)
-                            .setTunniste(KIELIKOE_TUNNISTE)
-                            .setOsallistumisenTunniste(KIELIKOE_OSALLISTUMISENTUNNISTE)
-                            .setTotuusarvofunktio()
-                            .build()
-            );
-
             MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
@@ -837,4 +888,40 @@ public class PistesyottoResourceTest {
             cleanMocks();
         }
     }
+
+    @Test
+    public void pistesyottoTuontiSureVirheellaTest() {
+            cleanMocks();
+            try {
+                MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
+                MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
+                        lisatiedot()
+                                .setOid(HAKEMUS1).build(),
+                        lisatiedot()
+                                .setOid(HAKEMUS3).build()));
+                MockApplicationAsyncResource.setAdditionalDataResultByOid(
+                        Arrays.asList(
+                                lisatiedot()
+                                        .setOid(HAKEMUS2)
+                                        .build(),
+                                lisatiedot()
+                                        .setOid(HAKEMUS3).build()
+                        )
+                );
+                MockSuoritusrekisteriAsyncResource.setPostException(Optional.of(
+                    new HttpExceptionWithResponse("Something terrible happened", Response.serverError().entity("Boom").build())));
+                MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+
+                Response r =
+                        pistesyottoTuontiResource.getWebClient()
+                                .query("hakuOid", HAKU1)
+                                .query("hakukohdeOid",HAKUKOHDE1)
+                                .post(Entity.entity(pistesyottoExcel.getExcel().vieXlsx(),
+                                        MediaType.APPLICATION_OCTET_STREAM));
+                assertEquals(500, r.getStatus());
+            } finally {
+                MockSuoritusrekisteriAsyncResource.clear();
+                cleanMocks();
+            }
+        }
 }

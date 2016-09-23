@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.parametrit.service;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import fi.vm.sade.valinta.http.HttpExceptionWithStatus;
+import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
@@ -54,7 +54,7 @@ public class HakuParametritService {
                     promise.complete(parametrit);
                 },
                 (Throwable t) -> {
-                    if(t instanceof HttpExceptionWithStatus && ((HttpExceptionWithStatus)t).status == 404) {
+                    if(t instanceof HttpExceptionWithResponse && ((HttpExceptionWithResponse)t).status == 404) {
                         promise.complete(new ParametritDTO());
                     } else {
                         promise.completeExceptionally(t);
