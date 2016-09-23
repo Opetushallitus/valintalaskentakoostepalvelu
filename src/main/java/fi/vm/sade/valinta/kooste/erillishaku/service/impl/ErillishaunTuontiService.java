@@ -371,7 +371,14 @@ public class ErillishaunTuontiService {
         assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
 
         final List<ErillishaunHakijaDTO> hakijat = zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) ->
-                toErillishaunHakijaStream(haku, hakemus, rivi)).flatMap(s -> s).collect(Collectors.toList());
+                toErillishaunHakijaStream(haku, hakemus, rivi)).flatMap(s -> s)
+                .map(h -> {
+                    if (h.getHakemuksenTila() == null) {
+                        h.setPoistetaankoTulokset(true);
+                    }
+                    return h;
+                })
+                .collect(Collectors.toList());
 
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(
