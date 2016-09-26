@@ -219,10 +219,10 @@ public class PistesyottoTuontiService {
 
                     suoritusrekisteriAsyncResource.postSuoritus(suoritus).subscribe( tallennettuSuoritus -> {
                         prosessi.inkrementoiTehtyjaToita();
-                        String arvioArvosana = kielikoetulokset.get(tunnus).toUpperCase();
+                        String arvioArvosana = kielikoetulokset.get(tunnus).toLowerCase();
 
                         Arvosana arvosana = new Arvosana();
-                        arvosana.setAine("KIELIKOE");
+                        arvosana.setAine("kielikoe");
                         arvosana.setLisatieto(kieli.toUpperCase());
                         arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
                         arvosana.setSuoritus(tallennettuSuoritus.getId());
