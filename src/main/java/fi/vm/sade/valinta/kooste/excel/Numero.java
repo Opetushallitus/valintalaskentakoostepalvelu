@@ -41,11 +41,6 @@ public class Numero extends Solu {
         return Arrays.asList(min, max);
     }
 
-    @Override
-    protected boolean validoi() {
-        return this.numero != null;
-    }
-
     public Numero(Number numero) {
         this.numero = numero;
         this.muokattava = false;

@@ -6,12 +6,11 @@ import java.io.InputStream;
 import org.springframework.core.io.ClassPathResource;
 
 public class ExcelTestData {
-    public static InputStream erillisHakuHetullaJaSyntymaAjalla() {
-        return getInputStream("kustom_erillishaku.xlsx");
-    }
-
     public static InputStream kkHakuToisenAsteenValintatuloksella() {
         return getInputStream("kkhaku_toisenasteen_valintatuloksella.xlsx");
+    }
+    public static InputStream kkHakuPuuttuviaPakollisiaTietoja() {
+        return getInputStream("kkhaku_puuttuvia_pakollisia_tietoja.xlsx");
     }
 
     public static InputStream puutteellisiaTietojaAutotayttoaVarten() {
@@ -30,8 +29,8 @@ public class ExcelTestData {
         return getInputStream("erillishaku_tuntemattomalla_aidinkielella.xlsx");
     }
 
-    public static InputStream erillisHakuUusillaKentilla() {
-        return getInputStream("erillishaku_uusilla_kentilla.xlsx");
+    public static InputStream toisenAsteenErillisHaku() {
+        return getInputStream("erillishaku_toinen_aste.xlsx");
     }
 
     private static InputStream getInputStream(final String filename) {

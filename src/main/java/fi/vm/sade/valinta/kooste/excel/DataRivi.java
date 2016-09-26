@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.excel;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.google.common.collect.Lists;
 
@@ -16,7 +17,7 @@ public class DataRivi extends Rivi {
     }
 
     @Override
-    public boolean validoi(Rivi rivi) {
+    public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
         return true;
     }
 
@@ -38,8 +39,8 @@ public class DataRivi extends Rivi {
     }
 
     @Override
-    public Collection<Rivi> getToisteisetRivit() {
-        Collection<Rivi> rivit = Lists.newArrayList();
+    public List<Rivi> getToisteisetRivit() {
+        List<Rivi> rivit = Lists.newArrayList();
         for (Collection<Arvo> arvot : s) {
             rivit.add(asRivi(arvot));
         }

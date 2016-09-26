@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +105,7 @@ public class PistesyotonTuontiTestBase {
                 }).toList();
     }
 
-    void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot, final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot, final String tiedosto, final String hakuOid, final String hakukohdeOid) throws IOException {
+    void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot, final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot, final String tiedosto, final String hakuOid, final String hakukohdeOid) throws IOException, ExcelValidointiPoikkeus {
         List<Hakemus> hakemukset = Collections.emptyList();
         Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();

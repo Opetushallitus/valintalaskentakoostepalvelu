@@ -22,11 +22,11 @@ import java.util.List;
  */
 public class ExcelImportUtil {
 
-    public static Collection<Rivi> importExcel(InputStream excel) throws Throwable {
+    public static List<Rivi> importExcel(InputStream excel) throws Throwable {
         XSSFWorkbook workbook = new XSSFWorkbook(excel);
         XSSFSheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
         int lastRowIndex = sheet.getLastRowNum();
-        Collection<Rivi> rivit = Lists.newArrayList();
+        List<Rivi> rivit = Lists.newArrayList();
         for (int i = 0; i <= lastRowIndex; ++i) {
             XSSFRow row = sheet.getRow(i);
             // LOG.error("rivi [{}]", i);
@@ -40,11 +40,11 @@ public class ExcelImportUtil {
         }
         return rivit;
     }
-    public static Collection<Rivi> importHSSFExcel(InputStream excel) throws Throwable {
+    public static List<Rivi> importHSSFExcel(InputStream excel) throws Throwable {
         HSSFWorkbook workbook = new HSSFWorkbook(excel);
         HSSFSheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
         int lastRowIndex = sheet.getLastRowNum();
-        Collection<Rivi> rivit = Lists.newArrayList();
+        List<Rivi> rivit = Lists.newArrayList();
         for (int i = 0; i <= lastRowIndex; ++i) {
             HSSFRow row = sheet.getRow(i);
             // LOG.error("rivi [{}]", i);

@@ -37,7 +37,7 @@ public class SuoritaHakuImportKomponentti {
         // null,
         // null,
         // null);
-        LOG.info("Importoidaan hakukohteita yhteensä kpl");
+        LOG.info("Importoidaan hakukohteita yhteensä {} kpl", a.getResult().getHakukohdeOids().size());
 
         Collection<String> hakukohdeOids = a.getResult().getHakukohdeOids();
 

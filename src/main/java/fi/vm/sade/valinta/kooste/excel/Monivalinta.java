@@ -33,14 +33,6 @@ public class Monivalinta extends Solu {
         return muokattava;
     }
 
-    @Override
-    protected boolean validoi() {
-        if (vaihtoehdot.isEmpty() || teksti == null) {
-            return false;
-        }
-        return vaihtoehdot.contains(teksti);
-    }
-
     public Collection<String> getVaihtoehdot() {
         return vaihtoehdot;
     }

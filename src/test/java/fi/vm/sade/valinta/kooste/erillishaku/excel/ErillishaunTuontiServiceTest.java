@@ -2,10 +2,8 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHenkiloOidilla;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHetullaJaSyntymaAjalla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuSyntymaAjalla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuUusillaKentilla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.kkHakuToisenAsteenValintatuloksella;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.puutteellisiaTietojaAutotayttoaVarten;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -107,7 +105,7 @@ public class ErillishaunTuontiServiceTest {
     public final static class HetullaJaSyntymaAjalla extends ErillisHakuTuontiTestCase {
         @Test
         public void tuontiSuoritetaan() throws IOException, InterruptedException {
-            importData(erillisHakuHetullaJaSyntymaAjalla());
+            importData(kkHakuToisenAsteenValintatuloksella());
 
             assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
             final HenkiloCreateDTO henkilo = henkiloAsyncResource.henkiloPrototyypit.get(0);
@@ -194,20 +192,6 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(SYNTYMAAIKAFORMAT.parseDateTime(erillishakuRivi.getSyntymaAika()).toDate(), henkilo.syntymaaika);
             assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
 
-            assertEquals(1, applicationAsyncResource.results.size());
-            applicationAsyncResource.results.get(0);
-            final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
-            assertEquals("haku1", appResult.hakuOid);
-            assertEquals("kohde1", appResult.hakukohdeOid);
-            assertEquals("tarjoaja1", appResult.tarjoajaOid);
-            assertEquals(1, appResult.hakemusPrototyypit.size());
-            final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
-            assertEquals(personOidHenkiloPalvelusta, hakemusProto.getHakijaOid());
-            assertEquals(erillishakuRivi.getHenkilotunnus(), hakemusProto.getHenkilotunnus());
-            assertEquals(erillishakuRivi.getEtunimi(), hakemusProto.getEtunimi());
-            assertEquals(erillishakuRivi.getSukunimi(), hakemusProto.getSukunimi());
-            assertEquals(erillishakuRivi.getSyntymaAika(), hakemusProto.getSyntymaAika());
-
             assertEquals(1, tilaAsyncResource.results.size());
             final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
             assertEquals(MockData.hakuOid, tilaResult.hakuOid);
@@ -227,7 +211,7 @@ public class ErillishaunTuontiServiceTest {
 
     private static ErillishakuRivi createRow(String henkilotunnus, String personOid, String hakemusOid) {
         return new ErillishakuRivi(hakemusOid, "Toppurainen", "Joonas", henkilotunnus, "tuomas.toppurainen@example.com", "10.12.1975", "MIES", personOid,
-            "FI", "HYVAKSYTTY", false, new Date(), "KESKEN", "EI_TEHTY", false, false, "FI", "045-6709709", "Kaisaniemenkatu 2 B", "00100", "Helsinki", "", "", "", "");
+            "FI", "HYVAKSYTTY", false, new Date(), "KESKEN", "EI_TEHTY", false, false, "FI", "045-6709709", "Kaisaniemenkatu 2 B", "00100", "Helsinki", "FIN", "FIN", "Helsinki", true, "FIN");
     }
 
     public final static class TuntemattomallaAidinkielella extends ErillisHakuTuontiTestCase {
@@ -236,13 +220,6 @@ public class ErillishaunTuontiServiceTest {
             importData(erillisHakuTuntemattomallaKielella());
             applicationAsyncResource.results.get(0);
             assertEquals(1, applicationAsyncResource.results.size());
-        }
-    }
-
-    public final static class UusillaKentilla extends ErillisHakuTuontiTestCase {
-        @Test
-        public void tuodaan() {
-            importData(erillisHakuUusillaKentilla());
         }
     }
 
@@ -262,7 +239,7 @@ public class ErillishaunTuontiServiceTest {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, failingHenkiloResource, valintaTulosServiceAsyncResource, koodistoCachedAsyncResource, Schedulers.immediate());
             assertEquals(0, tilaAsyncResource.results.size());
             assertEquals(0, applicationAsyncResource.results.size());
-            tuontiService.tuoExcelistä(null, prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä(null, prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             Mockito.verify(prosessi).keskeyta();
         }
 
@@ -275,7 +252,7 @@ public class ErillishaunTuontiServiceTest {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(failingResource, applicationAsyncResource, henkiloAsyncResource, valintaTulosServiceAsyncResource, koodistoCachedAsyncResource, Schedulers.immediate());
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
-            tuontiService.tuoExcelistä("bob",prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä("bob",prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             Mockito.verify(prosessi).keskeyta((Collection<Poikkeus>)Matchers.any());
         }
 
@@ -288,7 +265,7 @@ public class ErillishaunTuontiServiceTest {
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             KirjeProsessi prosessi = new ErillishakuProsessiDTO(1);
 
-            tuontiService.tuoExcelistä(null,prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä(null,prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             assertTrue(prosessi.isKeskeytetty());
         }
     }

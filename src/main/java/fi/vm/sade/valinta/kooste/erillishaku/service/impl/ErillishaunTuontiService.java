@@ -9,6 +9,7 @@ import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
 import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static rx.schedulers.Schedulers.newThread;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -28,6 +29,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
+import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -47,6 +49,7 @@ import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
@@ -114,21 +117,28 @@ public class ErillishaunTuontiService {
     }
 
     public void tuoExcelistä(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
-        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data));
+        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data), true);
     }
 
     public void tuoJson(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit) {
-        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit));
+        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit), false);
     }
 
-    private void tuoData(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer) {
+    private void tuoData(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer, final boolean saveApplications) {
         Observable.just(erillishaku).subscribeOn(scheduler).subscribe(haku -> {
             final ImportedErillisHakuExcel erillishakuExcel;
             try {
                 erillishakuExcel = importer.apply(haku);
-                tuoHakijatJaLuoHakemukset(username, prosessi, erillishakuExcel, haku);
+                tuoHakijatJaLuoHakemukset(username, prosessi, erillishakuExcel, saveApplications, haku);
+            } catch(ErillishaunDataException dataException) {
+                LOG.warn("excel ei validi:", dataException);
+                prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
+                        dataException.getPoikkeusRivit().stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
+            } catch(ExcelValidointiPoikkeus validointiPoikkeus) {
+                LOG.warn("excel ei validi", validointiPoikkeus);
+                prosessi.keskeyta(validointiPoikkeus.getMessage());
             } catch(Exception e) {
-                LOG.error("tuoData exception!", e);
+                LOG.error("unexpexted tuoData exception!", e);
                 prosessi.keskeyta();
             }
         }, poikkeus -> {
@@ -137,11 +147,10 @@ public class ErillishaunTuontiService {
         }, () -> LOG.info("Tuonti lopetettiin"));
     }
 
-    private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
+    private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit, final boolean saveApplications) {
         if (rivit.isEmpty()) {
-            LOG.error("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
             prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
-            throw new RuntimeException("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
+            throw new RuntimeException(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
         }
 
         Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
@@ -156,9 +165,9 @@ public class ErillishaunTuontiService {
                     ErillishakuRivi rivi = riviJaIndeksi.getValue();
 
                     if (!rivi.isPoistetaankoRivi()) {
-                        String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
-                        if (validointiVirhe != null) {
-                            poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
+                        List<String> errors = validoi(haku.getHakutyyppi(), rivi, saveApplications);
+                        if(errors.size() > 0) {
+                            poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi,  StringUtils.join(errors, " ") + " : " + rivi));
                         }
                     } else {
                         // validoi poistettavaksi merkitty rivi
@@ -168,8 +177,6 @@ public class ErillishaunTuontiService {
                     }
                 });
         if(!poikkeusRivis.isEmpty()) {
-            prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
-                    poikkeusRivis.stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
             throw new ErillishaunDataException(poikkeusRivis);
         }
     }
@@ -212,18 +219,19 @@ public class ErillishaunTuontiService {
                         rivi.getAsuinmaa(),
                         rivi.getKansalaisuus(),
                         rivi.getKotikunta(),
-                        rivi.getPohjakoulutusMaaToinenAste());
+                        rivi.getToisenAsteenSuoritus(),
+                        rivi.getToisenAsteenSuoritusmaa());
             } else {
                 return rivi;
                 }
             }).collect(Collectors.toList());
         }
 
-    private void tuoHakijatJaLuoHakemukset(final String username, final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final ErillishakuDTO haku) throws Exception {
+    private void tuoHakijatJaLuoHakemukset(final String username, final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final boolean saveApplications, final ErillishakuDTO haku) throws Exception {
         LOG.info("Aloitetaan tuonti. Rivit=" + erillishakuExcel.rivit.size());
         final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
 
-        validoiRivit(prosessi,haku,rivit);
+        validoiRivit(prosessi,haku,rivit,saveApplications);
 
         List<ErillishakuRivi> lisattavatTaiKeskeneraiset = rivit.stream()
                 .filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList());
@@ -247,12 +255,10 @@ public class ErillishaunTuontiService {
                 throw e;
             }
             LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
-            hakemukset = kasitteleHakemukset(haku, henkilot, lisattavatTaiKeskeneraiset, prosessi);
-        } else {
-            hakemukset = Collections.emptyList();
+            lisattavatTaiKeskeneraiset = kasitteleHakemukset(haku, henkilot, lisattavatTaiKeskeneraiset, saveApplications, prosessi);
         }
         LOG.info("Viedaan hakijoita ({}kpl) jonoon {}", lisattavatTaiKeskeneraiset.size(), haku.getValintatapajononNimi());
-        tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset, prosessi);
+        tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, prosessi);
     }
 
     private String convertKansalaisuusKoodi(String kansalaisuus) {
@@ -267,12 +273,19 @@ public class ErillishaunTuontiService {
                 .orElse(null);
     }
 
-    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
+    private List<ErillishakuRivi> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, boolean saveApplications, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
         try {
-            final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
-                .map(h -> createHakemusprototyyppi(h, lisattavatTaiKeskeneraiset))
-                .collect(Collectors.toList());
-            return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+            final List<ErillishakuRivi> rivitWithHenkiloData = henkilot.stream().map(h -> riviWithHenkiloData(h, lisattavatTaiKeskeneraiset)).collect(Collectors.toList());
+            if(saveApplications) {
+                List<HakemusPrototyyppi> hakemusPrototyypit = rivitWithHenkiloData.stream().map(rivi -> createHakemusprototyyppi(rivi)).collect(Collectors.toList());
+                LOG.info("Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
+                final List<Hakemus> hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+                assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
+                return zip(hakemukset.stream(), rivitWithHenkiloData.stream(), (hakemus, rivi) ->
+                        rivi.withHakemusOid(hakemus.getOid())).collect(Collectors.toList());
+            } else {
+                return rivitWithHenkiloData;
+            }
         } catch (HenkilonRivinPaattelyEpaonnistuiException e) {
             LOG.error(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE, e);
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE + " " + e.getMessage()));
@@ -284,9 +297,9 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
+    private ErillishakuRivi riviWithHenkiloData(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
         ErillishakuRivi rivi = etsiHenkiloaVastaavaRivi(henkilo, kaikkiLisattavatTaiKeskeneraiset);
-        return createHakemusprototyyppi(henkilo, rivi);
+        return riviWithHenkiloData(henkilo, rivi);
     }
 
     private ErillishakuRivi etsiHenkiloaVastaavaRivi(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
@@ -314,25 +327,60 @@ public class ErillishaunTuontiService {
         throw new HenkilonRivinPaattelyEpaonnistuiException("Ei löytynyt " + kaikkiLisattavatTaiKeskeneraiset.size() + " tuodusta rivistä henkilöä " + henkilo);
     }
 
-    private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, ErillishakuRivi rivi) {
+    private ErillishakuRivi riviWithHenkiloData(Henkilo henkilo, ErillishakuRivi rivi) {
+        String aidinkieli = kielisyysToString(henkilo.getAidinkieli());
+        String asiointikieli = kielisyysToString(henkilo.getAsiointiKieli());
+        String sukupuoli = henkilo.getSukupuoli();
+        return new ErillishakuRivi(
+                        rivi.getHakemusOid(),
+                        henkilo.getSukunimi(),
+                        henkilo.getEtunimet(),
+                        henkilo.getHetu(),
+                        StringUtils.trimToEmpty(rivi.getSahkoposti()),
+                        HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()),
+                        isNotBlank(sukupuoli) ? sukupuoli : Sukupuoli.toHenkiloString(rivi.getSukupuoli()),
+                        henkilo.getOidHenkilo(),
+                        isNotBlank(aidinkieli) ? aidinkieli : rivi.getAidinkieli(),
+                        rivi.getHakemuksenTila(),
+                        rivi.getEhdollisestiHyvaksyttavissa(),
+                        rivi.getHyvaksymiskirjeLahetetty(),
+                        rivi.getVastaanottoTila(),
+                        rivi.getIlmoittautumisTila(),
+                        rivi.isJulkaistaankoTiedot(),
+                        rivi.isPoistetaankoRivi(),
+                        isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli(),
+                        rivi.getPuhelinnumero(),
+                        rivi.getOsoite(),
+                        rivi.getPostinumero(),
+                        rivi.getPostitoimipaikka(),
+                        rivi.getAsuinmaa(),
+                        rivi.getKansalaisuus(),
+                        rivi.getKotikunta(),
+                        rivi.getToisenAsteenSuoritus(),
+                        rivi.getToisenAsteenSuoritusmaa()
+        );
+    }
+
+    private HakemusPrototyyppi createHakemusprototyyppi(ErillishakuRivi rivi) {
         HakemusPrototyyppi hakemus = new HakemusPrototyyppi();
-        hakemus.setAidinkieli(kielisyysToString(henkilo.getAidinkieli()));
-        hakemus.setAsiointikieli(kielisyysToString(henkilo.getAsiointiKieli()));
+        hakemus.setAidinkieli(rivi.getAidinkieli());
+        hakemus.setAsiointikieli(rivi.getAsiointikieli());
         hakemus.setAsuinmaa(rivi.getAsuinmaa());
-        hakemus.setEtunimi(henkilo.getEtunimet());
-        hakemus.setHakijaOid(henkilo.getOidHenkilo());
-        hakemus.setHenkilotunnus(henkilo.getHetu());
+        hakemus.setEtunimi(rivi.getEtunimi());
+        hakemus.setHakijaOid(rivi.getPersonOid());
+        hakemus.setHenkilotunnus(rivi.getHenkilotunnus());
         hakemus.setKansalaisuus(rivi.getKansalaisuus());
         hakemus.setKotikunta(convertKuntaNimiToKuntaKoodi(rivi.getKotikunta()));
         hakemus.setOsoite(rivi.getOsoite());
         hakemus.setPostinumero(rivi.getPostinumero());
         hakemus.setPostitoimipaikka(rivi.getPostitoimipaikka());
         hakemus.setPuhelinnumero(rivi.getPuhelinnumero());
-        hakemus.setSukunimi(henkilo.getSukunimi());
-        hakemus.setSukupuoli(henkilo.getSukupuoli());
+        hakemus.setSukunimi(rivi.getSukunimi());
+        hakemus.setSukupuoli(Sukupuoli.toHenkiloString(rivi.getSukupuoli()));
         hakemus.setSahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()));
-        hakemus.setSyntymaAika(henkilo.getSyntymaaika());
-        hakemus.setToinenAstePohjakoulutusMaa(rivi.getPohjakoulutusMaaToinenAste());
+        hakemus.setSyntymaAika(rivi.getSyntymaAika());
+        hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
+        hakemus.setToisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa());
         return hakemus;
     }
 
@@ -367,11 +415,9 @@ public class ErillishaunTuontiService {
         return resultDTO;
     }
 
-    private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset, final KirjeProsessi prosessi) {
-        assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
-
-        final List<ErillishaunHakijaDTO> hakijat = zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) ->
-                toErillishaunHakijaStream(haku, hakemus, rivi)).flatMap(s -> s).collect(Collectors.toList());
+    private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat, final KirjeProsessi prosessi) {
+        final List<ErillishaunHakijaDTO> hakijat = lisattavatTaiKeskeneraiset.stream().flatMap(rivi ->
+                toErillishaunHakijaStream(haku, rivi)).collect(Collectors.toList());
 
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(
@@ -473,28 +519,24 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private Stream<ErillishaunHakijaDTO> toErillishaunHakijaStream(ErillishakuDTO haku, Hakemus hakemus, ErillishakuRivi rivi) {
-        HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+    private Stream<ErillishaunHakijaDTO> toErillishaunHakijaStream(ErillishakuDTO haku, ErillishakuRivi rivi) {
         return Stream.of(new ErillishaunHakijaDTO(
                 haku.getValintatapajonoOid(),
-                hakemus.getOid(),
+                rivi.getHakemusOid(),
                 haku.getHakukohdeOid(),
                 rivi.isJulkaistaankoTiedot(),
-                hakemus.getPersonOid(),
+                rivi.getPersonOid(),
                 haku.getHakuOid(),
                 haku.getTarjoajaOid(),
                 valintatuloksenTila(rivi),
                 rivi.getEhdollisestiHyvaksyttavissa(),
                 ilmoittautumisTila(rivi),
                 hakemuksenTila(rivi),
-                wrapper.getEtunimi(),
-                wrapper.getSukunimi(),
-                // Poistetaan rivi myös siinä tapauksessa että hakemuksen tila on tyhjä, muttei kuitenkaan
-                // passivoida hakemusta!
+                rivi.getEtunimi(),
+                rivi.getSukunimi(),
                 Optional.of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
                 rivi.getHyvaksymiskirjeLahetetty(),
                 Lists.newArrayList()));
-
     }
 
     private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja, String selite) {
@@ -524,10 +566,8 @@ public class ErillishaunTuontiService {
         }
     }
 
-    /**
-     * @return Validointivirhe tai null jos kaikki ok
-     */
-    private String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
+    private List<String> validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi, boolean saveApplications) {
+        List<String> errors = new ArrayList<>();
         // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika+sukupuoli,henkilö-oid
         if (// mikään seuraavista ei ole totta:
                 !(// on syntymaika+sukupuoli tunnistus
@@ -537,76 +577,76 @@ public class ErillishaunTuontiService {
                         !isBlank(rivi.getHenkilotunnus()) ||
                         // on henkilo OID
                         !isBlank(rivi.getPersonOid()))) {
-            return "Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + rivi.toString();
+            errors.add("Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid olivat tyhjiä (vähintään yksi tunniste on syötettävä).");
         }
         // Syntymäaika oikeassa formaatissa
         if(!isBlank(rivi.getSyntymaAika())) {
             try {
                 ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime(rivi.getSyntymaAika());
             } catch(Exception e){
-                return "Syntymäaika '" + rivi.getSyntymaAika() + "' on väärin muotoiltu. Syntymäaika on syötettävä muodossa pp.mm.vvvv. " + rivi.toString();
+                errors.add("Syntymäaika '" + rivi.getSyntymaAika() + "' on väärin muotoiltu (syötettävä muodossa pp.mm.vvvv).");
             }
         }
         // Jos vahvatunniste puuttuu niin nimet on pakollisia tietoja
         if(isBlank(rivi.getPersonOid())) {
             if (isBlank(rivi.getEtunimi()) || isBlank(rivi.getSukunimi())) {
-                return "Etunimi ja sukunimi on pakollisia. " + rivi.toString();
+                errors.add("Etunimi ja sukunimi on pakollisia.");
             }
         }
         // Henkilötunnus on oikeassa formaatissa jos sellainen on syötetty
         if(!isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
-            return "Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen. " + rivi.toString();
+            errors.add("Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen.");
         }
         if (!"KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
             ValintatuloksenTila vt = valintatuloksenTila(rivi);
             String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vt, ilmoittautumisTila(rivi));
             if (tilaVirhe != null) {
-                return tilaVirhe + ". " + rivi.toString();
+                errors.add(tilaVirhe + ".");
             }
         }
         if((isBlank(rivi.getPersonOid()) && isBlank(rivi.getHenkilotunnus())) && Sukupuoli.EI_SUKUPUOLTA.equals(rivi.getSukupuoli())) {
-            return "Sukupuoli ("+rivi.getSukupuoli()+") on pakollinen kun henkilötunnus ja personOID puuttuu. " + rivi.toString();
+            errors.add("Sukupuoli ("+rivi.getSukupuoli()+") on pakollinen kun henkilötunnus ja personOID puuttuu.");
         }
 
         if (isBlank(rivi.getHenkilotunnus()) &&
                 isBlank(rivi.getPersonOid()) &&
                 StringUtils.trimToEmpty(rivi.getAidinkieli()).isEmpty()) {
-            return "Äidinkieli puuttuu. Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat";
+            errors.add("Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat.");
         }
 
         Map<String, Koodi> kieliKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KIELI);
         if (! StringUtils.trimToEmpty(rivi.getAidinkieli()).isEmpty() &&
                 ! kieliKoodit.keySet().contains(rivi.getAidinkieli().toUpperCase())) {
-            return "Äidinkielen kielikoodi ("+rivi.getAidinkieli()+") on virheellinen." + rivi.toString();
+            errors.add("Äidinkielen kielikoodi ("+rivi.getAidinkieli()+") on virheellinen.");
         }
 
         if (!isBlank(rivi.getAsiointikieli()) && !ErillishakuDataRivi.ASIONTIKIELEN_ARVOT.contains(StringUtils.trimToEmpty(rivi.getAsiointikieli()).toLowerCase())) {
-            return "Asiointikieli on virheellinen. Sallitut arvot ["+
+            errors.add("Asiointikieli (" + rivi.getAsiointikieli() + ") on virheellinen (sallitut arvot ["+
                     StringUtils.join(ErillishakuDataRivi.ASIONTIKIELEN_ARVOT, '|') +
-                    "] " + rivi.toString();
+                    "]).");
         }
 
 
         Map<String, Koodi> maaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         String asuinmaa = StringUtils.trimToEmpty(rivi.getAsuinmaa()).toUpperCase();
         if (!asuinmaa.isEmpty() && !maaKoodit.keySet().contains(asuinmaa)) {
-            return "Asuinmaan maakoodi (" +  rivi.getAsuinmaa() + ") on virheellinen. " + rivi.toString();
+            errors.add("Asuinmaan maakoodi (" +  rivi.getAsuinmaa() + ") on virheellinen.");
         }
 
         String kansalaisuus = StringUtils.trimToEmpty(rivi.getKansalaisuus()).toUpperCase();
         if (! kansalaisuus.isEmpty() && !maaKoodit.keySet().contains(kansalaisuus)) {
-            return "Kansalaisuuden maakoodi (" + rivi.getKansalaisuus() + ") on virheellinen. " + rivi.toString();
+            errors.add("Kansalaisuuden maakoodi (" + rivi.getKansalaisuus() + ") on virheellinen.");
         }
 
-        String pohjakoulutusMaaToinenAste = StringUtils.trimToEmpty(rivi.getPohjakoulutusMaaToinenAste()).toUpperCase();
-        if (! pohjakoulutusMaaToinenAste.isEmpty() && !maaKoodit.keySet().contains(pohjakoulutusMaaToinenAste)) {
-            return "Pohjakoulutuksen (toinen aste) maakoodi (" + rivi.getPohjakoulutusMaaToinenAste() + ") on virheellinen. " + rivi.toString();
+        String toisenAsteenSuoritusmaa = StringUtils.trimToEmpty(rivi.getToisenAsteenSuoritusmaa()).toUpperCase();
+        if (! toisenAsteenSuoritusmaa.isEmpty() && !maaKoodit.keySet().contains(toisenAsteenSuoritusmaa)) {
+            errors.add("Toisen asteen pohjakoulutuksen suoritusmaan maakoodi (" + rivi.getToisenAsteenSuoritusmaa() + ") on virheellinen.");
         }
 
         String kotikunta = StringUtils.trimToEmpty(rivi.getKotikunta());
         if(!kotikunta.isEmpty()) {
             if (convertKuntaNimiToKuntaKoodi(kotikunta) == null) {
-                return "Virheellinen kotikunta (" + rivi.getKotikunta() + "). " + rivi.toString();
+                errors.add("Virheellinen kotikunta (" + rivi.getKotikunta() + ").");
             }
         }
 
@@ -614,7 +654,7 @@ public class ErillishaunTuontiService {
             Map<String, Koodi> postiKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
             String postinumero = StringUtils.trimToEmpty(rivi.getPostinumero());
             if (!postinumero.isEmpty() && !postiKoodit.keySet().contains(postinumero)) {
-                return "Virheellinen suomalainen postinumero (" + rivi.getPostinumero() + "). " + rivi.toString();
+                errors.add("Virheellinen suomalainen postinumero (" + rivi.getPostinumero() + ").");
             }
 
             String postitoimipaikka = StringUtils.trimToEmpty(rivi.getPostitoimipaikka()).toUpperCase();
@@ -625,23 +665,42 @@ public class ErillishaunTuontiService {
                         .map(Metadata::getNimi)
                         .anyMatch(x -> x.equalsIgnoreCase(postitoimipaikka));
                 if (!postitoimipaikkaKoodistossa) {
-                    return "Virheellinen suomalainen postitoimipaikka (" + rivi.getPostinumero() + "). " + rivi.toString();
+                    errors.add("Virheellinen suomalainen postitoimipaikka (" + rivi.getPostinumero() + ").");
                 }
 
                 if (!postinumero.isEmpty() &&
                         !postiKoodit.get(postinumero).getMetadata().stream().anyMatch(m -> m.getNimi().equalsIgnoreCase(postitoimipaikka))) {
-                    return "Annettu suomalainen postinumero (" + rivi.getPostinumero() + ") ei vastaa annettua postitoimipaikkaa ("
-                            + rivi.getPostitoimipaikka() + "). " + rivi.toString();
+                    errors.add("Annettu suomalainen postinumero (" + rivi.getPostinumero() + ") ei vastaa annettua postitoimipaikkaa ("
+                            + rivi.getPostitoimipaikka() + ").");
                 }
             }
         }
 
         String puhelinnumero = StringUtils.trimToEmpty(rivi.getPuhelinnumero());
         if (! puhelinnumero.isEmpty() && !puhelinnumero.matches(PHONE_PATTERN)) {
-            return "Virheellinen puhelinnumero (" + rivi.getPuhelinnumero() + "). " + rivi.toString();
+            errors.add("Virheellinen puhelinnumero (" + rivi.getPuhelinnumero() + ").");
         }
 
-        return null;
+        if(saveApplications && tyyppi == Hakutyyppi.KORKEAKOULU) {
+            validateRequiredValue(asuinmaa, "asuinmaa", errors);
+            validateRequiredValue(kansalaisuus, "kansalaisuus", errors);
+            validateRequiredValue(kotikunta, "kotikunta", errors);
+
+            Boolean toisenAsteenSuoritus = rivi.getToisenAsteenSuoritus();
+            validateRequiredValue(ErillishakuDataRivi.getTotuusarvoString(toisenAsteenSuoritus), "toisen asteen suoritus", errors);
+            if(BooleanUtils.isTrue(toisenAsteenSuoritus)) {
+                validateRequiredValue(toisenAsteenSuoritusmaa, "toisen asteen pohjakoulutuksen maa", errors);
+            } else if(StringUtils.isNotBlank(toisenAsteenSuoritusmaa)) {
+                errors.add("Toisen asteen pohjakoulutuksen suoritusmaata (" + rivi.getToisenAsteenSuoritusmaa() + ") ei saa antaa, jos ei toisen asteen pohjakoulutusta ole suoritettu.");
+            }
+        }
+        return errors;
+    }
+
+    private static void validateRequiredValue(String value, String name, List<String> errors) {
+        if(StringUtils.isBlank(value)) {
+            errors.add("Pakollinen tieto \"" + name + "\" puuttuu.");
+        }
     }
 
     public static class HenkilonRivinPaattelyEpaonnistuiException extends RuntimeException {

@@ -37,7 +37,7 @@ public class ValintatapajonoTuontiTest extends ValintatapajonoTestTools {
 
 
     @Test
-    public void testaaValintatapajonoTuonti() throws JsonSyntaxException, IOException {
+    public void testaaValintatapajonoTuonti() throws Exception {
         List<ValintatietoValinnanvaiheDTO> valinnanvaihe = GSON.fromJson(resurssi("valinnanvaihe.json"), valinnanVaiheListType);
         List<Hakemus> hakemukset = GSON.fromJson(resurssi("listfull.json"), hakemusListType);
         ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
@@ -72,7 +72,7 @@ public class ValintatapajonoTuontiTest extends ValintatapajonoTestTools {
     }
 
     @Test
-    public void testaaValintatapajonoKokonaispisteetTuonti() throws JsonSyntaxException, IOException {
+    public void testaaValintatapajonoKokonaispisteetTuonti() throws Exception {
         List<ValintatietoValinnanvaiheDTO> valinnanvaihe = GSON.fromJson(resurssi("valinnanvaihe.json"), valinnanVaiheListType);
         List<Hakemus> hakemukset = GSON.fromJson(resurssi("listfull.json"), hakemusListType);
         ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();

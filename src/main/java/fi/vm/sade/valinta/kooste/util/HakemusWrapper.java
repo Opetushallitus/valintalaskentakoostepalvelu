@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.util;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
@@ -42,7 +43,8 @@ public class HakemusWrapper {
     private final static String KOTIKUNTA                       = "kotikunta";
     private final static String NAINEN                          = "2";
     private final static String MIES                            = "1";
-    private final static String POHJAKOULUTUSMAA_TOINEN_ASTE    = "pohjakoulutusmaa_toinen_aste";
+    public final static String TOISEN_ASTEEN_SUORITUS           = "toisen_asteen_suoritus";
+    public final static String TOISEN_ASTEEN_SUORITUSMAA        = "toisen_asteen_suoritusmaa";
     public final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
 
     private Yhteystiedot yhteystiedot = null;
@@ -189,10 +191,19 @@ public class HakemusWrapper {
         return null;
     }
 
-    public String getPohjakoulutusmaaToinenAste() {
+    public Boolean getToisenAsteenSuoritus() {
         getKoulutustausta();
-        if (koulutustausta.containsKey(POHJAKOULUTUSMAA_TOINEN_ASTE)) {
-            return koulutustausta.get(POHJAKOULUTUSMAA_TOINEN_ASTE);
+        if (koulutustausta.containsKey(TOISEN_ASTEEN_SUORITUS)) {
+            String l = koulutustausta.get(TOISEN_ASTEEN_SUORITUS);
+            return BooleanUtils.toBooleanObject(l);
+        }
+        return null;
+    }
+
+    public String getToisenAsteenSuoritusmaa() {
+        getKoulutustausta();
+        if (koulutustausta.containsKey(TOISEN_ASTEEN_SUORITUSMAA)) {
+            return koulutustausta.get(TOISEN_ASTEEN_SUORITUSMAA);
         }
         return StringUtils.EMPTY;
     }

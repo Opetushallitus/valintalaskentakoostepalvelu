@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.excel.DataRivi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
-import fi.vm.sade.valinta.kooste.excel.SoluLukija;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
-import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Arrays.*;
 
@@ -27,11 +24,10 @@ public class PistesyottoDataRivi extends DataRivi {
 
     @Override
     public boolean validoi(Rivi rivi) {
-        SoluLukija lukija = new SoluLukija(rivi.getSolut());
-        String oid = lukija.getArvoAt(0);
-        String nimi = lukija.getArvoAt(1);
-        String hetu = lukija.getArvoAt(2);
-        String pvm = lukija.getArvoAt(3);
+        String oid = rivi.getArvoAt(0);
+        String nimi = rivi.getArvoAt(1);
+        String hetu = rivi.getArvoAt(2);
+        String pvm = rivi.getArvoAt(3);
         final boolean isEmptyRow = asList(oid,nimi,hetu,pvm).stream().allMatch(String::isEmpty);
         if(isEmptyRow) {
             return true;
@@ -40,8 +36,8 @@ public class PistesyottoDataRivi extends DataRivi {
         {
             int i = 4;
             for (PistesyottoDataArvo dataArvo : dataArvot) {
-                arvot.add(dataArvo.asPistesyottoArvo(lukija.getArvoAt(i),
-                        lukija.getArvoAt(i + 1)));
+                arvot.add(dataArvo.asPistesyottoArvo(rivi.getArvoAt(i),
+                        rivi.getArvoAt(i + 1)));
                 i += 2;
             }
         }

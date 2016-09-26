@@ -24,26 +24,26 @@ import java.util.Map;
 public class Excel {
     private static final Logger LOG = LoggerFactory.getLogger(Excel.class);
     public static final int VAKIO_LEVEYS = 8500;
-    private final Collection<Rivi> rivit;
+    private final List<Rivi> rivit;
     private final String nimi;
     private final int[] sarakkeetPysty;
     private final int[] sarakkeetVaaka;
 
-    public Excel(String nimi, Collection<Rivi> rivit) {
+    public Excel(String nimi, List<Rivi> rivit) {
         this.rivit = rivit;
         this.nimi = nimi;
         this.sarakkeetPysty = new int[]{};
         this.sarakkeetVaaka = new int[]{};
     }
 
-    public Excel(String nimi, Collection<Rivi> rivit, int[] sarakkeetPysty, int[] sarakkeetVaaka) {
+    public Excel(String nimi, List<Rivi> rivit, int[] sarakkeetPysty, int[] sarakkeetVaaka) {
         this.rivit = rivit;
         this.nimi = nimi;
         this.sarakkeetPysty = sarakkeetPysty;
         this.sarakkeetVaaka = sarakkeetVaaka;
     }
 
-    public Collection<Rivi> getRivit() {
+    public List<Rivi> getRivit() {
         return rivit;
     }
 

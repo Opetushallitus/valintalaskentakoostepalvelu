@@ -4,7 +4,6 @@ import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
@@ -15,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
@@ -24,9 +24,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -45,33 +43,11 @@ public class ErillishakuResourceTest {
         ValintaKoosteJetty.startShared();
     }
 
-    @Test
-    public void vientiExcelTiedostoon() throws IOException {
-        MockApplicationAsyncResource.setResult(null);
+    private void testVientiExcelTiedostoon(Hakutyyppi hakutyyppi) throws IOException {
+        MockApplicationAsyncResource.setResult(createVientiHakemus(hakutyyppi));
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
-            .query("hakutyyppi", "KORKEAKOULU")
-            .query("hakuOid", hakuOid)
-            .query("hakukohdeOid", hakukohdeOid)
-            .query("tarjoajaOid", tarjoajaOid)
-            .query("valintatapajonoOid", valintatapajonoOid)
-            .query("valintatapajononNimi", "varsinainen jono")
-            .type(MediaType.APPLICATION_JSON_TYPE)
-            .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(Arrays.asList(), MediaType.APPLICATION_JSON), ProsessiId.class);
-
-        String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
-        final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
-        assertNotNull(storedDocument);
-        verifyCreatedExcelDocument(storedDocument);
-    }
-
-    @Test
-    public void vientiExcelTiedostoon2() throws IOException {
-        MockApplicationAsyncResource.setResult(createVientiHakemus());
-        final String url = root + "/erillishaku/vienti";
-        final ProsessiId prosessiId = createClient(url)
-                .query("hakutyyppi", "KORKEAKOULU")
+                .query("hakutyyppi", hakutyyppi)
                 .query("hakuOid", hakuOid)
                 .query("hakukohdeOid", hakukohdeOid)
                 .query("tarjoajaOid", tarjoajaOid)
@@ -84,10 +60,20 @@ public class ErillishakuResourceTest {
         String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
         final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
         assertNotNull(storedDocument);
-        verifyCreatedExcelDocument2(storedDocument);
+        verifyCreatedExcelDocument(hakutyyppi, storedDocument);
     }
 
-    private List<Hakemus> createVientiHakemus() {
+    @Test
+    public void vientiExcelTiedostoonKK() throws IOException {
+        testVientiExcelTiedostoon(Hakutyyppi.KORKEAKOULU);
+    }
+
+    @Test
+    public void vientiExcelTiedostoonToinenAste() throws IOException {
+        testVientiExcelTiedostoon(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS);
+    }
+
+    private List<Hakemus> createVientiHakemus(Hakutyyppi hakutyyppi) {
         Hakemus hakemus = new Hakemus();
         hakemus.setOid(MockData.hakemusOid);
         hakemus.setPersonOid(MockData.hakijaOid);
@@ -106,12 +92,16 @@ public class ErillishakuResourceTest {
         answers.getHenkilotiedot().put("aidinkieli", "SV");
         answers.getHenkilotiedot().put("kotikunta", "091");
         answers.getLisatiedot().put("asiointikieli", "ruotsi");
+        if(hakutyyppi == Hakutyyppi.KORKEAKOULU) {
+            answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
+            answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUSMAA, "FIN");
+        }
         hakemus.setAnswers(answers);
         return Collections.singletonList(hakemus);
     }
 
     @Test
-    public void tuontiExcelTiedostosta() {
+    public void tuontiExcelTiedostostaKK() {
         final String url = root + "/erillishaku/tuonti";
 
         final ProsessiId prosessiId = createClient(url)
@@ -122,48 +112,43 @@ public class ErillishakuResourceTest {
             .query("valintatapajonoOid", valintatapajonoOid)
             .query("valintatapajononNimi", "varsinainen jono")
             .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(ExcelTestData.erillisHakuHetullaJaSyntymaAjalla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+            .post(Entity.entity(ExcelTestData.kkHakuToisenAsteenValintatuloksella(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
 
     @Test
-    public void tuontiExcelTiedostosta2() {
+    public void tuontiExcelTiedostostaToinenAste() {
         final String url = root + "/erillishaku/tuonti";
 
         final ProsessiId prosessiId = createClient(url)
-                .query("hakutyyppi", "KORKEAKOULU")
+                .query("hakutyyppi", "TOISEN_ASTEEN_OPPILAITOS")
                 .query("hakuOid", hakuOid)
                 .query("hakukohdeOid", hakukohdeOid)
                 .query("tarjoajaOid", tarjoajaOid)
                 .query("valintatapajonoOid", valintatapajonoOid)
                 .query("valintatapajononNimi", "varsinainen jono")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(ExcelTestData.erillisHakuHetullaJaSyntymaAjalla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+                .post(Entity.entity(ExcelTestData.toisenAsteenErillisHaku(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
 
-    private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
+    private void verifyCreatedExcelDocument(Hakutyyppi hakutyyppi, final InputStream storedDocument) throws IOException {
+        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(hakutyyppi, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO(
-                "",
+                "SV",
                 "MIES",
-                "Tuomas",
-                "Hakkarainen",
+                MockData.etunimi,
+                MockData.sukunimi,
                 MockData.hetu,
                 ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime("1.1.1901").toDate(),
                 henkiloOid,
                 HenkiloTyyppi.OPPIJA,
-                null,
+                "SV",
                 null);
         assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO(null));
-    }
-
-    private void verifyCreatedExcelDocument2(final InputStream storedDocument) throws IOException {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
-        assertEquals(1, tulos.rivit.size());
         final ErillishakuRivi expectedRivi = new ErillishakuRivi(
                 MockData.hakemusOid,
                 MockData.sukunimi,
@@ -189,7 +174,8 @@ public class ErillishakuResourceTest {
                 "FIN",
                 "FIN",
                 "Helsinki",
-                "");
+                hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null,
+                hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "");
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }
 
