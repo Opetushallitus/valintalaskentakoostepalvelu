@@ -251,7 +251,7 @@ public class ErillishaunTuontiService {
         } else {
             hakemukset = Collections.emptyList();
         }
-        LOG.info("Viedaan hakijoita ohittaen rivit hakemuksentilalla kesken ({}/{}) jonoon {}", lisattavatTaiKeskeneraiset.stream().filter(r -> !r.isKesken()).count(), rivit.size(), haku.getValintatapajononNimi());
+        LOG.info("Viedaan hakijoita ({}kpl) jonoon {}", lisattavatTaiKeskeneraiset.size(), haku.getValintatapajononNimi());
         tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset, prosessi);
     }
 
@@ -474,30 +474,27 @@ public class ErillishaunTuontiService {
     }
 
     private Stream<ErillishaunHakijaDTO> toErillishaunHakijaStream(ErillishakuDTO haku, Hakemus hakemus, ErillishakuRivi rivi) {
-        if (rivi.isKesken()) {
-            return Stream.<ErillishaunHakijaDTO>empty(); // Keskeneräisiä ei viedä sijoitteluun
-        } else {
-            HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-            return Stream.of(new ErillishaunHakijaDTO(
-                    haku.getValintatapajonoOid(),
-                    hakemus.getOid(),
-                    haku.getHakukohdeOid(),
-                    rivi.isJulkaistaankoTiedot(),
-                    hakemus.getPersonOid(),
-                    haku.getHakuOid(),
-                    haku.getTarjoajaOid(),
-                    valintatuloksenTila(rivi),
-                    rivi.getEhdollisestiHyvaksyttavissa(),
-                    ilmoittautumisTila(rivi),
-                    hakemuksenTila(rivi),
-                    wrapper.getEtunimi(),
-                    wrapper.getSukunimi(),
-                    // Poistetaan rivi myös siinä tapauksessa että hakemuksen tila on tyhjä, muttei kuitenkaan
-                    // passivoida hakemusta!
-                    Optional.of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
-                    rivi.getHyvaksymiskirjeLahetetty(),
-                    Lists.newArrayList()));
-        }
+        HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+        return Stream.of(new ErillishaunHakijaDTO(
+                haku.getValintatapajonoOid(),
+                hakemus.getOid(),
+                haku.getHakukohdeOid(),
+                rivi.isJulkaistaankoTiedot(),
+                hakemus.getPersonOid(),
+                haku.getHakuOid(),
+                haku.getTarjoajaOid(),
+                valintatuloksenTila(rivi),
+                rivi.getEhdollisestiHyvaksyttavissa(),
+                ilmoittautumisTila(rivi),
+                hakemuksenTila(rivi),
+                wrapper.getEtunimi(),
+                wrapper.getSukunimi(),
+                // Poistetaan rivi myös siinä tapauksessa että hakemuksen tila on tyhjä, muttei kuitenkaan
+                // passivoida hakemusta!
+                Optional.of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
+                rivi.getHyvaksymiskirjeLahetetty(),
+                Lists.newArrayList()));
+
     }
 
     private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja, String selite) {

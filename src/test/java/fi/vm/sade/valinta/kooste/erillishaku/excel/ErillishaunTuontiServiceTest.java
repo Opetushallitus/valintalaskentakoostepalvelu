@@ -75,7 +75,7 @@ public class ErillishaunTuontiServiceTest {
         public void tuodaanHylattyjaJaPeruutettujaJaVarallaOleviaPuutteellisinTiedoinAutosyotonTestaamiseksi() {
             importData(puutteellisiaTietojaAutotayttoaVarten());
             assertEquals(1, tilaAsyncResource.results.size());
-            assertEquals(5, tilaAsyncResource.results.stream()
+            assertEquals(6, tilaAsyncResource.results.stream()
                     .flatMap(r -> r.erillishaunHakijat.stream()).count());
             tilaAsyncResource.results.stream()
                     .flatMap(r -> r.erillishaunHakijat.stream())
