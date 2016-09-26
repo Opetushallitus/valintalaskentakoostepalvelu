@@ -1,18 +1,27 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
+import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.KORKEAKOULU;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO;
+import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.laillinenRivi;
+import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.viallinenJsonRiviPuuttuvillaTunnisteilla;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import com.google.gson.GsonBuilder;
+
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.*;
-import static org.hamcrest.CoreMatchers.*;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
-
-import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.*;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
@@ -25,18 +34,12 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import static java.util.Arrays.*;
-import java.util.concurrent.TimeUnit;
-
-import static java.util.Collections.*;
-import static org.junit.Assert.*;
 
 /**
  * @author Jussi Jartamo
  */
 public class ErillishakuResourceKayttajaPalauteTest {
 
-    public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final static Logger LOG = LoggerFactory.getLogger(ErillishakuResourceKayttajaPalauteTest.class);
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     String hakuOid = "1.2.246.562.5.2013080813081926341928";
@@ -45,7 +48,6 @@ public class ErillishakuResourceKayttajaPalauteTest {
     String valintatapajonoOid = "14090336922663576781797489829886";
     final HttpResource jsonResource = new HttpResource(root + "/erillishaku/tuonti/json");
     final HttpResource excelResource = new HttpResource(root + "/erillishaku/tuonti");
-    final HttpResource prosessiResource = new HttpResource(root + "/dokumenttiprosessi/");
 
     @Before
     public void startServer() {
@@ -136,26 +138,9 @@ public class ErillishakuResourceKayttajaPalauteTest {
         }
     }
     private Prosessi odotaVirhettaTaiEpaonnistuTimeouttiin(final ProsessiId prosessiId) {
-        return odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId, DEFAULT_POLL_TIMEOUT_MS);
+        return DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessiResponse -> !prosessiResponse.poikkeukset.isEmpty());
     }
-    private Prosessi odotaPaluuarvoTaiEpaonnistuTimeouttiin(final ProsessiId prosessiId, long timeout) {
-        if(timeout < 0) {
-            throw new RuntimeException("Aika loppui yksikkötestin vastausta odotellessa!");
-        }
-        long t0 = System.currentTimeMillis();
-        final Prosessi dokumenttiProsessi = prosessiResource.getWebClient().path(prosessiId.getId())
-                .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
-        if (dokumenttiProsessi.poikkeukset.isEmpty()) {
-            try {
-                Thread.sleep(0L);
-            } catch (InterruptedException e) {
-                //ignore
-            }
-            return odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId, timeout - (System.currentTimeMillis() - t0));
-        } else {
-            return dokumenttiProsessi;
-        }
-    }
+
     private WebClient jsonClient() {
         return jsonResource.getWebClient()
                 .query("hakutyyppi", KORKEAKOULU.toString())
