@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AmmatillisenKielikoetuloksetSurestaConverter {
-    private static final String SURE_ASTEIKKO_HYVAKSYTTY = "HYVAKSYTTY";
+    public static final String SURE_ASTEIKKO_HYVAKSYTTY = "HYVAKSYTTY";
 
     public static List<AvainArvoDTO> convert(List<SuoritusJaArvosanat> oppijanSuorituksetJaArvosanat, ParametritDTO parametritDTO) {
         if (oppijanSuorituksetJaArvosanat == null) {

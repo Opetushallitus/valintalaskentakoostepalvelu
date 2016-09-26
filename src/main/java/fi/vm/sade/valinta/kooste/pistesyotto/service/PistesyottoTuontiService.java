@@ -21,6 +21,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapte
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -223,7 +224,7 @@ public class PistesyottoTuontiService {
                         Arvosana arvosana = new Arvosana();
                         arvosana.setAine("KIELIKOE");
                         arvosana.setLisatieto(kieli.toUpperCase());
-                        arvosana.setArvio(new Arvio(arvioArvosana, null, null));
+                        arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
                         arvosana.setSuoritus(tallennettuSuoritus.getId());
 
                         suoritusrekisteriAsyncResource.postArvosana(arvosana).subscribe(arvosanaResponse -> {
