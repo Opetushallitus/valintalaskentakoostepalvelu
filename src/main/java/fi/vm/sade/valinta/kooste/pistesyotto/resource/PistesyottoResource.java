@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Lists;
@@ -21,6 +23,7 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
@@ -28,10 +31,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.VirheDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.*;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import org.apache.camel.Produce;
@@ -40,6 +40,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -77,6 +78,63 @@ public class PistesyottoResource {
     private PistesyottoTuontiSoteliService tuontiSoteliService;
     @Autowired
     private AuthorityCheckService authorityCheckService;
+    @Autowired
+    private PistesyottoKoosteService pistesyottoKoosteService;
+
+    @POST
+    @Path("/koostaPistetiedotHakemuksille/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+    public void koostaPistetiedotHakemuksille(
+            @PathParam("hakuOid") String hakuOid,
+            @PathParam("hakukohdeOid") String hakukohdeOid,
+            List<String> hakemusOidit,
+            @Suspended final AsyncResponse response) {
+        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeoutHandler(handler -> {
+            LOG.error("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu: /koostaPistetiedotHakemuksille/haku/{hakuOid}/hakukohde/{hakukohdeOid}", hakuOid, hakukohdeOid);
+            handler.resume(Response.serverError()
+                    .entity("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu")
+                    .build());
+        });
+        pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid, hakemusOidit).subscribe(
+                pistetiedot -> response.resume(Response.ok().header("Content-Type", "application/json").entity(pistetiedot).build()),
+                error -> {
+                    LOG.error("koostaPistetiedotHakemuksille epäonnistui", error);
+                    response.resume(Response.serverError().entity(error.getMessage()).build());
+                }
+
+        );
+    }
+
+    @PUT
+    @Path("/tallennaKoostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+    public void tallennaKoostetutPistetiedot(
+            @PathParam("hakuOid") String hakuOid,
+            @PathParam("hakukohdeOid") String hakukohdeOid,
+            List<ApplicationAdditionalDataDTO> pistetiedot,
+            @Suspended final AsyncResponse response) {
+        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeoutHandler(handler -> {
+            LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: /tallennaKoostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}", hakuOid, hakukohdeOid);
+            handler.resume(Response.serverError()
+                    .entity("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu")
+                    .build());
+        });
+        Consumer<String> onSuccess = (message) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
+        BiConsumer<String, Throwable> onError = (message, error) -> {
+            LOG.error("tallennaKoostetutPistetiedot epäonnistui: " + message, error);
+            response.resume(Response.serverError().entity(error.getMessage()).build());
+        };
+
+        pistesyottoKoosteService.tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedot, onSuccess, onError);
+    }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @POST

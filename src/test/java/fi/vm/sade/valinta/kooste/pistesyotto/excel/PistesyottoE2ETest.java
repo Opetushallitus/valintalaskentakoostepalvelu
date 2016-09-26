@@ -77,39 +77,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         MockServer fakeSure = new MockServer();
         final Semaphore suoritusCounter = new Semaphore(0);
         final Semaphore arvosanaCounter = new Semaphore(0);
-        mockForward(POST,
-                fakeSure.addHandler("/suoritusrekisteri/rest/v1/suoritukset/", exchange -> {
-                        try {
-                            Suoritus suoritus = new Gson().fromJson(
-                                    IOUtils.toString(exchange.getRequestBody()), new TypeToken<Suoritus>() {
-                                    }.getType()
-                            );
-                            System.out.println(suoritus);
-                            suoritus.setId("suoritus" + suoritus.getHenkiloOid());
-                            exchange.sendResponseHeaders(200, 0);
-                            OutputStream responseBody = exchange.getResponseBody();
-                            IOUtils.write(new Gson().toJson(suoritus), responseBody);
-                            responseBody.close();
-                            suoritusCounter.release();
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-                }).addHandler("/suoritusrekisteri/rest/v1/arvosanat/", exchange -> {
-                        try {
-                            Arvosana arvosana = new Gson().fromJson(
-                                    IOUtils.toString(exchange.getRequestBody()), new TypeToken<Arvosana>() {
-                                    }.getType()
-                            );
-                            System.out.println(arvosana);
-                            exchange.sendResponseHeaders(200, 0);
-                            OutputStream responseBody = exchange.getResponseBody();
-                            IOUtils.write(new Gson().toJson(arvosana), responseBody);
-                            responseBody.close();
-                            arvosanaCounter.release();
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-                }));
+        mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
 
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);

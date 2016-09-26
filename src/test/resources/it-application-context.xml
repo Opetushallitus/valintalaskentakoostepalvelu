@@ -45,6 +45,8 @@
         class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService" />
   <bean id="PistesyottoVientiService"
         class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService" />
+  <bean id="PistesyottoKoosteService"
+        class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService" />
   <bean id="ValintalaskentaExcelResource"
         class="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource.ValintalaskentaExcelResource" />
   <bean id="ValintakoekutsutExcelService"

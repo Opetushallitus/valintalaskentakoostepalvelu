@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,9 +11,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -34,6 +40,10 @@ import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
 
 public class PistesyotonTuontiTestBase {
     final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -157,4 +167,52 @@ public class PistesyotonTuontiTestBase {
         IOUtils.copy(excel.vieXlsx(), new FileOutputStream("pistesyotto.xlsx"));
     }
 
+    public static class Result<T> {
+        private T result;
+
+        public Result(T result) {
+            this.result = result;
+        }
+
+        public T getResult() {
+            return result;
+        }
+    }
+
+    public static void mockSuoritusrekisteri(final Semaphore suoritusCounter, final Semaphore arvosanaCounter) {
+        MockServer fakeSure = new MockServer();
+        mockForward(POST,
+                fakeSure.addHandler("/suoritusrekisteri/rest/v1/suoritukset/", exchange -> {
+                    try {
+                        Suoritus suoritus = new Gson().fromJson(
+                                IOUtils.toString(exchange.getRequestBody()), new com.google.common.reflect.TypeToken<Suoritus>() {
+                                }.getType()
+                        );
+                        System.out.println(suoritus);
+                        suoritus.setId("suoritus" + suoritus.getHenkiloOid());
+                        exchange.sendResponseHeaders(200, 0);
+                        OutputStream responseBody = exchange.getResponseBody();
+                        IOUtils.write(new Gson().toJson(suoritus), responseBody);
+                        responseBody.close();
+                        suoritusCounter.release();
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
+                }).addHandler("/suoritusrekisteri/rest/v1/arvosanat/", exchange -> {
+                    try {
+                        Arvosana arvosana = new Gson().fromJson(
+                                IOUtils.toString(exchange.getRequestBody()), new com.google.common.reflect.TypeToken<Arvosana>() {
+                                }.getType()
+                        );
+                        System.out.println(arvosana);
+                        exchange.sendResponseHeaders(200, 0);
+                        OutputStream responseBody = exchange.getResponseBody();
+                        IOUtils.write(new Gson().toJson(arvosana), responseBody);
+                        responseBody.close();
+                        arvosanaCounter.release();
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
+                }));
+    }
 }

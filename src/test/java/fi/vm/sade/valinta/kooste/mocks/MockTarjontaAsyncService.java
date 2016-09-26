@@ -17,6 +17,8 @@ import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import rx.Observable;
 
+import static fi.vm.sade.valinta.kooste.mocks.MockData.*;
+
 @Service
 public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     private static Map<String, HakuV1RDTO> mockHaku= new HashMap<>();
@@ -44,7 +46,7 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     @Override
     public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
         HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
-        hakukohdeDTO.setHakuOid(MockData.hakuOid);
+        hakukohdeDTO.setHakuOid(hakuOid);
         hakukohdeDTO.setOid(hakukohdeOid);
         hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
         return Observable.just(hakukohdeDTO);
@@ -53,8 +55,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     @Override
     public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
         Set<String> set = new HashSet<>();
-        set.add(MockData.hakuOid);
-        set.add(MockData.hakuOid + "-1");
+        set.add(hakuOid);
+        set.add(hakuOid + "-1");
         return Observable.just(set);
     }
 

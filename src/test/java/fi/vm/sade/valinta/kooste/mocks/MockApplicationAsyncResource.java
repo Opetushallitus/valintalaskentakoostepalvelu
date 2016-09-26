@@ -181,6 +181,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
+    public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids) {
+        return Observable.just(additionalDataResultByOidReference.get());
+    }
+
+    @Override
     public Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData) {
         additionalDataPutReference.set(additionalData);
         return Observable.just(Response.ok().build());

@@ -146,6 +146,20 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
     @Override
+    public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids) {
+        return postAsObservable(
+                "/applications/additionalData",
+                new TypeToken<List<ApplicationAdditionalDataDTO>>(){
+                }.getType(),
+                Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    @Override
     public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
         String url = "/applications/list";
         return new PeruutettavaImpl(getWebClient()
