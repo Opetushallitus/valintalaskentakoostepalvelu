@@ -10,7 +10,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -27,6 +26,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
+import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -46,10 +46,10 @@ import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -954,20 +954,16 @@ public class PistesyottoResourceTest {
                                 .post(Entity.entity(pistesyottoExcel.getExcel().vieXlsx(),
                                         MediaType.APPLICATION_OCTET_STREAM));
                 assertEquals(200, r.getStatus());
-                String initialResponseString = IOUtils.toString((InputStream) r.getEntity());
-                String prosessiId = objectMapper.reader().readTree(initialResponseString).get("id").asText();
+                ProsessiId prosessiId = r.readEntity(ProsessiId.class);
 
-                final HttpResource dokumenttiProsessiResource = new HttpResource(root + "/dokumenttiprosessi/" + prosessiId);
+                final HttpResource dokumenttiProsessiResource = new HttpResource(root + "/dokumenttiprosessi/" + prosessiId.getId());
                 long pollStarted = System.currentTimeMillis();
                 boolean complete = false;
                 int millisToWait = 1000;
                 while (System.currentTimeMillis() < pollStarted + millisToWait && !complete) {
-                    Response prosessiStatusResponse = dokumenttiProsessiResource.getWebClient().get();
-                    assertEquals(200, prosessiStatusResponse.getStatus());
-                    String prosessiStatusResponseString = IOUtils.toString((InputStream) prosessiStatusResponse.getEntity());
-                    JsonNode prosessiStatusResponseJson = objectMapper.reader().readTree(prosessiStatusResponseString);
-                    if (prosessiStatusResponseJson.get("keskeytetty").asBoolean()) {
-                        String exceptionMessage = prosessiStatusResponseJson.get("poikkeukset").get(0).get("viesti").asText();
+                    Prosessi prosessiStatusResponse = dokumenttiProsessiResource.getWebClient().get(Prosessi.class);
+                    if (prosessiStatusResponse.valmis() || prosessiStatusResponse.poikkeuksia()) {
+                        String exceptionMessage = prosessiStatusResponse.poikkeukset.iterator().next().getViesti();
                         assertEquals("Something terrible happened", exceptionMessage);
                         complete = true;
                     }
