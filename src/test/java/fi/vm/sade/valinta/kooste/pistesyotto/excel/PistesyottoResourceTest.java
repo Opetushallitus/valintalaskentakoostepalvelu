@@ -9,6 +9,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
@@ -46,6 +49,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -169,6 +173,7 @@ public class PistesyottoResourceTest {
             .setTotuusarvofunktio()
             .build()
     );
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                             TARJOAJA1, "", "", "",
                             Arrays.asList(
@@ -896,7 +901,7 @@ public class PistesyottoResourceTest {
     }
 
     @Test
-    public void pistesyottoTuontiSureVirheellaTest() {
+    public void pistesyottoTuontiSureVirheellaTest() throws IOException {
             cleanMocks();
             try {
                 MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
@@ -914,9 +919,33 @@ public class PistesyottoResourceTest {
                                         .setOid(HAKEMUS3).build()
                         )
                 );
+                MockValintaperusteetAsyncResource.setHakukohdeResult(Collections.singletonList(
+                    hakukohdeJaValintakoe().addValintakoe(VALINTAKOE1).addValintakoe(KIELIKOE).build()));
+                MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+                MockSuoritusrekisteriAsyncResource.setResult(
+                    new SuoritusrekisteriSpec.OppijaBuilder()
+                        .setOppijanumero(PERSONOID1)
+                        .suoritus()
+                        .setHenkiloOid(PERSONOID1)
+                        .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                        .arvosana()
+                        .setAine(KIELIKOE)
+                        .setLisatieto("FI")
+                        .setArvosana("true")
+                        .build()
+                        .build()
+                        .suoritus()
+                        .setHenkiloOid(PERSONOID1)
+                        .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                        .arvosana()
+                        .setAine(KIELIKOE)
+                        .setLisatieto("SV")
+                        .setArvosana("false")
+                        .build()
+                        .build()
+                        .build());
                 MockSuoritusrekisteriAsyncResource.setPostException(Optional.of(
                     new HttpExceptionWithResponse("Something terrible happened", Response.serverError().entity("Boom").build())));
-                MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
                 Response r =
                         pistesyottoTuontiResource.getWebClient()
@@ -924,7 +953,28 @@ public class PistesyottoResourceTest {
                                 .query("hakukohdeOid",HAKUKOHDE1)
                                 .post(Entity.entity(pistesyottoExcel.getExcel().vieXlsx(),
                                         MediaType.APPLICATION_OCTET_STREAM));
-                assertEquals(500, r.getStatus());
+                assertEquals(200, r.getStatus());
+                String initialResponseString = IOUtils.toString((InputStream) r.getEntity());
+                String prosessiId = objectMapper.reader().readTree(initialResponseString).get("id").asText();
+
+                final HttpResource dokumenttiProsessiResource = new HttpResource(root + "/dokumenttiprosessi/" + prosessiId);
+                long pollStarted = System.currentTimeMillis();
+                boolean complete = false;
+                int millisToWait = 1000;
+                while (System.currentTimeMillis() < pollStarted + millisToWait && !complete) {
+                    Response prosessiStatusResponse = dokumenttiProsessiResource.getWebClient().get();
+                    assertEquals(200, prosessiStatusResponse.getStatus());
+                    String prosessiStatusResponseString = IOUtils.toString((InputStream) prosessiStatusResponse.getEntity());
+                    JsonNode prosessiStatusResponseJson = objectMapper.reader().readTree(prosessiStatusResponseString);
+                    if (prosessiStatusResponseJson.get("keskeytetty").asBoolean()) {
+                        String exceptionMessage = prosessiStatusResponseJson.get("poikkeukset").get(0).get("viesti").asText();
+                        assertEquals("Something terrible happened", exceptionMessage);
+                        complete = true;
+                    }
+                }
+                if (!complete) {
+                    fail("Did not get wanted response within " + millisToWait + " ms.");
+                }
             } finally {
                 MockSuoritusrekisteriAsyncResource.clear();
                 cleanMocks();
