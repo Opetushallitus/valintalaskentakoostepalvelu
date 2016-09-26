@@ -9,7 +9,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -26,7 +25,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -44,6 +42,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
+import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
@@ -956,24 +955,18 @@ public class PistesyottoResourceTest {
                 assertEquals(200, r.getStatus());
                 ProsessiId prosessiId = r.readEntity(ProsessiId.class);
 
-                final HttpResource dokumenttiProsessiResource = new HttpResource(root + "/dokumenttiprosessi/" + prosessiId.getId());
-                long pollStarted = System.currentTimeMillis();
-                boolean complete = false;
-                int millisToWait = 1000;
-                while (System.currentTimeMillis() < pollStarted + millisToWait && !complete) {
-                    Prosessi prosessiStatusResponse = dokumenttiProsessiResource.getWebClient().get(Prosessi.class);
+                DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessiStatusResponse -> {
                     if (prosessiStatusResponse.valmis() || prosessiStatusResponse.poikkeuksia()) {
                         String exceptionMessage = prosessiStatusResponse.poikkeukset.iterator().next().getViesti();
                         assertEquals("Something terrible happened", exceptionMessage);
-                        complete = true;
+                        return true;
                     }
-                }
-                if (!complete) {
-                    fail("Did not get wanted response within " + millisToWait + " ms.");
-                }
+                    return false;
+                });
             } finally {
                 MockSuoritusrekisteriAsyncResource.clear();
                 cleanMocks();
             }
         }
+
 }
