@@ -11,6 +11,7 @@ public class Prosessi {
     public Osatyo kokonaistyo = new Osatyo();
     public String dokumenttiId;
     public Collection<Poikkeus> poikkeukset;
+    public boolean keskeytetty;
 
     public boolean poikkeuksia() {
         return !(poikkeukset == null || poikkeukset.isEmpty());
@@ -20,9 +21,10 @@ public class Prosessi {
         return dokumenttiId != null || kokonaistyo.valmis();
     }
 
-    static class Osatyo {
+    public static class Osatyo {
         public int tehty = 0;
         public int kokonaismaara = 0;
+        public int ohitettu;
 
         public boolean valmis() {
             return tehty == kokonaismaara;

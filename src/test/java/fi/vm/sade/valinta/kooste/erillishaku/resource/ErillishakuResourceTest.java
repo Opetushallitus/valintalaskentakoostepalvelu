@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
@@ -14,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
+import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -24,11 +28,9 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class ErillishakuResourceTest {
     private String hakuOid = "1.2.246.562.5.2013080813081926341928";
@@ -180,21 +182,13 @@ public class ErillishakuResourceTest {
     }
 
     private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
-        final Prosessi dokumenttiProsessi = createClient(root + "/dokumenttiprosessi/" + prosessiId.getId())
-            .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
-        if(dokumenttiProsessi.poikkeuksia()) {
-            throw new RuntimeException(dokumenttiProsessi.poikkeukset.toString());
-        }
-        if (!dokumenttiProsessi.valmis()) {
-            try {
-                Thread.sleep(100);
-                //System.err.println("odotetaan koska saatiin \n"+ new GsonBuilder().setPrettyPrinting().create().toJson(dokumenttiProsessi));
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+        Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessi -> {
+            if (prosessi.poikkeuksia()) {
+                throw new RuntimeException(prosessi.poikkeukset.toString());
             }
-            return odotaProsessiaPalautaDokumenttiId(prosessiId);
-        }
-        return dokumenttiProsessi.dokumenttiId;
+            return prosessi.valmis();
+        });
+        return valmisProsessi.dokumenttiId;
     }
 
     private WebClient createClient(String url) {

@@ -1,6 +1,19 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS2;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE1;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE2;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.HAKEMUS1;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
@@ -9,7 +22,10 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -21,16 +37,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.HAKEMUS1;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.POST;
 
 public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     @Before
@@ -72,7 +78,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
 
         mockLetterKutsut("^(?!.*HAKEMUS2).*HAKEMUS1.*$");
-        String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
+        ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
@@ -99,7 +105,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
 
         mockLetterKutsut(".*HAKEMUS1.*HAKEMUS2.*|.*HAKEMUS2.*HAKEMUS1.*");
-        String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
+        ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
@@ -126,7 +132,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
 
         mockLetterKutsut("^(?!.*HAKEMUS2).*HAKEMUS1.*$");
-        String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
+        ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
@@ -159,7 +165,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
 
         mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":true).*HAKEMUS2.*(?=skipIPosti\":true).*");
-        String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
+        ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
@@ -188,7 +194,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
 
         mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":true).*");
-        String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
+        ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
@@ -217,7 +223,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
 
         mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":false).*");
-        String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
+        ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
@@ -248,12 +254,12 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
 
         mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":false).*");
-        String dokumenttiId = makeCallAndReturnDokumenttiId("SV");
+        ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
 
-    private String makeCallAndReturnDokumenttiId(String asiointikieli) {
+    private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
         HttpResource http = new HttpResource(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet");
         WebClient client = http.getWebClient()
                 .query("hakuOid", HAKU1)
@@ -261,8 +267,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                 .query("letterBodyText","letterBodyText");
         Response response = client.post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2)));
         Assert.assertEquals(200, response.getStatus());
-        String body = response.readEntity(String.class);
-        return body.substring(7, body.length()-2);
+        return response.readEntity(ProsessiId.class);
     }
 
     private void mockYksiHyvaksyttyKutsu() {
@@ -336,21 +341,9 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockToReturnJson(GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
     }
 
-    private void pollAndAssertDokumenttiProsessi(String dokumenttiId) throws InterruptedException {
-        HttpResource http2 = new HttpResource(resourcesAddress + "/dokumenttiprosessi/" + dokumenttiId);
-        String body2 = "";
-        for(int i = 0; i < 10; i++) {
-            Response response2 = http2.getWebClient().get();
-            Assert.assertEquals(200, response2.getStatus());
-            body2 = response2.readEntity(String.class);
-            if(body2.contains("\"valmis\":false")) {
-                Thread.sleep(2000);
-            } else {
-                break;
-            }
-        }
-        Assert.assertTrue("valmis!=true " + body2, body2.contains("\"valmis\":true"));
-        Assert.assertTrue("ohitettu!=0 " + body2, body2.contains("\"ohitettu\":0"));
-        Assert.assertTrue("keskeytetty!=false " + body2, body2.contains("\"keskeytetty\":false"));
+    private void pollAndAssertDokumenttiProsessi(ProsessiId dokumenttiId) throws InterruptedException {
+        Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(resourcesAddress, dokumenttiId, Prosessi::valmis);
+        Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
+        Assert.assertEquals(false, valmisProsessi.keskeytetty);
     }
 }
