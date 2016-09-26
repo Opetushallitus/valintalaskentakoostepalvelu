@@ -6,6 +6,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
@@ -125,12 +126,12 @@ public class PistesyottoKoosteService {
                     suoritus.setValmistuminen(valmistuminen);
 
                     suoritusrekisteriAsyncResource.postSuoritus(suoritus).subscribe( tallennettuSuoritus -> {
-                        String arvioArvosana = kielikoetulokset.get(tunnus).toUpperCase();
+                        String arvioArvosana = kielikoetulokset.get(tunnus).toLowerCase();
 
                         Arvosana arvosana = new Arvosana();
-                        arvosana.setAine("KIELIKOE");
+                        arvosana.setAine("kielikoe");
                         arvosana.setLisatieto(kieli.toUpperCase());
-                        arvosana.setArvio(new Arvio(arvioArvosana, null, null));
+                        arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
                         arvosana.setSuoritus(tallennettuSuoritus.getId());
 
                         suoritusrekisteriAsyncResource.postArvosana(arvosana).subscribe(arvosanaResponse -> {
