@@ -2,9 +2,11 @@ package fi.vm.sade.valinta.kooste.util.sure;
 
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 
 import java.util.Collections;
@@ -18,17 +20,20 @@ import java.util.stream.Stream;
 public class AmmatillisenKielikoetuloksetSurestaConverter {
     private static final String SURE_ASTEIKKO_HYVAKSYTTY = "HYVAKSYTTY";
 
-    public static List<AvainArvoDTO> convert(List<SuoritusJaArvosanat> oppijanSuorituksetJaArvosanat) {
+    public static List<AvainArvoDTO> convert(List<SuoritusJaArvosanat> oppijanSuorituksetJaArvosanat, ParametritDTO parametritDTO) {
         if (oppijanSuorituksetJaArvosanat == null) {
             return Collections.emptyList();
         }
 
-        Stream<SuoritusJaArvosanat> kielikoesuoritukset = oppijanSuorituksetJaArvosanat.stream()
+        Stream<SuoritusJaArvosanat> suorituksetEnnenLaskennanAlkamistaMyonnettyjenArvosanojenKanssa =
+            OppijaToAvainArvoDTOConverter.removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(oppijanSuorituksetJaArvosanat.stream(), parametritDTO);
+        Stream<SuoritusJaArvosanat> kielikoesuoritukset = suorituksetEnnenLaskennanAlkamistaMyonnettyjenArvosanojenKanssa
                 .filter(Objects::nonNull)
                 .filter(s -> s.getSuoritus() != null)
                 .filter(s -> wrap(s).isAmmatillisenKielikoe())
                 .filter(s -> s.getSuoritus().isVahvistettu())
-                .filter(s -> s.getArvosanat() != null);
+                .filter(s -> s.getArvosanat() != null)
+                .filter(s -> !s.getArvosanat().isEmpty());
         return suorituksetKielikohtaisiksiAvainArvoiksi(kielikoesuoritukset);
     }
 

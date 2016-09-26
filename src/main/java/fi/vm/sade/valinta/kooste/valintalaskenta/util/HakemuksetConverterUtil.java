@@ -79,7 +79,7 @@ public class HakemuksetConverterUtil {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
         Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         Map<String, AvainArvoDTO> surenArvosanat = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
-        Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta = toAvainMap(AmmatillisenKielikoetuloksetSurestaConverter.convert(oppija.getSuoritukset()), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+        Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta = toAvainMap(AmmatillisenKielikoetuloksetSurestaConverter.convert(oppija.getSuoritukset(), parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
 
         Map<String, AvainArvoDTO> merge = Maps.newHashMap();
         merge.putAll(hakemuksenArvot);

@@ -59,7 +59,7 @@ public class OppijaToAvainArvoDTOConverter {
         return filtteroimattomat.filter(s -> !(wrap(s).onHakemukselta() && !wrap(s).onTaltaHakemukselta(hakemus)));
     }
 
-    private static Stream<SuoritusJaArvosanat> removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
+    public static Stream<SuoritusJaArvosanat> removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
             Stream<SuoritusJaArvosanat> filtteroimattomat, ParametritDTO parametritDTO) {
         Optional<DateTime> date = valintalaskennanStartDate(parametritDTO);
         if (date.isPresent()) {
