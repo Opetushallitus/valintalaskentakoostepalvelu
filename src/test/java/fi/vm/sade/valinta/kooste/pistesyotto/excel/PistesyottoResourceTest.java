@@ -56,9 +56,11 @@ import org.springframework.core.io.ClassPathResource;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -630,6 +632,8 @@ public class PistesyottoResourceTest {
                                 .setOid(HAKEMUS3).build()
                 )
         );
+        MockValintaperusteetAsyncResource.setHakukohdeResult(Collections.singletonList(
+                hakukohdeJaValintakoe().addValintakoe(VALINTAKOE1).addValintakoe(KIELIKOE).build()));
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                 TARJOAJA1, "", "", "",
@@ -873,6 +877,8 @@ public class PistesyottoResourceTest {
                                 .setOid(HAKEMUS3).build()
                 )
         );
+        MockValintaperusteetAsyncResource.setHakukohdeResult(Collections.singletonList(
+                hakukohdeJaValintakoe().addValintakoe(VALINTAKOE1).addValintakoe(KIELIKOE).build()));
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         Response r =
                 pistesyottoTuontiResource.getWebClient()
