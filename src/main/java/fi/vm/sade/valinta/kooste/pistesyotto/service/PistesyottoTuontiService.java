@@ -25,13 +25,11 @@ import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaCo
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -42,8 +40,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
-
-import javax.ws.rs.core.Response;
 
 /**
  *         GET
@@ -88,8 +84,7 @@ public class PistesyottoTuontiService {
         String tarjoajaNimi = StringUtils.EMPTY;
         PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
             if (t instanceof HttpExceptionWithResponse) {
-                Response response = ((HttpExceptionWithResponse) t).response;
-                LOG.error("Pistesyötön tuonti epäonnistui HTTP-virheilmoitukseen. Sisältö: " + contentToString(response), t);
+                LOG.error("Pistesyötön tuonti epäonnistui HTTP-virheilmoitukseen. Sisältö: " + ((HttpExceptionWithResponse) t).contentToString(), t);
             } else {
                 LOG.error("Pistesyötön tuonti epäonnistui", t);
             }
@@ -149,18 +144,6 @@ public class PistesyottoTuontiService {
         } catch (Throwable t) {
             poikkeusilmoitus.accept(t);
         }
-    }
-
-    private String contentToString(Response response) {
-        Object entity = response.getEntity();
-        if (entity instanceof InputStream) {
-            try {
-                return IOUtils.toString((InputStream) entity);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return entity.toString();
     }
 
     private void tallennaUudetKielikoetulokset(String username,

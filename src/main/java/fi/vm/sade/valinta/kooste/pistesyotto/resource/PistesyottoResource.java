@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -129,7 +130,11 @@ public class PistesyottoResource {
         });
         Consumer<String> onSuccess = (message) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
         BiConsumer<String, Throwable> onError = (message, error) -> {
-            LOG.error("tallennaKoostetutPistetiedot epäonnistui: " + message, error);
+            if (error instanceof HttpExceptionWithResponse) {
+                LOG.error("tallennaKoostetutPistetiedot epäonnistui: " + message + " , vastaus: " + ((HttpExceptionWithResponse) error).contentToString(), error);
+            } else {
+                LOG.error("tallennaKoostetutPistetiedot epäonnistui: " + message, error);
+            }
             response.resume(Response.serverError().entity(error.getMessage()).build());
         };
 
