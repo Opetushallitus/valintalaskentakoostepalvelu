@@ -75,11 +75,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         String hakukohdeNimi = StringUtils.EMPTY;
         String tarjoajaNimi = StringUtils.EMPTY;
         PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
-            if (t instanceof HttpExceptionWithResponse) {
-                LOG.error("Pistesyötön tuonti epäonnistui HTTP-virheilmoitukseen. Sisältö: " + ((HttpExceptionWithResponse) t).contentToString(), t);
-            } else {
-                LOG.error("Pistesyötön tuonti epäonnistui", t);
-            }
+            logPistesyotonTuontiEpaonnistui(t);
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
         });
         try {
@@ -151,6 +147,14 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         }
     }
 
+    private void logPistesyotonTuontiEpaonnistui(Throwable t) {
+        if (t instanceof HttpExceptionWithResponse) {
+            LOG.error("Pistesyötön tuonti epäonnistui HTTP-virheilmoitukseen. Sisältö: " + ((HttpExceptionWithResponse) t).contentToString(), t);
+        } else {
+            LOG.error("Pistesyötön tuonti epäonnistui", t);
+        }
+    }
+
     private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, List<ApplicationAdditionalDataDTO> hakemukset) {
         return getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h, (h1, h2) -> {
             return h2;
@@ -210,7 +214,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                         // luonti
                         + 1);
         PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
-            LOG.error("Pistesyötön tuonti epäonnistui", t);
+            logPistesyotonTuontiEpaonnistui(t);
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
         });
         AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedot = new AtomicReference<>();
