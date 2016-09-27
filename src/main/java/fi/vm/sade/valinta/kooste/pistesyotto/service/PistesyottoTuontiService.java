@@ -209,6 +209,7 @@ public class PistesyottoTuontiService {
                         arvosana.setLisatieto(kieli.toUpperCase());
                         arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
                         arvosana.setSuoritus(tallennettuSuoritus.getId());
+                        arvosana.setMyonnetty(valmistuminen);
 
                         suoritusrekisteriAsyncResource.postArvosana(arvosana).subscribe(arvosanaResponse -> {
                             AUDIT.log(builder()
