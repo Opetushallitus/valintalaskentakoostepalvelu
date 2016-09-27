@@ -138,7 +138,7 @@ public class PistesyottoResource {
             response.resume(Response.serverError().entity(error.getMessage()).build());
         };
 
-        pistesyottoKoosteService.tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedot, onSuccess, onError);
+        pistesyottoKoosteService.tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedot, KoosteAudit.username(), onSuccess, onError);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")

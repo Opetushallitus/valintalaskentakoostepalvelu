@@ -1,39 +1,30 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
-import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
-public class PistesyottoKoosteService {
-    private final ApplicationAsyncResource applicationAsyncResource;
-    private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
-    private final TarjontaAsyncResource tarjontaAsyncResource;
+public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
     @Autowired
     public PistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
                                     SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                     TarjontaAsyncResource tarjontaAsyncResource) {
-        this.applicationAsyncResource = applicationAsyncResource;
-        this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
-        this.tarjontaAsyncResource = tarjontaAsyncResource;
+        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource);
     }
 
     public Observable<List<ApplicationAdditionalDataDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, List<String> hakemusOidit) {
@@ -54,12 +45,13 @@ public class PistesyottoKoosteService {
     public void tallennaKoostetutPistetiedot(
             String hakuOid,
             String hakukohdeOid,
-            List<ApplicationAdditionalDataDTO> pistetiedoDTOs,
+            List<ApplicationAdditionalDataDTO> pistetietoDTOs,
+            String username,
             Consumer<String> onSuccess,
             BiConsumer<String, Throwable> onError) {
 
         Map<String, Map<String, String>> kielikoetuloksetSureen = new HashMap<>();
-        List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = pistetiedoDTOs.stream().flatMap(pistetieto -> {
+        List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = pistetietoDTOs.stream().flatMap(pistetieto -> {
             String hakemusOid = pistetieto.getOid();
             Map<String, String> additionalData = pistetieto.getAdditionalData();
 
@@ -74,96 +66,10 @@ public class PistesyottoKoosteService {
             return Stream.of(pistetieto);
         }).filter(a -> !a.getAdditionalData().isEmpty()).collect(Collectors.toList());
 
-        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError);
+        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL);
     }
 
-    private void tallennaKoostetutPistetiedot(String hakuOid,
-                                              String hakukohdeOid,
-                                              List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                              Map<String, Map<String, String>> kielikoetuloksetSureen,
-                                              Consumer<String> onSuccess,
-                                              BiConsumer<String, Throwable> onError) {
 
-        AtomicInteger laskuri = new AtomicInteger(kielikoetuloksetSureen.values().stream().mapToInt(map -> map.size()).sum());
-        AtomicReference<String> myontajaRef = new AtomicReference<>();
-
-        Supplier<Void> tallennaAdditionalInfo = () -> {
-            applicationAsyncResource.putApplicationAdditionalData(
-                    hakuOid, hakukohdeOid, pistetiedotHakemukselle).subscribe(response -> {
-                /*pistetiedotHakemukselle.forEach(p ->
-                        AUDIT.log(builder()
-                                .id(username)
-                                .hakuOid(hakuOid)
-                                .hakukohdeOid(hakukohdeOid)
-                                .hakijaOid(p.getPersonOid())
-                                .hakemusOid(p.getOid())
-                                .addAll(p.getAdditionalData())
-                                .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
-                                .build())
-                );*/
-                onSuccess.accept("ok");
-            }, error -> onError.accept("Lisätietojen tallennus hakemukselle epäonnistui", error));
-            return null;
-        };
-
-        Supplier<Void> tallennaKielikoetulokset = () -> {
-            kielikoetuloksetSureen.keySet().stream().forEach(hakemusOid ->
-            {
-                String valmistuminen = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
-                String personOid = pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
-                Map<String, String> kielikoetulokset = kielikoetuloksetSureen.get(hakemusOid);
-                kielikoetulokset.keySet().stream().filter(t -> isNotEmpty(kielikoetulokset.get(t))).forEach(tunnus -> {
-                    String kieli = tunnus.substring(9);
-
-                    Suoritus suoritus = new Suoritus();
-                    suoritus.setTila("VALMIS");
-                    suoritus.setYksilollistaminen("Ei");
-                    suoritus.setHenkiloOid(personOid);
-                    suoritus.setVahvistettu(true);
-                    suoritus.setSuoritusKieli(kieli.toUpperCase());
-                    suoritus.setMyontaja(myontajaRef.get());
-                    suoritus.setKomo("ammatillisenKielikoe");
-                    suoritus.setValmistuminen(valmistuminen);
-
-                    suoritusrekisteriAsyncResource.postSuoritus(suoritus).subscribe( tallennettuSuoritus -> {
-                        String arvioArvosana = kielikoetulokset.get(tunnus).toLowerCase();
-
-                        Arvosana arvosana = new Arvosana();
-                        arvosana.setAine("kielikoe");
-                        arvosana.setLisatieto(kieli.toUpperCase());
-                        arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
-                        arvosana.setSuoritus(tallennettuSuoritus.getId());
-                        arvosana.setMyonnetty(valmistuminen);
-
-                        suoritusrekisteriAsyncResource.postArvosana(arvosana).subscribe(arvosanaResponse -> {
-                            /*AUDIT.log(builder()
-                                    .id(username)
-                                    .hakuOid(hakuOid)
-                                    .hakukohdeOid(hakukohdeOid)
-                                    .hakijaOid(personOid)
-                                    .hakemusOid(hakemusOid)
-                                    .addAll(ImmutableMap.of("kielikoe_" + kieli.toLowerCase(), arvioArvosana))
-                                    .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
-                                    .build());*/
-                            if(0 == laskuri.decrementAndGet()) {
-                                tallennaAdditionalInfo.get();
-                            }
-                        }, error -> onError.accept("Arvosanan tallennus Suoritusrekisteriin epäonnistui", error));
-                    }, error -> onError.accept("Arvosanan tallennus Suoritusrekisteriin epäonnistui", error));
-                });
-            });
-            return null;
-        };
-
-        if(0 == laskuri.get()) {
-            tallennaAdditionalInfo.get();
-        } else {
-            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
-                myontajaRef.set(hakukohde.getTarjoajaOids().stream().findFirst().orElse(""));
-                tallennaKielikoetulokset.get();
-            }, error -> onError.accept("Hakukohteen haku Tarjonnasta epäonnistui", error));
-        }
-    }
 
     private Map<String,String> toAdditionalData(List<Arvosana> arvosanat) {
         Map<String, List<Arvosana>> groupedByKieli = arvosanat.stream().collect(Collectors.groupingBy(Arvosana::getLisatieto));
