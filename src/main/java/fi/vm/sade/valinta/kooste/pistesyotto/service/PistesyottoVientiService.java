@@ -78,7 +78,7 @@ public class PistesyottoVientiService {
             String tarjoajaNimi = new Teksti(hakukohdeDTO.getTarjoajaNimet()).getTeksti();
             Collection<String> valintakoeTunnisteet = valintakoeTunnisteet(valintaperusteet);
 
-            Map<String, List<Arvosana>> kielikoeArvosanat = ammatillisenKielikoeArvosanat(oppijat);
+            Map<String, List<Arvosana>> kielikoeArvosanat = AbstractPistesyottoKoosteService.ammatillisenKielikoeArvosanat(oppijat);
 
             Set<String> kaikkiKutsutaanTunnisteet =
                     hakukohdeJaValintakoe.stream().flatMap(h -> {
@@ -103,15 +103,6 @@ public class PistesyottoVientiService {
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
-    }
-
-    private Map<String, List<Arvosana>> ammatillisenKielikoeArvosanat(List<Oppija> oppijat) {
-        return oppijat.stream().collect(
-                Collectors.toMap(Oppija::getOppijanumero,
-                o -> o.getSuoritukset().stream()
-                        .filter(SuoritusJaArvosanatWrapper::isAmmatillisenKielikoe).map(SuoritusJaArvosanat::getArvosanat).flatMap(List::stream)
-                        .filter(a -> "kielikoe".equalsIgnoreCase(a.getAine())).collect(Collectors.toList()))
-        );
     }
 
     private Collection<String> valintakoeTunnisteet(List<ValintaperusteDTO> valintaperusteet) {

@@ -74,7 +74,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     private Map<String,String> toAdditionalData(List<Arvosana> arvosanat) {
         Map<String, List<Arvosana>> groupedByKieli = arvosanat.stream().collect(Collectors.groupingBy(Arvosana::getLisatieto));
         return groupedByKieli.keySet().stream().collect(Collectors.toMap(
-            kieli -> "kielikoe_" + kieli.toLowerCase(),
+            kieli -> KIELIKOE_KEY_PREFIX + kieli.toLowerCase(),
             kieli -> groupedByKieli.get(kieli).stream().anyMatch(a -> "TRUE".equalsIgnoreCase(a.getArvio().getArvosana())) ? "true" : "false"
         ));
     }

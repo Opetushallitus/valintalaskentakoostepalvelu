@@ -26,6 +26,11 @@ import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 public abstract class AbstractPistesyottoKoosteService {
 
+    public static String KIELIKOE_SUORITUS_TILA = "VALMIS";
+    public static String KIELIKOE_ARVOSANA_AINE = "kielikoe";
+    public static String KIELIKOE_SUORITUS_YKSILOLLISTAMINEN = "Ei";
+    public static String KIELIKOE_KEY_PREFIX = "kielikoe_";
+
     protected final ApplicationAsyncResource applicationAsyncResource;
     protected final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     protected final TarjontaAsyncResource tarjontaAsyncResource;
@@ -71,27 +76,27 @@ public abstract class AbstractPistesyottoKoosteService {
         Supplier<Void> tallennaKielikoetulokset = () -> {
             kielikoetuloksetSureen.keySet().stream().forEach(hakemusOid ->
             {
-                String valmistuminen = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
+                String valmistuminen = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(new Date());
                 String personOid = pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
                 Map<String, String> kielikoetulokset = kielikoetuloksetSureen.get(hakemusOid);
                 kielikoetulokset.keySet().stream().filter(t -> isNotEmpty(kielikoetulokset.get(t))).forEach(tunnus -> {
                     String kieli = tunnus.substring(9);
 
                     Suoritus suoritus = new Suoritus();
-                    suoritus.setTila("VALMIS");
-                    suoritus.setYksilollistaminen("Ei");
+                    suoritus.setTila(KIELIKOE_SUORITUS_TILA);
+                    suoritus.setYksilollistaminen(KIELIKOE_SUORITUS_YKSILOLLISTAMINEN);
                     suoritus.setHenkiloOid(personOid);
                     suoritus.setVahvistettu(true);
                     suoritus.setSuoritusKieli(kieli.toUpperCase());
                     suoritus.setMyontaja(myontajaRef.get());
-                    suoritus.setKomo("ammatillisenKielikoe");
+                    suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
                     suoritus.setValmistuminen(valmistuminen);
 
                     suoritusrekisteriAsyncResource.postSuoritus(suoritus).subscribe( tallennettuSuoritus -> {
                         String arvioArvosana = kielikoetulokset.get(tunnus).toLowerCase();
 
                         Arvosana arvosana = new Arvosana();
-                        arvosana.setAine("kielikoe");
+                        arvosana.setAine(KIELIKOE_ARVOSANA_AINE);
                         arvosana.setLisatieto(kieli.toUpperCase());
                         arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
                         arvosana.setSuoritus(tallennettuSuoritus.getId());
@@ -104,7 +109,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                     .hakukohdeOid(hakukohdeOid)
                                     .hakijaOid(personOid)
                                     .hakemusOid(hakemusOid)
-                                    .addAll(ImmutableMap.of("kielikoe_" + kieli.toLowerCase(), arvioArvosana))
+                                    .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + kieli.toLowerCase(), arvioArvosana))
                                     .setOperaatio(auditLogOperation)
                                     .build());
                             if(0 == laskuri.decrementAndGet()) {
@@ -127,12 +132,12 @@ public abstract class AbstractPistesyottoKoosteService {
         }
     }
 
-    protected Map<String, List<Arvosana>> ammatillisenKielikoeArvosanat(List<Oppija> oppijat) {
+    public static Map<String, List<Arvosana>> ammatillisenKielikoeArvosanat(List<Oppija> oppijat) {
         return oppijat.stream().collect(
                 Collectors.toMap(Oppija::getOppijanumero,
                         o -> o.getSuoritukset().stream()
-                                .filter(sa -> "ammatillisenKielikoe".equalsIgnoreCase(sa.getSuoritus().getKomo())).map(SuoritusJaArvosanat::getArvosanat).flatMap(List::stream)
-                                .filter(a -> "kielikoe".equalsIgnoreCase(a.getAine())).collect(Collectors.toList()))
+                                .filter(SuoritusJaArvosanatWrapper::isAmmatillisenKielikoe).map(SuoritusJaArvosanat::getArvosanat).flatMap(List::stream)
+                                .filter(a -> KIELIKOE_ARVOSANA_AINE.equalsIgnoreCase(a.getAine())).collect(Collectors.toList()))
         );
     }
 }

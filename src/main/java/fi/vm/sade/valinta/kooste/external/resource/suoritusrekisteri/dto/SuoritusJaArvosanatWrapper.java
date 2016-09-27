@@ -32,6 +32,8 @@ public class SuoritusJaArvosanatWrapper {
     private static final Map<String, String> KOMO_TO_STRING_MAPPER = createKomoToStringMapper();
     public static final String HAKEMUS_OID_PREFIX = "1.2.246.562.11";
 
+    public static final String SUORITUS_PVM_FORMAT = "dd.MM.yyyy";
+
     private static Map<String, String> createKomoToStringMapper() {
         Map<String, String> tmp = Maps.newHashMap();
         tmp.put(YO_KOMO, "YO-suoritus");

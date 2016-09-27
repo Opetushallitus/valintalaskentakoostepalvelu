@@ -10,6 +10,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -117,20 +118,20 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     }
 
     private Oppija createOppija() {
-        String valmistuminen = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
+        String valmistuminen = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(new Date());
         Oppija oppija = new Oppija();
         oppija.setOppijanumero("1.2.246.562.24.77642460905");
         Suoritus suoritus = new Suoritus();
         suoritus.setHenkiloOid("1.2.246.562.24.77642460905");
-        suoritus.setTila("VALMIS");
-        suoritus.setYksilollistaminen("Ei");
+        suoritus.setTila(AbstractPistesyottoKoosteService.KIELIKOE_SUORITUS_TILA);
+        suoritus.setYksilollistaminen(AbstractPistesyottoKoosteService.KIELIKOE_SUORITUS_YKSILOLLISTAMINEN);
         suoritus.setVahvistettu(true);
         suoritus.setSuoritusKieli("FI");
         suoritus.setMyontaja("1.2.3.4444.5");
-        suoritus.setKomo("ammatillisenKielikoe");
+        suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
         suoritus.setValmistuminen(valmistuminen);
         Arvosana arvosana = new Arvosana();
-        arvosana.setAine("KIELIKOE");
+        arvosana.setAine(AbstractPistesyottoKoosteService.KIELIKOE_ARVOSANA_AINE);
         arvosana.setLisatieto("FI");
         arvosana.setArvio(new Arvio("TRUE", null, null));
         SuoritusJaArvosanat suoritusJaArvosanat = new SuoritusJaArvosanat();
