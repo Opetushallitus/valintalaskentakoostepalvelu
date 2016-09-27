@@ -73,10 +73,10 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         BiFunction<String, String, String> readPistetieto = (personOid, key) ->
             uudetPistetiedot.stream().filter(p -> personOid.equals(p.getPersonOid())).findFirst().get().getAdditionalData().get(key);
 
-        assertEquals("TRUE", readPistetieto.apply("1.2.246.562.24.77642460905", "kielikoe_fi"));
-        assertEquals("FALSE", readPistetieto.apply("1.2.246.562.24.52321744679", "kielikoe_fi"));
-        assertEquals("TRUE", readPistetieto.apply("1.2.246.562.24.52321744679", "kielikoe_sv"));
-        assertEquals("TRUE", readPistetieto.apply("1.2.246.562.24.93793496064", "kielikoe_fi"));
+        assertEquals("true", readPistetieto.apply("1.2.246.562.24.77642460905", "kielikoe_fi"));
+        assertEquals("false", readPistetieto.apply("1.2.246.562.24.52321744679", "kielikoe_fi"));
+        assertEquals("true", readPistetieto.apply("1.2.246.562.24.52321744679", "kielikoe_sv"));
+        assertEquals("true", readPistetieto.apply("1.2.246.562.24.93793496064", "kielikoe_fi"));
 
         Function<List<ApplicationAdditionalDataDTO>, Integer> countAdditionalData = (pistetietoList) ->
             pistetietoList.stream().mapToInt(p -> p.getAdditionalData().values().size()).sum();
