@@ -1,26 +1,32 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Stream.concat;
+
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.ArvosanaWrapper;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Stream.concat;
 
 public class OppijaToAvainArvoDTOConverter {
     private static final String PK_PREFIX = "PK_";
     private static final String LK_PREFIX = "LK_";
     private static final String AM_PREFIX = "AM_";
+    private static final Logger LOG = LoggerFactory.getLogger(OppijaToAvainArvoDTOConverter.class);
 
     public static List<AvainArvoDTO> convert(String oppijanumero, List<SuoritusJaArvosanat> suoritukset, HakemusDTO hakemus, ParametritDTO parametritDTO) {
         if (suoritukset == null) {
@@ -64,9 +70,17 @@ public class OppijaToAvainArvoDTOConverter {
         Optional<DateTime> date = valintalaskennanStartDate(parametritDTO);
         if (date.isPresent()) {
             return filtteroimattomat.map(s -> {
-                s.setArvosanat(s.getArvosanat().stream()
-                        .filter(a -> a.getMyonnetty() == null || new ArvosanaWrapper(a).onkoMyonnettyEnnen(date.get()))
-                        .collect(Collectors.toList()));
+                s.setArvosanat(s.getArvosanat().stream().filter(a -> {
+                    if (a.getMyonnetty() == null) {
+                        return true;
+                    }
+                    if (new ArvosanaWrapper(a).onkoMyonnettyEnnen(date.get())) {
+                        return true;
+                    }
+                    LOG.info(String.format("Filtteröidään pois ennen laskennan alkamista (%s) myönnetty arvosana %s hakijan %s suoritukselta",
+                        date.get(), a, s.getSuoritus().getHenkiloOid()));
+                    return false;
+                }).collect(Collectors.toList()));
                 return s;
             });
         } else {
