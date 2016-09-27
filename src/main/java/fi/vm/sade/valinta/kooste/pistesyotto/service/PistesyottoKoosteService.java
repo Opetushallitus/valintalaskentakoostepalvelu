@@ -78,13 +78,4 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             kieli -> groupedByKieli.get(kieli).stream().anyMatch(a -> "TRUE".equalsIgnoreCase(a.getArvio().getArvosana())) ? "true" : "false"
         ));
     }
-
-    private Map<String, List<Arvosana>> ammatillisenKielikoeArvosanat(List<Oppija> oppijat) {
-        return oppijat.stream().collect(
-                Collectors.toMap(Oppija::getOppijanumero,
-                        o -> o.getSuoritukset().stream()
-                                .filter(sa -> "ammatillisenKielikoe".equalsIgnoreCase(sa.getSuoritus().getKomo())).map(SuoritusJaArvosanat::getArvosanat).flatMap(List::stream)
-                                .filter(a -> "kielikoe".equalsIgnoreCase(a.getAine())).collect(Collectors.toList()))
-        );
-    }
 }

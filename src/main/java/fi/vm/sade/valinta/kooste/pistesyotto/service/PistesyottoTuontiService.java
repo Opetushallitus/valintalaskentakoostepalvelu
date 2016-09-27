@@ -1,11 +1,9 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -21,7 +19,6 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapte
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
-import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -31,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,7 +36,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 /**
@@ -89,7 +84,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         });
         try {
 
-            final List<String> valintakoeTunnisteet = valintaperusteet.stream().map(vp -> vp.getTunniste()).collect(Collectors.toList());
+            final List<String> valintakoeTunnisteet = valintakoeTunnisteet(valintaperusteet);
 
             List<Hakemus> hakemukset = Collections.emptyList();
             // LOG.error("Excelin luonti");
@@ -156,15 +151,6 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         }
     }
 
-    private Map<String, List<Arvosana>> ammatillisenKielikoeArvosanat(List<Oppija> oppijat) {
-        return oppijat.stream().collect(
-                Collectors.toMap(Oppija::getOppijanumero,
-                        o -> o.getSuoritukset().stream()
-                                .filter(sa -> "ammatillisenKielikoe".equalsIgnoreCase(sa.getSuoritus().getKomo())).map(SuoritusJaArvosanat::getArvosanat).flatMap(List::stream)
-                                .filter(a -> "kielikoe".equalsIgnoreCase(a.getAine())).collect(Collectors.toList()))
-        );
-    }
-
     private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, List<ApplicationAdditionalDataDTO> hakemukset) {
         return getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h, (h1, h2) -> {
             return h2;
@@ -215,7 +201,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                 ).collect(Collectors.toList());
     }
 
-    private Collection<String> valintakoeTunnisteet(List<ValintaperusteDTO> valintaperusteet) {
+    private List<String> valintakoeTunnisteet(List<ValintaperusteDTO> valintaperusteet) {
         return valintaperusteet.stream().map(v -> v.getTunniste()).collect(Collectors.toList());
     }
 
