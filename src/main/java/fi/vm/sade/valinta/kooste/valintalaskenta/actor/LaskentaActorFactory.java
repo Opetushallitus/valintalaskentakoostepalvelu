@@ -1,20 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiFunction;
-import java.util.stream.IntStream;
-
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -50,8 +45,16 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observables.ConnectableObservable;
 
-import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
-import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
+import java.util.stream.IntStream;
 
 @Service
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
@@ -192,7 +195,13 @@ public class LaskentaActorFactory {
     }
 
     private static final BiFunction<String, String, Action1<? super Object>> resurssiOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Saatiin resurssi hakukohteelle {}", uuid, hakukohde);
-    private static final BiFunction<String, String, Action1<Throwable>> resurssiException = (uuid, hakukohde) -> error -> LOG.warn("(Uuid={}) Resurssin lataus epäonnistui hakukohteelle {}", uuid, hakukohde, error);
+    private static final BiFunction<String, String, Action1<Throwable>> resurssiException = (uuid, hakukohde) -> error -> {
+        if (error instanceof HttpExceptionWithResponse) {
+            LOG.warn(String.format("(Uuid=%s) Resurssin lataus epäonnistui hakukohteelle %s, vastaus: %s", uuid, hakukohde, ((HttpExceptionWithResponse) error).contentToString()), error);
+        } else {
+            LOG.warn("(Uuid={}) Resurssin lataus epäonnistui hakukohteelle {}", uuid, hakukohde, error);
+        }
+    };
 
     public LaskentaActor createValintalaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
@@ -231,7 +240,13 @@ public class LaskentaActorFactory {
     }
 
     private static final BiFunction<String, String, Action1<? super Object>> laskentaOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Laskenta onnistui hakukohteelle {}", uuid, hakukohde);
-    private static final BiFunction<String, String, Action1<Throwable>> laskentaException = (uuid, hakukohde) -> error -> LOG.warn("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohde, error);
+    private static final BiFunction<String, String, Action1<Throwable>> laskentaException = (uuid, hakukohde) -> error -> {
+        if (error instanceof HttpExceptionWithResponse) {
+            LOG.warn(String.format("(Uuid=%s) Laskenta epäonnistui hakukohteelle %s, vastaus: %s", uuid, hakukohde, ((HttpExceptionWithResponse) error).contentToString()), error);
+        } else {
+            LOG.warn("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohde, error);
+        }
+    };
 
     public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
