@@ -168,7 +168,7 @@ public class PistesyottoKoosteService {
         Map<String, List<Arvosana>> groupedByKieli = arvosanat.stream().collect(Collectors.groupingBy(Arvosana::getLisatieto));
         return groupedByKieli.keySet().stream().collect(Collectors.toMap(
             kieli -> "kielikoe_" + kieli.toLowerCase(),
-            kieli -> groupedByKieli.get(kieli).stream().anyMatch(a -> "TRUE".equalsIgnoreCase(a.getArvio().getArvosana())) ? "TRUE" : "FALSE"
+            kieli -> groupedByKieli.get(kieli).stream().anyMatch(a -> "TRUE".equalsIgnoreCase(a.getArvio().getArvosana())) ? "true" : "false"
         ));
     }
 
