@@ -456,20 +456,16 @@
 		<bean id="ViestintapalveluProxyResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu.ViestintapalveluProxyResource"/>
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice" />
-		<!-- Swagger -->
-		<bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
-		<bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
 
-		<!-- Swagger configuration -->
-		<bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
+		<!-- CXF Swagger2Feature -->
+		<bean id="swagger2Feature" class="org.apache.cxf.jaxrs.swagger.Swagger2Feature">
 			<property name="resourcePackage" value="fi.vm.sade.valinta.kooste" />
 			<property name="version" value="1.0" />
 			<property name="filterClass" value="fi.vm.sade.valinta.kooste.swagger.AsyncResponseFilter"/>
-			<property name="basePath"
-					  value="${valintalaskentakoostepalvelu.swagger.basepath}" />
+			<property name="basePath" value="${valintalaskentakoostepalvelu.swagger.basepath}" />
 
-			<property name="title" value="Swagger API documentation" />
-			<property name="scan" value="true" />
+			<property name="title" value="Swagger API documentation"/>
+			<property name="scan" value="true"/>
 		</bean>
 
 		<bean id="SessionResource"
@@ -497,15 +493,14 @@
 				<ref bean="ViestintapalveluProxyResource"/>
 				<ref bean="SessionResource"/>
 				<ref bean="HakemuksetResource"/>
-
-				<ref bean="swaggerResource"/>
 			</jaxrs:serviceBeans>
 			<jaxrs:providers>
 				<ref bean="jsonProvider" />
 				<ref bean="cors-filter"/>
-
-				<ref bean="swaggerWriter"/>
 			</jaxrs:providers>
+			<jaxrs:features>
+				<ref bean="swagger2Feature" />
+			</jaxrs:features>
 		</jaxrs:server>
 
 		<!-- Tarjonnan ajastettu synkronointi -->

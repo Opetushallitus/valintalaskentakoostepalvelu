@@ -47,22 +47,6 @@
       <beans:property name="allowIfAllAbstainDecisions" value="true"/>
   </beans:bean>
 
-  <!-- Swagger -->
-  <!-- Swagger API listing resource -->
-
-  <!-- Swagger writers -->
-  <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
-	<bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
-
-  <!-- Swagger configuration -->
-  <bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
-    <property name="resourcePackage" value="fi.vm.sade.valinta.kooste" />
-    <property name="version" value="1.0" />
-    <property name="filterClass" value="fi.vm.sade.valinta.kooste.swagger.AsyncResponseFilter"/>
-
-    <property name="title" value="Swagger API documentation" />
-    <property name="scan" value="true" />
-  </bean>
   <bean id="SmoketestResource" class="fi.vm.sade.valinta.kooste.test.SmoketestResource"/>
 
   <bean id="jsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
@@ -70,14 +54,10 @@
   <jaxrs:server id="koostepalveluResurssit">
     <jaxrs:serviceBeans>
       <ref bean="SmoketestResource"/>
-
-      <ref bean="swaggerResource"/>
     </jaxrs:serviceBeans>
     <jaxrs:providers>
       <ref bean="jsonProvider"/>
       <ref bean="cors-filter"/>
-
-      <ref bean="swaggerWriter"/>
     </jaxrs:providers>
   </jaxrs:server>
 

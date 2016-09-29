@@ -64,7 +64,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("cas.service.organisaatio-service", "");
         p0.setProperty("cas.service.valintalaskenta-service", "");
         p0.setProperty("cas.service.dokumenttipalvelu", "");
-        p0.setProperty("valintalaskentakoostepalvelu.swagger.basepath", "");
+        p0.setProperty("valintalaskentakoostepalvelu.swagger.basepath", "/valintalaskentakoostepalvelu/resources");
         p0.setProperty("host.scheme", "http");
         p0.setProperty("host.virkailija", proxyServer);
         p0.setProperty("cas.service.valintalaskentakoostepalvelu", "");
