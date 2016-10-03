@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import java.util.*;
 
+import com.ctc.wstx.util.StringUtil;
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -132,11 +133,20 @@ public abstract class AbstractPistesyottoKoosteService {
             tallennaAdditionalInfo.get();
         } else {
             tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
-                String tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst().orElse("");
-                organisaatioAsyncResource.haeOrganisaationTyyppiHierarkia(tarjoajaOid).subscribe(
-                   hierarkia -> etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef),
-                   error -> onError.accept("Myöntäjän etsiminen kielikoesuoritukseen epäonnistui", error));
-                tallennaKielikoetulokset.get();
+                for(String tarjoajaOid : hakukohde.getTarjoajaOids()) {
+                    organisaatioAsyncResource.haeOrganisaationTyyppiHierarkia(tarjoajaOid).subscribe(
+                            hierarkia -> etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef),
+                            error -> onError.accept("Myöntäjän etsiminen kielikoesuoritukseen epäonnistui", error));
+                    if(isNotEmpty(myontajaRef.get())) {
+                        break;
+                    }
+                }
+                if(isNotEmpty(myontajaRef.get())) {
+                    tallennaKielikoetulokset.get();
+                } else {
+                    String message = "Kielikoesuoritukselle ei löydetty myöntäjää. Hakukohde " + hakukohdeOid + ", tarjoajat " + hakukohde.getTarjoajaOids();
+                    onError.accept(message, new Exception(message));
+                }
             }, error -> onError.accept("Hakukohteen haku Tarjonnasta epäonnistui", error));
         }
     }
