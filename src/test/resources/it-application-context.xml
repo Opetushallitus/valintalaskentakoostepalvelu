@@ -81,7 +81,6 @@
     <mockito:mock id="viestintapalveluAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource" />
     <mockito:mock id="ryhmasahkopostiAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource" />
     <mockito:mock id="viestintapalveluResource" class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource" />
-    <mockito:mock id="organisaatioAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource" />
     <mockito:mock id="valintakoeResource" class="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource" />
     <mockito:mock id="sijoitteluResource" class="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource" />
     <mockito:mock id="dokumenttiResource" class="fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource" />

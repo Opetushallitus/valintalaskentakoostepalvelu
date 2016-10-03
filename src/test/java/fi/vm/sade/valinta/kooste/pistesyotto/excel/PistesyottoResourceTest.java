@@ -30,14 +30,12 @@ import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
@@ -728,6 +726,62 @@ public class PistesyottoResourceTest {
                     .build()
                     .build());
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+            MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
+                    new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
+                            new OrganisaatioTyyppi(
+                                    "1.2.246.562.10.45042175963",
+                                    ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
+                                    Arrays.asList(
+                                            new OrganisaatioTyyppi(
+                                                    "1.2.246.562.10.45698499378",
+                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
+                                                    Arrays.asList(
+                                                            new OrganisaatioTyyppi(
+                                                                    "1.2.3.44444.5",
+                                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
+                                                                    Arrays.asList(),
+                                                                    null,
+                                                                    Arrays.asList("TOIMIPISTE")
+                                                            ),
+                                                            new OrganisaatioTyyppi(
+                                                                    "1.2.3.44444.6",
+                                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, sirkusala"),
+                                                                    Arrays.asList(),
+                                                                    null,
+                                                                    Arrays.asList("TOIMIPISTE")
+                                                            )
+                                                    ),
+                                                    "oppilaitostyyppi_21#1",
+                                                    Arrays.asList("OPPILAITOS")
+                                            ),
+                                            new OrganisaatioTyyppi(
+                                                    "1.2.246.562.10.45698499379",
+                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto 2"),
+                                                    Arrays.asList(
+                                                            new OrganisaatioTyyppi(
+                                                                    "1.2.3.44444.7",
+                                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
+                                                                    Arrays.asList(),
+                                                                    null,
+                                                                    Arrays.asList("TOIMIPISTE")
+                                                            ),
+                                                            new OrganisaatioTyyppi(
+                                                                    "1.2.3.44444.8",
+                                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, sirkusala"),
+                                                                    Arrays.asList(),
+                                                                    null,
+                                                                    Arrays.asList("TOIMIPISTE")
+                                                            )
+                                                    ),
+                                                    "oppilaitostyyppi_21#1",
+                                                    Arrays.asList("OPPILAITOS")
+                                            )
+                                    ),
+                                    null,
+                                    Arrays.asList("OPPILAITOS")
+                            )
+                    ))
+            );
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                     TARJOAJA1, "", "", "",
                     Arrays.asList(
@@ -791,6 +845,7 @@ public class PistesyottoResourceTest {
             assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!", 3, tuodutLisatiedot.size());
             assertFalse("Kielikokeita ei saa löytyä hakemuksen lisätiedoista", tuodutLisatiedot.stream().anyMatch(a -> a.getAdditionalData().containsKey("kielikoe_fi")));
             MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().forEach(s -> LOG.error(s.toString()));
+            assertEquals("Suorituksilla on oikea myöntäjä", 2, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals("1.2.246.562.10.45698499378")).count());
             MockSuoritusrekisteriAsyncResource.arvosanatRef.get().stream().forEach(a -> LOG.error(a.toString()));
             assertEquals("Kielikokeiden suoritukset löytyvät suresta", 2, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size());
             assertEquals("Kielikokeiden arvosanat löytyvät suresta", 2, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().size());
@@ -943,6 +998,33 @@ public class PistesyottoResourceTest {
                         .build()
                         .build()
                         .build());
+                MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
+                        new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
+                                new OrganisaatioTyyppi(
+                                        "1.2.246.562.10.45042175963",
+                                        ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
+                                        Arrays.asList(
+                                                new OrganisaatioTyyppi(
+                                                        "1.2.246.562.10.45698499378",
+                                                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
+                                                        Arrays.asList(
+                                                                new OrganisaatioTyyppi(
+                                                                        "1.2.3.44444.5",
+                                                                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
+                                                                        Arrays.asList(),
+                                                                        null,
+                                                                        Arrays.asList("TOIMIPISTE")
+                                                                )
+                                                        ),
+                                                        "oppilaitostyyppi_21#1",
+                                                        Arrays.asList("OPPILAITOS")
+                                                )
+                                        ),
+                                        null,
+                                        Arrays.asList("KOULUTUSTOIMIJA")
+                                )
+                        ))
+                );
                 MockSuoritusrekisteriAsyncResource.setPostException(Optional.of(
                     new HttpExceptionWithResponse("Something terrible happened", Response.serverError().entity("Boom").build())));
 

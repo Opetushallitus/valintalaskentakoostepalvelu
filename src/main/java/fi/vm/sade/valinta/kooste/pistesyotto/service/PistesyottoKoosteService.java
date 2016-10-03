@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -23,8 +24,9 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     @Autowired
     public PistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
                                     SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
-                                    TarjontaAsyncResource tarjontaAsyncResource) {
-        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource);
+                                    TarjontaAsyncResource tarjontaAsyncResource,
+                                    OrganisaatioAsyncResource organisaatioAsyncResource) {
+        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource, organisaatioAsyncResource);
     }
 
     public Observable<List<ApplicationAdditionalDataDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, List<String> hakemusOidit) {

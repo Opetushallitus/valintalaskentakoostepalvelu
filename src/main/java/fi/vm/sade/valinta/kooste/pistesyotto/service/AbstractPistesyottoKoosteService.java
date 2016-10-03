@@ -1,23 +1,25 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
+import java.util.*;
+
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
+import rx.Observable;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
@@ -34,12 +36,16 @@ public abstract class AbstractPistesyottoKoosteService {
     protected final ApplicationAsyncResource applicationAsyncResource;
     protected final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     protected final TarjontaAsyncResource tarjontaAsyncResource;
+    protected final OrganisaatioAsyncResource organisaatioAsyncResource;
 
     protected AbstractPistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
-                                               SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource, TarjontaAsyncResource tarjontaAsyncResource) {
+                                               SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
+                                               TarjontaAsyncResource tarjontaAsyncResource,
+                                               OrganisaatioAsyncResource organisaatioAsyncResource) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
+        this.organisaatioAsyncResource = organisaatioAsyncResource;
     }
 
     protected void tallennaKoostetutPistetiedot(String hakuOid,
@@ -126,9 +132,29 @@ public abstract class AbstractPistesyottoKoosteService {
             tallennaAdditionalInfo.get();
         } else {
             tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
-                myontajaRef.set(hakukohde.getTarjoajaOids().stream().findFirst().orElse(""));
+                String tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst().orElse("");
+                organisaatioAsyncResource.haeOrganisaationTyyppiHierarkia(tarjoajaOid).subscribe(
+                   hierarkia -> etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef),
+                   error -> onError.accept("Myöntäjän etsiminen kielikoesuoritukseen epäonnistui", error));
                 tallennaKielikoetulokset.get();
             }, error -> onError.accept("Hakukohteen haku Tarjonnasta epäonnistui", error));
+        }
+    }
+
+    public AtomicReference<String> etsiOppilaitosHierarkiasta(String tarjoajaOid, List<OrganisaatioTyyppi> taso, AtomicReference<String> oppilaitosRef) {
+        Optional<OrganisaatioTyyppi> oppilaitos = taso.stream().filter(ot -> ot.getOrganisaatiotyypit().contains("OPPILAITOS")).findFirst();
+        if(oppilaitos.isPresent()) {
+            oppilaitosRef.set(oppilaitos.get().getOid());
+        }
+        Optional<OrganisaatioTyyppi> tarjoaja = taso.stream().filter(ot -> ot.getOid().equals(tarjoajaOid)).findFirst();
+        if(tarjoaja.isPresent()) {
+            return oppilaitosRef;
+        } else {
+            List<OrganisaatioTyyppi> seuraavaTaso = taso.stream().map(OrganisaatioTyyppi::getChildren).flatMap(Collection::stream).collect(Collectors.toList());
+            if(seuraavaTaso.size() == 0) {
+                return oppilaitosRef;
+            }
+            return etsiOppilaitosHierarkiasta(tarjoajaOid, seuraavaTaso, oppilaitosRef);
         }
     }
 

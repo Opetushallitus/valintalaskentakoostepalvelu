@@ -1,8 +1,10 @@
 package fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl;
 
+import com.google.common.reflect.TypeToken;
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -37,12 +40,19 @@ public class OrganisaatioAsyncResourceImpl extends HttpResource implements Organ
     }
 
     @Override
-    public Future<String> haeOrganisaationOidKetju(String organisaatioOid) {
-        String url = "/organisaatio/" + organisaatioOid + "/parentoids";
-        return getWebClient().path(url)
-                .accept(MediaType.WILDCARD)
-                .async()
-                .get(String.class);
+    public Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(String organisaatioOid) {
+        return getAsObservable(
+                "/organisaatio/v2/hierarkia/hae/tyyppi",
+                new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    client.query("oid", organisaatioOid);
+                    client.query("aktiiviset", true);
+                    client.query("suunnitellut", false);
+                    client.query("lakkautetut", false);
+                    return client;
+                }
+        );
     }
 
     @Override

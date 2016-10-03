@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
@@ -68,6 +69,7 @@ public class LaskentaKerrallaFailTest {
 
     @Test
     public void testValintaperusteetHaunHakukohteetFail() throws InterruptedException {
+        MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(null);
         AsyncResponse asyncResponse = mock(AsyncResponse.class);
         try {
             valintalaskentaKerralla.valintalaskentaHaulle(

@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 import javax.ws.rs.core.Response;
 
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
-import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import rx.Observable;
 
 public interface OrganisaatioAsyncResource {
@@ -15,11 +15,7 @@ public interface OrganisaatioAsyncResource {
      */
     Future<Response> haeOrganisaatio(String organisaatioOid);
 
-    /**
-     * @param organisaatioOid
-     * @return esim formaatissa 1.2.246.562.10.xxxx/1.2.246.562.10.xxxx/1.2.246.562.10.xxxx
-     */
-    Future<String> haeOrganisaationOidKetju(String organisaatioOid);
+    Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(String organisaatioOid);
 
     Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId);
 

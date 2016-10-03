@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
@@ -90,6 +92,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tallennaKoostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
+        mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();
 
         int totalCount = pistetiedot.stream().mapToInt(p -> p.getAdditionalData().size()).sum();
@@ -152,6 +155,39 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockToReturnJson(GET,
                 "/tarjonta-service/rest/v1/hakukohde/testihakukohde/",
                 new Result(hakukohdeDTO));
+    }
+
+    private void mockOrganisaatioKutsu() {
+
+        OrganisaatioTyyppiHierarkia hierarkia = new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
+                new OrganisaatioTyyppi(
+                        "1.2.246.562.10.45042175963",
+                        ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
+                        Arrays.asList(
+                                new OrganisaatioTyyppi(
+                                        "1.2.246.562.10.45698499378",
+                                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
+                                        Arrays.asList(
+                                                new OrganisaatioTyyppi(
+                                                        "1.2.3.44444.5",
+                                                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
+                                                        Arrays.asList(),
+                                                        null,
+                                                        Arrays.asList("TOIMIPISTE")
+                                                )
+                                        ),
+                                        "oppilaitostyyppi_21#1",
+                                        Arrays.asList("OPPILAITOS")
+                                )
+                        ),
+                        null,
+                        Arrays.asList("KOULUTUSTOIMIJA")
+                )
+        ));
+        mockToReturnJsonWithParams(GET,
+                "/organisaatio-service/rest/organisaatio/v2/hierarkia/hae/tyyppi.*",
+                hierarkia,
+                ImmutableMap.of("oid", "1.2.3.44444.5", "aktiiviset", "true", "suunnitellut", "false", "lakkautetut", "false"));
     }
 
     private void mockHakuAppKutsu(List<ApplicationAdditionalDataDTO> pistetiedot) {
