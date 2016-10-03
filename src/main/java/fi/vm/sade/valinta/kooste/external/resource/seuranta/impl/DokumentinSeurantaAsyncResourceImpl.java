@@ -6,8 +6,12 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import fi.vm.sade.valinta.http.HttpResource;
@@ -17,11 +21,13 @@ import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
 import rx.Observable;
 
 @Service
-public class DokumentinSeurantaAsyncResourceImpl extends HttpResource implements DokumentinSeurantaAsyncResource {
+public class DokumentinSeurantaAsyncResourceImpl extends AsyncResourceWithCas implements DokumentinSeurantaAsyncResource {
 
     @Autowired
-    public DokumentinSeurantaAsyncResourceImpl(@Value("${host.ilb}") String address) {
-        super(address, TimeUnit.HOURS.toMillis(1));
+    public DokumentinSeurantaAsyncResourceImpl(@Qualifier("SeurantaRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
+                                               @Value("${host.ilb}") String address,
+                                               ApplicationContext context) {
+        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
     }
 
     public Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId) {

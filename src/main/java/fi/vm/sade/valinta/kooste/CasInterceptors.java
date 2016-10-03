@@ -90,6 +90,14 @@ public class CasInterceptors {
             @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
         return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
     }
+    @Bean(name="SeurantaRestClientCasInterceptor")
+    public fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor getSeurantaRestClientCasInterceptor(
+            @Value("${web.url.cas}") String webCasUrl,
+            @Value("${cas.service.seuranta}/j_spring_cas_security_check") String targetService,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
+        return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
+    }
     @Bean(name="SuoritusrekisteriRestClientCasInterceptor")
     public fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor getSuoritusrekisteriRestClientCasInterceptor(
             @Value("${web.url.cas}") String webCasUrl,

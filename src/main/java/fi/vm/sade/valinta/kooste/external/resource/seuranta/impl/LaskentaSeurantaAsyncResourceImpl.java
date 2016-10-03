@@ -10,11 +10,15 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.LaskentaParams;
 import fi.vm.sade.valinta.seuranta.dto.*;
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.google.common.reflect.TypeToken;
@@ -28,13 +32,15 @@ import rx.Observable;
 
 
 @Service
-public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements LaskentaSeurantaAsyncResource {
+public class LaskentaSeurantaAsyncResourceImpl extends AsyncResourceWithCas implements LaskentaSeurantaAsyncResource {
     private final Gson gson = new Gson();
     private final ResponseCallback responseCallback = new ResponseCallback();
 
     @Autowired
-    public LaskentaSeurantaAsyncResourceImpl(@Value("${host.ilb}") String address) {
-        super(address, TimeUnit.HOURS.toMillis(1));
+    public LaskentaSeurantaAsyncResourceImpl( @Qualifier("SeurantaRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
+                                              @Value("${host.ilb}") String address,
+                                              ApplicationContext context) {
+        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
     }
 
     @Override
