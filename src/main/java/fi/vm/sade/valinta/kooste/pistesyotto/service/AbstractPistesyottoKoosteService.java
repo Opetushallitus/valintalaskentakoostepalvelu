@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 public abstract class AbstractPistesyottoKoosteService {
@@ -133,20 +134,16 @@ public abstract class AbstractPistesyottoKoosteService {
             tallennaAdditionalInfo.get();
         } else {
             tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
-                for(String tarjoajaOid : hakukohde.getTarjoajaOids()) {
-                    organisaatioAsyncResource.haeOrganisaationTyyppiHierarkia(tarjoajaOid).subscribe(
-                            hierarkia -> etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef),
-                            error -> onError.accept("Myöntäjän etsiminen kielikoesuoritukseen epäonnistui", error));
-                    if(isNotEmpty(myontajaRef.get())) {
-                        break;
-                    }
-                }
-                if(isNotEmpty(myontajaRef.get())) {
-                    tallennaKielikoetulokset.get();
-                } else {
-                    String message = "Kielikoesuoritukselle ei löydetty myöntäjää. Hakukohde " + hakukohdeOid + ", tarjoajat " + hakukohde.getTarjoajaOids();
-                    onError.accept(message, new Exception(message));
-                }
+                String tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst().orElse("");
+                    organisaatioAsyncResource.haeOrganisaationTyyppiHierarkia(tarjoajaOid).subscribe(hierarkia ->
+                    {
+                        etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef);
+                        if(isEmpty(myontajaRef.get())) {
+                            onError.accept("Hakukohteen " + hakukohdeOid + " suoritukselle ei löytynyt myöntäjää.",
+                                    new Exception("Hakukohteen " + hakukohdeOid + " suoritukselle ei löytynyt myöntäjää."));
+                        }
+                        tallennaKielikoetulokset.get();
+                    }, error -> onError.accept("Myöntäjän etsiminen kielikoesuoritukseen epäonnistui", error));
             }, error -> onError.accept("Hakukohteen haku Tarjonnasta epäonnistui", error));
         }
     }
