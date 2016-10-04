@@ -337,13 +337,7 @@ public class PistesyottoResourceTest {
             MockValintaperusteetAsyncResource.setValintaperusteetResult(
                     valintaperusteet
             );
-            MockValintaperusteetAsyncResource.setHakukohdeResult(
-                    Arrays.asList(
-                            hakukohdeJaValintakoe()
-                                    .addValintakoe(VALINTAKOE1)
-                                    .build()
-                    )
-            );
+            mockValintakokeetHakukohteille();
             MockApplicationAsyncResource.setResult(Arrays.asList(
                     hakemus()
                             .setOid(HAKEMUS1)
@@ -452,14 +446,7 @@ public class PistesyottoResourceTest {
             MockValintaperusteetAsyncResource.setValintaperusteetResult(
                     valintaperusteet
             );
-            MockValintaperusteetAsyncResource.setHakukohdeResult(
-                    Arrays.asList(
-                            hakukohdeJaValintakoe()
-                                    .addValintakoe(VALINTAKOE1)
-                                    .addValintakoe(KIELIKOE)
-                                    .build()
-                    )
-            );
+            mockValintakokeetHakukohteille();
             MockApplicationAsyncResource.setResult(Arrays.asList(
                     hakemus()
                             .setOid(HAKEMUS1)
@@ -634,8 +621,7 @@ public class PistesyottoResourceTest {
                                 .setOid(HAKEMUS3).build()
                 )
         );
-        MockValintaperusteetAsyncResource.setHakukohdeResult(Collections.singletonList(
-                hakukohdeJaValintakoe().addValintakoe(VALINTAKOE1).addValintakoe(KIELIKOE).build()));
+        mockValintakokeetHakukohteille();
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                 TARJOAJA1, "", "", "",
@@ -691,16 +677,23 @@ public class PistesyottoResourceTest {
             MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
-                            .setOid(HAKEMUS1).build(),
+                            .setPersonOid(PERSONOID1)
+                            .setOid(HAKEMUS1)
+                            .build(),
                     lisatiedot()
-                            .setOid(HAKEMUS3).build()));
+                            .setPersonOid(PERSONOID3)
+                            .setOid(HAKEMUS3)
+                            .build()));
             MockApplicationAsyncResource.setAdditionalDataResultByOid(
                     Arrays.asList(
                             lisatiedot()
+                                    .setPersonOid(PERSONOID2)
                                     .setOid(HAKEMUS2)
                                     .build(),
                             lisatiedot()
-                                    .setOid(HAKEMUS3).build()
+                                    .setPersonOid(PERSONOID3)
+                                    .setOid(HAKEMUS3)
+                                    .build()
                     )
             );
             MockSuoritusrekisteriAsyncResource.setResult(
@@ -725,6 +718,7 @@ public class PistesyottoResourceTest {
                     .build()
                     .build()
                     .build());
+            mockValintakokeetHakukohteille();
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
             MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
                     new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
@@ -854,11 +848,6 @@ public class PistesyottoResourceTest {
         }
     }
 
-    public void cleanMocks() {
-        Mocks.reset();
-        MockApplicationAsyncResource.clear();
-    }
-
     @Test
     public void pistesyottoTuontiVirheellisestiSortatuillaHakemuksillaTest() throws Throwable {
         cleanMocks();
@@ -936,8 +925,7 @@ public class PistesyottoResourceTest {
                                 .setOid(HAKEMUS3).build()
                 )
         );
-        MockValintaperusteetAsyncResource.setHakukohdeResult(Collections.singletonList(
-                hakukohdeJaValintakoe().addValintakoe(VALINTAKOE1).addValintakoe(KIELIKOE).build()));
+        mockValintakokeetHakukohteille();
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         Response r =
                 pistesyottoTuontiResource.getWebClient()
@@ -956,99 +944,113 @@ public class PistesyottoResourceTest {
 
     @Test
     public void pistesyottoTuontiSureVirheellaTest() throws IOException {
+        cleanMocks();
+        try {
+            MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
+            MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
+                    lisatiedot()
+                            .setOid(HAKEMUS1).build(),
+                    lisatiedot()
+                            .setOid(HAKEMUS3).build()));
+            MockApplicationAsyncResource.setAdditionalDataResultByOid(
+                    Arrays.asList(
+                            lisatiedot()
+                                    .setOid(HAKEMUS2)
+                                    .build(),
+                            lisatiedot()
+                                    .setOid(HAKEMUS3).build()
+                    )
+            );
+            mockValintakokeetHakukohteille();
+
+            MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+            MockSuoritusrekisteriAsyncResource.setResult(
+                new SuoritusrekisteriSpec.OppijaBuilder()
+                    .setOppijanumero(PERSONOID1)
+                    .suoritus()
+                    .setHenkiloOid(PERSONOID1)
+                    .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                    .arvosana()
+                    .setAine(KIELIKOE)
+                    .setLisatieto("FI")
+                    .setArvosana("true")
+                    .build()
+                    .build()
+                    .suoritus()
+                    .setHenkiloOid(PERSONOID1)
+                    .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                    .arvosana()
+                    .setAine(KIELIKOE)
+                    .setLisatieto("SV")
+                    .setArvosana("false")
+                    .build()
+                    .build()
+                    .build());
+            MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
+                    new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
+                            new OrganisaatioTyyppi(
+                                    "1.2.246.562.10.45042175963",
+                                    ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
+                                    Arrays.asList(
+                                            new OrganisaatioTyyppi(
+                                                    "1.2.246.562.10.45698499378",
+                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
+                                                    Arrays.asList(
+                                                            new OrganisaatioTyyppi(
+                                                                    "1.2.3.44444.5",
+                                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
+                                                                    Arrays.asList(),
+                                                                    null,
+                                                                    Arrays.asList("TOIMIPISTE")
+                                                            )
+                                                    ),
+                                                    "oppilaitostyyppi_21#1",
+                                                    Arrays.asList("OPPILAITOS")
+                                            )
+                                    ),
+                                    null,
+                                    Arrays.asList("KOULUTUSTOIMIJA")
+                            )
+                    ))
+            );
+            MockSuoritusrekisteriAsyncResource.setPostException(Optional.of(
+                new HttpExceptionWithResponse("Something terrible happened", Response.serverError().entity("Boom").build())));
+
+            Response r =
+                    pistesyottoTuontiResource.getWebClient()
+                            .query("hakuOid", HAKU1)
+                            .query("hakukohdeOid",HAKUKOHDE1)
+                            .post(Entity.entity(pistesyottoExcel.getExcel().vieXlsx(),
+                                    MediaType.APPLICATION_OCTET_STREAM));
+            assertEquals(200, r.getStatus());
+            ProsessiId prosessiId = r.readEntity(ProsessiId.class);
+
+            DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessiStatusResponse -> {
+                if (prosessiStatusResponse.valmis() || prosessiStatusResponse.poikkeuksia()) {
+                    String exceptionMessage = prosessiStatusResponse.poikkeukset.iterator().next().getViesti();
+                    assertEquals("Something terrible happened", exceptionMessage);
+                    return true;
+                }
+                return false;
+            });
+        } finally {
+            MockSuoritusrekisteriAsyncResource.clear();
             cleanMocks();
-            try {
-                MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
-                MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
-                        lisatiedot()
-                                .setOid(HAKEMUS1).build(),
-                        lisatiedot()
-                                .setOid(HAKEMUS3).build()));
-                MockApplicationAsyncResource.setAdditionalDataResultByOid(
-                        Arrays.asList(
-                                lisatiedot()
-                                        .setOid(HAKEMUS2)
-                                        .build(),
-                                lisatiedot()
-                                        .setOid(HAKEMUS3).build()
-                        )
-                );
-                MockValintaperusteetAsyncResource.setHakukohdeResult(Collections.singletonList(
-                    hakukohdeJaValintakoe().addValintakoe(VALINTAKOE1).addValintakoe(KIELIKOE).build()));
-                MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
-                MockSuoritusrekisteriAsyncResource.setResult(
-                    new SuoritusrekisteriSpec.OppijaBuilder()
-                        .setOppijanumero(PERSONOID1)
-                        .suoritus()
-                        .setHenkiloOid(PERSONOID1)
-                        .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-                        .arvosana()
-                        .setAine(KIELIKOE)
-                        .setLisatieto("FI")
-                        .setArvosana("true")
-                        .build()
-                        .build()
-                        .suoritus()
-                        .setHenkiloOid(PERSONOID1)
-                        .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-                        .arvosana()
-                        .setAine(KIELIKOE)
-                        .setLisatieto("SV")
-                        .setArvosana("false")
-                        .build()
-                        .build()
-                        .build());
-                MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
-                        new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
-                                new OrganisaatioTyyppi(
-                                        "1.2.246.562.10.45042175963",
-                                        ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
-                                        Arrays.asList(
-                                                new OrganisaatioTyyppi(
-                                                        "1.2.246.562.10.45698499378",
-                                                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
-                                                        Arrays.asList(
-                                                                new OrganisaatioTyyppi(
-                                                                        "1.2.3.44444.5",
-                                                                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                                                        Arrays.asList(),
-                                                                        null,
-                                                                        Arrays.asList("TOIMIPISTE")
-                                                                )
-                                                        ),
-                                                        "oppilaitostyyppi_21#1",
-                                                        Arrays.asList("OPPILAITOS")
-                                                )
-                                        ),
-                                        null,
-                                        Arrays.asList("KOULUTUSTOIMIJA")
-                                )
-                        ))
-                );
-                MockSuoritusrekisteriAsyncResource.setPostException(Optional.of(
-                    new HttpExceptionWithResponse("Something terrible happened", Response.serverError().entity("Boom").build())));
-
-                Response r =
-                        pistesyottoTuontiResource.getWebClient()
-                                .query("hakuOid", HAKU1)
-                                .query("hakukohdeOid",HAKUKOHDE1)
-                                .post(Entity.entity(pistesyottoExcel.getExcel().vieXlsx(),
-                                        MediaType.APPLICATION_OCTET_STREAM));
-                assertEquals(200, r.getStatus());
-                ProsessiId prosessiId = r.readEntity(ProsessiId.class);
-
-                DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessiStatusResponse -> {
-                    if (prosessiStatusResponse.valmis() || prosessiStatusResponse.poikkeuksia()) {
-                        String exceptionMessage = prosessiStatusResponse.poikkeukset.iterator().next().getViesti();
-                        assertEquals("Something terrible happened", exceptionMessage);
-                        return true;
-                    }
-                    return false;
-                });
-            } finally {
-                MockSuoritusrekisteriAsyncResource.clear();
-                cleanMocks();
-            }
         }
+    }
+
+    public void cleanMocks() {
+        Mocks.reset();
+        MockApplicationAsyncResource.clear();
+        MockValintaperusteetAsyncResource.clear();
+        MockValintalaskentaValintakoeAsyncResource.clear();
+        MockSuoritusrekisteriAsyncResource.clear();
+        MockOrganisaationAsyncResource.clear();
+    }
+
+    private void mockValintakokeetHakukohteille() {
+        MockValintaperusteetAsyncResource.setHakukohdeResult(Collections.singletonList(
+                hakukohdeJaValintakoe().addValintakoe(VALINTAKOE1).addValintakoe(KIELIKOE).build()));
+    }
 
 }

@@ -23,8 +23,14 @@ public class MockValintalaskentaValintakoeAsyncResource implements Valintalasken
     public static void setHakemusOsallistuminenResult(List<HakemusOsallistuminenDTO> res) {
         hakemusOsallistuminen.set(res);
     }
+
     public static void setResult(List<ValintakoeOsallistuminenDTO> res) {
         osallistumistiedot.set(res);
+    }
+
+    public static void clear() {
+        osallistumistiedot.set(null);
+        hakemusOsallistuminen.set(null);
     }
 
     @Override

@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -23,6 +26,12 @@ import java.util.stream.Collectors;
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
 
+    private static AtomicReference<List<Hakemus>> resultReference = new AtomicReference<>();
+    private static AtomicReference<List<Hakemus>> resultByOidReference = new AtomicReference<>();
+    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultReference = new AtomicReference<>();
+    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultByOidReference = new AtomicReference<>();
+    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataPutReference = new AtomicReference<>();
+
     public static class Result {
         public final String hakuOid;
         public final String hakukohdeOid;
@@ -35,6 +44,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
             this.hakemusPrototyypit = hakemusPrototyypit;
         }
     }
+
     public final List<Result> results = new ArrayList<>();
 
     @Override
@@ -59,28 +69,33 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         }
         return null;
     }
-    private static AtomicReference<List<Hakemus>> resultReference = new AtomicReference<>();
-    private static AtomicReference<List<Hakemus>> resultByOidReference = new AtomicReference<>();
-    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultReference = new AtomicReference<>();
-    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultByOidReference = new AtomicReference<>();
-    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataPutReference = new AtomicReference<>();
+
+
     public static void setAdditionalDataResult(List<ApplicationAdditionalDataDTO> result) {
         additionalDataResultReference.set(result);
     }
+
     public static void setAdditionalDataResultByOid(List<ApplicationAdditionalDataDTO> result) {
         additionalDataResultByOidReference.set(result);
     }
+
     public static List<ApplicationAdditionalDataDTO> getAdditionalDataInput() {
         return additionalDataPutReference.get();
     }
+
     public static void setResult(List<Hakemus> result) {
         resultReference.set(result);
     }
+
     public static void setResultByOid(List<Hakemus> result) {
         resultByOidReference.set(result);
     }
+
     public static void clear() {
+        additionalDataResultReference.set(null);
         additionalDataPutReference.set(null);
+        additionalDataResultByOidReference.set(null);
+        resultByOidReference.set(null);
         resultReference.set(null);
     }
 
@@ -96,30 +111,10 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
                 }
         );
     }
-    private Hakemus toHakemus(HakemusPrototyyppi prototyyppi) {
-        final Hakemus hakemus = new Hakemus();
-        hakemus.setAnswers(new Answers());
-        final Map<String, String> henkilotiedot = hakemus.getAnswers().getHenkilotiedot();
-        henkilotiedot.put("Henkilotunnus", prototyyppi.getHenkilotunnus());
-        henkilotiedot.put("Etunimet", prototyyppi.getEtunimi());
-        henkilotiedot.put("Kutsumanimi", prototyyppi.getEtunimi());
-        henkilotiedot.put("Sukunimi", prototyyppi.getSukunimi());
-        henkilotiedot.put("syntymaaika", prototyyppi.getSyntymaAika());
-        hakemus.setOid(MockData.hakemusOid);
-        hakemus.setPersonOid(prototyyppi.getHakijaOid());
-        return hakemus;
-    }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByOid(final String hakuOid, final String hakukohdeOid) {
-        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(() -> {
-            if (resultReference.get() != null) {
-                return Futures.immediateFuture(resultReference.get());
-            } else {
-                Hakemus hakemus = getHakemus();
-                return Futures.immediateFuture(Arrays.asList(hakemus));
-            }
-        }));
+    public Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
+        return getApplicationsByOids(hakuOid, Arrays.asList(hakukohdeOid));
     }
 
     @Override
@@ -132,20 +127,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
                 return Futures.immediateFuture(Arrays.asList(hakemus));
             }
         }));
-    }
-
-    private Hakemus getHakemus() {
-        Hakemus hakemus = new Hakemus();
-        hakemus.setOid(MockData.hakemusOid);
-        hakemus.setPersonOid(MockData.hakijaOid);
-        Answers answers = new Answers();
-        answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
-        answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
-        answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
-        answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
-        answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
-        hakemus.setAnswers(answers);
-        return hakemus;
     }
 
     @Override
@@ -211,5 +192,33 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public Peruutettava getApplicationAdditionalData(final String hakuOid, final String hakukohdeOid, final Consumer<List<ApplicationAdditionalDataDTO>> callback, final Consumer<Throwable> failureCallback) {
         callback.accept(additionalDataResultReference.get());
         return new PeruutettavaImpl(Futures.immediateFuture(additionalDataResultReference.get()));
+    }
+
+    private Hakemus getHakemus() {
+        Hakemus hakemus = new Hakemus();
+        hakemus.setOid(MockData.hakemusOid);
+        hakemus.setPersonOid(MockData.hakijaOid);
+        Answers answers = new Answers();
+        answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
+        answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
+        answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
+        answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
+        answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
+        hakemus.setAnswers(answers);
+        return hakemus;
+    }
+
+    private Hakemus toHakemus(HakemusPrototyyppi prototyyppi) {
+        final Hakemus hakemus = new Hakemus();
+        hakemus.setAnswers(new Answers());
+        final Map<String, String> henkilotiedot = hakemus.getAnswers().getHenkilotiedot();
+        henkilotiedot.put("Henkilotunnus", prototyyppi.getHenkilotunnus());
+        henkilotiedot.put("Etunimet", prototyyppi.getEtunimi());
+        henkilotiedot.put("Kutsumanimi", prototyyppi.getEtunimi());
+        henkilotiedot.put("Sukunimi", prototyyppi.getSukunimi());
+        henkilotiedot.put("syntymaaika", prototyyppi.getSyntymaAika());
+        hakemus.setOid(MockData.hakemusOid);
+        hakemus.setPersonOid(prototyyppi.getHakijaOid());
+        return hakemus;
     }
 }

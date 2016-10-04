@@ -22,6 +22,10 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
         hierarkiaRef.set(hierarkia);
     }
 
+    public static void clear() {
+        hierarkiaRef.set(null);
+    }
+
     @Override
     public Future<Response> haeOrganisaatio(String organisaatioOid) {
         throw new NotImplementedException();

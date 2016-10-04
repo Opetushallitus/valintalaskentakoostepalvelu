@@ -61,6 +61,10 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
     public static void clear() {
         resultReference.set(null);
+        hakukohdeResultReference.set(null);
+        hakukohdeJaValintaperusteetResultReference.set(null);
+        valintaperusteetResultReference.set(null);
+        valintakokeetResultReference.set(null);
     }
 
     @Override
