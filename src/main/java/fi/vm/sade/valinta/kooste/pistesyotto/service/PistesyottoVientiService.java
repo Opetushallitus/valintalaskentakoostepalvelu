@@ -115,7 +115,7 @@ public class PistesyottoVientiService {
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
         });
         try {
-            prosessi.setKokonaistyo(7
+            prosessi.setKokonaistyo(8
                             // luonti
                             + 1
                             // dokumenttipalveluun vienti

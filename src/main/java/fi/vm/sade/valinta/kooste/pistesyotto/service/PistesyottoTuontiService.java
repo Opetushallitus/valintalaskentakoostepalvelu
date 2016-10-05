@@ -215,9 +215,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
     }
 
     public void tuo(String username, String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
-        prosessi.setKokonaistyo(5
-                        // luonti
-                        + 1);
+        prosessi.setKokonaistyo(7); //Kuusi + valmistuminen
         PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
             logPistesyotonTuontiEpaonnistui(t);
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
