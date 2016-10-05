@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.sun.net.httpserver.HttpHandler;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -22,12 +23,14 @@ import javax.ws.rs.core.Response;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,9 +40,7 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
+import static javax.ws.rs.HttpMethod.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -94,6 +95,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
         mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();
+        mockSureKutsu(createOppijat());
 
         int totalCount = pistetiedot.stream().mapToInt(p -> p.getAdditionalData().size()).sum();
         int kielikoeCount = pistetiedot.stream().mapToInt(p -> p.getAdditionalData().keySet().stream().filter(k -> "kielikoe_fi".equals(k)).collect(Collectors.toList()).size()).sum();
@@ -103,7 +105,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
         final Semaphore suoritusCounter = new Semaphore(0);
         final Semaphore arvosanaCounter = new Semaphore(0);
+        final Semaphore deleteCounter = new Semaphore(0);
         mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
+        mockSuoritusrekisteriDelete(deleteCounter);
 
         final Semaphore lisatietoCounter = new Semaphore(0);
         mockHakuAppTallennus(lisatietoCounter);
@@ -214,30 +218,35 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     private List<Oppija> createOppijat() {
         return Arrays.asList(
                createOppija("1.2.246.562.24.77642460905", Arrays.asList(
-                       createSuoritus("1.2.246.562.24.77642460905", "FI", Arrays.asList(
+                       createSuoritus("suoritus1", "1.2.246.562.24.77642460905", "FI", Arrays.asList(
                                createArvosana("FI", "TRUE"))))),
                createOppija("1.2.246.562.24.52321744679", Arrays.asList(
-                       createSuoritus("1.2.246.562.24.52321744679", "FI", Arrays.asList(
+                       createSuoritus("suoritus2", "1.2.246.562.24.52321744679", "FI", Arrays.asList(
                                createArvosana("FI", "FALSE"))),
-                       createSuoritus("1.2.246.562.24.52321744679", "SV", Arrays.asList(
+                       createSuoritus("suoritus3", "1.2.246.562.24.52321744679", "SV", Arrays.asList(
                                createArvosana("SV", "TRUE"))))),
                 createOppija("1.2.246.562.24.93793496064", Arrays.asList(
-                        createSuoritus("1.2.246.562.24.93793496064", "FI", Arrays.asList(
+                        createSuoritus("suoritus4", "1.2.246.562.24.93793496064", "FI", Arrays.asList(
                                 createArvosana("FI", "FALSE"))),
-                        createSuoritus("1.2.246.562.24.93793496064", "FI", Arrays.asList(
-                                createArvosana("FI", "TRUE")))))
+                        createSuoritus("suoritus5", "1.2.246.562.24.93793496064", "FI", Arrays.asList(
+                                createArvosana("FI", "TRUE")), "1.2.246.562.10.45698499379")))
         );
     }
 
-    private SuoritusJaArvosanat createSuoritus(String oppijanumero, String kieli, List<Arvosana> arvosanat) {
+    private SuoritusJaArvosanat createSuoritus(String id, String oppijanumero, String kieli, List<Arvosana> arvosanat) {
+        return createSuoritus(id, oppijanumero, kieli, arvosanat, "1.2.246.562.10.45698499378");
+    }
+
+    private SuoritusJaArvosanat createSuoritus(String id, String oppijanumero, String kieli, List<Arvosana> arvosanat, String myontaja) {
         String valmistuminen = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(new Date());
         Suoritus suoritus = new Suoritus();
+        suoritus.setId(id);
         suoritus.setHenkiloOid(oppijanumero);
         suoritus.setTila(AbstractPistesyottoKoosteService.KIELIKOE_SUORITUS_TILA);
         suoritus.setYksilollistaminen(AbstractPistesyottoKoosteService.KIELIKOE_SUORITUS_YKSILOLLISTAMINEN);
         suoritus.setVahvistettu(true);
         suoritus.setSuoritusKieli(kieli.toUpperCase());
-        suoritus.setMyontaja("1.2.3.4444.5");
+        suoritus.setMyontaja(myontaja);
         suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
         suoritus.setValmistuminen(valmistuminen);
 
@@ -261,5 +270,31 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         oppija.setOppijanumero(oppijanumero);
         oppija.setSuoritukset(suoritusJaArvosanat);
         return oppija;
+    }
+
+    private void mockSuoritusrekisteriDelete(final Semaphore counter) {
+        MockServer fakeSure = new MockServer();
+        HttpHandler handler = (exchange) -> {
+            try {
+                String path = exchange.getRequestURI().getRawPath();
+                String suoritusId = path.substring(39);
+                System.out.println(path);
+                System.out.println(suoritusId);
+                Suoritus suoritus = new Suoritus();
+                suoritus.setId(suoritusId);
+                exchange.sendResponseHeaders(200, 0);
+                counter.release();
+                OutputStream responseBody = exchange.getResponseBody();
+                IOUtils.write(new Gson().toJson(suoritus), responseBody);
+                responseBody.close();
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+
+        };
+        mockForward(DELETE,
+                fakeSure.addHandler("/suoritusrekisteri/rest/v1/suoritukset/suoritus2", handler )
+                        .addHandler("/suoritusrekisteri/rest/v1/suoritukset/suoritus1", handler )
+                        .addHandler("/suoritusrekisteri/rest/v1/suoritukset/suoritus4", handler ));
     }
 }

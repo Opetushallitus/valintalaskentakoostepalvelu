@@ -59,7 +59,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
             List<String> kielikoeAvaimet = additionalData.keySet().stream().filter(a -> a.matches(PistesyottoExcel.KIELIKOE_REGEX)).collect(Collectors.toList());
             if(0 < kielikoeAvaimet.size()) {
-                kielikoetuloksetSureen.put(hakemusOid, kielikoeAvaimet.stream().filter(avain -> isNotEmpty(additionalData.get(avain))).collect(Collectors.toMap(
+                kielikoetuloksetSureen.put(hakemusOid, kielikoeAvaimet.stream().collect(Collectors.toMap(
                         avain -> avain,
                         avain -> additionalData.get(avain)
                 )));

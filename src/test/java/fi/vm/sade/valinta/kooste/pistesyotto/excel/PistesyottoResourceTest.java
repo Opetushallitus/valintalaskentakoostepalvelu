@@ -1039,6 +1039,161 @@ public class PistesyottoResourceTest {
         }
     }
 
+    @Test
+    public void pistesyottoTuonti3Test() {
+        cleanMocks();
+        try {
+            MockValintaperusteetAsyncResource.setValintaperusteetResultReference(valintaperusteet);
+            MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
+                    lisatiedot()
+                            .setPersonOid(PERSONOID1)
+                            .setOid(HAKEMUS1)
+                            .build(),
+                    lisatiedot()
+                            .setPersonOid(PERSONOID3)
+                            .setOid(HAKEMUS3)
+                            .build()));
+            MockApplicationAsyncResource.setAdditionalDataResultByOid(
+                    Arrays.asList(
+                            lisatiedot()
+                                    .setPersonOid(PERSONOID2)
+                                    .setOid(HAKEMUS2)
+                                    .build(),
+                            lisatiedot()
+                                    .setPersonOid(PERSONOID3)
+                                    .setOid(HAKEMUS3)
+                                    .build()
+                    )
+            );
+            MockSuoritusrekisteriAsyncResource.setResult(
+                    new SuoritusrekisteriSpec.OppijaBuilder()
+                            .setOppijanumero(PERSONOID1)
+                            .suoritus()
+                            .setId("123-123-123-1")
+                            .setMyontaja("1.2.246.562.10.45698499379")
+                            .setHenkiloOid(PERSONOID1)
+                            .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                            .arvosana()
+                            .setAine(KIELIKOE)
+                            .setLisatieto("FI")
+                            .setArvosana("true")
+                            .build()
+                            .build()
+                            .suoritus()
+                            .setId("123-123-123-2")
+                            .setMyontaja("1.2.246.562.10.45698499378")
+                            .setHenkiloOid(PERSONOID1)
+                            .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                            .arvosana()
+                            .setAine(KIELIKOE)
+                            .setLisatieto("FI")
+                            .setArvosana("false")
+                            .build()
+                            .build()
+                            .build());
+            MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+            MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
+                    new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
+                            new OrganisaatioTyyppi(
+                                    "1.2.246.562.10.45042175963",
+                                    ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
+                                    Arrays.asList(
+                                            new OrganisaatioTyyppi(
+                                                    "1.2.246.562.10.45698499378",
+                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
+                                                    Arrays.asList(
+                                                            new OrganisaatioTyyppi(
+                                                                    "1.2.3.44444.5",
+                                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
+                                                                    Arrays.asList(),
+                                                                    null,
+                                                                    Arrays.asList("TOIMIPISTE")
+                                                            )
+                                                    ),
+                                                    "oppilaitostyyppi_21#1",
+                                                    Arrays.asList("OPPILAITOS")
+                                            )
+                                    ),
+                                    null,
+                                    Arrays.asList("KOULUTUSTOIMIJA")
+                            )
+                    ))
+            );
+            mockValintakokeetHakukohteille();
+            PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
+                    TARJOAJA1, "", "", "",
+                    Arrays.asList(
+                            hakemus()
+                                    .setOid(HAKEMUS1)
+                                    .build(),
+                            hakemus()
+                                    .setOid(HAKEMUS2)
+                                    .build(),
+                            hakemus()
+                                    .setOid(HAKEMUS3)
+                                    .build()
+                    ),
+                    Sets.newHashSet(Arrays.asList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
+                    Arrays.asList(VALINTAKOE1), // TUNNISTEET
+                    osallistumistiedot,
+                    valintaperusteet,
+                    Arrays.asList(
+                            lisatiedot()
+                                    .setOid(HAKEMUS1)
+                                    .setPersonOid(PERSONOID1)
+                                    .addLisatieto(TUNNISTE1, "3")
+                                    .addLisatieto(TUNNISTE2, "true")
+                                    .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
+                                    //.addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                    .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                                    .build(),
+                            lisatiedot()
+                                    .setOid(HAKEMUS2)
+                                    .setPersonOid(PERSONOID2)
+                                    .addLisatieto(TUNNISTE1, "2")
+                                    .addLisatieto(TUNNISTE2, "true")
+                                    .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
+                                    //.addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                    .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                                    .build(),
+                            lisatiedot()
+                                    .setOid(HAKEMUS3)
+                                    .setPersonOid(PERSONOID3)
+                                    .addLisatieto(TUNNISTE1, "")
+                                    .build()
+                    ), ImmutableMap.of(
+                    PERSONOID1,
+                    Arrays.asList(new Arvosana(
+                            null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("", null, null), "FI")),
+                    PERSONOID2,
+                    Arrays.asList(new Arvosana(
+                            null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("false", null, null), "FI"))
+            )
+            );
+
+            Response r =
+                    pistesyottoTuontiResource.getWebClient()
+                            .query("hakuOid", HAKU1)
+                            .query("hakukohdeOid",HAKUKOHDE1)
+                            .post(Entity.entity(excel.getExcel().vieXlsx(),
+                                    MediaType.APPLICATION_OCTET_STREAM));
+            assertEquals(200, r.getStatus());
+            List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
+            assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!", 3, tuodutLisatiedot.size());
+            assertFalse("Kielikokeita ei saa löytyä hakemuksen lisätiedoista", tuodutLisatiedot.stream().anyMatch(a -> a.getAdditionalData().containsKey("kielikoe_fi")));
+            MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().forEach(s -> LOG.error(s.toString()));
+            MockSuoritusrekisteriAsyncResource.arvosanatRef.get().stream().forEach(a -> LOG.error(a.toString()));
+            assertEquals("Kielikokeen suoritus löytyy suresta", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size());
+            assertEquals("Suresta löytyy oikea kielikoesuoritus", PERSONOID2, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().get(0).getHenkiloOid());
+            assertEquals("Suorituksella on oikea myöntäjä", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals("1.2.246.562.10.45698499378")).count());
+            assertEquals("Kielikokeen arvosana löytyy suresta", 1, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().size());
+            assertEquals("Oikea suoritus on deletoitu", Arrays.asList("123-123-123-2"),MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get());
+        } finally {
+            cleanMocks();
+        }
+    }
+
     public void cleanMocks() {
         Mocks.reset();
         MockApplicationAsyncResource.clear();

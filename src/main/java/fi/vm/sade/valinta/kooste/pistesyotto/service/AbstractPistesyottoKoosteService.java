@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
@@ -61,6 +62,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
         AtomicInteger laskuri = new AtomicInteger(kielikoetuloksetSureen.values().stream().mapToInt(map -> map.size()).sum());
         AtomicReference<String> myontajaRef = new AtomicReference<>();
+        AtomicReference<List<Oppija>> oppijatRef = new AtomicReference<>();
 
         Supplier<Void> tallennaAdditionalInfo = () -> {
             applicationAsyncResource.putApplicationAdditionalData(
@@ -81,13 +83,19 @@ public abstract class AbstractPistesyottoKoosteService {
             return null;
         };
 
+
+
         Supplier<Void> tallennaKielikoetulokset = () -> {
             kielikoetuloksetSureen.keySet().stream().forEach(hakemusOid ->
             {
                 String valmistuminen = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(new Date());
                 String personOid = pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
                 Map<String, String> kielikoetulokset = kielikoetuloksetSureen.get(hakemusOid);
-                kielikoetulokset.keySet().stream().filter(t -> isNotEmpty(kielikoetulokset.get(t))).forEach(tunnus -> {
+
+                List<String> lisattavatKielikoetulokset = kielikoetulokset.keySet().stream().filter(t -> isNotEmpty(kielikoetulokset.get(t))).collect(Collectors.toList());
+                List<String> poistettavatKielikoetulokset = kielikoetulokset.keySet().stream().filter(t -> isEmpty(kielikoetulokset.get(t))).collect(Collectors.toList());
+
+                lisattavatKielikoetulokset.forEach(tunnus -> {
                     String kieli = tunnus.substring(9);
 
                     Suoritus suoritus = new Suoritus();
@@ -126,7 +134,49 @@ public abstract class AbstractPistesyottoKoosteService {
                         }, error -> onError.accept("Arvosanan tallennus Suoritusrekisteriin epäonnistui", error));
                     }, error -> onError.accept("Arvosanan tallennus Suoritusrekisteriin epäonnistui", error));
                 });
+
+                poistettavatKielikoetulokset.forEach(tunnus -> {
+                    String kieli = tunnus.substring(9);
+                    Function<SuoritusJaArvosanat, Boolean> isKielikoeArvosana = (suoritusJaArvosana) -> {
+                        Suoritus suoritus = suoritusJaArvosana.getSuoritus();
+                        return SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE.equals(suoritus.getKomo()) &&
+                               myontajaRef.get().equals(suoritus.getMyontaja()) &&
+                               suoritusJaArvosana.getArvosanat().stream().map(Arvosana::getLisatieto).anyMatch(k -> kieli.equalsIgnoreCase(k));
+                    };
+                    List<Suoritus> poistettavatSuoritukset = oppijatRef.get().stream().filter(o -> o.getOppijanumero().equals(personOid))
+                      .map(o -> o.getSuoritukset()).flatMap(Collection::stream).filter(sa -> isKielikoeArvosana.apply(sa))
+                      .map(SuoritusJaArvosanat::getSuoritus).collect(Collectors.toList());
+                    AtomicInteger suoritusLaskuri = new AtomicInteger(poistettavatSuoritukset.size());
+                    poistettavatSuoritukset.forEach(suoritus -> {
+                        suoritusrekisteriAsyncResource.deleteSuoritus(suoritus.getId()).subscribe(poistettu -> {
+                            if(0 == suoritusLaskuri.decrementAndGet()) {
+                                if(0 == laskuri.decrementAndGet()) {
+                                    tallennaAdditionalInfo.get();
+                                }
+                            }
+                        }, error -> onError.accept("Suorituksen poistaminen epäonnistui", error));
+
+                    });
+                    if(0 == poistettavatSuoritukset.size()) {
+                        if(0 == laskuri.decrementAndGet()) {
+                            tallennaAdditionalInfo.get();
+                        }
+                    }
+                });
+
             });
+            return null;
+        };
+
+        Supplier<Void> haeOppijatPoistettaville = () -> {
+            if(kielikoetuloksetSureen.values().stream().anyMatch(map -> map.values().stream().anyMatch(String::isEmpty))) {
+                suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid).subscribe(oppijat -> {
+                    oppijatRef.set(oppijat);
+                    tallennaKielikoetulokset.get();
+                }, error -> onError.accept("Oppijoiden hakeminen Suoritusrekisteristä epäonnistui", error));
+            } else {
+                tallennaKielikoetulokset.get();
+            }
             return null;
         };
 
@@ -142,7 +192,7 @@ public abstract class AbstractPistesyottoKoosteService {
                             onError.accept("Hakukohteen " + hakukohdeOid + " suoritukselle ei löytynyt myöntäjää.",
                                     new Exception("Hakukohteen " + hakukohdeOid + " suoritukselle ei löytynyt myöntäjää."));
                         }
-                        tallennaKielikoetulokset.get();
+                        haeOppijatPoistettaville.get();
                     }, error -> onError.accept("Myöntäjän etsiminen kielikoesuoritukseen epäonnistui", error));
             }, error -> onError.accept("Hakukohteen haku Tarjonnasta epäonnistui", error));
         }

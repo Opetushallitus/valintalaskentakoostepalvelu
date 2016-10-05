@@ -114,7 +114,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                                         valintakoetunniste -> pistesyottoExcel.onkoHakijaOsallistujaValintakokeeseen(hakemusOid, valintakoetunniste));
                                 List<String> kielikoeAvaimet = newPistetiedot.keySet().stream().filter(a -> a.matches(PistesyottoExcel.KIELIKOE_REGEX)).collect(Collectors.toList());
                                 if(0 < kielikoeAvaimet.size()) {
-                                    uudetKielikoetulokset.put(hakemusOid, kielikoeAvaimet.stream().filter(avain -> isNotEmpty(newPistetiedot.get(avain))).collect(Collectors.toMap(
+                                    uudetKielikoetulokset.put(hakemusOid, kielikoeAvaimet.stream().collect(Collectors.toMap(
                                             avain -> avain,
                                             avain -> newPistetiedot.get(avain)
                                     )));

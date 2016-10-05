@@ -167,6 +167,10 @@ public class SuoritusrekisteriSpec {
             this.oppija = oppija;
             this.suoritusJaArvosanat.setSuoritus(suoritus);
         }
+        public SuoritusBuilder setId(String id) {
+            suoritus.setId(id);
+            return SuoritusBuilder.this;
+        }
         public SuoritusBuilder setSource(String source) {
             suoritus.setSource(source);
             return SuoritusBuilder.this;

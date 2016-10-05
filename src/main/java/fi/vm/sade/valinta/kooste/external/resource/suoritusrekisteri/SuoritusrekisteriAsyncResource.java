@@ -34,4 +34,6 @@ public interface SuoritusrekisteriAsyncResource {
     Observable<Suoritus> postSuoritus(Suoritus suoritus);
 
     Observable<Arvosana> postArvosana(Arvosana arvosana);
+
+    Observable<Suoritus> deleteSuoritus(String suoritusId);
 }

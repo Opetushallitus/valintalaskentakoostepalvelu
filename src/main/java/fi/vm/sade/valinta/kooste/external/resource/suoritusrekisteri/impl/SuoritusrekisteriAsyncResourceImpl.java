@@ -76,6 +76,8 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
             return TyhjaPeruutettava.tyhjaPeruutettava();
         }
     }
+
+    @Override
     public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
         return getAsObservable("/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid, Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -134,6 +136,19 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
                 new TypeToken<Arvosana>(){
                 }.getType(),
                 Entity.entity(gson().toJson(arvosana), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Observable<Suoritus> deleteSuoritus(String suoritusId) {
+        return deleteAsObservable(
+                "/suoritusrekisteri/rest/v1/suoritukset/" + suoritusId,
+                new TypeToken<Suoritus>(){
+                }.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;

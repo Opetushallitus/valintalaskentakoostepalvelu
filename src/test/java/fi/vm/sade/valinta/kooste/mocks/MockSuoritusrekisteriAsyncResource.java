@@ -34,11 +34,14 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     private static Optional<RuntimeException> postException = Optional.empty();
 
+    public static AtomicReference<List<String>> deletedSuorituksetRef = new AtomicReference<>(new ArrayList<>());
+
     public static void clear() {
         postException = Optional.empty();
         oppijaRef.set(null);
         suorituksetRef.set(new ArrayList<>());
         arvosanatRef.set(new ArrayList<>());
+        deletedSuorituksetRef.set(new ArrayList<>());
     }
 
     public static void setPostException(Optional<RuntimeException> exception) {
@@ -95,5 +98,16 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
             return arvosanat;
         });
         return Observable.just(arvosana);
+    }
+
+    @Override
+    public Observable<Suoritus> deleteSuoritus(String suoritusId) {
+        deletedSuorituksetRef.getAndUpdate((List<String> suoritusIdt) -> {
+            suoritusIdt.add(suoritusId);
+            return suoritusIdt;
+        });
+        Suoritus suoritus = new Suoritus();
+        suoritus.setId(suoritusId);
+        return Observable.just(suoritus);
     }
 }
