@@ -354,6 +354,10 @@
 
 		<bean id="ValinnanvaiheenValintakoekutsutService"
 			  class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
+		<bean id="AmmatillisenKielikoeMigrationService"
+					class="fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationService"/>
+		<bean id="AmmatillisenKielikoeMigrationPistesyottoService"
+					class="fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationPistesyottoService"/>
 		<!-- Valintalaskenta -->
 		<bean id="ValintalaskentaKerrallaResource"
 			  class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
@@ -461,6 +465,8 @@
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.ValintaTulosServiceProxyResource"/>
 		<bean id="ViestintapalveluProxyResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu.ViestintapalveluProxyResource"/>
+		<bean id="AmmatillisenKielikoeMigrationResource"
+        class="fi.vm.sade.valinta.kooste.hakemukset.resource.AmmatillisenKielikoeMigrationResource"/>
 		<bean id="JonotSijoittelussaProxyResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.JonotSijoittelussaProxyResource"/>
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice" />
@@ -502,6 +508,7 @@
 				<ref bean="ViestintapalveluProxyResource"/>
 				<ref bean="SessionResource"/>
 				<ref bean="HakemuksetResource"/>
+				<ref bean="AmmatillisenKielikoeMigrationResource"/>
 			</jaxrs:serviceBeans>
 			<jaxrs:providers>
 				<ref bean="jsonProvider" />
