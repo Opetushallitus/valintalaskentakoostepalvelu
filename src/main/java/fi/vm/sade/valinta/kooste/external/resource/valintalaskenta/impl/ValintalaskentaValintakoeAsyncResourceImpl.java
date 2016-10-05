@@ -1,30 +1,25 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
+
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-
-import com.google.common.collect.Lists;
-import fi.vm.sade.valinta.http.HttpResource;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-
-import com.google.common.reflect.TypeToken;
-
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import rx.Observable;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintalaskentaValintakoeAsyncResourceImpl extends HttpResource implements ValintalaskentaValintakoeAsyncResource {
@@ -53,5 +48,11 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends HttpResource imp
     public Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeTunnisteet) {
         return postAsObservable("/valintalaskentakoostepalvelu/valintatieto/hakukohde/" + hakukohdeOid, new TypeToken<List<HakemusOsallistuminenDTO>>() {
         }.getType(), Entity.entity(valintakoeTunnisteet, MediaType.APPLICATION_JSON_TYPE));
+    }
+
+    @Override
+    public Observable<List<ValintakoeOsallistuminenDTO>> haeAmmatillisenKielikokeenOsallistumiset(Date since) {
+        return getAsObservable("/valintalaskentakoostepalvelu/valintakoe/ammatillisenkielikoeosallistumiset/" + new SimpleDateFormat("yyyy-MM-dd").format(since),
+            new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
     }
 }

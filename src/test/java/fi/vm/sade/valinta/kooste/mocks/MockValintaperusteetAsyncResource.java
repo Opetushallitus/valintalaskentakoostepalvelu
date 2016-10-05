@@ -32,6 +32,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     public static void setValintaperusteetResult(List<ValintaperusteDTO> result) {
         valintaperusteetResultReference.set(result);
     }
+
     public static void setHakukohteetValinnanvaiheelleResult(Set<String> result) {
         hakukohteetValinnanvaiheelleResultReference.set(result);
     }

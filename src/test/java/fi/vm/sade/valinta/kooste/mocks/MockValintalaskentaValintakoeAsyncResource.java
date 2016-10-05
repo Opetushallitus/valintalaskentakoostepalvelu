@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,6 +37,11 @@ public class MockValintalaskentaValintakoeAsyncResource implements Valintalasken
     @Override
     public Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeOid) {
         return Observable.just(hakemusOsallistuminen.get());
+    }
+
+    @Override
+    public Observable<List<ValintakoeOsallistuminenDTO>> haeAmmatillisenKielikokeenOsallistumiset(Date since) {
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     @Override

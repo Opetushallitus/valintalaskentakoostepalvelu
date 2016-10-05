@@ -1043,7 +1043,7 @@ public class PistesyottoResourceTest {
     public void pistesyottoTuonti3Test() {
         cleanMocks();
         try {
-            MockValintaperusteetAsyncResource.setValintaperusteetResultReference(valintaperusteet);
+            MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
                             .setPersonOid(PERSONOID1)
