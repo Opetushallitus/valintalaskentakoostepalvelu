@@ -26,7 +26,11 @@ public class AmmatillisenKielikoeMigrationService {
 
     public void migroiKielikoetuloksetSuoritusrekisteriin(Date since, String username, Consumer<Result> successHandler, BiConsumer<String, Throwable> exceptionHandler) {
         valintalaskentaValintakoeAsyncResource.haeAmmatillisenKielikokeenOsallistumiset(since).subscribe(valintakoeOsallistuminenDTOs -> {
-            pistesyottoService.save(valintakoeOsallistuminenDTOs, new Result(since), successHandler, exceptionHandler, username);
+            Result initialResult = new Result(since);
+            if (valintakoeOsallistuminenDTOs.isEmpty()) {
+                successHandler.accept(initialResult);
+            }
+            pistesyottoService.save(valintakoeOsallistuminenDTOs, initialResult, successHandler, exceptionHandler, username);
         }, (exception -> exceptionHandler.accept("Virhe osallistumisia haettaessa", exception)));
     }
 
