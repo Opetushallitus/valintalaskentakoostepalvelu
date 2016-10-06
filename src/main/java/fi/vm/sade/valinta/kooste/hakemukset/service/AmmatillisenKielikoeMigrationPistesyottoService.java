@@ -61,8 +61,10 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
                     successHandler, onError, username, PISTETIEDOT_AMMATTILLISEN_KIELIKOKEEN_MIGRAATIO);
             }));
 
-        return Observable.combineLatest(resultStream.collect(Collectors.toList()), (resultsList ->
-            Arrays.stream((Result[]) resultsList).reduce(new Result(r.startingFrom), Result::plus))).subscribe(onSuccess::accept);
+        return Observable.combineLatest(resultStream.collect(Collectors.toList()), resultsList -> {
+            Stream<Result> stream = Arrays.stream(resultsList).map(x -> ((Result) x));
+            return stream.reduce(new Result(r.startingFrom), Result::plus);
+        }).subscribe(onSuccess::accept);
     }
 
     private static Predicate<HakutoiveDTO> containsKielikoeResult() {
