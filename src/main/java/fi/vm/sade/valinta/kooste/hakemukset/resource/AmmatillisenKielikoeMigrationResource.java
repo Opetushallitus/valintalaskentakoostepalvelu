@@ -45,7 +45,7 @@ public class AmmatillisenKielikoeMigrationResource {
     @Value("${root.organisaatio.oid}")
     private String rootOrganisationOid;
 
-    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_CRID')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_CRUD')")
     @POST
     @Path("/migroiSureen")
     @Produces("application/json")
