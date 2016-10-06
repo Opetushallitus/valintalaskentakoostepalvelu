@@ -51,10 +51,10 @@ public class AmmatillisenKielikoeMigrationResource {
     @Produces("application/json")
     @ApiOperation(value = "Migroi ammatillisen koulutuksen kielikokeen tuloksia hakemukselta Suoritusrekisteriin", response = AmmatillisenKielikoeMigrationService.Result.class)
     public void migroiAmmatillisenKielikoetulksetSureen(@QueryParam("since") @ApiParam(value = "since", example = "2016-10-05") String sinceStr,
-                                                        @Suspended AsyncResponse asyncResponse) throws ParseException {
+                                                        @Suspended AsyncResponse asyncResponse) {
         assertUserIsOph();
         Preconditions.checkNotNull(sinceStr);
-        Date since = new SimpleDateFormat("yyyy-MM-dd").parse(sinceStr);
+        Date since = parse(sinceStr);
         asyncResponse.setTimeout(60, TimeUnit.MINUTES);
 
         LOG.info(String.format("Aloitetaan ammatillisen kielikoetulosten migraatio Suoritusrekisteriin ajankohdasta %s lähtien ", since));
@@ -71,6 +71,16 @@ public class AmmatillisenKielikoeMigrationResource {
                 logException(since, message, exception, durationSeconds);
                 asyncResponse.resume(Response.serverError().entity(message).build());
             });
+    }
+
+    private Date parse(@QueryParam("since") @ApiParam(value = "since", example = "2016-10-05") String sinceStr) {
+        Date since;
+        try {
+            since = new SimpleDateFormat("yyyy-MM-dd").parse(sinceStr);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return since;
     }
 
     private void logException(Date since, String message, Throwable exception, long durationSeconds) {
