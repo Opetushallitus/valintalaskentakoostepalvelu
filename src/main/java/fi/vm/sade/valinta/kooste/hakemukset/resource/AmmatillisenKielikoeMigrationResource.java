@@ -52,25 +52,30 @@ public class AmmatillisenKielikoeMigrationResource {
     @ApiOperation(value = "Migroi ammatillisen koulutuksen kielikokeen tuloksia hakemukselta Suoritusrekisteriin", response = AmmatillisenKielikoeMigrationService.Result.class)
     public void migroiAmmatillisenKielikoetulksetSureen(@QueryParam("since") @ApiParam(value = "since", example = "2016-10-05") String sinceStr,
                                                         @Suspended AsyncResponse asyncResponse) {
-        assertUserIsOph();
-        Preconditions.checkNotNull(sinceStr);
-        Date since = parse(sinceStr);
-        asyncResponse.setTimeout(60, TimeUnit.MINUTES);
+        try {
+            assertUserIsOph();
+            Preconditions.checkNotNull(sinceStr);
+            Date since = parse(sinceStr);
+            asyncResponse.setTimeout(60, TimeUnit.MINUTES);
 
-        LOG.info(String.format("Aloitetaan ammatillisen kielikoetulosten migraatio Suoritusrekisteriin ajankohdasta %s lähtien ", since));
-        Long started = System.currentTimeMillis();
+            LOG.info(String.format("Aloitetaan ammatillisen kielikoetulosten migraatio Suoritusrekisteriin ajankohdasta %s lähtien ", since));
+            Long started = System.currentTimeMillis();
 
-        ammatillisenKielikoeMigrationService.migroiKielikoetuloksetSuoritusrekisteriin(since, KoosteAudit.username(),
-            successResult -> {
-                long durationSeconds = (System.currentTimeMillis() - started) / 1000;
-                LOG.info(String.format("Migraatio meni virheittä läpi (käsiteltiin osallistumiset hetkestä %s lähtien, kesti %s sekuntia, tulos: %s)", since, durationSeconds, successResult));
-                asyncResponse.resume(Response.ok(successResult).build());
-            },
-            (message, exception) -> {
-                long durationSeconds = (System.currentTimeMillis() - started) / 1000;
-                logException(since, message, exception, durationSeconds);
-                asyncResponse.resume(Response.serverError().entity(message).build());
-            });
+            ammatillisenKielikoeMigrationService.migroiKielikoetuloksetSuoritusrekisteriin(since, KoosteAudit.username(),
+                successResult -> {
+                    long durationSeconds = (System.currentTimeMillis() - started) / 1000;
+                    LOG.info(String.format("Migraatio meni virheittä läpi (käsiteltiin osallistumiset hetkestä %s lähtien, kesti %s sekuntia, tulos: %s)", since, durationSeconds, successResult));
+                    asyncResponse.resume(Response.ok(successResult).build());
+                },
+                (message, exception) -> {
+                    long durationSeconds = (System.currentTimeMillis() - started) / 1000;
+                    logException(since, message, exception, durationSeconds);
+                    asyncResponse.resume(Response.serverError().entity(message).build());
+                });
+        } catch (Exception e) {
+            LOG.error("Odottamaton ongelma migraatiossa", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private Date parse(@QueryParam("since") @ApiParam(value = "since", example = "2016-10-05") String sinceStr) {
