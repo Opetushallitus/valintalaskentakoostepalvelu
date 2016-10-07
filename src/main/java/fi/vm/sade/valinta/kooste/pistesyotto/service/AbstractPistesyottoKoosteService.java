@@ -2,27 +2,22 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import java.util.*;
 
-import com.ctc.wstx.util.StringUtil;
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
-import rx.Observable;
 
 import java.text.SimpleDateFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
@@ -58,28 +53,32 @@ public abstract class AbstractPistesyottoKoosteService {
                                                 Consumer<String> onSuccess,
                                                 BiConsumer<String, Throwable> onError,
                                                 String username,
-                                                ValintaperusteetOperation auditLogOperation) {
+                                                ValintaperusteetOperation auditLogOperation, boolean saveApplicationAdditionalInfo) {
 
         AtomicInteger laskuri = new AtomicInteger(kielikoetuloksetSureen.values().stream().mapToInt(map -> map.size()).sum());
         AtomicReference<String> myontajaRef = new AtomicReference<>();
         AtomicReference<List<Oppija>> oppijatRef = new AtomicReference<>();
 
         Supplier<Void> tallennaAdditionalInfo = () -> {
-            applicationAsyncResource.putApplicationAdditionalData(
-                    hakuOid, hakukohdeOid, pistetiedotHakemukselle).subscribe(response -> {
-                pistetiedotHakemukselle.forEach(p ->
-                        AUDIT.log(builder()
-                                .id(username)
-                                .hakuOid(hakuOid)
-                                .hakukohdeOid(hakukohdeOid)
-                                .hakijaOid(p.getPersonOid())
-                                .hakemusOid(p.getOid())
-                                .addAll(p.getAdditionalData())
-                                .setOperaatio(auditLogOperation)
-                                .build())
-                );
+            if (saveApplicationAdditionalInfo) {
+                applicationAsyncResource.putApplicationAdditionalData(
+                        hakuOid, hakukohdeOid, pistetiedotHakemukselle).subscribe(response -> {
+                    pistetiedotHakemukselle.forEach(p ->
+                            AUDIT.log(builder()
+                                    .id(username)
+                                    .hakuOid(hakuOid)
+                                    .hakukohdeOid(hakukohdeOid)
+                                    .hakijaOid(p.getPersonOid())
+                                    .hakemusOid(p.getOid())
+                                    .addAll(p.getAdditionalData())
+                                    .setOperaatio(auditLogOperation)
+                                    .build())
+                    );
+                    onSuccess.accept("ok");
+                }, error -> onError.accept("Lisätietojen tallennus hakemukselle epäonnistui", error));
+            } else {
                 onSuccess.accept("ok");
-            }, error -> onError.accept("Lisätietojen tallennus hakemukselle epäonnistui", error));
+            }
             return null;
         };
 

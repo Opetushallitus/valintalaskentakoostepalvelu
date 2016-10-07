@@ -17,8 +17,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
-
 public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
     @Autowired
@@ -68,7 +66,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             return Stream.of(pistetieto);
         }).filter(a -> !a.getAdditionalData().isEmpty()).collect(Collectors.toList());
 
-        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA);
+        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, true);
     }
 
 

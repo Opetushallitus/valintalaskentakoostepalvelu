@@ -37,7 +37,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 /**
  *         GET
@@ -143,7 +142,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     poikkeusilmoitus.accept(error);
                 };
 
-                tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, uudetPistetiedot, uudetKielikoetulokset, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL);
+                tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, uudetPistetiedot, uudetKielikoetulokset, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, true);
 
 
             }

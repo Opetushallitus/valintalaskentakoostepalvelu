@@ -58,7 +58,7 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
                     subscriber.onNext(result);
                 };
                 tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen,
-                    successHandler, onError, username, PISTETIEDOT_AMMATTILLISEN_KIELIKOKEEN_MIGRAATIO);
+                    successHandler, onError, username, PISTETIEDOT_AMMATTILLISEN_KIELIKOKEEN_MIGRAATIO, false);
             }));
 
         return Observable.zip(resultStream.collect(Collectors.toList()), resultsList -> {
