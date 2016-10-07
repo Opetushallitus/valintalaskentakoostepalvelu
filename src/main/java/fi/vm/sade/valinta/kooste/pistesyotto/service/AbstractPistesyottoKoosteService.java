@@ -184,12 +184,13 @@ public abstract class AbstractPistesyottoKoosteService {
         } else {
             tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
                 String tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst().orElse("");
-                    organisaatioAsyncResource.haeOrganisaationTyyppiHierarkia(tarjoajaOid).subscribe(hierarkia ->
+                    organisaatioAsyncResource.haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid).subscribe(hierarkia ->
                     {
                         etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef);
-                        if(isEmpty(myontajaRef.get())) {
-                            onError.accept("Hakukohteen " + hakukohdeOid + " suoritukselle ei löytynyt myöntäjää.",
-                                    new Exception("Hakukohteen " + hakukohdeOid + " suoritukselle ei löytynyt myöntäjää."));
+                        if (isEmpty(myontajaRef.get())) {
+                            String msg = String.format("Hakukohteen %s suoritukselle ei löytynyt myöntäjää, tarjoaja on %s ja sillä %s organisaatiota.",
+                                hakukohdeOid, tarjoajaOid, hierarkia.getOrganisaatiot().size());
+                            onError.accept(msg, new Exception(msg));
                         }
                         haeOppijatPoistettaville.get();
                     }, error -> onError.accept("Myöntäjän etsiminen kielikoesuoritukseen epäonnistui", error));

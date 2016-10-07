@@ -37,6 +37,11 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
     }
 
     @Override
+    public Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
+    @Override
     public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
         throw new NotImplementedException();
     }

@@ -5,6 +5,7 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
+import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  *         https://${host.virkailija}/organisaatio-service/rest esim
@@ -41,18 +43,33 @@ public class OrganisaatioAsyncResourceImpl extends HttpResource implements Organ
 
     @Override
     public Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(String organisaatioOid) {
-        return getAsObservable(
-                "/organisaatio/v2/hierarkia/hae/tyyppi",
-                new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    client.query("oid", organisaatioOid);
-                    client.query("aktiiviset", true);
-                    client.query("suunnitellut", false);
-                    client.query("lakkautetut", false);
-                    return client;
-                }
-        );
+        return getOrganisaatioTyyppiHierarkiaObservable(client -> {
+            client.accept(MediaType.APPLICATION_JSON_TYPE);
+            client.query("oid", organisaatioOid);
+            client.query("aktiiviset", true);
+            client.query("suunnitellut", false);
+            client.query("lakkautetut", false);
+            return client;
+        });
+    }
+
+    @Override
+    public Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid) {
+        return getOrganisaatioTyyppiHierarkiaObservable(client -> {
+            client.accept(MediaType.APPLICATION_JSON_TYPE);
+            client.query("oid", organisaatioOid);
+            client.query("aktiiviset", true);
+            client.query("suunnitellut", false);
+            client.query("lakkautetut", true);
+            return client;
+        });
+    }
+
+
+    private Observable<OrganisaatioTyyppiHierarkia> getOrganisaatioTyyppiHierarkiaObservable(Function<WebClient, WebClient> paramsHeadersAndStuff) {
+        return getAsObservable("/organisaatio/v2/hierarkia/hae/tyyppi",
+            new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType(),
+            paramsHeadersAndStuff);
     }
 
     @Override
