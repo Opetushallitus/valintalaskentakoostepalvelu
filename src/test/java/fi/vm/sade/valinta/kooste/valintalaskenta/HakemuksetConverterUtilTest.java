@@ -204,6 +204,27 @@ public class HakemuksetConverterUtilTest {
                     .setUlkomainenKorvaava().setVahvistettu(true)
                     .setValmistuminen(HAKUKAUDELLA).setValmis()
                     .done();
+    private static final SuoritusJaArvosanat vahvistamatonYksilollistettyPerusopetusValmisHakukaudella =
+            new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setPerusopetus().setVahvistettu(false)
+                    .setYksilollistaminen("Kokonaan")
+                    .setMyontaja(HAKEMUS1_OID)
+                    .setValmistuminen(HAKUKAUDELLA).setValmis()
+                    .done();
+    private static final SuoritusJaArvosanat vahvistamatonOsittainYksilollistettyPerusopetusValmisHakukaudella =
+            new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setPerusopetus().setVahvistettu(false)
+                    .setYksilollistaminen("Osittain")
+                    .setMyontaja(HAKEMUS1_OID)
+                    .setValmistuminen(HAKUKAUDELLA).setValmis()
+                    .done();
+    private static final SuoritusJaArvosanat vahvistamatonAlueittainYksilollistettyPerusopetusValmisHakukaudella =
+            new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setPerusopetus().setVahvistettu(false)
+                    .setYksilollistaminen("Alueittain")
+                    .setMyontaja(HAKEMUS1_OID)
+                    .setValmistuminen(HAKUKAUDELLA).setValmis()
+                    .done();
 
     @Test
     public void suodattaaPoisHakukaudenUlkopuolellaKeskenOlleetPeruskoulunSuoritukset() {
@@ -470,6 +491,55 @@ public class HakemuksetConverterUtilTest {
         Assert.assertEquals(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
         suoritukset.add(vahvistettuUlkomainenValmisHakukaudella);
         Assert.assertEquals(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+    }
+
+    @Test
+    public void pohjakoulutusVahvistamatonYksilollistettuPeruskouluJosVahvistettuaPeruskoulunSuoritusEiOleSuressa() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
+            add(vahvistamatonYksilollistettyPerusopetusValmisHakukaudella);
+        }};
+        Assert.assertEquals(PohjakoulutusToinenAste.YKSILOLLISTETTY, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+    }
+
+    @Test
+    public void pohjakoulutusVahvistamatonOsittainYksilollistettyPeruskouluJosVahvistettuaPeruskoulunSuoritusEiOleSuressa() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
+            add(vahvistamatonOsittainYksilollistettyPerusopetusValmisHakukaudella);
+        }};
+        Assert.assertEquals(PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+    }
+
+    @Test
+    public void pohjakoulutusVahvistamatonAlueittainYksilollistettuPeruskouluJosVahvistettuaPeruskoulunSuoritusEiOleSuressa() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
+            add(vahvistamatonAlueittainYksilollistettyPerusopetusValmisHakukaudella);
+        }};
+        Assert.assertEquals(PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+    }
+
+    @Test
+    public void pohjakoulutusPeruskouluJosVahvistettuaPeruskoulunSuoritusOnSuressa() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
+            add(vahvistamatonYksilollistettyPerusopetusValmisHakukaudella);
+            add(vahvistettuPerusopetusValmisHakukaudella);
+        }};
+        Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
 
     @Test

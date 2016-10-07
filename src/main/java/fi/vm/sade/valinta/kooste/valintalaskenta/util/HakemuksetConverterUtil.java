@@ -205,19 +205,13 @@ public class HakemuksetConverterUtil {
                 .filter(s -> s.isPerusopetus() && s.isVahvistettu())
                 .findFirst();
         if (perusopetus.isPresent()) {
-            String yksilollistaminen = PohjakoulutusToinenAste.PERUSKOULU;
-            switch (perusopetus.get().getSuoritusJaArvosanat().getSuoritus().getYksilollistaminen()) {
-                case "Kokonaan":
-                    yksilollistaminen = PohjakoulutusToinenAste.YKSILOLLISTETTY;
-                    break;
-                case "Osittain":
-                    yksilollistaminen = PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY;
-                    break;
-                case "Alueittain":
-                    yksilollistaminen = PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY;
-                    break;
-            }
-            return Optional.of(yksilollistaminen);
+            return yksilollistetunPerusopetuksenPaattely(perusopetus.get());
+        }
+        Optional<SuoritusJaArvosanatWrapper> perusopetusVahvistamaton = suorituksetRekisterista.stream()
+                .filter(s -> s.isPerusopetus() && !s.isVahvistettu())
+                .findFirst();
+        if (perusopetusVahvistamaton.isPresent()) {
+            return yksilollistetunPerusopetuksenPaattely(perusopetusVahvistamaton.get());
         }
         if (PohjakoulutusToinenAste.PERUSKOULU.equals(pohjakoulutusHakemukselta) &&
                 suorituksetRekisterista.stream().anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
@@ -232,6 +226,22 @@ public class HakemuksetConverterUtil {
         LOG.warn("Hakijan {} pohjakoulutusta ei voitu päätellä, käytetään hakemuksen pohjakoulutusta {}.",
                 h.getHakijaOid(), pohjakoulutusHakemukselta);
         return Optional.of(pohjakoulutusHakemukselta);
+    }
+
+    private static Optional<String> yksilollistetunPerusopetuksenPaattely(SuoritusJaArvosanatWrapper perusopetus) {
+        String yksilollistaminen = PohjakoulutusToinenAste.PERUSKOULU;
+        switch (perusopetus.getSuoritusJaArvosanat().getSuoritus().getYksilollistaminen()) {
+            case "Kokonaan":
+                yksilollistaminen = PohjakoulutusToinenAste.YKSILOLLISTETTY;
+                break;
+            case "Osittain":
+                yksilollistaminen = PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY;
+                break;
+            case "Alueittain":
+                yksilollistaminen = PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY;
+                break;
+        }
+        return Optional.of(yksilollistaminen);
     }
 
     public static List<SuoritusJaArvosanat> pohjakoulutuksenSuoritukset(String pohjakoulutus, List<SuoritusJaArvosanat> suoritukset) {
