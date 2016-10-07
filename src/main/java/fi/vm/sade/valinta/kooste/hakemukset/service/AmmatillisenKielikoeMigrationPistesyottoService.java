@@ -88,19 +88,25 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
 
         private void lisaaKielikoeTulos(ValintakoeOsallistuminenDTO valintakoeOsallistuminen) {
             List<HakutoiveDTO> hakutoiveetWithKielikoeResults = valintakoeOsallistuminen.getHakutoiveet().stream().filter(containsKielikoeResult()).collect(Collectors.toList());
-            if (hakutoiveetWithKielikoeResults.size() != 1) {
-                throw new IllegalStateException(String.format("Odotettiin täsämälleen yhtä toivetta, jossa on kielikokeeseen osallistuminen, " +
-                    "mutta löytyi %s kpl: %s", hakutoiveetWithKielikoeResults.size(), hakutoiveetWithKielikoeResults));
+            if (hakutoiveetWithKielikoeResults.size() != 1 && hakutoiveetWithKielikoeResults.size() != 2) {
+                List<String> hakukohdeOids = hakutoiveetWithKielikoeResults.stream().map(HakutoiveDTO::getHakukohdeOid).collect(Collectors.toList());
+                throw new IllegalStateException(String.format("Odotettiin täsämälleen yhtä tai kahta toivetta, jossa on kielikokeeseen osallistuminen, " +
+                    "mutta hakemukselle %s löytyi %s kpl: %s", valintakoeOsallistuminen.getHakemusOid(), hakutoiveetWithKielikoeResults.size(), hakukohdeOids));
             }
 
-            HakutoiveDTO kielikoetuloksenSisaltavaHakutoive = hakutoiveetWithKielikoeResults.get(0);
-            String hakukohdeOid = kielikoetuloksenSisaltavaHakutoive.getHakukohdeOid();
             String hakuOid = valintakoeOsallistuminen.getHakuOid();
+            String hakemusOid = valintakoeOsallistuminen.getHakemusOid();
+            String hakijaOid = valintakoeOsallistuminen.getHakijaOid();
 
+            hakutoiveetWithKielikoeResults.forEach(kielikoetuloksenSisaltavaHakutoive -> lisaaKielikoeTulos(kielikoetuloksenSisaltavaHakutoive, hakuOid, hakemusOid, hakijaOid));
+        }
+
+        private void lisaaKielikoeTulos(HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, String hakuOid, String hakemusOid, String hakijaOid) {
+            String hakukohdeOid = kielikoetuloksenSisaltavaHakutoive.getHakukohdeOid();
             tallennettavatTiedotHakukohdeOidinMukaan.compute(hakukohdeOid, (k, kohteenTiedot) -> {
                 if (kohteenTiedot == null) {
                     kohteenTiedot = new YhdenHakukohteenTallennettavatTiedot(hakuOid, hakukohdeOid);
-                    kohteenTiedot.lisaaTulos(valintakoeOsallistuminen.getHakemusOid(), valintakoeOsallistuminen.getHakijaOid(), kielikoetuloksenSisaltavaHakutoive);
+                    kohteenTiedot.lisaaTulos(hakemusOid, hakijaOid, kielikoetuloksenSisaltavaHakutoive);
                 }
                 return kohteenTiedot;
             });
