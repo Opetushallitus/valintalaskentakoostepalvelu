@@ -139,7 +139,7 @@ public class LaskentaStarter {
         if (t.isPresent()) LOG.error(msg, t);
         else LOG.error(msg);
         seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, HakukohdeTila.KESKEYTETTY,
-                t.map(poikkeus -> IlmoitusDto.virheilmoitus(poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()))));
+                t.map(poikkeus -> IlmoitusDto.virheilmoitus(msg, Arrays.toString(poikkeus.getStackTrace()))));
         laskennanKaynnistajaActor.tell(new LaskentaStarterActor.WorkerAvailable(), ActorRef.noSender());
     }
 
