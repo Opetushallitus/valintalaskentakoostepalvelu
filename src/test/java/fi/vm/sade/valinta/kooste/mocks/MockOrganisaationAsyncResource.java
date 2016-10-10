@@ -38,7 +38,7 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
 
     @Override
     public Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return Observable.just(hierarkiaRef.get());
     }
 
     @Override
