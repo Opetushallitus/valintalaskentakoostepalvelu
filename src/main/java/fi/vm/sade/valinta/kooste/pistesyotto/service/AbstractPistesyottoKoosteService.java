@@ -1,30 +1,45 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import java.util.*;
-
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 import com.google.common.collect.ImmutableMap;
+
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
-
 public abstract class AbstractPistesyottoKoosteService {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
+    private static final String OPPILAITOS = "OPPILAITOS";
 
     public static String KIELIKOE_SUORITUS_TILA = "VALMIS";
     public static String KIELIKOE_ARVOSANA_AINE = "kielikoe";
@@ -199,20 +214,24 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     public AtomicReference<String> etsiOppilaitosHierarkiasta(String tarjoajaOid, List<OrganisaatioTyyppi> taso, AtomicReference<String> oppilaitosRef) {
-        Optional<OrganisaatioTyyppi> oppilaitos = taso.stream().filter(ot -> ot.getOrganisaatiotyypit().contains("OPPILAITOS")).findFirst();
+        Optional<OrganisaatioTyyppi> oppilaitos = taso.stream().filter(ot -> ot.getOrganisaatiotyypit().contains(OPPILAITOS)).findFirst();
         if(oppilaitos.isPresent()) {
             oppilaitosRef.set(oppilaitos.get().getOid());
         }
         Optional<OrganisaatioTyyppi> tarjoaja = taso.stream().filter(ot -> ot.getOid().equals(tarjoajaOid)).findFirst();
-        if(tarjoaja.isPresent()) {
-            return oppilaitosRef;
-        } else {
-            List<OrganisaatioTyyppi> seuraavaTaso = taso.stream().map(OrganisaatioTyyppi::getChildren).flatMap(Collection::stream).collect(Collectors.toList());
-            if(seuraavaTaso.size() == 0) {
+        if (tarjoaja.isPresent()) {
+            if (isNotEmpty(oppilaitosRef.get())) {
                 return oppilaitosRef;
+            } else {
+                LOG.warn(String.format("Ei löytynyt %s -tyyppistä organisaatiota tarjoajan %s tasolta tai ylempää, etsitään organisaatiohierarkian alemmilta tasoilta.",
+                    OPPILAITOS, tarjoajaOid));
             }
-            return etsiOppilaitosHierarkiasta(tarjoajaOid, seuraavaTaso, oppilaitosRef);
         }
+        List<OrganisaatioTyyppi> seuraavaTaso = taso.stream().map(OrganisaatioTyyppi::getChildren).flatMap(Collection::stream).collect(Collectors.toList());
+        if (seuraavaTaso.size() == 0) {
+            return oppilaitosRef;
+        }
+        return etsiOppilaitosHierarkiasta(tarjoajaOid, seuraavaTaso, oppilaitosRef);
     }
 
     public static Map<String, List<Arvosana>> ammatillisenKielikoeArvosanat(List<Oppija> oppijat) {
