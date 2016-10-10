@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku;
 
 import com.google.common.collect.Maps;
+import fi.vm.sade.authentication.business.service.Authorizer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
@@ -66,6 +67,8 @@ public class ErillishakuProxyResource {
     private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
     @Autowired
     private ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
+    @Autowired
+    private Authorizer authorizer;
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @GET
@@ -131,6 +134,7 @@ public class ErillishakuProxyResource {
         sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(hakuOid, hakukohdeOid,
                 s -> {
                     LOG.info("Haetaan sijoittelusta hakukohteen tiedot");
+                    tarkistaOikeudetHakukohteeseen(s.getTarjoajaOid());
                     hakukohde.set(s);
                     mergeSupplier.get();
                 },
@@ -176,6 +180,12 @@ public class ErillishakuProxyResource {
             asyncResponse.resume(Response.ok().header("Content-Type", "application/json").entity(msg).build());
         } catch (Throwable e) {
             LOG.error("Paluuarvon muodostos epäonnistui!", e);
+        }
+    }
+
+    private void tarkistaOikeudetHakukohteeseen(String tarjoajaOid) {
+        if (tarjoajaOid != null) {
+            authorizer.checkOrganisationAccess(tarjoajaOid, "ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_READ", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD");
         }
     }
 }
