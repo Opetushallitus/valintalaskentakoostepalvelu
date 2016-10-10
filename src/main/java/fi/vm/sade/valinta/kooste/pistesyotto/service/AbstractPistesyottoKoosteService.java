@@ -49,13 +49,13 @@ public abstract class AbstractPistesyottoKoosteService {
     protected void tallennaKoostetutPistetiedot(String hakuOid,
                                                 String hakukohdeOid,
                                                 List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                Map<String, Map<String, String>> kielikoetuloksetSureen,
+                                                Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
                                                 Consumer<String> onSuccess,
                                                 BiConsumer<String, Throwable> onError,
                                                 String username,
                                                 ValintaperusteetOperation auditLogOperation, boolean saveApplicationAdditionalInfo) {
 
-        AtomicInteger laskuri = new AtomicInteger(kielikoetuloksetSureen.values().stream().mapToInt(map -> map.size()).sum());
+        AtomicInteger laskuri = new AtomicInteger(kielikoetuloksetSureen.values().stream().mapToInt(List::size).sum());
         AtomicReference<String> myontajaRef = new AtomicReference<>();
         AtomicReference<List<Oppija>> oppijatRef = new AtomicReference<>();
 
@@ -87,15 +87,15 @@ public abstract class AbstractPistesyottoKoosteService {
         Supplier<Void> tallennaKielikoetulokset = () -> {
             kielikoetuloksetSureen.keySet().stream().forEach(hakemusOid ->
             {
-                String valmistuminen = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(new Date());
                 String personOid = pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
-                Map<String, String> kielikoetulokset = kielikoetuloksetSureen.get(hakemusOid);
+                List<SingleKielikoeTulos> kielikoetulokset = kielikoetuloksetSureen.get(hakemusOid);
 
-                List<String> lisattavatKielikoetulokset = kielikoetulokset.keySet().stream().filter(t -> isNotEmpty(kielikoetulokset.get(t))).collect(Collectors.toList());
-                List<String> poistettavatKielikoetulokset = kielikoetulokset.keySet().stream().filter(t -> isEmpty(kielikoetulokset.get(t))).collect(Collectors.toList());
+                List<SingleKielikoeTulos> lisattavatKielikoetulokset = kielikoetulokset.stream().filter(t -> isNotEmpty(t.arvioArvosana)).collect(Collectors.toList());
+                List<SingleKielikoeTulos> poistettavatKielikoetulokset = kielikoetulokset.stream().filter(t -> isEmpty(t.arvioArvosana)).collect(Collectors.toList());
 
-                lisattavatKielikoetulokset.forEach(tunnus -> {
-                    String kieli = tunnus.substring(9);
+                lisattavatKielikoetulokset.forEach(singleKielikoeTulos -> {
+                    String kieli = singleKielikoeTulos.kieli();
+                    String valmistuminen = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(singleKielikoeTulos.valmistuminen);
 
                     Suoritus suoritus = new Suoritus();
                     suoritus.setTila(KIELIKOE_SUORITUS_TILA);
@@ -108,7 +108,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     suoritus.setValmistuminen(valmistuminen);
 
                     suoritusrekisteriAsyncResource.postSuoritus(suoritus).subscribe( tallennettuSuoritus -> {
-                        String arvioArvosana = kielikoetulokset.get(tunnus).toLowerCase();
+                        String arvioArvosana = singleKielikoeTulos.arvioArvosana.toLowerCase();
 
                         Arvosana arvosana = new Arvosana();
                         arvosana.setAine(KIELIKOE_ARVOSANA_AINE);
@@ -134,8 +134,8 @@ public abstract class AbstractPistesyottoKoosteService {
                     }, error -> onError.accept("Arvosanan tallennus Suoritusrekisteriin epäonnistui", error));
                 });
 
-                poistettavatKielikoetulokset.forEach(tunnus -> {
-                    String kieli = tunnus.substring(9);
+                poistettavatKielikoetulokset.forEach(singleKielikoeTulos -> {
+                    String kieli = singleKielikoeTulos.kieli();
                     Function<SuoritusJaArvosanat, Boolean> isKielikoeArvosana = (suoritusJaArvosana) -> {
                         Suoritus suoritus = suoritusJaArvosana.getSuoritus();
                         return SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE.equals(suoritus.getKomo()) &&
@@ -168,7 +168,7 @@ public abstract class AbstractPistesyottoKoosteService {
         };
 
         Supplier<Void> haeOppijatPoistettaville = () -> {
-            if(kielikoetuloksetSureen.values().stream().anyMatch(map -> map.values().stream().anyMatch(String::isEmpty))) {
+            if(kielikoetuloksetSureen.values().stream().anyMatch(tulokset -> tulokset.stream().anyMatch(tulos -> isEmpty(tulos.arvioArvosana)))) {
                 suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid).subscribe(oppijat -> {
                     oppijatRef.set(oppijat);
                     tallennaKielikoetulokset.get();
@@ -222,5 +222,21 @@ public abstract class AbstractPistesyottoKoosteService {
                                 .filter(SuoritusJaArvosanatWrapper::isAmmatillisenKielikoe).map(SuoritusJaArvosanat::getArvosanat).flatMap(List::stream)
                                 .filter(a -> KIELIKOE_ARVOSANA_AINE.equalsIgnoreCase(a.getAine())).collect(Collectors.toList()))
         );
+    }
+
+    public static class SingleKielikoeTulos {
+        public final String kokeenTunnus; // kielikoe_fi , kielikoe_sv
+        public final String arvioArvosana; // "true", "false", ""
+        public final Date valmistuminen;
+
+        public SingleKielikoeTulos(String kokeenTunnus, String arvioArvosana, Date valmistuminen) {
+            this.kokeenTunnus = kokeenTunnus;
+            this.arvioArvosana = arvioArvosana;
+            this.valmistuminen = valmistuminen;
+        }
+
+        public String kieli() {
+            return kokeenTunnus.replace("kielikoe_", "");
+        }
     }
 }

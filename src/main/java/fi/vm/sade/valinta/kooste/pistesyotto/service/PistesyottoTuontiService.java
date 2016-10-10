@@ -82,6 +82,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             logPistesyotonTuontiEpaonnistui(t);
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
         });
+        final Date valmistuminen = new Date();
         try {
 
             final List<String> valintakoeTunnisteet = valintakoeTunnisteet(valintaperusteet);
@@ -101,7 +102,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                 return;
             }
             Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
-            Map<String, Map<String, String>> uudetKielikoetulokset = new HashMap<>();
+            Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> uudetKielikoetulokset = new HashMap<>();
             List<ApplicationAdditionalDataDTO> uudetPistetiedot =
                     pistesyottoTuontiAdapteri
                             .getRivit().stream()
@@ -113,10 +114,8 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                                         valintakoetunniste -> pistesyottoExcel.onkoHakijaOsallistujaValintakokeeseen(hakemusOid, valintakoetunniste));
                                 List<String> kielikoeAvaimet = newPistetiedot.keySet().stream().filter(a -> a.matches(PistesyottoExcel.KIELIKOE_REGEX)).collect(Collectors.toList());
                                 if(0 < kielikoeAvaimet.size()) {
-                                    uudetKielikoetulokset.put(hakemusOid, kielikoeAvaimet.stream().collect(Collectors.toMap(
-                                            avain -> avain,
-                                            avain -> newPistetiedot.get(avain)
-                                    )));
+                                    uudetKielikoetulokset.put(hakemusOid, kielikoeAvaimet.stream().map(avain ->
+                                        new SingleKielikoeTulos(avain, newPistetiedot.get(avain), valmistuminen)).collect(Collectors.toList()));
                                 }
                                 kielikoeAvaimet.stream().forEach(a -> newPistetiedot.remove(a));
                                 additionalData.setAdditionalData(newPistetiedot);

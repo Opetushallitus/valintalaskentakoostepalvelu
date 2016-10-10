@@ -50,19 +50,18 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             Consumer<String> onSuccess,
             BiConsumer<String, Throwable> onError) {
 
-        Map<String, Map<String, String>> kielikoetuloksetSureen = new HashMap<>();
+        Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoetuloksetSureen = new HashMap<>();
+        Date valmistuminen = new Date();
         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = pistetietoDTOs.stream().flatMap(pistetieto -> {
             String hakemusOid = pistetieto.getOid();
             Map<String, String> additionalData = pistetieto.getAdditionalData();
 
             List<String> kielikoeAvaimet = additionalData.keySet().stream().filter(a -> a.matches(PistesyottoExcel.KIELIKOE_REGEX)).collect(Collectors.toList());
-            if(0 < kielikoeAvaimet.size()) {
-                kielikoetuloksetSureen.put(hakemusOid, kielikoeAvaimet.stream().collect(Collectors.toMap(
-                        avain -> avain,
-                        avain -> additionalData.get(avain)
-                )));
+            if (0 < kielikoeAvaimet.size()) {
+                kielikoetuloksetSureen.put(hakemusOid, kielikoeAvaimet.stream().map(avain ->
+                    new SingleKielikoeTulos(avain, additionalData.get(avain), valmistuminen)).collect(Collectors.toList()));
             }
-            kielikoeAvaimet.stream().forEach(a -> additionalData.remove(a));
+            kielikoeAvaimet.forEach(additionalData::remove);
             return Stream.of(pistetieto);
         }).filter(a -> !a.getAdditionalData().isEmpty()).collect(Collectors.toList());
 

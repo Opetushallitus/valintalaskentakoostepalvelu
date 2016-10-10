@@ -19,7 +19,7 @@ import rx.Observable;
 import rx.Subscription;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,11 +50,11 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
                 String hakuOid = kohteenTiedot.hakuOid;
                 String hakukohdeOid = kohteenTiedot.hakukohdeOid;
                 List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = kohteenTiedot.hakemusJaPersonOidit;
-                Map<String, Map<String, String>> kielikoetuloksetSureen = kohteenTiedot.kielikoeTuloksetHakemuksittain;
+                Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen = kohteenTiedot.kielikoeTuloksetHakemuksittain;
                 Result result = new Result(r.startingFrom);
                 Consumer<String> successHandler = message -> {
-                    kielikoetuloksetSureen.values().forEach(tulos ->
-                        tulos.forEach((tunniste, arvo) -> result.add(tunniste, Boolean.TRUE.toString().equals(arvo))));
+                    kielikoetuloksetSureen.values().forEach(hakijanTulokset ->
+                        hakijanTulokset.forEach(tulos -> result.add(tulos.kokeenTunnus, Boolean.TRUE.toString().equals(tulos.arvioArvosana))));
                     subscriber.onNext(result);
                 };
                 tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen,
@@ -97,16 +97,18 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
             String hakuOid = valintakoeOsallistuminen.getHakuOid();
             String hakemusOid = valintakoeOsallistuminen.getHakemusOid();
             String hakijaOid = valintakoeOsallistuminen.getHakijaOid();
+            Date createdAt = valintakoeOsallistuminen.getCreatedAt();
 
-            hakutoiveetWithKielikoeResults.forEach(kielikoetuloksenSisaltavaHakutoive -> lisaaKielikoeTulos(kielikoetuloksenSisaltavaHakutoive, hakuOid, hakemusOid, hakijaOid));
+            hakutoiveetWithKielikoeResults.forEach(kielikoetuloksenSisaltavaHakutoive ->
+                lisaaKielikoeTulos(kielikoetuloksenSisaltavaHakutoive, hakuOid, hakemusOid, hakijaOid, createdAt));
         }
 
-        private void lisaaKielikoeTulos(HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, String hakuOid, String hakemusOid, String hakijaOid) {
+        private void lisaaKielikoeTulos(HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, String hakuOid, String hakemusOid, String hakijaOid, Date createdAt) {
             String hakukohdeOid = kielikoetuloksenSisaltavaHakutoive.getHakukohdeOid();
             tallennettavatTiedotHakukohdeOidinMukaan.compute(hakukohdeOid, (k, kohteenTiedot) -> {
                 if (kohteenTiedot == null) {
                     kohteenTiedot = new YhdenHakukohteenTallennettavatTiedot(hakuOid, hakukohdeOid);
-                    kohteenTiedot.lisaaTulos(hakemusOid, hakijaOid, kielikoetuloksenSisaltavaHakutoive);
+                    kohteenTiedot.lisaaTulos(hakemusOid, hakijaOid, kielikoetuloksenSisaltavaHakutoive, createdAt);
                 }
                 return kohteenTiedot;
             });
@@ -122,7 +124,7 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
     private static class YhdenHakukohteenTallennettavatTiedot {
         final String hakuOid;
         final String hakukohdeOid;
-        final Map<String,Map<String,String>> kielikoeTuloksetHakemuksittain = new HashMap<>();
+        final Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoeTuloksetHakemuksittain = new HashMap<>();
         final List<ApplicationAdditionalDataDTO> hakemusJaPersonOidit = new LinkedList<>();
 
         YhdenHakukohteenTallennettavatTiedot(String hakuOid, String hakukohdeOid) {
@@ -130,12 +132,18 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
             this.hakukohdeOid = hakukohdeOid;
         }
 
-        void lisaaTulos(String hakemusOid, String hakijaOid, HakutoiveDTO kielikoetuloksenSisaltavaHakutoive) {
-            kielikoeTuloksetHakemuksittain.put(hakemusOid, extractKielikoeTulos(kielikoetuloksenSisaltavaHakutoive, hakemusOid));
+        void lisaaTulos(String hakemusOid, String hakijaOid, HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, Date createdAt) {
+            kielikoeTuloksetHakemuksittain.compute(hakemusOid, (key, resultListOfHakemus) -> {
+                if (resultListOfHakemus == null) {
+                    resultListOfHakemus = new LinkedList<>();
+                }
+                resultListOfHakemus.add(extractKielikoeTulos(kielikoetuloksenSisaltavaHakutoive, hakemusOid, createdAt));
+                return resultListOfHakemus;
+            });
             hakemusJaPersonOidit.add(new ApplicationAdditionalDataDTO(hakemusOid, hakijaOid, null, null, null));
         }
 
-        private Map<String, String> extractKielikoeTulos(HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, String hakemusOid) {
+        private AbstractPistesyottoKoosteService.SingleKielikoeTulos extractKielikoeTulos(HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, String hakemusOid, Date createdAt) {
             Stream<ValintakoeValinnanvaiheDTO> kielikoetuloksenSisaltavatVaiheet = kielikoetuloksenSisaltavaHakutoive.getValinnanVaiheet().stream()
                 .filter(containsKielikoeParticipation());
             List<ValintakoeDTO> kielikoeDtos = kielikoetuloksenSisaltavatVaiheet.flatMap(vaihe ->
@@ -148,7 +156,7 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
             ValintakoeDTO kielikoeDto = kielikoeDtos.get(0);
             String tunniste = kielikoeDto.getValintakoeTunniste();
             boolean hyvaksytty = kielikoeDto.getOsallistuminenTulos().getLaskentaTulos();
-            return Collections.singletonMap(tunniste, Boolean.toString(hyvaksytty));
+            return new SingleKielikoeTulos(tunniste, Boolean.toString(hyvaksytty), createdAt);
         }
     }
 }
