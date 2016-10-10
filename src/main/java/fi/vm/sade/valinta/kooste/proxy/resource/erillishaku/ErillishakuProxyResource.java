@@ -80,6 +80,9 @@ public class ErillishakuProxyResource {
             @PathParam("hakuOid") String hakuOid,
             @PathParam("hakukohdeOid") String hakukohdeOid,
             @Suspended AsyncResponse asyncResponse) {
+
+
+
         asyncResponse.setTimeout(5L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(asyncResponse1 -> {
             LOG.error("Erillishakuproxy -palvelukutsu on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -184,8 +187,6 @@ public class ErillishakuProxyResource {
     }
 
     private void tarkistaOikeudetHakukohteeseen(String tarjoajaOid) {
-        if (tarjoajaOid != null) {
-            authorizer.checkOrganisationAccess(tarjoajaOid, "ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_READ", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD");
-        }
+        authorizer.checkOrganisationAccess(tarjoajaOid, "ROLE_APP_SIJOITTELU_READ","ROLE_APP_SIJOITTELU_READ_UPDATE","ROLE_APP_SIJOITTELU_CRUD");
     }
 }
