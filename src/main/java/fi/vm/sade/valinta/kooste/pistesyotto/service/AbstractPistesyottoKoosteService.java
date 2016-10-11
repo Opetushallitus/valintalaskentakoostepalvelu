@@ -112,6 +112,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
 
         Supplier<Void> tallennaKielikoetulokset = () -> {
+            SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
             kielikoetuloksetSureen.keySet().stream().forEach(hakemusOid ->
             {
                 String personOid = pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
@@ -122,7 +123,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
                 lisattavatKielikoetulokset.forEach(singleKielikoeTulos -> {
                     String kieli = singleKielikoeTulos.kieli();
-                    String valmistuminen = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(singleKielikoeTulos.valmistuminen);
+                    String valmistuminen = valmistuminenFormat.format(singleKielikoeTulos.valmistuminen);
 
                     Suoritus suoritus = new Suoritus();
                     suoritus.setTila(KIELIKOE_SUORITUS_TILA);
