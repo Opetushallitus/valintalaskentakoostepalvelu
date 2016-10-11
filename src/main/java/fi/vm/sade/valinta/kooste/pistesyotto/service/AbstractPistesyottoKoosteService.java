@@ -226,25 +226,32 @@ public abstract class AbstractPistesyottoKoosteService {
         }
     }
 
-    public AtomicReference<String> etsiOppilaitosHierarkiasta(String tarjoajaOid, List<OrganisaatioTyyppi> taso, AtomicReference<String> oppilaitosRef) {
+    public void etsiOppilaitosHierarkiasta(String tarjoajaOid, List<OrganisaatioTyyppi> tasonOrganisaatiot, AtomicReference<String> myontajaRef) {
+        etsiOppilaitosHierarkiasta(tarjoajaOid, tasonOrganisaatiot, myontajaRef, false);
+    }
+
+    private AtomicReference<String> etsiOppilaitosHierarkiasta(String tarjoajaOid, List<OrganisaatioTyyppi> taso, AtomicReference<String> oppilaitosRef, boolean tarjoajaLevelReached) {
         Optional<OrganisaatioTyyppi> oppilaitos = taso.stream().filter(ot -> ot.getOrganisaatiotyypit().contains(OPPILAITOS)).findFirst();
-        if(oppilaitos.isPresent()) {
+        if (oppilaitos.isPresent()) {
             oppilaitosRef.set(oppilaitos.get().getOid());
         }
+
         Optional<OrganisaatioTyyppi> tarjoaja = taso.stream().filter(ot -> ot.getOid().equals(tarjoajaOid)).findFirst();
-        if (tarjoaja.isPresent()) {
-            if (isNotEmpty(oppilaitosRef.get())) {
-                return oppilaitosRef;
-            } else {
-                LOG.warn(String.format("Ei löytynyt %s -tyyppistä organisaatiota tarjoajan %s tasolta tai ylempää, etsitään organisaatiohierarkian alemmilta tasoilta.",
-                    OPPILAITOS, tarjoajaOid));
-            }
+        tarjoajaLevelReached = tarjoajaLevelReached || tarjoaja.isPresent();
+
+        if (isNotEmpty(oppilaitosRef.get()) && tarjoajaLevelReached) {
+            return oppilaitosRef;
+        }
+        if (tarjoaja.isPresent() && isEmpty(oppilaitosRef.get())) {
+            LOG.warn(String.format("Ei löytynyt %s -tyyppistä organisaatiota tarjoajan %s tasolta tai ylempää, etsitään organisaatiohierarkian alemmilta tasoilta.",
+                OPPILAITOS, tarjoajaOid));
+            tarjoajaLevelReached = true;
         }
         List<OrganisaatioTyyppi> seuraavaTaso = taso.stream().map(OrganisaatioTyyppi::getChildren).flatMap(Collection::stream).collect(Collectors.toList());
         if (seuraavaTaso.size() == 0) {
             return oppilaitosRef;
         }
-        return etsiOppilaitosHierarkiasta(tarjoajaOid, seuraavaTaso, oppilaitosRef);
+        return etsiOppilaitosHierarkiasta(tarjoajaOid, seuraavaTaso, oppilaitosRef, tarjoajaLevelReached);
     }
 
     public static Map<String, List<Arvosana>> ammatillisenKielikoeArvosanat(List<Oppija> oppijat) {

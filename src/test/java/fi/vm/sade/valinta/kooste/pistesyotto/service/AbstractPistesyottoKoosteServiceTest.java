@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -16,6 +15,18 @@ public class AbstractPistesyottoKoosteServiceTest {
     private AbstractPistesyottoKoosteService service = new AbstractPistesyottoKoosteService(null, null, null, null) {};
     private final String tarjoajaOid = "oidOfTarjoajaThatNeedsOppilaitos";
     private final String oppilaitostyyppi = "oppilaitostyyppi_61#1";
+
+    /*
+    * root
+    * |
+    * level2oid1, level2oid2
+    * |
+    * level3oid1, level3oid2
+    * |
+    * level4oid1, level4oid2
+    * |
+    * level5oid1, level5oid2
+    * */
 
     private List<OrganisaatioTyyppi> fifthLevel = Arrays.asList(
         createOrganisation("level5oid1", nimi("Level 5 org 1"), Collections.emptyList(), oppilaitostyyppi, Collections.singletonList("TOIMIPISTE")),
@@ -59,11 +70,10 @@ public class AbstractPistesyottoKoosteServiceTest {
     }
 
     @Test
-    @Ignore
     public void ifThereIsNoOppilaitosTypeOrganisationAboveTarjoajaThenClosestBelowIsReturned() {
         OrganisaatioTyyppi tarjoaja = thirdLevel.get(0);
         tarjoaja.setOid(tarjoajaOid);
-        OrganisaatioTyyppi closestOppilaitosBelow = fourthLevel.get(0);
+        OrganisaatioTyyppi closestOppilaitosBelow = fourthLevel.get(1);
         closestOppilaitosBelow.setOrganisaatiotyypit(OPPILAITOS);
         OrganisaatioTyyppi oppilaitosLowerBelow = fifthLevel.get(0);
         oppilaitosLowerBelow.setOrganisaatiotyypit(OPPILAITOS);
