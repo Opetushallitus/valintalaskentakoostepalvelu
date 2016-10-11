@@ -65,7 +65,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             return Stream.of(pistetieto);
         }).filter(a -> !a.getAdditionalData().isEmpty()).collect(Collectors.toList());
 
-        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, true);
+        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA);
     }
 
 

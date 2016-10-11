@@ -68,6 +68,18 @@ public abstract class AbstractPistesyottoKoosteService {
                                                 Consumer<String> onSuccess,
                                                 BiConsumer<String, Throwable> onError,
                                                 String username,
+                                                ValintaperusteetOperation auditLogOperation) {
+        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError, username, auditLogOperation, true);
+    }
+
+
+    protected void tallennaKoostetutPistetiedot(String hakuOid,
+                                                String hakukohdeOid,
+                                                List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
+                                                Consumer<String> onSuccess,
+                                                BiConsumer<String, Throwable> onError,
+                                                String username,
                                                 ValintaperusteetOperation auditLogOperation, boolean saveApplicationAdditionalInfo) {
 
         AtomicInteger laskuri = new AtomicInteger(kielikoetuloksetSureen.values().stream().mapToInt(List::size).sum());

@@ -141,7 +141,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     poikkeusilmoitus.accept(error);
                 };
 
-                tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, uudetPistetiedot, uudetKielikoetulokset, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, true);
+                tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, uudetPistetiedot, uudetKielikoetulokset, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL);
 
 
             }
