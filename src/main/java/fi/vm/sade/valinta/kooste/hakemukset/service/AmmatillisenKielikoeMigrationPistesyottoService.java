@@ -108,8 +108,8 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
             tallennettavatTiedotHakukohdeOidinMukaan.compute(hakukohdeOid, (k, kohteenTiedot) -> {
                 if (kohteenTiedot == null) {
                     kohteenTiedot = new YhdenHakukohteenTallennettavatTiedot(hakuOid, hakukohdeOid);
-                    kohteenTiedot.lisaaTulos(hakemusOid, hakijaOid, kielikoetuloksenSisaltavaHakutoive, createdAt);
                 }
+                kohteenTiedot.lisaaTulos(hakemusOid, hakijaOid, kielikoetuloksenSisaltavaHakutoive, createdAt);
                 return kohteenTiedot;
             });
         }
