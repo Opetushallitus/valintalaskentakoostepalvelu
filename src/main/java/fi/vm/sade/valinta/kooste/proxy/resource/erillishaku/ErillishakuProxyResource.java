@@ -103,9 +103,10 @@ public class ErillishakuProxyResource {
         Supplier<Void> mergeSupplier = () -> {
             if (counter.decrementAndGet() == 0) {
                 LOG.info("Etsitään tarjoajan Oid datasta");
-                String tarjoajaOid = (StringUtils.isEmpty(sijoittelu.get().getTarjoajaOid())) ?
+                String tarjoajaOid = (!StringUtils.isEmpty(sijoittelu.get().getTarjoajaOid())) ?
                         sijoittelu.get().getTarjoajaOid() :
                         HakukohdeHelper.tarjoajaOid(hakukohde.get());
+                LOG.info("Tarkistetaan käyttäjän oikeudet organisaatioon: {}", tarjoajaOid);
                 tarkistaOikeudetHakukohteeseen(tarjoajaOid);
                 LOG.info("Muodostetaan vastaus hakukohteelle {} haussa {}", hakukohdeOid, hakuOid);
                 r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), sijoittelu.get(), valinnanvaiheet.get(), valintatulokset.get(), vtsValintatulokset.get()));
