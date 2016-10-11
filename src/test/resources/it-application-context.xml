@@ -61,6 +61,8 @@
   <bean id="ValinnanvaiheenValintakoekutsutService"
         class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
 
+  <bean class="fi.vm.sade.security.OidProvider" />
+
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
@@ -87,6 +89,7 @@
     <mockito:mock id="ValintalaskentaTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute" />
     <mockito:mock id="kirjeetHakukohdeCache" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache" />
     <mockito:mock id="koodistoAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource" />
+    <mockito:mock id="organisationHierarchyAuthorizer" class="fi.vm.sade.security.OrganisationHierarchyAuthorizer" />
 
     <bean id="jaxrsconfig" class="fi.vm.sade.valinta.kooste.JaxrsConfiguration"/>
 

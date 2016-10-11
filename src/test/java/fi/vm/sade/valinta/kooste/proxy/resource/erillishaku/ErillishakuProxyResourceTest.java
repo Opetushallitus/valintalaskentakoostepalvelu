@@ -18,6 +18,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.InputStream;
 import static java.util.Collections.*;
@@ -49,6 +52,8 @@ public class ErillishakuProxyResourceTest {
 
     @Test
     public void testaaProxyResurssiIlmanLaskentaaHakukohteelle() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken("admin",null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
         List<ValintatietoValinnanvaiheDTO> valintatieto = emptyList(); // ei valinnanvaiheita
         List<Hakemus> hakemukset = hakemuksetFromJson("/proxy/erillishaku/data/ilmanlaskentaa/listfull.json");
         List<ValinnanVaiheJonoillaDTO> valinnanvaihejonoilla = valinnanvaihejonoillaFromJson("/proxy/erillishaku/data/ilmanlaskentaa/valinnanvaihe.json");

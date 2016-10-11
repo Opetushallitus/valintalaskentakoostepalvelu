@@ -58,11 +58,15 @@
 			<http:client Connection="Keep-Alive" ConnectionTimeout="0"
 						 ReceiveTimeout="0" AllowChunking="false" />
 		</http:conduit>
+
+		<bean class="fi.vm.sade.security.OrganisationHierarchyAuthorizer" />
+		<bean class="fi.vm.sade.security.OidProvider" />
 	</beans>
 	<beans>
 		<bean id="jacksonMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
 		<bean class="fi.vm.sade.valinta.kooste.CasInterceptors" />
 		<bean class="fi.vm.sade.valinta.kooste.KoostepalveluContext" />
+
 		<!-- CAS-palvelukutsut -->
 		<jaxws:client id="koodiService"
 					  serviceClass="fi.vm.sade.koodisto.service.KoodiService"

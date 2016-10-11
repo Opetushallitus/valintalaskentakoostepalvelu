@@ -1,36 +1,32 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku;
 
-import com.google.common.collect.Maps;
-import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import fi.vm.sade.generic.service.exception.NotAuthorizedException;
+import fi.vm.sade.security.OrganisationHierarchyAuthorizer;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.ValinnanVaiheTyyppi;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-
-import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusSijoitteluntulosMergeUtil.*;
-
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.Consumes;
@@ -40,12 +36,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusSijoitteluntulosMergeUtil.merge;
 
 ///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 ///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
@@ -70,7 +68,7 @@ public class ErillishakuProxyResource {
     @Autowired
     private ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     @Autowired
-    private Authorizer authorizer;
+    private OrganisationHierarchyAuthorizer authorizer;
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
 
@@ -85,8 +83,6 @@ public class ErillishakuProxyResource {
             @PathParam("hakukohdeOid") String hakukohdeOid,
             @Suspended AsyncResponse asyncResponse) {
 
-
-
         asyncResponse.setTimeout(5L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(asyncResponse1 -> {
             LOG.error("Erillishakuproxy -palvelukutsu on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -98,6 +94,7 @@ public class ErillishakuProxyResource {
         final AtomicReference<List<Valintatulos>> vtsValintatulokset = new AtomicReference<>();
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
         final AtomicReference<HakukohdeV1RDTO> hakukohde = new AtomicReference<>();
+        final Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
         AtomicInteger counter = new AtomicInteger(1 + 1 + 1 + 1 + 1 + 1);
 
         Supplier<Void> mergeSupplier = () -> {
@@ -107,9 +104,13 @@ public class ErillishakuProxyResource {
                         sijoittelu.get().getTarjoajaOid() :
                         HakukohdeHelper.tarjoajaOid(hakukohde.get());
                 LOG.info("Tarkistetaan käyttäjän oikeudet organisaatioon: {}", tarjoajaOid);
-                tarkistaOikeudetHakukohteeseen(tarjoajaOid);
-                LOG.info("Muodostetaan vastaus hakukohteelle {} haussa {}", hakukohdeOid, hakuOid);
-                r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), sijoittelu.get(), valinnanvaiheet.get(), valintatulokset.get(), vtsValintatulokset.get()));
+                try {
+                    tarkistaOikeudetHakukohteeseen(tarjoajaOid, currentUser);
+                    LOG.info("Muodostetaan vastaus hakukohteelle {} haussa {}", hakukohdeOid, hakuOid);
+                    r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), sijoittelu.get(), valinnanvaiheet.get(), valintatulokset.get(), vtsValintatulokset.get()));
+                } catch (NotAuthorizedException e) {
+                    logAndReturnError("tunnistuspalvelu", asyncResponse, e);
+                }
             }
             return null;
         };
@@ -189,6 +190,14 @@ public class ErillishakuProxyResource {
         );
     }
 
+    private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
+        try {
+            asyncResponse.resume(Response.ok().header("Content-Type", "application/json").entity(msg).build());
+        } catch (Throwable e) {
+            LOG.error("Paluuarvon muodostos epäonnistui!", e);
+        }
+    }
+
     private void logAndReturnError(String appName, AsyncResponse asyncResponse, Throwable poikkeus) {
         LOG.error("Erillishakuproxy -palvelukutsu epäonnistui " + appName + ":n virheeseen!", poikkeus);
         try {
@@ -200,17 +209,12 @@ public class ErillishakuProxyResource {
         }
     }
 
-    private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
-        try {
-            asyncResponse.resume(Response.ok().header("Content-Type", "application/json").entity(msg).build());
-        } catch (Throwable e) {
-            LOG.error("Paluuarvon muodostos epäonnistui!", e);
-        }
-    }
-
-    private void tarkistaOikeudetHakukohteeseen(String tarjoajaOid) {
+    private void tarkistaOikeudetHakukohteeseen(String tarjoajaOid, Authentication currentUser) {
         if (!StringUtils.isEmpty(tarjoajaOid)) {
-            authorizer.checkOrganisationAccess(tarjoajaOid, "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_SIJOITTELU_CRUD");
+            authorizer.checkAccess(
+                    currentUser,
+                    tarjoajaOid,
+                    new String[]{"ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_SIJOITTELU_CRUD"});
         }
     }
 }
