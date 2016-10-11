@@ -214,7 +214,7 @@ public class ErillishakuProxyResource {
             authorizer.checkAccess(
                     currentUser,
                     tarjoajaOid,
-                    new String[]{"ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_SIJOITTELU_CRUD"});
+                    new String[]{"ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_READ", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"});
         }
     }
 }
