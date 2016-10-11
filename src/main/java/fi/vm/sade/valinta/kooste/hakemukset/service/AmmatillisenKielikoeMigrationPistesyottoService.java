@@ -14,6 +14,9 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 import rx.Subscription;
@@ -31,6 +34,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPistesyottoKoosteService {
+    private static final Logger LOG = LoggerFactory.getLogger(AmmatillisenKielikoeMigrationPistesyottoService.class);
+
+    private static Map<String,Date> VALMISTUMIS_DATES_BY_HAKU_OID = new HashMap<>();
+    static {
+        VALMISTUMIS_DATES_BY_HAKU_OID.put("1.2.246.562.29.90697286251", new LocalDate(2015, 4, 10).toDate()); // "Yhteishaku ammatilliseen ja lukioon, kevät 2015",2015,"kausi_k#1"
+        VALMISTUMIS_DATES_BY_HAKU_OID.put("1.2.246.562.29.80306203979", new LocalDate(2015, 10, 14).toDate()); // "Ammatillisen koulutuksen ja lukiokoulutuksen syksyn 2015 yhteishaku",2015,"kausi_s#1"
+        VALMISTUMIS_DATES_BY_HAKU_OID.put("1.2.246.562.29.14662042044", new LocalDate(2016, 4, 11).toDate()); // "Yhteishaku ammatilliseen ja lukioon, kevät 2016",2016,"kausi_k#1"
+        VALMISTUMIS_DATES_BY_HAKU_OID.put("1.2.246.562.29.98929669087", new LocalDate(2016, 9, 1).toDate()); // "Lisähaku kevään 2016 ammatillisen ja lukiokoulutuksen yhteishaussa vapaaksi jääneille opiskelupaikoille",2016,"kausi_k#1"
+    }
 
     @Autowired
     public AmmatillisenKielikoeMigrationPistesyottoService(ApplicationAsyncResource applicationAsyncResource,
@@ -105,11 +117,16 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
 
         private void lisaaKielikoeTulos(HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, String hakuOid, String hakemusOid, String hakijaOid, Date createdAt) {
             String hakukohdeOid = kielikoetuloksenSisaltavaHakutoive.getHakukohdeOid();
+            Date kielikoePvm = VALMISTUMIS_DATES_BY_HAKU_OID.get(hakuOid);
+            if (kielikoePvm == null) {
+                LOG.warn(String.format("Ei löydy kielikoepäivämäärää haulle %s, joten käytetään ValintakoeOsallistuminen -olioiden mukaisia päivämääriä", hakuOid));
+            }
             tallennettavatTiedotHakukohdeOidinMukaan.compute(hakukohdeOid, (k, kohteenTiedot) -> {
                 if (kohteenTiedot == null) {
                     kohteenTiedot = new YhdenHakukohteenTallennettavatTiedot(hakuOid, hakukohdeOid);
                 }
-                kohteenTiedot.lisaaTulos(hakemusOid, hakijaOid, kielikoetuloksenSisaltavaHakutoive, createdAt);
+                Date valmistumisPvmToUse = resolveValmistusPaivamaara(hakuOid, hakemusOid, createdAt, hakukohdeOid, kielikoePvm);
+                kohteenTiedot.lisaaTulos(hakemusOid, hakijaOid, kielikoetuloksenSisaltavaHakutoive, valmistumisPvmToUse);
                 return kohteenTiedot;
             });
         }
@@ -118,6 +135,16 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
             SureenTallennettavatTiedot t = new SureenTallennettavatTiedot();
             valintakoeOsallistuminenDTOs.forEach(t::lisaaKielikoeTulos);
             return t;
+        }
+    }
+
+    private static Date resolveValmistusPaivamaara(String hakuOid, String hakemusOid, Date createdAt, String hakukohdeOid, Date haunMukainenKielikoePvm) {
+        if (haunMukainenKielikoePvm != null) {
+            return haunMukainenKielikoePvm;
+        } else {
+            LOG.warn(String.format("Tallennetaan kielikoepäivämääräksi %s hakemukselle %s kohteeseen %s haussa %s",
+                createdAt, hakemusOid, hakukohdeOid, hakuOid));
+            return createdAt;
         }
     }
 
