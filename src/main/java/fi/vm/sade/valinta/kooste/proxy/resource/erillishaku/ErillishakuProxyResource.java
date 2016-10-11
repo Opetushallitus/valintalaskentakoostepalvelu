@@ -2,6 +2,9 @@ package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku;
 
 import com.google.common.collect.Maps;
 import fi.vm.sade.authentication.business.service.Authorizer;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
@@ -11,7 +14,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 
@@ -23,6 +26,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +60,6 @@ public class ErillishakuProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishakuProxyResource.class);
 
     @Autowired
-    private TilaAsyncResource tilaResource;
-    @Autowired
     private ApplicationAsyncResource applicationAsyncResource;
     @Autowired
     private SijoitteluAsyncResource sijoitteluAsyncResource;
@@ -69,6 +71,8 @@ public class ErillishakuProxyResource {
     private ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     @Autowired
     private Authorizer authorizer;
+    @Autowired
+    private TarjontaAsyncResource tarjontaAsyncResource;
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @GET
@@ -90,15 +94,21 @@ public class ErillishakuProxyResource {
         });
         final AtomicReference<List<Hakemus>> hakemukset = new AtomicReference<>();
         final AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet = new AtomicReference<>();
-        final AtomicReference<HakukohdeDTO> hakukohde = new AtomicReference<>();
+        final AtomicReference<HakukohdeDTO> sijoittelu = new AtomicReference<>();
         final AtomicReference<List<Valintatulos>> vtsValintatulokset = new AtomicReference<>();
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
-        AtomicInteger counter = new AtomicInteger(1 + 1 + 1 + 1 + 1);
+        final AtomicReference<HakukohdeV1RDTO> hakukohde = new AtomicReference<>();
+        AtomicInteger counter = new AtomicInteger(1 + 1 + 1 + 1 + 1 + 1);
 
         Supplier<Void> mergeSupplier = () -> {
             if (counter.decrementAndGet() == 0) {
+                LOG.info("Etsitään tarjoajan Oid datasta");
+                String tarjoajaOid = (StringUtils.isEmpty(sijoittelu.get().getTarjoajaOid())) ?
+                        sijoittelu.get().getTarjoajaOid() :
+                        HakukohdeHelper.tarjoajaOid(hakukohde.get());
+                tarkistaOikeudetHakukohteeseen(tarjoajaOid);
                 LOG.info("Muodostetaan vastaus hakukohteelle {} haussa {}", hakukohdeOid, hakuOid);
-                r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), hakukohde.get(), valinnanvaiheet.get(), valintatulokset.get(), vtsValintatulokset.get()));
+                r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), sijoittelu.get(), valinnanvaiheet.get(), valintatulokset.get(), vtsValintatulokset.get()));
             }
             return null;
         };
@@ -107,11 +117,12 @@ public class ErillishakuProxyResource {
         ///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         fetchValinnanVaihes(hakukohdeOid, asyncResponse, valinnanvaiheet, mergeSupplier);
         ///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
-        fetchSijoittelu(hakuOid, hakukohdeOid, asyncResponse, hakukohde, mergeSupplier);
+        fetchSijoittelu(hakuOid, hakukohdeOid, asyncResponse, sijoittelu, mergeSupplier);
         ///virkailija/valintatulos/haku/{hakuOid}/hakukohde/{hakukohdeOid}
         fetchValintatulos(hakuOid, hakukohdeOid, asyncResponse, vtsValintatulokset, mergeSupplier);
         ///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         fetchValinnanTulos(hakuOid, hakukohdeOid, asyncResponse, valintatulokset, mergeSupplier);
+        fetchHakukohde(hakukohdeOid, asyncResponse, hakukohde, mergeSupplier);
     }
 
     void fetchValinnanTulos(String hakuOid, String hakukohdeOid, AsyncResponse asyncResponse, AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset, Supplier<Void> mergeSupplier) {
@@ -137,7 +148,6 @@ public class ErillishakuProxyResource {
         sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(hakuOid, hakukohdeOid,
                 s -> {
                     LOG.info("Haetaan sijoittelusta hakukohteen tiedot");
-                    tarkistaOikeudetHakukohteeseen(s.getTarjoajaOid());
                     hakukohde.set(s);
                     mergeSupplier.get();
                 },
@@ -150,6 +160,17 @@ public class ErillishakuProxyResource {
                 v -> {
                     LOG.info("Haetaan valinnanvaiheita");
                     valinnanvaiheet.set(v.stream().filter(vaihe -> vaihe.getValinnanVaiheTyyppi().equals(ValinnanVaiheTyyppi.TAVALLINEN)).collect(Collectors.toList()));
+                    mergeSupplier.get();
+                },
+                poikkeus -> logAndReturnError("valintaperusteet", asyncResponse, poikkeus)
+        );
+    }
+
+    void fetchHakukohde(String hakukohdeOid, AsyncResponse asyncResponse, AtomicReference<HakukohdeV1RDTO> hakukohde, Supplier<Void> mergeSupplier) {
+        tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(
+                h -> {
+                    LOG.info("Haetaan hakukohdetta");
+                    hakukohde.set(h);
                     mergeSupplier.get();
                 },
                 poikkeus -> logAndReturnError("valintaperusteet", asyncResponse, poikkeus)
@@ -187,6 +208,8 @@ public class ErillishakuProxyResource {
     }
 
     private void tarkistaOikeudetHakukohteeseen(String tarjoajaOid) {
-        authorizer.checkOrganisationAccess(tarjoajaOid, "ROLE_APP_SIJOITTELU_READ","ROLE_APP_SIJOITTELU_READ_UPDATE","ROLE_APP_SIJOITTELU_CRUD");
+        if (!StringUtils.isEmpty(tarjoajaOid)) {
+            authorizer.checkOrganisationAccess(tarjoajaOid, "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_SIJOITTELU_CRUD");
+        }
     }
 }
