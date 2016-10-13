@@ -1,15 +1,21 @@
 package fi.vm.sade.valinta.kooste;
 
+import com.google.common.io.Files;
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
@@ -43,10 +49,25 @@ public class ValintalaskentakoostepalveluJetty {
     }
 
     public final static String resourcesAddress = "http://localhost:" + ValintalaskentakoostepalveluJetty.port + "/valintalaskentakoostepalvelu/resources";
-
+    private static void mockUserHomeWithCommonProperties() {
+        try {
+            final File tempDir = Files.createTempDir();
+            final File ophConfiguration = new File(tempDir,"oph-configuration");
+            ophConfiguration.mkdir();
+            final File commonProperties = new File(ophConfiguration, "common.properties");
+            final FileOutputStream output = new FileOutputStream(commonProperties);
+            System.setProperty("user.home", tempDir.getAbsolutePath());
+            IOUtils.writeLines(Arrays.asList("web.url.cas", "some_cas_url"),System.lineSeparator(),output);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public static void startShared() {
         Integraatiopalvelimet.mockServer.reset();
         SpringProfile.setProfile("test");
+        mockUserHomeWithCommonProperties();
         try {
             if (server.isStopped()) {
                 KoosteTestProfileConfiguration.PROXY_SERVER.set(Integraatiopalvelimet.mockServer.getHost() + ":" + Integraatiopalvelimet.mockServer.getPort());
