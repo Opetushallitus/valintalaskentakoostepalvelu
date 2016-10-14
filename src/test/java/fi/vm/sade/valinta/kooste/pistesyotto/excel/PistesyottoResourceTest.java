@@ -107,11 +107,6 @@ public class PistesyottoResourceTest {
         final String hakemusPersonOid5 = "1.2.4124.83141";
 
         cleanMocks();
-        Mockito.doAnswer(invocation -> {
-            Consumer<HakukohdeOIDAuthorityCheck> authChecker = (Consumer<HakukohdeOIDAuthorityCheck>)invocation.getArguments()[1];
-            authChecker.accept(h -> !hakukohdeOid2.equals(h));
-            return null;
-        }).when(Mocks.getAuthorityCheckService()).getAuthorityCheckForRoles(Mockito.anyCollection(), Mockito.any(), Mockito.any());
 
         Hakemus hakemus1 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).build();
         Hakemus hakemus2 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid2).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid2).build();
@@ -672,12 +667,6 @@ public class PistesyottoResourceTest {
 
     public void cleanMocks() {
         Mocks.reset();
-        Mockito.doAnswer(invocation -> {
-            Consumer<HakukohdeOIDAuthorityCheck> authOidCheck = (Consumer<HakukohdeOIDAuthorityCheck>)invocation.getArguments()[1];
-            authOidCheck.accept((OID)-> true);
-            return null;
-        }).when(Mocks.getAuthorityCheckService())
-                .getAuthorityCheckForRoles(Mockito.<String>anyCollection(), Mockito.<Consumer<HakukohdeOIDAuthorityCheck> >any(), Mockito.<Consumer<Throwable> >any());
         MockApplicationAsyncResource.clear();
     }
 

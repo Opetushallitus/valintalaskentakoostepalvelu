@@ -56,7 +56,6 @@ public class HakemuksetResourceTest {
         ValintaKoosteJetty.startShared();
     }
 
-    @Ignore // AuthorityCheckService needs to be mocked in HakemuksetResourceTest
     @Test
     public void testHaeHakemukset() throws Exception {
 

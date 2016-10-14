@@ -30,8 +30,6 @@ public class Mocks {
     private KoodistoAsyncResource koodistoAsyncResource;
     @Autowired
     private OhjausparametritAsyncResource ohjausparametritAsyncResource;
-    @Autowired
-    private AuthorityCheckService authorityCheckService;
 
     @PostConstruct
     public void init() {
@@ -53,10 +51,7 @@ public class Mocks {
     public static DokumenttiAsyncResource getDokumenttiAsyncResource() {
         return MOCKS.dokumenttiAsyncResource;
     }
-    public static AuthorityCheckService getAuthorityCheckService() {
-        return MOCKS.authorityCheckService;
-    }
     public static void reset() {
-        Mockito.reset(getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource(), getDokumenttiAsyncResource(), getAuthorityCheckService());
+        Mockito.reset(getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource(), getDokumenttiAsyncResource());
     }
 }
