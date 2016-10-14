@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
@@ -23,6 +22,7 @@ import java.util.function.Consumer;
 @Service
 public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncResource {
     private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference = new AtomicReference<>();
+    private static AtomicReference<Set<String>> hakukohteetValinnanvaiheelleResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference = new AtomicReference<>();
     private static AtomicReference<List<HakukohdeJaValintaperusteDTO>> hakukohdeJaValintaperusteetResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference = new AtomicReference<>();
@@ -31,8 +31,9 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     public static void setValintaperusteetResult(List<ValintaperusteDTO> result) {
         valintaperusteetResultReference.set(result);
     }
-
-
+    public static void setHakukohteetValinnanvaiheelleResult(Set<String> result) {
+        hakukohteetValinnanvaiheelleResultReference.set(result);
+    }
 
     @Override
     public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
@@ -84,8 +85,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
-        Set<String> hakukohdelist = Sets.newHashSet("1.2.3.4", "4.3.2.1");
-        return Observable.just(hakukohdelist);
+        return Observable.just(hakukohteetValinnanvaiheelleResultReference.get());
     }
 
     @Override

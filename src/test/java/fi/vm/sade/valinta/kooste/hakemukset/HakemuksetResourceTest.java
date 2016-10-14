@@ -1,12 +1,13 @@
 package fi.vm.sade.valinta.kooste.hakemukset;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -18,7 +19,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -53,6 +53,11 @@ public class HakemuksetResourceTest {
                     setHakemusOid("1.2.246.562.11.00000015082");
                 }})
         );
+        MockValintaperusteetAsyncResource.setHakukohteetValinnanvaiheelleResult(Sets.newHashSet("1.2.246.562.5.28143628072"));
+        ValintaperusteDTO v3 = new ValintaperusteDTO();
+        v3.setTunniste("tunniste");
+        HakukohdeJaValintaperusteDTO v4  = new HakukohdeJaValintaperusteDTO("1.2.246.562.5.28143628072", Lists.newArrayList(v3));
+        MockValintaperusteetAsyncResource.setHakukohdeValintaperusteResult(Lists.newArrayList(v4));
         ValintaKoosteJetty.startShared();
     }
 
@@ -81,6 +86,11 @@ public class HakemuksetResourceTest {
         String prettyJsonString = gson.toJson(je);
 
         System.out.println(prettyJsonString);
+        assertEquals(1, je.getAsJsonArray().size());
+        assertEquals("tunniste", je.getAsJsonArray().get(0).getAsJsonObject()
+                        .get("hakukohteet").getAsJsonArray().get(0).getAsJsonObject()
+                         .get("valintakokeet").getAsJsonArray().get(0).getAsJsonObject()
+                         .get("tunniste").getAsString());
     }
 
 }
