@@ -42,6 +42,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValinta
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -596,6 +597,9 @@ public class ErillishaunTuontiService {
         // Henkilötunnus on oikeassa formaatissa jos sellainen on syötetty
         if(!isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
             errors.add("Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen.");
+        }
+        if (!rivi.isJulkaistaankoTiedot() && (rivi.getVastaanottoTila().equals("EI_TEHTY") || StringUtils.isEmpty(rivi.getVastaanottoTila()))) {
+            errors.add("Julkaisutietoa ei voi päivittää jos valinta ei ole julkaistavissa.");
         }
         if (!"KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
             ValintatuloksenTila vt = valintatuloksenTila(rivi);
