@@ -26,7 +26,6 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
@@ -196,7 +195,7 @@ public class PistesyottoResourceTest {
                             .build()
             );
 
-            MockValintaperusteetAsyncResource.setValintaperusteetResultReference(
+            MockValintaperusteetAsyncResource.setValintaperusteetResult(
                     valintaperusteet
             );
             MockValintaperusteetAsyncResource.setHakukohdeResult(
@@ -311,7 +310,7 @@ public class PistesyottoResourceTest {
                             .build()
             );
 
-            MockValintaperusteetAsyncResource.setValintaperusteetResultReference(
+            MockValintaperusteetAsyncResource.setValintaperusteetResult(
                     valintaperusteet
             );
             MockValintaperusteetAsyncResource.setHakukohdeResult(
@@ -452,7 +451,7 @@ public class PistesyottoResourceTest {
                         .build()
         );
 
-        MockValintaperusteetAsyncResource.setValintaperusteetResultReference(valintaperusteet);
+        MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
         MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                 lisatiedot()
                     .setOid(HAKEMUS1).build(),
@@ -594,7 +593,7 @@ public class PistesyottoResourceTest {
                             .build()
             );
 
-            MockValintaperusteetAsyncResource.setValintaperusteetResultReference(valintaperusteet);
+            MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
                             .setOid(HAKEMUS1).build(),
@@ -729,7 +728,7 @@ public class PistesyottoResourceTest {
                         .build()
         );
 
-        MockValintaperusteetAsyncResource.setValintaperusteetResultReference(valintaperusteet);
+        MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
         MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                 lisatiedot()
                         .setEtunimiJaSukunimi("Essi1", "Hakemus1")
