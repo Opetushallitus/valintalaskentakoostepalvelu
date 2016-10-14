@@ -598,8 +598,8 @@ public class ErillishaunTuontiService {
         if(!isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
             errors.add("Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen.");
         }
-        if (!rivi.isJulkaistaankoTiedot() && !(rivi.getVastaanottoTila().equals("EI_TEHTY") || StringUtils.isEmpty(rivi.getVastaanottoTila()))) {
-            errors.add("Julkaisutietoa ei voi päivittää jos valinta ei ole julkaistavissa.");
+        if (!rivi.isJulkaistaankoTiedot() && !(ValintatuloksenTila.KESKEN.name().equals(rivi.getVastaanottoTila()) || StringUtils.isEmpty(rivi.getVastaanottoTila()))) {
+            errors.add("Vastaanottotietoa ei voi päivittää jos valinta ei ole julkaistavissa tai vastaanottotieto ei ole kesken");
         }
         if (!"KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
             ValintatuloksenTila vt = valintatuloksenTila(rivi);
