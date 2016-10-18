@@ -200,7 +200,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         ValintatapajonoDTO jono = new ValintatapajonoDTO();
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(HAKEMUS1);
-        hakemusDTO.setHakijaryhmaOid(HAKIJARYHMA1);
+        hakemusDTO.getHyvaksyttyHakijaryhmista().add(HAKIJARYHMA1);
 
         jono.setHakemukset(Arrays.asList(hakemusDTO));
         hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
