@@ -31,6 +31,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
     private final AtomicReference<Runnable> callback = new AtomicReference<>();
     private final boolean erillishaku;
     private final String uuid;
+    private final boolean korkeakouluHaku;
 
     @SuppressWarnings("unchecked")
     public ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
@@ -53,6 +54,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
         );
         this.uuid = hakukohdeOid.getUuid();
         this.erillishaku = erillishaku;
+        this.korkeakouluHaku = haku.isKorkeakouluHaku();
         this.valintaryhmaPalvelukutsuYhdiste = valintaryhmaPalvelukutsuYhdiste;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
     }
@@ -76,6 +78,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
                     try {
                         LaskeDTO l = new LaskeDTO(
                                 uuid,
+                                korkeakouluHaku,
                                 erillishaku,
                                 y.getHakukohdeOid(),
                                 muodostaHakemuksetDTO(y.getHakukohdeOid(), y.getHakemuksetPalvelukutsu().getHakemukset(), y.getSuoritusrekisteriPalvelukutsut().getOppijat()),

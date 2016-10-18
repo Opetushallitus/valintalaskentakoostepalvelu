@@ -183,6 +183,7 @@ public class LaskentaActorFactory {
                                 Observable<String> l =
                                         valintalaskentaAsyncResource.valintakokeet(new LaskeDTO(
                                                 actorParams.getUuid(),
+                                                haku.isKorkeakouluHaku(),
                                                 actorParams.isErillishaku(),
                                                 hakukohdeOid,
                                                 HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO(), true), v));
@@ -227,6 +228,7 @@ public class LaskentaActorFactory {
                                 Observable<String> l =
                                         valintalaskentaAsyncResource.laske(new LaskeDTO(
                                                 actorParams.getUuid(),
+                                                haku.isKorkeakouluHaku(),
                                                 actorParams.isErillishaku(),
                                                 hakukohdeOid,
                                                 HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO(), true), v, hr));
@@ -273,6 +275,7 @@ public class LaskentaActorFactory {
                                 Observable<String> l =
                                         valintalaskentaAsyncResource.laskeKaikki(new LaskeDTO(
                                                 actorParams.getUuid(),
+                                                haku.isKorkeakouluHaku(),
                                                 actorParams.isErillishaku(),
                                                 hakukohdeOid,
                                                 HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO(), true), v, hr));
