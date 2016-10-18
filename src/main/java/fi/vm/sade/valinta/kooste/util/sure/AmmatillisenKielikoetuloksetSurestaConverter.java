@@ -27,51 +27,44 @@ public class AmmatillisenKielikoetuloksetSurestaConverter {
 
         Stream<SuoritusJaArvosanat> suorituksetEnnenLaskennanAlkamistaMyonnettyjenArvosanojenKanssa =
             OppijaToAvainArvoDTOConverter.removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(oppijanSuorituksetJaArvosanat.stream(), parametritDTO);
-        Stream<SuoritusJaArvosanat> kielikoesuoritukset = suorituksetEnnenLaskennanAlkamistaMyonnettyjenArvosanojenKanssa
+        List<SuoritusJaArvosanat> kielikoesuoritukset = suorituksetEnnenLaskennanAlkamistaMyonnettyjenArvosanojenKanssa
                 .filter(Objects::nonNull)
                 .filter(s -> s.getSuoritus() != null)
                 .filter(s -> wrap(s).isAmmatillisenKielikoe())
                 .filter(s -> s.getSuoritus().isVahvistettu())
                 .filter(s -> s.getArvosanat() != null)
-                .filter(s -> !s.getArvosanat().isEmpty());
+                .filter(s -> !s.getArvosanat().isEmpty()).collect(Collectors.toList());
         return suorituksetKielikohtaisiksiAvainArvoiksi(kielikoesuoritukset);
     }
 
-    private static List<AvainArvoDTO> suorituksetKielikohtaisiksiAvainArvoiksi(Stream<SuoritusJaArvosanat> kielikoesuoritukset) {
+    private static List<AvainArvoDTO> suorituksetKielikohtaisiksiAvainArvoiksi(List<SuoritusJaArvosanat> oppijanKielikoesuoritukset) {
         List<AvainArvoDTO> relevanttiArvoKullekinKielelle = new LinkedList<>();
-        Map<String, List<SuoritusJaArvosanat>> arvosanatKielittain = kielikoesuoritukset.collect(Collectors.groupingBy(AmmatillisenKielikoetuloksetSurestaConverter::kieliArvosananLisatiedosta));
-        for (String kieli : arvosanatKielittain.keySet()) {
-            List<SuoritusJaArvosanat> kielenSuoritusArvosanaParit = arvosanatKielittain.get(kieli);
-            if (containsSuoritusWithValue(kielenSuoritusArvosanaParit, "true")) {
+        Stream<String> kaikkiKielet = oppijanKielikoesuoritukset.stream().map(SuoritusJaArvosanat::getArvosanat).flatMap(arvosanat ->
+            arvosanat.stream().map(Arvosana::getLisatieto)).distinct();
+        kaikkiKielet.forEach(kieli -> {
+            if (containsSuoritusWithValue(oppijanKielikoesuoritukset, kieli, "true")) {
                 relevanttiArvoKullekinKielelle.add(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, "true"));
-            } else if (containsSuoritusWithValue(kielenSuoritusArvosanaParit, "false")) {
+            } else if (containsSuoritusWithValue(oppijanKielikoesuoritukset, kieli, "false")) {
                 relevanttiArvoKullekinKielelle.add(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, "false"));
             } else {
                 relevanttiArvoKullekinKielelle.add(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, ""));
             }
-        }
+        });
         return relevanttiArvoKullekinKielelle;
     }
 
-    private static String kieliArvosananLisatiedosta(SuoritusJaArvosanat suoritusJaArvosanat) {
-        List<Arvosana> arvosanat = suoritusJaArvosanat.getArvosanat();
-        if (arvosanat.size() != 1) {
-            throw new IllegalStateException(String.format("Suoritukselle %s löytyi yhdestä poikkeava määrä (%d) arvosanoja: %s", suoritusJaArvosanat.getSuoritus(), arvosanat.size(), arvosanat));
-        }
-        return arvosanat.get(0).getLisatieto();
+    private static boolean containsSuoritusWithValue(List<SuoritusJaArvosanat> oppijanSuoritusJaArvosanaParit, String kieli, String expectedValue) {
+        return oppijanSuoritusJaArvosanaParit.stream().anyMatch(s -> hasValueInAnyArvosana(s, kieli, expectedValue));
     }
 
-    private static boolean containsSuoritusWithValue(List<SuoritusJaArvosanat> kielenSuoritusArvosanaParit, String expectedValue) {
-        return kielenSuoritusArvosanaParit.stream().anyMatch(s -> hasValueInOnlyArvosana(s, expectedValue));
-    }
-
-    private static boolean hasValueInOnlyArvosana(SuoritusJaArvosanat suoritusJaArvosanat, String expectedValue) {
-        Arvosana onlyArvosana = suoritusJaArvosanat.getArvosanat().get(0);
-        Arvio onlyArvio = onlyArvosana.getArvio();
-        if (!SURE_ASTEIKKO_HYVAKSYTTY.equals(onlyArvio.getAsteikko())) {
-            throw new IllegalArgumentException(String.format("Suorituksen %s arvosanan %s asteikko on '%s'", suoritusJaArvosanat.getSuoritus(), onlyArvosana, onlyArvio.getAsteikko()));
-        }
-        return expectedValue.equals(onlyArvio.getArvosana());
+    private static boolean hasValueInAnyArvosana(SuoritusJaArvosanat suoritusJaArvosanat, String kieli, String expectedValue) {
+        return suoritusJaArvosanat.getArvosanat().stream().anyMatch(a -> {
+            Arvio arvio = a.getArvio();
+            if (!SURE_ASTEIKKO_HYVAKSYTTY.equals(arvio.getAsteikko())) {
+                throw new IllegalArgumentException(String.format("Suorituksen %s arvosanan %s asteikko on '%s'", suoritusJaArvosanat.getSuoritus(), a, arvio.getAsteikko()));
+            }
+            return kieli.equals(a.getLisatieto()) && expectedValue.equals(arvio.getArvosana());
+        });
     }
 
     private static AvainArvoDTO createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(String kieli, String valueForAvainArvoDto) {

@@ -2227,18 +2227,28 @@ public class HakemuksetConverterUtilTest {
         Assert.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_fi"));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void useampiAmmatillisenKielikoeArvosanatietoSamalleSuoritukselleSurestaAiheuttaaPoikkeuksen() {
+    @Test
+    public void useampiAmmatillisenKielikoeArvosanatietoSamalleSuoritukselleSurestaPalauttaaHyvaksytynArvosananJosSellainenLoytyy() {
         HakemusDTO h = new HakemusDTO();
         h.setAvaimet(new ArrayList<>());
-        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+        Oppija oppijaJollaOnSekaHyvaksyttyEttaHylattyArvosana = new SuoritusrekisteriSpec.OppijaBuilder()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
                 .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
                 .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("true").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
                 .build()
             .build();
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppijaJollaOnSekaHyvaksyttyEttaHylattyArvosana, h, true);
+        Assert.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
 
-        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
+        h.setAvaimet(new ArrayList<>());
+        Oppija oppijaJollaOnVainHylattyjaArvosanoja = new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .build()
+            .build();
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppijaJollaOnVainHylattyjaArvosanoja, h, true);
+        Assert.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_fi"));
     }
 
     @Test(expected = IllegalArgumentException.class)
