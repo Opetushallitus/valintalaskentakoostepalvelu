@@ -77,7 +77,7 @@ public class OppijaToAvainArvoDTOConverter {
                     if (new ArvosanaWrapper(a).onkoMyonnettyEnnen(date.get())) {
                         return true;
                     }
-                    LOG.info(String.format("Filtteröidään pois ennen laskennan alkamista (%s) myönnetty arvosana %s hakijan %s suoritukselta",
+                    LOG.info(String.format("Filtteröidään pois laskennan alkamisen (%s) jälkeen myönnetty arvosana %s hakijan %s suoritukselta",
                         date.get(), a, s.getSuoritus().getHenkiloOid()));
                     return false;
                 }).collect(Collectors.toList()));
