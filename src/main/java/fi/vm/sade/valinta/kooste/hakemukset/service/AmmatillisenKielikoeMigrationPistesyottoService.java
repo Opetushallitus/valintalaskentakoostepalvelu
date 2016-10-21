@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.hakemukset.service;
 
 import static fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation.PISTETIEDOT_AMMATTILLISEN_KIELIKOKEEN_MIGRAATIO;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -14,13 +16,18 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import rx.Observable;
 import rx.Subscription;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,18 +51,55 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
         VALMISTUMIS_DATES_BY_HAKU_OID.put("1.2.246.562.29.98929669087", new LocalDate(2016, 9, 1).toDate()); // "Lisähaku kevään 2016 ammatillisen ja lukiokoulutuksen yhteishaussa vapaaksi jääneille opiskelupaikoille",2016,"kausi_k#1"
     }
 
+    private Map<String,Map<String,String>> kielikoeResultsByHakemusOidAndKielikoeTunniste = new HashMap<>();
+
     @Autowired
     public AmmatillisenKielikoeMigrationPistesyottoService(ApplicationAsyncResource applicationAsyncResource,
                                                            SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                                            TarjontaAsyncResource tarjontaAsyncResource,
                                                            OrganisaatioAsyncResource organisaatioAsyncResource) {
         super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource, organisaatioAsyncResource);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String hakuAppExportLocationInClasspath = "ammatillisenKielikoeSuorituksetHakuAppista.json";
+        try {
+            File hakuAppExportFile = new ClassPathResource(hakuAppExportLocationInClasspath, getClass()).getFile();
+            byte[] hakuAppResultsBytes = FileUtils.readFileToByteArray(hakuAppExportFile);
+            JsonNode parsedHakuAppResults = mapper.reader().readTree(new ByteArrayInputStream(hakuAppResultsBytes));
+            parsedHakuAppResults.iterator().forEachRemaining(n -> {
+/*
+	{
+		"additionalInfo" : {
+			"kielikoe_fi" : "false",
+			"kielikoe_fi-OSALLISTUMINEN" : "OSALLISTUI"
+		},
+		"oid" : "1.2.246.562.11.00000012522"
+	},
+* */
+                String hakemusOid = n.get("oid").asText();
+                kielikoeResultsByHakemusOidAndKielikoeTunniste.compute(hakemusOid, (k, kielikoeResultsFromHakemus) -> {
+                    if (kielikoeResultsFromHakemus == null) {
+                        kielikoeResultsFromHakemus = new HashMap<>();
+                    }
+                    JsonNode additionalInfoNode = n.get("additionalInfo");
+                    copyAdditionalInfoFieldsToMap(additionalInfoNode, kielikoeResultsFromHakemus);
+                    return kielikoeResultsFromHakemus;
+                });
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Ongelma haku-appista exportoitujen tulosten lukemisessa tiedostosta %s", hakuAppExportLocationInClasspath), e);
+        }
+    }
+
+    private void copyAdditionalInfoFieldsToMap(JsonNode additionalInfoNode, Map<String, String> kielikoeResultsFromHakemus) {
+        additionalInfoNode.fields().forEachRemaining(additionalInfoField ->
+            kielikoeResultsFromHakemus.put(additionalInfoField.getKey(), additionalInfoField.getValue().asText()));
     }
 
 
     public Subscription save(List<ValintakoeOsallistuminenDTO> valintakoeOsallistuminenDTOs, Result r,
                              Consumer<Result> onSuccess, BiConsumer<String, Throwable> onError, String username) {
-        SureenTallennettavatTiedot tallennettavatTiedot = SureenTallennettavatTiedot.create(valintakoeOsallistuminenDTOs);
+        SureenTallennettavatTiedot tallennettavatTiedot = SureenTallennettavatTiedot.create(valintakoeOsallistuminenDTOs, kielikoeResultsByHakemusOidAndKielikoeTunniste);
 
         Stream<Observable<Result>> resultStream = tallennettavatTiedot.tallennettavatTiedotHakukohdeOidinMukaan.values().stream().map(kohteenTiedot ->
             Observable.create((Observable.OnSubscribe<Result>) subscriber -> {
@@ -93,9 +137,11 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
     }
 
     private static class SureenTallennettavatTiedot {
+        private final Map<String, Map<String, String>> kielikoeResultsByHakemusOidAndKielikoeTunniste;
         final Map<String,YhdenHakukohteenTallennettavatTiedot> tallennettavatTiedotHakukohdeOidinMukaan = new HashMap<>();
 
-        private SureenTallennettavatTiedot() {
+        private SureenTallennettavatTiedot(Map<String, Map<String, String>> kielikoeResultsByHakemusOidAndKielikoeTunniste) {
+            this.kielikoeResultsByHakemusOidAndKielikoeTunniste = kielikoeResultsByHakemusOidAndKielikoeTunniste;
         }
 
         private void lisaaKielikoeTulos(ValintakoeOsallistuminenDTO valintakoeOsallistuminen) {
@@ -123,7 +169,7 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
             }
             tallennettavatTiedotHakukohdeOidinMukaan.compute(hakukohdeOid, (k, kohteenTiedot) -> {
                 if (kohteenTiedot == null) {
-                    kohteenTiedot = new YhdenHakukohteenTallennettavatTiedot(hakuOid, hakukohdeOid);
+                    kohteenTiedot = new YhdenHakukohteenTallennettavatTiedot(hakuOid, hakukohdeOid, kielikoeResultsByHakemusOidAndKielikoeTunniste);
                 }
                 Date valmistumisPvmToUse = resolveValmistusPaivamaara(hakuOid, hakemusOid, createdAt, hakukohdeOid, kielikoePvm);
                 kohteenTiedot.lisaaTulos(hakemusOid, hakijaOid, kielikoetuloksenSisaltavaHakutoive, valmistumisPvmToUse);
@@ -131,8 +177,9 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
             });
         }
 
-        public static SureenTallennettavatTiedot create(List<ValintakoeOsallistuminenDTO> valintakoeOsallistuminenDTOs) {
-            SureenTallennettavatTiedot t = new SureenTallennettavatTiedot();
+        public static SureenTallennettavatTiedot create(List<ValintakoeOsallistuminenDTO> valintakoeOsallistuminenDTOs,
+                                                        Map<String, Map<String, String>> kielikoeResultsByHakemusOidAndKielikoeTunniste) {
+            SureenTallennettavatTiedot t = new SureenTallennettavatTiedot(kielikoeResultsByHakemusOidAndKielikoeTunniste);
             valintakoeOsallistuminenDTOs.forEach(t::lisaaKielikoeTulos);
             return t;
         }
@@ -151,12 +198,14 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
     private static class YhdenHakukohteenTallennettavatTiedot {
         final String hakuOid;
         final String hakukohdeOid;
+        private Map<String, Map<String, String>> kielikoeResultsByHakemusOidAndKielikoeTunniste;
         final Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoeTuloksetHakemuksittain = new HashMap<>();
         final List<ApplicationAdditionalDataDTO> hakemusJaPersonOidit = new LinkedList<>();
 
-        YhdenHakukohteenTallennettavatTiedot(String hakuOid, String hakukohdeOid) {
+        YhdenHakukohteenTallennettavatTiedot(String hakuOid, String hakukohdeOid, Map<String, Map<String, String>> kielikoeResultsByHakemusOidAndKielikoeTunniste) {
             this.hakuOid = hakuOid;
             this.hakukohdeOid = hakukohdeOid;
+            this.kielikoeResultsByHakemusOidAndKielikoeTunniste = kielikoeResultsByHakemusOidAndKielikoeTunniste;
         }
 
         void lisaaTulos(String hakemusOid, String hakijaOid, HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, Date createdAt) {
@@ -182,8 +231,8 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
             }
             ValintakoeDTO kielikoeDto = kielikoeDtos.get(0);
             String tunniste = kielikoeDto.getValintakoeTunniste();
-            boolean hyvaksytty = kielikoeDto.getOsallistuminenTulos().getLaskentaTulos();
-            return new SingleKielikoeTulos(tunniste, Boolean.toString(hyvaksytty), createdAt);
+            String hyvaksytty = kielikoeResultsByHakemusOidAndKielikoeTunniste.get(hakemusOid).get(tunniste);
+            return new SingleKielikoeTulos(tunniste, hyvaksytty, createdAt);
         }
     }
 }
