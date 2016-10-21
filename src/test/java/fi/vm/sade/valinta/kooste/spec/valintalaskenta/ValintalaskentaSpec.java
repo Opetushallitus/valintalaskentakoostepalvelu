@@ -136,6 +136,11 @@ public class ValintalaskentaSpec {
             osallistuminenDTO.setHakemusOid(hakemusOid);
             return this;
         }
+
+        public ValintakoeOsallistuminenBuilder setHakuOid(String hakuOid) {
+            osallistuminenDTO.setHakuOid(hakuOid);
+            return this;
+        }
         public ValintakoeOsallistuminenDTO build() {
             return osallistuminenDTO;
         }
