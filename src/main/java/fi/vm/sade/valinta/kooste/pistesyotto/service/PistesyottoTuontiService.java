@@ -2,16 +2,17 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -29,7 +30,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
@@ -117,7 +127,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                                     uudetKielikoetulokset.put(hakemusOid, kielikoeAvaimet.stream().map(avain ->
                                         new SingleKielikoeTulos(avain, newPistetiedot.get(avain), valmistuminen)).collect(Collectors.toList()));
                                 }
-                                kielikoeAvaimet.stream().forEach(a -> newPistetiedot.remove(a));
+                                kielikoeAvaimet.forEach(newPistetiedot::remove);
                                 additionalData.setAdditionalData(newPistetiedot);
                                 return Stream.of(additionalData);
                             }).filter(Objects::nonNull)
@@ -159,15 +169,12 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
     }
 
     private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, List<ApplicationAdditionalDataDTO> hakemukset) {
-        return getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h, (h1, h2) -> {
-            return h2;
-        })));
+        return getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, hakemukset.stream().collect(Collectors.toMap(ApplicationAdditionalDataDTO::getOid, h -> h, (h1, h2) -> h2)));
     }
 
     private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, Map<String, ApplicationAdditionalDataDTO> oidToAdditionalMapping) {
-        return (List<String>) pistesyottoTuontiAdapteri
+        return pistesyottoTuontiAdapteri
                 .getRivit().stream()
-                        //.filter(rivi -> !rivi.isValidi())
                 .flatMap(
                         rivi -> {
                             String nimi = PistesyottoExcel.additionalDataToNimi(oidToAdditionalMapping.get(rivi.getOid()));
@@ -209,7 +216,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
     }
 
     private List<String> valintakoeTunnisteet(List<ValintaperusteDTO> valintaperusteet) {
-        return valintaperusteet.stream().map(v -> v.getTunniste()).collect(Collectors.toList());
+        return valintaperusteet.stream().map(ValintaperusteDTO::getTunniste).collect(Collectors.toList());
     }
 
     public void tuo(String username, String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
@@ -254,7 +261,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         };
         Supplier<Void> haeKielikokeetSuoritusrekisterista = () -> {
             Boolean haeSuoritusrekisterista = haeSuoritusrekisteristaRef.get();
-            if(haeSuoritusrekisterista) {
+            if (haeSuoritusrekisterista) {
                 suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid).subscribe(oppijat -> {
                     oppijatRef.set(oppijat);
                     prosessi.inkrementoiTehtyjaToita();
@@ -266,33 +273,30 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             }
             return null;
         };
-        valintakoeResource.haeHakutoiveelle(hakukohdeOid).subscribe(
-                o -> {
-                    prosessi.inkrementoiTehtyjaToita();
-                    osallistumistiedot.set(o);
-                    tarkistaYlimaaraisetOsallistujat.get();
-                    viimeisteleTuonti.get();
-                }, poikkeusilmoitus);
+        valintakoeResource.haeHakutoiveelle(hakukohdeOid).subscribe(o -> {
+            prosessi.inkrementoiTehtyjaToita();
+            osallistumistiedot.set(o);
+            tarkistaYlimaaraisetOsallistujat.get();
+            viimeisteleTuonti.get();
+        }, poikkeusilmoitus);
 
-        valintaperusteetResource
-                .findAvaimet(hakukohdeOid).subscribe(
-                v -> {
-                    valintaperusteet.set(v);
-                    prosessi.inkrementoiTehtyjaToita();
-                    haeSuoritusrekisteristaRef.set(valintakoeTunnisteet(v).stream().anyMatch(t -> t.startsWith("kielikoe_")));
-                    haeKielikokeetSuoritusrekisterista.get();
-                    viimeisteleTuonti.get();
-                },
-                poikkeusilmoitus);
+        valintaperusteetResource.findAvaimet(hakukohdeOid).subscribe(v -> {
+                valintaperusteet.set(v);
+                prosessi.inkrementoiTehtyjaToita();
+                haeSuoritusrekisteristaRef.set(valintakoeTunnisteet(v).stream().anyMatch(t -> t.startsWith("kielikoe_")));
+                haeKielikokeetSuoritusrekisterista.get();
+                viimeisteleTuonti.get();
+            },
+            poikkeusilmoitus);
 
-        valintaperusteetResource.haeValintakokeetHakukohteille(Arrays.asList(hakukohdeOid), hakukohdeJaValintakoe -> {
+        valintaperusteetResource.haeValintakokeetHakukohteille(Collections.singletonList(hakukohdeOid), hakukohdeJaValintakoe -> {
             prosessi.inkrementoiTehtyjaToita();
             Set<String> kaikkiKutsutaanTunnisteet =
                     hakukohdeJaValintakoe.stream().flatMap(h -> {
                         Optional.ofNullable(h.getValintakoeDTO()).orElse(Collections.emptyList()).forEach(vk ->
                                 LOG.error("Valintakoetunniste=={}, kutsutaankokaikki={}", vk.getTunniste(), vk.getKutsutaankoKaikki()));
                         return h.getValintakoeDTO().stream();
-                    }).filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki())).map(v -> v.getTunniste()).collect(Collectors.toSet());
+                    }).filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki())).map(ValintakoeCreateDTO::getTunniste).collect(Collectors.toSet());
             kaikkiKutsutaanTunnisteetRef.set(kaikkiKutsutaanTunnisteet);
             viimeisteleTuonti.get();
         }, poikkeusilmoitus);
