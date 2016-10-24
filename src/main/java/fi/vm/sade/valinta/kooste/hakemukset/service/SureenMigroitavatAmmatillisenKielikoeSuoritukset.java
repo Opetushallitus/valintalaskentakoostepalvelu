@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -162,13 +163,14 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
                 if (resultListOfHakemus == null) {
                     resultListOfHakemus = new LinkedList<>();
                 }
-                resultListOfHakemus.add(extractKielikoeTulos(kielikoetuloksenSisaltavaHakutoive, hakemusOid, createdAt));
+                Optional<AbstractPistesyottoKoosteService.SingleKielikoeTulos> tulosIfFound = extractKielikoeTulos(kielikoetuloksenSisaltavaHakutoive, hakemusOid, createdAt);
+                tulosIfFound.ifPresent(resultListOfHakemus::add);
                 return resultListOfHakemus;
             });
             hakemusJaPersonOidit.add(new ApplicationAdditionalDataDTO(hakemusOid, hakijaOid, null, null, null));
         }
 
-        private AbstractPistesyottoKoosteService.SingleKielikoeTulos extractKielikoeTulos(HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, String hakemusOid, Date createdAt) {
+        private Optional<AbstractPistesyottoKoosteService.SingleKielikoeTulos> extractKielikoeTulos(HakutoiveDTO kielikoetuloksenSisaltavaHakutoive, String hakemusOid, Date createdAt) {
             Stream<ValintakoeValinnanvaiheDTO> kielikoetuloksenSisaltavatVaiheet = kielikoetuloksenSisaltavaHakutoive.getValinnanVaiheet().stream()
                 .filter(containsKielikoeParticipation());
             List<ValintakoeDTO> kielikoeDtos = kielikoetuloksenSisaltavatVaiheet.flatMap(vaihe ->
@@ -182,15 +184,13 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
             String tunniste = kielikoeDto.getValintakoeTunniste();
 
             Map<String, String> kielikoeResultsOfHakemusByTunniste = kielikoeResultsByHakemusOidAndKielikoeTunniste.get(hakemusOid);
-            String hyvaksytty;
             if (kielikoeResultsOfHakemusByTunniste == null) {
                 LOG.warn("Haku-app-export-JSONista ladatuista " + kielikoeResultsByHakemusOidAndKielikoeTunniste.size() +
-                    " tietueesta ei löytynyt tulosta hakemukselle " + hakemusOid + " - laitetaan sille tyhjä tulos.");
-                hyvaksytty = "";
-            } else {
-                hyvaksytty = kielikoeResultsOfHakemusByTunniste.get(tunniste);
+                    " tietueesta ei löytynyt tulosta hakemukselle " + hakemusOid + " - ei migroida sitä.");
+                return Optional.empty();
             }
-            return new AbstractPistesyottoKoosteService.SingleKielikoeTulos(tunniste, hyvaksytty, createdAt);
+            String hyvaksytty = kielikoeResultsOfHakemusByTunniste.get(tunniste);
+            return Optional.of(new AbstractPistesyottoKoosteService.SingleKielikoeTulos(tunniste, hyvaksytty, createdAt));
         }
     }
 }
