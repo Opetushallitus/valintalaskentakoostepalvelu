@@ -180,7 +180,16 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
             }
             ValintakoeDTO kielikoeDto = kielikoeDtos.get(0);
             String tunniste = kielikoeDto.getValintakoeTunniste();
-            String hyvaksytty = kielikoeResultsByHakemusOidAndKielikoeTunniste.get(hakemusOid).get(tunniste);
+
+            Map<String, String> kielikoeResultsOfHakemusByTunniste = kielikoeResultsByHakemusOidAndKielikoeTunniste.get(hakemusOid);
+            String hyvaksytty;
+            if (kielikoeResultsOfHakemusByTunniste == null) {
+                LOG.warn("Haku-app-export-JSONista ladatuista " + kielikoeResultsByHakemusOidAndKielikoeTunniste.size() +
+                    " tietueesta ei löytynyt tulosta hakemukselle " + hakemusOid + " - laitetaan sille tyhjä tulos.");
+                hyvaksytty = "";
+            } else {
+                hyvaksytty = kielikoeResultsOfHakemusByTunniste.get(tunniste);
+            }
             return new AbstractPistesyottoKoosteService.SingleKielikoeTulos(tunniste, hyvaksytty, createdAt);
         }
     }
