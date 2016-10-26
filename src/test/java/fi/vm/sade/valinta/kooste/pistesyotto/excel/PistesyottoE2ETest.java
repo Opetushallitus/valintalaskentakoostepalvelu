@@ -121,9 +121,9 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
         Assert.assertEquals(200, r.getStatus());
         try {
-            Assert.assertTrue(suoritusCounter.tryAcquire(7, 10, TimeUnit.SECONDS));
-            Assert.assertTrue(arvosanaCounter.tryAcquire(7, 10, TimeUnit.SECONDS));
-            Assert.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
+            Assert.assertTrue(suoritusCounter.tryAcquire(7, 15, TimeUnit.SECONDS));
+            Assert.assertTrue(arvosanaCounter.tryAcquire(7, 15, TimeUnit.SECONDS));
+            Assert.assertTrue(counter.tryAcquire(1, 15, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             Assert.fail();
         }
