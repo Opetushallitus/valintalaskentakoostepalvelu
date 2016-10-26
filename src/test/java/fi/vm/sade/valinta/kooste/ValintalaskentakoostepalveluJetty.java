@@ -68,22 +68,37 @@ public class ValintalaskentakoostepalveluJetty {
         Integraatiopalvelimet.mockServer.reset();
         SpringProfile.setProfile("test");
         mockUserHomeWithCommonProperties();
-        try {
-            if (server.isStopped()) {
-                KoosteTestProfileConfiguration.PROXY_SERVER.set(Integraatiopalvelimet.mockServer.getHost() + ":" + Integraatiopalvelimet.mockServer.getPort());
-                String root =  ProjectRootFinder.findProjectRoot() + "/valintalaskentakoostepalvelu";
-                WebAppContext wac = new WebAppContext();
-
-                wac.setResourceBase(root + "/src/main/webapp");
-                wac.setContextPath("/valintalaskentakoostepalvelu");
-                wac.setParentLoaderPriority(true);
-                server.setHandler(wac);
-                server.setStopAtShutdown(true);
-                server.start();
+        int maxTriesToStart = 10;
+        if (server.isStopped()) {
+            int startTriesLeft = maxTriesToStart;
+            boolean startSucceeded = false;
+            while (startTriesLeft-- > 0 && !startSucceeded) {
+                try {
+                    startServer();
+                    startSucceeded = true;
+                } catch (Exception e) {
+                    System.err.println(ValintalaskentakoostepalveluJetty.class.getName() +
+                        " Warning: could not start server, trying again " + startTriesLeft + " times. Exception was:");
+                    e.printStackTrace();
+                }
             }
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
+            if (!startSucceeded) {
+                throw new IllegalStateException("Could not get the server started with " + maxTriesToStart + " attempts.");
+            }
         }
+    }
+
+    private static void startServer() throws Exception {
+        KoosteTestProfileConfiguration.PROXY_SERVER.set(Integraatiopalvelimet.mockServer.getHost() + ":" + Integraatiopalvelimet.mockServer.getPort());
+        String root =  ProjectRootFinder.findProjectRoot() + "/valintalaskentakoostepalvelu";
+        WebAppContext wac = new WebAppContext();
+
+        wac.setResourceBase(root + "/src/main/webapp");
+        wac.setContextPath("/valintalaskentakoostepalvelu");
+        wac.setParentLoaderPriority(true);
+        server.setHandler(wac);
+        server.setStopAtShutdown(true);
+        server.start();
     }
 
 }
