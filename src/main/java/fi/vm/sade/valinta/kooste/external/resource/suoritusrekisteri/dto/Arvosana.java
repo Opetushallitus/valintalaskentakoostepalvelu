@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
-import com.google.common.base.Objects;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -158,5 +160,34 @@ public class Arvosana {
         result = 31 * result + (arvio != null ? arvio.hashCode() : 0);
         result = 31 * result + (lisatieto != null ? lisatieto.hashCode() : 0);
         return result;
+    }
+
+    public static class DescendingMyonnettyOrder implements Comparator<Arvosana> {
+        @Override
+        public int compare(Arvosana first, Arvosana second) {
+            if (first.myonnetty == null && second.myonnetty == null) {
+                return 0;
+            }
+            if (first.myonnetty == null) {
+                return -1;
+            }
+            if (second.myonnetty == null) {
+                return 1;
+            }
+            SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
+
+            try {
+                Date firstMyonnetty = valmistuminenFormat.parse(first.myonnetty);
+                Date secondMyonnetty = valmistuminenFormat.parse(second.myonnetty);
+                return secondMyonnetty.compareTo(firstMyonnetty);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj == this;
+        }
     }
 }

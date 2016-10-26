@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
+
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;

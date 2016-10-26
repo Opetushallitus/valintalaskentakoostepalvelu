@@ -34,6 +34,7 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
@@ -622,6 +623,7 @@ public class PistesyottoResourceTest {
                 )
         );
         mockValintakokeetHakukohteille();
+        MockSuoritusrekisteriAsyncResource.setResult(new Oppija());
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                 TARJOAJA1, "", "", "",
@@ -949,16 +951,15 @@ public class PistesyottoResourceTest {
             MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
-                            .setOid(HAKEMUS1).build(),
+                            .setOid(HAKEMUS1).setPersonOid(PERSONOID1).build(),
                     lisatiedot()
-                            .setOid(HAKEMUS3).build()));
+                            .setOid(HAKEMUS3).setPersonOid(PERSONOID3).build()));
             MockApplicationAsyncResource.setAdditionalDataResultByOid(
                     Arrays.asList(
                             lisatiedot()
-                                    .setOid(HAKEMUS2)
-                                    .build(),
+                                    .setOid(HAKEMUS2).setPersonOid(PERSONOID2).build(),
                             lisatiedot()
-                                    .setOid(HAKEMUS3).build()
+                                    .setOid(HAKEMUS3).setPersonOid(PERSONOID3).build()
                     )
             );
             mockValintakokeetHakukohteille();

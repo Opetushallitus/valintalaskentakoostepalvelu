@@ -20,6 +20,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,6 @@ import rx.functions.Func1;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -86,13 +86,13 @@ public abstract class AbstractPistesyottoKoosteService {
 
         Observable<Boolean> kielikoeTallennus = Observable.zip(
             findMyontajaOid(hakukohdeOid, onError),
-            haeOppijatPoistettaville(hakuOid, hakukohdeOid, kielikoetuloksetSureen, onError),
+            haeOppijatSuresta(hakuOid, hakukohdeOid, onError),
             Pair::of)
             .flatMap(myontajaAndOppijat -> {
                 String myontajaOid = myontajaAndOppijat.getLeft();
-                List<Oppija> oppijatPoistettaville = myontajaAndOppijat.getRight();
+                List<Oppija> oppijatSuresta = myontajaAndOppijat.getRight();
                 return tallennaKielikoetulokset(hakuOid, hakukohdeOid, myontajaOid, pistetiedotHakemukselle, kielikoetuloksetSureen,
-                    onError, username, auditLogOperation, oppijatPoistettaville);
+                    onError, username, auditLogOperation, oppijatSuresta);
             });
 
         Observable<Boolean> ennenAdditionalInfonTallennusta = kielikoetuloksetSureen.isEmpty() ? Observable.just(false) : kielikoeTallennus;
@@ -115,11 +115,16 @@ public abstract class AbstractPistesyottoKoosteService {
                                                          List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
                                                          Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
                                                          BiConsumer<String, Throwable> onError, String username,
-                                                         ValintaperusteetOperation auditLogOperation, List<Oppija> oppijatPoistettaville) {
+                                                         ValintaperusteetOperation auditLogOperation, List<Oppija> oppijatSuresta) {
         SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
-        return Observable.from(kielikoetuloksetSureen.keySet()).flatMap(hakemusOid -> {
-            String personOid = pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
-            List<SingleKielikoeTulos> hakemuksenKielikoeTulokset = kielikoetuloksetSureen.get(hakemusOid);
+
+        Function<String,String> findPersonOidByHakemusOid = hakemusOid -> pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
+        AmmatillisenKielikoetulosUpdates updates = new AmmatillisenKielikoetulosUpdates(myontajaOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
+        Map<String, List<SingleKielikoeTulos>> sureenLahetettavatPaivitykset = updates.getResultsToSendToSure();
+
+        return Observable.from(sureenLahetettavatPaivitykset.keySet()).flatMap(hakemusOid -> {
+            String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
+            List<SingleKielikoeTulos> hakemuksenKielikoeTulokset = sureenLahetettavatPaivitykset.get(hakemusOid);
 
             List<SingleKielikoeTulos> lisattavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> isNotEmpty(t.arvioArvosana)).collect(Collectors.toList());
             List<SingleKielikoeTulos> poistettavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> isEmpty(t.arvioArvosana)).collect(Collectors.toList());
@@ -182,7 +187,7 @@ public abstract class AbstractPistesyottoKoosteService {
                         myontajaOid.equals(suoritus.getMyontaja()) &&
                         suoritusJaArvosana.getArvosanat().stream().map(Arvosana::getLisatieto).anyMatch(kieli::equalsIgnoreCase);
                 };
-                return oppijatPoistettaville.stream().filter(o -> o.getOppijanumero().equals(personOid))
+                return oppijatSuresta.stream().filter(o -> o.getOppijanumero().equals(personOid))
                     .map(Oppija::getSuoritukset).flatMap(Collection::stream).filter(isKielikoeArvosana::apply)
                     .map(SuoritusJaArvosanat::getSuoritus).collect(Collectors.toList());
             });
@@ -213,14 +218,10 @@ public abstract class AbstractPistesyottoKoosteService {
                 )).map(x -> "ok");
     }
 
-    private Observable<List<Oppija>> haeOppijatPoistettaville(String hakuOid, String hakukohdeOid, Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen, BiConsumer<String, Throwable> onError) {
-        if (kielikoetuloksetSureen.values().stream().anyMatch(tulokset -> tulokset.stream().anyMatch(tulos -> isEmpty(tulos.arvioArvosana)))) {
-            return suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
-                .doOnError(e ->
-                    onError.accept(String.format("Oppijoiden haku Suoritusrekisteristä haun %s hakukohteelle %s epäonnistui", hakuOid, hakukohdeOid), e));
-        } else {
-            return Observable.just(Collections.emptyList());
-        }
+    private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid, BiConsumer<String, Throwable> onError) {
+        return suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
+            .doOnError(e ->
+                onError.accept(String.format("Oppijoiden haku Suoritusrekisteristä haun %s hakukohteelle %s epäonnistui", hakuOid, hakukohdeOid), e));
     }
 
     private Observable<String> findMyontajaOid(String hakukohdeOid, BiConsumer<String, Throwable> onError) {
@@ -298,6 +299,11 @@ public abstract class AbstractPistesyottoKoosteService {
 
         public String kieli() {
             return kokeenTunnus.replace("kielikoe_", "");
+        }
+
+        @Override
+        public String toString() {
+            return ToStringBuilder.reflectionToString(this);
         }
     }
 }
