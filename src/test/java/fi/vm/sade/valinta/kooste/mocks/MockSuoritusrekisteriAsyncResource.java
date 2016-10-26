@@ -78,7 +78,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     @Override
     public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
         if (postException.isPresent()) {
-            throw postException.get();
+            return Observable.error(postException.get());
         }
         suoritus.setId("" + ids.getAndIncrement());
         suorituksetRef.getAndUpdate((List<Suoritus> suoritukset) -> {
@@ -91,7 +91,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     @Override
     public Observable<Arvosana> postArvosana(Arvosana arvosana) {
         if (postException.isPresent()) {
-            throw postException.get();
+            return Observable.error(postException.get());
         }
         arvosanatRef.getAndUpdate((List<Arvosana> arvosanat) -> {
             arvosanat.add(arvosana);

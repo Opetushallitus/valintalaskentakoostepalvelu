@@ -20,21 +20,23 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Observable;
+import rx.functions.Func1;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class AbstractPistesyottoKoosteService {
@@ -82,148 +84,168 @@ public abstract class AbstractPistesyottoKoosteService {
                                                 String username,
                                                 ValintaperusteetOperation auditLogOperation, boolean saveApplicationAdditionalInfo) {
 
-        AtomicInteger laskuri = new AtomicInteger(kielikoetuloksetSureen.values().stream().mapToInt(List::size).sum());
-        AtomicReference<String> myontajaRef = new AtomicReference<>();
-        AtomicReference<List<Oppija>> oppijatRef = new AtomicReference<>();
-
-        Supplier<Void> tallennaAdditionalInfo = () -> {
-            if (saveApplicationAdditionalInfo) {
-                applicationAsyncResource.putApplicationAdditionalData(
-                        hakuOid, hakukohdeOid, pistetiedotHakemukselle).subscribe(response -> {
-                    pistetiedotHakemukselle.forEach(p ->
-                            AUDIT.log(builder()
-                                    .id(username)
-                                    .hakuOid(hakuOid)
-                                    .hakukohdeOid(hakukohdeOid)
-                                    .hakijaOid(p.getPersonOid())
-                                    .hakemusOid(p.getOid())
-                                    .addAll(p.getAdditionalData())
-                                    .setOperaatio(auditLogOperation)
-                                    .build())
-                    );
-                    onSuccess.accept("ok");
-                }, error -> onError.accept("Lisätietojen tallennus hakemukselle epäonnistui", error));
-            } else {
-                onSuccess.accept("ok");
-            }
-            return null;
-        };
-
-
-
-        Supplier<Void> tallennaKielikoetulokset = () -> {
-            SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
-            kielikoetuloksetSureen.keySet().stream().forEach(hakemusOid ->
-            {
-                String personOid = pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
-                List<SingleKielikoeTulos> kielikoetulokset = kielikoetuloksetSureen.get(hakemusOid);
-
-                List<SingleKielikoeTulos> lisattavatKielikoetulokset = kielikoetulokset.stream().filter(t -> isNotEmpty(t.arvioArvosana)).collect(Collectors.toList());
-                List<SingleKielikoeTulos> poistettavatKielikoetulokset = kielikoetulokset.stream().filter(t -> isEmpty(t.arvioArvosana)).collect(Collectors.toList());
-
-                lisattavatKielikoetulokset.forEach(singleKielikoeTulos -> {
-                    String kieli = singleKielikoeTulos.kieli();
-                    String valmistuminen = valmistuminenFormat.format(singleKielikoeTulos.valmistuminen);
-
-                    Suoritus suoritus = new Suoritus();
-                    suoritus.setTila(KIELIKOE_SUORITUS_TILA);
-                    suoritus.setYksilollistaminen(KIELIKOE_SUORITUS_YKSILOLLISTAMINEN);
-                    suoritus.setHenkiloOid(personOid);
-                    suoritus.setVahvistettu(true);
-                    suoritus.setSuoritusKieli(kieli.toUpperCase());
-                    suoritus.setMyontaja(myontajaRef.get());
-                    suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
-                    suoritus.setValmistuminen(valmistuminen);
-
-                    suoritusrekisteriAsyncResource.postSuoritus(suoritus).subscribe( tallennettuSuoritus -> {
-                        String arvioArvosana = singleKielikoeTulos.arvioArvosana.toLowerCase();
-
-                        Arvosana arvosana = new Arvosana();
-                        arvosana.setAine(KIELIKOE_ARVOSANA_AINE);
-                        arvosana.setLisatieto(kieli.toUpperCase());
-                        arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
-                        arvosana.setSuoritus(tallennettuSuoritus.getId());
-                        arvosana.setMyonnetty(valmistuminen);
-
-                        suoritusrekisteriAsyncResource.postArvosana(arvosana).subscribe(arvosanaResponse -> {
-                            AUDIT.log(builder()
-                                    .id(username)
-                                    .hakuOid(hakuOid)
-                                    .hakukohdeOid(hakukohdeOid)
-                                    .hakijaOid(personOid)
-                                    .hakemusOid(hakemusOid)
-                                    .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + kieli.toLowerCase(), arvioArvosana))
-                                    .setOperaatio(auditLogOperation)
-                                    .build());
-                            if(0 == laskuri.decrementAndGet()) {
-                                tallennaAdditionalInfo.get();
-                            }
-                        }, error -> onError.accept("Arvosanan tallennus Suoritusrekisteriin epäonnistui", error));
-                    }, error -> onError.accept("Arvosanan tallennus Suoritusrekisteriin epäonnistui", error));
-                });
-
-                poistettavatKielikoetulokset.forEach(singleKielikoeTulos -> {
-                    String kieli = singleKielikoeTulos.kieli();
-                    Function<SuoritusJaArvosanat, Boolean> isKielikoeArvosana = (suoritusJaArvosana) -> {
-                        Suoritus suoritus = suoritusJaArvosana.getSuoritus();
-                        return SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE.equals(suoritus.getKomo()) &&
-                               myontajaRef.get().equals(suoritus.getMyontaja()) &&
-                               suoritusJaArvosana.getArvosanat().stream().map(Arvosana::getLisatieto).anyMatch(k -> kieli.equalsIgnoreCase(k));
-                    };
-                    List<Suoritus> poistettavatSuoritukset = oppijatRef.get().stream().filter(o -> o.getOppijanumero().equals(personOid))
-                      .map(o -> o.getSuoritukset()).flatMap(Collection::stream).filter(sa -> isKielikoeArvosana.apply(sa))
-                      .map(SuoritusJaArvosanat::getSuoritus).collect(Collectors.toList());
-                    AtomicInteger suoritusLaskuri = new AtomicInteger(poistettavatSuoritukset.size());
-                    poistettavatSuoritukset.forEach(suoritus -> {
-                        suoritusrekisteriAsyncResource.deleteSuoritus(suoritus.getId()).subscribe(poistettu -> {
-                            if(0 == suoritusLaskuri.decrementAndGet()) {
-                                if(0 == laskuri.decrementAndGet()) {
-                                    tallennaAdditionalInfo.get();
-                                }
-                            }
-                        }, error -> onError.accept("Suorituksen poistaminen epäonnistui", error));
-
-                    });
-                    if(0 == poistettavatSuoritukset.size()) {
-                        if(0 == laskuri.decrementAndGet()) {
-                            tallennaAdditionalInfo.get();
-                        }
-                    }
-                });
-
+        Observable<Boolean> kielikoeTallennus = Observable.zip(
+            findMyontajaOid(hakukohdeOid, onError),
+            haeOppijatPoistettaville(hakuOid, hakukohdeOid, kielikoetuloksetSureen, onError),
+            Pair::of)
+            .flatMap(myontajaAndOppijat -> {
+                String myontajaOid = myontajaAndOppijat.getLeft();
+                List<Oppija> oppijatPoistettaville = myontajaAndOppijat.getRight();
+                return tallennaKielikoetulokset(hakuOid, hakukohdeOid, myontajaOid, pistetiedotHakemukselle, kielikoetuloksetSureen,
+                    onError, username, auditLogOperation, oppijatPoistettaville);
             });
-            return null;
-        };
 
-        Supplier<Void> haeOppijatPoistettaville = () -> {
-            if(kielikoetuloksetSureen.values().stream().anyMatch(tulokset -> tulokset.stream().anyMatch(tulos -> isEmpty(tulos.arvioArvosana)))) {
-                suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid).subscribe(oppijat -> {
-                    oppijatRef.set(oppijat);
-                    tallennaKielikoetulokset.get();
-                }, error -> onError.accept("Oppijoiden hakeminen Suoritusrekisteristä epäonnistui", error));
+        Observable<Boolean> ennenAdditionalInfonTallennusta = kielikoetuloksetSureen.isEmpty() ? Observable.just(false) : kielikoeTallennus;
+        Observable<String> additionalInfonTallennus = saveApplicationAdditionalInfo ?
+            tallennaAdditionalInfoHakemuksille(hakuOid, hakukohdeOid, pistetiedotHakemukselle, username, auditLogOperation, onError) :
+            Observable.just("ok");
+
+        ennenAdditionalInfonTallennusta.distinct().flatMap(olikoKielikoeTulostenTallennuksia -> {
+            if (olikoKielikoeTulostenTallennuksia) {
+                LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui");
             } else {
-                tallennaKielikoetulokset.get();
+                LOG.info("Ei Suoritusrekisteriin tallennettavia kielikoetietoja.");
             }
-            return null;
-        };
+            return additionalInfonTallennus;
+        }).doOnError(e -> onError.accept(String.format("Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), e))
+            .subscribe(onSuccess::accept);
+    }
 
-        if(0 == laskuri.get()) {
-            tallennaAdditionalInfo.get();
+    private Observable<Boolean> tallennaKielikoetulokset(String hakuOid, String hakukohdeOid, String myontajaOid,
+                                                         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                         Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
+                                                         BiConsumer<String, Throwable> onError, String username,
+                                                         ValintaperusteetOperation auditLogOperation, List<Oppija> oppijatPoistettaville) {
+        SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
+        return Observable.from(kielikoetuloksetSureen.keySet()).flatMap(hakemusOid -> {
+            String personOid = pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
+            List<SingleKielikoeTulos> hakemuksenKielikoeTulokset = kielikoetuloksetSureen.get(hakemusOid);
+
+            List<SingleKielikoeTulos> lisattavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> isNotEmpty(t.arvioArvosana)).collect(Collectors.toList());
+            List<SingleKielikoeTulos> poistettavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> isEmpty(t.arvioArvosana)).collect(Collectors.toList());
+
+            Observable<Pair<SingleKielikoeTulos, Suoritus>> suoritustenTallennukset = Observable.from(lisattavatKielikoetulokset).flatMap(singleKielikoeTulos -> {
+                String kieli = singleKielikoeTulos.kieli();
+                String valmistuminen = valmistuminenFormat.format(singleKielikoeTulos.valmistuminen);
+
+                Suoritus suoritus = new Suoritus();
+                suoritus.setTila(KIELIKOE_SUORITUS_TILA);
+                suoritus.setYksilollistaminen(KIELIKOE_SUORITUS_YKSILOLLISTAMINEN);
+                suoritus.setHenkiloOid(personOid);
+                suoritus.setVahvistettu(true);
+                suoritus.setSuoritusKieli(kieli.toUpperCase());
+                suoritus.setMyontaja(myontajaOid);
+                suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
+                suoritus.setValmistuminen(valmistuminen);
+
+                return Observable.zip(Observable.just(singleKielikoeTulos), suoritusrekisteriAsyncResource.postSuoritus(suoritus)
+                    .doOnError(e -> onError.accept(String.format("Suorituksen %s tallentaminen suoritusrekisteriin epäonnistui", suoritus), e)
+                ), Pair::of);
+            });
+
+            Func1<Pair<SingleKielikoeTulos, Suoritus>, Observable<Boolean>> tallennaArvosana = kielikoetulosJaTallennettuSuoritus -> {
+                SingleKielikoeTulos singleKielikoeTulos = kielikoetulosJaTallennettuSuoritus.getLeft();
+                Suoritus tallennettuSuoritus = kielikoetulosJaTallennettuSuoritus.getRight();
+                String kieli = singleKielikoeTulos.kieli();
+                String arvioArvosana = singleKielikoeTulos.arvioArvosana.toLowerCase();
+                String valmistuminen = valmistuminenFormat.format(singleKielikoeTulos.valmistuminen);
+
+                Arvosana arvosana = new Arvosana();
+                arvosana.setAine(KIELIKOE_ARVOSANA_AINE);
+                arvosana.setLisatieto(kieli.toUpperCase());
+                arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
+                arvosana.setSuoritus(tallennettuSuoritus.getId());
+                arvosana.setMyonnetty(valmistuminen);
+
+                Func1<Arvosana, Boolean> kirjoitaAuditLogiin = arvosanaResponse -> {
+                    AUDIT.log(builder()
+                        .id(username)
+                        .hakuOid(hakuOid)
+                        .hakukohdeOid(hakukohdeOid)
+                        .hakijaOid(personOid)
+                        .hakemusOid(hakemusOid)
+                        .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + kieli.toLowerCase(), arvioArvosana))
+                        .setOperaatio(auditLogOperation)
+                        .build());
+                    return true;
+                };
+                return suoritusrekisteriAsyncResource.postArvosana(arvosana)
+                    .doOnError(e -> onError.accept(String.format("Arvosanan %s tallentaminen Suoritusrekisteriin epäonnistui", arvosana), e)
+                ).map(kirjoitaAuditLogiin);
+            };
+
+            Observable<List<Suoritus>> poistettavatSuoritukset = Observable.from(poistettavatKielikoetulokset).map(singleKielikoeTulos -> {
+                String kieli = singleKielikoeTulos.kieli();
+                Function<SuoritusJaArvosanat, Boolean> isKielikoeArvosana = (suoritusJaArvosana) -> {
+                    Suoritus suoritus = suoritusJaArvosana.getSuoritus();
+                    return SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE.equals(suoritus.getKomo()) &&
+                        myontajaOid.equals(suoritus.getMyontaja()) &&
+                        suoritusJaArvosana.getArvosanat().stream().map(Arvosana::getLisatieto).anyMatch(kieli::equalsIgnoreCase);
+                };
+                return oppijatPoistettaville.stream().filter(o -> o.getOppijanumero().equals(personOid))
+                    .map(Oppija::getSuoritukset).flatMap(Collection::stream).filter(isKielikoeArvosana::apply)
+                    .map(SuoritusJaArvosanat::getSuoritus).collect(Collectors.toList());
+            });
+            Observable<Suoritus> suoritustenPoistot = poistettavatSuoritukset.flatMap(p ->
+                Observable.from(p)
+                    .flatMap(suoritus -> suoritusrekisteriAsyncResource.deleteSuoritus(suoritus.getId())
+                    .doOnError(e -> onError.accept(String.format("Suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", suoritus), e))));
+
+            return Observable.merge(suoritustenTallennukset.flatMap(tallennaArvosana), suoritustenPoistot).materialize().map(x -> true);
+        });
+    }
+
+    private Observable<String> tallennaAdditionalInfoHakemuksille(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                                  String username, ValintaperusteetOperation auditLogOperation, BiConsumer<String, Throwable> onError) {
+        return applicationAsyncResource.putApplicationAdditionalData(hakuOid, hakukohdeOid, pistetiedotHakemukselle)
+            .doOnError(e -> onError.accept("Lisätietojen tallennus hakemukselle epäonnistui", e))
+            .materialize()
+            .doOnCompleted(() ->
+                pistetiedotHakemukselle.forEach(p -> AUDIT.log(builder()
+                    .id(username)
+                    .hakuOid(hakuOid)
+                    .hakukohdeOid(hakukohdeOid)
+                    .hakijaOid(p.getPersonOid())
+                    .hakemusOid(p.getOid())
+                    .addAll(p.getAdditionalData())
+                    .setOperaatio(auditLogOperation)
+                    .build())
+                )).map(x -> "ok");
+    }
+
+    private Observable<List<Oppija>> haeOppijatPoistettaville(String hakuOid, String hakukohdeOid, Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen, BiConsumer<String, Throwable> onError) {
+        if (kielikoetuloksetSureen.values().stream().anyMatch(tulokset -> tulokset.stream().anyMatch(tulos -> isEmpty(tulos.arvioArvosana)))) {
+            return suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
+                .doOnError(e ->
+                    onError.accept(String.format("Oppijoiden haku Suoritusrekisteristä haun %s hakukohteelle %s epäonnistui", hakuOid, hakukohdeOid), e));
         } else {
-            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
-                String tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst().orElse("");
-                    organisaatioAsyncResource.haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid).subscribe(hierarkia ->
-                    {
-                        etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef);
-                        if (isEmpty(myontajaRef.get())) {
-                            String msg = String.format("Hakukohteen %s suoritukselle ei löytynyt myöntäjää, tarjoaja on %s ja sillä %s organisaatiota.",
-                                hakukohdeOid, tarjoajaOid, hierarkia.getOrganisaatiot().size());
-                            onError.accept(msg, new Exception(msg));
-                        }
-                        haeOppijatPoistettaville.get();
-                    }, error -> onError.accept("Myöntäjän etsiminen kielikoesuoritukseen epäonnistui", error));
-            }, error -> onError.accept("Hakukohteen haku Tarjonnasta epäonnistui", error));
+            return Observable.just(Collections.emptyList());
         }
+    }
+
+    private Observable<String> findMyontajaOid(String hakukohdeOid, BiConsumer<String, Throwable> onError) {
+        return tarjontaAsyncResource.haeHakukohde(hakukohdeOid).flatMap(hakukohde -> {
+            String tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst().orElse("");
+            return organisaatioAsyncResource.haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid).map(hierarkia -> {
+                AtomicReference<String> myontajaRef = new AtomicReference<>();
+                if (hierarkia == null) {
+                    String msg = String.format("Hakukohteen %s tarjoajalle %s ei löytynyt organisaatiohierarkiaa.",
+                        hakukohdeOid, tarjoajaOid);
+                    onError.accept(msg, new RuntimeException(msg));
+                    return "";
+                } else {
+                    etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef);
+                    if (isEmpty(myontajaRef.get())) {
+                        String msg = String.format("Hakukohteen %s suoritukselle ei löytynyt myöntäjää, tarjoaja on %s ja sillä %s organisaatiota.",
+                            hakukohdeOid, tarjoajaOid, hierarkia.getOrganisaatiot().size());
+                        onError.accept(msg, new RuntimeException(msg));
+                        return "";
+                    } else {
+                        return myontajaRef.get();
+                    }
+                }
+            });
+        });
     }
 
     public void etsiOppilaitosHierarkiasta(String tarjoajaOid, List<OrganisaatioTyyppi> tasonOrganisaatiot, AtomicReference<String> myontajaRef) {
