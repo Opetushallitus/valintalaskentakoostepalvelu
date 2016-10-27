@@ -8,6 +8,7 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -47,6 +48,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -75,6 +78,9 @@ import java.util.function.Consumer;
 public class PistesyottoResourceTest {
     final static Logger LOG = LoggerFactory.getLogger(PistesyottoResourceTest.class);
     public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
+    private static final String KIELIKOE_KOULUTUSTOIMIJA_OID = "1.2.246.562.10.45042175963";
+    private static final String KIELIKOE_OPPILAITOS_OID = "1.2.246.562.10.45698499378";
+    private static final String KIELIKOE_TOIMIPISTE_OID = "1.2.3.44444.5";
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     final HttpResource pistesyottoTuontiResource = new HttpResource(root + "/pistesyotto/tuonti");
     final HttpResource pistesyottoVientiResource = new HttpResource(root + "/pistesyotto/vienti");
@@ -174,16 +180,13 @@ public class PistesyottoResourceTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final OrganisaatioTyyppiHierarkia kielikokeitaJarjestavanOppilaitoksenHierarkia
         = new OrganisaatioTyyppiHierarkia(1, Collections.singletonList(
-        new OrganisaatioTyyppi(
-            "1.2.246.562.10.45042175963",
+        new OrganisaatioTyyppi(KIELIKOE_KOULUTUSTOIMIJA_OID,
             ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
             Collections.singletonList(
-                new OrganisaatioTyyppi(
-                    "1.2.246.562.10.45698499378",
+                new OrganisaatioTyyppi(KIELIKOE_OPPILAITOS_OID,
                     ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
                     Collections.singletonList(
-                        new OrganisaatioTyyppi(
-                            "1.2.3.44444.5",
+                        new OrganisaatioTyyppi(KIELIKOE_TOIMIPISTE_OID,
                             ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
                             Collections.emptyList(),
                             null,
@@ -1166,6 +1169,51 @@ public class PistesyottoResourceTest {
             assertEquals("Suorituksella on oikea myöntäjä", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals("1.2.246.562.10.45698499378")).count());
             assertEquals("Kielikokeen arvosana löytyy suresta", 1, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().size());
             assertEquals("Oikea suoritus on deletoitu", Arrays.asList("123-123-123-2"),MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get());
+        } finally {
+            cleanMocks();
+        }
+    }
+
+    @Test
+    public void pistesyottoTuontiKunKaikkiAmmatillisenKielikoeTuloksetLoytyvatJoSurestaTest() {
+        cleanMocks();
+        try {
+            MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
+            MockApplicationAsyncResource.setAdditionalDataResult(Collections.singletonList(
+                lisatiedot().setPersonOid(PERSONOID1).setOid(HAKEMUS1).build()));
+            MockApplicationAsyncResource.setAdditionalDataResultByOid(Collections.emptyList());
+            MockSuoritusrekisteriAsyncResource.setResult(new SuoritusrekisteriSpec.OppijaBuilder().setOppijanumero(PERSONOID1)
+                .suoritus().setId("123-123-123-1").setMyontaja(KIELIKOE_OPPILAITOS_OID).setHenkiloOid(PERSONOID1).setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                    .arvosana().setAine(KIELIKOE).setLisatieto("FI").setArvosana("true").build()
+                .build()
+            .build());
+            MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+            MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(kielikokeitaJarjestavanOppilaitoksenHierarkia);
+            mockValintakokeetHakukohteille();
+
+            PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1, KIELIKOE_TOIMIPISTE_OID, "", "", "", Collections.singletonList(hakemus().setOid(HAKEMUS1).build()),
+                Sets.newHashSet(Collections.singletonList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
+                Collections.singletonList(VALINTAKOE1), // TUNNISTEET
+                osallistumistiedot,
+                valintaperusteet,
+                Collections.singletonList(lisatiedot().setOid(HAKEMUS1).setPersonOid(PERSONOID1).addLisatieto(TUNNISTE1, "3").addLisatieto(TUNNISTE2, "true")
+                        .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
+                        .addLisatieto(KIELIKOE_TUNNISTE, "true")
+                        .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                        .build()),
+                ImmutableMap.of(PERSONOID1,  Collections.singletonList(new Arvosana(null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("true", "HYVAKSYTTY", null), "FI"))));
+
+            Response r = pistesyottoTuontiResource.getWebClient().query("hakuOid", HAKU1).query("hakukohdeOid", HAKUKOHDE1)
+                .post(Entity.entity(excel.getExcel().vieXlsx(), MediaType.APPLICATION_OCTET_STREAM));
+
+            assertEquals(200, r.getStatus());
+
+            List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
+            assertThat("Hakukohteen hakemukselle tuotiin lisätiedot", tuodutLisatiedot, Matchers.hasSize(1));
+            assertFalse("Kielikokeita ei saa löytyä hakemuksen lisätiedoista", tuodutLisatiedot.stream().anyMatch(a -> a.getAdditionalData().containsKey("kielikoe_fi")));
+            assertThat(MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), Matchers.hasSize(0));
+            assertThat("Suorituksia ei deletoitu", MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get(), Matchers.hasSize(0));
         } finally {
             cleanMocks();
         }
