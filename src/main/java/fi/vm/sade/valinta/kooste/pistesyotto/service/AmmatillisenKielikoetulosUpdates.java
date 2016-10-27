@@ -59,7 +59,7 @@ public class AmmatillisenKielikoetulosUpdates {
                 personOid, tuloksetToSendForHakemus, hakemusOid, myontajaOid));
             resultsToSendToSure.put(hakemusOid, tuloksetToSendForHakemus);
         } else {
-            LOG.info(String.format("Hakijan %s ammatillisen kielikoearvosanat myöntäjälle %s" +
+            LOG.info(String.format("Hakijan %s ammatillisen kielikoearvosanat myöntäjälle %s " +
                 "löytyvät jo samoilla arvoilla Suoritusrekisteristä, ei päivitetä.", personOid, myontajaOid));
         }
     }
