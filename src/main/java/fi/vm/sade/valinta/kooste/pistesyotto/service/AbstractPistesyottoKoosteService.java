@@ -122,6 +122,12 @@ public abstract class AbstractPistesyottoKoosteService {
         AmmatillisenKielikoetulosUpdates updates = new AmmatillisenKielikoetulosUpdates(myontajaOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
         Map<String, List<SingleKielikoeTulos>> sureenLahetettavatPaivitykset = updates.getResultsToSendToSure();
 
+        if (sureenLahetettavatPaivitykset.isEmpty()) {
+            LOG.info(String.format("Näyttää siltä, että kaikki %d ammatillisen kielikokeen tulostietoa Suoritusrekisterissä " +
+                "ovat jo ajan tasalla, ei päivitetä.", kielikoetuloksetSureen.size()));
+            return Observable.just(false);
+        }
+
         return Observable.from(sureenLahetettavatPaivitykset.keySet()).flatMap(hakemusOid -> {
             String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
             List<SingleKielikoeTulos> hakemuksenKielikoeTulokset = sureenLahetettavatPaivitykset.get(hakemusOid);
