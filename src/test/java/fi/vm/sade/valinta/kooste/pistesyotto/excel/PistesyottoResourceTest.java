@@ -172,6 +172,32 @@ public class PistesyottoResourceTest {
             .build()
     );
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final OrganisaatioTyyppiHierarkia kielikokeitaJarjestavanOppilaitoksenHierarkia
+        = new OrganisaatioTyyppiHierarkia(1, Collections.singletonList(
+        new OrganisaatioTyyppi(
+            "1.2.246.562.10.45042175963",
+            ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
+            Collections.singletonList(
+                new OrganisaatioTyyppi(
+                    "1.2.246.562.10.45698499378",
+                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
+                    Collections.singletonList(
+                        new OrganisaatioTyyppi(
+                            "1.2.3.44444.5",
+                            ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
+                            Collections.emptyList(),
+                            null,
+                            Collections.singletonList("TOIMIPISTE")
+                        )
+                    ),
+                    "oppilaitostyyppi_21#1",
+                    Collections.singletonList("OPPILAITOS")
+                )
+            ),
+            null,
+            Collections.singletonList("KOULUTUSTOIMIJA")
+        )
+    ));
     private PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                             TARJOAJA1, "", "", "",
                             Arrays.asList(
@@ -988,31 +1014,7 @@ public class PistesyottoResourceTest {
                     .build()
                     .build());
             MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
-                    new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
-                            new OrganisaatioTyyppi(
-                                    "1.2.246.562.10.45042175963",
-                                    ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
-                                    Arrays.asList(
-                                            new OrganisaatioTyyppi(
-                                                    "1.2.246.562.10.45698499378",
-                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
-                                                    Arrays.asList(
-                                                            new OrganisaatioTyyppi(
-                                                                    "1.2.3.44444.5",
-                                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                                                    Arrays.asList(),
-                                                                    null,
-                                                                    Arrays.asList("TOIMIPISTE")
-                                                            )
-                                                    ),
-                                                    "oppilaitostyyppi_21#1",
-                                                    Arrays.asList("OPPILAITOS")
-                                            )
-                                    ),
-                                    null,
-                                    Arrays.asList("KOULUTUSTOIMIJA")
-                            )
-                    ))
+                kielikokeitaJarjestavanOppilaitoksenHierarkia
             );
             MockSuoritusrekisteriAsyncResource.setPostException(Optional.of(
                 new HttpExceptionWithResponse("Something terrible happened", Response.serverError().entity("Boom").build())));
@@ -1093,33 +1095,7 @@ public class PistesyottoResourceTest {
                             .build()
                             .build());
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
-            MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
-                    new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
-                            new OrganisaatioTyyppi(
-                                    "1.2.246.562.10.45042175963",
-                                    ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
-                                    Arrays.asList(
-                                            new OrganisaatioTyyppi(
-                                                    "1.2.246.562.10.45698499378",
-                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
-                                                    Arrays.asList(
-                                                            new OrganisaatioTyyppi(
-                                                                    "1.2.3.44444.5",
-                                                                    ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                                                    Arrays.asList(),
-                                                                    null,
-                                                                    Arrays.asList("TOIMIPISTE")
-                                                            )
-                                                    ),
-                                                    "oppilaitostyyppi_21#1",
-                                                    Arrays.asList("OPPILAITOS")
-                                            )
-                                    ),
-                                    null,
-                                    Arrays.asList("KOULUTUSTOIMIJA")
-                            )
-                    ))
-            );
+            MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(kielikokeitaJarjestavanOppilaitoksenHierarkia);
             mockValintakokeetHakukohteille();
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                     TARJOAJA1, "", "", "",
