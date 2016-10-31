@@ -636,6 +636,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.github.baev</groupId>
+			<artifactId>hamcrest-optional</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<scope>test</scope>
