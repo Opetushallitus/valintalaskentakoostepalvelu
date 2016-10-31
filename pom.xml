@@ -669,14 +669,11 @@
 		</dependency>
 
 
-		<!-- EhCache Replication -->
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache-jgroupsreplication</artifactId>
-		</dependency>
+		<!-- UUID generator used from here -->
 		<dependency>
 			<groupId>org.jgroups</groupId>
 			<artifactId>jgroups</artifactId>
+			<version>2.10.0.GA</version>
 		</dependency>
 
 		<dependency>
