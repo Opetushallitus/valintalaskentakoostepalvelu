@@ -85,7 +85,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                                 ValintaperusteetOperation auditLogOperation, boolean saveApplicationAdditionalInfo) {
 
         Observable<Boolean> kielikoeTallennus = Observable.zip(
-            findMyontajaOid(hakukohdeOid, onError),
+            findMyontajaOid(hakukohdeOid),
             haeOppijatSuresta(hakuOid, hakukohdeOid, onError),
             Pair::of)
             .flatMap(myontajaAndOppijat -> {
@@ -230,28 +230,34 @@ public abstract class AbstractPistesyottoKoosteService {
                 onError.accept(String.format("Oppijoiden haku Suoritusrekisteristä haun %s hakukohteelle %s epäonnistui", hakuOid, hakukohdeOid), e));
     }
 
-    private Observable<String> findMyontajaOid(String hakukohdeOid, BiConsumer<String, Throwable> onError) {
+    private Observable<String> findMyontajaOid(String hakukohdeOid) {
         return tarjontaAsyncResource.haeHakukohde(hakukohdeOid).flatMap(hakukohde -> {
-            String tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst().orElse("");
-            return organisaatioAsyncResource.haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid).map(hierarkia -> {
-                AtomicReference<String> myontajaRef = new AtomicReference<>();
-                if (hierarkia == null) {
-                    String msg = String.format("Hakukohteen %s tarjoajalle %s ei löytynyt organisaatiohierarkiaa.",
-                        hakukohdeOid, tarjoajaOid);
-                    onError.accept(msg, new RuntimeException(msg));
-                    return "";
-                } else {
-                    etsiOppilaitosHierarkiasta(tarjoajaOid, hierarkia.getOrganisaatiot(), myontajaRef);
-                    if (isEmpty(myontajaRef.get())) {
-                        String msg = String.format("Hakukohteen %s suoritukselle ei löytynyt myöntäjää, tarjoaja on %s ja sillä %s organisaatiota.",
-                            hakukohdeOid, tarjoajaOid, hierarkia.getOrganisaatiot().size());
-                        onError.accept(msg, new RuntimeException(msg));
-                        return "";
-                    } else {
-                        return myontajaRef.get();
+            Optional<String> tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst();
+            if (tarjoajaOid.isPresent()) {
+                return organisaatioAsyncResource.haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid.get()).flatMap(hierarkia -> {
+                    if (hierarkia == null) {
+                        return Observable.error(new IllegalStateException(String.format(
+                                "Hakukohteen %s tarjoajalle %s ei löytynyt organisaatiohierarkiaa.",
+                                hakukohdeOid,
+                                tarjoajaOid
+                        )));
                     }
-                }
-            });
+                    AtomicReference<String> myontajaRef = new AtomicReference<>();
+                    etsiOppilaitosHierarkiasta(tarjoajaOid.get(), hierarkia.getOrganisaatiot(), myontajaRef);
+                    if (isEmpty(myontajaRef.get())) {
+                        return Observable.error(new IllegalStateException(String.format(
+                                "Hakukohteen %s suoritukselle ei löytynyt myöntäjää, tarjoaja on %s ja sillä %s organisaatiota.",
+                                hakukohdeOid,
+                                tarjoajaOid,
+                                hierarkia.getOrganisaatiot().size()
+                        )));
+                    }
+                    return Observable.just(myontajaRef.get());
+                });
+            } else {
+                return Observable.error(new IllegalStateException(String.format(
+                        "Hakukohteella %s ei ole tarjoajaa.", hakukohdeOid)));
+            }
         });
     }
 
