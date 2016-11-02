@@ -86,7 +86,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
         Observable<Boolean> kielikoeTallennus = Observable.zip(
             findMyontajaOid(hakukohdeOid),
-            haeOppijatSuresta(hakuOid, hakukohdeOid, onError),
+            haeOppijatSuresta(hakuOid, hakukohdeOid),
             Pair::of)
             .flatMap(myontajaAndOppijat -> {
                 String myontajaOid = myontajaAndOppijat.getLeft();
@@ -224,10 +224,13 @@ public abstract class AbstractPistesyottoKoosteService {
                 )).map(x -> "ok");
     }
 
-    private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid, BiConsumer<String, Throwable> onError) {
+    private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid) {
         return suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
-            .doOnError(e ->
-                onError.accept(String.format("Oppijoiden haku Suoritusrekisteristä haun %s hakukohteelle %s epäonnistui", hakuOid, hakukohdeOid), e));
+                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
+                        "Oppijoiden haku Suoritusrekisteristä haun %s hakukohteelle %s epäonnistui",
+                        hakuOid,
+                        hakukohdeOid
+                ), t)));
     }
 
     private Observable<String> findMyontajaOid(String hakukohdeOid) {
