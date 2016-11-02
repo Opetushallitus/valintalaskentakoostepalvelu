@@ -96,7 +96,7 @@ public class JalkiohjauskirjeetKomponentti {
                 KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, false, preferoituKielikoodi);
                 tulokset.put("sijoitukset", kkSijoitukset);
 
-                Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
+                Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sort());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
                 KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
                 tulokset.put("omatPisteet", omatPisteet.toString());

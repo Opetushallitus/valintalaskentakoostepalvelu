@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
@@ -13,16 +14,19 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.CompareToBuilder;
+import org.codehaus.jackson.map.util.*;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
 import static fi.vm.sade.valinta.kooste.util.Formatter.*;
 import static java.util.Optional.ofNullable;
 
 public class KirjeetUtil {
-    static final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
+    private static final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
     static {
         tilaToPrioriteetti.put(HARKINNANVARAISESTI_HYVAKSYTTY, 1);
         tilaToPrioriteetti.put(HYVAKSYTTY, 2);
@@ -53,7 +57,15 @@ public class KirjeetUtil {
             }
         }
     }
-    public static Comparator<HakutoiveenValintatapajonoDTO> sortByTila() {
+
+    public static Comparator<HakutoiveenValintatapajonoDTO> sort() {
+        return Comparator.comparing(sortByPrioriteetti()).thenComparing(sortByTila());
+    }
+    private static Function<HakutoiveenValintatapajonoDTO, Integer> sortByPrioriteetti() {
+        return (jono) ->
+                Optional.ofNullable(jono).map(HakutoiveenValintatapajonoDTO::getValintatapajonoPrioriteetti).orElse(0);
+    }
+    private static Comparator<HakutoiveenValintatapajonoDTO> sortByTila() {
         return (o1, o2) -> {
             HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(HYLATTY);
             HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(HYLATTY);
@@ -61,11 +73,6 @@ public class KirjeetUtil {
                 Integer i1 = Optional.ofNullable(o1.getVarasijanNumero()).orElse(0);
                 Integer i2 = Optional.ofNullable(o2.getVarasijanNumero()).orElse(0);
                 return i1.compareTo(i2);
-            }
-            if(h1.equals(h2)) {
-                Integer p1 = Optional.ofNullable(o1.getValintatapajonoPrioriteetti()).orElse(0);
-                Integer p2 = Optional.ofNullable(o2.getValintatapajonoPrioriteetti()).orElse(0);
-                p1.compareTo(p2);
             }
             return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
         };
