@@ -87,14 +87,14 @@ public abstract class AbstractPistesyottoKoosteService {
                         kielikoetuloksetSureen, username, auditLogOperation, oppijatSuresta);
             });
 
-        Observable<String> additionalInfonTallennus = saveApplicationAdditionalInfo ?
-            tallennaAdditionalInfoHakemuksille(hakuOid, hakukohdeOid, pistetiedotHakemukselle, username, auditLogOperation, onError) :
-            Observable.just("ok");
-
         kielikoeTallennus.distinct().flatMap(a -> {
-            return additionalInfonTallennus;
+            if (saveApplicationAdditionalInfo) {
+                return tallennaAdditionalInfoHakemuksille(hakuOid, hakukohdeOid, pistetiedotHakemukselle, username, auditLogOperation);
+            } else {
+                return Observable.just(null);
+            }
         }).doOnError(e -> onError.accept(String.format("Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), e))
-            .subscribe(onSuccess::accept);
+                .subscribe(a -> onSuccess.accept("ok"));
     }
 
     private Observable<Void> tallennaKielikoetulokset(String hakuOid, String hakukohdeOid, String myontajaOid,
@@ -201,22 +201,25 @@ public abstract class AbstractPistesyottoKoosteService {
         });
     }
 
-    private Observable<String> tallennaAdditionalInfoHakemuksille(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                                  String username, ValintaperusteetOperation auditLogOperation, BiConsumer<String, Throwable> onError) {
+    private Observable<Void> tallennaAdditionalInfoHakemuksille(String hakuOid,
+                                                                String hakukohdeOid,
+                                                                List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                                String username,
+                                                                ValintaperusteetOperation auditLogOperation) {
         return applicationAsyncResource.putApplicationAdditionalData(hakuOid, hakukohdeOid, pistetiedotHakemukselle)
-            .doOnError(e -> onError.accept("Lisätietojen tallennus hakemukselle epäonnistui", e))
-            .materialize()
-            .doOnCompleted(() ->
-                pistetiedotHakemukselle.forEach(p -> AUDIT.log(builder()
-                    .id(username)
-                    .hakuOid(hakuOid)
-                    .hakukohdeOid(hakukohdeOid)
-                    .hakijaOid(p.getPersonOid())
-                    .hakemusOid(p.getOid())
-                    .addAll(p.getAdditionalData())
-                    .setOperaatio(auditLogOperation)
-                    .build())
-                )).map(x -> "ok");
+                .<Void>map(a -> null)
+                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
+                        "Lisätietojen tallennus hakemukselle epäonnistui", t)))
+                .doOnCompleted(() ->
+                        pistetiedotHakemukselle.forEach(p -> AUDIT.log(builder()
+                                .id(username)
+                                .hakuOid(hakuOid)
+                                .hakukohdeOid(hakukohdeOid)
+                                .hakijaOid(p.getPersonOid())
+                                .hakemusOid(p.getOid())
+                                .addAll(p.getAdditionalData())
+                                .setOperaatio(auditLogOperation)
+                                .build())));
     }
 
     private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid) {
