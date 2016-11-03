@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
@@ -9,8 +9,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Entity;
 import java.util.Arrays;
@@ -38,7 +36,7 @@ public class LaskentaKerrallaE2ETest {
     @Test
     public void testaaLaskentaa() {
         mockForward(seurantaServerMock);
-        HttpResource http = new HttpResource(resourcesAddress + "/valintalaskentakerralla/haku/HAKUOID1/tyyppi/HAKU/whitelist/true");
+        HttpResourceImpl http = new HttpResourceImpl(resourcesAddress + "/valintalaskentakerralla/haku/HAKUOID1/tyyppi/HAKU/whitelist/true");
         mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/.*",
                 Arrays.asList(
                         hakukohdeviite()

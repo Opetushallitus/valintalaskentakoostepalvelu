@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -45,8 +46,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class ValintalaskentaTulosExcelTest {
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null, "", null);
-    final HttpResource valintakoekutsutResource = new HttpResource(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi");
+    final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null, null);
+    final HttpResourceImpl valintakoekutsutResource = new HttpResourceImpl(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi");
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String VALINTAKOENIMI1 = "VALINTAKOENIMI1";

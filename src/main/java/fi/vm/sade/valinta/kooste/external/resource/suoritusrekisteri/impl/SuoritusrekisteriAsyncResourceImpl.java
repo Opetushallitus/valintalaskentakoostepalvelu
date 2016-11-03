@@ -7,11 +7,10 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -24,22 +23,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 @Service
-public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas implements SuoritusrekisteriAsyncResource {
+public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource implements SuoritusrekisteriAsyncResource {
 
     @Autowired
     public SuoritusrekisteriAsyncResourceImpl(
             @Qualifier("SuoritusrekisteriRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            @Value("${host.scheme:https}://${host.virkailija}") String address,
-            ApplicationContext context
+            UrlConfiguration urlConfiguration // FIXME: check
     ) {
-        super(casInterceptor, address, context, TimeUnit.MINUTES.toMillis(10));
+        super(urlConfiguration, TimeUnit.MINUTES.toMillis(10), casInterceptor);
     }
 
     @Override
     public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
                                                           String hakuOid) {
         return getAsObservable(
-                "/suoritusrekisteri/rest/v1/oppijat",
+                getUrl("suoritusrekisteri.oppijat"),
                 new TypeToken<List<Oppija>>() { }.getType(),
                 client -> {
                     client.query("hakukohde", hakukohdeOid);
@@ -52,7 +50,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     @Override
     public Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
         return getAsObservable(
-                "/suoritusrekisteri/rest/v1/oppijat",
+                getUrl("suoritusrekisteri.oppijat"),
                 new TypeToken<List<Oppija>>() { }.getType(),
                 client -> {
                     client.query("hakukohde", hakukohdeOid);
@@ -68,7 +66,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
                                               String hakuOid,
                                               Consumer<List<Oppija>> callback,
                                               Consumer<Throwable> failureCallback) {
-        String url = "/suoritusrekisteri/rest/v1/oppijat";
+        String url = getUrl("suoritusrekisteri.oppijat");
         try {
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
@@ -76,7 +74,6 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
                     .query("haku", hakuOid)
                     .async()
                     .get(new GsonResponseCallback<>(gson(),
-                            address,
                             url + "?hakukohde=" + hakukohdeOid + "&haku=" + hakuOid,
                             callback,
                             failureCallback, new TypeToken<List<Oppija>>() {
@@ -91,7 +88,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 
     @Override
     public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
-        return getAsObservable("/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid, Oppija.class, client -> {
+        return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
             client.query("haku", hakuOid);
             return client;
@@ -100,7 +97,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 
     @Override
     public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
-        return getAsObservable("/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid, Oppija.class, client -> {
+        return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
             return client;
         });
@@ -111,14 +108,13 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
                                                    String hakuOid,
                                                    Consumer<Oppija> callback,
                                                    Consumer<Throwable> failureCallback) {
-        String url = "/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid;
+        String url = getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid);
         return getWebClient()
                 .path(url)
                 .query("haku", hakuOid)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .get(new GsonResponseCallback<Oppija>(gson(),
-                        address,
                         url  + "?haku=" + hakuOid,
                         callback,
                         failureCallback,
@@ -130,7 +126,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     @Override
     public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
         return postAsObservable(
-                "/suoritusrekisteri/rest/v1/suoritukset/",
+                "/suoritusrekisteri/rest/v1/suoritukset/", // FIXME: url-props
                 new TypeToken<Suoritus>(){
                 }.getType(),
                 Entity.entity(gson().toJson(suoritus), MediaType.APPLICATION_JSON_TYPE),
@@ -144,7 +140,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     @Override
     public Observable<Arvosana> postArvosana(Arvosana arvosana) {
         return postAsObservable(
-                "/suoritusrekisteri/rest/v1/arvosanat/",
+                "/suoritusrekisteri/rest/v1/arvosanat/", // FIXME: url-props
                 new TypeToken<Arvosana>(){
                 }.getType(),
                 Entity.entity(gson().toJson(arvosana), MediaType.APPLICATION_JSON_TYPE),
@@ -158,7 +154,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     @Override
     public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
         return postAsObservable(
-                "/suoritusrekisteri/rest/v1/arvosanat/" + arvosanaId,
+                "/suoritusrekisteri/rest/v1/arvosanat/" + arvosanaId, // FIXME: url-props
                 new TypeToken<Arvosana>(){}.getType(),
                 Entity.entity(gson().toJson(arvosanaWithUpdatedValues), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
@@ -171,7 +167,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     @Override
     public Observable<Void> deleteSuoritus(String suoritusId) {
         return deleteAsObservable(
-                "/suoritusrekisteri/rest/v1/suoritukset/" + suoritusId,
+                "/suoritusrekisteri/rest/v1/suoritukset/" + suoritusId, // FIXME: url-props
                 new TypeToken<Suoritus>(){
                 }.getType(),
                 client -> {
@@ -184,7 +180,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     @Override
     public Observable<Void> deleteArvosana(String arvosanaId) {
         return deleteAsObservable(
-                "/suoritusrekisteri/rest/v1/arvosanat/" + arvosanaId, new TypeToken<Arvosana>(){}.getType(),
+                "/suoritusrekisteri/rest/v1/arvosanat/" + arvosanaId, new TypeToken<Arvosana>(){}.getType(), // FIXME: url-props
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;

@@ -1,42 +1,29 @@
 package fi.vm.sade.valinta.kooste.external.resource.authentication.impl;
 
-import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.authentication.model.Henkilo;
-import fi.vm.sade.security.OidProvider;
-import fi.vm.sade.security.OrganisationHierarchyAuthorizer;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.AuthorizationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 @Service
-public class AuthorizationAsyncResourceImpl extends AsyncResourceWithCas implements AuthorizationAsyncResource {
+public class AuthorizationAsyncResourceImpl extends UrlConfiguredResource implements AuthorizationAsyncResource {
     private final TarjontaAsyncResource tarjontaAsyncResource;
 
     @Autowired
     public AuthorizationAsyncResourceImpl(@Qualifier("AuthenticationServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-                                          @Value("${valintalaskentakoostepalvelu.authentication.rest.url}") String address,
-                                          ApplicationContext context,
-                                          TarjontaAsyncResource tarjontaAsyncResource) {
-        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
+                                          TarjontaAsyncResource tarjontaAsyncResource,
+                                          UrlConfiguration urlConfiguration) {
+        super(urlConfiguration, TimeUnit.HOURS.toMillis(1), casInterceptor);
         this.tarjontaAsyncResource = tarjontaAsyncResource;
     }
 

@@ -13,7 +13,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import com.google.gson.GsonBuilder;
-
+import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
@@ -47,8 +47,8 @@ public class ErillishakuResourceKayttajaPalauteTest {
     String hakukohdeOid = "1.2.246.562.5.72607738902";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
-    final HttpResource jsonResource = new HttpResource(root + "/erillishaku/tuonti/ui");
-    final HttpResource excelResource = new HttpResource(root + "/erillishaku/tuonti");
+    final HttpResource jsonResource = new HttpResourceImpl(root + "/erillishaku/tuonti/ui");
+    final HttpResource excelResource = new HttpResourceImpl(root + "/erillishaku/tuonti");
 
     @Before
     public void startServer() {

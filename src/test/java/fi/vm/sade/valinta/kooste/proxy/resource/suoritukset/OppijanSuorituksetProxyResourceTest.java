@@ -4,7 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -38,7 +38,7 @@ public class OppijanSuorituksetProxyResourceTest {
     private static final String opiskelijaOid = "1.2.246.562.24.71943835646";
     private static final String hakemusOid = "1.2.246.562.11.00000000615";
     private static final String hakuOid = "1.2.246.562.29.90697286251";
-    final HttpResource proxyResource = new HttpResource(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid + "/opiskeljaOid/" + opiskelijaOid + "/hakemusOid/" + hakemusOid);
+    final HttpResourceImpl proxyResource = new HttpResourceImpl(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid + "/opiskeljaOid/" + opiskelijaOid + "/hakemusOid/" + hakemusOid);
 
     private static String classpathResourceAsString(String path) throws Exception {
         return IOUtils.toString(new ClassPathResource(path).getInputStream());

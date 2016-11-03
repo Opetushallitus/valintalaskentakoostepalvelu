@@ -47,16 +47,14 @@ public class HakijatoimistoTest {
         Integraatiopalvelimet.mockToReturnJson(GET, "/sijoittelu/haku/hyvaksytyt/hakukohde/hakukohde", new HakijaPaginationObject());
         Integraatiopalvelimet.mockToReturnJson(GET, "/applications/listfull", Arrays.asList());
         Integraatiopalvelimet.mockToNotFound(GET, "/organisaatio/v2/" + tarjoajaOid + "/hakutoimisto");
-        OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(Integraatiopalvelimet.mockServer.getUrl());
+        OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(null);
         final String host= Integraatiopalvelimet.mockServer.getUrl();
         SijoitteluAsyncResourceImpl s = new SijoitteluAsyncResourceImpl(
                 null,
-                host,
                 null
         );
         ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(
                 null,
-                host,
                 null
         );
         Observable<List<Hakemus>> hakemuksetObservable = a.getApplicationsByOid(hakuOid, hakukohdeOid);
@@ -93,7 +91,7 @@ public class HakijatoimistoTest {
                 ImmutableMap.of("jee","jee"), Collections.emptyMap()
         ));
 
-        OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(Integraatiopalvelimet.mockServer.getUrl());
+        OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(null);
         final Semaphore counter = new Semaphore(0);
 
         final AtomicReference<Optional<HakutoimistoDTO>> notFoundWasPresent = new AtomicReference<>();

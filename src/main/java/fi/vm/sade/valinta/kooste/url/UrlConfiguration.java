@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste;
+package fi.vm.sade.valinta.kooste.url;
 
 import fi.vm.sade.properties.OphProperties;
 import org.springframework.context.annotation.Configuration;

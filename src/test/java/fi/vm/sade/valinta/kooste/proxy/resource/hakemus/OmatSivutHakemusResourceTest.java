@@ -1,9 +1,8 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
-import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -14,7 +13,6 @@ import org.springframework.core.io.ClassPathResource;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
@@ -41,7 +39,7 @@ public class OmatSivutHakemusResourceTest {
     public void hakemusResourceTest() throws Exception {
         final String valintatulos = classpathResourceAsString(PROXY_VALINTA_TULOS_SERVICE_JSON);
         mockToReturnString(GET, "/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid, valintatulos);
-        final HttpResource proxyResource = new HttpResource(resourcesAddress + "/proxy/valintatulos/haku/" + hakuOid + "/hakemusOid/" + hakemusOid);
+        final HttpResourceImpl proxyResource = new HttpResourceImpl(resourcesAddress + "/proxy/valintatulos/haku/" + hakuOid + "/hakemusOid/" + hakemusOid);
         Response response = proxyResource.getWebClient().get();
         assertEquals(200, response.getStatus());
         assertEquals(valintatulos, IOUtils.toString((InputStream) response.getEntity()));

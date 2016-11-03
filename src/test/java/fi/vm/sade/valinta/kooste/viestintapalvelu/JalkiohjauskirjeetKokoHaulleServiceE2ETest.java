@@ -20,7 +20,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
@@ -296,7 +296,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     }
 
     private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
-        HttpResource http = new HttpResource(resourcesAddress + "/viestintapalvelu/jalkiohjauskirjeet/aktivoi");
+        HttpResourceImpl http = new HttpResourceImpl(resourcesAddress + "/viestintapalvelu/jalkiohjauskirjeet/aktivoi");
         WebClient client = http.getWebClient()
                 .query("hakuOid", HAKU1)
                 .query("templateName","jalkiohjauskirje")

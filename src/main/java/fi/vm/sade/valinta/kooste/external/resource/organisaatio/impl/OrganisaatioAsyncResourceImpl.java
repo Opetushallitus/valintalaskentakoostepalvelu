@@ -2,18 +2,19 @@ package fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl;
 
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import org.apache.cxf.jaxrs.client.WebClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -25,16 +26,17 @@ import java.util.function.Function;
  *         ?noCache=1413976497594
  */
 @Service
-public class OrganisaatioAsyncResourceImpl extends HttpResource implements OrganisaatioAsyncResource {
+public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource implements OrganisaatioAsyncResource {
+    private final Logger LOG = LoggerFactory.getLogger(getClass());
+
     @Autowired
-    public OrganisaatioAsyncResourceImpl(
-            @Value("${valintalaskentakoostepalvelu.organisaatioService.rest.url}") String address) {
-        super(address, TimeUnit.MINUTES.toMillis(1));
+    public OrganisaatioAsyncResourceImpl(UrlConfiguration urlConfiguration) {
+        super(urlConfiguration, TimeUnit.MINUTES.toMillis(1));
     }
 
     @Override
     public Future<Response> haeOrganisaatio(String organisaatioOid) {
-        String url = "/organisaatio/" + organisaatioOid + "/";
+        String url = getUrl("organisaatio-service.organisaatio", organisaatioOid);
         return getWebClient().path(url)
                 .accept(MediaType.WILDCARD)
                 .async()
@@ -67,14 +69,16 @@ public class OrganisaatioAsyncResourceImpl extends HttpResource implements Organ
 
 
     private Observable<OrganisaatioTyyppiHierarkia> getOrganisaatioTyyppiHierarkiaObservable(Function<WebClient, WebClient> paramsHeadersAndStuff) {
-        return getAsObservable("/organisaatio/v2/hierarkia/hae/tyyppi",
+        return getAsObservable("/organisaatio/v2/hierarkia/hae/tyyppi", // FIXME: url-props
             new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType(),
             paramsHeadersAndStuff);
     }
 
     @Override
     public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
-        return this.<HakutoimistoDTO>getAsObservable("/organisaatio/v2/" + organisaatioId + "/hakutoimisto", HakutoimistoDTO.class)
+        return this.<HakutoimistoDTO>getAsObservable(
+                getUrl("organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
+                HakutoimistoDTO.class)
                 .onErrorReturn(
                         exception -> {
                             LOG.error("Unable to fetch hakutoimisto for organisaatioId={}",organisaatioId);

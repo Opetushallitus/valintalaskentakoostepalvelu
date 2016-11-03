@@ -2,17 +2,13 @@ package fi.vm.sade.valinta.kooste.external.resource.koodisto.impl;
 
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 
-import org.apache.cxf.jaxrs.client.WebClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.GenericType;
@@ -23,16 +19,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 @Service
-public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoAsyncResource {
+public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements KoodistoAsyncResource {
 
     @Autowired
-    public KoodistoAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.koodisto.url:https://${host.virkailija}}") String address) {
-        super(address, TimeUnit.HOURS.toMillis(20));
+    public KoodistoAsyncResourceImpl(UrlConfiguration urlConfiguration) {
+        super(urlConfiguration, TimeUnit.HOURS.toMillis(20));
     }
 
     @Override
     public Peruutettava haeKoodisto(String koodistoUri, Consumer<List<Koodi>> callback, Consumer<Throwable> failureCallback) {
-        String url = "/koodisto-service/rest/json/" + koodistoUri + "/koodi";
+        String url = getUrl("koodisto-service.json.oid.koodi", koodistoUri);
         try {
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
@@ -40,7 +36,7 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
                             //.query("koodistoVersio", 1)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<List<Koodi>>(gson(), address, url, callback, failureCallback, new TypeToken<List<Koodi>>() {
+                    .get(new GsonResponseCallback<List<Koodi>>(gson(), url, callback, failureCallback, new TypeToken<List<Koodi>>() {
                     }.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
@@ -51,9 +47,8 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
     @Override
     public Future<List<Koodi>> haeKoodisto(String koodistoUri) {
         try {
-            WebClient client = getWebClient();
             return getWebClient()
-                    .path("/koodisto-service/rest/json/" + koodistoUri + "/koodi")
+                    .path(getUrl("koodisto-service.json.oid.koodi", koodistoUri))
                     .query("onlyValidKoodis", true)
                             //.query("koodistoVersio", 1)
                     .accept(MediaType.APPLICATION_JSON_TYPE)

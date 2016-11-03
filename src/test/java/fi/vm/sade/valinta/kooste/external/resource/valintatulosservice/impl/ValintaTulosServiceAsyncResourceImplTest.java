@@ -1,17 +1,21 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RunWith(JUnit4.class)
 public class ValintaTulosServiceAsyncResourceImplTest {
-    private final HttpResource vtsHttpResource = new ValintaTulosServiceAsyncResourceImpl("http://localhost/this/should/be/valinta-tulos-service/url");
+    private final HttpResource vtsHttpResource = new ValintaTulosServiceAsyncResourceImpl(null);
 
     @Test
     public void vastaanottoAikarajaMennytDTOsCanBeParsed() {

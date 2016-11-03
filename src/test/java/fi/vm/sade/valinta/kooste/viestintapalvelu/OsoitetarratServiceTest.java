@@ -1,19 +1,14 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
-import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.OsallistuminenTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.junit.Assert;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -25,22 +20,15 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.lisatiedot;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.hakemusOsallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintaperusteet;
 
 /**
  * @author Jussi Jartamo
@@ -49,8 +37,8 @@ public class OsoitetarratServiceTest {
     final static Logger LOG = LoggerFactory.getLogger(OsoitetarratServiceTest.class);
     public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource osoitetarratResource = new HttpResource(root + "/viestintapalvelu/osoitetarrat/aktivoi");
-    final HttpResource osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResource(root + "/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi");
+    final HttpResourceImpl osoitetarratResource = new HttpResourceImpl(root + "/viestintapalvelu/osoitetarrat/aktivoi");
+    final HttpResourceImpl osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResourceImpl(root + "/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi");
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String TARJOAJA1 = "TARJOAJA1";

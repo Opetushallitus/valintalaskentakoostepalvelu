@@ -2,21 +2,17 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -33,36 +29,25 @@ import java.util.stream.Collectors;
 import static rx.observables.BlockingObservable.from;
 
 @Service
-public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implements ApplicationAsyncResource {
-
-    private static final Gson GSON = DateDeserializer.gsonBuilder()
-            .create();
+public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implements ApplicationAsyncResource {
+    private final Logger LOG = LoggerFactory.getLogger(getClass());
 
     @Autowired
     public ApplicationAsyncResourceImpl(
             @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address,
-            ApplicationContext context) {
-        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
-    }
-
-    @Override
-    public Gson gson() {
-        return GSON;
+            UrlConfiguration urlConfiguration) {
+        super(urlConfiguration, TimeUnit.HOURS.toMillis(1), casInterceptor);
     }
 
     @Override
     public Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-        String url = "/applications/syntheticApplication";
+        String url = getUrl("haku-app.applications.syntheticapplication");
         return getWebClient().path(url)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON), new GenericType<List<Hakemus>>() {});
     }
 
-    /**
-     * /haku-app/applications/listfull?appState=ACTIVE&appState=INCOMPLETE&rows=100000&asId={hakuOid}&aoOid={hakukohdeOid}
-     */
     @Override
     public Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
         return getApplicationsByOids(hakuOid, Arrays.asList(hakukohdeOid));
@@ -78,7 +63,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                 Collections.singletonList("oid")
         );
         return this.<ListFullSearchDTO, List<HakemusOid>>postAsObservable(
-                "/applications/listfull",
+                "/applications/listfull", // FIXME: url-props
                 new TypeToken<List<HakemusOid>>() {}.getType(),
                 Entity.entity(s, MediaType.APPLICATION_JSON_TYPE)
         ).map(lh -> lh.stream().map(HakemusOid::getOid).collect(Collectors.toSet()));
@@ -86,7 +71,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
-        return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), client -> {
+        return getAsObservable(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(), client -> {
             client.query("appState", DEFAULT_STATES.toArray());
             client.query("rows", DEFAULT_ROW_LIMIT).query("asId", hakuOid).query("aoOid", hakukohdeOids);
             LOG.info("Calling url {}", client.getCurrentURI());
@@ -101,14 +86,13 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
         requestBody.put("asIds", Arrays.asList(hakuOid));
         requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
         requestBody.put("keys", ApplicationAsyncResource.DEFAULT_KEYS);
-        return postAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(),
+        return postAsObservable(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(requestBody, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     LOG.info("Calling url {} with asIds {} and aoOids {}", client.getCurrentURI(), requestBody.get("asIds"), requestBody.get("aoOids"));
                     return client;
                 });
-        //return postAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), Entity.json(requestBody));
     }
 
     @Override
@@ -117,7 +101,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
     private Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
-        return postAsObservable("/applications/list", new TypeToken<List<Hakemus>>() {}.getType(),
+        return postAsObservable(getUrl("haku-app.applications.list"), new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -150,7 +134,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     @Override
     public Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids) {
         return getWebClient()
-                .path("/applications/list")
+                .path(getUrl("haku-app.applications.list"))
                 .query("rows", DEFAULT_ROW_LIMIT)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
@@ -159,13 +143,13 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 
     @Override
     public Observable<Hakemus> getApplication(String hakemusOid) {
-        return getAsObservable("/applications/" + hakemusOid, Hakemus.class);
+        return getAsObservable(getUrl("haku-app.applications", hakemusOid), Hakemus.class);
     }
 
     @Override
     public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids) {
         return postAsObservable(
-                "/applications/additionalData",
+                "/applications/additionalData", // FIXME: url-props
                 new TypeToken<List<ApplicationAdditionalDataDTO>>(){
                 }.getType(),
                 Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
@@ -178,14 +162,15 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 
     @Override
     public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
-        String url = "/applications/list";
+        String url = getUrl("haku-app.applications.list");
         return new PeruutettavaImpl(getWebClient()
                 .path(url)
                 .query("rows", DEFAULT_ROW_LIMIT)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<List<Hakemus>>(gson(),
-                        address,
+                .post(Entity.entity(Lists.newArrayList(hakemusOids),
+                        MediaType.APPLICATION_JSON_TYPE),
+                        new GsonResponseCallback<List<Hakemus>>(gson(),
                         url + "?rows=" + DEFAULT_ROW_LIMIT,
                         callback,
                         failureCallback,
@@ -193,7 +178,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
     public Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
-        String url = "/applications/listfull";
+        String url = getUrl("haku-app.applications.listfull");
         try {
             return new PeruutettavaImpl(
                     getWebClient()
@@ -204,7 +189,6 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                             .query("aoOid", hakukohdeOid)
                             .async()
                             .get(new GsonResponseCallback<List<Hakemus>>(gson(),
-                                    address,
                                     url + "?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=" + hakukohdeOid + "&asId=" + hakuOid,
                                     callback,
                                     failureCallback,
@@ -217,23 +201,23 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 
     public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(String hakuOid, String hakukohdeOid) {
         return getAsObservable(
-                "/applications/additionalData/" + hakuOid + "/" + hakukohdeOid,
+                getUrl("haku-app.applications.additionaldata.hakuoid.hakukohdeoid", hakuOid, hakukohdeOid),
                 new TypeToken<List<ApplicationAdditionalDataDTO>>() {}.getType()
         );
     }
 
     @Override
     public Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData) {
-        return putAsObservable("/applications/additionalData/" + hakuOid + "/" + hakukohdeOid, Entity.json(additionalData));
+        return putAsObservable(getUrl("haku-app.applications.additionaldata.hakuoid.hakukohdeoid", hakuOid, hakukohdeOid), Entity.json(additionalData));
     }
 
     @Override
     public Observable<Response> putApplicationAdditionalData(String hakuOid, List<ApplicationAdditionalDataDTO> additionalData) {
-        return putAsObservable("/applications/additionalData/" + hakuOid, Entity.json(additionalData));
+        return putAsObservable(getUrl("haku-app.applications.additionaldata.hakuoid", hakuOid), Entity.json(additionalData));
     }
 
     @Override
     public Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOids, String reason) {
-        return postAsObservable("/applications/state/passivate", Entity.json(new ApplicationOidsAndReason(hakemusOids, reason)));
+        return postAsObservable(getUrl("haku-app.applications.state.passivate"), Entity.json(new ApplicationOidsAndReason(hakemusOids, reason)));
     }
 }

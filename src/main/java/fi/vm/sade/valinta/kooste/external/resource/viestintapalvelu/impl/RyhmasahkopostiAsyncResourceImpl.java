@@ -1,8 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,15 +17,14 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class RyhmasahkopostiAsyncResourceImpl extends AsyncResourceWithCas implements RyhmasahkopostiAsyncResource {
+public class RyhmasahkopostiAsyncResourceImpl extends UrlConfiguredResource implements RyhmasahkopostiAsyncResource {
 
     @Autowired
     public RyhmasahkopostiAsyncResourceImpl(
             @Qualifier("ryhmasahkopostiClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            @Value("${valintalaskentakoostepalvelu.ryhmasahkoposti.url}") String address,
-            ApplicationContext context
+            UrlConfiguration urlConfiguration
     ) {
-        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(20));
+        super(urlConfiguration, TimeUnit.HOURS.toMillis(20), casInterceptor);
     }
 
     @Override

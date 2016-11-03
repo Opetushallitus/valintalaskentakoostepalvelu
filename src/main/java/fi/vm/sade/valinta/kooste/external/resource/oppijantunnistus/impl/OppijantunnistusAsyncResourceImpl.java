@@ -1,14 +1,14 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.impl;
 
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.OppijantunnistusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensRequest;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import rx.Observable;
 
 import javax.ws.rs.client.Entity;
@@ -16,20 +16,20 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.concurrent.TimeUnit;
 
-public class OppijantunnistusAsyncResourceImpl extends HttpResource implements OppijantunnistusAsyncResource {
+public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource implements OppijantunnistusAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(OppijantunnistusAsyncResourceImpl.class);
     private final static MediaType EML_TYPE = new MediaType("message", "rfc822");
 
     @Autowired
-    public OppijantunnistusAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.oppijantunnistus.rest.url}") String address) {
-        super(address, TimeUnit.MINUTES.toMillis(20));
+    public OppijantunnistusAsyncResourceImpl(UrlConfiguration urlConfiguration) {
+        super(urlConfiguration, TimeUnit.MINUTES.toMillis(20));
     }
 
     @Override
     public Observable<TokensResponse> sendSecureLinks(TokensRequest tokensRequest) {
         LOG.info("Sending securelinks to {} recipients.", tokensRequest.getApplicationOidToEmailAddress().size());
         return postAsObservable(
-                "/api/v1/tokens",
+                getUrl("oppijan-tunnistus.tokens"),
                 new TypeToken<TokensResponse>(){
                 }.getType(),
                 Entity.entity(gson().toJson(tokensRequest), MediaType.APPLICATION_JSON_TYPE),

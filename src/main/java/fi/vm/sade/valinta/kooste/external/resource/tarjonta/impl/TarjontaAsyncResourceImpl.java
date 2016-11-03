@@ -13,25 +13,30 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.*;
 import fi.vm.sade.valinta.http.DateDeserializer;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import rx.Observable;
 
 @Service
-public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaAsyncResource {
-    private final static Logger LOG = LoggerFactory.getLogger(TarjontaAsyncResourceImpl.class);
-    private static final Gson GSON = DateDeserializer.gsonBuilder()
+public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements TarjontaAsyncResource {
+
+    @Autowired
+    public TarjontaAsyncResourceImpl(UrlConfiguration urlConfiguration) {
+        super(urlConfiguration, TimeUnit.MINUTES.toMillis(5));
+    }
+
+    @Override
+    protected Gson createGson() {
+        return DateDeserializer.gsonBuilder()
             .registerTypeAdapter(ResultV1RDTO.class, (JsonDeserializer) (json, typeOfT, context) -> {
                 Type accessRightsType = new TypeToken<Map<String, Boolean>>() {}.getType();
                 Type errorsType = new TypeToken<List<ErrorV1RDTO>>() {}.getType();
@@ -48,19 +53,11 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
                 return r;
             })
             .create();
-
-    @Override
-    public Gson gson() {
-        return GSON;
     }
 
-    @Autowired
-    public TarjontaAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String address) {
-        super(address, TimeUnit.MINUTES.toMillis(5));
-    }
     @Override
     public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(Collection<String> organizationGroupOids) {
-        return this.<ResultSearch>getAsObservable("/v1/hakukohde/search", new TypeToken<ResultSearch>() {
+        return this.<ResultSearch>getAsObservable(getUrl("tarjonta-service.hakukohde.search"), new TypeToken<ResultSearch>() {
         }.getType(), client -> {
             client.query("organisaatioRyhmaOid", organizationGroupOids.toArray());
             return client;
@@ -68,7 +65,9 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
     }
     @Override
     public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(Collection<String> organizationOids) {
-        return this.<ResultSearch>getAsObservable("/v1/hakukohde/search", new TypeToken<ResultSearch>() {
+        return this.<ResultSearch>getAsObservable(
+                getUrl("tarjonta-service.hakukohde.search"),
+                new TypeToken<ResultSearch>() {
         }.getType(), client -> {
             client.query("organisationOid", organizationOids.toArray());
             return client;
@@ -77,19 +76,23 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 
     @Override
     public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
-        return this.<ResultV1RDTO<HakuV1RDTO>>getAsObservable("/v1/haku/" + hakuOid + "/", new TypeToken<ResultV1RDTO<HakuV1RDTO>>() {
+        return this.<ResultV1RDTO<HakuV1RDTO>>getAsObservable(
+                getUrl("tarjonta-service.haku.hakuoid", hakuOid),
+                new TypeToken<ResultV1RDTO<HakuV1RDTO>>() {
         }.getType()).map(result -> result.getResult());
     }
 
     @Override
     public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
-        return this.<ResultV1RDTO<HakukohdeV1RDTO>>getAsObservable("/v1/hakukohde/" + hakukohdeOid + "/", new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {
+        return this.<ResultV1RDTO<HakukohdeV1RDTO>>getAsObservable(
+                getUrl("tarjonta-service.hakukohde.hakukohdeoid", hakukohdeOid),
+                new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {
         }.getType()).map(result -> result.getResult());
     }
 
     @Override
     public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
-        return this.<ResultV1RDTO<Set<String>>>getAsObservable("/v1/haku/findOidsToSyncTarjontaFor", new TypeToken<ResultV1RDTO<Set<String>>>() {
+        return this.<ResultV1RDTO<Set<String>>>getAsObservable(getUrl("tarjonta-service.haku.findoidstosynctarjontafor"), new TypeToken<ResultV1RDTO<Set<String>>>() {
         }.getType()).map(result -> result.getResult());
     }
 }

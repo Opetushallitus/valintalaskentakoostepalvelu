@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
@@ -196,7 +196,7 @@ public class ErillishakuResourceTest {
     }
 
     private WebClient createClient(String url) {
-        return new HttpResource(url).getWebClient();
+        return new HttpResourceImpl(url).getWebClient();
     }
 
 }
