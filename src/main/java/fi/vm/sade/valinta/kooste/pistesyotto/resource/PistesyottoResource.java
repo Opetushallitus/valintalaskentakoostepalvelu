@@ -112,6 +112,36 @@ public class PistesyottoResource {
     }
 
     @PUT
+    @Path("/tallennaKoostetutPistetiedot")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+    public void tallennaKoostetutPistetiedotHakemukselle(
+            ApplicationAdditionalDataDTO pistetiedot,
+            @Suspended final AsyncResponse response) {
+        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeoutHandler(handler -> {
+            LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: /tallennaKoostetutPistetiedot");
+            handler.resume(Response.serverError()
+                    .entity("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu")
+                    .build());
+        });
+        Action1<Void> onSuccess = (a) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
+        Action1<Throwable> onError = (error) -> {
+            if (error instanceof HttpExceptionWithResponse) {
+                LOG.error("tallennaKoostetutPistetiedotHakemukselle epäonnistui, vastaus: " + ((HttpExceptionWithResponse) error).contentToString(), error);
+            } else {
+                LOG.error("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
+            }
+            response.resume(Response.serverError().entity(error.getMessage()).build());
+        };
+
+        pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(pistetiedot, KoosteAudit.username())
+                .subscribe(onSuccess, onError);
+    }
+
+    @PUT
     @Path("/tallennaKoostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

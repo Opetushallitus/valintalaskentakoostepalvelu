@@ -45,6 +45,11 @@ public class MockValintalaskentaValintakoeAsyncResource implements Valintalasken
     }
 
     @Override
+    public Observable<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
+    @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
         return Observable.just(osallistumistiedot.get());
     }

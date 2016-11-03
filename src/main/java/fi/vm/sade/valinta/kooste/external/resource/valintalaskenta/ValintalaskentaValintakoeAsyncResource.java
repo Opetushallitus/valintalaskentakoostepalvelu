@@ -13,4 +13,5 @@ public interface ValintalaskentaValintakoeAsyncResource {
     Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids);
     Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeTunnisteet);
     Observable<List<ValintakoeOsallistuminenDTO>> haeAmmatillisenKielikokeenOsallistumiset(Date since);
+    Observable<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid);
 }

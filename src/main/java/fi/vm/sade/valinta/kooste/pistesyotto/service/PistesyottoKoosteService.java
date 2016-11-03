@@ -7,7 +7,15 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyn
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Hakutoive;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
@@ -23,8 +31,13 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     public PistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
                                     SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                     TarjontaAsyncResource tarjontaAsyncResource,
-                                    OrganisaatioAsyncResource organisaatioAsyncResource) {
-        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource, organisaatioAsyncResource);
+                                    OrganisaatioAsyncResource organisaatioAsyncResource,
+                                    ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
+        super(applicationAsyncResource,
+                suoritusrekisteriAsyncResource,
+                tarjontaAsyncResource,
+                organisaatioAsyncResource,
+                valintalaskentaValintakoeAsyncResource);
     }
 
     public Observable<List<ApplicationAdditionalDataDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, List<String> hakemusOidit) {
@@ -40,6 +53,59 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
             return pistetiedot;
         });
+    }
+
+    private static Map<String, HakutoiveDTO> kielikokeidenHakukohteet(ValintakoeOsallistuminenDTO voDTO) {
+        Map<String, HakutoiveDTO> kielikokeidenHakukohteet = new HashMap<>();
+        voDTO.getHakutoiveet().forEach(h -> {
+            h.getValinnanVaiheet().stream()
+                    .flatMap(vaihe -> vaihe.getValintakokeet().stream())
+                    .filter(koe -> koe.getOsallistuminenTulos().getOsallistuminen() == Osallistuminen.OSALLISTUU)
+                    .filter(koe -> koe.getValintakoeTunniste().matches(PistesyottoExcel.KIELIKOE_REGEX))
+                    .forEach(koe -> {
+                        String koetunniste = koe.getValintakoeTunniste();
+                        if (kielikokeidenHakukohteet.containsKey(koetunniste)) {
+                            throw new IllegalStateException(String.format(
+                                    "Hakemuksen %s hakija osallistunut kielikokeeseen %s useammassa kuin yhdessä hakukohteessa: %s, %s",
+                                    voDTO.getHakemusOid(),
+                                    koetunniste,
+                                    kielikokeidenHakukohteet.get(koetunniste),
+                                    h.getHakukohdeOid()
+                            ));
+                        }
+                        kielikokeidenHakukohteet.put(koetunniste, h);
+                    });
+        });
+        return kielikokeidenHakukohteet;
+    }
+
+    private static void poistaKielikoepistetiedot(ApplicationAdditionalDataDTO pistetietoDTO) {
+        Iterator<String> i = pistetietoDTO.getAdditionalData().keySet().iterator();
+        while (i.hasNext()) {
+            String key = i.next();
+            if (key.matches(PistesyottoExcel.KIELIKOE_REGEX)) {
+                i.remove();
+            }
+        }
+    }
+
+    public Observable<Void> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
+                                                                     String username) {
+        return valintalaskentaValintakoeAsyncResource.haeHakemukselle(pistetietoDTO.getOid()).flatMap(vo -> {
+            String hakuOid = vo.getHakuOid();
+            Map<String, HakutoiveDTO> kh = kielikokeidenHakukohteet(vo);
+            Map<String, String> kielikoePistetiedot = pistetietoDTO.getAdditionalData().entrySet().stream()
+                    .filter(e -> e.getKey().matches(PistesyottoExcel.KIELIKOE_REGEX))
+                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+            return Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
+                poistaKielikoepistetiedot(pistetietoDTO);
+                pistetietoDTO.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
+                return tallennaKoostetutPistetiedot(
+                        hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(),
+                        Collections.singletonList(pistetietoDTO), username
+                );
+            }).collect(Collectors.toList()));
+        }).lastOrDefault(null);
     }
 
     public Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,

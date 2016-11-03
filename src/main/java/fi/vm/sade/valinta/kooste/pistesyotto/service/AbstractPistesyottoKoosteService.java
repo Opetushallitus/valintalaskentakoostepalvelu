@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -44,15 +45,18 @@ public abstract class AbstractPistesyottoKoosteService {
     protected final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     protected final TarjontaAsyncResource tarjontaAsyncResource;
     protected final OrganisaatioAsyncResource organisaatioAsyncResource;
+    protected final ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource;
 
     protected AbstractPistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
                                                SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                                TarjontaAsyncResource tarjontaAsyncResource,
-                                               OrganisaatioAsyncResource organisaatioAsyncResource) {
+                                               OrganisaatioAsyncResource organisaatioAsyncResource,
+                                               ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
+        this.valintalaskentaValintakoeAsyncResource = valintalaskentaValintakoeAsyncResource;
     }
 
     protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,

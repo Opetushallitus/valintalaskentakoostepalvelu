@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,7 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AbstractPistesyottoKoosteServiceTest {
     private static final List<String> OPPILAITOS = Collections.singletonList(AbstractPistesyottoKoosteService.OPPILAITOS);
-    private AbstractPistesyottoKoosteService service = new AbstractPistesyottoKoosteService(null, null, null, null) {};
+    private ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource = new MockValintalaskentaValintakoeAsyncResource();
+    private AbstractPistesyottoKoosteService service = new AbstractPistesyottoKoosteService(null, null, null, null, valintalaskentaValintakoeAsyncResource) {};
     private final String tarjoajaOid = "oidOfTarjoajaThatNeedsOppilaitos";
     private final String oppilaitostyyppi = "oppilaitostyyppi_61#1";
 

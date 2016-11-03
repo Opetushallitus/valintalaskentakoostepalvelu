@@ -73,8 +73,9 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             ApplicationAsyncResource applicationAsyncResource,
             SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
             TarjontaAsyncResource tarjontaAsyncResource,
-            OrganisaatioAsyncResource organisaatioAsyncResource) {
-        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource, organisaatioAsyncResource);
+            OrganisaatioAsyncResource organisaatioAsyncResource,
+            ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
+        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource, organisaatioAsyncResource, valintalaskentaValintakoeAsyncResource);
         this.valintakoeResource = valintakoeResource;
         this.valintaperusteetResource = valintaperusteetResource;
     }

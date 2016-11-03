@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditi
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationService.Result;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -27,8 +28,9 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
     public AmmatillisenKielikoeMigrationPistesyottoService(ApplicationAsyncResource applicationAsyncResource,
                                                            SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                                            TarjontaAsyncResource tarjontaAsyncResource,
-                                                           OrganisaatioAsyncResource organisaatioAsyncResource) {
-        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource, organisaatioAsyncResource);
+                                                           OrganisaatioAsyncResource organisaatioAsyncResource,
+                                                           ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
+        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource, organisaatioAsyncResource, valintalaskentaValintakoeAsyncResource);
 
     }
 
