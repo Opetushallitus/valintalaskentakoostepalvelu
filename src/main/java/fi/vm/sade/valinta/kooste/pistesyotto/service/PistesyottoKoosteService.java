@@ -42,14 +42,10 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         });
     }
 
-    public void tallennaKoostetutPistetiedot(
-            String hakuOid,
-            String hakukohdeOid,
-            List<ApplicationAdditionalDataDTO> pistetietoDTOs,
-            String username,
-            Consumer<String> onSuccess,
-            BiConsumer<String, Throwable> onError) {
-
+    public Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
+                                                         String hakukohdeOid,
+                                                         List<ApplicationAdditionalDataDTO> pistetietoDTOs,
+                                                         String username) {
         Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoetuloksetSureen = new HashMap<>();
         Date valmistuminen = new Date();
         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = pistetietoDTOs.stream().flatMap(pistetieto -> {
@@ -65,7 +61,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             return Stream.of(pistetieto);
         }).filter(a -> !a.getAdditionalData().isEmpty()).collect(Collectors.toList());
 
-        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA);
+        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA);
     }
 
 

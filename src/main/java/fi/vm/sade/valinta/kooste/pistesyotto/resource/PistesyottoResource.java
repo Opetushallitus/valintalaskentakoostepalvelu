@@ -54,6 +54,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import rx.*;
 import rx.Observable;
+import rx.functions.Action1;
 
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
@@ -128,17 +129,19 @@ public class PistesyottoResource {
                     .entity("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu")
                     .build());
         });
-        Consumer<String> onSuccess = (message) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
-        BiConsumer<String, Throwable> onError = (message, error) -> {
+        Action1<Void> onSuccess = (a) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
+        Action1<Throwable> onError = (error) -> {
             if (error instanceof HttpExceptionWithResponse) {
-                LOG.error("tallennaKoostetutPistetiedot epäonnistui: " + message + " , vastaus: " + ((HttpExceptionWithResponse) error).contentToString(), error);
+                LOG.error("tallennaKoostetutPistetiedot epäonnistui, vastaus: " + ((HttpExceptionWithResponse) error).contentToString(), error);
             } else {
-                LOG.error("tallennaKoostetutPistetiedot epäonnistui: " + message, error);
+                LOG.error("tallennaKoostetutPistetiedot epäonnistui", error);
             }
             response.resume(Response.serverError().entity(error.getMessage()).build());
         };
 
-        pistesyottoKoosteService.tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedot, KoosteAudit.username(), onSuccess, onError);
+        pistesyottoKoosteService.tallennaKoostetutPistetiedot(
+                hakuOid, hakukohdeOid, pistetiedot, KoosteAudit.username()
+        ).subscribe(onSuccess, onError);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")

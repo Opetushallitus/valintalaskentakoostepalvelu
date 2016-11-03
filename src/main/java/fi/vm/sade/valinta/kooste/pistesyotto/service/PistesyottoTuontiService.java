@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import rx.functions.Action1;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -141,17 +142,18 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             } else {
                 LOG.info("Pistesyötössä hakukohteeseen {} muuttunutta {} tietoa tallennettavaksi", hakukohdeOid, uudetPistetiedot.size());
 
-                Consumer<String> onSuccess = (message) -> {
+                Action1<Void> onSuccess = (a) -> {
                     prosessi.setDokumenttiId("valmis");
                     prosessi.inkrementoiTehtyjaToita();
                 };
 
-                BiConsumer<String, Throwable> onError = (message, error) -> {
-                    LOG.error(message, error);
+                Action1<Throwable> onError = (error) -> {
+                    LOG.error("Pistetietojen tallennus epäonnistui", error);
                     poikkeusilmoitus.accept(error);
                 };
 
-                tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, uudetPistetiedot, uudetKielikoetulokset, onSuccess, onError, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL);
+                tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, uudetPistetiedot, uudetKielikoetulokset, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
+                        .subscribe(onSuccess, onError);
 
 
             }

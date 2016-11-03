@@ -55,46 +55,42 @@ public abstract class AbstractPistesyottoKoosteService {
         this.organisaatioAsyncResource = organisaatioAsyncResource;
     }
 
-    protected void tallennaKoostetutPistetiedot(String hakuOid,
-                                                String hakukohdeOid,
-                                                List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                Consumer<String> onSuccess,
-                                                BiConsumer<String, Throwable> onError,
-                                                String username,
-                                                ValintaperusteetOperation auditLogOperation) {
-        tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, onSuccess, onError, username, auditLogOperation, true);
+    protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
+                                                            String hakukohdeOid,
+                                                            List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                            Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
+                                                            String username,
+                                                            ValintaperusteetOperation auditLogOperation) {
+        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, auditLogOperation, true);
     }
 
 
-    protected void tallennaKoostetutPistetiedot(String hakuOid,
-                                                String hakukohdeOid,
-                                                List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                Consumer<String> onSuccess,
-                                                BiConsumer<String, Throwable> onError,
-                                                String username,
-                                                ValintaperusteetOperation auditLogOperation, boolean saveApplicationAdditionalInfo) {
-
+    protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
+                                                            String hakukohdeOid,
+                                                            List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                            Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
+                                                            String username,
+                                                            ValintaperusteetOperation auditLogOperation,
+                                                            boolean saveApplicationAdditionalInfo) {
         Observable<Void> kielikoeTallennus = Observable.zip(
-            findMyontajaOid(hakukohdeOid),
-            haeOppijatSuresta(hakuOid, hakukohdeOid),
-            Pair::of)
-            .flatMap(myontajaAndOppijat -> {
-                String myontajaOid = myontajaAndOppijat.getLeft();
-                List<Oppija> oppijatSuresta = myontajaAndOppijat.getRight();
-                return tallennaKielikoetulokset(hakuOid, hakukohdeOid, myontajaOid, pistetiedotHakemukselle,
-                        kielikoetuloksetSureen, username, auditLogOperation, oppijatSuresta);
-            });
+                findMyontajaOid(hakukohdeOid),
+                haeOppijatSuresta(hakuOid, hakukohdeOid),
+                Pair::of)
+                .flatMap(myontajaAndOppijat -> {
+                    String myontajaOid = myontajaAndOppijat.getLeft();
+                    List<Oppija> oppijatSuresta = myontajaAndOppijat.getRight();
+                    return tallennaKielikoetulokset(hakuOid, hakukohdeOid, myontajaOid, pistetiedotHakemukselle,
+                            kielikoetuloksetSureen, username, auditLogOperation, oppijatSuresta);
+                });
 
-        kielikoeTallennus.distinct().flatMap(a -> {
+        return kielikoeTallennus.distinct().flatMap(a -> {
             if (saveApplicationAdditionalInfo) {
                 return tallennaAdditionalInfoHakemuksille(hakuOid, hakukohdeOid, pistetiedotHakemukselle, username, auditLogOperation);
             } else {
                 return Observable.just(null);
             }
-        }).doOnError(e -> onError.accept(String.format("Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), e))
-                .subscribe(a -> onSuccess.accept("ok"));
+        }).onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
+                "Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), t)));
     }
 
     private Observable<Void> tallennaKielikoetulokset(String hakuOid, String hakukohdeOid, String myontajaOid,

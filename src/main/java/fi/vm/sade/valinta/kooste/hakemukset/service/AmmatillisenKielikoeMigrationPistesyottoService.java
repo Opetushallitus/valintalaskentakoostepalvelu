@@ -44,18 +44,21 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
                 List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = kohteenTiedot.hakemusJaPersonOidit;
                 Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen = kohteenTiedot.kielikoeTuloksetHakemuksittain;
                 Result result = new Result(r.startingFrom);
-                Consumer<String> successHandler = message -> {
-                    kielikoetuloksetSureen.values().forEach(hakijanTulokset ->
-                        hakijanTulokset.forEach(tulos -> result.add(tulos.kokeenTunnus, Boolean.TRUE.toString().equals(tulos.arvioArvosana))));
-                    subscriber.onNext(result);
-                };
+                kielikoetuloksetSureen.values().forEach(hakijanTulokset ->
+                        hakijanTulokset.forEach(tulos ->
+                                result.add(tulos.kokeenTunnus, Boolean.TRUE.toString().equals(tulos.arvioArvosana))));
                 tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen,
-                    successHandler, onError, username, PISTETIEDOT_AMMATTILLISEN_KIELIKOKEEN_MIGRAATIO, false);
+                        username, PISTETIEDOT_AMMATTILLISEN_KIELIKOKEEN_MIGRAATIO, false)
+                        .subscribe((a) -> {
+                            subscriber.onNext(result);
+                            subscriber.onCompleted();
+                        }, (e) -> {
+                            subscriber.onError(e);
+                        });
             }));
-
         return Observable.zip(resultStream.collect(Collectors.toList()), resultsList -> {
             Stream<Result> stream = Arrays.stream(resultsList).map(x -> ((Result) x));
             return stream.reduce(new Result(r.startingFrom), Result::plus);
-        }).subscribe(onSuccess::accept);
+        }).subscribe(onSuccess::accept, e -> onError.accept("Pistetietojen tallennus epäonnistui", e));
     }
 }
