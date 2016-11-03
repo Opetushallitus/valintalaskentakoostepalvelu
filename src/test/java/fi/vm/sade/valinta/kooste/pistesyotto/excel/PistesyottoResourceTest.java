@@ -685,6 +685,7 @@ public class PistesyottoResourceTest {
                                 .addLisatieto(TUNNISTE1, "")
                                 .build()
                 ), null);
+        MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(kielikokeitaJarjestavanOppilaitoksenHierarkia);
 
         Response r =
                 pistesyottoTuontiResource.getWebClient()
@@ -1034,7 +1035,7 @@ public class PistesyottoResourceTest {
             DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessiStatusResponse -> {
                 if (prosessiStatusResponse.valmis() || prosessiStatusResponse.poikkeuksia()) {
                     String exceptionMessage = prosessiStatusResponse.poikkeukset.iterator().next().getViesti();
-                    assertEquals("Something terrible happened", exceptionMessage);
+                    assertEquals("Virhe tallennettaessa koostettuja pistetietoja haun HAKU1 hakukohteelle HAKUKOHDE1", exceptionMessage);
                     return true;
                 }
                 return false;
