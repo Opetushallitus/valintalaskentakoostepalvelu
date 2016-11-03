@@ -83,7 +83,7 @@ public abstract class AbstractPistesyottoKoosteService {
                             kielikoetuloksetSureen, username, auditLogOperation, oppijatSuresta);
                 });
 
-        return kielikoeTallennus.distinct().flatMap(a -> {
+        return kielikoeTallennus.flatMap(a -> {
             if (saveApplicationAdditionalInfo) {
                 return tallennaAdditionalInfoHakemuksille(hakuOid, hakukohdeOid, pistetiedotHakemukselle, username, auditLogOperation);
             } else {
@@ -189,11 +189,9 @@ public abstract class AbstractPistesyottoKoosteService {
                                         "Suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", suoritus), t)))));
 
             return Observable.merge(suoritustenTallennukset.flatMap(tallennaArvosana), suoritustenPoistot)
-                    .materialize()
-                    .doOnCompleted(() -> {
-                        LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui");
-                    })
                     .<Void>map(a -> null);
+        }).lastOrDefault(null).doOnCompleted(() -> {
+            LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui");
         });
     }
 
