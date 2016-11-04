@@ -96,14 +96,19 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             Map<String, String> kielikoePistetiedot = pistetietoDTO.getAdditionalData().entrySet().stream()
                     .filter(e -> e.getKey().matches(PistesyottoExcel.KIELIKOE_REGEX))
                     .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-            return Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
-                poistaKielikoepistetiedot(pistetietoDTO);
-                pistetietoDTO.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
-                return tallennaKoostetutPistetiedot(
-                        hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(),
-                        Collections.singletonList(pistetietoDTO), username
-                );
-            }).collect(Collectors.toList()));
+            if (kielikoePistetiedot.isEmpty()) {
+                return applicationAsyncResource.putApplicationAdditionalData(hakuOid, Collections.singletonList(pistetietoDTO))
+                        .map(a -> null);
+            } else {
+                return Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
+                    poistaKielikoepistetiedot(pistetietoDTO);
+                    pistetietoDTO.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
+                    return tallennaKoostetutPistetiedot(
+                            hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(),
+                            Collections.singletonList(pistetietoDTO), username
+                    );
+                }).collect(Collectors.toList()));
+            }
         }).lastOrDefault(null);
     }
 
