@@ -57,25 +57,24 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
     private static Map<String, HakutoiveDTO> kielikokeidenHakukohteet(ValintakoeOsallistuminenDTO voDTO) {
         Map<String, HakutoiveDTO> kielikokeidenHakukohteet = new HashMap<>();
-        voDTO.getHakutoiveet().forEach(h -> {
+        voDTO.getHakutoiveet().forEach(h ->
             h.getValinnanVaiheet().stream()
-                    .flatMap(vaihe -> vaihe.getValintakokeet().stream())
-                    .filter(koe -> koe.getOsallistuminenTulos().getOsallistuminen() == Osallistuminen.OSALLISTUU)
-                    .filter(koe -> koe.getValintakoeTunniste().matches(PistesyottoExcel.KIELIKOE_REGEX))
-                    .forEach(koe -> {
-                        String koetunniste = koe.getValintakoeTunniste();
-                        if (kielikokeidenHakukohteet.containsKey(koetunniste)) {
-                            throw new IllegalStateException(String.format(
-                                    "Hakemuksen %s hakija osallistunut kielikokeeseen %s useammassa kuin yhdessä hakukohteessa: %s, %s",
-                                    voDTO.getHakemusOid(),
-                                    koetunniste,
-                                    kielikokeidenHakukohteet.get(koetunniste),
-                                    h.getHakukohdeOid()
-                            ));
-                        }
-                        kielikokeidenHakukohteet.put(koetunniste, h);
-                    });
-        });
+                .flatMap(vaihe -> vaihe.getValintakokeet().stream())
+                .filter(koe -> koe.getOsallistuminenTulos().getOsallistuminen() == Osallistuminen.OSALLISTUU)
+                .filter(koe -> koe.getValintakoeTunniste().matches(PistesyottoExcel.KIELIKOE_REGEX))
+                .forEach(koe -> {
+                    String koetunniste = koe.getValintakoeTunniste();
+                    if (kielikokeidenHakukohteet.containsKey(koetunniste)) {
+                        throw new IllegalStateException(String.format(
+                                "Hakemuksen %s hakija osallistunut kielikokeeseen %s useammassa kuin yhdessä hakukohteessa: %s, %s",
+                                voDTO.getHakemusOid(),
+                                koetunniste,
+                                kielikokeidenHakukohteet.get(koetunniste),
+                                h.getHakukohdeOid()
+                        ));
+                    }
+                    kielikokeidenHakukohteet.put(koetunniste, h);
+                }));
         return kielikokeidenHakukohteet;
     }
 

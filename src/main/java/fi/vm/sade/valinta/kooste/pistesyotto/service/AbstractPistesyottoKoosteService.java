@@ -157,7 +157,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 arvosana.setSuoritus(tallennettuSuoritus.getId());
                 arvosana.setMyonnetty(valmistuminen);
 
-                Action0 kirjoitaAuditLogiin = () -> {
+                Action0 kirjoitaAuditLogiin = () ->
                     AUDIT.log(builder()
                         .id(username)
                         .hakuOid(hakuOid)
@@ -167,7 +167,6 @@ public abstract class AbstractPistesyottoKoosteService {
                         .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + kieli.toLowerCase(), arvioArvosana))
                         .setOperaatio(auditLogOperation)
                         .build());
-                };
                 return suoritusrekisteriAsyncResource.postArvosana(arvosana)
                         .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
                                 "Arvosanan %s tallentaminen Suoritusrekisteriin epäonnistui", arvosana), t)))
@@ -195,9 +194,8 @@ public abstract class AbstractPistesyottoKoosteService {
 
             return Observable.merge(suoritustenTallennukset.flatMap(tallennaArvosana), suoritustenPoistot)
                     .<Void>map(a -> null);
-        }).lastOrDefault(null).doOnCompleted(() -> {
-            LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui");
-        });
+        }).lastOrDefault(null).doOnCompleted(() ->
+            LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }
 
     private Observable<Void> tallennaAdditionalInfoHakemuksille(String hakuOid,
