@@ -4,13 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
@@ -19,32 +14,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.VirheDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.*;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
-import fi.vm.sade.valinta.kooste.util.SecurityUtil;
-import org.apache.camel.Produce;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import io.swagger.annotations.Api;
@@ -52,13 +36,8 @@ import io.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
-import rx.*;
-import rx.Observable;
 import rx.functions.Action1;
 
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static fi.vm.sade.valinta.kooste.util.SecurityUtil.*;
 import static java.util.Arrays.*;
 
 @Controller("PistesyottoResource")
@@ -104,7 +83,7 @@ public class PistesyottoResource {
         pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid, hakemusOidit).subscribe(
                 pistetiedot -> response.resume(Response.ok().header("Content-Type", "application/json").entity(pistetiedot).build()),
                 error -> {
-                    LOG.error("koostaPistetiedotHakemuksille epäonnistui", error);
+                    logError("koostaPistetiedotHakemuksille epäonnistui", error);
                     response.resume(Response.serverError().entity(error.getMessage()).build());
                 }
 
@@ -129,11 +108,7 @@ public class PistesyottoResource {
         });
         Action1<Void> onSuccess = (a) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
         Action1<Throwable> onError = (error) -> {
-            if (error instanceof HttpExceptionWithResponse) {
-                LOG.error("tallennaKoostetutPistetiedotHakemukselle epäonnistui, vastaus: " + ((HttpExceptionWithResponse) error).contentToString(), error);
-            } else {
-                LOG.error("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
-            }
+            logError("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
             response.resume(Response.serverError().entity(error.getMessage()).build());
         };
 
@@ -161,11 +136,7 @@ public class PistesyottoResource {
         });
         Action1<Void> onSuccess = (a) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
         Action1<Throwable> onError = (error) -> {
-            if (error instanceof HttpExceptionWithResponse) {
-                LOG.error("tallennaKoostetutPistetiedot epäonnistui, vastaus: " + ((HttpExceptionWithResponse) error).contentToString(), error);
-            } else {
-                LOG.error("tallennaKoostetutPistetiedot epäonnistui", error);
-            }
+            logError("tallennaKoostetutPistetiedot epäonnistui", error);
             response.resume(Response.serverError().entity(error.getMessage()).build());
         };
 
@@ -254,21 +225,22 @@ public class PistesyottoResource {
                                     asyncResponse.resume(Response.ok(response).build());
                                 },
                                 sisainenPoikkeus -> {
-                                    LOG.error("Soteli tuonti epaonnistui!", sisainenPoikkeus);
+                                    logError("Soteli tuonti epaonnistui!", sisainenPoikkeus);
                                     asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
                                 });
                     },
                     sisainenPoikkeus -> {
-                        LOG.error("Soteli tuonti epaonnistui!", sisainenPoikkeus);
+                        logError("Soteli tuonti epaonnistui!", sisainenPoikkeus);
                         asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
-
                     });
-
-
-
-
         }
     }
 
-
+    private void logError(String errorMessage, Throwable error) {
+        if (error instanceof HttpExceptionWithResponse) {
+            LOG.error(errorMessage + ", vastaus: " + ((HttpExceptionWithResponse) error).contentToString(), error);
+        } else {
+            LOG.error(errorMessage, error);
+        }
+    }
 }
