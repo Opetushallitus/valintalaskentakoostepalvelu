@@ -50,7 +50,7 @@ public class AmmatillisenKielikoeMigrationResource {
     @Path("/migroiSureen")
     @Produces("application/json")
     @ApiOperation(value = "Migroi ammatillisen koulutuksen kielikokeen tuloksia hakemukselta Suoritusrekisteriin", response = AmmatillisenKielikoeMigrationService.Result.class)
-    public void migroiAmmatillisenKielikoetulksetSureen(@QueryParam("since") @ApiParam(value = "since", example = "2016-10-05") String sinceStr,
+    public void migroiAmmatillisenKielikoetulksetSureen(@QueryParam("since") @ApiParam(value = "since", example = "2015-01-01") String sinceStr,
                                                         @Suspended AsyncResponse asyncResponse) {
         try {
             assertUserIsOph();
