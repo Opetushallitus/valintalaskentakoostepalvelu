@@ -174,7 +174,7 @@ public abstract class AbstractPistesyottoKoosteService {
                         .doOnCompleted(kirjoitaAuditLogiin);
             };
 
-            Observable<List<Suoritus>> poistettavatSuoritukset = Observable.from(poistettavatKielikoetulokset).map(singleKielikoeTulos -> {
+            List<Suoritus> poistettavatSuoritukset = poistettavatKielikoetulokset.stream().flatMap(singleKielikoeTulos -> {
                 String kieli = singleKielikoeTulos.kieli();
                 Function<SuoritusJaArvosanat, Boolean> isKielikoeArvosana = (suoritusJaArvosana) -> {
                     Suoritus suoritus = suoritusJaArvosana.getSuoritus();
@@ -182,15 +182,16 @@ public abstract class AbstractPistesyottoKoosteService {
                         myontajaOid.equals(suoritus.getMyontaja()) &&
                         suoritusJaArvosana.getArvosanat().stream().map(Arvosana::getLisatieto).anyMatch(kieli::equalsIgnoreCase);
                 };
-                return oppijatSuresta.stream().filter(o -> o.getOppijanumero().equals(personOid))
-                    .map(Oppija::getSuoritukset).flatMap(Collection::stream).filter(isKielikoeArvosana::apply)
-                    .map(SuoritusJaArvosanat::getSuoritus).collect(Collectors.toList());
-            });
-            Observable<Suoritus> suoritustenPoistot = poistettavatSuoritukset.flatMap(p ->
-                Observable.from(p).flatMap(suoritus ->
-                        suoritusrekisteriAsyncResource.deleteSuoritus(suoritus.getId())
-                                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
-                                        "Suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", suoritus), t)))));
+                return oppijatSuresta.stream()
+                        .filter(o -> o.getOppijanumero().equals(personOid))
+                        .flatMap(o -> o.getSuoritukset().stream())
+                        .filter(isKielikoeArvosana::apply)
+                        .map(SuoritusJaArvosanat::getSuoritus);
+            }).collect(Collectors.toList());
+            Observable<Suoritus> suoritustenPoistot = Observable.from(poistettavatSuoritukset).flatMap(suoritus ->
+                    suoritusrekisteriAsyncResource.deleteSuoritus(suoritus.getId())
+                            .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
+                                    "Suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", suoritus), t))));
 
             return Observable.merge(suoritustenTallennukset.flatMap(tallennaArvosana), suoritustenPoistot)
                     .<Void>map(a -> null);
