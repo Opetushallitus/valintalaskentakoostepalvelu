@@ -14,6 +14,11 @@
 *  Ensure that the resulting file is valid JSON with reasonable content -- for instance,
 *  if you get "Cannot use 'commands' readMode, degrading to 'legacy' mode", it must be
 *  cleaned up from the start of the file by hand.
+*
+*  Then you can copy it to the valinta server to /data00/oph/valinta/tomcat/webapps/valintalaskentakoostepalvelu/WEB-INF/classes/fi/vm/sade/valinta/kooste/hakemukset/service/ammatillisenKielikoeSuorituksetHakuAppista.json
+*
+*  and navigate to /valintalaskentakoostepalvelu/swagger/index.html#!/ammatillisenKielikoeTulokset/migroiAmmatillisenKielikoetulksetSureen
+*  for running the migration.
 * */
 
 db.getMongo().setSlaveOk();
