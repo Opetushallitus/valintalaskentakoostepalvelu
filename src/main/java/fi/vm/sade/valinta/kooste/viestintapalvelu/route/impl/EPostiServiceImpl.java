@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import javax.ws.rs.core.Response;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -57,7 +59,7 @@ public class EPostiServiceImpl implements EPostiService {
         EPostiResponse response = new EPostiResponse();
         viestintapalveluAsyncResource.haeKirjelahetysEPostille(ePostiRequest.getHakuOid(), ePostiRequest.getKirjeenTyyppi(), ePostiRequest.getAsiointikieli())
                 .flatMap( batchIdOptional -> haeEPostiOsoitteet(batchIdOptional, hakuMessage, response) )
-                .flatMap( hakemusOidToEmailAddress -> teeTokensRequest(ePostiRequest, response, hakemusOidToEmailAddress, hakuMessage) )
+                .flatMap( hakemusOidToEmailAddress -> teeTokensRequestJosOsoitteita(ePostiRequest, response, hakemusOidToEmailAddress, hakuMessage) )
                 .flatMap( tokensRequest -> oppijantunnistusAsyncResource.sendSecureLinks(tokensRequest))
                 .subscribe(
 
@@ -75,23 +77,52 @@ public class EPostiServiceImpl implements EPostiService {
                 );
     }
 
-    private Observable<TokensRequest> teeTokensRequest(EPostiRequest ePostiRequest, EPostiResponse ePostiResponse, Map<String, String> applicationOidToEmailAddress, String hakuMessage) {
+    @Override
+    public void esikatseleSecurelinkki(EPostiRequest ePostiRequest, Consumer<Response> success, Consumer<String> failure) {
+        String hakuMessage = "Haku=" + ePostiRequest.getHakuOid()
+                + ", kirjeen tyyppi=" + ePostiRequest.getKirjeenTyyppi()
+                + ", asiointikieli=" + ePostiRequest.getAsiointikieli();
+
+        if(StringUtils.isBlank(ePostiRequest.getTemplateName())) {
+            ePostiRequest.setTemplateName(ePostiRequest.getKirjeenTyyppi());
+        }
+
+        teeTokensRequest(ePostiRequest, Collections.emptyMap())
+                .flatMap( tokensRequest -> oppijantunnistusAsyncResource.previewSecureLink(tokensRequest))
+                .subscribe(
+                        response -> {
+                            success.accept(response);
+                        },
+
+                        throwable -> {
+                            LOG.error("Securelinkin esikatselu epäonnistui. "
+                                    + hakuMessage, throwable);
+                            failure.accept(throwable.getMessage());
+                        }
+                );
+    }
+
+    private Observable<TokensRequest> teeTokensRequestJosOsoitteita(EPostiRequest ePostiRequest, EPostiResponse ePostiResponse, Map<String, String> applicationOidToEmailAddress, String hakuMessage) {
         if(!applicationOidToEmailAddress.isEmpty()) {
             LOG.info("Saatiin sähköpostiosoitteet {} kpl. Lähetetään oppijan tunnistukseen." + hakuMessage, applicationOidToEmailAddress.size());
             ePostiResponse.setNumberOfRecipients(applicationOidToEmailAddress.size());
-            return haeExpirationTime(ePostiRequest.getHakuOid())
-                    .map( expirationTime -> {
-                        TokensRequest request = new TokensRequest();
-                        request.setApplicationOidToEmailAddress(applicationOidToEmailAddress);
-                        request.setExpires(expirationTime);
-                        request.setTemplatename(ePostiRequest.getTemplateName());
-                        request.setHakuOid(ePostiRequest.getHakuOid());
-                        request.setLang(ePostiRequest.getAsiointikieli());
-                        request.setUrl(secureLinkUrls.get(ePostiRequest.getAsiointikieli()));
-                        return request;
-                    });
+            return teeTokensRequest(ePostiRequest, applicationOidToEmailAddress);
         }
         throw new RuntimeException("Ei löydetty sähköpostiosoitteita.");
+    }
+
+    private Observable<TokensRequest> teeTokensRequest(EPostiRequest ePostiRequest, Map<String, String> applicationOidToEmailAddress) {
+        return haeExpirationTime(ePostiRequest.getHakuOid())
+                .map( expirationTime -> {
+                    TokensRequest request = new TokensRequest();
+                    request.setApplicationOidToEmailAddress(applicationOidToEmailAddress);
+                    request.setExpires(expirationTime);
+                    request.setTemplatename(ePostiRequest.getTemplateName());
+                    request.setHakuOid(ePostiRequest.getHakuOid());
+                    request.setLang(ePostiRequest.getAsiointikieli());
+                    request.setUrl(secureLinkUrls.get(ePostiRequest.getAsiointikieli()));
+                    return request;
+                });
     }
 
     private Observable<Long> haeExpirationTime(String hakuOid) {

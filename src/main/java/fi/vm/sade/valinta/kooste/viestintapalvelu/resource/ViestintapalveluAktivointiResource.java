@@ -324,6 +324,31 @@ public class ViestintapalveluAktivointiResource {
         );
     }
 
+    @GET
+    @Path("/securelinkit/esikatselu")
+    @Produces("message/rfc822")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Esikatsele Secure Linkin ryhmäsähköposti", response = AsyncResponse.class)
+    public void secureLinkkienEsikatselu(@QueryParam(OPH.HAKUOID) String hakuOid,
+                                         @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
+                                         @QueryParam("asiointikieli") String asiointikieli,
+                                         @Suspended AsyncResponse asyncResponse
+                                         ) {
+
+        setAsyncTimeout(asyncResponse, "Securelinkin esikatselu -palvelukutsu on aikakatkaistu: /viestintapalvelu/securelinkit/esikatselu");
+
+        EPostiRequest ePostiRequest = new EPostiRequest();
+        ePostiRequest.setHakuOid(hakuOid);
+        ePostiRequest.setKirjeenTyyppi(kirjeenTyyppi);
+        ePostiRequest.setAsiointikieli(asiointikieli);
+        validateEPostiRequest(ePostiRequest, asyncResponse);
+
+        ePostiService.esikatseleSecurelinkki(ePostiRequest,
+                (response) -> asyncResponse.resume(response),
+                (errorMessage) -> errorResponse(String.format("Securelinkin esikatselu epäonnistui! %s",errorMessage), asyncResponse)
+        );
+    }
+
     private void validateEPostiRequest(EPostiRequest ePostiRequest, AsyncResponse asyncResponse) {
         String hakuOid = ePostiRequest.getHakuOid();
         String kirjeenTyyppi = ePostiRequest.getKirjeenTyyppi();

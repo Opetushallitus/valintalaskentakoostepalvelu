@@ -4,7 +4,11 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensRe
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
 import rx.Observable;
 
+import javax.ws.rs.core.Response;
+
 public interface OppijantunnistusAsyncResource {
 
     Observable<TokensResponse> sendSecureLinks(TokensRequest tokensRequest);
+
+    Observable<Response> previewSecureLink(TokensRequest tokensRequest);
 }

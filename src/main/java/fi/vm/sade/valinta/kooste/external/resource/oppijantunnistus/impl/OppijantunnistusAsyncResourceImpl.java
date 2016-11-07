@@ -13,10 +13,12 @@ import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.concurrent.TimeUnit;
 
 public class OppijantunnistusAsyncResourceImpl extends HttpResource implements OppijantunnistusAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(OppijantunnistusAsyncResourceImpl.class);
+    private final static MediaType EML_TYPE = new MediaType("message", "rfc822");
 
     @Autowired
     public OppijantunnistusAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.oppijantunnistus.rest.url}") String address) {
@@ -33,6 +35,18 @@ public class OppijantunnistusAsyncResourceImpl extends HttpResource implements O
                 Entity.entity(gson().toJson(tokensRequest), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Observable<Response> previewSecureLink(TokensRequest tokensRequest) {
+        return getAsObservable(
+                "/api/v1/preview/haku/" + tokensRequest.getHakuOid() + "/template/" + tokensRequest.getTemplatename() + "/lang/" + tokensRequest.getLang(),
+                client -> {
+                    client.accept(EML_TYPE);
+                    client.query("callback-url", tokensRequest.getUrl());
                     return client;
                 }
         );
