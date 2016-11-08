@@ -1,19 +1,41 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static java.util.Collections.singletonList;
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpHandler;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.OsallistuminenTulosDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -27,6 +49,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -34,13 +57,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static javax.ws.rs.HttpMethod.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
@@ -55,7 +71,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/koostaPistetiedotHakemuksille/haku/testihaku/hakukohde/testihakukohde");
 
         List<ApplicationAdditionalDataDTO> pistetiedot = readAdditionalData();
-        List<String> hakemusOids = pistetiedot.stream().map(p -> p.getOid()).collect(Collectors.toList());
+        List<String> hakemusOids = pistetiedot.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toList());
 
         assertFalse(pistetiedot.stream().anyMatch(p -> p.getAdditionalData().containsKey("kielikoe_fi")));
 
@@ -96,7 +112,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockSureKutsu(createOppijat());
 
         int totalCount = pistetiedot.stream().mapToInt(p -> p.getAdditionalData().size()).sum();
-        int kielikoeCount = pistetiedot.stream().mapToInt(p -> p.getAdditionalData().keySet().stream().filter(k -> "kielikoe_fi".equals(k)).collect(Collectors.toList()).size()).sum();
+        int kielikoeCount = pistetiedot.stream().mapToInt(p -> p.getAdditionalData().keySet().stream().filter("kielikoe_fi"::equals).collect(Collectors.toList()).size()).sum();
         System.out.println(totalCount);
         System.out.println(kielikoeCount);
         System.out.println(totalCount - kielikoeCount);
@@ -184,9 +200,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockForward(PUT,
                 fakeHakuApp.addHandler("/haku-app/applications/additionalData/testihaku", exchange -> {
                     try {
-                        List<ApplicationAdditionalDataDTO> additionalData = new Gson().fromJson(
-                                IOUtils.toString(exchange.getRequestBody()), new TypeToken<List<ApplicationAdditionalDataDTO>>() {
-                                }.getType()
+                        new Gson().fromJson(
+                            IOUtils.toString(exchange.getRequestBody()), new TypeToken<List<ApplicationAdditionalDataDTO>>() {
+                            }.getType()
                         );
                         exchange.sendResponseHeaders(200, 0);
                         exchange.getResponseBody().close();
@@ -228,35 +244,35 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
         mockToReturnJson(GET,
                 "/tarjonta-service/rest/v1/hakukohde/testihakukohde/",
-                new Result(hakukohdeDTO));
+                new Result<>(hakukohdeDTO));
     }
 
     private void mockOrganisaatioKutsu() {
 
-        OrganisaatioTyyppiHierarkia hierarkia = new OrganisaatioTyyppiHierarkia(1, Arrays.asList(
-                new OrganisaatioTyyppi(
-                        "1.2.246.562.10.45042175963",
-                        ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
-                        Arrays.asList(
-                                new OrganisaatioTyyppi(
-                                        "1.2.246.562.10.45698499378",
-                                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
-                                        Arrays.asList(
-                                                new OrganisaatioTyyppi(
-                                                        "1.2.3.44444.5",
-                                                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                                        Arrays.asList(),
-                                                        null,
-                                                        Arrays.asList("TOIMIPISTE")
-                                                )
-                                        ),
-                                        "oppilaitostyyppi_21#1",
-                                        Arrays.asList("OPPILAITOS")
-                                )
+        OrganisaatioTyyppiHierarkia hierarkia = new OrganisaatioTyyppiHierarkia(1, singletonList(
+            new OrganisaatioTyyppi(
+                "1.2.246.562.10.45042175963",
+                ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
+                singletonList(
+                    new OrganisaatioTyyppi(
+                        "1.2.246.562.10.45698499378",
+                        ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
+                        singletonList(
+                            new OrganisaatioTyyppi(
+                                "1.2.3.44444.5",
+                                ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
+                                Collections.emptyList(),
+                                null,
+                                singletonList("TOIMIPISTE")
+                            )
                         ),
-                        null,
-                        Arrays.asList("KOULUTUSTOIMIJA")
-                )
+                        "oppilaitostyyppi_21#1",
+                        singletonList("OPPILAITOS")
+                    )
+                ),
+                null,
+                singletonList("KOULUTUSTOIMIJA")
+            )
         ));
         mockToReturnJsonWithParams(GET,
                 "/organisaatio-service/rest/organisaatio/v2/hierarkia/hae/tyyppi.*",
@@ -281,25 +297,25 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     private List<ApplicationAdditionalDataDTO> readAdditionalData() throws Exception {
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
-        pistetiedot.stream().forEach(p -> p.getAdditionalData().remove("kielikoe_fi"));
+        pistetiedot.forEach(p -> p.getAdditionalData().remove("kielikoe_fi"));
         return pistetiedot;
     }
 
     private List<Oppija> createOppijat() {
         return Arrays.asList(
-               createOppija("1.2.246.562.24.77642460905", Arrays.asList(
-                       createSuoritus("suoritus1", "1.2.246.562.24.77642460905", "FI", Arrays.asList(
-                               createArvosana("FI", "TRUE"))))),
+               createOppija("1.2.246.562.24.77642460905", singletonList(
+                   createSuoritus("suoritus1", "1.2.246.562.24.77642460905", "FI", singletonList(
+                       createArvosana("FI", "TRUE"))))),
                createOppija("1.2.246.562.24.52321744679", Arrays.asList(
-                       createSuoritus("suoritus2", "1.2.246.562.24.52321744679", "FI", Arrays.asList(
-                               createArvosana("FI", "FALSE"))),
-                       createSuoritus("suoritus3", "1.2.246.562.24.52321744679", "SV", Arrays.asList(
-                               createArvosana("SV", "TRUE"))))),
+                       createSuoritus("suoritus2", "1.2.246.562.24.52321744679", "FI", singletonList(
+                           createArvosana("FI", "FALSE"))),
+                       createSuoritus("suoritus3", "1.2.246.562.24.52321744679", "SV", singletonList(
+                           createArvosana("SV", "TRUE"))))),
                 createOppija("1.2.246.562.24.93793496064", Arrays.asList(
-                        createSuoritus("suoritus4", "1.2.246.562.24.93793496064", "FI", Arrays.asList(
-                                createArvosana("FI", "FALSE"))),
-                        createSuoritus("suoritus5", "1.2.246.562.24.93793496064", "FI", Arrays.asList(
-                                createArvosana("FI", "TRUE")), "1.2.246.562.10.45698499379")))
+                        createSuoritus("suoritus4", "1.2.246.562.24.93793496064", "FI", singletonList(
+                            createArvosana("FI", "FALSE"))),
+                        createSuoritus("suoritus5", "1.2.246.562.24.93793496064", "FI", singletonList(
+                            createArvosana("FI", "TRUE")), "1.2.246.562.10.45698499379")))
         );
     }
 
