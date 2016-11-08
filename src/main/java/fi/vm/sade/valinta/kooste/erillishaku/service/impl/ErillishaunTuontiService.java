@@ -318,9 +318,11 @@ public class ErillishaunTuontiService {
             }
             return loytynyt;
         }
-        Optional<ErillishakuRivi> riviSyntymaajanJaSukupuolenMukaan = kaikkiLisattavatTaiKeskeneraiset.stream().filter(r ->
-            HakemusPrototyyppi.parseDate(r.parseSyntymaAika()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika())) &&
-                r.getSukupuoli().equals(Sukupuoli.fromString(henkilo.getSukupuoli()))
+        Optional<ErillishakuRivi> riviSyntymaajanJaSukupuolenMukaan = kaikkiLisattavatTaiKeskeneraiset.stream()
+                .filter(r -> r.parseSyntymaAika() != null)
+                .filter(r ->
+                    HakemusPrototyyppi.parseDate(r.parseSyntymaAika()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika())) &&
+                    r.getSukupuoli().equals(Sukupuoli.fromString(henkilo.getSukupuoli()))
         ).findFirst();
         if (riviSyntymaajanJaSukupuolenMukaan.isPresent()) {
             return riviSyntymaajanJaSukupuolenMukaan.get();
