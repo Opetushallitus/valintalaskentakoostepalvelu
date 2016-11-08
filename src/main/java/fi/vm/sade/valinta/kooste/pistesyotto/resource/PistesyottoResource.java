@@ -179,10 +179,10 @@ public class PistesyottoResource {
                     }, poikkeus -> {
                         LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
                                 username, hakuOid, hakukohdeOid);
-                        LOG.error("Virheen tiedot", poikkeus);
+                        LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Virheen tiedot", poikkeus), poikkeus);
                     });
         } catch (Throwable t) {
-            LOG.error("Tuntematon virhetilanne", t);
+            LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
         }
         DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, asList(hakukohdeOid));
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
@@ -237,10 +237,6 @@ public class PistesyottoResource {
     }
 
     private void logError(String errorMessage, Throwable error) {
-        if (error instanceof HttpExceptionWithResponse) {
-            LOG.error(errorMessage + ", vastaus: " + ((HttpExceptionWithResponse) error).contentToString(), error);
-        } else {
-            LOG.error(errorMessage, error);
-        }
+        LOG.error(HttpExceptionWithResponse.appendWrappedResponse(errorMessage, error), error);
     }
 }

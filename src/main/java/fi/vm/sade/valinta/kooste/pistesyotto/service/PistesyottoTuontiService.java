@@ -164,11 +164,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
     }
 
     private void logPistesyotonTuontiEpaonnistui(Throwable t) {
-        if (t instanceof HttpExceptionWithResponse) {
-            LOG.error("Pistesyötön tuonti epäonnistui HTTP-virheilmoitukseen. Sisältö: " + ((HttpExceptionWithResponse) t).contentToString(), t);
-        } else {
-            LOG.error("Pistesyötön tuonti epäonnistui", t);
-        }
+        LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Pistesyötön tuonti epäonnistui", t), t);
     }
 
     private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, List<ApplicationAdditionalDataDTO> hakemukset) {

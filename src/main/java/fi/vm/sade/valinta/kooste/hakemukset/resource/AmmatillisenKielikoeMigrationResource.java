@@ -89,13 +89,9 @@ public class AmmatillisenKielikoeMigrationResource {
     }
 
     private void logException(Date since, String message, Throwable exception, long durationSeconds) {
-        String messageToLog;
-        if (exception instanceof HttpExceptionWithResponse) {
-            messageToLog = message + " : " + ((HttpExceptionWithResponse) exception).contentToString();
-        } else {
-            messageToLog = message;
-        }
-        LOG.error(String.format("Migraatio epäonnistui virheeseen (käsiteltiin osallistumiset hetkestä %s lähtien, kesti %s sekuntia): %s", since, durationSeconds, messageToLog), exception);
+        String messageToLog = HttpExceptionWithResponse.appendWrappedResponse(message, exception);
+        LOG.error(String.format("Migraatio epäonnistui virheeseen (käsiteltiin osallistumiset hetkestä %s lähtien, kesti %s sekuntia): %s",
+            since, durationSeconds, messageToLog), exception);
     }
 
     private void assertUserIsOph() {
