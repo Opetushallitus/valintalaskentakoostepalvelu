@@ -20,9 +20,9 @@ import java.util.function.Consumer;
 public class OhjausparametritAsyncResourceImpl extends UrlConfiguredResource implements OhjausparametritAsyncResource {
 
     @Autowired
-    public OhjausparametritAsyncResourceImpl(UrlConfiguration urlConfiguration,
-                                             @Value("${valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds:20}") int requestTimeoutSeconds) {
-        super(urlConfiguration, TimeUnit.SECONDS.toMillis(requestTimeoutSeconds));
+    public OhjausparametritAsyncResourceImpl(
+            @Value("${valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds:20}") int requestTimeoutSeconds) {
+        super(TimeUnit.SECONDS.toMillis(requestTimeoutSeconds));
     }
     public Observable<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
         return getAsObservable(getUrl("ohjausparametrit-service.parametri", hakuOid), ParametritDTO.class);

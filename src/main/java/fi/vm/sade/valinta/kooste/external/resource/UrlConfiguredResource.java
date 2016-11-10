@@ -26,17 +26,17 @@ public abstract class UrlConfiguredResource implements HttpResource{
     private final HttpResource wrappedHttpResource;
     private final UrlConfiguration urlConfiguration;
 
-    public UrlConfiguredResource(UrlConfiguration urlConfiguration) {
-        this(urlConfiguration, HttpResource.DEFAULT_CLIENT_TIMEOUT_MS);
+    public UrlConfiguredResource() {
+        this(HttpResource.DEFAULT_CLIENT_TIMEOUT_MS);
     }
 
-    public UrlConfiguredResource(UrlConfiguration urlConfiguration, long timeoutMillis) {
-        this(urlConfiguration, timeoutMillis, null);
+    public UrlConfiguredResource(long timeoutMillis) {
+        this(timeoutMillis, null);
     }
 
-    public UrlConfiguredResource(UrlConfiguration urlConfiguration, long timeoutMillis,
+    public UrlConfiguredResource(long timeoutMillis,
                                  AbstractPhaseInterceptor casInterceptor) {
-        this.urlConfiguration = urlConfiguration;
+        this.urlConfiguration = UrlConfiguration.getInstance();
 
         HttpResourceBuilder builder = new HttpResourceBuilder().gson(createGson()).timeoutMillis(timeoutMillis);
         if (casInterceptor != null) {

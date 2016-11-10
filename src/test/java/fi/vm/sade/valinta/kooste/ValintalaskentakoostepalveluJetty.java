@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste;
 
 import com.google.common.io.Files;
-
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
 import org.apache.commons.io.IOUtils;

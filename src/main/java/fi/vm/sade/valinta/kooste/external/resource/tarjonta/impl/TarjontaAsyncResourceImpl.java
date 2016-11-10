@@ -29,9 +29,8 @@ import rx.Observable;
 @Service
 public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements TarjontaAsyncResource {
 
-    @Autowired
-    public TarjontaAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.MINUTES.toMillis(5));
+    public TarjontaAsyncResourceImpl() {
+        super(TimeUnit.MINUTES.toMillis(5));
     }
 
     @Override

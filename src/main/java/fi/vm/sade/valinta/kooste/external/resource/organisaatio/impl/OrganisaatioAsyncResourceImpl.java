@@ -29,9 +29,8 @@ import java.util.function.Function;
 public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource implements OrganisaatioAsyncResource {
     private final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    public OrganisaatioAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.MINUTES.toMillis(1));
+    public OrganisaatioAsyncResourceImpl() {
+        super(TimeUnit.MINUTES.toMillis(1));
     }
 
     @Override

@@ -21,9 +21,8 @@ import java.util.function.Consumer;
 @Service
 public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements KoodistoAsyncResource {
 
-    @Autowired
-    public KoodistoAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(20));
+    public KoodistoAsyncResourceImpl() {
+        super(TimeUnit.HOURS.toMillis(20));
     }
 
     @Override

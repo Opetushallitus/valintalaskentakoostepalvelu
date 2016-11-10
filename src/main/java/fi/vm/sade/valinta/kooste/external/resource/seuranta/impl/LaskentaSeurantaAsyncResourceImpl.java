@@ -37,9 +37,8 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Autowired
     public LaskentaSeurantaAsyncResourceImpl(
-            @Qualifier("SeurantaRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(1), casInterceptor);
+            @Qualifier("SeurantaRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+        super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     }
 
     @Override

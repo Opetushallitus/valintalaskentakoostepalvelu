@@ -33,9 +33,8 @@ import rx.Observable;
 public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource implements ValintaperusteetAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintaperusteetAsyncResourceImpl.class);
 
-    @Autowired
-    public ValintaperusteetAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(1L));
+    public ValintaperusteetAsyncResourceImpl() {
+        super(TimeUnit.HOURS.toMillis(1L));
     }
 
     public Peruutettava haeHakijaryhmat(String hakukohdeOid, Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback, Consumer<Throwable> failureCallback) {

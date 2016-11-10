@@ -22,9 +22,8 @@ import rx.Observable;
 public class DokumentinSeurantaAsyncResourceImpl extends UrlConfiguredResource implements DokumentinSeurantaAsyncResource {
 
     @Autowired
-    public DokumentinSeurantaAsyncResourceImpl(@Qualifier("SeurantaRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-                                               UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(1), casInterceptor);
+    public DokumentinSeurantaAsyncResourceImpl(@Qualifier("SeurantaRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+        super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     }
 
     public Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId) {

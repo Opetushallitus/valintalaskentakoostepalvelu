@@ -21,6 +21,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
@@ -31,6 +33,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,9 +45,21 @@ import java.util.Collections;
 
 public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     @Before
-    public void startServer() throws Throwable{
+    public void init() throws Throwable{
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
+        UrlConfiguration.getInstance()
+                .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("baseurl-koodisto-service", "https://itest-virkailija.oph.ware.fi");
+    }
+
+    @After
+    public void clean() {
+        UrlConfiguration uc = UrlConfiguration.getInstance();
+        uc.overrides.remove("url-virkailija");
+        uc.overrides.remove("url-ilb");
+        uc.overrides.remove("baseurl-koodisto-service");
     }
 
     public static class Result<T> {
@@ -278,20 +293,20 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         HakukohdeV1RDTO hk = new HakukohdeV1RDTO();
         hk.setOpetusKielet(Sets.newHashSet("FI"));
         hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
-        mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1/", new Result(hk));
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1", new Result(hk));
     }
 
     private void mockHaku1Kutsu() {
         HakuV1RDTO haku = new HakuV1RDTO();
         haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
-        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(haku));
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
 
     }
 
     private void mockHaku1KutsuToinenAste() {
         HakuV1RDTO haku = new HakuV1RDTO();
         haku.setKohdejoukkoUri("haunkohdejoukko_11");
-        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(haku));
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
 
     }
 

@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
 import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import org.apache.commons.io.IOUtils;
@@ -25,14 +26,20 @@ public class OmatSivutHakemusResourceTest {
     public static final String PROXY_VALINTA_TULOS_SERVICE_JSON = "/proxy/vts/1.2.246.562.11.00003935855.json";
 
     @Before
-    public void startServer() {
+    public void init() {
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
+        UrlConfiguration.getInstance()
+                .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
     }
 
     @After
     public void reset() {
         Integraatiopalvelimet.mockServer.reset();
+        UrlConfiguration uc = UrlConfiguration.getInstance();
+        uc.overrides.remove("url-virkailija");
+        uc.overrides.remove("url-ilb");
     }
 
     @Test

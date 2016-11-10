@@ -32,10 +32,8 @@ public class TilaAsyncResourceImpl extends UrlConfiguredResource implements Tila
 
     @Autowired
     public TilaAsyncResourceImpl(
-            @Qualifier("sijoitteluTilaServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            UrlConfiguration urlConfiguration
-    ) {
-        super(urlConfiguration, TimeUnit.MINUTES.toMillis(50), casInterceptor);
+            @Qualifier("sijoitteluTilaServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+        super(TimeUnit.MINUTES.toMillis(50), casInterceptor);
 
     }
 

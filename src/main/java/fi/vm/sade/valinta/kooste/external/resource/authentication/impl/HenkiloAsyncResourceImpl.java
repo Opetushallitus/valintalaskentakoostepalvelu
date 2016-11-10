@@ -24,9 +24,8 @@ public class HenkiloAsyncResourceImpl extends UrlConfiguredResource implements H
 
     @Autowired
     public HenkiloAsyncResourceImpl(
-            @Qualifier("AuthenticationServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(1), casInterceptor);
+            @Qualifier("AuthenticationServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+        super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     }
 
     public Future<List<Henkilo>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {

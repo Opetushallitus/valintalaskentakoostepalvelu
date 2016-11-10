@@ -21,9 +21,8 @@ public class AuthorizationAsyncResourceImpl extends UrlConfiguredResource implem
 
     @Autowired
     public AuthorizationAsyncResourceImpl(@Qualifier("AuthenticationServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-                                          TarjontaAsyncResource tarjontaAsyncResource,
-                                          UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(1), casInterceptor);
+                                          TarjontaAsyncResource tarjontaAsyncResource) {
+        super(TimeUnit.HOURS.toMillis(1), casInterceptor);
         this.tarjontaAsyncResource = tarjontaAsyncResource;
     }
 

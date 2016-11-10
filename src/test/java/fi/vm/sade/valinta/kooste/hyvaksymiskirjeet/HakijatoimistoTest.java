@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -32,11 +33,17 @@ public class HakijatoimistoTest {
     @Before
     public void init() {
         SpringProfile.setProfile("test");
+        UrlConfiguration.getInstance()
+            .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
+            .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
     }
 
     @After
     public void reset() {
         Integraatiopalvelimet.mockServer.reset();
+        UrlConfiguration uc = UrlConfiguration.getInstance();
+        uc.overrides.remove("url-virkailija");
+        uc.overrides.remove("url-ilb");
     }
 
     @Test
@@ -44,19 +51,14 @@ public class HakijatoimistoTest {
         final String hakuOid = "haku";
         final String hakukohdeOid = "hakukohde";
         final String tarjoajaOid = "tarjoajaOid";
-        Integraatiopalvelimet.mockToReturnJson(GET, "/sijoittelu/haku/hyvaksytyt/hakukohde/hakukohde", new HakijaPaginationObject());
-        Integraatiopalvelimet.mockToReturnJson(GET, "/applications/listfull", Arrays.asList());
-        Integraatiopalvelimet.mockToNotFound(GET, "/organisaatio/v2/" + tarjoajaOid + "/hakutoimisto");
-        OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(null);
+        Integraatiopalvelimet.mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/haku/hyvaksytyt/hakukohde/hakukohde", new HakijaPaginationObject());
+        Integraatiopalvelimet.mockToReturnJson(GET, "/haku-app/applications/listfull", Arrays.asList());
+        Integraatiopalvelimet.mockToNotFound(GET, "/organisaatio-service/rest/organisaatio/v2/" + tarjoajaOid + "/hakutoimisto");
+
+        OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl();
         final String host= Integraatiopalvelimet.mockServer.getUrl();
-        SijoitteluAsyncResourceImpl s = new SijoitteluAsyncResourceImpl(
-                null,
-                null
-        );
-        ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(
-                null,
-                null
-        );
+        SijoitteluAsyncResourceImpl s = new SijoitteluAsyncResourceImpl(null);
+        ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(null);
         Observable<List<Hakemus>> hakemuksetObservable = a.getApplicationsByOid(hakuOid, hakukohdeOid);
         Observable<HakijaPaginationObject> hakijatFuture = s.getKoulutuspaikkalliset(hakuOid, hakukohdeOid);
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = o.haeHakutoimisto(tarjoajaOid);
@@ -86,12 +88,12 @@ public class HakijatoimistoTest {
         final String EI_LOYDY_ORGANISAATIO_ID = "ei_loydy";
         final String HAKUKOHDE_OID = "hakukohdeOid";
         final String LOYTYY_ORGANISAATIO_ID = "loytyy";
-        Integraatiopalvelimet.mockToNotFound(GET, "/organisaatio/v2/" + EI_LOYDY_ORGANISAATIO_ID + "/hakutoimisto");
-        Integraatiopalvelimet.mockToReturnJson(GET, "/organisaatio/v2/" + LOYTYY_ORGANISAATIO_ID + "/hakutoimisto", new HakutoimistoDTO(
+        Integraatiopalvelimet.mockToNotFound(GET, "/organisaatio-service/rest/organisaatio/v2/" + EI_LOYDY_ORGANISAATIO_ID + "/hakutoimisto");
+        Integraatiopalvelimet.mockToReturnJson(GET, "/organisaatio-service/rest/organisaatio/v2/" + LOYTYY_ORGANISAATIO_ID + "/hakutoimisto", new HakutoimistoDTO(
                 ImmutableMap.of("jee","jee"), Collections.emptyMap()
         ));
 
-        OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(null);
+        OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl();
         final Semaphore counter = new Semaphore(0);
 
         final AtomicReference<Optional<HakutoimistoDTO>> notFoundWasPresent = new AtomicReference<>();

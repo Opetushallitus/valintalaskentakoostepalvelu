@@ -20,9 +20,8 @@ public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource imp
     private final static Logger LOG = LoggerFactory.getLogger(OppijantunnistusAsyncResourceImpl.class);
     private final static MediaType EML_TYPE = new MediaType("message", "rfc822");
 
-    @Autowired
-    public OppijantunnistusAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.MINUTES.toMillis(20));
+    public OppijantunnistusAsyncResourceImpl() {
+        super(TimeUnit.MINUTES.toMillis(20));
     }
 
     @Override

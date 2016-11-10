@@ -18,9 +18,8 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncRes
 @Service
 public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implements SijoitteleAsyncResource {
 
-    @Autowired
-    public SijoitteleAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.MINUTES.toMillis(50));
+    public SijoitteleAsyncResourceImpl() {
+        super(TimeUnit.MINUTES.toMillis(50));
     }
 
     @Override

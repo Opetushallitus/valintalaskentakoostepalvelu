@@ -34,9 +34,8 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
 
     @Autowired
     public ApplicationAsyncResourceImpl(
-            @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(1), casInterceptor);
+            @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+        super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     }
 
     @Override

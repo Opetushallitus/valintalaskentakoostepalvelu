@@ -21,10 +21,9 @@ public class RyhmasahkopostiAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Autowired
     public RyhmasahkopostiAsyncResourceImpl(
-            @Qualifier("ryhmasahkopostiClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            UrlConfiguration urlConfiguration
+            @Qualifier("ryhmasahkopostiClientCasInterceptor") AbstractPhaseInterceptor casInterceptor
     ) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(20), casInterceptor);
+        super(TimeUnit.HOURS.toMillis(20), casInterceptor);
     }
 
     @Override

@@ -27,10 +27,8 @@ import java.util.Date;
 @Service
 public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaValintakoeAsyncResource {
 
-    @Autowired
-    public ValintalaskentaValintakoeAsyncResourceImpl(
-            UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(1));
+    public ValintalaskentaValintakoeAsyncResourceImpl() {
+        super(TimeUnit.HOURS.toMillis(1));
     }
 
     @Override

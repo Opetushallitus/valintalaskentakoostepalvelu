@@ -18,7 +18,7 @@ public class OhjausparametritAsyncResourceTest {
 
     @Test
     public void testaaOhjausparametriJsoninSarjallistus() throws Exception {
-        OhjausparametritAsyncResourceImpl oi = new OhjausparametritAsyncResourceImpl(null, 10);
+        OhjausparametritAsyncResourceImpl oi = new OhjausparametritAsyncResourceImpl(10);
         ParametritDTO parametrit = oi.gson().fromJson(IOUtils.toString(new ClassPathResource("ohjausparametrit/parametrit2.json").getInputStream()), ParametritDTO.class);
         LOG.info("{}", new GsonBuilder().setPrettyPrinting().create().toJson(parametrit));
     }

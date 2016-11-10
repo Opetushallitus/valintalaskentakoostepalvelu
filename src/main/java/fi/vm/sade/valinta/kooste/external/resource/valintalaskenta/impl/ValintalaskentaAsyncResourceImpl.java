@@ -27,9 +27,8 @@ import java.util.function.Consumer;
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
 
-    @Autowired
-    public ValintalaskentaAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(8));
+    public ValintalaskentaAsyncResourceImpl() {
+        super(TimeUnit.HOURS.toMillis(8));
     }
     @Override
     public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {

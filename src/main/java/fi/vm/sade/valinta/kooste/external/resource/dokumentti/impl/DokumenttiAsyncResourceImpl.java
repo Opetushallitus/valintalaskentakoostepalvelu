@@ -19,9 +19,8 @@ import java.util.function.Consumer;
 
 public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implements DokumenttiAsyncResource {
 
-    @Autowired
-    public DokumenttiAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(1));
+    public DokumenttiAsyncResourceImpl() {
+        super(TimeUnit.HOURS.toMillis(1));
     }
 
     @Override

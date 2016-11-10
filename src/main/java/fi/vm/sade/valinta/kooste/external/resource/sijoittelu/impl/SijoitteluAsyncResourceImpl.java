@@ -43,10 +43,8 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
 
     @Autowired
     public SijoitteluAsyncResourceImpl(
-            @Qualifier("SijoitteluServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            UrlConfiguration urlConfiguration
-    ) {
-        super(urlConfiguration, TimeUnit.MINUTES.toMillis(50), casInterceptor);
+            @Qualifier("SijoitteluServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+        super(TimeUnit.MINUTES.toMillis(50), casInterceptor);
     }
 
     @Override

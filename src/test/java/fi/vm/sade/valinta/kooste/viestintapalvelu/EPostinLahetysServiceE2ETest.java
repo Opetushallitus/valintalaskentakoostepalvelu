@@ -3,16 +3,19 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.Recipient;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiResponse;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,9 +44,19 @@ public class EPostinLahetysServiceE2ETest {
     private static final long EXPIRATION_TIME = System.currentTimeMillis() + 9999999;
 
     @Before
-    public void startServer() throws Throwable{
+    public void init() throws Throwable {
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
+        UrlConfiguration.getInstance()
+                .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
+    }
+
+    @After
+    public void clean() {
+        UrlConfiguration uc = UrlConfiguration.getInstance();
+        uc.overrides.remove("url-virkailija");
+        uc.overrides.remove("url-ilb");
     }
 
     @Test

@@ -39,10 +39,9 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Autowired
     public ViestintapalveluAsyncResourceImpl(
-            @Qualifier("viestintapalveluClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            UrlConfiguration urlConfiguration)
+            @Qualifier("viestintapalveluClientCasInterceptor") AbstractPhaseInterceptor casInterceptor)
     {
-        super(urlConfiguration, TimeUnit.HOURS.toMillis(20), casInterceptor);
+        super(TimeUnit.HOURS.toMillis(20), casInterceptor);
     }
 
     @Override

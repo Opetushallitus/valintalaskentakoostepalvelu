@@ -33,9 +33,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource implements ValintaTulosServiceAsyncResource {
 
-    @Autowired
-    public ValintaTulosServiceAsyncResourceImpl(UrlConfiguration urlConfiguration) {
-        super(urlConfiguration, TimeUnit.MINUTES.toMillis(30));
+    public ValintaTulosServiceAsyncResourceImpl() {
+        super(TimeUnit.MINUTES.toMillis(30));
     }
 
     @Override

@@ -20,6 +20,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -37,7 +38,9 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,9 +67,19 @@ import java.util.stream.Stream;
 public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     @Before
-    public void startServerAndSetupMockCalls() throws Throwable{
+    public void init() throws Throwable{
         startShared();
         setUpMockCalls();
+        UrlConfiguration.getInstance()
+                .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
+    }
+
+    @After
+    public void clean() {
+        UrlConfiguration uc = UrlConfiguration.getInstance();
+        uc.overrides.remove("url-virkailija");
+        uc.overrides.remove("url-ilb");
     }
 
     private void setUpMockCalls() throws IOException {

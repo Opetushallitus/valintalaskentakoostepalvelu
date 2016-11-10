@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
@@ -23,6 +24,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -46,8 +49,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class ValintalaskentaTulosExcelTest {
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null, null);
-    final HttpResourceImpl valintakoekutsutResource = new HttpResourceImpl(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi");
+    final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null);
+    final HttpResource valintakoekutsutResource = new HttpResourceImpl(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi");
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String VALINTAKOENIMI1 = "VALINTAKOENIMI1";
