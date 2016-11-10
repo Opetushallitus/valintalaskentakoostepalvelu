@@ -5,23 +5,23 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Hakutoive;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -121,13 +121,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = pistetietoDTOs.stream().flatMap(pistetieto -> {
             String hakemusOid = pistetieto.getOid();
             Map<String, String> additionalData = pistetieto.getAdditionalData();
-
-            List<String> kielikoeAvaimet = additionalData.keySet().stream().filter(a -> a.matches(PistesyottoExcel.KIELIKOE_REGEX)).collect(Collectors.toList());
-            if (0 < kielikoeAvaimet.size()) {
-                kielikoetuloksetSureen.put(hakemusOid, kielikoeAvaimet.stream().map(avain ->
-                    new SingleKielikoeTulos(avain, additionalData.get(avain), valmistuminen)).collect(Collectors.toList()));
-            }
-            kielikoeAvaimet.forEach(additionalData::remove);
+            siirraKielikoepistetiedotKielikoetulosMapiin(valmistuminen, kielikoetuloksetSureen, hakemusOid, additionalData);
             return Stream.of(pistetieto);
         }).filter(a -> !a.getAdditionalData().isEmpty()).collect(Collectors.toList());
 

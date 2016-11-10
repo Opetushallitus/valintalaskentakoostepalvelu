@@ -43,8 +43,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -124,12 +122,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                                 ApplicationAdditionalDataDTO additionalData = pistetiedotMapping.get(hakemusOid);
                                 Map<String, String> newPistetiedot = rivi.asAdditionalData(
                                         valintakoetunniste -> pistesyottoExcel.onkoHakijaOsallistujaValintakokeeseen(hakemusOid, valintakoetunniste));
-                                List<String> kielikoeAvaimet = newPistetiedot.keySet().stream().filter(a -> a.matches(PistesyottoExcel.KIELIKOE_REGEX)).collect(Collectors.toList());
-                                if(0 < kielikoeAvaimet.size()) {
-                                    uudetKielikoetulokset.put(hakemusOid, kielikoeAvaimet.stream().map(avain ->
-                                        new SingleKielikoeTulos(avain, newPistetiedot.get(avain), valmistuminen)).collect(Collectors.toList()));
-                                }
-                                kielikoeAvaimet.forEach(newPistetiedot::remove);
+                                siirraKielikoepistetiedotKielikoetulosMapiin(valmistuminen, uudetKielikoetulokset, hakemusOid, newPistetiedot);
                                 additionalData.setAdditionalData(newPistetiedot);
                                 return Stream.of(additionalData);
                             }).filter(Objects::nonNull)

@@ -12,7 +12,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,5 +68,9 @@ public class AmmatillisenKielikoetuloksetSurestaConverter {
 
     private static AvainArvoDTO createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(String kieli, String valueForAvainArvoDto) {
         return new AvainArvoDTO("kielikoe_" + kieli.toLowerCase(), valueForAvainArvoDto);
+    }
+
+    public enum SureHyvaksyttyArvosana {
+        hyvaksytty, hylatty, ei_osallistunut, tyhja
     }
 }

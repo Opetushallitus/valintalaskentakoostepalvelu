@@ -73,7 +73,7 @@ public class AmmatillisenKielikoetulosUpdates {
             return true;
         }
         Arvosana latestArvosana = existingArvosanatForKieli.get(0);
-        return !kielikoeTulosFromInput.arvioArvosana.equals(latestArvosana.getArvio().getArvosana());
+        return !kielikoeTulosFromInput.arvioArvosana.name().equals(latestArvosana.getArvio().getArvosana());
     }
 
     public Map<String, List<SingleKielikoeTulos>> getResultsToSendToSure() {

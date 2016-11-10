@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -9,6 +11,7 @@ import static org.junit.Assert.assertThat;
 
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService.SingleKielikoeTulos;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -37,10 +40,10 @@ public class AmmatillisenKielikoetulosUpdatesTest {
     private final List<Oppija> oppijatSuresta = Arrays.asList(
         new SuoritusrekisteriSpec.OppijaBuilder().setOppijanumero(PERSON_OID_1)
             .suoritus().setId("123-123-123-1").setMyontaja(MYONTAJA_OID_1).setHenkiloOid(PERSON_OID_1).setKomo(AMMATILLISEN_KIELIKOE).setValmistuminen("2015-09-01")
-                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("FI").setArvosana("false").setMyonnetty("2015-09-01").build()
+                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("FI").setArvosana(hylatty.name()).setMyonnetty("2015-09-01").build()
                 .build()
             .suoritus().setId("123-123-123-2").setMyontaja(MYONTAJA_OID_2).setHenkiloOid(PERSON_OID_1).setKomo(AMMATILLISEN_KIELIKOE).setValmistuminen("2016-04-06")
-                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("FI").setArvosana("true").setMyonnetty("2016-04-06").build()
+                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("FI").setArvosana(hyvaksytty.name()).setMyonnetty("2016-04-06").build()
                 .build()
             .suoritus().setId("123-123-123-3").setMyontaja(MYONTAJA_OID_2).setHenkiloOid(PERSON_OID_1).setKomo("1.2.3.4.5.6").setValmistuminen("2015-01-05")
                 .arvosana().setAine("FY").setArvosana("7.0").setMyonnetty("2015-01-05").build()
@@ -48,10 +51,10 @@ public class AmmatillisenKielikoetulosUpdatesTest {
             .build(),
         new SuoritusrekisteriSpec.OppijaBuilder().setOppijanumero(PERSON_OID_2)
             .suoritus().setId("123-123-123-4").setMyontaja(MYONTAJA_OID_1).setHenkiloOid(PERSON_OID_2).setKomo(AMMATILLISEN_KIELIKOE).setValmistuminen("2015-09-01")
-                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("SV").setArvosana("false").setMyonnetty("2015-09-01").build()
+                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("SV").setArvosana(hylatty.name()).setMyonnetty("2015-09-01").build()
                 .build()
             .suoritus().setId("123-123-123-5").setMyontaja(MYONTAJA_OID_2).setHenkiloOid(PERSON_OID_2).setKomo(AMMATILLISEN_KIELIKOE).setValmistuminen("2016-04-06")
-                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("SV").setArvosana("false").setMyonnetty("2016-04-06").build()
+                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("SV").setArvosana(hylatty.name()).setMyonnetty("2016-04-06").build()
                 .build()
             .build());
 
@@ -63,10 +66,10 @@ public class AmmatillisenKielikoetulosUpdatesTest {
     public void populateTestData() {
         hakijaOidByHakemusOid.put(HAKEMUS_OID_1, PERSON_OID_1);
         hakijaOidByHakemusOid.put(HAKEMUS_OID_2, PERSON_OID_2);
-        syotetytTulokset.put(HAKEMUS_OID_1, Collections.singletonList(new SingleKielikoeTulos("kielikoe_fi", "true", new LocalDate(2016, 10, 26).toDate())));
+        syotetytTulokset.put(HAKEMUS_OID_1, Collections.singletonList(new SingleKielikoeTulos("kielikoe_fi", hyvaksytty, new LocalDate(2016, 10, 26).toDate())));
         syotetytTulokset.put(HAKEMUS_OID_2, Arrays.asList(
-            new SingleKielikoeTulos("kielikoe_fi", "true", new LocalDate(2016, 10, 26).toDate()),
-            new SingleKielikoeTulos("kielikoe_sv", "true", new LocalDate(2016, 10, 26).toDate())
+            new SingleKielikoeTulos("kielikoe_fi", hyvaksytty, new LocalDate(2016, 10, 26).toDate()),
+            new SingleKielikoeTulos("kielikoe_sv", hyvaksytty, new LocalDate(2016, 10, 26).toDate())
         ));
     }
 
@@ -78,8 +81,8 @@ public class AmmatillisenKielikoetulosUpdatesTest {
         assertThat(myontaja2Updates.getResultsToSendToSure(), hasKey(HAKEMUS_OID_2));
         List<SingleKielikoeTulos> personOid2Updates = myontaja2Updates.getResultsToSendToSure().get(HAKEMUS_OID_2);
         assertThat(personOid2Updates, hasSize(2));
-        assertThat(personOid2Updates, hasItem(withValues("kielikoe_fi", "true", new LocalDate(2016, 10, 26))));
-        assertThat(personOid2Updates, hasItem(withValues("kielikoe_sv", "true", new LocalDate(2016, 10, 26))));
+        assertThat(personOid2Updates, hasItem(withValues("kielikoe_fi", hyvaksytty, new LocalDate(2016, 10, 26))));
+        assertThat(personOid2Updates, hasItem(withValues("kielikoe_sv", hyvaksytty, new LocalDate(2016, 10, 26))));
     }
 
     @Test
@@ -92,12 +95,12 @@ public class AmmatillisenKielikoetulosUpdatesTest {
 
         List<SingleKielikoeTulos> personOid1Updates = myontaja1Updates.getResultsToSendToSure().get(HAKEMUS_OID_1);
         assertThat(personOid1Updates, hasSize(1));
-        assertThat(personOid1Updates, hasItem(withValues("kielikoe_fi", "true", new LocalDate(2016, 10, 26))));
+        assertThat(personOid1Updates, hasItem(withValues("kielikoe_fi", hyvaksytty, new LocalDate(2016, 10, 26))));
 
         List<SingleKielikoeTulos> personOid2Updates = myontaja1Updates.getResultsToSendToSure().get(HAKEMUS_OID_2);
         assertThat(personOid2Updates, hasSize(2));
-        assertThat(personOid2Updates, hasItem(withValues("kielikoe_fi", "true", new LocalDate(2016, 10, 26))));
-        assertThat(personOid2Updates, hasItem(withValues("kielikoe_sv", "true", new LocalDate(2016, 10, 26))));
+        assertThat(personOid2Updates, hasItem(withValues("kielikoe_fi", hyvaksytty, new LocalDate(2016, 10, 26))));
+        assertThat(personOid2Updates, hasItem(withValues("kielikoe_sv", hyvaksytty, new LocalDate(2016, 10, 26))));
     }
 
     @Test
@@ -107,7 +110,7 @@ public class AmmatillisenKielikoetulosUpdatesTest {
         assertEquals(syotetytTulokset, myontaja3Updates.getResultsToSendToSure());
     }
 
-    private Matcher<SingleKielikoeTulos> withValues(String kokeenTunnus, String arvosana, LocalDate valmistuminen) {
+    private Matcher<SingleKielikoeTulos> withValues(String kokeenTunnus, SureHyvaksyttyArvosana arvosana, LocalDate valmistuminen) {
         return new BaseMatcher<SingleKielikoeTulos>() {
             @Override
             public boolean matches(Object item) {

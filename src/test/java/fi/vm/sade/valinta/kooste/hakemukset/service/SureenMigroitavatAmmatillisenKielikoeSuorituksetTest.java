@@ -3,8 +3,11 @@ package fi.vm.sade.valinta.kooste.hakemukset.service;
 import static fi.vm.sade.valinta.kooste.hakemukset.service.SureenMigroitavatAmmatillisenKielikoeSuoritukset.create;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE1;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 
 import fi.vm.sade.valinta.kooste.hakemukset.service.SureenMigroitavatAmmatillisenKielikoeSuoritukset.YhdenHakukohteenTallennettavatTiedot;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,16 +36,16 @@ public class SureenMigroitavatAmmatillisenKielikoeSuorituksetTest {
         YhdenHakukohteenTallennettavatTiedot hakukohteenTallennettavatTiedot = suoritukset.tallennettavatTiedotHakukohdeOidinMukaan.get(HAKUKOHDE1);
 
         Assert.assertEquals("kielikoe_fi", hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(fiTrueHakemus).get(0).kokeenTunnus);
-        Assert.assertEquals("true", hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(fiTrueHakemus).get(0).arvioArvosana);
+        Assert.assertEquals(hyvaksytty, hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(fiTrueHakemus).get(0).arvioArvosana);
 
         Assert.assertEquals("kielikoe_fi", hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(fiFalseHakemus).get(0).kokeenTunnus);
-        Assert.assertEquals("false", hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(fiFalseHakemus).get(0).arvioArvosana);
+        Assert.assertEquals(hylatty, hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(fiFalseHakemus).get(0).arvioArvosana);
 
         Assert.assertEquals("kielikoe_sv", hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(svTrueHakemus).get(0).kokeenTunnus);
-        Assert.assertEquals("true", hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(svTrueHakemus).get(0).arvioArvosana);
+        Assert.assertEquals(hyvaksytty, hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(svTrueHakemus).get(0).arvioArvosana);
 
         Assert.assertEquals("kielikoe_sv", hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(svFalseHakemus).get(0).kokeenTunnus);
-        Assert.assertEquals("false", hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(svFalseHakemus).get(0).arvioArvosana);
+        Assert.assertEquals(hylatty, hakukohteenTallennettavatTiedot.kielikoeTuloksetHakemuksittain.get(svFalseHakemus).get(0).arvioArvosana);
     }
 
     private ValintakoeOsallistuminenDTO createOsallistuminen(String hakemusOid, String tunniste) {

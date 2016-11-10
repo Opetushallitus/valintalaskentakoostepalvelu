@@ -10,7 +10,9 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -22,13 +24,15 @@ import rx.functions.Func1;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
@@ -118,8 +122,8 @@ public abstract class AbstractPistesyottoKoosteService {
             String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
             List<SingleKielikoeTulos> hakemuksenKielikoeTulokset = sureenLahetettavatPaivitykset.get(hakemusOid);
 
-            List<SingleKielikoeTulos> lisattavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> isNotEmpty(t.arvioArvosana)).collect(Collectors.toList());
-            List<SingleKielikoeTulos> poistettavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> isEmpty(t.arvioArvosana)).collect(Collectors.toList());
+            List<SingleKielikoeTulos> lisattavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> t.arvioArvosana != tyhja).collect(Collectors.toList());
+            List<SingleKielikoeTulos> poistettavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> t.arvioArvosana == tyhja).collect(Collectors.toList());
 
             Observable<Pair<SingleKielikoeTulos, Suoritus>> suoritustenTallennukset = Observable.from(lisattavatKielikoetulokset).flatMap(singleKielikoeTulos -> {
                 String kieli = singleKielikoeTulos.kieli();
@@ -147,7 +151,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 SingleKielikoeTulos singleKielikoeTulos = kielikoetulosJaTallennettuSuoritus.getLeft();
                 Suoritus tallennettuSuoritus = kielikoetulosJaTallennettuSuoritus.getRight();
                 String kieli = singleKielikoeTulos.kieli();
-                String arvioArvosana = singleKielikoeTulos.arvioArvosana.toLowerCase();
+                String arvioArvosana = singleKielikoeTulos.arvioArvosana.name();
                 String valmistuminen = valmistuminenFormat.format(singleKielikoeTulos.valmistuminen);
 
                 Arvosana arvosana = new Arvosana();
@@ -296,12 +300,42 @@ public abstract class AbstractPistesyottoKoosteService {
         );
     }
 
+    protected void siirraKielikoepistetiedotKielikoetulosMapiin(Date valmistuminen, Map<String, List<SingleKielikoeTulos>> uudetKielikoetulokset, String hakemusOid, Map<String, String> newPistetiedot) {
+        List<String> kielikoeAvaimet = newPistetiedot.keySet().stream().filter(a -> a.matches(PistesyottoExcel.KIELIKOE_REGEX)).collect(Collectors.toList());
+        if(0 < kielikoeAvaimet.size()) {
+            uudetKielikoetulokset.put(hakemusOid, kielikoeAvaimet.stream().map(avain -> {
+                String osallistuminenAvain = avain + "-OSALLISTUMINEN";
+                String osallistumisArvo = newPistetiedot.get(osallistuminenAvain);
+                if ("OSALLISTUI".equals(osallistumisArvo)) {
+                    String tulosArvo = newPistetiedot.get(avain);
+                    if ("true".equals(tulosArvo)) {
+                        return new SingleKielikoeTulos(avain, hyvaksytty, valmistuminen);
+                    }
+                    if ("false".equals(tulosArvo)) {
+                        return new SingleKielikoeTulos(avain, hylatty, valmistuminen);
+                    }
+                    throw new IllegalArgumentException(String.format("TODO: lisättävä oikea virhekäsittely: huono arvo '%s' hakemuksella %s",
+                        tulosArvo, hakemusOid));
+                }
+                if ("EI_OSALLISTUNUT".equals(osallistumisArvo)) {
+                    return new SingleKielikoeTulos(avain, ei_osallistunut, valmistuminen);
+                }
+                if (Arrays.asList("MERKITSEMATTA", "EI_VAADITA").contains(osallistumisArvo)) {
+                    return new SingleKielikoeTulos(avain, tyhja, valmistuminen);
+                }
+                throw new IllegalArgumentException(String.format("TODO: lisättävä oikea virhekäsittely: huono osallistumistieto '%s' hakemuksella %s",
+                    osallistumisArvo, hakemusOid));
+            }).collect(Collectors.toList()));
+        }
+        kielikoeAvaimet.forEach(newPistetiedot::remove);
+    }
+
     public static class SingleKielikoeTulos {
         public final String kokeenTunnus; // kielikoe_fi , kielikoe_sv
-        public final String arvioArvosana; // "true", "false", ""
+        public final SureHyvaksyttyArvosana arvioArvosana;
         public final Date valmistuminen;
 
-        public SingleKielikoeTulos(String kokeenTunnus, String arvioArvosana, Date valmistuminen) {
+        public SingleKielikoeTulos(String kokeenTunnus, SureHyvaksyttyArvosana arvioArvosana, Date valmistuminen) {
             this.kokeenTunnus = kokeenTunnus;
             this.arvioArvosana = arvioArvosana;
             this.valmistuminen = valmistuminen;

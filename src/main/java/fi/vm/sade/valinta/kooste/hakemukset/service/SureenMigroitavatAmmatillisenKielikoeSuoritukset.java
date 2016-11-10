@@ -1,10 +1,14 @@
 package fi.vm.sade.valinta.kooste.hakemukset.service;
 
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -40,7 +44,7 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
         VALMISTUMIS_DATES_BY_HAKU_OID.put("1.2.246.562.29.98929669087", new LocalDate(2016, 9, 1).toDate()); // "Lisähaku kevään 2016 ammatillisen ja lukiokoulutuksen yhteishaussa vapaaksi jääneille opiskelupaikoille",2016,"kausi_k#1"
     }
     
-    private final Map<String, Map<String, String>> kielikoeTuloksetHakemuksiltaHakemuksenJaKielikoodinMukaan = new HashMap<>();
+    private final Map<String, Map<String, SureHyvaksyttyArvosana>> kielikoeTuloksetHakemuksiltaHakemuksenJaKielikoodinMukaan = new HashMap<>();
     final Map<String,YhdenHakukohteenTallennettavatTiedot> tallennettavatTiedotHakukohdeOidinMukaan = new HashMap<>();
 
     public static SureenMigroitavatAmmatillisenKielikoeSuoritukset create(List<ValintakoeOsallistuminenDTO> valintakoeOsallistuminenDTOs) {
@@ -61,13 +65,15 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
             JsonNode parsedHakuAppResults = mapper.reader().readTree(new ByteArrayInputStream(hakuAppResultsBytes));
             parsedHakuAppResults.iterator().forEachRemaining(n -> {
 /*
-	{
-		"additionalInfo" : {
-			"kielikoe_fi" : "false",
-			"kielikoe_fi-OSALLISTUMINEN" : "OSALLISTUI"
-		},
-		"oid" : "1.2.246.562.11.00000012522"
-	},
+    {
+            "additionalInfo" : {
+                    "kielikoe_sv" : "",
+                    "kielikoe_sv-OSALLISTUMINEN" : "EI_OSALLISTUNUT",
+                    "kielikoe_fi" : "false",
+                    "kielikoe_fi-OSALLISTUMINEN" : "OSALLISTUI"
+            },
+            "oid" : "1.2.246.562.11.00001778108"
+    },
 * */
                 String hakemusOid = n.get("oid").asText();
                 kielikoeTuloksetHakemuksiltaHakemuksenJaKielikoodinMukaan.compute(hakemusOid, (k, kielikoeResultsFromHakemus) -> {
@@ -75,7 +81,7 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
                         kielikoeResultsFromHakemus = new HashMap<>();
                     }
                     JsonNode additionalInfoNode = n.get("additionalInfo");
-                    copyAdditionalInfoFieldsToMap(additionalInfoNode, kielikoeResultsFromHakemus);
+                    copyKielikoeResultsFromHakemusTo(additionalInfoNode, kielikoeResultsFromHakemus);
                     return kielikoeResultsFromHakemus;
                 });
             });
@@ -84,9 +90,24 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
         }
     }
 
-    private static void copyAdditionalInfoFieldsToMap(JsonNode additionalInfoNode, Map<String, String> kielikoeResultsFromHakemus) {
-        additionalInfoNode.fields().forEachRemaining(additionalInfoField ->
-            kielikoeResultsFromHakemus.put(additionalInfoField.getKey(), additionalInfoField.getValue().asText()));
+    private static void copyKielikoeResultsFromHakemusTo(JsonNode additionalInfoNode, Map<String, SureHyvaksyttyArvosana> kielikoeResultsFromHakemus) {
+        AmmatillisenKielikoeMigrationService.KIELIKOE_TUNNISTEET.forEach(koeTunniste -> {
+            JsonNode osallistuminenNode = additionalInfoNode.get(koeTunniste + "-OSALLISTUMINEN");
+            JsonNode valueNode = additionalInfoNode.get(koeTunniste);
+            if (osallistuminenNode != null && "OSALLISTUI".equals(osallistuminenNode.asText())) {
+                if ("true".equals(valueNode.asText())) {
+                    kielikoeResultsFromHakemus.put(koeTunniste, hyvaksytty);
+                } else if ("false".equals(valueNode.asText())) {
+                    kielikoeResultsFromHakemus.put(koeTunniste, hylatty);
+                } else {
+                    throw new IllegalArgumentException(String.format("Ei osata tulkita kielikoetulosarvoa '%s'", valueNode.asText()));
+                }
+            } else if (osallistuminenNode != null && "EI_OSALLISTUNUT".equals(osallistuminenNode.asText())) {
+                kielikoeResultsFromHakemus.put(koeTunniste, ei_osallistunut);
+            } else if (osallistuminenNode != null && !"MERKITSEMATTA".equals(osallistuminenNode.asText())) {
+                throw new IllegalArgumentException(String.format("Ei osata tulkita kielikoeosallistumisarvoa '%s'", osallistuminenNode));
+            }
+        });
     }
 
     private static Date resolveValmistusPaivamaara(String hakuOid, String hakemusOid, Date createdAt, String hakukohdeOid, Date haunMukainenKielikoePvm) {
@@ -148,11 +169,11 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
     static class YhdenHakukohteenTallennettavatTiedot {
         final String hakuOid;
         final String hakukohdeOid;
-        private Map<String, Map<String, String>> kielikoeResultsByHakemusOidAndKielikoeTunniste;
+        private Map<String, Map<String, SureHyvaksyttyArvosana>> kielikoeResultsByHakemusOidAndKielikoeTunniste;
         final Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoeTuloksetHakemuksittain = new HashMap<>();
         final List<ApplicationAdditionalDataDTO> hakemusJaPersonOidit = new LinkedList<>();
 
-        YhdenHakukohteenTallennettavatTiedot(String hakuOid, String hakukohdeOid, Map<String, Map<String, String>> kielikoeResultsByHakemusOidAndKielikoeTunniste) {
+        YhdenHakukohteenTallennettavatTiedot(String hakuOid, String hakukohdeOid, Map<String, Map<String, SureHyvaksyttyArvosana>> kielikoeResultsByHakemusOidAndKielikoeTunniste) {
             this.hakuOid = hakuOid;
             this.hakukohdeOid = hakukohdeOid;
             this.kielikoeResultsByHakemusOidAndKielikoeTunniste = kielikoeResultsByHakemusOidAndKielikoeTunniste;
@@ -183,13 +204,13 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
             ValintakoeDTO kielikoeDto = kielikoeDtos.get(0);
             String tunniste = kielikoeDto.getValintakoeTunniste();
 
-            Map<String, String> kielikoeResultsOfHakemusByTunniste = kielikoeResultsByHakemusOidAndKielikoeTunniste.get(hakemusOid);
+            Map<String, SureHyvaksyttyArvosana> kielikoeResultsOfHakemusByTunniste = kielikoeResultsByHakemusOidAndKielikoeTunniste.get(hakemusOid);
             if (kielikoeResultsOfHakemusByTunniste == null) {
                 LOG.warn("Haku-app-export-JSONista ladatuista " + kielikoeResultsByHakemusOidAndKielikoeTunniste.size() +
                     " tietueesta ei löytynyt tulosta hakemukselle " + hakemusOid + " - ei migroida sitä.");
                 return Optional.empty();
             }
-            String hyvaksytty = kielikoeResultsOfHakemusByTunniste.get(tunniste);
+            SureHyvaksyttyArvosana hyvaksytty = kielikoeResultsOfHakemusByTunniste.get(tunniste);
             return Optional.of(new AbstractPistesyottoKoosteService.SingleKielikoeTulos(tunniste, hyvaksytty, createdAt));
         }
     }

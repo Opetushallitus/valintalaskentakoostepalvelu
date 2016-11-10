@@ -48,7 +48,7 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
                 Result result = new Result(r.startingFrom);
                 kielikoetuloksetSureen.values().forEach(hakijanTulokset ->
                         hakijanTulokset.forEach(tulos ->
-                                result.add(tulos.kokeenTunnus, Boolean.TRUE.toString().equals(tulos.arvioArvosana))));
+                                result.add(tulos.kokeenTunnus, tulos.arvioArvosana)));
                 tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen,
                         username, PISTETIEDOT_AMMATTILLISEN_KIELIKOKEEN_MIGRAATIO, false)
                         .subscribe((a) -> {
