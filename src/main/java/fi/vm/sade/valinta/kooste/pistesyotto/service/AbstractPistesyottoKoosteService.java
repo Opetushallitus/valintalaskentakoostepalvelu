@@ -135,7 +135,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 suoritus.setHenkiloOid(personOid);
                 suoritus.setVahvistettu(true);
                 suoritus.setSuoritusKieli(kieli.toUpperCase());
-                suoritus.setMyontaja(myontajaOid);
+                suoritus.setMyontaja(hakemusOid);
                 suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
                 suoritus.setValmistuminen(valmistuminen);
 
@@ -160,6 +160,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
                 arvosana.setSuoritus(tallennettuSuoritus.getId());
                 arvosana.setMyonnetty(valmistuminen);
+                arvosana.setSource(myontajaOid);
 
                 Action0 kirjoitaAuditLogiin = () ->
                     AUDIT.log(builder()
