@@ -21,46 +21,46 @@ public class AmmatillisenKielikoetulosUpdates {
     private static final Logger LOG = LoggerFactory.getLogger(AmmatillisenKielikoetulosUpdates.class);
     private final Map<String, List<SingleKielikoeTulos>> resultsToSendToSure = new HashMap<>();
 
-    public AmmatillisenKielikoetulosUpdates(String myontajaOid, List<Oppija> oppijatiedotSuresta,
+    public AmmatillisenKielikoetulosUpdates(String sourceOid, List<Oppija> oppijatiedotSuresta,
                                             Map<String, List<SingleKielikoeTulos>> kielikoetuloksetHakemuksittain,
                                             Function<String, String> findPersonOidByHakemusOid) {
         for (String hakemusOid : kielikoetuloksetHakemuksittain.keySet()) {
             List<SingleKielikoeTulos> inputValuesForHakemus = kielikoetuloksetHakemuksittain.get(hakemusOid);
             String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
             if (personOid == null) {
-                LOG.warn(String.format("Ei löytynyt hakijaOidia hakemukselle %s tallennettaessa ammatillisen kielikoetuloksia myöntäjälle %s . " +
-                    "Lisätään arvosanat %s hakemukselle Suoritusrekisteriin lähetettäviin.", hakemusOid, myontajaOid,
+                LOG.warn(String.format("Ei löytynyt hakijaOidia hakemukselle %s tallennettaessa ammatillisen kielikoetuloksia lähteelle %s . " +
+                    "Lisätään arvosanat %s hakemukselle Suoritusrekisteriin lähetettäviin.", hakemusOid, sourceOid,
                     inputValuesForHakemus));
                 resultsToSendToSure.put(hakemusOid, inputValuesForHakemus);
             } else {
                 Optional<Oppija> oppijaFromExistingSureResults = oppijatiedotSuresta.stream().filter(o -> personOid.equals(o.getOppijanumero())).findFirst();
                 if (!oppijaFromExistingSureResults.isPresent()) {
-                    LOG.info(String.format("Ei löytynyt hakijan %s ammatillisen kielikoesuorituksia myöntäjälle %s . " +
-                        "Lisätään arvosanat %s hakemukselle %s Suoritusrekisteriin lähetettäviin.", personOid, myontajaOid, inputValuesForHakemus, hakemusOid));
+                    LOG.info(String.format("Ei löytynyt hakijan %s ammatillisen kielikoesuorituksia lähteelle %s . " +
+                        "Lisätään arvosanat %s hakemukselle %s Suoritusrekisteriin lähetettäviin.", personOid, sourceOid, inputValuesForHakemus, hakemusOid));
                     resultsToSendToSure.put(hakemusOid, inputValuesForHakemus);
                 } else {
-                    addOnlyUpdatedResults(myontajaOid, hakemusOid, inputValuesForHakemus, personOid, oppijaFromExistingSureResults.get());
+                    addOnlyUpdatedResults(sourceOid, hakemusOid, inputValuesForHakemus, personOid, oppijaFromExistingSureResults.get());
                 }
             }
         }
     }
 
-    private void addOnlyUpdatedResults(String myontajaOid, String hakemusOid, List<SingleKielikoeTulos> inputValuesForHakemus,
+    private void addOnlyUpdatedResults(String sourceOid, String hakemusOid, List<SingleKielikoeTulos> inputValuesForHakemus,
                                        String personOid, Oppija oppijaFromExistingSureResults) {
         List<SuoritusJaArvosanat> existingResultsInSure = oppijaFromExistingSureResults.getSuoritukset().stream()
             .filter(SuoritusJaArvosanatWrapper::isAmmatillisenKielikoe)
-            .filter(sja -> myontajaOid.equals(sja.getSuoritus().getMyontaja()))
+            .filter(sja -> sourceOid.equals(sja.getSuoritus().getMyontaja()))
             .collect(Collectors.toList());
 
         List<SingleKielikoeTulos> tuloksetToSendForHakemus = inputValuesForHakemus.stream().filter(singleKielikoeTulos ->
             containsUpdateFor(existingResultsInSure, singleKielikoeTulos)).collect(Collectors.toCollection(LinkedList::new));
         if (!tuloksetToSendForHakemus.isEmpty()) {
             LOG.info(String.format("Lisätään hakijan %s arvosanat %s hakemukselle %s Suoritusrekisteriin lähetettäviin myöntäjälle %s.",
-                personOid, tuloksetToSendForHakemus, hakemusOid, myontajaOid));
+                personOid, tuloksetToSendForHakemus, hakemusOid, sourceOid));
             resultsToSendToSure.put(hakemusOid, tuloksetToSendForHakemus);
         } else {
             LOG.info(String.format("Hakijan %s ammatillisen kielikoearvosanat myöntäjälle %s " +
-                "löytyvät jo samoilla arvoilla Suoritusrekisteristä, ei päivitetä.", personOid, myontajaOid));
+                "löytyvät jo samoilla arvoilla Suoritusrekisteristä, ei päivitetä.", personOid, sourceOid));
         }
     }
 

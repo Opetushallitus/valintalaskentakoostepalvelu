@@ -81,13 +81,13 @@ public abstract class AbstractPistesyottoKoosteService {
                                                             ValintaperusteetOperation auditLogOperation,
                                                             boolean saveApplicationAdditionalInfo) {
         Observable<Void> kielikoeTallennus = Observable.zip(
-                findMyontajaOid(hakukohdeOid),
+                findSourceOid(hakukohdeOid),
                 haeOppijatSuresta(hakuOid, hakukohdeOid),
                 Pair::of)
-                .flatMap(myontajaAndOppijat -> {
-                    String myontajaOid = myontajaAndOppijat.getLeft();
-                    List<Oppija> oppijatSuresta = myontajaAndOppijat.getRight();
-                    return tallennaKielikoetulokset(hakuOid, hakukohdeOid, myontajaOid, pistetiedotHakemukselle,
+                .flatMap(sourceAndOppijat -> {
+                    String sourceOid = sourceAndOppijat.getLeft();
+                    List<Oppija> oppijatSuresta = sourceAndOppijat.getRight();
+                    return tallennaKielikoetulokset(hakuOid, hakukohdeOid, sourceOid, pistetiedotHakemukselle,
                             kielikoetuloksetSureen, username, auditLogOperation, oppijatSuresta);
                 });
 
@@ -101,7 +101,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 "Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), t)));
     }
 
-    private Observable<Void> tallennaKielikoetulokset(String hakuOid, String hakukohdeOid, String myontajaOid,
+    private Observable<Void> tallennaKielikoetulokset(String hakuOid, String hakukohdeOid, String sourceOid,
                                                          List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
                                                          Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
                                                          String username, ValintaperusteetOperation auditLogOperation,
@@ -109,7 +109,7 @@ public abstract class AbstractPistesyottoKoosteService {
         SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
 
         Function<String,String> findPersonOidByHakemusOid = hakemusOid -> pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
-        AmmatillisenKielikoetulosUpdates updates = new AmmatillisenKielikoetulosUpdates(myontajaOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
+        AmmatillisenKielikoetulosUpdates updates = new AmmatillisenKielikoetulosUpdates(sourceOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
         Map<String, List<SingleKielikoeTulos>> sureenLahetettavatPaivitykset = updates.getResultsToSendToSure();
 
         if (sureenLahetettavatPaivitykset.isEmpty()) {
@@ -160,7 +160,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
                 arvosana.setSuoritus(tallennettuSuoritus.getId());
                 arvosana.setMyonnetty(valmistuminen);
-                arvosana.setSource(myontajaOid);
+                arvosana.setSource(sourceOid);
 
                 Action0 kirjoitaAuditLogiin = () ->
                     AUDIT.log(builder()
@@ -183,7 +183,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 Function<SuoritusJaArvosanat, Boolean> isKielikoeArvosana = (suoritusJaArvosana) -> {
                     Suoritus suoritus = suoritusJaArvosana.getSuoritus();
                     return SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE.equals(suoritus.getKomo()) &&
-                        myontajaOid.equals(suoritus.getMyontaja()) &&
+                        sourceOid.equals(suoritus.getMyontaja()) &&
                         suoritusJaArvosana.getArvosanat().stream().map(Arvosana::getLisatieto).anyMatch(kieli::equalsIgnoreCase);
                 };
                 return oppijatSuresta.stream()
@@ -233,7 +233,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 ), t)));
     }
 
-    private Observable<String> findMyontajaOid(String hakukohdeOid) {
+    private Observable<String> findSourceOid(String hakukohdeOid) {
         return tarjontaAsyncResource.haeHakukohde(hakukohdeOid).flatMap(hakukohde -> {
             Optional<String> tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst();
             if (tarjoajaOid.isPresent()) {
@@ -245,17 +245,17 @@ public abstract class AbstractPistesyottoKoosteService {
                                 tarjoajaOid
                         )));
                     }
-                    AtomicReference<String> myontajaRef = new AtomicReference<>();
-                    etsiOppilaitosHierarkiasta(tarjoajaOid.get(), hierarkia.getOrganisaatiot(), myontajaRef);
-                    if (isEmpty(myontajaRef.get())) {
+                    AtomicReference<String> sourceRef = new AtomicReference<>();
+                    etsiOppilaitosHierarkiasta(tarjoajaOid.get(), hierarkia.getOrganisaatiot(), sourceRef);
+                    if (isEmpty(sourceRef.get())) {
                         return Observable.error(new IllegalStateException(String.format(
-                                "Hakukohteen %s suoritukselle ei löytynyt myöntäjää, tarjoaja on %s ja sillä %s organisaatiota.",
+                                "Hakukohteen %s suoritukselle ei löytynyt lähdettä, tarjoaja on %s ja sillä %s organisaatiota.",
                                 hakukohdeOid,
                                 tarjoajaOid,
                                 hierarkia.getOrganisaatiot().size()
                         )));
                     }
-                    return Observable.just(myontajaRef.get());
+                    return Observable.just(sourceRef.get());
                 });
             } else {
                 return Observable.error(new IllegalStateException(String.format(
