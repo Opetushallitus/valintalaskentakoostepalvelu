@@ -58,14 +58,15 @@ public class KirjeetUtil {
         }
     }
 
-    public static Comparator<HakutoiveenValintatapajonoDTO> sort() {
-        return Comparator.comparing(sortByPrioriteetti()).thenComparing(sortByTila());
+    public static Comparator<HakutoiveenValintatapajonoDTO> sortByPrioriteetti() {
+        //return Comparator.comparing(sortByPrioriteetti()).thenComparing(sortByTila());
+        return Comparator.comparing(sortByPrioriteettiFunction());
     }
-    private static Function<HakutoiveenValintatapajonoDTO, Integer> sortByPrioriteetti() {
+    private static Function<HakutoiveenValintatapajonoDTO, Integer> sortByPrioriteettiFunction() {
         return (jono) ->
                 Optional.ofNullable(jono).map(HakutoiveenValintatapajonoDTO::getValintatapajonoPrioriteetti).orElse(0);
     }
-    private static Comparator<HakutoiveenValintatapajonoDTO> sortByTila() {
+    public static Comparator<HakutoiveenValintatapajonoDTO> sortByTila() {
         return (o1, o2) -> {
             HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(HYLATTY);
             HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(HYLATTY);

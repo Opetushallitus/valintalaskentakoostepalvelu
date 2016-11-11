@@ -20,7 +20,8 @@ public class KirjeetUtilTest {
     @Test
     public void testSortShouldNotFailOnNullData() {
         HakutoiveenValintatapajonoDTO v1 = new HakutoiveenValintatapajonoDTO();
-        Arrays.asList(v1).sort(KirjeetUtil.sort());
+        Arrays.asList(v1).sort(KirjeetUtil.sortByPrioriteetti());
+        Arrays.asList(v1).sort(KirjeetUtil.sortByTila());
     }
 
     @Test
@@ -29,23 +30,23 @@ public class KirjeetUtilTest {
                 flatten(jono().map(setPriority(5)).map(setTila(HakemuksenTila.HYVAKSYTTY)),
                         jono().map(setPriority(6)).map(setTila(HakemuksenTila.HYVAKSYTTY)),
                         jono().map(setPriority(7)).map(setTila(HakemuksenTila.HYVAKSYTTY)))
-                        .sorted(KirjeetUtil.sort()).map(prioriteetit).collect(Collectors.toList());
+                        .sorted(KirjeetUtil.sortByPrioriteetti()).map(prioriteetit).collect(Collectors.toList());
 
         Assert.assertTrue(priot.equals(ImmutableList.of(5,6,7)));
     }
 
     @Test
-    public void testShouldSortByTilaAfterPriority() {
+    public void testShouldSortByTila() {
         List<HakemuksenTila> tilas =
                 flatten(jono().map(setPriority(4)).map(setTila(HakemuksenTila.HYLATTY)),
                         jono().map(setPriority(5)).map(setTila(HakemuksenTila.HYVAKSYTTY)),
                         jono().map(setPriority(6)).map(setTila(HakemuksenTila.VARALLA)),
                         jono().map(setPriority(6)).map(setTila(HakemuksenTila.HYVAKSYTTY)),
                         jono().map(setPriority(7)).map(setTila(HakemuksenTila.HYLATTY)))
-                        .sorted(KirjeetUtil.sort()).map(tilat).collect(Collectors.toList());
+                        .sorted(KirjeetUtil.sortByTila()).map(tilat).collect(Collectors.toList());
 
         Assert.assertTrue(tilas.equals(
-                ImmutableList.of(HakemuksenTila.HYLATTY,HakemuksenTila.HYVAKSYTTY,HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARALLA,HakemuksenTila.HYLATTY)));
+                ImmutableList.of(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARALLA,HakemuksenTila.HYLATTY,HakemuksenTila.HYLATTY)));
     }
     @Test
     public void testShouldSortByVarasijaNumero() {
@@ -54,15 +55,15 @@ public class KirjeetUtilTest {
                 jono().map(setPriority(6)).map(setTila(HakemuksenTila.VARALLA)).map(setVarasijaNumero(2)),
                 jono().map(setPriority(6)).map(setTila(HakemuksenTila.VARALLA)).map(setVarasijaNumero(1)),
                 jono().map(setPriority(7)).map(setTila(HakemuksenTila.HYVAKSYTTY)))
-                .sorted(KirjeetUtil.sort()).collect(Collectors.toList());
+                .sorted(KirjeetUtil.sortByTila()).collect(Collectors.toList());
         List<HakemuksenTila> tilas =jonos.stream().map(tilat).collect(Collectors.toList());
 
         Assert.assertTrue(tilas.equals(
-                ImmutableList.of(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARALLA,HakemuksenTila.VARALLA,HakemuksenTila.HYVAKSYTTY)));
+                ImmutableList.of(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARALLA,HakemuksenTila.VARALLA)));
 
         List<Integer> varasijas =jonos.stream().map(varasijanumerot).collect(Collectors.toList());
         Assert.assertTrue(varasijas.equals(
-                ImmutableList.of(-1, 1,2, -1)));
+                ImmutableList.of(-1, -1, 1, 2)));
     }
 
     private final Function<HakutoiveenValintatapajonoDTO, Integer> varasijanumerot = (jono) -> Optional.ofNullable(jono.getVarasijanNumero()).orElse(-1);
