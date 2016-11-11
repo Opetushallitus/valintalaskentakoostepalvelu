@@ -17,13 +17,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class AmmatillisenKielikoetulosUpdates {
-    private static final Logger LOG = LoggerFactory.getLogger(AmmatillisenKielikoetulosUpdates.class);
+public class AmmatillisenKielikoetulosOperations {
+    private static final Logger LOG = LoggerFactory.getLogger(AmmatillisenKielikoetulosOperations.class);
     private final Map<String, List<SingleKielikoeTulos>> resultsToSendToSure = new HashMap<>();
 
-    public AmmatillisenKielikoetulosUpdates(String sourceOid, List<Oppija> oppijatiedotSuresta,
-                                            Map<String, List<SingleKielikoeTulos>> kielikoetuloksetHakemuksittain,
-                                            Function<String, String> findPersonOidByHakemusOid) {
+    public AmmatillisenKielikoetulosOperations(String sourceOid, List<Oppija> oppijatiedotSuresta,
+                                               Map<String, List<SingleKielikoeTulos>> kielikoetuloksetHakemuksittain,
+                                               Function<String, String> findPersonOidByHakemusOid) {
         for (String hakemusOid : kielikoetuloksetHakemuksittain.keySet()) {
             List<SingleKielikoeTulos> inputValuesForHakemus = kielikoetuloksetHakemuksittain.get(hakemusOid);
             String personOid = findPersonOidByHakemusOid.apply(hakemusOid);

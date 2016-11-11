@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class AmmatillisenKielikoetulosUpdatesTest {
+public class AmmatillisenKielikoetulosOperationsTest {
     private static final String HAKEMUS_OID_1 = "1.2.246.562.11.00000000001";
     private static final String HAKEMUS_OID_2 = "1.2.246.562.11.00000000002";
     private final String PERSON_OID_1 = "1.2.3.4.111";
@@ -75,7 +75,7 @@ public class AmmatillisenKielikoetulosUpdatesTest {
 
     @Test
     public void existingResultsWithEqualArvosanaAreFilteredOut() {
-        AmmatillisenKielikoetulosUpdates source2Updates = new AmmatillisenKielikoetulosUpdates(SOURCE_OID_2, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);
+        AmmatillisenKielikoetulosOperations source2Updates = new AmmatillisenKielikoetulosOperations(SOURCE_OID_2, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);
         assertThat(source2Updates.getResultsToSendToSure().entrySet(), hasSize(1));
 
         assertThat(source2Updates.getResultsToSendToSure(), hasKey(HAKEMUS_OID_2));
@@ -87,7 +87,7 @@ public class AmmatillisenKielikoetulosUpdatesTest {
 
     @Test
     public void existingResultsWithDifferentArvosanaRetainGivenValmistuminen() {
-        AmmatillisenKielikoetulosUpdates source1Updates = new AmmatillisenKielikoetulosUpdates(SOURCE_OID_1, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);
+        AmmatillisenKielikoetulosOperations source1Updates = new AmmatillisenKielikoetulosOperations(SOURCE_OID_1, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);
         assertThat(source1Updates.getResultsToSendToSure().entrySet(), hasSize(2));
 
         assertThat(source1Updates.getResultsToSendToSure(), hasKey(HAKEMUS_OID_1));
@@ -105,7 +105,7 @@ public class AmmatillisenKielikoetulosUpdatesTest {
 
     @Test
     public void newResultsRetainGivenValmistuminen() {
-        AmmatillisenKielikoetulosUpdates source3Updates = new AmmatillisenKielikoetulosUpdates(SOURCE_OID_3, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);
+        AmmatillisenKielikoetulosOperations source3Updates = new AmmatillisenKielikoetulosOperations(SOURCE_OID_3, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);
         assertThat(source3Updates.getResultsToSendToSure().entrySet(), hasSize(2));
         assertEquals(syotetytTulokset, source3Updates.getResultsToSendToSure());
     }

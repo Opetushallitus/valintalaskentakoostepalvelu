@@ -109,7 +109,7 @@ public abstract class AbstractPistesyottoKoosteService {
         SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
 
         Function<String,String> findPersonOidByHakemusOid = hakemusOid -> pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
-        AmmatillisenKielikoetulosUpdates updates = new AmmatillisenKielikoetulosUpdates(sourceOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
+        AmmatillisenKielikoetulosOperations updates = new AmmatillisenKielikoetulosOperations(sourceOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
         Map<String, List<SingleKielikoeTulos>> sureenLahetettavatPaivitykset = updates.getResultsToSendToSure();
 
         if (sureenLahetettavatPaivitykset.isEmpty()) {
