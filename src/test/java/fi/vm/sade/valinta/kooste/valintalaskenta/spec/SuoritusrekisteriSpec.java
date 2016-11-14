@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaCo
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
 import org.joda.time.DateTime;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -89,6 +90,10 @@ public class SuoritusrekisteriSpec {
         }
         public ArvosanaBuilder setMyonnetty(DateTime myonnetty) {
             arvosana.setMyonnetty(ArvosanaWrapper.ARVOSANA_DTF.print(myonnetty));
+            return ArvosanaBuilder.this;
+        }
+        public ArvosanaBuilder setSource(String sourceOid) {
+            arvosana.setSource(sourceOid);
             return ArvosanaBuilder.this;
         }
         public ArvosanaBuilder setAsteikko(String asteikko) {

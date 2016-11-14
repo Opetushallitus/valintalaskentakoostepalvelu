@@ -29,7 +29,8 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     public static AtomicReference<List<Suoritus>> suorituksetRef = new AtomicReference<>(new ArrayList<>());
-    public static AtomicReference<List<Arvosana>> arvosanatRef = new AtomicReference<>(new ArrayList<>());
+    public static AtomicReference<List<Arvosana>> createdArvosanatRef = new AtomicReference<>(new ArrayList<>());
+    public static AtomicReference<List<Arvosana>> updatedArvosanatRef = new AtomicReference<>(new ArrayList<>());
 
     private static AtomicInteger ids = new AtomicInteger(100);
 
@@ -42,8 +43,10 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
         postException = Optional.empty();
         oppijaRef.set(null);
         suorituksetRef.set(new ArrayList<>());
-        arvosanatRef.set(new ArrayList<>());
+        createdArvosanatRef.set(new ArrayList<>());
+        updatedArvosanatRef.set(new ArrayList<>());
         deletedSuorituksetRef.set(new ArrayList<>());
+        deletedArvosanatRef.set(new ArrayList<>());
     }
 
     public static void setPostException(Optional<RuntimeException> exception) {
@@ -95,7 +98,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
         if (postException.isPresent()) {
             return Observable.error(postException.get());
         }
-        arvosanatRef.getAndUpdate((List<Arvosana> arvosanat) -> {
+        createdArvosanatRef.getAndUpdate((List<Arvosana> arvosanat) -> {
             arvosanat.add(arvosana);
             return arvosanat;
         });
@@ -104,7 +107,14 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        if (postException.isPresent()) {
+            return Observable.error(postException.get());
+        }
+        updatedArvosanatRef.getAndUpdate((List<Arvosana> arvosanat) -> {
+            arvosanat.add(arvosanaWithUpdatedValues);
+            return arvosanat;
+        });
+        return Observable.just(arvosanaWithUpdatedValues);
     }
 
     @Override
