@@ -13,10 +13,11 @@ public class ViestintapalveluDtoTest {
 
     @Test
     public void testLetterBatchDtoConversion() {
-        String json = "{\"letterTotalCount\":3,\"letterReadyCount\":2,\"letterErrorCount\":1}";
+        String json = "{\"letterTotalCount\":4,\"letterReadyCount\":2,\"letterErrorCount\":1,\"letterPublishedCount\":1}";
         LetterBatchCountDto countDto = new Gson().fromJson(json, LetterBatchCountDto.class);
-        assertTrue(countDto.letterTotalCount == 3);
-        assertTrue(countDto.letterReadyCount == 2);
+        assertTrue(countDto.letterTotalCount == 4);
         assertTrue(countDto.letterErrorCount == 1);
+        assertTrue(countDto.letterErrorCount == 1);
+        assertTrue(countDto.letterPublishedCount == 1);
     }
 }
