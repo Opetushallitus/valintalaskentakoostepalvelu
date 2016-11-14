@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -71,9 +72,17 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             ApplicationAsyncResource applicationAsyncResource,
             SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
             TarjontaAsyncResource tarjontaAsyncResource,
+            OhjausparametritAsyncResource ohjausparametritAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
+            ValintaperusteetAsyncResource valintaperusteetAsyncResource,
             ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
-        super(applicationAsyncResource, suoritusrekisteriAsyncResource, tarjontaAsyncResource, organisaatioAsyncResource, valintalaskentaValintakoeAsyncResource);
+        super(applicationAsyncResource,
+                suoritusrekisteriAsyncResource,
+                tarjontaAsyncResource,
+                ohjausparametritAsyncResource,
+                organisaatioAsyncResource,
+                valintaperusteetAsyncResource,
+                valintalaskentaValintakoeAsyncResource);
         this.valintakoeResource = valintakoeResource;
         this.valintaperusteetResource = valintaperusteetResource;
     }

@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class AbstractPistesyottoKoosteServiceTest {
     private static final List<String> OPPILAITOS = Collections.singletonList(AbstractPistesyottoKoosteService.OPPILAITOS);
     private ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource = new MockValintalaskentaValintakoeAsyncResource();
-    private AbstractPistesyottoKoosteService service = new AbstractPistesyottoKoosteService(null, null, null, null, valintalaskentaValintakoeAsyncResource) {};
+    private AbstractPistesyottoKoosteService service = new AbstractPistesyottoKoosteService(null, null, null, null, null, null, valintalaskentaValintakoeAsyncResource) {};
     private final String tarjoajaOid = "oidOfTarjoajaThatNeedsOppilaitos";
     private final String oppilaitostyyppi = "oppilaitostyyppi_61#1";
 

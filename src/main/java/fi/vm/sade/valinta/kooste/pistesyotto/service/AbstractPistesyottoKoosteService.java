@@ -1,18 +1,10 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 import com.google.common.collect.ImmutableMap;
-
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
@@ -22,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AmmatillisenKielikoetulosOperations.CompositeCommand;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
@@ -31,15 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.*;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 public abstract class AbstractPistesyottoKoosteService {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
@@ -53,18 +47,24 @@ public abstract class AbstractPistesyottoKoosteService {
     protected final ApplicationAsyncResource applicationAsyncResource;
     protected final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     protected final TarjontaAsyncResource tarjontaAsyncResource;
+    protected final OhjausparametritAsyncResource ohjausparametritAsyncResource;
     protected final OrganisaatioAsyncResource organisaatioAsyncResource;
+    protected final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     protected final ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource;
 
     protected AbstractPistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
                                                SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                                TarjontaAsyncResource tarjontaAsyncResource,
+                                               OhjausparametritAsyncResource ohjausparametritAsyncResource,
                                                OrganisaatioAsyncResource organisaatioAsyncResource,
+                                               ValintaperusteetAsyncResource valintaperusteetAsyncResource,
                                                ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
+        this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
+        this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
         this.valintalaskentaValintakoeAsyncResource = valintalaskentaValintakoeAsyncResource;
     }
 

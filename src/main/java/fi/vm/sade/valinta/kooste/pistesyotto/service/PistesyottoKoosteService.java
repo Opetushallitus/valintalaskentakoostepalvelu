@@ -3,12 +3,14 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistetietoDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -16,12 +18,7 @@ import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,28 +28,40 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     public PistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
                                     SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                     TarjontaAsyncResource tarjontaAsyncResource,
+                                    OhjausparametritAsyncResource ohjausparametritAsyncResource,
                                     OrganisaatioAsyncResource organisaatioAsyncResource,
+                                    ValintaperusteetAsyncResource valintaperusteetAsyncResource,
                                     ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         super(applicationAsyncResource,
                 suoritusrekisteriAsyncResource,
                 tarjontaAsyncResource,
+                ohjausparametritAsyncResource,
                 organisaatioAsyncResource,
+                valintaperusteetAsyncResource,
                 valintalaskentaValintakoeAsyncResource);
     }
 
-    public Observable<List<ApplicationAdditionalDataDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, List<String> hakemusOidit) {
-        Observable<List<Oppija>> oppijatObservable = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid);
-        Observable<List<ApplicationAdditionalDataDTO>> pistetiedotObservable = applicationAsyncResource.getApplicationAdditionalData(hakemusOidit);
-
-        return pistetiedotObservable.zipWith(oppijatObservable, (pistetiedot, oppijat) -> {
-            Map<String, List<Arvosana>> kielikoeArvosanat = ammatillisenKielikoeArvosanat(oppijat);
-
-            pistetiedot.stream().filter(pt -> kielikoeArvosanat.keySet().contains(pt.getPersonOid())).forEach(pt ->
-                    pt.getAdditionalData().putAll(toAdditionalData(kielikoeArvosanat.get(pt.getPersonOid())))
-            );
-
-            return pistetiedot;
-        });
+    public Observable<List<PistetietoDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, List<String> hakemusOidit) {
+        return Observable.zip(
+                applicationAsyncResource.getApplicationAdditionalData(hakemusOidit),
+                valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
+                valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
+                        .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v))),
+                suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
+                        .map(os -> os.stream().collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o))),
+                ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
+                (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) -> {
+                    return additionalDatat.stream().map(additionalData ->
+                            new PistetietoDTO(
+                                    additionalData,
+                                    valintaperusteet,
+                                    valintakokeet.get(additionalData.getOid()),
+                                    oppijat.get(additionalData.getPersonOid()),
+                                    ohjausparametrit
+                            )
+                    ).collect(Collectors.toList());
+                }
+        );
     }
 
     private static Map<String, HakutoiveDTO> kielikokeidenHakukohteet(ValintakoeOsallistuminenDTO voDTO) {
