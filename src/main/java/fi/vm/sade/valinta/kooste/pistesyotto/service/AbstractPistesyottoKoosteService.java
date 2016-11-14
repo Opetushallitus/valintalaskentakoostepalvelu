@@ -129,9 +129,11 @@ public abstract class AbstractPistesyottoKoosteService {
             }
 
             CompositeCommand compositeCommandForHakemus = operationOptional.get();
-            Observable<List<Observable<Arvosana>>> sureOperations = compositeCommandForHakemus.createSureOperation(suoritusrekisteriAsyncResource);
+            Observable<List<Observable<Arvosana>>> sureOperations = compositeCommandForHakemus.createSureOperation(suoritusrekisteriAsyncResource)
+                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
+                    "Virhe hakemuksen %s tulosten tallentamisessa Suoritusrekisteriin ", hakemusOid), t)));
             sureOperations.forEach(arvosanaObservables -> arvosanaObservables.forEach(arvosanaObservable -> {
-                    arvosanaObservable.last().forEach(processedArvosana -> {
+                    arvosanaObservable.last().forEach(processedArvosana ->
                         AUDIT.log(builder()
                             .id(username)
                             .hakuOid(hakuOid)
@@ -140,8 +142,7 @@ public abstract class AbstractPistesyottoKoosteService {
                             .hakemusOid(hakemusOid)
                             .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
                             .setOperaatio(auditLogOperation)
-                            .build());
-                    });
+                            .build()));
                 }
             ));
 
