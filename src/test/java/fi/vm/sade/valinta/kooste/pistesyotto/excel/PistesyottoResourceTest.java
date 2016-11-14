@@ -5,7 +5,11 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.lisatiedot;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintaperuste;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -36,8 +40,14 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
-import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
@@ -48,8 +58,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matchers;
-import org.junit.Assert;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -71,6 +82,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * @author Jussi Jartamo
@@ -867,14 +879,13 @@ public class PistesyottoResourceTest {
                                     MediaType.APPLICATION_OCTET_STREAM));
             assertEquals(200, r.getStatus());
             List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
-            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
             assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!", 3, tuodutLisatiedot.size());
             assertFalse("Kielikokeita ei saa löytyä hakemuksen lisätiedoista", tuodutLisatiedot.stream().anyMatch(a -> a.getAdditionalData().containsKey("kielikoe_fi")));
-            MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().forEach(s -> LOG.error(s.toString()));
-            assertEquals("Suorituksilla on oikea myöntäjä", 2, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals("1.2.246.562.10.45698499378")).count());
-            MockSuoritusrekisteriAsyncResource.arvosanatRef.get().stream().forEach(a -> LOG.error(a.toString()));
-            assertEquals("Kielikokeiden suoritukset löytyvät suresta", 2, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size());
-            assertEquals("Kielikokeiden arvosanat löytyvät suresta", 2, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().size());
+            assertThat("Arvosanoilla on oikea lähde", MockSuoritusrekisteriAsyncResource.arvosanatRef.get().stream().filter(a -> "1.2.246.562.10.45698499378".equals(a.getSource())).collect(Collectors.toList()), hasSize(3));
+            assertEquals("Suorituksilla on oikea myöntäjä", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals(HAKEMUS1)).count());
+            assertEquals("Suorituksilla on oikea myöntäjä", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals(HAKEMUS2)).count());
+            assertEquals("Kielikokeiden suoritukset löytyvät suresta", 3, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size());
+            assertEquals("Kielikokeiden arvosanat löytyvät suresta", 3, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().size());
         } finally {
             cleanMocks();
         }
@@ -1077,25 +1088,29 @@ public class PistesyottoResourceTest {
                             .setOppijanumero(PERSONOID1)
                             .suoritus()
                             .setId("123-123-123-1")
-                            .setMyontaja("1.2.246.562.10.45698499379")
+                            .setSource("1.2.246.562.10.45698499379")
+                            .setMyontaja(HAKEMUS1)
                             .setHenkiloOid(PERSONOID1)
                             .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
                             .arvosana()
-                            .setAine(KIELIKOE)
-                            .setLisatieto("FI")
-                            .setArvosana("true")
-                            .build()
+                                .setId("123-123-123-1-arvosana")
+                                .setAine(KIELIKOE)
+                                .setLisatieto("FI")
+                                .setArvosana(hyvaksytty)
+                                .build()
                             .build()
                             .suoritus()
                             .setId("123-123-123-2")
-                            .setMyontaja("1.2.246.562.10.45698499378")
+                            .setSource("1.2.246.562.10.45698499378")
+                            .setMyontaja(HAKEMUS3)
                             .setHenkiloOid(PERSONOID1)
                             .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
                             .arvosana()
-                            .setAine(KIELIKOE)
-                            .setLisatieto("FI")
-                            .setArvosana("false")
-                            .build()
+                                .setId("123-123-123-2-arvosana")
+                                .setAine(KIELIKOE)
+                                .setLisatieto("FI")
+                                .setArvosana(hylatty)
+                                .build()
                             .build()
                             .build());
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
@@ -1160,19 +1175,34 @@ public class PistesyottoResourceTest {
                                     MediaType.APPLICATION_OCTET_STREAM));
             assertEquals(200, r.getStatus());
             List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
-            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
             assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!", 3, tuodutLisatiedot.size());
             assertFalse("Kielikokeita ei saa löytyä hakemuksen lisätiedoista", tuodutLisatiedot.stream().anyMatch(a -> a.getAdditionalData().containsKey("kielikoe_fi")));
-            MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().forEach(s -> LOG.error(s.toString()));
-            MockSuoritusrekisteriAsyncResource.arvosanatRef.get().stream().forEach(a -> LOG.error(a.toString()));
-            assertEquals("Kielikokeen suoritus löytyy suresta", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size());
-            assertEquals("Suresta löytyy oikea kielikoesuoritus", PERSONOID2, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().get(0).getHenkiloOid());
-            assertEquals("Suorituksella on oikea myöntäjä", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals("1.2.246.562.10.45698499378")).count());
-            assertEquals("Kielikokeen arvosana löytyy suresta", 1, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().size());
-            assertEquals("Oikea suoritus on deletoitu", Arrays.asList("123-123-123-2"),MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get());
+            assertThat("Kielikokeen suoritus löytyy suresta", MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), hasSize(2));
+            assertThat("Suresta löytyy oikea kielikoesuoritus", MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), hasItem(withHenkiloOid(PERSONOID2)));
+            assertThat("Suresta löytyy oikea kielikoesuoritus", MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), hasItem(withHenkiloOid(PERSONOID3)));
+            assertEquals("Suorituksella on oikea myöntäjä", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals(HAKEMUS2)).count());
+            assertEquals("Suorituksella on oikea myöntäjä", 1, MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream().filter(s -> s.getMyontaja().equals(HAKEMUS3)).count());
+            assertEquals("Arvosanoilla on oikea lähde", 2, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().stream().filter(a -> a.getSource().equals("1.2.246.562.10.45698499378")).count());
+            assertEquals("Kielikokeen arvosana löytyy suresta", 2, MockSuoritusrekisteriAsyncResource.arvosanatRef.get().size());
+            assertThat("Oikea suoritus on deletoitu", MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get(), hasItem("123-123-123-1"));
+            assertThat("Oikea arvosana on deletoitu", MockSuoritusrekisteriAsyncResource.deletedArvosanatRef.get(), hasItem("123-123-123-1-arvosana"));
         } finally {
             cleanMocks();
         }
+    }
+
+    private Matcher<Suoritus> withHenkiloOid(String expectedHenkiloOid) {
+        return new TypeSafeMatcher<Suoritus>() {
+            @Override
+            protected boolean matchesSafely(Suoritus item) {
+                return expectedHenkiloOid.equals(item.getHenkiloOid());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("suoritus, jonka henkiloOid == " + expectedHenkiloOid);
+            }
+        };
     }
 
     @Test
@@ -1184,8 +1214,9 @@ public class PistesyottoResourceTest {
                 lisatiedot().setPersonOid(PERSONOID1).setOid(HAKEMUS1).build()));
             MockApplicationAsyncResource.setAdditionalDataResultByOid(Collections.emptyList());
             MockSuoritusrekisteriAsyncResource.setResult(new SuoritusrekisteriSpec.OppijaBuilder().setOppijanumero(PERSONOID1)
-                .suoritus().setId("123-123-123-1").setMyontaja(KIELIKOE_OPPILAITOS_OID).setHenkiloOid(PERSONOID1).setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-                    .arvosana().setAine(KIELIKOE).setLisatieto("FI").setArvosana("true").build()
+                .suoritus().setId("123-123-123-1").setMyontaja(HAKEMUS1).setHenkiloOid(PERSONOID1).setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                    .setSource(KIELIKOE_OPPILAITOS_OID)
+                    .arvosana().setAine(KIELIKOE).setLisatieto("FI").setArvosana(hyvaksytty).build()
                 .build()
             .build());
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
@@ -1211,10 +1242,10 @@ public class PistesyottoResourceTest {
 
             List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
             LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
-            assertThat("Hakukohteen hakemukselle tuotiin lisätiedot", tuodutLisatiedot, Matchers.hasSize(1));
+            assertThat("Hakukohteen hakemukselle tuotiin lisätiedot", tuodutLisatiedot, hasSize(1));
             assertFalse("Kielikokeita ei saa löytyä hakemuksen lisätiedoista", tuodutLisatiedot.stream().anyMatch(a -> a.getAdditionalData().containsKey("kielikoe_fi")));
-            assertThat(MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), Matchers.hasSize(0));
-            assertThat("Suorituksia ei deletoitu", MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get(), Matchers.hasSize(0));
+            assertThat(MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), hasSize(0));
+            assertThat("Suorituksia ei deletoitu", MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get(), hasSize(0));
         } finally {
             cleanMocks();
         }

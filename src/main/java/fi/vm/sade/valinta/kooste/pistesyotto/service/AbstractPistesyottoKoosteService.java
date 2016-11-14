@@ -1,32 +1,5 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import com.google.common.collect.ImmutableMap;
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
-import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
-import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.functions.Action0;
-import rx.functions.Func1;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
@@ -35,6 +8,38 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
+import com.google.common.collect.ImmutableMap;
+
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.AmmatillisenKielikoetulosOperations.CompositeCommand;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import rx.Observable;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class AbstractPistesyottoKoosteService {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
@@ -106,99 +111,41 @@ public abstract class AbstractPistesyottoKoosteService {
                                                          Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
                                                          String username, ValintaperusteetOperation auditLogOperation,
                                                          List<Oppija> oppijatSuresta) {
-        SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
-
         Function<String,String> findPersonOidByHakemusOid = hakemusOid -> pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
-        AmmatillisenKielikoetulosOperations updates = new AmmatillisenKielikoetulosOperations(sourceOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
-        Map<String, List<SingleKielikoeTulos>> sureenLahetettavatPaivitykset = updates.getResultsToSendToSure();
+        AmmatillisenKielikoetulosOperations operations = new AmmatillisenKielikoetulosOperations(sourceOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
 
-        if (sureenLahetettavatPaivitykset.isEmpty()) {
+        Map<String, Optional<CompositeCommand>> resultsToSendToSure = operations.getResultsToSendToSure();
+        if (resultsToSendToSure.isEmpty()) {
             LOG.info(String.format("Näyttää siltä, että kaikki %d ammatillisen kielikokeen tulostietoa Suoritusrekisterissä " +
                 "ovat jo ajan tasalla, ei päivitetä.", kielikoetuloksetSureen.size()));
             return Observable.just(null);
         }
 
-        return Observable.from(sureenLahetettavatPaivitykset.keySet()).flatMap(hakemusOid -> {
+        return Observable.from(resultsToSendToSure.keySet()).flatMap(hakemusOid -> {
             String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
-            List<SingleKielikoeTulos> hakemuksenKielikoeTulokset = sureenLahetettavatPaivitykset.get(hakemusOid);
+            Optional<CompositeCommand> operationOptional = resultsToSendToSure.get(hakemusOid);
+            if (!operationOptional.isPresent()) {
+                return null;
+            }
 
-            List<SingleKielikoeTulos> lisattavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> t.arvioArvosana != tyhja).collect(Collectors.toList());
-            List<SingleKielikoeTulos> poistettavatKielikoetulokset = hakemuksenKielikoeTulokset.stream().filter(t -> t.arvioArvosana == tyhja).collect(Collectors.toList());
+            CompositeCommand compositeCommandForHakemus = operationOptional.get();
+            Observable<List<Observable<Arvosana>>> sureOperations = compositeCommandForHakemus.createSureOperation(suoritusrekisteriAsyncResource);
+            sureOperations.forEach(arvosanaObservables -> arvosanaObservables.forEach(arvosanaObservable -> {
+                    arvosanaObservable.last().forEach(processedArvosana -> {
+                        AUDIT.log(builder()
+                            .id(username)
+                            .hakuOid(hakuOid)
+                            .hakukohdeOid(hakukohdeOid)
+                            .hakijaOid(personOid)
+                            .hakemusOid(hakemusOid)
+                            .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
+                            .setOperaatio(auditLogOperation)
+                            .build());
+                    });
+                }
+            ));
 
-            Observable<Pair<SingleKielikoeTulos, Suoritus>> suoritustenTallennukset = Observable.from(lisattavatKielikoetulokset).flatMap(singleKielikoeTulos -> {
-                String kieli = singleKielikoeTulos.kieli();
-                String valmistuminen = valmistuminenFormat.format(singleKielikoeTulos.valmistuminen);
-
-                Suoritus suoritus = new Suoritus();
-                suoritus.setTila(KIELIKOE_SUORITUS_TILA);
-                suoritus.setYksilollistaminen(KIELIKOE_SUORITUS_YKSILOLLISTAMINEN);
-                suoritus.setHenkiloOid(personOid);
-                suoritus.setVahvistettu(true);
-                suoritus.setSuoritusKieli(kieli.toUpperCase());
-                suoritus.setMyontaja(hakemusOid);
-                suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
-                suoritus.setValmistuminen(valmistuminen);
-
-                return Observable.zip(
-                        Observable.just(singleKielikoeTulos),
-                        suoritusrekisteriAsyncResource.postSuoritus(suoritus)
-                                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
-                                        "Suorituksen %s tallentaminen suoritusrekisteriin epäonnistui", suoritus), t))),
-                        Pair::of);
-            });
-
-            Func1<Pair<SingleKielikoeTulos, Suoritus>, Observable<Arvosana>> tallennaArvosana = kielikoetulosJaTallennettuSuoritus -> {
-                SingleKielikoeTulos singleKielikoeTulos = kielikoetulosJaTallennettuSuoritus.getLeft();
-                Suoritus tallennettuSuoritus = kielikoetulosJaTallennettuSuoritus.getRight();
-                String kieli = singleKielikoeTulos.kieli();
-                String arvioArvosana = singleKielikoeTulos.arvioArvosana.name();
-                String valmistuminen = valmistuminenFormat.format(singleKielikoeTulos.valmistuminen);
-
-                Arvosana arvosana = new Arvosana();
-                arvosana.setAine(KIELIKOE_ARVOSANA_AINE);
-                arvosana.setLisatieto(kieli.toUpperCase());
-                arvosana.setArvio(new Arvio(arvioArvosana, AmmatillisenKielikoetuloksetSurestaConverter.SURE_ASTEIKKO_HYVAKSYTTY, null));
-                arvosana.setSuoritus(tallennettuSuoritus.getId());
-                arvosana.setMyonnetty(valmistuminen);
-                arvosana.setSource(sourceOid);
-
-                Action0 kirjoitaAuditLogiin = () ->
-                    AUDIT.log(builder()
-                        .id(username)
-                        .hakuOid(hakuOid)
-                        .hakukohdeOid(hakukohdeOid)
-                        .hakijaOid(personOid)
-                        .hakemusOid(hakemusOid)
-                        .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + kieli.toLowerCase(), arvioArvosana))
-                        .setOperaatio(auditLogOperation)
-                        .build());
-                return suoritusrekisteriAsyncResource.postArvosana(arvosana)
-                        .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
-                                "Arvosanan %s tallentaminen Suoritusrekisteriin epäonnistui", arvosana), t)))
-                        .doOnCompleted(kirjoitaAuditLogiin);
-            };
-
-            List<Suoritus> poistettavatSuoritukset = poistettavatKielikoetulokset.stream().flatMap(singleKielikoeTulos -> {
-                String kieli = singleKielikoeTulos.kieli();
-                Function<SuoritusJaArvosanat, Boolean> isKielikoeArvosana = (suoritusJaArvosana) -> {
-                    Suoritus suoritus = suoritusJaArvosana.getSuoritus();
-                    return SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE.equals(suoritus.getKomo()) &&
-                        sourceOid.equals(suoritus.getMyontaja()) &&
-                        suoritusJaArvosana.getArvosanat().stream().map(Arvosana::getLisatieto).anyMatch(kieli::equalsIgnoreCase);
-                };
-                return oppijatSuresta.stream()
-                        .filter(o -> o.getOppijanumero().equals(personOid))
-                        .flatMap(o -> o.getSuoritukset().stream())
-                        .filter(isKielikoeArvosana::apply)
-                        .map(SuoritusJaArvosanat::getSuoritus);
-            }).collect(Collectors.toList());
-            Observable<Suoritus> suoritustenPoistot = Observable.from(poistettavatSuoritukset).flatMap(suoritus ->
-                    suoritusrekisteriAsyncResource.deleteSuoritus(suoritus.getId())
-                            .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
-                                    "Suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", suoritus), t))));
-
-            return Observable.merge(suoritustenTallennukset.flatMap(tallennaArvosana), suoritustenPoistot)
-                    .<Void>map(a -> null);
+            return Observable.just(sureOperations).<Void>map(x -> null);
         }).lastOrDefault(null).doOnCompleted(() ->
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }

@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +18,6 @@ import rx.Observable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -144,11 +142,35 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     }
 
     @Override
-    public Observable<Suoritus> deleteSuoritus(String suoritusId) {
+    public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
+        return postAsObservable(
+                "/suoritusrekisteri/rest/v1/arvosanat/" + arvosanaId,
+                new TypeToken<Arvosana>(){}.getType(),
+                Entity.entity(gson().toJson(arvosanaWithUpdatedValues), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Observable<Void> deleteSuoritus(String suoritusId) {
         return deleteAsObservable(
                 "/suoritusrekisteri/rest/v1/suoritukset/" + suoritusId,
                 new TypeToken<Suoritus>(){
                 }.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Observable<Void> deleteArvosana(String arvosanaId) {
+        return deleteAsObservable(
+                "/suoritusrekisteri/rest/v1/arvosanat/" + arvosanaId, new TypeToken<Arvosana>(){}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;

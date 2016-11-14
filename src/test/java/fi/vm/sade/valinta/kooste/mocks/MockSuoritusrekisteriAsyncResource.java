@@ -36,6 +36,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     private static Optional<RuntimeException> postException = Optional.empty();
 
     public static AtomicReference<List<String>> deletedSuorituksetRef = new AtomicReference<>(new ArrayList<>());
+    public static AtomicReference<List<String>> deletedArvosanatRef = new AtomicReference<>(new ArrayList<>());
 
     public static void clear() {
         postException = Optional.empty();
@@ -102,13 +103,29 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public Observable<Suoritus> deleteSuoritus(String suoritusId) {
+    public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
+    @Override
+    public Observable<Void> deleteSuoritus(String suoritusId) {
         deletedSuorituksetRef.getAndUpdate((List<String> suoritusIdt) -> {
             suoritusIdt.add(suoritusId);
             return suoritusIdt;
         });
         Suoritus suoritus = new Suoritus();
         suoritus.setId(suoritusId);
-        return Observable.just(suoritus);
+        return Observable.just(null);
+    }
+
+    @Override
+    public Observable<Void> deleteArvosana(String arvosanaId) {
+        deletedArvosanatRef.getAndUpdate((List<String> arvosanaIdt) -> {
+            arvosanaIdt.add(arvosanaId);
+            return arvosanaIdt;
+        });
+        Arvosana arvosana = new Arvosana();
+        arvosana.setId(arvosanaId);
+        return Observable.just(null);
     }
 }

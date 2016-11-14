@@ -2,9 +2,16 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.spec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.ArvosanaWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
 import org.joda.time.DateTime;
 
@@ -72,6 +79,10 @@ public class SuoritusrekisteriSpec {
         public ArvosanaBuilder(SuoritusBuilder suoritus) {
             this.suoritus = suoritus;
         }
+        public ArvosanaBuilder setId(String id) {
+            arvosana.setId(id);
+            return ArvosanaBuilder.this;
+        }
         public ArvosanaBuilder setMyonnetty(String myonnetty) {
             arvosana.setMyonnetty(myonnetty);
             return ArvosanaBuilder.this;
@@ -119,6 +130,9 @@ public class SuoritusrekisteriSpec {
         public ArvosanaBuilder setArvosana(String a) {
             arvosana.getArvio().setArvosana(a);
             return ArvosanaBuilder.this;
+        }
+        public ArvosanaBuilder setArvosana(SureHyvaksyttyArvosana arvosana) {
+            return setArvosana(arvosana.name());
         }
         public ArvosanaBuilder setPisteet(Integer pisteet) {
             arvosana.getArvio().setPisteet(pisteet);

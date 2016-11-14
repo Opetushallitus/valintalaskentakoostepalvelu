@@ -34,6 +34,10 @@ public class Arvosana {
         this.lisatieto = lisatieto;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public void setAine(String aine) {
         this.aine = aine;
     }
