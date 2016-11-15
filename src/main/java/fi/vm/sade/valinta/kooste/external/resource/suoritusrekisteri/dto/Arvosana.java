@@ -1,13 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Arvosana {
+    public static final DescendingMyonnettyOrder NEWEST_FIRST = new DescendingMyonnettyOrder();
+
     private String id;
     private String suoritus;
     private String aine;
@@ -166,6 +166,10 @@ public class Arvosana {
         return result;
     }
 
+    public boolean isMyonnettyAfter(Arvosana a) {
+        return NEWEST_FIRST.compare(this, a) < 0;
+    }
+
     public static class DescendingMyonnettyOrder implements Comparator<Arvosana> {
         @Override
         public int compare(Arvosana first, Arvosana second) {
@@ -178,15 +182,10 @@ public class Arvosana {
             if (second.myonnetty == null) {
                 return 1;
             }
-            SimpleDateFormat valmistuminenFormat = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
 
-            try {
-                Date firstMyonnetty = valmistuminenFormat.parse(first.myonnetty);
-                Date secondMyonnetty = valmistuminenFormat.parse(second.myonnetty);
-                return secondMyonnetty.compareTo(firstMyonnetty);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
+            LocalDate firstMyonnetty = LocalDate.parse(first.myonnetty, SuoritusJaArvosanatWrapper.ARVOSANA_PVM_FORMATTER);
+            LocalDate secondMyonnetty = LocalDate.parse(second.myonnetty, SuoritusJaArvosanatWrapper.ARVOSANA_PVM_FORMATTER);
+            return secondMyonnetty.compareTo(firstMyonnetty);
         }
 
         @Override

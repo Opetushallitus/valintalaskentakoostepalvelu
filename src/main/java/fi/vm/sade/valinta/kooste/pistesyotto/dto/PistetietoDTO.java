@@ -16,16 +16,19 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.ARVOSANA_PVM_FORMATTER;
 import static fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService.KIELIKOE_KEY_PREFIX;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class PistetietoDTO {
-    private final ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
-    private final Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
+    public final ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
+    public final Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
 
     @JsonCreator
     public PistetietoDTO(
@@ -50,17 +53,18 @@ public class PistetietoDTO {
                     ohjausparametrit
             ).forEach(s -> {
                 s.getArvosanat().forEach(a -> {
-                    if (hakemusOid.equals(s.getSuoritus().getMyontaja())) {
-                        kielikoetulokset.put(
-                                KIELIKOE_KEY_PREFIX + a.getLisatieto(),
-                                Pair.of(s.getSuoritus(), a)
-                        );
-                    } else if ("hyvaksytty".equals(a.getArvio().getArvosana())) {
-                        kielikoetulokset.putIfAbsent(
-                                KIELIKOE_KEY_PREFIX + a.getLisatieto(),
-                                Pair.of(s.getSuoritus(), a)
-                        );
-                    }
+                    kielikoetulokset.compute(KIELIKOE_KEY_PREFIX + a.getLisatieto(), (k, p) -> {
+                        if (hakemusOid.equals(s.getSuoritus().getMyontaja())) {
+                            if (p == null || !hakemusOid.equals(p.getLeft().getMyontaja()) || a.isMyonnettyAfter(p.getRight())) {
+                                return Pair.of(s.getSuoritus(), a);
+                            }
+                        } else if ("hyvaksytty".equals(a.getArvio().getArvosana())) {
+                            if (p == null || (!hakemusOid.equals(p.getLeft().getMyontaja()) && a.isMyonnettyAfter(p.getRight()))) {
+                                return Pair.of(s.getSuoritus(), a);
+                            }
+                        }
+                        return p;
+                    });
                 });
             });
         }

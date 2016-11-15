@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class HakukohteenOsallistumistiedotDTO {
-    private final Map<String, KokeenOsallistumistietoDTO> valintakokeidenOsallistumistiedot;
+    public final Map<String, KokeenOsallistumistietoDTO> valintakokeidenOsallistumistiedot;
 
     @JsonCreator
     public HakukohteenOsallistumistiedotDTO(
@@ -40,9 +40,9 @@ public class HakukohteenOsallistumistiedotDTO {
 
     @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
     public static class KokeenOsallistumistietoDTO implements Serializable {
-        private final Osallistumistieto osallistumistieto;
-        private final Optional<String> lahdeHakemusOid;
-        private final Optional<String> lahdeMyontajaOid;
+        public final Osallistumistieto osallistumistieto;
+        public final Optional<String> lahdeHakemusOid;
+        public final Optional<String> lahdeMyontajaOid;
 
         @JsonCreator
         public KokeenOsallistumistietoDTO(

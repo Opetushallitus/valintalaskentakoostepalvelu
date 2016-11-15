@@ -9,6 +9,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +34,8 @@ public class SuoritusJaArvosanatWrapper {
     public static final String HAKEMUS_OID_PREFIX = "1.2.246.562.11";
 
     public static final String SUORITUS_PVM_FORMAT = "dd.MM.yyyy";
+    public static final DateTimeFormatter ARVOSANA_PVM_FORMATTER =
+            DateTimeFormatter.ofPattern(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
 
     private static Map<String, String> createKomoToStringMapper() {
         Map<String, String> tmp = Maps.newHashMap();
