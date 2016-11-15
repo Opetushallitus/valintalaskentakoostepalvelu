@@ -249,10 +249,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         return (letterBatch, prosessi, kirje) -> {
             try {
                 if (prosessi.isKeskeytetty()) {
-                    LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
+                    LOG.warn("Hyväksymiskirjeiden luonti on keskeytetty kayttajantoimesta ennen niiden siirtoa viestintäpalveluun!");
                     return;
                 }
-                LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
+                LOG.info("Aloitetaan hyvaksymiskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
                 final LetterResponse batchId;
                 try {
                     batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(letterBatch).get(165L, TimeUnit.SECONDS);
@@ -260,7 +260,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     LOG.error("Viestintapalvelukutsu epaonnistui virheeseen", e);
                     throw new RuntimeException(e);
                 }
-                LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
+                LOG.info("Saatiin hyvaksymiskirjeiden seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)", batchId.getBatchId());
                 prosessi.vaiheValmistui();
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                     PublishSubject<String> stop = PublishSubject.create();
@@ -271,15 +271,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             .subscribe(
                                     pulse -> {
                                         try {
-                                            LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
+                                            LOG.info("Tehdaan status kutsu seurantaId:lle {}", batchId);
                                             LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatus(batchId.getBatchId()).get(900L, TimeUnit.MILLISECONDS);
                                             if (prosessi.isKeskeytetty()) {
-                                                LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
+                                                LOG.warn("Hyvaksymiskirjeiden muodostuksen seuranta on keskeytetty kayttajantoimesta!");
                                                 stop.onNext(null);
                                                 return;
                                             }
                                             if ("error".equals(status.getStatus())) {
-                                                LOG.error("Hyvaksymiskirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
+                                                LOG.error("Hyvaksymiskirjeiden muodostuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen!");
                                                 prosessi.keskeyta();
                                                 stop.onNext(null);
                                             }

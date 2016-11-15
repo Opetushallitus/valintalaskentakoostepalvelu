@@ -162,14 +162,16 @@ public class HyvaksymiskirjeetKomponentti {
             boolean iPosti,
             boolean sahkoinenKorkeakoulunMassaposti ) {
         try {
-            LOG.debug("Hyvaksymiskirjeet for haku '{}'", hakuOid);
             assert (hakuOid != null);
+            int kaikkiHyvaksytyt = hakukohteenHakijat.size();
+            LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti", kaikkiHyvaksytyt);
             Map<String, Hakemus> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
             final List<Letter> kirjeet = new ArrayList<>();
             Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
             Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);
             LetterBatch viesti = new LetterBatch(kirjeet);
 
+            int count = 0;
             for (HakijaDTO hakija : hakukohteenHakijat) {
                 final String hakukohdeOid = StringUtils.isEmpty(hakukohdeOidFromRequest) ? hyvaksytynHakutoiveenHakukohdeOid(hakija) : hakukohdeOidFromRequest;
                 MetaHakukohde hyvaksyttyMeta = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
@@ -234,9 +236,13 @@ public class HyvaksymiskirjeetKomponentti {
                 viesti.setFetchTarget(hakukohdeOid);
                 viesti.setOrganizationOid(tarjoajaOid);
                 viesti.setLanguageCode(preferoituKielikoodi);
+                count++;
+                if(count % 10000 == 0) {
+                    LOG.info("Luotu {}/{} kirjettä", count, kaikkiHyvaksytyt);
+                }
             }
 
-            LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
+            LOG.info("Yritetään luoda viestintapalvelulle hyvaksymiskirje-erä, jossa kirjeitä {} kappaletta!", kirjeet.size());
             Collections.sort(kirjeet, (o1, o2) -> {
                 try {
                     return o1.getAddressLabel().getLastName().compareTo(o2.getAddressLabel().getLastName());

@@ -65,12 +65,14 @@ public class JalkiohjauskirjeetKomponentti {
             LOG.error("Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
             throw new SijoittelupalveluException("Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
         }
+        LOG.info("Aloitetaan {} kpl jälkiohjauskirjeen luonti", kaikkiHyvaksymattomat);
         final Map<String, Hakemus> hakemusOidHakemukset = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
         final List<Letter> kirjeet = new ArrayList<>();
         final boolean kaytetaanYlikirjoitettuKielikoodia = StringUtils.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
         String preferoituKielikoodi = kaytetaanYlikirjoitettuKielikoodia ? ylikirjoitettuPreferoitukielikoodi : KieliUtil.SUOMI;
         Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
+        int count = 0;
         for (HakijaDTO hakija : hyvaksymattomatHakijat) {
             final String hakemusOid = hakija.getHakemusOid();
             if (!hakemusOidHakemukset.containsKey(hakemusOid)) {
@@ -113,9 +115,13 @@ public class JalkiohjauskirjeetKomponentti {
             boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : false;
             kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements,
                     hakija.getHakijaOid(), skipIPosti, sahkoposti, hakija.getHakemusOid()));
+            count++;
+            if(count % 10000 == 0) {
+                LOG.info("Luotu {}/{} kirjettä", count, kaikkiHyvaksymattomat);
+            }
         }
 
-        LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
+        LOG.info("Yritetään luoda viestintäpalvelulle jälkiohjauskirje-erä, jossa kirjeitä {} kappaletta!", kirjeet.size());
         LetterBatch viesti = new LetterBatch(kirjeet);
         viesti.setApplicationPeriod(hakuOid);
         viesti.setFetchTarget(null);

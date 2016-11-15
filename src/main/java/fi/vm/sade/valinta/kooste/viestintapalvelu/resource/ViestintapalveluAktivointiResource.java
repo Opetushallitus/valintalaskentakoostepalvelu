@@ -168,9 +168,9 @@ public class ViestintapalveluAktivointiResource {
             if (hakemuksillaRajaus == null) {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
+            LOG.info("Luodaan jälkiohjauskirjeet kielellä {} hakuun {}", hakemuksillaRajaus.getLanguageCode(), hakuOid);
             KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            LOG.warn("Luodaan jälkiohjauskirjeet kielellä {}. Onko {} == {}", hakemuksillaRajaus.getLanguageCode(), KieliUtil.RUOTSI, KieliUtil.RUOTSI.equals(hakemuksillaRajaus.getLanguageCode()));
             JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(), templateName, tag, hakuOid, hakemuksillaRajaus.getLanguageCode());
             if (hakemuksillaRajaus.getHakemusOids() == null) {
                 jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO);

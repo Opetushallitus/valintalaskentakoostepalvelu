@@ -146,16 +146,15 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag(), sahkoinenKorkeakoulunMassaposti);
             try {
                 if (prosessi.isKeskeytetty()) {
-                    LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta! (Timeout 30min)");
+                    LOG.warn("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta ennen siirto viestintapalveluun!");
                     return;
                 }
-                LOG.error("Aloitetaan jalkiohjauskirjeiden vienti! Kirjeita {}kpl", letterBatch.getLetters().size());
+                LOG.info("Aloitetaan jalkiohjauskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
                 //TODO: Muuta aidosti asynkroniseksi
                 LetterResponse batchId = from(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)).first();
-                LOG.error("Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)", batchId.getBatchId());
+                LOG.info("Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)", batchId.getBatchId());
                 prosessi.vaiheValmistui();
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
-                    LOG.error("############ Kirjeiden status ok #############");
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
                             .interval(1, TimeUnit.SECONDS)
@@ -164,22 +163,22 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                             .subscribe(
                                     pulse -> {
                                         try {
-                                            LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
+                                            LOG.info("Tehdaan status kutsu seurantaId:lle {}", batchId);
                                             //TODO: Muuta aidosti asynkroniseksi
                                             LetterBatchStatusDto status = from(viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())).first();
                                             if (prosessi.isKeskeytetty()) {
-                                                LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta!");
+                                                LOG.warn("Jalkiohjauskirjeiden muodstuksen seuranta on keskeytetty kayttajantoimesta");
                                                 stop.onNext(null);
                                                 return;
                                             }
                                             if ("error".equals(status.getStatus())) {
-                                                LOG.error("Jalkiohjauskirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
+                                                LOG.error("Jalkiohjauskirjeiden muodstuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen!");
                                                 prosessi.keskeyta();
                                                 stop.onNext(null);
                                             }
                                             if ("ready".equals(status.getStatus())) {
                                                 prosessi.vaiheValmistui();
-                                                LOG.error("Jalkiohjauskirjeet valmistui!");
+                                                LOG.info("Jalkiohjauskirjeet valmistui!");
                                                 prosessi.valmistui(batchId.getBatchId());
                                                 stop.onNext(null);
                                             }
