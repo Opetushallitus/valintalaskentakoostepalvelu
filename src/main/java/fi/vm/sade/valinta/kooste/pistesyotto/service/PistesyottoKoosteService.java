@@ -136,14 +136,4 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
         return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA);
     }
-
-
-
-    private Map<String,String> toAdditionalData(List<Arvosana> arvosanat) {
-        Map<String, List<Arvosana>> groupedByKieli = arvosanat.stream().collect(Collectors.groupingBy(Arvosana::getLisatieto));
-        return groupedByKieli.keySet().stream().collect(Collectors.toMap(
-            kieli -> KIELIKOE_KEY_PREFIX + kieli.toLowerCase(),
-            kieli -> groupedByKieli.get(kieli).stream().anyMatch(a -> "TRUE".equalsIgnoreCase(a.getArvio().getArvosana())) ? "true" : "false"
-        ));
-    }
 }
