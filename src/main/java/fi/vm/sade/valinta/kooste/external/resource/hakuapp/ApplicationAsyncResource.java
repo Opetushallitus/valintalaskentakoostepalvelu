@@ -14,8 +14,10 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public interface ApplicationAsyncResource {
+
     List<String> DEFAULT_KEYS = Arrays.asList("applicationSystemId", "oid", "personOid", "answers.henkilotiedot", "answers.lisatiedot", "answers.hakutoiveet", "hakutapa", "maxApplicationOptions");
     List<String> DEFAULT_STATES = Arrays.asList("ACTIVE", "INCOMPLETE");
+    int DEFAULT_ROW_LIMIT = 100000;
 
     Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 

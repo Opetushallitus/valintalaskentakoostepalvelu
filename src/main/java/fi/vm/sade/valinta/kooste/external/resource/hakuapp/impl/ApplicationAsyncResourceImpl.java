@@ -69,7 +69,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     public Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
         return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), client -> {
             client.query("appState", DEFAULT_STATES.toArray());
-            client.query("rows", 100000).query("asId", hakuOid).query("aoOid", hakukohdeOids);
+            client.query("rows", DEFAULT_ROW_LIMIT).query("asId", hakuOid).query("aoOid", hakukohdeOids);
             LOG.info("Calling url {}", client.getCurrentURI());
             return client;
         });
@@ -103,7 +103,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    client.query("rows", 100000);
+                    client.query("rows", DEFAULT_ROW_LIMIT);
                     if(!keys.isEmpty()) {
                         client.query("asIds", hakuOid);
                         client.query("state", DEFAULT_STATES.toArray());
@@ -117,7 +117,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     public Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids) {
         return getWebClient()
                 .path("/applications/list")
-                .query("rows", 100000)
+                .query("rows", DEFAULT_ROW_LIMIT)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Hakemus>>() {});
@@ -133,12 +133,12 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
         String url = "/applications/list";
         return new PeruutettavaImpl(getWebClient()
                 .path(url)
-                .query("rows", 100000)
+                .query("rows", DEFAULT_ROW_LIMIT)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<List<Hakemus>>(gson(),
                         address,
-                        url + "?rows=100000",
+                        url + "?rows=" + DEFAULT_ROW_LIMIT,
                         callback,
                         failureCallback,
                         new TypeToken<List<Hakemus>>() {}.getType())));
@@ -151,7 +151,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                     getWebClient()
                             .path(url)
                             .query("appState", "ACTIVE", "INCOMPLETE")
-                            .query("rows", 100000)
+                            .query("rows", DEFAULT_ROW_LIMIT)
                             .query("asId", hakuOid)
                             .query("aoOid", hakukohdeOid)
                             .async()
