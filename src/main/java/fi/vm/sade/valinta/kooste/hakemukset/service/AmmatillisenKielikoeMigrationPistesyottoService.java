@@ -13,11 +13,14 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationService.Result;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 import rx.Subscription;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -26,6 +29,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPistesyottoKoosteService {
+    private static final Logger LOG = LoggerFactory.getLogger(AmmatillisenKielikoeMigrationPistesyottoService.class);
+
     @Autowired
     public AmmatillisenKielikoeMigrationPistesyottoService(ApplicationAsyncResource applicationAsyncResource,
                                                            SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
@@ -56,10 +61,20 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
                 List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = kohteenTiedot.hakemusJaPersonOidit;
                 Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen = kohteenTiedot.kielikoeTuloksetHakemuksittain;
                 Result result = new Result(r.startingFrom);
-                kielikoetuloksetSureen.values().forEach(hakijanTulokset ->
+
+                Map<String, List<SingleKielikoeTulos>> eiTyhjatKielikoetuloksetSureen = new HashMap<>();
+                for (Map.Entry<String, List<SingleKielikoeTulos>> entry : kielikoetuloksetSureen.entrySet()) {
+                    if (entry.getValue().isEmpty()) {
+                        LOG.warn(String.format("Tyhjä tulosjoukko kohteen %s hakemukselle %s", hakukohdeOid, entry.getKey()));
+                    } else {
+                        eiTyhjatKielikoetuloksetSureen.put(entry.getKey(), entry.getValue());
+                    }
+                }
+
+                eiTyhjatKielikoetuloksetSureen.values().forEach(hakijanTulokset ->
                         hakijanTulokset.forEach(tulos ->
                                 result.add(tulos.kokeenTunnus, tulos.arvioArvosana)));
-                tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen,
+                tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, eiTyhjatKielikoetuloksetSureen,
                         username, PISTETIEDOT_AMMATTILLISEN_KIELIKOKEEN_MIGRAATIO, false)
                         .subscribe((a) -> {
                             subscriber.onNext(result);
