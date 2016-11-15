@@ -265,7 +265,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
-                            .interval(1, TimeUnit.SECONDS)
+                            .interval(10, TimeUnit.SECONDS)
                             .take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
                             .takeUntil(stop)
                             .subscribe(
