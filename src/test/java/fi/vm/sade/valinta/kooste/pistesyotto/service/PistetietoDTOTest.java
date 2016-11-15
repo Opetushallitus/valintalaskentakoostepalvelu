@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.Osallistumistieto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistetietoDTO;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,6 +16,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static org.junit.Assert.assertEquals;
 
 public class PistetietoDTOTest {
@@ -67,7 +71,7 @@ public class PistetietoDTOTest {
         Arvosana a = new Arvosana();
         a.setLisatieto("fi");
         Arvio arvio = new Arvio();
-        arvio.setArvosana("hyvaksytty");
+        arvio.setArvosana(hyvaksytty.name());
         a.setArvio(arvio);
         kielikoesuoritus.setArvosanat(Collections.singletonList(a));
         oppija.setSuoritukset(Collections.singletonList(kielikoesuoritus));
@@ -94,7 +98,7 @@ public class PistetietoDTOTest {
         Arvosana aFi = new Arvosana();
         aFi.setLisatieto("fi");
         Arvio arvioFi = new Arvio();
-        arvioFi.setArvosana("hylatty");
+        arvioFi.setArvosana(hylatty.name());
         aFi.setArvio(arvioFi);
         samanHakemuksenSuoritus.setArvosanat(Collections.singletonList(aFi));
 
@@ -106,7 +110,7 @@ public class PistetietoDTOTest {
         Arvosana aSv = new Arvosana();
         aSv.setLisatieto("sv");
         Arvio arvioSv = new Arvio();
-        arvioSv.setArvosana("hylatty");
+        arvioSv.setArvosana(hylatty.name());
         aSv.setArvio(arvioSv);
         eriHakemuksenSuoritus.setArvosanat(Collections.singletonList(aSv));
 
@@ -136,7 +140,7 @@ public class PistetietoDTOTest {
         Arvosana aFi = new Arvosana();
         aFi.setLisatieto("fi");
         Arvio arvioFi = new Arvio();
-        arvioFi.setArvosana("ei_osallistunut");
+        arvioFi.setArvosana(ei_osallistunut.name());
         aFi.setArvio(arvioFi);
         samanHakemuksenSuoritus.setArvosanat(Collections.singletonList(aFi));
 
@@ -148,7 +152,7 @@ public class PistetietoDTOTest {
         Arvosana aSv = new Arvosana();
         aSv.setLisatieto("sv");
         Arvio arvioSv = new Arvio();
-        arvioSv.setArvosana("ei_osallistunut");
+        arvioSv.setArvosana(ei_osallistunut.name());
         aSv.setArvio(arvioSv);
         eriHakemuksenSuoritus.setArvosanat(Collections.singletonList(aSv));
 
@@ -180,7 +184,7 @@ public class PistetietoDTOTest {
         aV.setMyonnetty("30.01.2000");
         aV.setSource("organisaatioOid1");
         Arvio arvioV = new Arvio();
-        arvioV.setArvosana("hyvaksytty");
+        arvioV.setArvosana(hyvaksytty.name());
         aV.setArvio(arvioV);
         vanhempiSuoritus.setArvosanat(Collections.singletonList(aV));
 
@@ -194,7 +198,7 @@ public class PistetietoDTOTest {
         aU.setMyonnetty("31.01.2000");
         aU.setSource("organisaatioOid2");
         Arvio arvioU = new Arvio();
-        arvioU.setArvosana("hyvaksytty");
+        arvioU.setArvosana(hyvaksytty.name());
         aU.setArvio(arvioU);
         uudempiSuoritus.setArvosanat(Collections.singletonList(aU));
 
