@@ -114,12 +114,6 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockTarjontaHakukohdeCall();
         mockSureKutsu(createOppijat());
 
-        int totalCount = pistetiedot.stream().mapToInt(p -> p.getAdditionalData().size()).sum();
-        int kielikoeCount = pistetiedot.stream().mapToInt(p -> p.getAdditionalData().keySet().stream().filter("kielikoe_fi"::equals).collect(Collectors.toList()).size()).sum();
-        System.out.println(totalCount);
-        System.out.println(kielikoeCount);
-        System.out.println(totalCount - kielikoeCount);
-
         final Semaphore suoritusCounter = new Semaphore(0);
         final Semaphore arvosanaCounter = new Semaphore(0);
         final Semaphore deleteCounter = new Semaphore(0);
