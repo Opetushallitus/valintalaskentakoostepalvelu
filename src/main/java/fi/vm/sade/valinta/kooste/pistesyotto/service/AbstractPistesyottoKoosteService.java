@@ -132,7 +132,7 @@ public abstract class AbstractPistesyottoKoosteService {
             Observable<List<Observable<Arvosana>>> sureOperations = compositeCommandForHakemus.createSureOperation(suoritusrekisteriAsyncResource)
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
                     "Virhe hakemuksen %s tulosten tallentamisessa Suoritusrekisteriin ", hakemusOid), t)));
-            sureOperations.forEach(arvosanaObservables -> arvosanaObservables.forEach(arvosanaObservable -> {
+            sureOperations.last().forEach(arvosanaObservables -> arvosanaObservables.forEach(arvosanaObservable -> {
                     arvosanaObservable.last().forEach(processedArvosana ->
                         AUDIT.log(builder()
                             .id(username)
@@ -146,7 +146,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 }
             ));
 
-            return Observable.just(sureOperations).<Void>map(x -> null);
+            return sureOperations.<Void>map(x -> null);
         }).lastOrDefault(null).doOnCompleted(() ->
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }
