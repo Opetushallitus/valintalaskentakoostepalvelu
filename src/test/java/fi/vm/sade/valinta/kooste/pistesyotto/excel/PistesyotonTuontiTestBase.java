@@ -1,30 +1,7 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.sun.net.httpserver.HttpHandler;
-import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
-import fi.vm.sade.valinta.kooste.server.MockServer;
-import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
+import static javax.ws.rs.HttpMethod.POST;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -39,14 +16,30 @@ import com.google.gson.reflect.TypeToken;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.POST;
-import static javax.ws.rs.HttpMethod.PUT;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 public class PistesyotonTuontiTestBase {
     final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -191,7 +184,6 @@ public class PistesyotonTuontiTestBase {
                                 IOUtils.toString(exchange.getRequestBody()), new com.google.common.reflect.TypeToken<Suoritus>() {
                                 }.getType()
                         );
-                        System.out.println(suoritus);
                         suoritus.setId("suoritus" + suoritus.getHenkiloOid());
                         exchange.sendResponseHeaders(200, 0);
                         OutputStream responseBody = exchange.getResponseBody();
@@ -207,7 +199,6 @@ public class PistesyotonTuontiTestBase {
                                 IOUtils.toString(exchange.getRequestBody()), new com.google.common.reflect.TypeToken<Arvosana>() {
                                 }.getType()
                         );
-                        System.out.println(arvosana);
                         exchange.sendResponseHeaders(200, 0);
                         OutputStream responseBody = exchange.getResponseBody();
                         IOUtils.write(new Gson().toJson(arvosana), responseBody);
