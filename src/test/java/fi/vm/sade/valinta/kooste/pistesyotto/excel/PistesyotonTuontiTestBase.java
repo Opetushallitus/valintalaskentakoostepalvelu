@@ -2,8 +2,6 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
 import static javax.ws.rs.HttpMethod.POST;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -40,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.stream.Collectors;
 
 public class PistesyotonTuontiTestBase {
     final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -99,16 +98,7 @@ public class PistesyotonTuontiTestBase {
     }
 
     Collection<String> getValintakoeTunnisteet(final List<ValintaperusteDTO> valintaperusteet) {
-        return FluentIterable
-            .from(valintaperusteet)
-            .transform(
-                new Function<ValintaperusteDTO, String>() {
-                    @Override
-                    public String apply(
-                        ValintaperusteDTO input) {
-                        return input.getTunniste();
-                    }
-                }).toList();
+        return valintaperusteet.stream().map(ValintaperusteDTO::getTunniste).collect(Collectors.toList());
     }
 
     void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot, final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot, final String tiedosto, final String hakuOid, final String hakukohdeOid) throws IOException, ExcelValidointiPoikkeus {
