@@ -5,6 +5,8 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.GET;
@@ -31,6 +33,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.OsallistuminenTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
@@ -305,17 +308,17 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         return Arrays.asList(
                createOppija("1.2.246.562.24.77642460905", singletonList(
                    createSuoritus("suoritus1", "1.2.246.562.24.77642460905", "FI", singletonList(
-                       createArvosana("FI", "TRUE"))))),
+                       createArvosana("FI", hyvaksytty))))),
                createOppija("1.2.246.562.24.52321744679", Arrays.asList(
                        createSuoritus("suoritus2", "1.2.246.562.24.52321744679", "FI", singletonList(
-                           createArvosana("FI", "FALSE"))),
+                           createArvosana("FI", hylatty))),
                        createSuoritus("suoritus3", "1.2.246.562.24.52321744679", "SV", singletonList(
-                           createArvosana("SV", "TRUE"))))),
+                           createArvosana("SV", hyvaksytty))))),
                 createOppija("1.2.246.562.24.93793496064", Arrays.asList(
                         createSuoritus("suoritus4", "1.2.246.562.24.93793496064", "FI", singletonList(
-                            createArvosana("FI", "FALSE"))),
+                            createArvosana("FI", hylatty))),
                         createSuoritus("suoritus5", "1.2.246.562.24.93793496064", "FI", singletonList(
-                            createArvosana("FI", "TRUE")), "1.2.246.562.10.45698499379")))
+                            createArvosana("FI", hyvaksytty)), "1.2.246.562.10.45698499379")))
         );
     }
 
@@ -343,11 +346,11 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         return suoritusJaArvosanat;
     }
 
-    private Arvosana createArvosana(String kieli, String arvio) {
+    private Arvosana createArvosana(String kieli, AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana arvio) {
         Arvosana arvosana = new Arvosana();
         arvosana.setAine(AbstractPistesyottoKoosteService.KIELIKOE_ARVOSANA_AINE);
         arvosana.setLisatieto(kieli.toUpperCase());
-        arvosana.setArvio(new Arvio(arvio.toUpperCase(), null, null));
+        arvosana.setArvio(new Arvio(arvio.name(), "HYVAKSYTTY", null));
         return arvosana;
     }
 
