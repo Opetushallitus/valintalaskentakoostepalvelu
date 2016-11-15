@@ -38,13 +38,13 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public final List<Result> results = new ArrayList<>();
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids) {
+    public Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids) {
         return Observable.just(resultReference.get());
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
-        return Observable.just(resultReference.get());
+    public List<Hakemus> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
+        return resultReference.get();
     }
 
     @Override

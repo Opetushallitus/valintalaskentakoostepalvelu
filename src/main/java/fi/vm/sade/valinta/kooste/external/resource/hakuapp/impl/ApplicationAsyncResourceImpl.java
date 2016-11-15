@@ -29,6 +29,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static rx.observables.BlockingObservable.from;
+
 @Service
 public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implements ApplicationAsyncResource {
 
@@ -93,12 +95,11 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids) {
+    public Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids) {
         return getApplicationsByHakemusOids(null, hakemusOids, Collections.emptyList());
     }
 
-    @Override
-    public Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
+    private Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
         return postAsObservable("/applications/list", new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
@@ -111,6 +112,22 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                     }
                     return client;
                 });
+    }
+
+    @Override
+    public List<Hakemus> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
+        LOG.info("Haetaan " + hakemusOids.size() + " hakemusta haku-app:sta");
+        List<Hakemus> allApplications = new ArrayList<>();
+        List<List<String>> partialIdLists = Lists.partition(hakemusOids, DEFAULT_PART_ROW_LIMIT);
+        for (int patchNo = 1; patchNo <= partialIdLists.size(); patchNo++) {
+            List<Hakemus> applicationBatch = from(getApplicationsByHakemusOids(hakuOid, partialIdLists.get(patchNo - 1), keys)).first();
+            allApplications.addAll(applicationBatch);
+            if(patchNo < partialIdLists.size()) {
+                LOG.info("Haettu " + allApplications.size() + " hakemusta. Haetaan lisää.");
+            }
+        }
+        LOG.info("Haettiin " + allApplications.size() + " hakemusta haku-app:sta onnistuneesti.");
+        return allApplications;
     }
 
     @Override

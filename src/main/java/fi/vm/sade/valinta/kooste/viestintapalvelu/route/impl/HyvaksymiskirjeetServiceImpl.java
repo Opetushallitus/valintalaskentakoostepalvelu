@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static rx.Observable.from;
+import static rx.Observable.just;
 import static rx.Observable.zip;
 
 @Service
@@ -88,7 +89,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
-            Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByHakemusOids(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS);
+            Observable<List<Hakemus>> hakemuksetFuture = just(applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS));
             Observable<List<HakijaDTO>> hakijatFuture = Observable.from(hakemusOids).concatMap(hakemus -> sijoitteluAsyncResource.getHakijaByHakemus(hakuOid, hakemus)).toList();
             Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
 

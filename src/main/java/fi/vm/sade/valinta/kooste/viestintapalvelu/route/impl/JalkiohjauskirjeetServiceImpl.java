@@ -117,16 +117,15 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
             throw new RuntimeException("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
         }
 
-        Collection<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
+        List<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
         try {
-            LOG.info("Haetaan hakemukset!");
-            //TODO: Muuta aidosti asynkroniseksi
-            return from(applicationAsyncResource.getApplicationsByHakemusOids(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)).first();
+            return applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS);
         } catch (Throwable e) {
             LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
             throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
         }
     }
+
 
     private String lueAsiointikieliKirjeesta(JalkiohjauskirjeDTO kirje) {
         return KieliUtil.normalisoiKielikoodi(Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
