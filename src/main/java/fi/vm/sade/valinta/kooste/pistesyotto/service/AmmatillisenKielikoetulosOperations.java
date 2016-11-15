@@ -48,27 +48,34 @@ public class AmmatillisenKielikoetulosOperations {
         }
         String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
         if (personOid == null) {
-            LOG.warn(String.format("Ei löytynyt hakijaOidia hakemukselle %s tallennettaessa ammatillisen kielikoetuloksia lähteelle %s . " +
-                "Lisätään arvosanat %s hakemukselle Suoritusrekisteriin lähetettäviin.", hakemusOid, sourceOid,
-                inputValuesForHakemus));
-            return Optional.of(createSingleNewArvosanaSave(sourceOid, hakemusOid, inputValuesForHakemus, personOid));
+            LOG.warn(String.format("Ei löytynyt hakijaOidia hakemukselle %s tallennettaessa ammatillisen kielikoetuloksia lähteelle %s . ", hakemusOid, sourceOid));
+            return createSingleNewArvosanaSave(sourceOid, hakemusOid, inputValuesForHakemus, personOid);
         } else {
             Optional<Oppija> oppijaFromExistingSureResults = oppijatiedotSuresta.stream().filter(o -> personOid.equals(o.getOppijanumero())).findFirst();
             if (!oppijaFromExistingSureResults.isPresent()) {
-                LOG.info(String.format("Ei löytynyt hakijan %s ammatillisen kielikoesuorituksia lähteelle %s . " +
-                    "Lisätään arvosanat %s hakemukselle %s Suoritusrekisteriin lähetettäviin.", personOid, sourceOid, inputValuesForHakemus, hakemusOid));
-                return Optional.of(createSingleNewArvosanaSave(sourceOid, hakemusOid, inputValuesForHakemus, personOid));
+                LOG.info(String.format("Ei löytynyt hakijan %s ammatillisen kielikoesuorituksia lähteelle %s . ", personOid, sourceOid));
+                return createSingleNewArvosanaSave(sourceOid, hakemusOid, inputValuesForHakemus, personOid);
             } else {
                 return createExistingSuoritusUpdate(sourceOid, hakemusOid, inputValuesForHakemus, personOid, oppijaFromExistingSureResults.get());
             }
         }
     }
 
-    private CompositeCommand createSingleNewArvosanaSave(String sourceOid, String hakemusOid, List<SingleKielikoeTulos> inputValuesForHakemus, String personOid) {
-        List<ArvosanaCommand> createArvosanas = inputValuesForHakemus.stream()
-            .filter(tulos -> !tyhja.equals(tulos.arvioArvosana))
+    private Optional<CompositeCommand> createSingleNewArvosanaSave(String sourceOid, String hakemusOid, List<SingleKielikoeTulos> inputValuesForHakemus, String personOid) {
+        List<SingleKielikoeTulos> nonEmptyTuloses = withNonEmptyValues(inputValuesForHakemus);
+        if (nonEmptyTuloses.isEmpty()) {
+            LOG.info(String.format("Ei tallennettavaa hakemukselle %s", hakemusOid));
+            return Optional.empty();
+        }
+        LOG.warn(String.format("Lisätään arvosanat %s hakemukselle %s Suoritusrekisteriin lähetettäviin.", nonEmptyTuloses, hakemusOid));
+        List<ArvosanaCommand> createArvosanas = nonEmptyTuloses.stream()
             .map(tulos -> new CreateArvosana(tulos, sourceOid)).collect(Collectors.toList());
-        return new SaveSuoritus(inputValuesForHakemus.get(0), hakemusOid, personOid, createArvosanas);
+        return Optional.of(new SaveSuoritus(nonEmptyTuloses.get(0), hakemusOid, personOid, createArvosanas));
+    }
+
+    private List<SingleKielikoeTulos> withNonEmptyValues(List<SingleKielikoeTulos> inputValuesForHakemus) {
+        return inputValuesForHakemus.stream()
+            .filter(tulos -> !tyhja.equals(tulos.arvioArvosana)).collect(Collectors.toList());
     }
 
     private Optional<CompositeCommand> createExistingSuoritusUpdate(String sourceOid, String hakemusOid, List<SingleKielikoeTulos> inputValuesForHakemus,
