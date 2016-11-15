@@ -65,7 +65,9 @@ public class AmmatillisenKielikoetulosOperations {
     }
 
     private CompositeCommand createSingleNewArvosanaSave(String sourceOid, String hakemusOid, List<SingleKielikoeTulos> inputValuesForHakemus, String personOid) {
-        List<ArvosanaCommand> createArvosanas = inputValuesForHakemus.stream().map(tulos -> new CreateArvosana(tulos, sourceOid)).collect(Collectors.toList());
+        List<ArvosanaCommand> createArvosanas = inputValuesForHakemus.stream()
+            .filter(tulos -> !tyhja.equals(tulos.arvioArvosana))
+            .map(tulos -> new CreateArvosana(tulos, sourceOid)).collect(Collectors.toList());
         return new SaveSuoritus(inputValuesForHakemus.get(0), hakemusOid, personOid, createArvosanas);
     }
 
