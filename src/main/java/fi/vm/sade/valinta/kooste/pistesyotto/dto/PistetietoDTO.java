@@ -56,7 +56,7 @@ public class PistetietoDTO {
                     ohjausparametrit
             ).forEach(s -> {
                 s.getArvosanat().forEach(a -> {
-                    kielikoetulokset.compute(KIELIKOE_KEY_PREFIX + a.getLisatieto(), (k, p) -> {
+                    kielikoetulokset.compute(KIELIKOE_KEY_PREFIX + a.getLisatieto().toLowerCase(), (k, p) -> {
                         if (hakemusOid.equals(s.getSuoritus().getMyontaja())) {
                             if (p == null || !hakemusOid.equals(p.getLeft().getMyontaja()) || a.isMyonnettyAfter(p.getRight())) {
                                 return Pair.of(s.getSuoritus(), a);
