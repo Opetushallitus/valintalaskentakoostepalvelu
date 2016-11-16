@@ -3,22 +3,22 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.Osallistumistieto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistetietoDTO;
-import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
-import org.junit.Assert;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.*;
 import static org.junit.Assert.assertEquals;
 
 public class PistetietoDTOTest {
@@ -48,7 +48,7 @@ public class PistetietoDTOTest {
         eiVaadiOsallistumista.setVaatiiOsallistumisen(false);
         PistetietoDTO p = new PistetietoDTO(
                 new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", additionalData),
-                Arrays.asList(vaatiiOsallistumisen, eiVaadiOsallistumista),
+                Pair.of("hakukohdeOid", Arrays.asList(vaatiiOsallistumisen, eiVaadiOsallistumista)),
                 new ValintakoeOsallistuminenDTO(),
                 new Oppija(),
                 new ParametritDTO()
@@ -69,7 +69,7 @@ public class PistetietoDTOTest {
         s.setMyontaja("hakemusOid");
         kielikoesuoritus.setSuoritus(s);
         Arvosana a = new Arvosana();
-        a.setLisatieto("fi");
+        a.setLisatieto("FI");
         Arvio arvio = new Arvio();
         arvio.setArvosana(hyvaksytty.name());
         a.setArvio(arvio);
@@ -77,7 +77,7 @@ public class PistetietoDTOTest {
         oppija.setSuoritukset(Collections.singletonList(kielikoesuoritus));
         PistetietoDTO p = new PistetietoDTO(
                 new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
-                Collections.singletonList(kielikoeFi),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,
                 new ParametritDTO()
@@ -96,7 +96,7 @@ public class PistetietoDTOTest {
         sFi.setMyontaja("hakemusOid");
         samanHakemuksenSuoritus.setSuoritus(sFi);
         Arvosana aFi = new Arvosana();
-        aFi.setLisatieto("fi");
+        aFi.setLisatieto("FI");
         Arvio arvioFi = new Arvio();
         arvioFi.setArvosana(hylatty.name());
         aFi.setArvio(arvioFi);
@@ -108,7 +108,7 @@ public class PistetietoDTOTest {
         sSv.setMyontaja("eriHakemusOid");
         eriHakemuksenSuoritus.setSuoritus(sSv);
         Arvosana aSv = new Arvosana();
-        aSv.setLisatieto("sv");
+        aSv.setLisatieto("SV");
         Arvio arvioSv = new Arvio();
         arvioSv.setArvosana(hylatty.name());
         aSv.setArvio(arvioSv);
@@ -117,7 +117,7 @@ public class PistetietoDTOTest {
         oppija.setSuoritukset(Arrays.asList(samanHakemuksenSuoritus, eriHakemuksenSuoritus));
         PistetietoDTO p = new PistetietoDTO(
                 new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
-                Collections.singletonList(kielikoeSv),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeSv)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,
                 new ParametritDTO()
@@ -138,7 +138,7 @@ public class PistetietoDTOTest {
         sFi.setMyontaja("hakemusOid");
         samanHakemuksenSuoritus.setSuoritus(sFi);
         Arvosana aFi = new Arvosana();
-        aFi.setLisatieto("fi");
+        aFi.setLisatieto("FI");
         Arvio arvioFi = new Arvio();
         arvioFi.setArvosana(ei_osallistunut.name());
         aFi.setArvio(arvioFi);
@@ -150,7 +150,7 @@ public class PistetietoDTOTest {
         sSv.setMyontaja("eriHakemusOid");
         eriHakemuksenSuoritus.setSuoritus(sSv);
         Arvosana aSv = new Arvosana();
-        aSv.setLisatieto("sv");
+        aSv.setLisatieto("SV");
         Arvio arvioSv = new Arvio();
         arvioSv.setArvosana(ei_osallistunut.name());
         aSv.setArvio(arvioSv);
@@ -159,7 +159,7 @@ public class PistetietoDTOTest {
         oppija.setSuoritukset(Arrays.asList(samanHakemuksenSuoritus, eriHakemuksenSuoritus));
         PistetietoDTO p = new PistetietoDTO(
                 new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
-                Collections.singletonList(kielikoeSv),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeSv)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,
                 new ParametritDTO()
@@ -180,7 +180,7 @@ public class PistetietoDTOTest {
         sV.setMyontaja("eriHakemusOid");
         vanhempiSuoritus.setSuoritus(sV);
         Arvosana aV = new Arvosana();
-        aV.setLisatieto("fi");
+        aV.setLisatieto("FI");
         aV.setMyonnetty("30.01.2000");
         aV.setSource("organisaatioOid1");
         Arvio arvioV = new Arvio();
@@ -194,7 +194,7 @@ public class PistetietoDTOTest {
         sU.setMyontaja("eriHakemusOid");
         uudempiSuoritus.setSuoritus(sU);
         Arvosana aU = new Arvosana();
-        aU.setLisatieto("fi");
+        aU.setLisatieto("FI");
         aU.setMyonnetty("31.01.2000");
         aU.setSource("organisaatioOid2");
         Arvio arvioU = new Arvio();
@@ -219,7 +219,7 @@ public class PistetietoDTOTest {
 
         PistetietoDTO p = new PistetietoDTO(
                 new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
-                Collections.singletonList(kielikoeFi),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 osallistuminen,
                 oppija,
                 new ParametritDTO()
@@ -228,5 +228,69 @@ public class PistetietoDTOTest {
         assertEquals(Osallistuminen.OSALLISTUI.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
         assertEquals(Osallistumistieto.TOISELLA_HAKEMUKSELLA, p.hakukohteidenOsallistumistiedot.get("hakukohdeOid").valintakokeidenOsallistumistiedot.get("kielikoe_fi").osallistumistieto);
         assertEquals("organisaatioOid2", p.hakukohteidenOsallistumistiedot.get("hakukohdeOid").valintakokeidenOsallistumistiedot.get("kielikoe_fi").lahdeMyontajaOid.get());
+    }
+
+    @Test
+    public void testOsallistumistietoVaikkeOsallistumistaJosSyotettavissaKaikille() {
+        ValintaperusteDTO syotettavissaKaikille = new ValintaperusteDTO();
+        syotettavissaKaikille.setTunniste("syotettavissa_kaikille");
+        syotettavissaKaikille.setSyotettavissaKaikille(true);
+        PistetietoDTO p = new PistetietoDTO(
+                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(syotettavissaKaikille)),
+                null,
+                null,
+                new ParametritDTO()
+        );
+        assertEquals(Osallistumistieto.OSALLISTUI, p.hakukohteidenOsallistumistiedot.get("hakukohdeOid").valintakokeidenOsallistumistiedot.get("syotettavissa_kaikille").osallistumistieto);
+    }
+
+    @Test
+    public void testValintalaskennanAlkamisenJalkeenMyonnettyjaKielikoetuloksiaEiKayteta() throws ParseException {
+        ValintakoeOsallistuminenDTO osallistuminen = new ValintakoeOsallistuminenDTO();
+        HakutoiveDTO h = new HakutoiveDTO();
+        h.setHakukohdeOid("hakukohdeOid");
+        ValintakoeValinnanvaiheDTO vv = new ValintakoeValinnanvaiheDTO();
+        ValintakoeDTO koe = new ValintakoeDTO();
+        koe.setValintakoeTunniste("kielikoe_fi");
+        OsallistuminenTulosDTO o = new OsallistuminenTulosDTO();
+        o.setOsallistuminen(fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.OSALLISTUU);
+        koe.setOsallistuminenTulos(o);
+        vv.setValintakokeet(Collections.singletonList(koe));
+        h.setValinnanVaiheet(Collections.singletonList(vv));
+        osallistuminen.setHakutoiveet(Collections.singletonList(h));
+
+        SuoritusJaArvosanat suoritus = new SuoritusJaArvosanat();
+        Suoritus s = new Suoritus();
+        s.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
+        s.setMyontaja("hakemusOid");
+        suoritus.setSuoritus(s);
+        Arvosana a = new Arvosana();
+        a.setLisatieto("FI");
+        a.setMyonnetty("31.01.2000");
+        a.setSource("organisaatioOid1");
+        Arvio arvio = new Arvio();
+        arvio.setArvosana(hyvaksytty.name());
+        a.setArvio(arvio);
+        suoritus.setArvosanat(Collections.singletonList(a));
+
+        Oppija oppija = new Oppija();
+        oppija.setSuoritukset(Collections.singletonList(suoritus));
+
+        ParametritDTO ohjausparametrit = new ParametritDTO();
+        ParametriDTO ph_vls = new ParametriDTO();
+        ph_vls.setDateStart((new SimpleDateFormat("dd.MM.yyyy").parse("30.01.2000")));
+        ohjausparametrit.setPH_VLS(ph_vls);
+
+        PistetietoDTO p = new PistetietoDTO(
+                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
+                osallistuminen,
+                oppija,
+                ohjausparametrit
+        );
+        assertEquals(Osallistumistieto.OSALLISTUI, p.hakukohteidenOsallistumistiedot.get("hakukohdeOid").valintakokeidenOsallistumistiedot.get("kielikoe_fi").osallistumistieto);
+        assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
+        assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
     }
 }

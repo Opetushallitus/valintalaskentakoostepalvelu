@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
@@ -12,6 +13,7 @@ import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +21,18 @@ import java.util.stream.Collectors;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class HakukohteenOsallistumistiedotDTO {
     public final Map<String, KokeenOsallistumistietoDTO> valintakokeidenOsallistumistiedot;
+
+    public HakukohteenOsallistumistiedotDTO(HakukohteenOsallistumistiedotDTO old, ValintaperusteDTO v) {
+        this.valintakokeidenOsallistumistiedot = old == null ?
+                new HashMap<>() :
+                new HashMap<>(old.valintakokeidenOsallistumistiedot);
+        this.valintakokeidenOsallistumistiedot.compute(v.getTunniste(), (tunniste, koe) -> {
+            if (koe == null || koe.osallistumistieto == Osallistumistieto.EI_KUTSUTTU) {
+                return new KokeenOsallistumistietoDTO(v);
+            }
+            return koe;
+        });
+    }
 
     @JsonCreator
     public HakukohteenOsallistumistiedotDTO(
@@ -90,6 +104,12 @@ public class HakukohteenOsallistumistiedotDTO {
                             "Odottamaton koeosallistumisen tila %s", koe.getOsallistuminenTulos().getOsallistuminen()
                     ));
             }
+        }
+
+        public KokeenOsallistumistietoDTO(ValintaperusteDTO v) {
+            this.osallistumistieto = Osallistumistieto.OSALLISTUI;
+            this.lahdeHakemusOid = Optional.empty();
+            this.lahdeMyontajaOid = Optional.empty();
         }
     }
 }

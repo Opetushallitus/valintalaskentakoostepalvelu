@@ -44,7 +44,7 @@ public class PistetietoDTO {
     }
 
     public PistetietoDTO(ApplicationAdditionalDataDTO additionalData,
-                         List<ValintaperusteDTO> valintaperusteet,
+                         Pair<String, List<ValintaperusteDTO>> valintaperusteet,
                          ValintakoeOsallistuminenDTO kokeet,
                          Oppija oppija,
                          ParametritDTO ohjausparametrit) {
@@ -98,7 +98,12 @@ public class PistetietoDTO {
                     ));
             }
         });
-        valintaperusteet.forEach(v -> {
+        valintaperusteet.getRight().forEach(v -> {
+            if (v.getSyotettavissaKaikille() != null && v.getSyotettavissaKaikille()) {
+                this.hakukohteidenOsallistumistiedot.compute(valintaperusteet.getLeft(), (oid, h) ->
+                        new HakukohteenOsallistumistiedotDTO(h, v)
+                );
+            }
             additionalData.getAdditionalData().putIfAbsent(v.getTunniste(), "");
             additionalData.getAdditionalData().putIfAbsent(
                     v.getOsallistuminenTunniste(),

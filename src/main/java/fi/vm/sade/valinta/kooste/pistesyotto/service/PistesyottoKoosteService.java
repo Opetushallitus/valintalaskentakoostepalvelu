@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
@@ -54,7 +55,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     return additionalDatat.stream().map(additionalData ->
                             new PistetietoDTO(
                                     additionalData,
-                                    valintaperusteet,
+                                    Pair.of(hakukohdeOid, valintaperusteet),
                                     valintakokeet.get(additionalData.getOid()),
                                     oppijat.get(additionalData.getPersonOid()),
                                     ohjausparametrit
