@@ -93,9 +93,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockHakuAppKutsu(pistetiedot);
         mockSureKutsu(createOppijat());
         mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde/",
-                Collections.<ValintaperusteDTO>singletonList(kielikoeFi)); // TODO add correct avaimet
+                Collections.singletonList(kielikoeFi));
         mockToReturnJson(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/testihakukohde",
-                Collections.<ValintakoeOsallistuminenDTO>emptyList()); // TODO add correct osallistuminen
+                Collections.<ValintakoeOsallistuminenDTO>emptyList());
         mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku", new ParametritDTO());
 
         Response r = http.getWebClient()
