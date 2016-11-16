@@ -6,7 +6,6 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditi
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -16,6 +15,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
+    private static final Logger LOG = LoggerFactory.getLogger(PistesyottoKoosteService.class);
 
     @Autowired
     public PistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
@@ -43,26 +45,30 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     }
 
     public Observable<List<PistetietoDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, List<String> hakemusOidit) {
-        return Observable.zip(
+        try {
+            return Observable.zip(
                 applicationAsyncResource.getApplicationAdditionalData(hakemusOidit),
                 valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
                 valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
-                        .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v))),
+                    .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v))),
                 suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
-                        .map(os -> os.stream().collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o))),
+                    .map(os -> os.stream().collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o))),
                 ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
-                (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) -> {
-                    return additionalDatat.stream().map(additionalData ->
-                            new PistetietoDTO(
-                                    additionalData,
-                                    Pair.of(hakukohdeOid, valintaperusteet),
-                                    valintakokeet.get(additionalData.getOid()),
-                                    oppijat.get(additionalData.getPersonOid()),
-                                    ohjausparametrit
-                            )
-                    ).collect(Collectors.toList());
-                }
-        );
+                (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) ->
+                    additionalDatat.stream().map(additionalData ->
+                        new PistetietoDTO(
+                            additionalData,
+                            Pair.of(hakukohdeOid, valintaperusteet),
+                            valintakokeet.get(additionalData.getOid()),
+                            oppijat.get(additionalData.getPersonOid()),
+                            ohjausparametrit
+                        )
+                    ).collect(Collectors.toList())
+            );
+        } catch (Exception e) {
+            LOG.error(String.format("Ongelma koostettaessa haun %s kohteen %s pistetietoja %s hakemukselle : %s", hakuOid, hakukohdeOid, hakemusOidit.size(), hakemusOidit), e);
+            return Observable.error(e);
+        }
     }
 
     private static Map<String, HakutoiveDTO> kielikokeidenHakukohteet(ValintakoeOsallistuminenDTO voDTO) {
@@ -127,14 +133,23 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                                                          List<ApplicationAdditionalDataDTO> pistetietoDTOs,
                                                          String username) {
         Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoetuloksetSureen = new HashMap<>();
+        List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle;
+        try {
+            pistetiedotHakemukselle = createAdditionalDataAndPopulateKielikoetulokset(pistetietoDTOs, kielikoetuloksetSureen);
+            return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA);
+        } catch (Exception e) {
+            LOG.error(String.format("Ongelma käsiteltäessä pistetietoja haun %s kohteelle %s , käyttäjä %s ", hakuOid, hakukohdeOid, username), e);
+            return Observable.error(e);
+        }
+    }
+
+    private List<ApplicationAdditionalDataDTO> createAdditionalDataAndPopulateKielikoetulokset(List<ApplicationAdditionalDataDTO> pistetietoDTOs, Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen) {
         Date valmistuminen = new Date();
-        List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle = pistetietoDTOs.stream().flatMap(pistetieto -> {
+        return pistetietoDTOs.stream().flatMap(pistetieto -> {
             String hakemusOid = pistetieto.getOid();
             Map<String, String> additionalData = pistetieto.getAdditionalData();
             siirraKielikoepistetiedotKielikoetulosMapiin(valmistuminen, kielikoetuloksetSureen, hakemusOid, additionalData);
             return Stream.of(pistetieto);
         }).filter(a -> !a.getAdditionalData().isEmpty()).collect(Collectors.toList());
-
-        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA);
     }
 }

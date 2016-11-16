@@ -261,8 +261,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     if ("false".equals(tulosArvo)) {
                         return new SingleKielikoeTulos(avain, hylatty, valmistuminen);
                     }
-                    throw new IllegalArgumentException(String.format("TODO: lisättävä oikea virhekäsittely: huono arvo '%s' hakemuksella %s",
-                        tulosArvo, hakemusOid));
+                    throw new IllegalArgumentException(String.format("'%s' hakemuksella %s", tulosArvo, hakemusOid));
                 }
                 if ("EI_OSALLISTUNUT".equals(osallistumisArvo)) {
                     return new SingleKielikoeTulos(avain, ei_osallistunut, valmistuminen);
@@ -270,7 +269,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 if (Arrays.asList("MERKITSEMATTA", "EI_VAADITA").contains(osallistumisArvo)) {
                     return new SingleKielikoeTulos(avain, tyhja, valmistuminen);
                 }
-                throw new IllegalArgumentException(String.format("TODO: lisättävä oikea virhekäsittely: huono osallistumistieto '%s' hakemuksella %s",
+                throw new IllegalArgumentException(String.format("huono osallistumistieto '%s' hakemuksella %s",
                     osallistumisArvo, hakemusOid));
             }).collect(Collectors.toList()));
         }

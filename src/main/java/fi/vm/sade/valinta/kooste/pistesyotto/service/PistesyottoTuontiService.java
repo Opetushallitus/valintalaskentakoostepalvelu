@@ -122,21 +122,27 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             }
             Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
             Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> uudetKielikoetulokset = new HashMap<>();
-            List<ApplicationAdditionalDataDTO> uudetPistetiedot =
-                    pistesyottoTuontiAdapteri
-                            .getRivit().stream()
-                            .filter(PistesyottoRivi::isValidi)
-                            .flatMap(rivi -> {
-                                final String hakemusOid = rivi.getOid();
-                                ApplicationAdditionalDataDTO additionalData = pistetiedotMapping.get(hakemusOid);
-                                Map<String, String> newPistetiedot = rivi.asAdditionalData(
-                                        valintakoetunniste -> pistesyottoExcel.onkoHakijaOsallistujaValintakokeeseen(hakemusOid, valintakoetunniste));
-                                siirraKielikoepistetiedotKielikoetulosMapiin(valmistuminen, uudetKielikoetulokset, hakemusOid, newPistetiedot);
-                                additionalData.setAdditionalData(newPistetiedot);
-                                return Stream.of(additionalData);
-                            }).filter(Objects::nonNull)
-                            .filter(a -> !a.getAdditionalData().isEmpty())
-                            .collect(Collectors.toList());
+            List<ApplicationAdditionalDataDTO> uudetPistetiedot;
+            try {
+                uudetPistetiedot = pistesyottoTuontiAdapteri
+                        .getRivit().stream()
+                        .filter(PistesyottoRivi::isValidi)
+                        .flatMap(rivi -> {
+                            final String hakemusOid = rivi.getOid();
+                            ApplicationAdditionalDataDTO additionalData = pistetiedotMapping.get(hakemusOid);
+                            Map<String, String> newPistetiedot = rivi.asAdditionalData(
+                                    valintakoetunniste -> pistesyottoExcel.onkoHakijaOsallistujaValintakokeeseen(hakemusOid, valintakoetunniste));
+                            siirraKielikoepistetiedotKielikoetulosMapiin(valmistuminen, uudetKielikoetulokset, hakemusOid, newPistetiedot);
+                            additionalData.setAdditionalData(newPistetiedot);
+                            return Stream.of(additionalData);
+                        }).filter(Objects::nonNull)
+                        .filter(a -> !a.getAdditionalData().isEmpty())
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                LOG.error(String.format("Ongelma muodostettaessa pistetietoja haun %s kohteelle %s , käyttäjä %s", hakuOid, hakukohdeOid, username), e);
+                poikkeusilmoitus.accept(e);
+                return;
+            }
 
             if (uudetPistetiedot.isEmpty()) {
                 LOG.info("Pistesyötössä hakukohteeseen {} ei yhtäkään muuttunutta tietoa tallennettavaksi", hakukohdeOid);
