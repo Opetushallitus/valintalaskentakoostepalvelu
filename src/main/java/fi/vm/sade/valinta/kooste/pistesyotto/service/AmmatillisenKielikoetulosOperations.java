@@ -48,12 +48,12 @@ public class AmmatillisenKielikoetulosOperations {
         }
         String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
         if (personOid == null) {
-            LOG.warn(String.format("Ei löytynyt hakijaOidia hakemukselle %s tallennettaessa ammatillisen kielikoetuloksia lähteelle %s . ", hakemusOid, sourceOid));
+            LOG.warn(String.format("Ei löytynyt hakijaOidia hakemukselle %s tallennettaessa ammatillisen kielikoetuloksia lähteelle %s . Tallennetaan tulokset uusina. ", hakemusOid, sourceOid));
             return createSingleNewArvosanaSave(sourceOid, hakemusOid, inputValuesForHakemus, personOid);
         } else {
             Optional<Oppija> oppijaFromExistingSureResults = oppijatiedotSuresta.stream().filter(o -> personOid.equals(o.getOppijanumero())).findFirst();
             if (!oppijaFromExistingSureResults.isPresent()) {
-                LOG.info(String.format("Ei löytynyt hakijan %s ammatillisen kielikoesuorituksia lähteelle %s . ", personOid, sourceOid));
+                LOG.info(String.format("Suoritusrekisteristä ei löytynyt hakijan %s ammatillisen kielikoesuorituksia %s . Tallennetaan tulokset uusina.", personOid, sourceOid));
                 return createSingleNewArvosanaSave(sourceOid, hakemusOid, inputValuesForHakemus, personOid);
             } else {
                 return createExistingSuoritusUpdate(sourceOid, hakemusOid, inputValuesForHakemus, personOid, oppijaFromExistingSureResults.get());
