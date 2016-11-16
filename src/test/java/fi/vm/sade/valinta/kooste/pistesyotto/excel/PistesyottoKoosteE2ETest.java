@@ -34,6 +34,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistetietoDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -66,6 +67,14 @@ import java.util.stream.Collectors;
 
 public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
+    private static final ValintaperusteDTO kielikoeFi = new ValintaperusteDTO();
+
+    static {
+        kielikoeFi.setTunniste("kielikoe_fi");
+        kielikoeFi.setOsallistuminenTunniste("kielikoe_fi-OSALLISTUMINEN");
+        kielikoeFi.setVaatiiOsallistumisen(true);
+    }
+
     @Before
     public void startServer() throws Throwable{
         startShared();
@@ -84,7 +93,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockHakuAppKutsu(pistetiedot);
         mockSureKutsu(createOppijat());
         mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde/",
-                Collections.<ValintaperusteDTO>emptyList()); // TODO add correct avaimet
+                Collections.<ValintaperusteDTO>singletonList(kielikoeFi)); // TODO add correct avaimet
         mockToReturnJson(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/testihakukohde",
                 Collections.<ValintakoeOsallistuminenDTO>emptyList()); // TODO add correct osallistuminen
         mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku", new ParametritDTO());
@@ -95,22 +104,30 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 .post(new Gson().toJson(hakemusOids));
         assertEquals(200, r.getStatus());
 
-        List<ApplicationAdditionalDataDTO> uudetPistetiedot = new Gson().fromJson(
+        List<PistetietoDTO> uudetPistetiedot = new Gson().fromJson(
                 new InputStreamReader((InputStream)r.getEntity()),
-                new TypeToken<List<ApplicationAdditionalDataDTO>>(){}.getType());
+                new TypeToken<List<PistetietoDTO>>(){}.getType());
 
         BiFunction<String, String, String> readPistetieto = (personOid, key) ->
-            uudetPistetiedot.stream().filter(p -> personOid.equals(p.getPersonOid())).findFirst().get().getAdditionalData().get(key);
+            uudetPistetiedot.stream()
+                    .map(p -> p.applicationAdditionalDataDTO)
+                    .filter(p -> personOid.equals(p.getPersonOid()))
+                    .findFirst().get().getAdditionalData().get(key);
 
         assertEquals("true", readPistetieto.apply("1.2.246.562.24.77642460905", "kielikoe_fi"));
-        assertEquals("false", readPistetieto.apply("1.2.246.562.24.52321744679", "kielikoe_fi"));
+        assertEquals("", readPistetieto.apply("1.2.246.562.24.52321744679", "kielikoe_fi"));
         assertEquals("true", readPistetieto.apply("1.2.246.562.24.52321744679", "kielikoe_sv"));
         assertEquals("true", readPistetieto.apply("1.2.246.562.24.93793496064", "kielikoe_fi"));
 
         Function<List<ApplicationAdditionalDataDTO>, Integer> countAdditionalData = (pistetietoList) ->
             pistetietoList.stream().mapToInt(p -> p.getAdditionalData().values().size()).sum();
 
-        assertEquals((countAdditionalData.apply(pistetiedot) + 4), (int)countAdditionalData.apply(uudetPistetiedot));
+        int keysAddedByKielikoeFi = hakemusOids.size() * 2;
+        int keysAddedByKielikoeSvSuoritus = 2;
+        assertEquals(
+                (countAdditionalData.apply(pistetiedot) + keysAddedByKielikoeFi + keysAddedByKielikoeSvSuoritus),
+                countAdditionalData.apply(uudetPistetiedot.stream().map(p -> p.applicationAdditionalDataDTO).collect(Collectors.toList())).intValue()
+        );
     }
 
     @Test
@@ -303,6 +320,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     private List<ApplicationAdditionalDataDTO> readAdditionalData() throws Exception {
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
         pistetiedot.forEach(p -> p.getAdditionalData().remove("kielikoe_fi"));
+        pistetiedot.forEach(p -> p.getAdditionalData().remove("kielikoe_fi-OSALLISTUMINEN"));
+        pistetiedot.forEach(p -> p.getAdditionalData().remove("kielikoe_sv"));
+        pistetiedot.forEach(p -> p.getAdditionalData().remove("kielikoe_sv-OSALLISTUMINEN"));
         return pistetiedot;
     }
 
