@@ -204,7 +204,7 @@ public class PistesyottoVientiService {
                                 viimeisteleTuonti.get();
                                 tarkistaYlimaaraisetOsallistujat.get();
                             }, poikkeuskasittelija);
-            valintaperusteetResource.haeValintakokeetHakukohteille(Arrays.asList(hakukohdeOid), hakukohdeJaValintakoe -> {
+            valintaperusteetResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)).subscribe(hakukohdeJaValintakoe -> {
                 prosessi.inkrementoiTehtyjaToita();
                 hakukohdeJaValintakoeRef.set(hakukohdeJaValintakoe);
                 viimeisteleTuonti.get();
