@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
@@ -26,13 +25,13 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import rx.Observable;
+import rx.functions.Func1;
+import rx.functions.Func2;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,7 +72,9 @@ public class PistesyottoVientiService {
             String tarjoajaOid = HakukohdeHelper.tarjoajaOid(hakukohdeDTO);
             String hakukohdeNimi = new Teksti(hakukohdeDTO.getHakukohteenNimet()).getTeksti();
             String tarjoajaNimi = new Teksti(hakukohdeDTO.getTarjoajaNimet()).getTeksti();
-            Collection<String> valintakoeTunnisteet = valintakoeTunnisteet(valintaperusteet);
+            Collection<String> valintakoeTunnisteet = valintaperusteet.stream()
+                    .map(v -> v.getTunniste())
+                    .collect(Collectors.toList());
 
             Map<String, List<Arvosana>> kielikoeArvosanat = AbstractPistesyottoKoosteService.ammatillisenKielikoeArvosanat(oppijat);
 
@@ -87,7 +88,7 @@ public class PistesyottoVientiService {
                     tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot,
                     valintaperusteet, pistetiedot, kielikoeArvosanat).getExcel().vieXlsx();
 
-            prosessi.inkrementoiTehtyjaToita();
+            prosessi.inkrementoiKokonaistyota();
             String id = UUID.randomUUID().toString();
             dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", defaultExpirationDate().getTime(), prosessi.getTags(),
                     "application/octet-stream", xlsx, response -> {
@@ -99,125 +100,83 @@ public class PistesyottoVientiService {
         }
     }
 
-    private Collection<String> valintakoeTunnisteet(List<ValintaperusteDTO> valintaperusteet) {
-        return valintaperusteet.stream().map(v -> v.getTunniste()).collect(Collectors.toList());
-    }
-
     public void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi) {
         PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
         });
         try {
-            prosessi.setKokonaistyo(8
-                            // luonti
-                            + 1
-                            // dokumenttipalveluun vienti
-                            + 1);
-            AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedotRef = new AtomicReference<>();
-            AtomicReference<List<Hakemus>> hakemusRef = new AtomicReference<>();
-            AtomicReference<List<ValintaperusteDTO>> valintaperusteRef = new AtomicReference<>();
-            AtomicReference<List<ApplicationAdditionalDataDTO>> lisatiedotRef = new AtomicReference<>();
-            AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeJaValintakoeRef = new AtomicReference<>();
-            AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
-            AtomicReference<HakukohdeV1RDTO> hakukohdeRef = new AtomicReference<>();
-            AtomicReference<List<Oppija>> oppijatRef = new AtomicReference<>(new ArrayList<Oppija>());
-            AtomicReference<Boolean> haeSuoritusrekisteristaRef = new AtomicReference<>(null);
-
-            Supplier<Void> viimeisteleTuonti;
-            {
-                AtomicInteger laskuri = new AtomicInteger(8 + 2 // <- ylimaaraisten osallistujen hakemukset ja lisatiedot
-                );
-                viimeisteleTuonti = () -> {
-                    if (laskuri.decrementAndGet() <= 0) {
-                        vie(hakuOid, hakukohdeOid, prosessi, osallistumistiedotRef.get(), hakemusRef.get(), valintaperusteRef.get(),
-                                lisatiedotRef.get(), hakukohdeJaValintakoeRef.get(), hakuRef.get(), hakukohdeRef.get(), oppijatRef.get());
-                    }
-                    return null;
-                };
-            }
-            Supplier<Void> tarkistaYlimaaraisetOsallistujat;
-            {
-                AtomicInteger laskuriYlimaaraisilleOsallistujille = new AtomicInteger(3 // osallistujat + hakemukset + lisatiedot
-                );
-                tarkistaYlimaaraisetOsallistujat = () -> {
-                    if (laskuriYlimaaraisilleOsallistujille.decrementAndGet() <= 0) {
-                        //osallistumistiedot.get().stream().filter(o -> o.getHakutoiveet().stream().anyMatch(o2 -> hakukohdeOid.equals(o2.getHakukohdeOid())));
-                        Set<String> osallistujienHakemusOids = Sets.newHashSet(osallistumistiedotRef.get().stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet()));
-                        osallistujienHakemusOids.removeAll(lisatiedotRef.get().stream().map(a -> a.getOid()).collect(Collectors.toSet()));
-                        if (!osallistujienHakemusOids.isEmpty()) {
-                            // haetaan puuttuvat lisätiedot ja hakemukset
-                            applicationAsyncResource.getApplicationAdditionalData(osallistujienHakemusOids).subscribe(a -> {
-                                lisatiedotRef.set(Stream.concat(lisatiedotRef.get().stream(), a.stream()).collect(Collectors.toList()));
-                                viimeisteleTuonti.get();
-                            }, poikkeuskasittelija);
-                            applicationAsyncResource.getApplicationsByHakemusOids(osallistujienHakemusOids).subscribe(a -> {
-                                hakemusRef.set(Stream.concat(hakemusRef.get().stream(), a.stream()).collect(Collectors.toList()));
-                                viimeisteleTuonti.get();
-                            }, poikkeuskasittelija);
-                        } else {
-                            viimeisteleTuonti.get();
-                            viimeisteleTuonti.get();
-                        }
-                    }
-                    return null;
-                };
-            }
-            Supplier<Void> haeKielikokeetSuoritusrekisterista = () -> {
-                Boolean haeSuoritusrekisterista = haeSuoritusrekisteristaRef.get();
-                if(haeSuoritusrekisterista) {
-                    suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid).subscribe(oppijat -> {
-                       oppijatRef.set(oppijat);
-                       prosessi.inkrementoiTehtyjaToita();
-                       viimeisteleTuonti.get();
-                    }, poikkeuskasittelija);
-                } else {
-                    prosessi.inkrementoiTehtyjaToita();
-                    viimeisteleTuonti.get();
+            Func2<List<ValintakoeOsallistuminenDTO>, List<ApplicationAdditionalDataDTO>, Observable<List<ApplicationAdditionalDataDTO>>> heaPuuttuvatLisatiedot = (osallistumiset, lisatiedot) -> {
+                Set<String> puuttuvatLisatiedot = osallistumiset.stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet());
+                puuttuvatLisatiedot.removeAll(lisatiedot.stream().map(l -> l.getOid()).collect(Collectors.toSet()));
+                if (puuttuvatLisatiedot.isEmpty()) {
+                    return Observable.just(lisatiedot);
                 }
-                return null;
+                prosessi.inkrementoiKokonaistyota();
+                return applicationAsyncResource.getApplicationAdditionalData(puuttuvatLisatiedot)
+                        .map(ls -> Stream.concat(lisatiedot.stream(), ls.stream()).collect(Collectors.toList()))
+                        .doOnCompleted(() -> {
+                            prosessi.inkrementoiTehtyjaToita();
+                        });
             };
-            valintakoeResource.haeHakutoiveelle(hakukohdeOid).subscribe(osallistumistiedot -> {
-                osallistumistiedotRef.set(osallistumistiedot);
+            Func2<List<ValintakoeOsallistuminenDTO>, List<Hakemus>, Observable<List<Hakemus>>> haePuuttuvatHakemukset = (osallistumiset, hakemukset) -> {
+                Set<String> puuttuvatHakemukset = osallistumiset.stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet());
+                puuttuvatHakemukset.removeAll(hakemukset.stream().map(h -> h.getOid()).collect(Collectors.toSet()));
+                if (puuttuvatHakemukset.isEmpty()) {
+                    return Observable.just(hakemukset);
+                }
+                prosessi.inkrementoiKokonaistyota();
+                return applicationAsyncResource.getApplicationsByHakemusOids(puuttuvatHakemukset)
+                        .map(hs -> Stream.concat(hakemukset.stream(), hs.stream()).collect(Collectors.toList()))
+                        .doOnCompleted(() -> {
+                            prosessi.inkrementoiTehtyjaToita();
+                        });
+            };
+            Func1<List<ValintaperusteDTO>, Observable<List<Oppija>>> haeKielikoetulokset = kokeet -> {
+                if (kokeet.stream().map(k -> k.getTunniste()).anyMatch(t -> t.matches(PistesyottoExcel.KIELIKOE_REGEX))) {
+                    prosessi.inkrementoiKokonaistyota();
+                    return suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
+                            .doOnCompleted(() -> {
+                                prosessi.inkrementoiTehtyjaToita();
+                            });
+                } else {
+                    return Observable.just(new ArrayList<>());
+                }
+            };
+            Observable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = valintakoeResource.haeHakutoiveelle(hakukohdeOid);
+            Observable<List<ApplicationAdditionalDataDTO>> lisatiedotO = Observable.merge(Observable.zip(
+                    osallistumistiedotO,
+                    applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid),
+                    heaPuuttuvatLisatiedot
+            ));
+            Observable<List<Hakemus>> hakemuksetO = Observable.merge(Observable.zip(
+                    osallistumistiedotO,
+                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
+                    haePuuttuvatHakemukset
+            ));
+            Observable<List<ValintaperusteDTO>> kokeetO = valintaperusteetResource.findAvaimet(hakukohdeOid);
+
+            prosessi.inkrementoiKokonaistyota();
+            Observable.zip(
+                    osallistumistiedotO,
+                    lisatiedotO,
+                    hakemuksetO,
+                    kokeetO,
+                    kokeetO.flatMap(haeKielikoetulokset),
+                    valintaperusteetResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)),
+                    tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
+                    tarjontaAsyncResource.haeHaku(hakuOid),
+                    (osallistumistiedot, lisatiedot, hakemukset, kokeet, kielikoetulokset, valintakoeosallistumiset, hakukohde, haku) -> {
+                        vie(hakuOid, hakukohdeOid, prosessi, osallistumistiedot, hakemukset, kokeet, lisatiedot,
+                                valintakoeosallistumiset, haku, hakukohde, kielikoetulokset);
+                        return null;
+                    }
+            ).subscribe(v -> {
                 prosessi.inkrementoiTehtyjaToita();
-                viimeisteleTuonti.get();
-                tarkistaYlimaaraisetOsallistujat.get();
-            }, poikkeuskasittelija);
-            applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
-                        hakemusRef.set(hakemukset);
-                        prosessi.inkrementoiTehtyjaToita();
-                        viimeisteleTuonti.get();
-                        tarkistaYlimaaraisetOsallistujat.get();
-                    }, poikkeuskasittelija);
-            valintaperusteetResource.findAvaimet(hakukohdeOid).subscribe(avaimet -> {
-                prosessi.inkrementoiTehtyjaToita();
-                valintaperusteRef.set(avaimet);
-                haeSuoritusrekisteristaRef.set(valintakoeTunnisteet(avaimet).stream().anyMatch(t -> t.startsWith("kielikoe_")));
-                haeKielikokeetSuoritusrekisterista.get();
-                viimeisteleTuonti.get();
-            }, poikkeuskasittelija);
-            applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid).subscribe(lisatiedot -> {
-                prosessi.inkrementoiTehtyjaToita();
-                lisatiedotRef.set(lisatiedot);
-                viimeisteleTuonti.get();
-                tarkistaYlimaaraisetOsallistujat.get();
-            }, poikkeuskasittelija);
-            valintaperusteetResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)).subscribe(hakukohdeJaValintakoe -> {
-                prosessi.inkrementoiTehtyjaToita();
-                hakukohdeJaValintakoeRef.set(hakukohdeJaValintakoe);
-                viimeisteleTuonti.get();
-            }, poikkeuskasittelija);
-            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
-                prosessi.inkrementoiTehtyjaToita();
-                hakukohdeRef.set(hakukohde);
-                viimeisteleTuonti.get();
-            }, poikkeuskasittelija);
-            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
-                prosessi.inkrementoiTehtyjaToita();
-                hakuRef.set(haku);
-                viimeisteleTuonti.get();
-            }, poikkeuskasittelija);
-        } catch (Throwable t) {
+            }, t -> {
+                poikkeuskasittelija.accept(t);
+            });
+        } catch (Exception t) {
             poikkeuskasittelija.accept(t);
         }
     }
