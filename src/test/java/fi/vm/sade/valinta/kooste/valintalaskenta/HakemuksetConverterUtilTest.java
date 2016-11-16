@@ -1,5 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import static fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen.EI_OSALLISTUNUT;
+import static fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen.MERKITSEMATTA;
+import static fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen.OSALLISTUI;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec.laskennanalkamisparametri;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -9,10 +15,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
@@ -2193,16 +2201,16 @@ public class HakemuksetConverterUtilTest {
         h.setAvaimet(new ArrayList<>());
         Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("1.10.2015")
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2015, 10, 1).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hylatty).setMyonnetty(new LocalDate(2015, 10, 1).toDateTimeAtStartOfDay()).build()
                 .build()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("true").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hyvaksytty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
                 .build()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("23.9.2016")
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 9, 23).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hylatty).setMyonnetty(new LocalDate(2016, 9, 23).toDateTimeAtStartOfDay()).build()
                 .build()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("23.9.2016")
-                .arvosana().setAine("kielikoe").setLisatieto("SV").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 9, 23).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("SV").setAsteikko_hyvaksytty().setArvosana(hylatty).setMyonnetty(new LocalDate(2016, 9, 23).toDateTimeAtStartOfDay()).build()
                 .build()
             .build();
 
@@ -2219,7 +2227,7 @@ public class HakemuksetConverterUtilTest {
         }});
         Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hylatty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
                 .build()
             .build();
 
@@ -2228,13 +2236,30 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
+    public void ammatillisenKielikokeenOsallistumistietoTuleeMyosSuoritusrekisterista() {
+        HakemusDTO h = new HakemusDTO();
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hyvaksytty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("SV").setAsteikko_hyvaksytty().setArvosana(ei_osallistunut).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .build()
+            .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
+        Assert.assertEquals(OSALLISTUI.name(), getFirstHakemusArvo(h, "kielikoe_fi-OSALLISTUMINEN"));
+        Assert.assertEquals(EI_OSALLISTUNUT.name(), getFirstHakemusArvo(h, "kielikoe_sv-OSALLISTUMINEN"));
+        Assert.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
+        Assert.assertEquals("", getFirstHakemusArvo(h, "kielikoe_sv"));
+    }
+
+    @Test
     public void useampiAmmatillisenKielikoeArvosanatietoSamalleSuoritukselleSurestaPalauttaaHyvaksytynArvosananJosSellainenLoytyy() {
         HakemusDTO h = new HakemusDTO();
         h.setAvaimet(new ArrayList<>());
         Oppija oppijaJollaOnSekaHyvaksyttyEttaHylattyArvosana = new SuoritusrekisteriSpec.OppijaBuilder()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("true").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hylatty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hyvaksytty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
                 .build()
             .build();
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppijaJollaOnSekaHyvaksyttyEttaHylattyArvosana, h, true);
@@ -2243,8 +2268,8 @@ public class HakemuksetConverterUtilTest {
         h.setAvaimet(new ArrayList<>());
         Oppija oppijaJollaOnVainHylattyjaArvosanoja = new SuoritusrekisteriSpec.OppijaBuilder()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("false").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hylatty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hylatty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
                 .build()
             .build();
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppijaJollaOnVainHylattyjaArvosanoja, h, true);
@@ -2257,7 +2282,7 @@ public class HakemuksetConverterUtilTest {
         h.setAvaimet(new ArrayList<>());
         Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_Osakoe().setArvosana("false").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_Osakoe().setArvosana(hylatty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
                 .build()
             .build();
 
@@ -2270,7 +2295,7 @@ public class HakemuksetConverterUtilTest {
         h.setAvaimet(new ArrayList<>() );
         Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
             .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016")
-                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana("true").setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hyvaksytty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
                 .build()
             .build();
 
