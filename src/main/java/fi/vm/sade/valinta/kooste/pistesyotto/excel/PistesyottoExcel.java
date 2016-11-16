@@ -116,45 +116,6 @@ public class PistesyottoExcel {
         return tunnisteOid;
     }
 
-    public PistesyottoExcel(String hakuOid,
-                            String hakukohdeOid,
-                            String tarjoajaOid,
-                            String hakuNimi,
-                            String hakukohdeNimi,
-                            String tarjoajaNimi,
-                            Collection<Hakemus> hakemukset,
-                            Set<String> kaikkiKutsutaanTunnisteet,
-                            Collection<String> valintakoeTunnisteet,
-                            List<ValintakoeOsallistuminenDTO> osallistumistiedot,
-                            List<ValintaperusteDTO> valintaperusteet,
-                            List<ApplicationAdditionalDataDTO> pistetiedot,
-                            Map<String, List<Arvosana>> kielikoeArvosanat
-    ) {
-        this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi, hakemukset,
-                kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
-                pistetiedot, Collections.<PistesyottoDataRiviKuuntelija>emptyList(), kielikoeArvosanat);
-    }
-
-    public PistesyottoExcel(String hakuOid,
-                            String hakukohdeOid,
-                            String tarjoajaOid,
-                            String hakuNimi,
-                            String hakukohdeNimi,
-                            String tarjoajaNimi,
-                            Collection<Hakemus> hakemukset,
-                            Set<String> kaikkiKutsutaanTunnisteet,
-                            Collection<String> valintakoeTunnisteet,
-                            List<ValintakoeOsallistuminenDTO> osallistumistiedot,
-                            List<ValintaperusteDTO> valintaperusteet,
-                            List<ApplicationAdditionalDataDTO> pistetiedot,
-                            PistesyottoDataRiviKuuntelija kuuntelija,
-                            Map<String, List<Arvosana>> kielikoeArvosanat
-    ) {
-        this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi, hakemukset,
-                kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
-                pistetiedot, Arrays.asList(kuuntelija), kielikoeArvosanat);
-    }
-
     public static String additionalDataToNimi(ApplicationAdditionalDataDTO data) {
         if (data == null) {
             return "'Hakemuksella ei ole nimeä'";
@@ -174,8 +135,7 @@ public class PistesyottoExcel {
                             List<ValintakoeOsallistuminenDTO> osallistumistiedot,
                             List<ValintaperusteDTO> valintaperusteet,
                             List<ApplicationAdditionalDataDTO> pistetiedot,
-                            Collection<PistesyottoDataRiviKuuntelija> kuuntelijat,
-                            Map<String, List<Arvosana>> kielikoeArvosanat
+                            Collection<PistesyottoDataRiviKuuntelija> kuuntelijat
     ) {
         if (pistetiedot == null) {
             pistetiedot = Collections.emptyList();
@@ -262,25 +222,10 @@ public class PistesyottoExcel {
                             s.add(new NumeroArvo(value, min, max));
                         }
                     } else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
-                        if(isKielikoe(valintaperuste)) {
-                            String tunniste = valintaperuste.getTunniste().toLowerCase();
-                            if(tunniste.matches(KIELIKOE_REGEX)) {
-                                String kieli = tunniste.substring(9);
-                                List<Arvosana> henkilonKielikoeArvosanat = kielikoeArvosanat.getOrDefault(data.getPersonOid(), new ArrayList<>()
-                                    ).stream().filter(a -> kieli.equalsIgnoreCase(a.getLisatieto())).collect(Collectors.toList());
-                                if(henkilonKielikoeArvosanat.stream().anyMatch(a -> "TRUE".equalsIgnoreCase(a.getArvio().getArvosana()))) {
-                                    s.add(new BooleanArvo(true, TOTUUSARVO_KIELIKOE, HYVAKSYTTY, HYLATTY, TYHJA));
-                                } else if(henkilonKielikoeArvosanat.stream().anyMatch(a -> "FALSE".equalsIgnoreCase(a.getArvio().getArvosana()))) {
-                                    s.add(new BooleanArvo(false, TOTUUSARVO_KIELIKOE, HYVAKSYTTY, HYLATTY, TYHJA));
-                                } else {
-                                    s.add(new BooleanArvo("", TOTUUSARVO_KIELIKOE, HYVAKSYTTY, HYLATTY, TYHJA));
-                                }
-                            } else {
-                                String value = StringUtils.trimToEmpty(data.getAdditionalData().get(valintaperuste.getTunniste()));
-                                s.add(new BooleanArvo(value, TOTUUSARVO_KIELIKOE, HYVAKSYTTY, HYLATTY, TYHJA));
-                            }
+                        String value = StringUtils.trimToEmpty(data.getAdditionalData().get(valintaperuste.getTunniste()));
+                        if (isKielikoe(valintaperuste)) {
+                            s.add(new BooleanArvo(value, TOTUUSARVO_KIELIKOE, HYVAKSYTTY, HYLATTY, TYHJA));
                         } else {
-                            String value = StringUtils.trimToEmpty(data.getAdditionalData().get(valintaperuste.getTunniste()));
                             s.add(new BooleanArvo(value, TOTUUSARVO, KYLLA, EI, TYHJA));
                         }
                     } else {

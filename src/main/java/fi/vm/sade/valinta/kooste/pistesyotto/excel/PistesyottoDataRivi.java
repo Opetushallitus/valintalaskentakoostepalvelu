@@ -36,8 +36,7 @@ public class PistesyottoDataRivi extends DataRivi {
         {
             int i = 4;
             for (PistesyottoDataArvo dataArvo : dataArvot) {
-                arvot.add(dataArvo.asPistesyottoArvo(rivi.getArvoAt(i),
-                        rivi.getArvoAt(i + 1)));
+                arvot.add(dataArvo.asPistesyottoArvo(rivi.getArvoAt(i), rivi.getArvoAt(i + 1)));
                 i += 2;
             }
         }
