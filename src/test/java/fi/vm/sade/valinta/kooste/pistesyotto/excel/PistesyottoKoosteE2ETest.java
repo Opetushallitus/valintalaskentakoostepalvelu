@@ -22,6 +22,7 @@ import com.sun.net.httpserver.HttpHandler;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -98,7 +99,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     @Test
     public void testKoostaaPistetiedotHakemuksille() throws Exception {
 
-        HttpResource http = new HttpResourceImpl(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
+        HttpResource http = new HttpResourceBuilder()
+                .address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde")
+                .build();
 
         List<ApplicationAdditionalDataDTO> pistetiedot = readAdditionalData();
         List<String> hakemusOids = pistetiedot.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toList());
@@ -147,7 +150,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     @Test
     public void testTallentaaKoostetutPistetiedotHakukohteelle() throws Exception {
-        HttpResource http = new HttpResourceImpl(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
+        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde").build();
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
         mockToReturnJson(POST, "/haku-app/applications/listfull",
@@ -186,7 +189,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
         String hakijaOid = pistetieto.getPersonOid();
 
-        HttpResource http = new HttpResourceImpl(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid());
+        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid()).build();
         pistetieto.getAdditionalData().remove("kielikoe_fi");
 
         mockOrganisaatioKutsu();
@@ -259,7 +262,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
         String hakijaOid = pistetieto.getPersonOid();
 
-        HttpResource http = new HttpResourceImpl(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid());
+        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid()).build();
         pistetieto.getAdditionalData().remove("kielikoe_fi");
 
         String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
@@ -301,7 +304,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
         String hakijaOid = pistetieto.getPersonOid();
 
-        HttpResource http = new HttpResourceImpl(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid());
+        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid()).build();
         pistetieto.getAdditionalData().remove("kielikoe_fi");
 
         String kayttajanOrganisaatioOid = "1.2.246.562.10.666";

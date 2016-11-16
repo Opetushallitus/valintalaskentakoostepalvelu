@@ -3,7 +3,8 @@ package fi.vm.sade.valinta.kooste.test;
 import fi.vm.sade.integrationtest.tomcat.EmbeddedTomcat;
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
-import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -40,7 +41,9 @@ public class KoostepalveluSmokeTest {
     public void testSpringSecurity() throws Exception {
         //TimeUnit.DAYS.sleep(1L);
         final String root = "http://localhost:" + port + "/valintalaskentakoostepalvelu/resources";
-        final HttpResourceImpl smoketestResource = new HttpResourceImpl(root + "/smoketest");
+        final HttpResource smoketestResource = new HttpResourceBuilder()
+                .address(root + "/smoketest")
+                .build();
         {
             Response response = smoketestResource.getWebClient().path("/unsecured_service_call").get();
             Assert.assertEquals(200, response.getStatus());

@@ -3,7 +3,8 @@ package fi.vm.sade.valinta.kooste.external.resource;
 import java.io.IOException;
 import java.util.List;
 
-import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public class TestCallback {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(TestCallback.class);
 
-	private static HttpResourceImpl httpResource = new HttpResourceImpl("");
+	private static HttpResource httpResource = new HttpResourceBuilder().build();
 
 	@Test
 	public void testListOfHakemuksetCallback() throws IOException {

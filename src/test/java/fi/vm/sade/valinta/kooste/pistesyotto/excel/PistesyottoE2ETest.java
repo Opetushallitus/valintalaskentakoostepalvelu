@@ -19,7 +19,7 @@ import com.google.gson.Gson;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -135,7 +135,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         final Semaphore arvosanaCounter = new Semaphore(0);
         mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
 
-        HttpResource http = new HttpResourceImpl(resourcesAddress + "/pistesyotto/tuonti");
+        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").build();
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);
         mockForward(PUT,
@@ -186,7 +186,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
         mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest);
 
-        HttpResource http = new HttpResourceImpl(resourcesAddress + "/pistesyotto/tuonti");
+        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").build();
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);
         mockForward(PUT,
@@ -219,7 +219,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
         mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest + ".666");
 
-        HttpResource http = new HttpResourceImpl(resourcesAddress + "/pistesyotto/tuonti");
+        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").build();
         Response r = http.getWebClient()
                 .query("hakuOid", "testioidi1")
                 .query("hakukohdeOid", hakukohdeOidFromUiRequest)

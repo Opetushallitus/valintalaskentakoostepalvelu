@@ -27,13 +27,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.Solu;
@@ -45,12 +44,7 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
@@ -84,7 +78,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -93,14 +86,16 @@ import java.util.stream.Collectors;
  */
 public class PistesyottoResourceTest {
     final static Logger LOG = LoggerFactory.getLogger(PistesyottoResourceTest.class);
-    public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     private static final String KIELIKOE_KOULUTUSTOIMIJA_OID = "1.2.246.562.10.45042175963";
     private static final String KIELIKOE_OPPILAITOS_OID = "1.2.246.562.10.45698499378";
     private static final String KIELIKOE_TOIMIPISTE_OID = "1.2.3.44444.5";
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource pistesyottoTuontiResource = new HttpResourceImpl(root + "/pistesyotto/tuonti");
-    final HttpResource pistesyottoVientiResource = new HttpResourceImpl(root + "/pistesyotto/vienti");
-    final HttpResource pistesyottoUlkoinenTuontiResource = new HttpResourceImpl(root + "/pistesyotto/ulkoinen");
+    final HttpResource pistesyottoTuontiResource = new HttpResourceBuilder()
+            .address(root + "/pistesyotto/tuonti").build();
+    final HttpResource pistesyottoVientiResource = new HttpResourceBuilder()
+            .address(root + "/pistesyotto/vienti").build();
+    final HttpResource pistesyottoUlkoinenTuontiResource = new HttpResourceBuilder()
+            .address(root + "/pistesyotto/ulkoinen").build();
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String TARJOAJA1 = "TARJOAJA1";

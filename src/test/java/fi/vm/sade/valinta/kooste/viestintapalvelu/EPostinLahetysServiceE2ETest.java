@@ -2,7 +2,8 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
@@ -122,7 +123,9 @@ public class EPostinLahetysServiceE2ETest {
     }
 
     private Response sendEPosti(String kirjeenTyyppi, String asiointikieli) {
-        HttpResourceImpl http = new HttpResourceImpl(resourcesAddress + "/viestintapalvelu/securelinkit/aktivoi");
+        HttpResource http = new HttpResourceBuilder()
+                .address(resourcesAddress + "/viestintapalvelu/securelinkit/aktivoi")
+                .build();
         EPostiRequest request = new EPostiRequest();
         request.setAsiointikieli(asiointikieli);
         request.setHakuOid(HAKU1);

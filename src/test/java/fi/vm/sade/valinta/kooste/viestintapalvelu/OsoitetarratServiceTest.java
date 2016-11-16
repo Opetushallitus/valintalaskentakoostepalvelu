@@ -2,7 +2,8 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
-import fi.vm.sade.valinta.http.HttpResourceImpl;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.mocks.*;
@@ -37,8 +38,12 @@ public class OsoitetarratServiceTest {
     final static Logger LOG = LoggerFactory.getLogger(OsoitetarratServiceTest.class);
     public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResourceImpl osoitetarratResource = new HttpResourceImpl(root + "/viestintapalvelu/osoitetarrat/aktivoi");
-    final HttpResourceImpl osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResourceImpl(root + "/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi");
+    final HttpResource osoitetarratResource = new HttpResourceBuilder()
+            .address(root + "/viestintapalvelu/osoitetarrat/aktivoi")
+            .build();
+    final HttpResource osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResourceBuilder()
+            .address(root + "/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
+            .build();
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String TARJOAJA1 = "TARJOAJA1";
