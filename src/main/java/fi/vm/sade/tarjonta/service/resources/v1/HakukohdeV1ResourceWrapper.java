@@ -17,7 +17,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 /**
  *         Wrapper luokalle
  *         fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource
- * @QueryParam("") ei ole laillinen httpClient annotaatio
+ * @QueryParam("") ei ole laillinen client annotaatio
  */
 @Path("/v1/hakukohde")
 public interface HakukohdeV1ResourceWrapper {
