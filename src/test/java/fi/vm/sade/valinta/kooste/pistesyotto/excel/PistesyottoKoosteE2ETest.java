@@ -7,6 +7,7 @@ import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resour
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.GET;
@@ -20,9 +21,11 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpHandler;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
@@ -80,6 +83,11 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
         mockHakuAppKutsu(pistetiedot);
         mockSureKutsu(createOppijat());
+        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde/",
+                Collections.<ValintaperusteDTO>emptyList()); // TODO add correct avaimet
+        mockToReturnJson(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/testihakukohde",
+                Collections.<ValintakoeOsallistuminenDTO>emptyList()); // TODO add correct osallistuminen
+        mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku", new ParametritDTO());
 
         Response r = http.getWebClient()
                 .header("Content-Type", MediaType.APPLICATION_JSON)
@@ -258,7 +266,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                             new OrganisaatioTyyppi(
                                 "1.2.3.44444.5",
                                 ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                Collections.emptyList(),
+                                emptyList(),
                                 null,
                                 singletonList("TOIMIPISTE")
                             )

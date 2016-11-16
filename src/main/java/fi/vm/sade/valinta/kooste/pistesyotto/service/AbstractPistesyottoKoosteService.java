@@ -121,33 +121,32 @@ public abstract class AbstractPistesyottoKoosteService {
             return Observable.just(null);
         }
 
-        return Observable.from(resultsToSendToSure.keySet()).flatMap(hakemusOid -> {
+        Observable<Void> voidObservable = Observable.from(resultsToSendToSure.keySet()).flatMap(hakemusOid -> {
             String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
             Optional<CompositeCommand> operationOptional = resultsToSendToSure.get(hakemusOid);
             if (!operationOptional.isPresent()) {
-                return null;
+                return Observable.just(null);
             }
 
             CompositeCommand compositeCommandForHakemus = operationOptional.get();
-            Observable<List<Observable<Arvosana>>> sureOperations = compositeCommandForHakemus.createSureOperation(suoritusrekisteriAsyncResource)
+            Observable<Arvosana> sureOperations = compositeCommandForHakemus.createSureOperation(suoritusrekisteriAsyncResource)
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
                     "Virhe hakemuksen %s tulosten tallentamisessa Suoritusrekisteriin ", hakemusOid), t)));
-            sureOperations.last().forEach(arvosanaObservables -> arvosanaObservables.forEach(arvosanaObservable -> {
-                    arvosanaObservable.last().forEach(processedArvosana ->
-                        AUDIT.log(builder()
-                            .id(username)
-                            .hakuOid(hakuOid)
-                            .hakukohdeOid(hakukohdeOid)
-                            .hakijaOid(personOid)
-                            .hakemusOid(hakemusOid)
-                            .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
-                            .setOperaatio(auditLogOperation)
-                            .build()));
-                }
-            ));
 
-            return sureOperations.<Void>map(x -> null);
-        }).lastOrDefault(null).doOnCompleted(() ->
+            sureOperations.doOnNext(processedArvosana ->
+                AUDIT.log(builder()
+                    .id(username)
+                    .hakuOid(hakuOid)
+                    .hakukohdeOid(hakukohdeOid)
+                    .hakijaOid(personOid)
+                    .hakemusOid(hakemusOid)
+                    .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
+                    .setOperaatio(auditLogOperation)
+                    .build()));
+
+            return sureOperations.lastOrDefault(null).map(x -> null);
+        });
+        return voidObservable.lastOrDefault(null).doOnCompleted(() ->
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }
 

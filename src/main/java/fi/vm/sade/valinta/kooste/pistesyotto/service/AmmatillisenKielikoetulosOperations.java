@@ -174,7 +174,7 @@ public class AmmatillisenKielikoetulosOperations {
     }
 
     public abstract static class CompositeCommand {
-        public abstract Observable<List<Observable<Arvosana>>> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource);
+        public abstract Observable<Arvosana> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource);
 
         @Override
         public String toString() {
@@ -201,13 +201,15 @@ public class AmmatillisenKielikoetulosOperations {
         }
 
         @Override
-        public Observable<List<Observable<Arvosana>>> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+        public Observable<Arvosana> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
             return suoritusrekisteriAsyncResource.deleteSuoritus(existingSuoritus.getId())
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
                     "Kielikokeen suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", existingSuoritus), t)))
-                .map(x ->
-                    deleteArvosanas.stream().map(arvosanaCommand ->
-                        arvosanaCommand.createSureOperation(existingSuoritus, suoritusrekisteriAsyncResource)).collect(Collectors.toList()));
+                .flatMap(x -> {
+                    List<Observable<Arvosana>> arvosanaObservables = deleteArvosanas.stream().map(arvosanaCommand ->
+                        arvosanaCommand.createSureOperation(existingSuoritus, suoritusrekisteriAsyncResource)).collect(Collectors.toList());
+                    return Observable.merge(arvosanaObservables);
+                });
         }
     }
 
@@ -223,13 +225,15 @@ public class AmmatillisenKielikoetulosOperations {
         }
 
         @Override
-        public Observable<List<Observable<Arvosana>>> createSureOperation(final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+        public Observable<Arvosana> createSureOperation(final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
             return suoritusrekisteriAsyncResource.postSuoritus(suoritus)
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
                     "Suorituksen %s tallentaminen suoritusrekisteriin epäonnistui", suoritus), t)))
-                .map(savedSuoritus ->
-                    allArvosanaCommandsForHakemus.stream().map(arvosanaCommand ->
-                        arvosanaCommand.createSureOperation(savedSuoritus, suoritusrekisteriAsyncResource)).collect(Collectors.toList()));
+                .flatMap(savedSuoritus -> {
+                    List<Observable<Arvosana>> arvosanaOperations = allArvosanaCommandsForHakemus.stream().map(arvosanaCommand ->
+                        arvosanaCommand.createSureOperation(savedSuoritus, suoritusrekisteriAsyncResource)).collect(Collectors.toList());
+                    return Observable.merge(arvosanaOperations);
+                });
         }
     }
 

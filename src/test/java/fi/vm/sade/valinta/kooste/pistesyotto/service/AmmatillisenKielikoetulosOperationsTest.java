@@ -68,7 +68,7 @@ public class AmmatillisenKielikoetulosOperationsTest {
     private Function<String, String> findPersonOidByHakemusOid = hakijaOidByHakemusOid::get;
     private List<Suoritus> postedSuoritukset = new LinkedList<>();
     private SuoritusSavingMockSuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusSavingMockSuoritusrekisteriAsyncResource();
-    private final TestSubscriber<List<Observable<Arvosana>>> testSubscriber = new TestSubscriber<>();
+    private final TestSubscriber<Arvosana> testSubscriber = new TestSubscriber<>();
 
     @Before
     public void populateTestData() {
@@ -94,20 +94,13 @@ public class AmmatillisenKielikoetulosOperationsTest {
 
         personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testSubscriber);
 
-        testSubscriber.assertValueCount(1);
-        List<List<Observable<Arvosana>>> onNextEvents = testSubscriber.getOnNextEvents();
-        List<Observable<Arvosana>> arvosanaObservables = onNextEvents.get(0);
-        Assert.assertThat(arvosanaObservables, Matchers.hasSize(2));
+        testSubscriber.assertValueCount(2);
+        List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
+        Assert.assertThat(receivedArvosanas, Matchers.hasSize(2));
 
-        TestSubscriber<Arvosana> firstArvosanaSubscriber = new TestSubscriber<>();
-        arvosanaObservables.get(0).subscribe(firstArvosanaSubscriber);
-        assertThat(firstArvosanaSubscriber.getOnNextEvents(), hasItem(createArvosana("100", "kielikoe", "26.10.2016", SOURCE_OID_2, hyvaksytty, "FI")));
-        assertThat(firstArvosanaSubscriber.getOnNextEvents(), hasSize(1));
+        assertEquals(receivedArvosanas.get(0), (createArvosana("100", "kielikoe", "26.10.2016", SOURCE_OID_2, hyvaksytty, "FI")));
 
-        TestSubscriber<Arvosana> secondArvosanaSubscriber = new TestSubscriber<>();
-        arvosanaObservables.get(1).subscribe(secondArvosanaSubscriber);
-        assertThat(secondArvosanaSubscriber.getOnNextEvents(), hasItem(createArvosana("100", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV")));
-        assertThat(secondArvosanaSubscriber.getOnNextEvents(), hasSize(1));
+        assertEquals(receivedArvosanas.get(1), (createArvosana("100", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV")));
 
         assertThat(postedSuoritukset, hasSize(1));
         Suoritus postedSuoritus = postedSuoritukset.get(0);
@@ -131,20 +124,12 @@ public class AmmatillisenKielikoetulosOperationsTest {
 
         personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testSubscriber);
 
-        testSubscriber.assertValueCount(1);
-        List<List<Observable<Arvosana>>> onNextEvents = testSubscriber.getOnNextEvents();
-        List<Observable<Arvosana>> arvosanaObservables = onNextEvents.get(0);
-        Assert.assertThat(arvosanaObservables, Matchers.hasSize(2));
+        testSubscriber.assertValueCount(2);
+        List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
 
-        TestSubscriber<Arvosana> firstArvosanaSubscriber = new TestSubscriber<>();
-        arvosanaObservables.get(0).subscribe(firstArvosanaSubscriber);
-        assertThat(firstArvosanaSubscriber.getOnNextEvents(), hasItem(createArvosana("101", "kielikoe", "26.10.2016", SOURCE_OID_1, hyvaksytty, "FI")));
-        assertThat(firstArvosanaSubscriber.getOnNextEvents(), hasSize(1));
 
-        TestSubscriber<Arvosana> secondArvosanaSubscriber = new TestSubscriber<>();
-        arvosanaObservables.get(1).subscribe(secondArvosanaSubscriber);
-        assertThat(secondArvosanaSubscriber.getOnNextEvents(), hasItem(createArvosana("101", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV")));
-        assertThat(secondArvosanaSubscriber.getOnNextEvents(), hasSize(1));
+        assertEquals(receivedArvosanas.get(0), createArvosana("101", "kielikoe", "26.10.2016", SOURCE_OID_1, hyvaksytty, "FI"));
+        assertEquals(receivedArvosanas.get(1), createArvosana("101", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV"));
 
         assertThat(postedSuoritukset, hasSize(1));
         Suoritus postedSuoritus = postedSuoritukset.get(0);
@@ -168,20 +153,11 @@ public class AmmatillisenKielikoetulosOperationsTest {
 
         personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testSubscriber);
 
-        testSubscriber.assertValueCount(1);
-        List<List<Observable<Arvosana>>> onNextEvents = testSubscriber.getOnNextEvents();
-        List<Observable<Arvosana>> arvosanaObservables = onNextEvents.get(0);
-        Assert.assertThat(arvosanaObservables, Matchers.hasSize(2));
+        testSubscriber.assertValueCount(2);
+        List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
 
-        TestSubscriber<Arvosana> firstArvosanaSubscriber = new TestSubscriber<>();
-        arvosanaObservables.get(0).subscribe(firstArvosanaSubscriber);
-        assertThat(firstArvosanaSubscriber.getOnNextEvents(), hasItem(createArvosana("102", "kielikoe", "26.10.2016", SOURCE_OID_3, hyvaksytty, "FI")));
-        assertThat(firstArvosanaSubscriber.getOnNextEvents(), hasSize(1));
-
-        TestSubscriber<Arvosana> secondArvosanaSubscriber = new TestSubscriber<>();
-        arvosanaObservables.get(1).subscribe(secondArvosanaSubscriber);
-        assertThat(secondArvosanaSubscriber.getOnNextEvents(), hasItem(createArvosana("102", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV")));
-        assertThat(secondArvosanaSubscriber.getOnNextEvents(), hasSize(1));
+        assertEquals(receivedArvosanas.get(0), createArvosana("102", "kielikoe", "26.10.2016", SOURCE_OID_3, hyvaksytty, "FI"));
+        assertEquals(receivedArvosanas.get(1), createArvosana("102", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV"));
 
         assertThat(postedSuoritukset, hasSize(1));
         Suoritus postedSuoritus = postedSuoritukset.get(0);
