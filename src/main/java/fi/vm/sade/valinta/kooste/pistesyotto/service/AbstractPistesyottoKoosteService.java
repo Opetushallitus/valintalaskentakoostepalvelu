@@ -121,7 +121,7 @@ public abstract class AbstractPistesyottoKoosteService {
             return Observable.just(null);
         }
 
-        Observable<Void> voidObservable = Observable.from(resultsToSendToSure.keySet()).flatMap(hakemusOid -> {
+        return Observable.from(resultsToSendToSure.keySet()).flatMap(hakemusOid -> {
             String personOid = findPersonOidByHakemusOid.apply(hakemusOid);
             Optional<CompositeCommand> operationOptional = resultsToSendToSure.get(hakemusOid);
             if (!operationOptional.isPresent()) {
@@ -144,9 +144,8 @@ public abstract class AbstractPistesyottoKoosteService {
                     .setOperaatio(auditLogOperation)
                     .build()));
 
-            return sureOperations.lastOrDefault(null).map(x -> null);
-        });
-        return voidObservable.lastOrDefault(null).doOnCompleted(() ->
+            return sureOperations;
+        }).lastOrDefault(null).<Void>map(x -> null).doOnCompleted(() ->
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }
 
