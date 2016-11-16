@@ -196,14 +196,12 @@ public class PistesyottoVientiService {
                 haeKielikokeetSuoritusrekisterista.get();
                 viimeisteleTuonti.get();
             }, poikkeuskasittelija);
-            applicationAsyncResource
-                    .getApplicationAdditionalData(hakuOid,
-                            hakukohdeOid, lisatiedot -> {
-                                prosessi.inkrementoiTehtyjaToita();
-                                lisatiedotRef.set(lisatiedot);
-                                viimeisteleTuonti.get();
-                                tarkistaYlimaaraisetOsallistujat.get();
-                            }, poikkeuskasittelija);
+            applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid).subscribe(lisatiedot -> {
+                prosessi.inkrementoiTehtyjaToita();
+                lisatiedotRef.set(lisatiedot);
+                viimeisteleTuonti.get();
+                tarkistaYlimaaraisetOsallistujat.get();
+            }, poikkeuskasittelija);
             valintaperusteetResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)).subscribe(hakukohdeJaValintakoe -> {
                 prosessi.inkrementoiTehtyjaToita();
                 hakukohdeJaValintakoeRef.set(hakukohdeJaValintakoe);

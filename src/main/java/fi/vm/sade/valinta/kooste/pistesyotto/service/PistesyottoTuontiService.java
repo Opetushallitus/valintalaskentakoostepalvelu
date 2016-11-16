@@ -302,15 +302,12 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             viimeisteleTuonti.get();
         }, poikkeusilmoitus);
 
-        applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid,
-                a -> {
-                    additionaldata.set(a);
-                    prosessi.inkrementoiTehtyjaToita();
-                    tarkistaYlimaaraisetOsallistujat.get();
-                    viimeisteleTuonti.get();
-                },
-                poikkeusilmoitus);
-
+        applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid).subscribe(a -> {
+            additionaldata.set(a);
+            prosessi.inkrementoiTehtyjaToita();
+            tarkistaYlimaaraisetOsallistujat.get();
+            viimeisteleTuonti.get();
+        }, poikkeusilmoitus);
     }
 
     private Map<String, ApplicationAdditionalDataDTO> asMap(Collection<ApplicationAdditionalDataDTO> datas) {
