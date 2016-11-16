@@ -248,7 +248,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                 osallistujienHakemusOids.removeAll(additionaldata.get().stream().map(a -> a.getOid()).collect(Collectors.toSet()));
                 if (!osallistujienHakemusOids.isEmpty()) {
                     // haetaan puuttuvat
-                    applicationAsyncResource.getApplicationAdditionalData(osallistujienHakemusOids, a -> {
+                    applicationAsyncResource.getApplicationAdditionalData(osallistujienHakemusOids).subscribe(a -> {
                         additionaldata.set(Stream.concat(additionaldata.get().stream(), a.stream()).collect(Collectors.toList()));
                         prosessi.inkrementoiTehtyjaToita();
                         viimeisteleTuonti.get();

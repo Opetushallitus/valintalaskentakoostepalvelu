@@ -39,8 +39,6 @@ public interface ApplicationAsyncResource {
 
     Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(String hakuOid, String hakukohdeOid);
 
-    Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback);
-
     Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids);
 
     Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData);

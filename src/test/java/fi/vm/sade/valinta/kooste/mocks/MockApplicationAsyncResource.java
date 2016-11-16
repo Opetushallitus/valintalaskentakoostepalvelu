@@ -156,12 +156,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(additionalDataResultByOidReference.get());
-        return new PeruutettavaImpl(Futures.immediateFuture(additionalDataResultByOidReference.get()));
-    }
-
-    @Override
     public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids) {
         return Observable.just(additionalDataResultByOidReference.get());
     }
@@ -189,9 +183,8 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Peruutettava getApplicationAdditionalData(final String hakuOid, final String hakukohdeOid, final Consumer<List<ApplicationAdditionalDataDTO>> callback, final Consumer<Throwable> failureCallback) {
-        callback.accept(additionalDataResultReference.get());
-        return new PeruutettavaImpl(Futures.immediateFuture(additionalDataResultReference.get()));
+    public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(final String hakuOid, final String hakukohdeOid) {
+        return Observable.just(additionalDataResultReference.get());
     }
 
     private Hakemus getHakemus() {

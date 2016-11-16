@@ -205,25 +205,6 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
         );
     }
 
-    public Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback) {
-        String url = "/applications/additionalData";
-        try {
-            return new PeruutettavaImpl(
-                    getWebClient()
-                            .path(url)
-                            .async()
-                            .post(Entity.json(hakemusOids), new GsonResponseCallback<List<ApplicationAdditionalDataDTO>>(gson(),
-                                    address,
-                                    url,
-                                    callback,
-                                    failureCallback,
-                                    new TypeToken<List<ApplicationAdditionalDataDTO>>() {}.getType())));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
-    }
-
     @Override
     public Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData) {
         return putAsObservable("/applications/additionalData/" + hakuOid + "/" + hakukohdeOid, Entity.json(additionalData));

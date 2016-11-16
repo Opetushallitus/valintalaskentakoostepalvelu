@@ -147,11 +147,11 @@ public class PistesyottoVientiService {
                         osallistujienHakemusOids.removeAll(lisatiedotRef.get().stream().map(a -> a.getOid()).collect(Collectors.toSet()));
                         if (!osallistujienHakemusOids.isEmpty()) {
                             // haetaan puuttuvat lisätiedot ja hakemukset
-                            applicationAsyncResource.getApplicationAdditionalData(osallistujienHakemusOids, a -> {
+                            applicationAsyncResource.getApplicationAdditionalData(osallistujienHakemusOids).subscribe(a -> {
                                 lisatiedotRef.set(Stream.concat(lisatiedotRef.get().stream(), a.stream()).collect(Collectors.toList()));
                                 viimeisteleTuonti.get();
                             }, poikkeuskasittelija);
-                            applicationAsyncResource.getApplicationsByOids(osallistujienHakemusOids, a -> {
+                            applicationAsyncResource.getApplicationsByHakemusOids(osallistujienHakemusOids).subscribe(a -> {
                                 hakemusRef.set(Stream.concat(hakemusRef.get().stream(), a.stream()).collect(Collectors.toList()));
                                 viimeisteleTuonti.get();
                             }, poikkeuskasittelija);
