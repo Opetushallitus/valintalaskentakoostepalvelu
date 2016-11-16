@@ -6,14 +6,12 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
@@ -31,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -80,22 +77,19 @@ public class PistesyottoVientiService {
 
             Map<String, List<Arvosana>> kielikoeArvosanat = AbstractPistesyottoKoosteService.ammatillisenKielikoeArvosanat(oppijat);
 
-            Set<String> kaikkiKutsutaanTunnisteet =
-                    hakukohdeJaValintakoe.stream().flatMap(h -> {
-                        Optional.ofNullable(h.getValintakoeDTO()).orElse(Collections.emptyList()).forEach(vk ->
-                                LOG.error("Valintakoetunniste=={}, kutsutaankokaikki={}", vk.getTunniste(), vk.getKutsutaankoKaikki()));
-                        return h.getValintakoeDTO().stream();
-                    }).filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki())).map(v -> v.getTunniste()).collect(Collectors.toSet());
-            PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi,
-                    hakukohdeNimi, tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot,
-                    valintaperusteet, pistetiedot, kielikoeArvosanat);
-            InputStream xlsx = pistesyottoExcel.getExcel().vieXlsx();
+            Set<String> kaikkiKutsutaanTunnisteet = hakukohdeJaValintakoe.stream()
+                    .flatMap(h -> h.getValintakoeDTO().stream())
+                    .filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki()))
+                    .map(v -> v.getTunniste())
+                    .collect(Collectors.toSet());
+
+            InputStream xlsx = new PistesyottoExcel(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
+                    tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot,
+                    valintaperusteet, pistetiedot, kielikoeArvosanat).getExcel().vieXlsx();
+
             prosessi.inkrementoiTehtyjaToita();
             String id = generateId();
-            Long expirationTime = defaultExpirationDate().getTime();
-            List<String> tags = prosessi.getTags();
-            // LOG.error("Excelin tallennus");
-            dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", expirationTime, tags,
+            dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", defaultExpirationDate().getTime(), prosessi.getTags(),
                     "application/octet-stream", xlsx, response -> {
                         prosessi.setDokumenttiId(id);
                         prosessi.inkrementoiTehtyjaToita();
