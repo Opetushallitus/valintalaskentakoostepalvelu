@@ -88,7 +88,7 @@ public class PistesyottoVientiService {
                     valintaperusteet, pistetiedot, kielikoeArvosanat).getExcel().vieXlsx();
 
             prosessi.inkrementoiTehtyjaToita();
-            String id = generateId();
+            String id = UUID.randomUUID().toString();
             dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", defaultExpirationDate().getTime(), prosessi.getTags(),
                     "application/octet-stream", xlsx, response -> {
                         prosessi.setDokumenttiId(id);
@@ -226,9 +226,5 @@ public class PistesyottoVientiService {
 
     protected Date defaultExpirationDate() {
         return DateTime.now().plusHours(168).toDate(); // almost a day
-    }
-
-    protected String generateId() {
-        return UUID.randomUUID().toString();
     }
 }
