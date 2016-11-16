@@ -85,6 +85,13 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids) {
+        if (resultByOidReference.get().stream().anyMatch(oid -> !hakemusOids.contains(oid))) {
+            throw new RuntimeException(String.format(
+                    "Mock data %s contains OIDs not in query %s",
+                    resultByOidReference.get().stream().map(h -> h.getOid()).collect(Collectors.toList()),
+                    hakemusOids
+            ));
+        }
         return Observable.just(resultByOidReference.get());
     }
 
