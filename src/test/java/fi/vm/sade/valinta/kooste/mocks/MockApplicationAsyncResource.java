@@ -47,22 +47,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     public final List<Result> results = new ArrayList<>();
 
-    @Override
-    public Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids) {
-        return Observable.just(resultReference.get());
-    }
-
-    @Override
-    public List<Hakemus> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
-        return resultReference.get();
-    }
-
-    @Override
-    public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(resultByOidReference.get());
-        return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get()));
-    }
-
     private static <T> Future<T> serviceAvailableCheck() {
         if(!serviceIsAvailable.get()) {
             return Futures.immediateFailedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
@@ -97,6 +81,22 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         additionalDataResultByOidReference.set(null);
         resultByOidReference.set(null);
         resultReference.set(null);
+    }
+
+    @Override
+    public Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids) {
+        return Observable.just(resultByOidReference.get());
+    }
+
+    @Override
+    public List<Hakemus> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
+        return resultReference.get();
+    }
+
+    @Override
+    public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
+        callback.accept(resultByOidReference.get());
+        return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get()));
     }
 
     @Override

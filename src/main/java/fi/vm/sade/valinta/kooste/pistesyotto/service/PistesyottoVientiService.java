@@ -126,7 +126,7 @@ public class PistesyottoVientiService {
                     return Observable.just(hakemukset);
                 }
                 prosessi.inkrementoiKokonaistyota();
-                return applicationAsyncResource.getApplicationsByHakemusOids(puuttuvatHakemukset)
+                return applicationAsyncResource.getApplicationsByHakemusOids(new ArrayList<>(puuttuvatHakemukset))
                         .map(hs -> Stream.concat(hakemukset.stream(), hs.stream()).collect(Collectors.toList()))
                         .doOnCompleted(() -> {
                             prosessi.inkrementoiTehtyjaToita();

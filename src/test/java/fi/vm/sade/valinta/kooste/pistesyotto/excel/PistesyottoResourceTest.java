@@ -297,7 +297,7 @@ public class PistesyottoResourceTest {
 
 
         List<Hakemus> hakemuses = Arrays.asList(hakemus1, hakemus2, hakemus3, hakemus4, hakemus5);
-        MockApplicationAsyncResource.setResult(hakemuses);
+        MockApplicationAsyncResource.setResultByOid(hakemuses);
 
         HakukohdeJaValintaperusteDTO vp = new HakukohdeJaValintaperusteDTO(hakukohdeOid1,
                 Arrays.asList(
@@ -371,7 +371,7 @@ public class PistesyottoResourceTest {
                     valintaperuste()
                             .setKuvaus(TUNNISTE1)
                             .setTunniste(TUNNISTE1)
-                            .setOsallistumisenTunniste(TUNNISTE1)
+                            .setOsallistumisenTunniste(TUNNISTE1 + "-OSALLISTUMINEN")
                             .setLukuarvofunktio()
                             .setArvot("1", "2", "3")
                             .build()
@@ -409,15 +409,15 @@ public class PistesyottoResourceTest {
             ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
             Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
                     Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+                    inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class)))
+                    .thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
 
-            Response r =
-                    pistesyottoVientiResource.getWebClient()
-                            .query("hakuOid", HAKU1)
-                            .query("hakukohdeOid", HAKUKOHDE1)
-                            .post(Entity.entity("",
-                                    "application/json"));
+            Response r = pistesyottoVientiResource.getWebClient()
+                    .query("hakuOid", HAKU1)
+                    .query("hakukohdeOid", HAKUKOHDE1)
+                    .post(Entity.entity("", "application/json"));
             assertEquals(200, r.getStatus());
+            Thread.sleep(2000);
             InputStream excelData = inputStreamArgumentCaptor.getValue();
             assertTrue(excelData != null);
             List<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
