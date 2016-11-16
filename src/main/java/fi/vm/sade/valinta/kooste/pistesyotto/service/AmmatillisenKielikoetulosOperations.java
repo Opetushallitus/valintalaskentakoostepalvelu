@@ -64,7 +64,7 @@ public class AmmatillisenKielikoetulosOperations {
     private Optional<CompositeCommand> createSingleNewArvosanaSave(String sourceOid, String hakemusOid, List<SingleKielikoeTulos> inputValuesForHakemus, String personOid) {
         List<SingleKielikoeTulos> nonEmptyTuloses = withNonEmptyValues(inputValuesForHakemus);
         if (nonEmptyTuloses.isEmpty()) {
-            LOG.info(String.format("Ei tallennettavaa hakemukselle %s", hakemusOid));
+            LOG.info(String.format("Ei tallennettavaa hakemukselle %s (hakija %s)", hakemusOid, personOid));
             return Optional.empty();
         }
         LOG.warn(String.format("Lisätään arvosanat %s hakemukselle %s Suoritusrekisteriin lähetettäviin.", nonEmptyTuloses, hakemusOid));
