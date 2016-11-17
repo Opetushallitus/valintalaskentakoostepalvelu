@@ -200,39 +200,40 @@ public class PistesyottoResource {
                                               @QueryParam("valinnanvaiheOid") String valinnanvaiheOid,
                                               List<HakemusDTO> hakemukset,
                                               @Suspended AsyncResponse asyncResponse) {
+        try {
+            if (hakemukset == null || hakemukset.isEmpty()) {
+                asyncResponse.resume(Response.serverError().entity("Ulkoinen pistesyotto API requires at least one hakemus").build());
+            } else {
+                asyncResponse.setTimeout(30L, TimeUnit.MINUTES);
+                asyncResponse.setTimeoutHandler(asyncResponse1 -> {
+                    LOG.error("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu: /haku/{}", hakuOid);
+                    asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
+                });
 
-
-
-
-        if(hakemukset == null || hakemukset.isEmpty()) {
-            asyncResponse.resume(Response.serverError().entity("Ulkoinen pistesyotto API requires at least one hakemus").build());
-        } else {
-            asyncResponse.setTimeout(30L, TimeUnit.MINUTES);
-            asyncResponse.setTimeoutHandler(asyncResponse1 -> {
-                LOG.error("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu: /haku/{}", hakuOid);
-                asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
-            });
-
-            final String username = KoosteAudit.username();
-            authorityCheckService.getAuthorityCheckForRoles(asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
-                    authorityCheck -> {
-                        LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
-                        tuontiSoteliService.tuo(authorityCheck, hakemukset,username, hakuOid, valinnanvaiheOid,
-                                (onnistuneet, validointivirheet) -> {
-                                    UlkoinenResponseDTO response = new UlkoinenResponseDTO();
-                                    response.setKasiteltyOk(onnistuneet);
-                                    response.setVirheet(Lists.newArrayList(validointivirheet));
-                                    asyncResponse.resume(Response.ok(response).build());
-                                },
-                                sisainenPoikkeus -> {
-                                    logError("Soteli tuonti epaonnistui!", sisainenPoikkeus);
-                                    asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
-                                });
-                    },
-                    sisainenPoikkeus -> {
-                        logError("Soteli tuonti epaonnistui!", sisainenPoikkeus);
-                        asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
-                    });
+                final String username = KoosteAudit.username();
+                authorityCheckService.getAuthorityCheckForRoles(asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+                        authorityCheck -> {
+                            LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
+                            tuontiSoteliService.tuo(authorityCheck, hakemukset, username, hakuOid, valinnanvaiheOid,
+                                    (onnistuneet, validointivirheet) -> {
+                                        UlkoinenResponseDTO response = new UlkoinenResponseDTO();
+                                        response.setKasiteltyOk(onnistuneet);
+                                        response.setVirheet(Lists.newArrayList(validointivirheet));
+                                        asyncResponse.resume(Response.ok(response).build());
+                                    },
+                                    sisainenPoikkeus -> {
+                                        logError("Soteli tuonti epaonnistui!", sisainenPoikkeus);
+                                        asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
+                                    });
+                        },
+                        sisainenPoikkeus -> {
+                            logError("Soteli tuonti epaonnistui!", sisainenPoikkeus);
+                            asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
+                        });
+            }
+        } catch (Exception e) {
+            LOG.error("Soteli tuonti epäonnistui", e);
+            asyncResponse.resume(Response.serverError().entity(e.toString()).build());
         }
     }
 
