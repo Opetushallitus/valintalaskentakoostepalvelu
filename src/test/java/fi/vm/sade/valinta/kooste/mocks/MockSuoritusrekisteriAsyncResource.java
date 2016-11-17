@@ -83,7 +83,6 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
-        System.err.println("GOT SUORITUS " + ToStringBuilder.reflectionToString(suoritus));
         if (postException.isPresent()) {
             return Observable.error(postException.get());
         }
@@ -97,7 +96,6 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<Arvosana> postArvosana(Arvosana arvosana) {
-        System.err.println("GOT NEW ARVOSANA " + ToStringBuilder.reflectionToString(arvosana));
         if (postException.isPresent()) {
             return Observable.error(postException.get());
         }
@@ -110,7 +108,6 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
-        System.err.println("UPDATED ARVOSANA " + ToStringBuilder.reflectionToString(arvosanaWithUpdatedValues));
         if (postException.isPresent()) {
             return Observable.error(postException.get());
         }
@@ -123,7 +120,6 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<Void> deleteSuoritus(String suoritusId) {
-        System.err.println("DELETING SUORITUS " + suoritusId);
         deletedSuorituksetRef.getAndUpdate((List<String> suoritusIdt) -> {
             suoritusIdt.add(suoritusId);
             return suoritusIdt;
@@ -135,7 +131,6 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Observable<Void> deleteArvosana(String arvosanaId) {
-        System.err.println("DELETING ARVOSANA " + arvosanaId);
         deletedArvosanatRef.getAndUpdate((List<String> arvosanaIdt) -> {
             arvosanaIdt.add(arvosanaId);
             return arvosanaIdt;
