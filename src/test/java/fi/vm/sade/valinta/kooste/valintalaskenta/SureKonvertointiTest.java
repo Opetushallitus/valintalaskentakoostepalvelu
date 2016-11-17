@@ -99,7 +99,7 @@ public class SureKonvertointiTest {
         });
 
         final List<Map<String,String>> ainereaali = konvertoitu.stream().filter(k -> k.getAvain().equals("AINEREAALI")).findFirst().get().getMetatiedot();
-        assertEquals(12, ainereaali.size());
+        assertEquals(14, ainereaali.size());
 
         final List<Map<String,String>>  reaali = konvertoitu.stream().filter(k -> k.getAvain().equals("REAALI")).findFirst().get().getMetatiedot();
         assertEquals(3, reaali.size());
@@ -115,7 +115,7 @@ public class SureKonvertointiTest {
         assertEquals(10, lyhyt_kieli.size());
 
         final List<Map<String,String>>  aidinkieli = konvertoitu.stream().filter(k -> k.getAvain().equals("AIDINKIELI")).findFirst().get().getMetatiedot();
-        assertEquals(7, aidinkieli.size());
+        assertEquals(9, aidinkieli.size());
 
     }
 

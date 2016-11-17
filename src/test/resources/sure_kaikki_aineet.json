@@ -904,6 +904,78 @@
                         "valinnainen": false,
                         "myonnetty": "01.06.2014",
                         "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "I+",
+                            "asteikko": "YO",
+                            "pisteet": 9
+                        },
+                        "aine": "AINEREAALI",
+                        "source": "1.2.246.562.10.43628088406",
+                        "lahdeArvot": {
+                            "koetunnus": "YH",
+                            "aineyhdistelmarooli": "71"
+                        },
+                        "valinnainen": true,
+                        "lisatieto": "YH",
+                        "myonnetty": "01.06.2013"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "I",
+                            "asteikko": "YO",
+                            "pisteet": 8
+                        },
+                        "aine": "AINEREAALI",
+                        "source": "1.2.246.562.10.43628088406",
+                        "lahdeArvot": {
+                            "koetunnus": "YH",
+                            "aineyhdistelmarooli": "71"
+                        },
+                        "valinnainen": true,
+                        "lisatieto": "YH",
+                        "myonnetty": "21.12.2013"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "I-",
+                            "asteikko": "YO",
+                            "pisteet": 22
+                        },
+                        "aine": "AI",
+                        "source": "1.2.246.562.10.43628088406",
+                        "lahdeArvot": {
+                            "koetunnus": "A",
+                            "aineyhdistelmarooli": "11"
+                        },
+                        "valinnainen": false,
+                        "lisatieto": "FI",
+                        "myonnetty": "01.06.2013"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "I=",
+                            "asteikko": "YO",
+                            "pisteet": 17
+                        },
+                        "aine": "AI",
+                        "source": "1.2.246.562.10.43628088406",
+                        "lahdeArvot": {
+                            "koetunnus": "A",
+                            "aineyhdistelmarooli": "11"
+                        },
+                        "valinnainen": false,
+                        "lisatieto": "FI",
+                        "myonnetty": "01.06.2013"
                     }
 
 

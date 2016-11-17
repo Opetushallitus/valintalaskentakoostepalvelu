@@ -1,6 +1,10 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Arvio {
+    private static final List<String> IMPROBATUR = Arrays.asList("I", "I+", "I-", "I=");
     private String arvosana;
     private String asteikko;
     private Integer pisteet;
@@ -31,8 +35,14 @@ public class Arvio {
         return asteikko;
     }
 
+
+
     public String getArvosana() {
-        return arvosana;
+        if(IMPROBATUR.contains(arvosana)) {
+            return "I";
+        } else {
+            return arvosana;
+        }
     }
 
     public Integer getPisteet() {
