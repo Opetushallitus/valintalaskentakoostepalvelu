@@ -142,8 +142,8 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     }
                 })
                 .subscribe(x -> {
-                    prosessi.setDokumenttiId("valmis");
                     prosessi.inkrementoiTehtyjaToita();
+                    prosessi.setDokumenttiId("valmis");
                 }, t -> {
                     logPistesyotonTuontiEpaonnistui(t);
                     prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));

@@ -71,8 +71,8 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             String id = UUID.randomUUID().toString();
             dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", defaultExpirationDate().getTime(), prosessi.getTags(),
                     "application/octet-stream", pistesyottoExcel.getExcel().vieXlsx(), response -> {
-                        prosessi.setDokumenttiId(id);
                         prosessi.inkrementoiTehtyjaToita();
+                        prosessi.setDokumenttiId(id);
                     }, poikkeuskasittelija);
         }, poikkeuskasittelija);
     }
