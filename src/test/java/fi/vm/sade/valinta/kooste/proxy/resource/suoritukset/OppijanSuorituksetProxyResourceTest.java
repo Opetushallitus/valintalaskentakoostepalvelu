@@ -49,7 +49,6 @@ public class OppijanSuorituksetProxyResourceTest {
     @BeforeClass
     public static void startServer() {
         ValintaKoosteJetty.startShared();
-        initOhjausParametritMock();
     }
 
     @Test
@@ -136,24 +135,4 @@ public class OppijanSuorituksetProxyResourceTest {
         MockApplicationAsyncResource.setResultByOid(Arrays.asList(expectedHakemus));
         MockSuoritusrekisteriAsyncResource.setResult(expectedOppijanSuoritukset);
     }
-
-    private static void initOhjausParametritMock() {
-        Mockito.when(Mocks
-                .getOhjausparametritAsyncResource()
-                .haeHaunOhjausparametrit(Mockito.anyString(), Mockito.any(), Mockito.any()))
-                .thenAnswer(
-                        answer -> {
-                            Consumer<ParametritDTO> ekaArgumentti = (Consumer<ParametritDTO>)
-                                    answer.getArguments()[1];
-                            ekaArgumentti.accept(null);
-                            return null;
-                        }
-                );
-        Mockito.when(Mocks
-                .getOhjausparametritAsyncResource()
-                .haeHaunOhjausparametrit(Mockito.anyString()))
-                .thenAnswer(
-                        answer -> Observable.just(null));
-    }
-
 }

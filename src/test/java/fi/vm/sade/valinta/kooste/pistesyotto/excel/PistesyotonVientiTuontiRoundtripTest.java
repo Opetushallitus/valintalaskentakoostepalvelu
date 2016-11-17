@@ -33,16 +33,6 @@ public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestB
 		List<ValintakoeOsallistuminenDTO> osallistumistiedot = lueOsallistumisTiedot("List_ValintakoeOsallistuminenDTO.json");
 		List<ValintaperusteDTO> valintaperusteet = lueValintaperusteet("List_ValintaperusteDTO.json");
 		List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
-		Map<String, List<Arvosana>> kielikoeArvosanat = pistetiedot.stream().filter(p ->
-				p.getAdditionalData().keySet().contains("kielikoe_fi") && isNotEmpty(p.getAdditionalData().get("kielikoe_fi"))).collect(Collectors.toMap(
-					dto -> dto.getPersonOid(),
-					dto -> ImmutableList.of(new Arvosana(
-							null, null, "KIELIKOE", true, "", "", new HashMap<>(), new Arvio(dto.getAdditionalData().get("kielikoe_fi"), null, null), "FI"))
-
-		));
-		pistetiedot.stream().forEach(p -> p.getAdditionalData().remove("kielikoe_fi"));
-		PistesyottoDataRiviKuuntelija kuuntelija = new PistesyottoDataRiviListAdapter();
-
 		PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 				"testioidi1",
 				"1.2.246.562.5.85532589612",
@@ -56,7 +46,7 @@ public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestB
 						"1_2_246_562_5_85532589612_urheilija_lisapiste",
 						"Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe",
 						"kielikoe_fi"), osallistumistiedot, valintaperusteet,
-				pistetiedot, kuuntelija, kielikoeArvosanat);
+				pistetiedot, Collections.singletonList(new PistesyottoDataRiviListAdapter()));
 		Excel excel = pistesyottoExcel.getExcel();
 
 		excel.tuoXlsx(excel.vieXlsx());

@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
@@ -85,10 +86,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids) {
-        if (resultByOidReference.get().stream().anyMatch(oid -> !hakemusOids.contains(oid))) {
+        List<Hakemus> nonMatching = resultByOidReference.get().stream().filter(oid -> !hakemusOids.contains(oid.getOid())).collect(Collectors.toList());
+        if (!nonMatching.isEmpty()) {
             throw new RuntimeException(String.format(
-                    "Mock data %s contains OIDs not in query %s",
-                    resultByOidReference.get().stream().map(h -> h.getOid()).collect(Collectors.toList()),
+                    "Mock data contains OIDs %s not in query %s",
+                    nonMatching.stream().map(h -> h.getOid()).collect(Collectors.toList()),
                     hakemusOids
             ));
         }

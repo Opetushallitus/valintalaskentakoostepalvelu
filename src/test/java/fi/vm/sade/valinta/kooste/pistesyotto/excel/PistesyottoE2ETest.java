@@ -14,9 +14,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
@@ -72,6 +75,15 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 ImmutableMap.of("haku", "testioidi1", "hakukohde", "1.2.246.562.5.85532589612")
         );
 
+        mockToReturnJsonWithParams(GET,
+                "/haku-app/applications/listfull",
+                Collections.emptyList(),
+                ImmutableMap.of("asId", "testioidi1", "aoOid", "1.2.246.562.5.85532589612"));
+
+        mockToReturnJson(POST,
+                "/haku-app/applications/list",
+                Collections.emptyList());
+
         mockToReturnString(GET,
                 "/haku-app/applications/additionalData/testioidi1/1.2.246.562.5.85532589612",
                 new Gson().toJson(pistetiedot)
@@ -80,8 +92,12 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe",
                 Collections.emptyList()
         );
+        mockToReturnJson(GET,
+                "/ohjausparametrit-service/api/v1/rest/parametri/testioidi1",
+                new ParametritDTO());
 
         mockTarjontaHakukohdeCall();
+        mockTarjontaHakuCall();
 
         mockOrganisaatioKutsu();
 
@@ -127,6 +143,15 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         } catch (InterruptedException e) {
             Assert.fail();
         }
+    }
+
+    private void mockTarjontaHakuCall() {
+        HakuV1RDTO haku = new HakuV1RDTO();
+        haku.setOid("testioidi1");
+        haku.setHakukohdeOids(Collections.singletonList("1.2.246.562.5.85532589612"));
+        mockToReturnJson(GET,
+                "/tarjonta-service/rest/v1/haku/testioidi1/",
+                new Result(haku));
     }
 
     private void mockOrganisaatioKutsu() {

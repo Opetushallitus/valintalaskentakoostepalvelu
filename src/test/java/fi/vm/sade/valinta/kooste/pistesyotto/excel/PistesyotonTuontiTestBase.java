@@ -110,7 +110,7 @@ public class PistesyotonTuontiTestBase {
             Collections.emptySet(),
             valintakoeTunnisteet, osallistumistiedot,
             valintaperusteet, pistetiedot,
-            pistesyottoTuontiAdapteri, null);
+            Collections.singletonList(pistesyottoTuontiAdapteri));
         pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/" + tiedosto).getInputStream());
         muplaa(pistesyottoTuontiAdapteri, pistetiedot);
     }

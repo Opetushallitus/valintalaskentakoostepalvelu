@@ -116,6 +116,17 @@ public class PistesyottoResourceTest {
     final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
     final String OSALLISTUMISENTUNNISTE2 = TUNNISTE2 + "-OSALLISTUMINEN";
     final String KIELIKOE_OSALLISTUMISENTUNNISTE = KIELIKOE_TUNNISTE + "-OSALLISTUMINEN";
+    private final List<Hakemus> hakemukset = Arrays.asList(
+            hakemus()
+                    .setOid(HAKEMUS1)
+                    .setHenkilotunnus("123456-789x")
+                    .build(),
+            hakemus()
+                    .setOid(HAKEMUS2)
+                    .setSyntymaaika("1.1.1900")
+                    .build(),
+            hakemus().setOid(HAKEMUS3).build()
+    );
     private final List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
             osallistuminen()
                     .setHakemusOid(HAKEMUS1)
@@ -215,55 +226,34 @@ public class PistesyottoResourceTest {
         )
     ));
     private PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
-                            TARJOAJA1, "", "", "",
-                            Arrays.asList(
-                                    hakemus()
-                                            .setOid(HAKEMUS1)
-                                            .build(),
-                                    hakemus()
-                                            .setOid(HAKEMUS2)
-                                            .build(),
-                                    hakemus()
-                                            .setOid(HAKEMUS3)
-                                            .build()
-                            ),
-                            Sets.newHashSet(Arrays.asList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
-                            Arrays.asList(VALINTAKOE1), // TUNNISTEET
-                            osallistumistiedot,
-                            valintaperusteet,
-                            Arrays.asList(
-                                    lisatiedot()
-                                            .setOid(HAKEMUS1)
-                                            .setPersonOid(PERSONOID1)
-                                            .addLisatieto(TUNNISTE1, "3")
-                                            .addLisatieto(TUNNISTE2, "true")
-                                            .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
-                                            //.addLisatieto(KIELIKOE_TUNNISTE, "true")
-                                            .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
-                                            .build(),
-                                    lisatiedot()
-                                            .setOid(HAKEMUS2)
-                                            .setPersonOid(PERSONOID2)
-                                            .addLisatieto(TUNNISTE1, "2")
-                                            .addLisatieto(TUNNISTE2, "true")
-                                            .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
-                                            //.addLisatieto(KIELIKOE_TUNNISTE, "true")
-                                            .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
-                                            .build(),
-                                    lisatiedot()
-                                            .setOid(HAKEMUS3)
-                                            .setPersonOid(PERSONOID3)
-                                            .addLisatieto(TUNNISTE1, "")
-                                            .build()
-                            ), ImmutableMap.of(
-                                PERSONOID1,
-                                Arrays.asList(new Arvosana(
-                                        null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("true", null, null), "FI")),
-                                PERSONOID2,
-                                Arrays.asList(new Arvosana(
-                                        null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("false", null, null), "FI"))
-                            )
-                    );
+            KIELIKOE_TOIMIPISTE_OID, "", "", "",
+            Arrays.asList(
+                    hakemus().setOid(HAKEMUS1).build(),
+                    hakemus().setOid(HAKEMUS2).build(),
+                    hakemus().setOid(HAKEMUS3).build()),
+            Sets.newHashSet(Arrays.asList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
+            Arrays.asList(VALINTAKOE1), // TUNNISTEET
+            osallistumistiedot,
+            valintaperusteet,
+            Arrays.asList(
+                    lisatiedot().setOid(HAKEMUS1).setPersonOid(PERSONOID1)
+                            .addLisatieto(TUNNISTE1, "3")
+                            .addLisatieto(TUNNISTE2, "true")
+                            .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
+                            .addLisatieto(KIELIKOE_TUNNISTE, "true")
+                            .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                            .build(),
+                    lisatiedot().setOid(HAKEMUS2).setPersonOid(PERSONOID2)
+                            .addLisatieto(TUNNISTE1, "2")
+                            .addLisatieto(TUNNISTE2, "true")
+                            .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
+                            .addLisatieto(KIELIKOE_TUNNISTE, "false")
+                            .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                            .build(),
+                    lisatiedot().setOid(HAKEMUS3).setPersonOid(PERSONOID3)
+                            .addLisatieto(TUNNISTE1, "")
+                            .build()),
+            Collections.emptyList());
 
     @Before
     public void startServer() {
@@ -297,6 +287,7 @@ public class PistesyottoResourceTest {
 
 
         List<Hakemus> hakemuses = Arrays.asList(hakemus1, hakemus2, hakemus3, hakemus4, hakemus5);
+        MockApplicationAsyncResource.setResult(hakemuses);
         MockApplicationAsyncResource.setResultByOid(hakemuses);
 
         HakukohdeJaValintaperusteDTO vp = new HakukohdeJaValintaperusteDTO(hakukohdeOid1,
@@ -490,44 +481,38 @@ public class PistesyottoResourceTest {
                     valintaperusteet
             );
             mockValintakokeetHakukohteille();
-            MockApplicationAsyncResource.setResult(Arrays.asList(
-                    hakemus()
-                            .setOid(HAKEMUS1)
-                            .setHenkilotunnus("123456-789x")
-                            .build(),
-                    hakemus()
-                            .setOid(HAKEMUS2)
-                            .setSyntymaaika("1.1.1900")
-                            .build()
-            ));
+            MockApplicationAsyncResource.setResult(hakemukset);
             MockSuoritusrekisteriAsyncResource.setResult(
                     new SuoritusrekisteriSpec.OppijaBuilder()
                         .setOppijanumero(PERSONOID1)
                         .suoritus()
                         .setHenkiloOid(PERSONOID1)
                         .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                        .setMyontaja(HAKEMUS1)
                         .arvosana()
                         .setAine(KIELIKOE)
                         .setLisatieto("FI")
-                        .setArvosana("true")
+                        .setArvosana("hyvaksytty")
                         .build()
                         .build()
                         .suoritus()
                         .setHenkiloOid(PERSONOID1)
                         .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                        .setMyontaja(HAKEMUS3)
                         .arvosana()
                         .setAine(KIELIKOE)
                         .setLisatieto("FI")
-                        .setArvosana("false")
+                        .setArvosana("hylatty")
                         .build()
                         .build()
                         .suoritus()
                         .setHenkiloOid(PERSONOID1)
                         .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                        .setMyontaja(HAKEMUS1)
                         .arvosana()
                         .setAine(KIELIKOE)
                         .setLisatieto("SV")
-                        .setArvosana("false")
+                        .setArvosana("hylatty")
                         .build()
                         .build()
                         .build());
@@ -536,7 +521,6 @@ public class PistesyottoResourceTest {
                             .setOid(HAKEMUS1)
                             .setPersonOid(PERSONOID1)
                             .setEtunimiJaSukunimi("Hilla", "Hiiri")
-                            .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
                             .build(),
                     lisatiedot()
                             .setOid(HAKEMUS2)
@@ -648,13 +632,12 @@ public class PistesyottoResourceTest {
                         .setArvot("1", "2", "3")
                         .build()
         );
-
+        MockApplicationAsyncResource.setResult(hakemukset);
+        MockApplicationAsyncResource.setResultByOid(hakemukset);
         MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
         MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                 lisatiedot()
-                    .setOid(HAKEMUS1).build(),
-                lisatiedot()
-                        .setOid(HAKEMUS3).build()));
+                    .setOid(HAKEMUS1).build()));
         MockApplicationAsyncResource.setAdditionalDataResultByOid(
                 Arrays.asList(
                         lisatiedot()
@@ -668,7 +651,7 @@ public class PistesyottoResourceTest {
         MockSuoritusrekisteriAsyncResource.setResult(new Oppija());
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
-                TARJOAJA1, "", "", "",
+                KIELIKOE_TOIMIPISTE_OID, "", "", "",
                 Arrays.asList(
                         hakemus()
                                 .setOid(HAKEMUS1)
@@ -720,14 +703,12 @@ public class PistesyottoResourceTest {
         cleanMocks();
         try {
             MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
+            MockApplicationAsyncResource.setResult(hakemukset);
+            MockApplicationAsyncResource.setResultByOid(hakemukset);
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
                             .setPersonOid(PERSONOID1)
                             .setOid(HAKEMUS1)
-                            .build(),
-                    lisatiedot()
-                            .setPersonOid(PERSONOID3)
-                            .setOid(HAKEMUS3)
                             .build()));
             MockApplicationAsyncResource.setAdditionalDataResultByOid(
                     Arrays.asList(
@@ -750,7 +731,7 @@ public class PistesyottoResourceTest {
                     .arvosana()
                     .setAine(KIELIKOE)
                     .setLisatieto("FI")
-                    .setArvosana("true")
+                    .setArvosana("hyvaksytty")
                     .build()
                     .build()
                     .suoritus()
@@ -759,7 +740,7 @@ public class PistesyottoResourceTest {
                     .arvosana()
                     .setAine(KIELIKOE)
                     .setLisatieto("SV")
-                    .setArvosana("false")
+                    .setArvosana("hylatty")
                     .build()
                     .build()
                     .build());
@@ -822,55 +803,34 @@ public class PistesyottoResourceTest {
                     ))
             );
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
-                    TARJOAJA1, "", "", "",
+                    KIELIKOE_TOIMIPISTE_OID, "", "", "",
                     Arrays.asList(
-                            hakemus()
-                                    .setOid(HAKEMUS1)
-                                    .build(),
-                            hakemus()
-                                    .setOid(HAKEMUS2)
-                                    .build(),
-                            hakemus()
-                                    .setOid(HAKEMUS3)
-                                    .build()
-                    ),
+                            hakemus().setOid(HAKEMUS1).build(),
+                            hakemus().setOid(HAKEMUS2).build(),
+                            hakemus().setOid(HAKEMUS3).build()),
                     Sets.newHashSet(Arrays.asList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
                     Arrays.asList(VALINTAKOE1), // TUNNISTEET
                     osallistumistiedot,
                     valintaperusteet,
                     Arrays.asList(
-                            lisatiedot()
-                                    .setOid(HAKEMUS1)
-                                    .setPersonOid(PERSONOID1)
+                            lisatiedot().setOid(HAKEMUS1).setPersonOid(PERSONOID1)
                                     .addLisatieto(TUNNISTE1, "3")
                                     .addLisatieto(TUNNISTE2, "true")
                                     .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
-                                    //.addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                    .addLisatieto(KIELIKOE_TUNNISTE, "true")
                                     .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
                                     .build(),
-                            lisatiedot()
-                                    .setOid(HAKEMUS2)
-                                    .setPersonOid(PERSONOID2)
+                            lisatiedot().setOid(HAKEMUS2).setPersonOid(PERSONOID2)
                                     .addLisatieto(TUNNISTE1, "2")
                                     .addLisatieto(TUNNISTE2, "true")
                                     .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
-                                    //.addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                    .addLisatieto(KIELIKOE_TUNNISTE, "false")
                                     .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
                                     .build(),
-                            lisatiedot()
-                                    .setOid(HAKEMUS3)
-                                    .setPersonOid(PERSONOID3)
+                            lisatiedot().setOid(HAKEMUS3).setPersonOid(PERSONOID3)
                                     .addLisatieto(TUNNISTE1, "")
-                                    .build()
-                    ), ImmutableMap.of(
-                        PERSONOID1,
-                        Arrays.asList(new Arvosana(
-                                null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("true", null, null), "FI")),
-                        PERSONOID2,
-                        Arrays.asList(new Arvosana(
-                                null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("false", null, null), "FI"))
-                    )
-            );
+                                    .build()),
+                    Collections.emptyList());
 
             Response r =
                     pistesyottoTuontiResource.getWebClient()
@@ -992,11 +952,11 @@ public class PistesyottoResourceTest {
         cleanMocks();
         try {
             MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
+            MockApplicationAsyncResource.setResult(hakemukset);
+            MockApplicationAsyncResource.setResultByOid(hakemukset);
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
-                            .setOid(HAKEMUS1).setPersonOid(PERSONOID1).build(),
-                    lisatiedot()
-                            .setOid(HAKEMUS3).setPersonOid(PERSONOID3).build()));
+                            .setOid(HAKEMUS1).setPersonOid(PERSONOID1).build()));
             MockApplicationAsyncResource.setAdditionalDataResultByOid(
                     Arrays.asList(
                             lisatiedot()
@@ -1014,19 +974,18 @@ public class PistesyottoResourceTest {
                     .suoritus()
                     .setHenkiloOid(PERSONOID1)
                     .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
+                    .setMyontaja(HAKEMUS1)
                     .arvosana()
                     .setAine(KIELIKOE)
                     .setLisatieto("FI")
-                    .setArvosana("true")
+                    .setArvosana("hyvaksytty")
+                    .setSource(KIELIKOE_TOIMIPISTE_OID)
                     .build()
-                    .build()
-                    .suoritus()
-                    .setHenkiloOid(PERSONOID1)
-                    .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
                     .arvosana()
                     .setAine(KIELIKOE)
                     .setLisatieto("SV")
-                    .setArvosana("false")
+                    .setArvosana("hylatty")
+                    .setSource(KIELIKOE_TOIMIPISTE_OID)
                     .build()
                     .build()
                     .build());
@@ -1064,14 +1023,12 @@ public class PistesyottoResourceTest {
         cleanMocks();
         try {
             MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
+            MockApplicationAsyncResource.setResult(hakemukset);
+            MockApplicationAsyncResource.setResultByOid(hakemukset);
             MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
                     lisatiedot()
                             .setPersonOid(PERSONOID1)
                             .setOid(HAKEMUS1)
-                            .build(),
-                    lisatiedot()
-                            .setPersonOid(PERSONOID3)
-                            .setOid(HAKEMUS3)
                             .build()));
             MockApplicationAsyncResource.setAdditionalDataResultByOid(
                     Arrays.asList(
@@ -1119,55 +1076,35 @@ public class PistesyottoResourceTest {
             MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(kielikokeitaJarjestavanOppilaitoksenHierarkia);
             mockValintakokeetHakukohteille();
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
-                    TARJOAJA1, "", "", "",
+                    KIELIKOE_TOIMIPISTE_OID, "", "", "",
                     Arrays.asList(
-                            hakemus()
-                                    .setOid(HAKEMUS1)
-                                    .build(),
-                            hakemus()
-                                    .setOid(HAKEMUS2)
-                                    .build(),
-                            hakemus()
-                                    .setOid(HAKEMUS3)
-                                    .build()
+                            hakemus().setOid(HAKEMUS1).build(),
+                            hakemus().setOid(HAKEMUS2).build(),
+                            hakemus().setOid(HAKEMUS3).build()
                     ),
                     Sets.newHashSet(Arrays.asList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
                     Arrays.asList(VALINTAKOE1), // TUNNISTEET
                     osallistumistiedot,
                     valintaperusteet,
                     Arrays.asList(
-                            lisatiedot()
-                                    .setOid(HAKEMUS1)
-                                    .setPersonOid(PERSONOID1)
+                            lisatiedot().setOid(HAKEMUS1).setPersonOid(PERSONOID1)
                                     .addLisatieto(TUNNISTE1, "3")
                                     .addLisatieto(TUNNISTE2, "true")
                                     .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
-                                    //.addLisatieto(KIELIKOE_TUNNISTE, "true")
-                                    .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
+                                    .addLisatieto(KIELIKOE_TUNNISTE, "")
+                                    .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "MERKITSEMATTA")
                                     .build(),
-                            lisatiedot()
-                                    .setOid(HAKEMUS2)
-                                    .setPersonOid(PERSONOID2)
+                            lisatiedot().setOid(HAKEMUS2).setPersonOid(PERSONOID2)
                                     .addLisatieto(TUNNISTE1, "2")
                                     .addLisatieto(TUNNISTE2, "true")
                                     .addLisatieto(OSALLISTUMISENTUNNISTE2, "OSALLISTUI")
-                                    //.addLisatieto(KIELIKOE_TUNNISTE, "true")
+                                    .addLisatieto(KIELIKOE_TUNNISTE, "false")
                                     .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
                                     .build(),
-                            lisatiedot()
-                                    .setOid(HAKEMUS3)
-                                    .setPersonOid(PERSONOID3)
+                            lisatiedot().setOid(HAKEMUS3).setPersonOid(PERSONOID3)
                                     .addLisatieto(TUNNISTE1, "")
-                                    .build()
-                    ), ImmutableMap.of(
-                    PERSONOID1,
-                    Arrays.asList(new Arvosana(
-                            null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("", null, null), "FI")),
-                    PERSONOID2,
-                    Arrays.asList(new Arvosana(
-                            null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("false", null, null), "FI"))
-            )
-            );
+                                    .build()),
+                    Collections.emptyList());
 
             Response r =
                     pistesyottoTuontiResource.getWebClient()
@@ -1212,6 +1149,8 @@ public class PistesyottoResourceTest {
         cleanMocks();
         try {
             MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
+            MockApplicationAsyncResource.setResult(hakemukset);
+            MockApplicationAsyncResource.setResultByOid(hakemukset);
             MockApplicationAsyncResource.setAdditionalDataResult(Collections.singletonList(
                 lisatiedot().setPersonOid(PERSONOID1).setOid(HAKEMUS1).build()));
             MockApplicationAsyncResource.setAdditionalDataResultByOid(Collections.emptyList());
@@ -1235,7 +1174,7 @@ public class PistesyottoResourceTest {
                         .addLisatieto(KIELIKOE_TUNNISTE, "true")
                         .addLisatieto(KIELIKOE_OSALLISTUMISENTUNNISTE, "OSALLISTUI")
                         .build()),
-                ImmutableMap.of(PERSONOID1,  Collections.singletonList(new Arvosana(null, null, KIELIKOE, true, "", "", new HashMap<>(), new Arvio("true", "HYVAKSYTTY", null), "FI"))));
+                Collections.emptyList());
 
             Response r = pistesyottoTuontiResource.getWebClient().query("hakuOid", HAKU1).query("hakukohdeOid", HAKUKOHDE1)
                 .post(Entity.entity(excel.getExcel().vieXlsx(), MediaType.APPLICATION_OCTET_STREAM));
