@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
-import static org.hamcrest.Matchers.hasItem;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
@@ -51,15 +51,15 @@ public class AmmatillisenKielikoetulosOperationsTest {
     private final List<Oppija> oppijatSuresta = Arrays.asList(
         new SuoritusrekisteriSpec.OppijaBuilder().setOppijanumero(PERSON_OID_1)
             .suoritus().setId("123-123-123-2").setMyontaja(HAKEMUS_OID_1).setHenkiloOid(PERSON_OID_1).setKomo(AMMATILLISEN_KIELIKOE).setValmistuminen("6.4.2016")
-                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("FI").setArvosana(hyvaksytty.name()).setMyonnetty("6.4.2016").setSource(SOURCE_OID_1).build()
+                .arvosana().setId("123-123-123-2-arvosana").setAine(KIELIKOE_AINE).setLisatieto("FI").setArvosana(hyvaksytty.name()).setMyonnetty("6.4.2016").setSource(SOURCE_OID_1).build()
                 .build()
             .suoritus().setId("123-123-123-3").setMyontaja(SOURCE_OID_2).setHenkiloOid(PERSON_OID_1).setKomo("1.2.3.4.5.6").setValmistuminen("5.1.2015")
-                .arvosana().setAine("FY").setArvosana("7.0").setMyonnetty("5.1.2015").setSource(SOURCE_OID_2).build()
+                .arvosana().setId("123-123-123-3-arvosana").setAine("FY").setArvosana("7.0").setMyonnetty("5.1.2015").setSource(SOURCE_OID_2).build()
                 .build()
             .build(),
         new SuoritusrekisteriSpec.OppijaBuilder().setOppijanumero(PERSON_OID_2)
             .suoritus().setId("123-123-123-4").setMyontaja(HAKEMUS_OID_2).setHenkiloOid(PERSON_OID_2).setKomo(AMMATILLISEN_KIELIKOE).setValmistuminen("1.9.2015")
-                .arvosana().setAine(KIELIKOE_AINE).setLisatieto("SV").setArvosana(hylatty.name()).setMyonnetty("1.9.2015").setSource(SOURCE_OID_2).build()
+                .arvosana().setId("123-123-123-4-arvosana").setAine(KIELIKOE_AINE).setLisatieto("SV").setArvosana(hylatty.name()).setMyonnetty("1.9.2015").setSource(SOURCE_OID_2).build()
                 .build()
             .build());
 
@@ -169,6 +169,23 @@ public class AmmatillisenKielikoetulosOperationsTest {
         assertEquals("26.10.2016", postedSuoritus.getValmistuminen());
     }
 
+    @Test
+    public void deletionsDeleteArvosanasFirstAndSuoritusAfter() {
+        syotetytTulokset.clear();
+        syotetytTulokset.put(HAKEMUS_OID_2, Arrays.asList(
+            new SingleKielikoeTulos("kielikoe_fi", tyhja, new LocalDate(2016, 10, 26).toDate()),
+            new SingleKielikoeTulos("kielikoe_sv", tyhja, new LocalDate(2016, 10, 26).toDate())
+        ));
+        AmmatillisenKielikoetulosOperations source2Updates = new AmmatillisenKielikoetulosOperations(SOURCE_OID_2, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);
+        Optional<CompositeCommand> personOid2Updates = source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_2);
+        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testSubscriber);
+
+        testSubscriber.assertValueCount(1);
+        assertThat(suoritusrekisteriAsyncResource.deletedResourceIds, hasSize(2));
+        assertEquals(suoritusrekisteriAsyncResource.deletedResourceIds.get(0), "123-123-123-4-arvosana");
+        assertEquals(suoritusrekisteriAsyncResource.deletedResourceIds.get(1), "123-123-123-4");
+    }
+
     private Arvosana createArvosana(String suoritusId, String aine, String myonnetty, String sourceOid, SureHyvaksyttyArvosana arvosana, String lisatieto) {
         Arvio arvio = new Arvio();
         arvio.setAsteikko("HYVAKSYTTY");
@@ -177,10 +194,24 @@ public class AmmatillisenKielikoetulosOperationsTest {
     }
 
     private class SuoritusSavingMockSuoritusrekisteriAsyncResource extends MockSuoritusrekisteriAsyncResource {
+        public List<String> deletedResourceIds = new LinkedList<>();
+
         @Override
         public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
             postedSuoritukset.add(suoritus);
             return super.postSuoritus(suoritus);
+        }
+
+        @Override
+        public Observable<Void> deleteSuoritus(String suoritusId) {
+            deletedResourceIds.add(suoritusId);
+            return super.deleteSuoritus(suoritusId);
+        }
+
+        @Override
+        public Observable<Void> deleteArvosana(String arvosanaId) {
+            deletedResourceIds.add(arvosanaId);
+            return super.deleteArvosana(arvosanaId);
         }
     }
 }

@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
-
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
@@ -202,15 +201,24 @@ public class AmmatillisenKielikoetulosOperations {
 
         @Override
         public Observable<Arvosana> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
-            return suoritusrekisteriAsyncResource.deleteSuoritus(existingSuoritus.getId())
+            List<Observable<Arvosana>> arvosanaObservables = deleteArvosanas.stream().map(arvosanaCommand ->
+                arvosanaCommand.createSureOperation(existingSuoritus, suoritusrekisteriAsyncResource)).collect(Collectors.toList());
+            Observable<Void> suoritusObservable = suoritusrekisteriAsyncResource.deleteSuoritus(existingSuoritus.getId())
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
-                    "Kielikokeen suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", existingSuoritus), t)))
-                .flatMap(x -> {
-                    List<Observable<Arvosana>> arvosanaObservables = deleteArvosanas.stream().map(arvosanaCommand ->
-                        arvosanaCommand.createSureOperation(existingSuoritus, suoritusrekisteriAsyncResource)).collect(Collectors.toList());
-                    return Observable.merge(arvosanaObservables);
-                });
+                    "Kielikokeen suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", existingSuoritus), t)));
+            return Observable.combineLatest(arvosanaObservables, AmmatillisenKielikoetulosOperations::toArvosanaList)
+                .flatMap(arvosanas ->
+                    suoritusObservable.last().flatMap(x ->
+                        Observable.from(arvosanas)));
         }
+    }
+
+    private static List<Arvosana> toArvosanaList(Object[] arvosanas) {
+        List<Arvosana> results = new ArrayList<>(arvosanas.length);
+        for (Object arvosana : arvosanas) {
+            results.add((Arvosana) arvosana);
+        }
+        return results;
     }
 
     public static class SaveSuoritus extends CompositeCommand {
