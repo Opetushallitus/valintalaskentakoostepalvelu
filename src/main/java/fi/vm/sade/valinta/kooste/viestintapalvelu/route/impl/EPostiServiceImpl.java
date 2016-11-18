@@ -48,7 +48,8 @@ public class EPostiServiceImpl implements EPostiService {
     public void lahetaSecurelinkit(EPostiRequest ePostiRequest, Consumer<EPostiResponse> success, Consumer<String> failure) {
         String hakuMessage = "Haku=" + ePostiRequest.getHakuOid()
                 + ", kirjeen tyyppi=" + ePostiRequest.getKirjeenTyyppi()
-                + ", asiointikieli=" + ePostiRequest.getAsiointikieli();
+                + ", asiointikieli=" + ePostiRequest.getAsiointikieli()
+                + ", kirjeen tunniste=" + ePostiRequest.getLetterId();
 
         LOG.info("Aloitetaan securelinkien muodostus ja lähetys, " + hakuMessage);
 
@@ -119,6 +120,7 @@ public class EPostiServiceImpl implements EPostiService {
                     request.setExpires(expirationTime);
                     request.setTemplatename(ePostiRequest.getTemplateName());
                     request.setHakuOid(ePostiRequest.getHakuOid());
+                    request.setLetterId(ePostiRequest.getLetterId());
                     request.setLang(ePostiRequest.getAsiointikieli());
                     request.setUrl(secureLinkUrls.get(ePostiRequest.getAsiointikieli()));
                     return request;

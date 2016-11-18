@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 public class EPostiRequest {
     private String hakuOid;
+    private String letterId;
     private String asiointikieli;
     private String kirjeenTyyppi;
     private String templateName;
@@ -12,6 +13,14 @@ public class EPostiRequest {
 
     public void setHakuOid(String hakuOid) {
         this.hakuOid = hakuOid;
+    }
+
+    public String getLetterId() {
+        return letterId;
+    }
+
+    public void setLetterId(String letterId) {
+        this.letterId = letterId;
     }
 
     public String getAsiointikieli() {

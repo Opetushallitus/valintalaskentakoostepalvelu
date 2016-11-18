@@ -5,6 +5,7 @@ import java.util.Map;
 public class TokensRequest {
     private String url;
     private String hakuOid;
+    private String letterId;
     private String templatename;
     private String lang;
     private Map<String, String> applicationOidToEmailAddress;
@@ -70,11 +71,20 @@ public class TokensRequest {
         this.hakuOid = hakuOid;
     }
 
+    public String getLetterId() {
+        return letterId;
+    }
+
+    public void setLetterId(String letterId) {
+        this.letterId = letterId;
+    }
+
     @Override
     public String toString() {
         return "TokensRequest{" +
                 "url='" + url + '\'' +
                 ", hakuOid='" + hakuOid + '\'' +
+                ", letterId='" + letterId + '\'' +
                 ", templatename='" + templatename + '\'' +
                 ", lang='" + lang + '\'' +
                 ", applicationOidToEmailAddress=" + applicationOidToEmailAddress +
