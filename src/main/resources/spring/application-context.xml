@@ -456,6 +456,8 @@
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.ValintaTulosServiceProxyResource"/>
 		<bean id="ViestintapalveluProxyResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu.ViestintapalveluProxyResource"/>
+		<bean id="JonotSijoittelussaProxyResource"
+			  class="fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.JonotSijoittelussaProxyResource"/>
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice" />
 
 		<!-- CXF Swagger2Feature -->
@@ -475,6 +477,7 @@
 		<bean id="cors-filter" class="fi.vm.sade.valinta.kooste.filter.CorsResponseFilter"/>
 		<jaxrs:server id="koostepalveluResurssit">
 			<jaxrs:serviceBeans>
+				<ref bean="JonotSijoittelussaProxyResource"/>
 				<ref bean="OmatSivutHakemusResource"/>
 				<ref bean="ErillishakuResource"/>
 				<ref bean="HakuImportResource"/>
