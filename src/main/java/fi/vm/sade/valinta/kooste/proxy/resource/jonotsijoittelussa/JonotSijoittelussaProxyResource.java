@@ -59,17 +59,12 @@ public class JonotSijoittelussaProxyResource {
             @Suspended final AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(5L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(this::handleTimeout);
-
-
-        Observable.combineLatest(
-                valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid),
-                tarjontaAsyncResource.haeHaku(hakuOid)
-                        .map(HakuV1RDTO::getHakukohdeOids)
-                        .switchMap(valintaperusteetAsyncResource::haeValintatapajonotSijoittelulle),
-                (jonotLaskennassa, jonotValintaperusteissa) -> {
-
-
-                    List<String> laskennastaPuuttuvatHakukohdeOids = jonotValintaperusteissa.entrySet().stream().flatMap(entry -> {
+        final Observable<Map<String, List<String>>> laskennanJonot = valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid);
+        final Observable<Map<String, List<ValintatapajonoDTO>>> valintaperusteidenJonot = tarjontaAsyncResource.haeHaku(hakuOid)
+                .map(HakuV1RDTO::getHakukohdeOids)
+                .switchMap(valintaperusteetAsyncResource::haeValintatapajonotSijoittelulle);
+        Observable.combineLatest(laskennanJonot,valintaperusteidenJonot, (jonotLaskennassa, jonotValintaperusteissa) -> {
+                    final List<String> laskennastaPuuttuvatHakukohdeOids = jonotValintaperusteissa.entrySet().stream().flatMap(entry -> {
                         final String hakukohdeOid = entry.getKey();
                         final Predicate<String> puuttuuLaskennasta = jonoOid ->
                                 !jonotLaskennassa.getOrDefault(hakukohdeOid, emptyList()).contains(jonoOid);
