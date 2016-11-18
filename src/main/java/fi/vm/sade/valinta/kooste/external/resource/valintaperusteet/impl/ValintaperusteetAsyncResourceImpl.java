@@ -1,12 +1,14 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -206,7 +208,13 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE),
                         new GsonResponseCallback<>(gson(), address, url, callback, failureCallback, new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType())));
     }
-
+    @Override
+    public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids) {
+        String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintatapajono";
+        return postAsObservable(url,
+                new TypeToken<Map<String, List<ValintatapajonoDTO>>>() {}.getType(),
+                Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE));
+    }
     @Override
     public Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
         return getWebClient()

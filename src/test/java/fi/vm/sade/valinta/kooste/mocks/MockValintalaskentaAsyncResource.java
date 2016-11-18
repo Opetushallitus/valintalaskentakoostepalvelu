@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -48,7 +49,10 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
         return Observable.just(resultReference.get());
     }
-
+    @Override
+    public Observable<Map<String, List<String>>> jonotSijoitteluun(String hakuOid) {
+        return null;
+    }
     @Override
     public Observable<ValinnanvaiheDTO> lisaaTuloksia(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final ValinnanvaiheDTO vaihe) {
         throw new UnsupportedOperationException();

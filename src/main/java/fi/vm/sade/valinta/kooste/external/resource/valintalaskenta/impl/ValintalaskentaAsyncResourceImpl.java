@@ -22,6 +22,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -35,7 +36,11 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
     ) {
         super(address, TimeUnit.HOURS.toMillis(8));
     }
-
+    @Override
+    public Observable<Map<String, List<String>>> jonotSijoitteluun(String hakuOid) {
+        return getAsObservable("/valintalaskentakoostepalvelu/jonotsijoittelussa/" + hakuOid, new GenericType<Map<String, List<String>>>() {
+        }.getType());
+    }
     @Override
     public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
         return getAsObservable("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe", new GenericType<List<ValintatietoValinnanvaiheDTO>>() {
