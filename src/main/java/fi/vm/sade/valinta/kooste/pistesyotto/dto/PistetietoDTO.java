@@ -31,7 +31,7 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class PistetietoDTO {
     public final ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
-    public final Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
+    private final Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
 
     @JsonCreator
     public PistetietoDTO(
@@ -100,9 +100,13 @@ public class PistetietoDTO {
         });
         valintaperusteet.getRight().forEach(v -> {
             if (v.getSyotettavissaKaikille() != null && v.getSyotettavissaKaikille()) {
-                this.hakukohteidenOsallistumistiedot.compute(valintaperusteet.getLeft(), (oid, h) ->
-                        new HakukohteenOsallistumistiedotDTO(h, v)
-                );
+                this.hakukohteidenOsallistumistiedot.compute(valintaperusteet.getLeft(), (oid, h) -> {
+                    if (h == null) {
+                        return new HakukohteenOsallistumistiedotDTO(v);
+                    } else {
+                        return h.paivitaValintaperusteidenTiedolla(v);
+                    }
+                });
             }
             additionalData.getAdditionalData().putIfAbsent(v.getTunniste(), "");
             additionalData.getAdditionalData().putIfAbsent(
@@ -112,5 +116,13 @@ public class PistetietoDTO {
                             Osallistuminen.EI_VAADITA.toString()
             );
         });
+    }
+
+    public HakukohteenOsallistumistiedotDTO.KokeenOsallistumistietoDTO osallistumistieto(String hakukohdeOid,
+                                                                                         String koetunniste) {
+        if (!this.hakukohteidenOsallistumistiedot.containsKey(hakukohdeOid)) {
+            return null;
+        }
+        return this.hakukohteidenOsallistumistiedot.get(hakukohdeOid).osallistumistieto(koetunniste);
     }
 }

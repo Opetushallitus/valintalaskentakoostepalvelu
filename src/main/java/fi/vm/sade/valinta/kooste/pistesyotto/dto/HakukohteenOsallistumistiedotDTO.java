@@ -20,19 +20,7 @@ import java.util.stream.Collectors;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class HakukohteenOsallistumistiedotDTO {
-    public final Map<String, KokeenOsallistumistietoDTO> valintakokeidenOsallistumistiedot;
-
-    public HakukohteenOsallistumistiedotDTO(HakukohteenOsallistumistiedotDTO old, ValintaperusteDTO v) {
-        this.valintakokeidenOsallistumistiedot = old == null ?
-                new HashMap<>() :
-                new HashMap<>(old.valintakokeidenOsallistumistiedot);
-        this.valintakokeidenOsallistumistiedot.compute(v.getTunniste(), (tunniste, koe) -> {
-            if (koe == null || koe.osallistumistieto == Osallistumistieto.EI_KUTSUTTU) {
-                return new KokeenOsallistumistietoDTO(v);
-            }
-            return koe;
-        });
-    }
+    private final Map<String, KokeenOsallistumistietoDTO> valintakokeidenOsallistumistiedot;
 
     @JsonCreator
     public HakukohteenOsallistumistiedotDTO(
@@ -50,6 +38,27 @@ public class HakukohteenOsallistumistiedotDTO {
                         k -> k.getValintakoeTunniste(),
                         k -> new KokeenOsallistumistietoDTO(k, kielikoetulokset.get(k.getValintakoeTunniste()), hakemusOid)
                 ));
+    }
+
+    public HakukohteenOsallistumistiedotDTO(ValintaperusteDTO v) {
+        this.valintakokeidenOsallistumistiedot = new HashMap<>();
+        this.valintakokeidenOsallistumistiedot.put(v.getTunniste(), new KokeenOsallistumistietoDTO(v));
+    }
+
+    public HakukohteenOsallistumistiedotDTO paivitaValintaperusteidenTiedolla(ValintaperusteDTO v) {
+        Map<String, KokeenOsallistumistietoDTO> m = new HashMap<>(this.valintakokeidenOsallistumistiedot);
+        m.compute(v.getTunniste(), (tunniste, koe) -> {
+            if (koe == null) {
+                return new KokeenOsallistumistietoDTO(v);
+            } else {
+                return koe.paivitaValintaperusteidenTiedolla(v);
+            }
+        });
+        return new HakukohteenOsallistumistiedotDTO(m);
+    }
+
+    public KokeenOsallistumistietoDTO osallistumistieto(String koetunniste) {
+        return this.valintakokeidenOsallistumistiedot.get(koetunniste);
     }
 
     @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
@@ -107,9 +116,20 @@ public class HakukohteenOsallistumistiedotDTO {
         }
 
         public KokeenOsallistumistietoDTO(ValintaperusteDTO v) {
-            this.osallistumistieto = Osallistumistieto.OSALLISTUI;
+            this.osallistumistieto = Boolean.TRUE.equals(v.getSyotettavissaKaikille()) ?
+                    Osallistumistieto.OSALLISTUI :
+                    Osallistumistieto.EI_KUTSUTTU;
             this.lahdeHakemusOid = Optional.empty();
             this.lahdeMyontajaOid = Optional.empty();
+        }
+
+        public KokeenOsallistumistietoDTO paivitaValintaperusteidenTiedolla(ValintaperusteDTO v) {
+            if (Boolean.TRUE.equals(v.getSyotettavissaKaikille()) &&
+                    this.osallistumistieto == Osallistumistieto.EI_KUTSUTTU) {
+                return new KokeenOsallistumistietoDTO(v);
+            } else {
+                return this;
+            }
         }
     }
 }

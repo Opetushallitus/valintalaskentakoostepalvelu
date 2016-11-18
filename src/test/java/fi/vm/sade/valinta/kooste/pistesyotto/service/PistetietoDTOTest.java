@@ -226,8 +226,8 @@ public class PistetietoDTOTest {
         );
         assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
         assertEquals(Osallistuminen.OSALLISTUI.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
-        assertEquals(Osallistumistieto.TOISELLA_HAKEMUKSELLA, p.hakukohteidenOsallistumistiedot.get("hakukohdeOid").valintakokeidenOsallistumistiedot.get("kielikoe_fi").osallistumistieto);
-        assertEquals("organisaatioOid2", p.hakukohteidenOsallistumistiedot.get("hakukohdeOid").valintakokeidenOsallistumistiedot.get("kielikoe_fi").lahdeMyontajaOid.get());
+        assertEquals(Osallistumistieto.TOISELLA_HAKEMUKSELLA, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
+        assertEquals("organisaatioOid2", p.osallistumistieto("hakukohdeOid", "kielikoe_fi").lahdeMyontajaOid.get());
     }
 
     @Test
@@ -242,7 +242,7 @@ public class PistetietoDTOTest {
                 null,
                 new ParametritDTO()
         );
-        assertEquals(Osallistumistieto.OSALLISTUI, p.hakukohteidenOsallistumistiedot.get("hakukohdeOid").valintakokeidenOsallistumistiedot.get("syotettavissa_kaikille").osallistumistieto);
+        assertEquals(Osallistumistieto.OSALLISTUI, p.osallistumistieto("hakukohdeOid", "syotettavissa_kaikille").osallistumistieto);
     }
 
     @Test
@@ -289,7 +289,7 @@ public class PistetietoDTOTest {
                 oppija,
                 ohjausparametrit
         );
-        assertEquals(Osallistumistieto.OSALLISTUI, p.hakukohteidenOsallistumistiedot.get("hakukohdeOid").valintakokeidenOsallistumistiedot.get("kielikoe_fi").osallistumistieto);
+        assertEquals(Osallistumistieto.OSALLISTUI, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
         assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
         assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
     }
