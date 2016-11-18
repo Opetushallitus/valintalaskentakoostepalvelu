@@ -22,6 +22,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class JonotSijoittelussaProxyResource {
                                 .map(ValintatapajonoDTO::getOid)
                                 .filter(puuttuuLaskennasta).collect(Collectors.toList());
 
-                        return !puuttuvatJonotLaskennassa.isEmpty() ? Stream.of(hakukohdeOid) : Stream.empty();
+                        return !puuttuvatJonotLaskennassa.isEmpty() ? Arrays.asList(hakukohdeOid).stream() : Stream.empty();
                     }).collect(Collectors.toList());
 
                     return laskennastaPuuttuvatHakukohdeOids;
