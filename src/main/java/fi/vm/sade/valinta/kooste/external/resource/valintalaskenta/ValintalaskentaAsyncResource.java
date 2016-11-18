@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
@@ -10,6 +11,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import rx.Observable;
 
 public interface ValintalaskentaAsyncResource {
+    Observable<Map<String, List<String>>> jonotSijoitteluun(String hakuOid);
+
     Observable<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
 
     Peruutettava laskeJaSijoittele(List<LaskeDTO> lista, Consumer<String> callback, Consumer<Throwable> failureCallback);

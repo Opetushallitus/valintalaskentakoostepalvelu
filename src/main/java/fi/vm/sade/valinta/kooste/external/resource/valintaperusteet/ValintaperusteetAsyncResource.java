@@ -9,11 +9,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public interface ValintaperusteetAsyncResource {
+
+    Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids);
 
     // @GET /valintaperusteet-service/resources/valintaperusteet/hakijaryhma/{}
     @Deprecated
