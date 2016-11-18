@@ -11,6 +11,7 @@ import rx.Observable;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,7 +35,9 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     public static void setHakukohteetValinnanvaiheelleResult(Set<String> result) {
         hakukohteetValinnanvaiheelleResultReference.set(result);
     }
-
+    public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids) {
+        return null;
+    }
     @Override
     public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
         return null;
