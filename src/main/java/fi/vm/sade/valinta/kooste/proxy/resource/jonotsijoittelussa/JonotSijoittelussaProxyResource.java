@@ -20,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import com.google.gson.Gson;
 
 @Controller("JonotSijoittelussaProxyResource")
 @Path("/proxy/jonotsijoittelussa")
@@ -72,18 +74,20 @@ public class JonotSijoittelussaProxyResource {
                         final Predicate<String> puuttuuLaskennasta = jonoOid ->
                                 !jonotLaskennassa.getOrDefault(hakukohdeOid, emptyList()).contains(jonoOid);
                         final List<ValintatapajonoDTO> jonot = entry.getValue();
-                        final boolean puuttuvaJonoLaskennassa = jonot.stream().filter(ValintatapajonoDTO::getSiirretaanSijoitteluun)
+                        final List<String> puuttuvatJonotLaskennassa = jonot.stream().filter(ValintatapajonoDTO::getSiirretaanSijoitteluun)
                                 .map(ValintatapajonoDTO::getOid)
-                                .anyMatch(puuttuuLaskennasta);
-                        return puuttuvaJonoLaskennassa ? Stream.of(hakukohdeOid) : Stream.empty();
+                                .filter(puuttuuLaskennasta).collect(Collectors.toList());
+
+                        return !puuttuvatJonotLaskennassa.isEmpty() ? Stream.of(hakukohdeOid) : Stream.empty();
                     }).collect(Collectors.toList());
 
                     return laskennastaPuuttuvatHakukohdeOids;
                 }
         ).subscribe(
-                laskennastaPuuttuvatHakukohdeOids -> {
-                    asyncResponse.resume(Response.ok(laskennastaPuuttuvatHakukohdeOids).build());
-                },
+                laskennastaPuuttuvatHakukohdeOids ->
+                        asyncResponse.resume(Response.ok(new Gson().toJson(laskennastaPuuttuvatHakukohdeOids),
+                                MediaType.APPLICATION_JSON_TYPE).build())
+                ,
                 exception -> {
                     LOG.error("Jonojen tarkistus sijoittelussa epaonnistui haulle {}!", hakuOid, exception);
                     asyncResponse.resume(Response.serverError().entity(exception).build());
