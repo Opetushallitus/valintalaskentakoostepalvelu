@@ -212,7 +212,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids) {
         String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintatapajono";
         return postAsObservable(url,
-                new TypeToken<Map<String, ValintatapajonoDTO>>() {}.getType(),
+                new TypeToken<Map<String, List<ValintatapajonoDTO>>>() {}.getType(),
                 Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE));
     }
     @Override
