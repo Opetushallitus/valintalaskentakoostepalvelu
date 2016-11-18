@@ -30,7 +30,9 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class PistetietoDTO {
+    @JsonProperty
     public final ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
+    @JsonProperty
     private final Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
 
     @JsonCreator

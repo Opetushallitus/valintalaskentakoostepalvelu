@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class HakukohteenOsallistumistiedotDTO {
+    @JsonProperty
     private final Map<String, KokeenOsallistumistietoDTO> valintakokeidenOsallistumistiedot;
 
     @JsonCreator
