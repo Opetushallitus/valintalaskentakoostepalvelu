@@ -26,6 +26,7 @@
 		<bean class="fi.vm.sade.valinta.kooste.KoosteTestProfileConfiguration"/>
 	</beans>
 	<beans  profile="default">
+		<bean id="koosteaudit" class="fi.vm.sade.valinta.kooste.KoosteAudit"/>
 		<ctx:property-placeholder
 				location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/override.properties"
 				ignore-resource-not-found="true" properties-ref="defaultProps" />
