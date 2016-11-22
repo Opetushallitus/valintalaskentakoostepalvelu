@@ -22,12 +22,12 @@ public class JonoPair {
         return !fromLaskenta.isPresent() && fromValintaperusteet.isPresent();
     }
     public boolean isValintaperusteissaSiirretaanSijoitteluun() {
-        return fromValintaperusteet.map(j -> j.siirretaanSijoitteluun).orElse(false);
+        return fromValintaperusteet.map(j -> j.siirretaanSijoitteluun && j.aktiivinen.orElse(false)).orElse(false);
     }
 
     public boolean isMolemmissaValmisSijoiteltavaksiJaSiirretaanSijoitteluun() {
         boolean laskentaOk = fromLaskenta.map(j -> j.isValmisSijoiteltavaksiAndSiirretaanSijoitteluun()).orElse(false);
-        boolean valintaperusteetOk = fromValintaperusteet.map(j -> j.siirretaanSijoitteluun).orElse(false);
+        boolean valintaperusteetOk = fromValintaperusteet.map(j -> j.siirretaanSijoitteluun && j.aktiivinen.orElse(false)).orElse(false);
         return laskentaOk && valintaperusteetOk;
     }
     public String getHakukohdeOid() {

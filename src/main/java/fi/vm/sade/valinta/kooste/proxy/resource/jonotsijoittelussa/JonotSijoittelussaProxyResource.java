@@ -66,8 +66,8 @@ public class JonotSijoittelussaProxyResource {
         Observable.combineLatest(laskennanJonot, valintaperusteidenJonot, (jonotLaskennassa, jonotValintaperusteissa) -> {
                     final List<Jono> fromValintaperusteet = jonotValintaperusteissa.entrySet().stream().flatMap(e -> e.getValue().stream().map(jono -> new Jono(e.getKey(), jono.getOid(),
                             Optional.empty(),
-                            jono.getSiirretaanSijoitteluun()))).collect(Collectors.toList());
-                    final List<Jono> fromLaskenta = jonotLaskennassa.stream().map(j -> new Jono(j.getHakukohdeOid(), j.getValintatapajonoOid(), Optional.of(j.getValmisSijoiteltavaksi()), j.getSiirretaanSijoitteluun())).collect(Collectors.toList());
+                            jono.getSiirretaanSijoitteluun(), Optional.ofNullable(jono.getAktiivinen())))).collect(Collectors.toList());
+                    final List<Jono> fromLaskenta = jonotLaskennassa.stream().map(j -> new Jono(j.getHakukohdeOid(), j.getValintatapajonoOid(), Optional.of(j.getValmisSijoiteltavaksi()), j.getSiirretaanSijoitteluun(), Optional.empty())).collect(Collectors.toList());
                     List<JonoPair> jonoPairs = JonoUtil.pairJonos(fromLaskenta, fromValintaperusteet);
                     return JonoUtil.puutteellisetHakukohteet(jonoPairs);
                 }

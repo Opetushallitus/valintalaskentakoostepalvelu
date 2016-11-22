@@ -22,7 +22,7 @@ public class JonoUtilTest {
 
     @Test
     public void testMolemmissaSamatJaKaikkiOk() {
-        Jono j1 = new Jono("hk1", "j1", Optional.of(true),true);
+        Jono j1 = new Jono("hk1", "j1", Optional.of(true),true, Optional.of(true));
         List<Jono> laskenta = Arrays.asList(j1);
         List<Jono> perusteet = Arrays.asList(j1);
         List<JonoPair> jonoPairs = JonoUtil.pairJonos(laskenta, perusteet);
