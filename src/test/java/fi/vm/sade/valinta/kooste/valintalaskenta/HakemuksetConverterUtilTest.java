@@ -2256,6 +2256,24 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
+    public void ammatillisenKielikokeenOsallistumistiedoksiTuleeMerkitsemattaJosSuoritusOnEriHakemukselta() {
+        HakemusDTO h = new HakemusDTO();
+        h.setHakemusoid(HAKEMUS1_OID);
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus().setAmmatillisenKielikoe().setVahvistettu(true).setValmis().setValmistuminen("18.5.2016").setMyontaja(HAKEMUS2_OID)
+                .arvosana().setAine("kielikoe").setLisatieto("FI").setAsteikko_hyvaksytty().setArvosana(hyvaksytty).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .arvosana().setAine("kielikoe").setLisatieto("SV").setAsteikko_hyvaksytty().setArvosana(ei_osallistunut).setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay()).build()
+                .build()
+            .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
+        Assert.assertEquals(MERKITSEMATTA.name(), getFirstHakemusArvo(h, "kielikoe_fi-OSALLISTUMINEN"));
+        Assert.assertEquals(MERKITSEMATTA.name(), getFirstHakemusArvo(h, "kielikoe_sv-OSALLISTUMINEN"));
+        Assert.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
+        Assert.assertEquals("", getFirstHakemusArvo(h, "kielikoe_sv"));
+    }
+
+    @Test
     public void useampiAmmatillisenKielikoeArvosanatietoSamalleSuoritukselleSurestaPalauttaaHyvaksytynArvosananJosSellainenLoytyy() {
         HakemusDTO h = new HakemusDTO();
         h.setHakemusoid(HAKEMUS1_OID);

@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +25,7 @@ import java.util.stream.Stream;
 public class AmmatillisenKielikoetuloksetSurestaConverter {
     public static final String SURE_ASTEIKKO_HYVAKSYTTY = "HYVAKSYTTY";
 
-    public static List<AvainArvoDTO> convert(List<SuoritusJaArvosanat> oppijanSuorituksetJaArvosanat, ParametritDTO parametritDTO) {
+    public static List<AvainArvoDTO> convert(List<SuoritusJaArvosanat> oppijanSuorituksetJaArvosanat, ParametritDTO parametritDTO, HakemusDTO hakemusDTO) {
         if (oppijanSuorituksetJaArvosanat == null) {
             return Collections.emptyList();
         }
@@ -38,20 +39,39 @@ public class AmmatillisenKielikoetuloksetSurestaConverter {
                 .filter(s -> s.getSuoritus().isVahvistettu())
                 .filter(s -> s.getArvosanat() != null)
                 .filter(s -> !s.getArvosanat().isEmpty()).collect(Collectors.toList());
-        return suorituksetKielikohtaisiksiAvainArvoiksi(kielikoesuoritukset);
+        return suorituksetKielikohtaisiksiAvainArvoiksi(kielikoesuoritukset, hakemusDTO.getHakemusoid());
     }
 
-    private static List<AvainArvoDTO> suorituksetKielikohtaisiksiAvainArvoiksi(List<SuoritusJaArvosanat> oppijanKielikoesuoritukset) {
+    private static List<AvainArvoDTO> suorituksetKielikohtaisiksiAvainArvoiksi(List<SuoritusJaArvosanat> oppijanKielikoesuoritukset, String hakemusoid) {
         List<AvainArvoDTO> relevanttiArvoKullekinKielelle = new LinkedList<>();
         Stream<String> kaikkiKielet = oppijanKielikoesuoritukset.stream().map(SuoritusJaArvosanat::getArvosanat).flatMap(arvosanat ->
             arvosanat.stream().map(Arvosana::getLisatieto)).distinct();
         kaikkiKielet.forEach(kieli -> {
-            if (containsSuoritusWithValue(oppijanKielikoesuoritukset, kieli, hyvaksytty)) {
+            List<SuoritusJaArvosanat> kaikkiKielenSuoritukset = oppijanKielikoesuoritukset.stream()
+                .filter(sja -> sja.getArvosanat().stream().anyMatch(arvosana -> kieli.equals(arvosana.getLisatieto()))).collect(Collectors.toList());
+
+            List<SuoritusJaArvosanat> kielenTamanHakemuksenSuoritukset = kaikkiKielenSuoritukset.stream()
+                .filter(sja -> hakemusoid.equals(sja.getSuoritus().getMyontaja())).collect(Collectors.toList());
+
+            boolean hyvaksyttyTallaHakemuksella = containsSuoritusWithValue(kielenTamanHakemuksenSuoritukset, kieli, hyvaksytty);
+            boolean hyvaksyttyMillaVainHakemuksella = containsSuoritusWithValue(kaikkiKielenSuoritukset, kieli, hyvaksytty);
+            boolean hylattyTallaHakemuksella = containsSuoritusWithValue(kielenTamanHakemuksenSuoritukset, kieli, hylatty);
+            boolean hylattyMillaVainHakemuksella = containsSuoritusWithValue(kaikkiKielenSuoritukset, kieli, hylatty);
+            boolean eiOsallistunutTallaHakemuksella = containsSuoritusWithValue(kielenTamanHakemuksenSuoritukset, kieli, ei_osallistunut);
+            boolean eiOsallistunutMillaVainHakemuksella = containsSuoritusWithValue(kaikkiKielenSuoritukset, kieli, ei_osallistunut);
+
+            if (hyvaksyttyTallaHakemuksella) {
                 relevanttiArvoKullekinKielelle.addAll(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, hyvaksytty, Osallistuminen.OSALLISTUI));
-            } else if (containsSuoritusWithValue(oppijanKielikoesuoritukset, kieli, hylatty)) {
+            } else if (hyvaksyttyMillaVainHakemuksella) {
+                relevanttiArvoKullekinKielelle.addAll(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, hyvaksytty, Osallistuminen.MERKITSEMATTA));
+            } else if (hylattyTallaHakemuksella) {
                 relevanttiArvoKullekinKielelle.addAll(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, hylatty, Osallistuminen.OSALLISTUI));
-            } else if (containsSuoritusWithValue(oppijanKielikoesuoritukset, kieli, ei_osallistunut)) {
+            } else if (hylattyMillaVainHakemuksella) {
+                relevanttiArvoKullekinKielelle.addAll(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, hylatty, Osallistuminen.MERKITSEMATTA));
+            } else if (eiOsallistunutTallaHakemuksella) {
                 relevanttiArvoKullekinKielelle.addAll(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, ei_osallistunut, Osallistuminen.EI_OSALLISTUNUT));
+            } else if (eiOsallistunutMillaVainHakemuksella) {
+                relevanttiArvoKullekinKielelle.addAll(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, ei_osallistunut, Osallistuminen.MERKITSEMATTA));
             } else {
                 relevanttiArvoKullekinKielelle.addAll(createAmmatillisenKielikoeAvainArvoDtoCompatibleWithOldHakuAppData(kieli, null, null));
             }
