@@ -14,9 +14,7 @@ import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.*;
 import static org.junit.Assert.assertEquals;
@@ -225,7 +223,7 @@ public class PistetietoDTOTest {
                 new ParametritDTO()
         );
         assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-        assertEquals(Osallistuminen.OSALLISTUI.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+        assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
         assertEquals(Osallistumistieto.TOISELLA_HAKEMUKSELLA, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
         assertEquals("organisaatioOid2", p.osallistumistieto("hakukohdeOid", "kielikoe_fi").lahdeMyontajaOid.get());
     }
@@ -291,6 +289,33 @@ public class PistetietoDTOTest {
         );
         assertEquals(Osallistumistieto.OSALLISTUI, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
         assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
+        assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+    }
+
+    @Test
+    public void testAsetaToiseltaHakemukseltaTulleenKielikoetuloksenOsallistumiseksiMerkitsematta() {
+        Oppija oppija = new Oppija();
+        SuoritusJaArvosanat kielikoesuoritus = new SuoritusJaArvosanat();
+        Suoritus s = new Suoritus();
+        s.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
+        s.setMyontaja("toinenHakemusOid");
+        kielikoesuoritus.setSuoritus(s);
+        Arvosana a = new Arvosana();
+        a.setLisatieto("FI");
+        Arvio arvio = new Arvio();
+        arvio.setArvosana(hyvaksytty.name());
+        a.setArvio(arvio);
+        kielikoesuoritus.setArvosanat(Collections.singletonList(a));
+        oppija.setSuoritukset(Collections.singletonList(kielikoesuoritus));
+
+        PistetietoDTO p = new PistetietoDTO(
+                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
+                new ValintakoeOsallistuminenDTO(),
+                oppija,
+                new ParametritDTO()
+        );
+        assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
         assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
     }
 }

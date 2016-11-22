@@ -84,7 +84,12 @@ public class PistetietoDTO {
             switch (arvosana) {
                 case hyvaksytty:
                     additionalData.getAdditionalData().put(koetunniste, "true");
-                    additionalData.getAdditionalData().put(koetunniste + "-OSALLISTUMINEN", Osallistuminen.OSALLISTUI.toString());
+                    additionalData.getAdditionalData().put(
+                            koetunniste + "-OSALLISTUMINEN",
+                            hakemusOid.equals(tulos.getLeft().getMyontaja()) ?
+                                    Osallistuminen.OSALLISTUI.toString() :
+                                    Osallistuminen.MERKITSEMATTA.toString()
+                    );
                     break;
                 case hylatty:
                     additionalData.getAdditionalData().put(koetunniste, "false");
