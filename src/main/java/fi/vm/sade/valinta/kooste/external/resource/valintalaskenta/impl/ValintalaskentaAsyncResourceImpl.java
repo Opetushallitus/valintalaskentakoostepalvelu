@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
@@ -37,8 +38,8 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
         super(address, TimeUnit.HOURS.toMillis(8));
     }
     @Override
-    public Observable<Map<String, List<String>>> jonotSijoitteluun(String hakuOid) {
-        return getAsObservable("/valintalaskentakoostepalvelu/jonotsijoittelussa/" + hakuOid, new GenericType<Map<String, List<String>>>() {
+    public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
+        return getAsObservable("/valintalaskentakoostepalvelu/jonotsijoittelussa/" + hakuOid, new GenericType<List<JonoDto>>() {
         }.getType());
     }
     @Override

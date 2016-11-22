@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import org.springframework.stereotype.Service;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
@@ -50,7 +51,7 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
         return Observable.just(resultReference.get());
     }
     @Override
-    public Observable<Map<String, List<String>>> jonotSijoitteluun(String hakuOid) {
+    public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
         return null;
     }
     @Override

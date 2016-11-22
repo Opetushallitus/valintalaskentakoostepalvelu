@@ -5,13 +5,14 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import rx.Observable;
 
 public interface ValintalaskentaAsyncResource {
-    Observable<Map<String, List<String>>> jonotSijoitteluun(String hakuOid);
+    Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid);
 
     Observable<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
 

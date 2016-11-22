@@ -7,6 +7,10 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.Jono;
+import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.JonoPair;
+import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.util.JonoUtil;
+import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +26,15 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+
 import com.google.gson.Gson;
 
 @Controller("JonotSijoittelussaProxyResource")
@@ -60,24 +63,34 @@ public class JonotSijoittelussaProxyResource {
             @Suspended final AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(5L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(this::handleTimeout);
-        final Observable<Map<String, List<String>>> laskennanJonot = valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid);
+        final Observable<List<JonoDto>> laskennanJonot = valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid);
         final Observable<Map<String, List<ValintatapajonoDTO>>> valintaperusteidenJonot = tarjontaAsyncResource.haeHaku(hakuOid)
                 .map(HakuV1RDTO::getHakukohdeOids)
                 .switchMap(valintaperusteetAsyncResource::haeValintatapajonotSijoittelulle);
-        Observable.combineLatest(laskennanJonot,valintaperusteidenJonot, (jonotLaskennassa, jonotValintaperusteissa) -> {
-                    final List<String> laskennastaPuuttuvatHakukohdeOids = jonotValintaperusteissa.entrySet().stream().flatMap(entry -> {
-                        final String hakukohdeOid = entry.getKey();
-                        final Predicate<String> puuttuuLaskennasta = jonoOid ->
-                                !jonotLaskennassa.getOrDefault(hakukohdeOid, emptyList()).contains(jonoOid);
-                        final List<ValintatapajonoDTO> jonot = entry.getValue();
-                        final List<String> puuttuvatJonotLaskennassa = jonot.stream().filter(ValintatapajonoDTO::getSiirretaanSijoitteluun)
-                                .map(ValintatapajonoDTO::getOid)
-                                .filter(puuttuuLaskennasta).collect(Collectors.toList());
-
-                        return !puuttuvatJonotLaskennassa.isEmpty() ? Arrays.asList(hakukohdeOid).stream() : Stream.empty();
+        Observable.combineLatest(laskennanJonot, valintaperusteidenJonot, (jonotLaskennassa, jonotValintaperusteissa) -> {
+                    final List<Jono> fromValintaperusteet = jonotValintaperusteissa.entrySet().stream().flatMap(e -> e.getValue().stream().map(jono -> new Jono(e.getKey(), jono.getOid(),
+                            Optional.empty(),
+                            jono.getSiirretaanSijoitteluun()))).collect(Collectors.toList());
+                    final List<Jono> fromLaskenta = jonotLaskennassa.stream().map(j -> new Jono(j.getHakukohdeOid(), j.getValintatapajonoOid(), Optional.of(j.getValmisSijoiteltavaksi()), j.getSiirretaanSijoitteluun())).collect(Collectors.toList());
+                    List<JonoPair> jonoPairs = JonoUtil.pairJonos(fromLaskenta, fromValintaperusteet);
+                    final List<String> puuttuvatHakukohdeOids = jonoPairs.stream().flatMap(j -> {
+                        if (j.isAinoastaanLaskennassa()) {
+                            if (!j.isLaskennassaValmisSijoiteltavaksiAndSiirretaanSijoitteluun()) {
+                                return Stream.of(j.getHakukohdeOid());
+                            }
+                        } else if (j.isAinoastaanValintaperusteissa()) {
+                            if (j.isValintaperusteissaSiirretaanSijoitteluun()) {
+                                return Stream.of(j.getHakukohdeOid());
+                            }
+                        } else {
+                            if (!j.isMolemmissaValmisSijoiteltavaksiJaSiirretaanSijoitteluun()) {
+                                return Stream.of(j.getHakukohdeOid());
+                            }
+                        }
+                        return Stream.empty();
                     }).collect(Collectors.toList());
 
-                    return laskennastaPuuttuvatHakukohdeOids;
+                    return puuttuvatHakukohdeOids;
                 }
         ).subscribe(
                 laskennastaPuuttuvatHakukohdeOids ->
