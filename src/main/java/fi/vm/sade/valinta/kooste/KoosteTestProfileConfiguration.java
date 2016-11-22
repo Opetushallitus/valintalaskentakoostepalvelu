@@ -31,6 +31,7 @@ public class KoosteTestProfileConfiguration {
         Properties p0 = new Properties();
         p0.setProperty("valintalaskentakoostepalvelu.jatkuvasijoittelu.timer", "time=2018-12-12 10:12:12&delay=10000000");
         p0.setProperty("valintalaskentakoostepalvelu.valintalaskenta.rest.url", "http://" + proxyServer + "/valintalaskenta-laskenta-service/resources");
+        p0.setProperty("valintalaskentakoostepalvelu.ryhmasahkoposti.url", "http://" + proxyServer + "/ryhmasahkoposti-service");
         p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url", "http://" + proxyServer + "/viestintapalvelu");
         p0.setProperty("valintalaskentakoostepalvelu.hakemus.rest.url", "http://" + proxyServer + "/haku-app");
         p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
@@ -123,6 +124,11 @@ public class KoosteTestProfileConfiguration {
 
     @Bean(name = "viestintapalveluClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getViestintapalveluClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+
+    @Bean(name = "ryhmasahkopostiClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getRyhmasahkopostiClientCasInterceptor() {
         return INTERCEPTOR;
     }
 

@@ -438,6 +438,8 @@
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />
 		<bean
+				class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.RyhmasahkopostiAsyncResourceImpl" />
+		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaValintakoeAsyncResourceImpl" />
 
 		<bean class="fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl" />

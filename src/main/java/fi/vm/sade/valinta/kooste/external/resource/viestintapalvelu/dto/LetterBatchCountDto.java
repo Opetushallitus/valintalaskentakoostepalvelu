@@ -9,8 +9,9 @@ public class LetterBatchCountDto {
     public final long letterPublishedCount;
     public final boolean readyForPublish;
     public final boolean readyForEPosti;
+    public final Long groupEmailId;
 
-    public LetterBatchCountDto(Long letterBatchId, long letterTotalCount, long letterReadyCount, long letterErrorCount, long letterPublishedCount, boolean readyForPublish, boolean readyForEPosti) {
+    public LetterBatchCountDto(Long letterBatchId, long letterTotalCount, long letterReadyCount, long letterErrorCount, long letterPublishedCount, boolean readyForPublish, boolean readyForEPosti, Long groupEmailId) {
         this.letterBatchId = letterBatchId;
         this.letterTotalCount = letterTotalCount;
         this.letterReadyCount = letterReadyCount;
@@ -18,6 +19,7 @@ public class LetterBatchCountDto {
         this.letterPublishedCount = letterPublishedCount;
         this.readyForPublish = readyForPublish;
         this.readyForEPosti = readyForEPosti;
+        this.groupEmailId = groupEmailId;
     }
 
 }
