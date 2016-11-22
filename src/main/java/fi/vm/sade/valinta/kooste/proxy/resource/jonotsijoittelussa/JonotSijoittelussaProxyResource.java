@@ -49,10 +49,6 @@ public class JonotSijoittelussaProxyResource {
     @Autowired
     private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     @Autowired
-    private SijoitteluAsyncResource sijoitteluAsyncResource;
-    @Autowired
-    private SijoitteleAsyncResource sijoitteleAsyncResource;
-    @Autowired
     private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
@@ -73,24 +69,7 @@ public class JonotSijoittelussaProxyResource {
                             jono.getSiirretaanSijoitteluun()))).collect(Collectors.toList());
                     final List<Jono> fromLaskenta = jonotLaskennassa.stream().map(j -> new Jono(j.getHakukohdeOid(), j.getValintatapajonoOid(), Optional.of(j.getValmisSijoiteltavaksi()), j.getSiirretaanSijoitteluun())).collect(Collectors.toList());
                     List<JonoPair> jonoPairs = JonoUtil.pairJonos(fromLaskenta, fromValintaperusteet);
-                    final List<String> puuttuvatHakukohdeOids = jonoPairs.stream().flatMap(j -> {
-                        if (j.isAinoastaanLaskennassa()) {
-                            if (!j.isLaskennassaValmisSijoiteltavaksiAndSiirretaanSijoitteluun()) {
-                                return Stream.of(j.getHakukohdeOid());
-                            }
-                        } else if (j.isAinoastaanValintaperusteissa()) {
-                            if (j.isValintaperusteissaSiirretaanSijoitteluun()) {
-                                return Stream.of(j.getHakukohdeOid());
-                            }
-                        } else {
-                            if (!j.isMolemmissaValmisSijoiteltavaksiJaSiirretaanSijoitteluun()) {
-                                return Stream.of(j.getHakukohdeOid());
-                            }
-                        }
-                        return Stream.empty();
-                    }).collect(Collectors.toList());
-
-                    return puuttuvatHakukohdeOids;
+                    return JonoUtil.puutteellisetHakukohteet(jonoPairs);
                 }
         ).subscribe(
                 laskennastaPuuttuvatHakukohdeOids ->

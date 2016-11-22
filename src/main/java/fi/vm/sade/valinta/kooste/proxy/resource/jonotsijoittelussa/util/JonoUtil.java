@@ -26,4 +26,23 @@ public class JonoUtil {
         Set<String> ids = Stream.concat(laskenta.keySet().stream(), valintaperusteet.keySet().stream()).collect(Collectors.toSet());
         return ids.stream().map(id -> new JonoPair(Optional.ofNullable(laskenta.get(id)), Optional.ofNullable(valintaperusteet.get(id)))).collect(Collectors.toList());
     }
+
+    public static List<String> puutteellisetHakukohteet(List<JonoPair> jonoPairs) {
+        return jonoPairs.stream().flatMap(j -> {
+            if (j.isAinoastaanLaskennassa()) {
+                if (!j.isLaskennassaValmisSijoiteltavaksiAndSiirretaanSijoitteluun()) {
+                    return Stream.of(j.getHakukohdeOid());
+                }
+            } else if (j.isAinoastaanValintaperusteissa()) {
+                if (j.isValintaperusteissaSiirretaanSijoitteluun()) {
+                    return Stream.of(j.getHakukohdeOid());
+                }
+            } else {
+                if (!j.isMolemmissaValmisSijoiteltavaksiJaSiirretaanSijoitteluun()) {
+                    return Stream.of(j.getHakukohdeOid());
+                }
+            }
+            return Stream.empty();
+        }).collect(Collectors.toList());
+    }
 }
