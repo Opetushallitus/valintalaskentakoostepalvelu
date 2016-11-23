@@ -27,7 +27,7 @@ public class JonoUtil {
         return ids.stream().map(id -> new JonoPair(Optional.ofNullable(laskenta.get(id)), Optional.ofNullable(valintaperusteet.get(id)))).collect(Collectors.toList());
     }
 
-    public static List<String> puutteellisetHakukohteet(List<JonoPair> jonoPairs) {
+    public static Set<String> puutteellisetHakukohteet(List<JonoPair> jonoPairs) {
         return jonoPairs.stream().flatMap(j -> {
             if (j.isAinoastaanLaskennassa()) {
                 if (!j.isLaskennassaValmisSijoiteltavaksiAndSiirretaanSijoitteluun()) {
@@ -43,6 +43,6 @@ public class JonoUtil {
                 }
             }
             return Stream.empty();
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toSet());
     }
 }
