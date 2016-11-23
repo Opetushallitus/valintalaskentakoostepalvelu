@@ -76,7 +76,7 @@ public class PistetietoDTO {
         this.hakukohteidenOsallistumistiedot = (kokeet == null ? Stream.<HakutoiveDTO>empty() : kokeet.getHakutoiveet().stream())
                 .collect(Collectors.toMap(
                         h -> h.getHakukohdeOid(),
-                        h -> new HakukohteenOsallistumistiedotDTO(h, kielikoetulokset, hakemusOid)
+                        h -> new HakukohteenOsallistumistiedotDTO(h, kielikoetulokset, hakemusOid, kokeet.getHakutoiveet())
                 ));
         this.applicationAdditionalDataDTO = additionalData;
         kielikoetulokset.forEach((koetunniste, tulos) -> {

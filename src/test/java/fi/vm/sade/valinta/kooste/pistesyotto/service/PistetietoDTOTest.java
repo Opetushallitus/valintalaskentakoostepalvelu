@@ -318,4 +318,53 @@ public class PistetietoDTOTest {
         assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
         assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
     }
+
+
+    @Test
+    public void testToisenHakukohteenTyhjaTietoNaytetaanMuodossaMerkitsemattaToisessaHakutoiveessa() {
+        Oppija oppija = new Oppija();
+        oppija.setSuoritukset(Collections.emptyList());
+        
+        ValintakoeOsallistuminenDTO valintakoeOsallistuminenDTO = new ValintakoeOsallistuminenDTO();
+
+        HakutoiveDTO hakutoiveDto = new HakutoiveDTO();
+        hakutoiveDto.setHakukohdeOid("hakukohdeOid");
+        ValintakoeValinnanvaiheDTO vv = new ValintakoeValinnanvaiheDTO();
+        ValintakoeDTO koe = new ValintakoeDTO();
+        koe.setValintakoeTunniste("kielikoe_fi");
+        OsallistuminenTulosDTO o = new OsallistuminenTulosDTO();
+        o.setOsallistuminen(fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.OSALLISTUU);
+        koe.setOsallistuminenTulos(o);
+        vv.setValintakokeet(Collections.singletonList(koe));
+        hakutoiveDto.setValinnanVaiheet(Collections.singletonList(vv));
+
+        HakutoiveDTO toinenHakutoiveDto = new HakutoiveDTO();
+        toinenHakutoiveDto.setHakukohdeOid("toinenHakukohdeOid");
+        ValintakoeValinnanvaiheDTO vv2 = new ValintakoeValinnanvaiheDTO();
+        ValintakoeDTO koe2 = new ValintakoeDTO();
+        koe2.setValintakoeTunniste("kielikoe_fi");
+        OsallistuminenTulosDTO o2 = new OsallistuminenTulosDTO();
+        o2.setOsallistuminen(fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.EI_OSALLISTU);
+        koe2.setOsallistuminenTulos(o2);
+        vv2.setValintakokeet(Collections.singletonList(koe2));
+        toinenHakutoiveDto.setValinnanVaiheet(Collections.singletonList(vv2));
+
+        valintakoeOsallistuminenDTO.setHakutoiveet(Arrays.asList(hakutoiveDto, toinenHakutoiveDto));
+        
+        
+        PistetietoDTO p = new PistetietoDTO(
+                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
+                valintakoeOsallistuminenDTO,
+                oppija,
+                new ParametritDTO()
+        );
+
+        assertEquals(Osallistumistieto.OSALLISTUI, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
+        assertEquals(Osallistumistieto.TOISESSA_HAKUTOIVEESSA, p.osallistumistieto("toinenHakukohdeOid", "kielikoe_fi").osallistumistieto);
+
+        assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
+        assertEquals("MERKITSEMATTA", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+        assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+    }
 }
