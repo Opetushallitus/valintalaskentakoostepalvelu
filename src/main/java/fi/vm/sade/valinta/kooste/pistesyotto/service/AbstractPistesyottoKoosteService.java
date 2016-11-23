@@ -145,7 +145,7 @@ public abstract class AbstractPistesyottoKoosteService {
         Func1<List<ValintaperusteDTO>, Observable<List<Oppija>>> haeKielikoetulokset = kokeet -> {
             if (kokeet.stream().map(k -> k.getTunniste()).anyMatch(t -> t.matches(PistesyottoExcel.KIELIKOE_REGEX))) {
                 prosessi.inkrementoiKokonaistyota();
-                return suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
+                return suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
                         .doOnCompleted(() -> {
                             prosessi.inkrementoiTehtyjaToita();
                         });
@@ -311,7 +311,7 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid) {
-        return suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
+        return suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
                         "Oppijoiden haku Suoritusrekisteristä haun %s hakukohteelle %s epäonnistui",
                         hakuOid,

@@ -51,7 +51,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
                 valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
                     .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v))),
-                suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid)
+                suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
                     .map(os -> os.stream().collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o))),
                 ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
                 (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) ->

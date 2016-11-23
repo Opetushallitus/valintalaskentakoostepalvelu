@@ -50,6 +50,20 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
     }
 
     @Override
+    public Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
+        return getAsObservable(
+                "/suoritusrekisteri/rest/v1/oppijat",
+                new TypeToken<List<Oppija>>() { }.getType(),
+                client -> {
+                    client.query("hakukohde", hakukohdeOid);
+                    client.query("haku", hakuOid);
+                    client.query("ensikertalaisuudet", "false");
+                    return client;
+                }
+        );
+    }
+
+    @Override
     public Peruutettava getOppijatByHakukohde(String hakukohdeOid,
                                               String hakuOid,
                                               Consumer<List<Oppija>> callback,

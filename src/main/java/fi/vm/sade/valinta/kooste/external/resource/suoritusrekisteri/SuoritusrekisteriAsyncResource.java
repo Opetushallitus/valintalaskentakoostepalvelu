@@ -16,6 +16,9 @@ public interface SuoritusrekisteriAsyncResource {
     Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
                                                    String hakuOid);
 
+    Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid,
+                                                                          String hakuOid);
+
     @Deprecated
     Peruutettava getOppijatByHakukohde(String hakukohdeOid,
                                        String hakuOid,
