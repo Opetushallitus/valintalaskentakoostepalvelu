@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteSe
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
@@ -131,6 +132,11 @@ public class HakukohteenOsallistumistiedotDTO {
             } else {
                 return this;
             }
+        }
+
+        @Override
+        public String toString() {
+            return ToStringBuilder.reflectionToString(this);
         }
     }
 }
