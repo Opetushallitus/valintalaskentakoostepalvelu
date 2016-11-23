@@ -66,6 +66,11 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
+    public Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
+        return Observable.just(ImmutableList.of(oppijaRef.get()));
+    }
+
+    @Override
     public Future<Response> getSuorituksetByOppija(String opiskelijaOid, String hakuOid, Consumer<Oppija> callback, Consumer<Throwable> failureCallback) {
         callback.accept(oppijaRef.get());
         return Futures.immediateCancelledFuture();
