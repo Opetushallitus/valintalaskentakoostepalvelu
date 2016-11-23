@@ -121,7 +121,7 @@ public class JalkiohjauskirjeetKomponentti {
             }
         }
 
-        LOG.info("Yritetään luoda viestintäpalvelulle jälkiohjauskirje-erä, jossa kirjeitä {} kappaletta!", kirjeet.size());
+        LOG.info("Yritetään luoda viestintäpalvelulle jälkiohjauskirje-erä haulle {} asiointikielelä {}, jossa kirjeitä {} kappaletta!", hakuOid, preferoituKielikoodi, kirjeet.size());
         LetterBatch viesti = new LetterBatch(kirjeet);
         viesti.setApplicationPeriod(hakuOid);
         viesti.setFetchTarget(null);

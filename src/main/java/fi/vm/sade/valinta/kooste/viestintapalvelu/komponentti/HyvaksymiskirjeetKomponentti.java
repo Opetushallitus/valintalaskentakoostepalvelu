@@ -170,7 +170,9 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
             Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);
             LetterBatch viesti = new LetterBatch(kirjeet);
-
+            if(asiointikieli.isPresent()) {
+                viesti.setLanguageCode(asiointikieli.get());
+            }
             int count = 0;
             for (HakijaDTO hakija : hakukohteenHakijat) {
                 final String hakukohdeOid = StringUtils.isEmpty(hakukohdeOidFromRequest) ? hyvaksytynHakutoiveenHakukohdeOid(hakija) : hakukohdeOidFromRequest;
@@ -242,7 +244,7 @@ public class HyvaksymiskirjeetKomponentti {
                 }
             }
 
-            LOG.info("Yritetään luoda viestintapalvelulle hyvaksymiskirje-erä, jossa kirjeitä {} kappaletta!", kirjeet.size());
+            LOG.info("Yritetään luodaviestintapalvelulle hyvaksymiskirje-erä haulle {} asiointikielellä {} , jossa kirjeitä {} kappaletta!", hakuOid, asiointikieli, kirjeet.size());
             Collections.sort(kirjeet, (o1, o2) -> {
                 try {
                     return o1.getAddressLabel().getLastName().compareTo(o2.getAddressLabel().getLastName());
