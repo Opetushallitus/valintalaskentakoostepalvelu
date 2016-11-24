@@ -61,7 +61,8 @@ public class HakemuksetResource {
         Long started = System.currentTimeMillis();
 
         authorityCheckService.getAuthorityCheckForRoles(
-                asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_READ", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+                asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_READ", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD")
+        ).subscribe(
                 authCheck -> {
                     valinnanvaiheenValintakoekutsutService.hae(valinnanvaiheOid, hakuOid, authCheck,
                             hakemusDTOs -> {
@@ -75,10 +76,10 @@ public class HakemuksetResource {
                                 asyncResponse.cancel();
                             }
                     );
-                },
-                exception -> {
+                }, exception -> {
                     LOG.error("hakemusten listaaminen epäonnistui, authCheck failed", exception);
                     asyncResponse.resume(Response.serverError().entity(exception).build());
-                });
+                }
+        );
     }
 }

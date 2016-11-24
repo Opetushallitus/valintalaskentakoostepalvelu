@@ -24,40 +24,30 @@ public class AuthorityCheckService {
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
 
-    public void getAuthorityCheckForRoles(Collection<String> roles, Consumer<HakukohdeOIDAuthorityCheck> callback, Consumer<Throwable> failureCallback) {
+    public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(Collection<String> roles) {
         final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
         final Set<String> organizationOids = parseOrganizationOidsFromSecurityRoles(authorities);
         boolean isRootAuthority = organizationOids.stream().anyMatch(oid -> isRootOrganizationOID(oid));
         if(isRootAuthority) {
-            callback.accept((OID) -> true);
+            return Observable.just((oid) -> true);
         } else {
             final Set<String> organizationGroupOids = parseOrganizationGroupOidsFromSecurityRoles(authorities);
             if(organizationGroupOids.isEmpty() && organizationOids.isEmpty()) {
-                LOG.error("Unauthorized! User has no organization OIDS");
-                throw new RuntimeException("Unauthorized");
+                return Observable.error(new RuntimeException("Unauthorized. User has no organization OIDS"));
             }
             Observable<List<ResultOrganization>> searchByOrganizationOids =
                     Optional.of(organizationOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids).orElse(Observable.just(Collections.emptyList()));
-
 
             Observable<List<ResultOrganization>> searchByOrganizationGroupOids =
                     Optional.of(organizationGroupOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
                             .orElse(Observable.just(Collections.emptyList()));
 
-            Observable.combineLatest(searchByOrganizationOids, searchByOrganizationGroupOids, (orgs, groupOrgs) -> {
+            return Observable.combineLatest(searchByOrganizationOids, searchByOrganizationGroupOids, (orgs, groupOrgs) -> {
                 Set<String> hakukohdeOidSet1 = orgs.stream().flatMap(o -> o.getTulokset().stream()).map(ResultHakukohde::getOid).collect(Collectors.toSet());
                 Set<String> hakukohdeOidSet2 = groupOrgs.stream().flatMap(o -> o.getTulokset().stream()).map(ResultHakukohde::getOid).collect(Collectors.toSet());
 
-                return Sets.union(hakukohdeOidSet1, hakukohdeOidSet2);
-            }).subscribe(
-                    hakukohdeOIDS -> {
-                        callback.accept((OID) -> hakukohdeOIDS.contains(OID));
-                    },
-                    exception -> {
-                        failureCallback.accept(exception);
-                    }
-            );
-
+                return (oid) -> Sets.union(hakukohdeOidSet1, hakukohdeOidSet2).contains(oid);
+            });
         }
     }
 }

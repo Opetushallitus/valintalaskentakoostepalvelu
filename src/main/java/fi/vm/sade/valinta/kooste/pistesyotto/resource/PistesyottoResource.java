@@ -211,7 +211,9 @@ public class PistesyottoResource {
                 });
 
                 final String username = KoosteAudit.username();
-                authorityCheckService.getAuthorityCheckForRoles(asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+                authorityCheckService.getAuthorityCheckForRoles(
+                        asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD")
+                ).subscribe(
                         authorityCheck -> {
                             LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
                             tuontiSoteliService.tuo(authorityCheck, hakemukset, username, hakuOid, valinnanvaiheOid,
