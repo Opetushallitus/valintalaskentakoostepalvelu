@@ -14,28 +14,5 @@ import java.util.Optional;
 import static java.util.Collections.*;
 
 public class JonoUtilTest {
-    @Test
-    public void testPuutteellisetTyhjalle() {
-        List<JonoPair> jonoPairs = JonoUtil.pairJonos(emptyList(), emptyList());
-        Assert.assertTrue(JonoUtil.puutteellisetHakukohteet(jonoPairs).isEmpty());
-    }
 
-    @Test
-    public void testMolemmissaSamatJaKaikkiOk() {
-        Jono j1 = new Jono("hk1", "j1", Optional.of(true),true, Optional.of(true));
-        List<Jono> laskenta = Arrays.asList(j1);
-        List<Jono> perusteet = Arrays.asList(j1);
-        List<JonoPair> jonoPairs = JonoUtil.pairJonos(laskenta, perusteet);
-        Assert.assertTrue(JonoUtil.puutteellisetHakukohteet(jonoPairs).isEmpty());
-    }
-
-    @Test
-    public void testEiPalautaDuplikaatteja() {
-        Jono j1 = new Jono("hk1", "j1", Optional.of(true),true, Optional.of(false));
-        Jono j2 = new Jono("hk1", "j2", Optional.of(true),true, Optional.of(false));
-        List<Jono> laskenta = Arrays.asList(j1,j2);
-        List<Jono> perusteet = Arrays.asList(j1,j2);
-        List<JonoPair> jonoPairs = JonoUtil.pairJonos(laskenta, perusteet);
-        Assert.assertTrue(JonoUtil.puutteellisetHakukohteet(jonoPairs).size() == 1);
-    }
 }

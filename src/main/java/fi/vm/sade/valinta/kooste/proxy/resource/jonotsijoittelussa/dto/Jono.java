@@ -19,4 +19,18 @@ public class Jono {
     public boolean isValmisSijoiteltavaksiAndSiirretaanSijoitteluun() {
         return valmisSijoiteltavaksi.orElse(false) && siirretaanSijoitteluun;
     }
+
+    /**
+     * @return puuttuva aktiivinen tulkitaan falseksi
+     */
+    public boolean isPassiivinen() {
+        return !(aktiivinen.orElse(true));
+    }
+
+    /**
+     * @return puuttuva aktiivinen tulkitaan falseksi
+     */
+    public boolean isAktiivinen() {
+        return aktiivinen.orElse(false);
+    }
 }

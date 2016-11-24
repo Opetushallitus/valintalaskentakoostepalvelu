@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.HakukohdePair;
 import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.Jono;
 import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.JonoPair;
 import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.util.JonoUtil;
@@ -68,8 +69,8 @@ public class JonotSijoittelussaProxyResource {
                             Optional.empty(),
                             jono.getSiirretaanSijoitteluun(), Optional.ofNullable(jono.getAktiivinen())))).collect(Collectors.toList());
                     final List<Jono> fromLaskenta = jonotLaskennassa.stream().map(j -> new Jono(j.getHakukohdeOid(), j.getValintatapajonoOid(), Optional.of(j.getValmisSijoiteltavaksi()), j.getSiirretaanSijoitteluun(), Optional.empty())).collect(Collectors.toList());
-                    List<JonoPair> jonoPairs = JonoUtil.pairJonos(fromLaskenta, fromValintaperusteet);
-                    return JonoUtil.puutteellisetHakukohteet(jonoPairs);
+            List<HakukohdePair> hakukohdePairs = JonoUtil.pairHakukohteet(fromLaskenta, fromValintaperusteet);
+            return JonoUtil.puutteellisetHakukohteet(hakukohdePairs);
                 }
         ).subscribe(
                 laskennastaPuuttuvatHakukohdeOids ->
