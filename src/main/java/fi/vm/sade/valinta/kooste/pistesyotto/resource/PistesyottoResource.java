@@ -62,16 +62,14 @@ public class PistesyottoResource {
     @Autowired
     private PistesyottoKoosteService pistesyottoKoosteService;
 
-    @POST
+    @GET
     @Path("/koostaPistetiedotHakemuksille/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     public void koostaPistetiedotHakemuksille(
             @PathParam("hakuOid") String hakuOid,
             @PathParam("hakukohdeOid") String hakukohdeOid,
-            List<String> hakemusOidit,
             @Suspended final AsyncResponse response) {
         response.setTimeout(30L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
@@ -80,7 +78,7 @@ public class PistesyottoResource {
                     .entity("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu")
                     .build());
         });
-        pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid, hakemusOidit).subscribe(
+        pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid).subscribe(
                 pistetiedot -> response.resume(Response.ok().header("Content-Type", "application/json").entity(pistetiedot).build()),
                 error -> {
                     logError("koostaPistetiedotHakemuksille epäonnistui", error);

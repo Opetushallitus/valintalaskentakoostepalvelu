@@ -44,10 +44,10 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 valintalaskentaValintakoeAsyncResource);
     }
 
-    public Observable<List<PistetietoDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, List<String> hakemusOidit) {
+    public Observable<List<PistetietoDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid) {
         try {
             return Observable.zip(
-                applicationAsyncResource.getApplicationAdditionalData(hakemusOidit),
+                applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid),
                 valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
                 valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
                     .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v))),
@@ -66,7 +66,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     ).collect(Collectors.toList())
             );
         } catch (Exception e) {
-            LOG.error(String.format("Ongelma koostettaessa haun %s kohteen %s pistetietoja %s hakemukselle : %s", hakuOid, hakukohdeOid, hakemusOidit.size(), hakemusOidit), e);
+            LOG.error(String.format("Ongelma koostettaessa haun %s kohteen %s pistetietoja", hakuOid, hakukohdeOid), e);
             return Observable.error(e);
         }
     }

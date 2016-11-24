@@ -101,7 +101,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         Response r = http.getWebClient()
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .post(new Gson().toJson(hakemusOids));
+                .get();
         assertEquals(200, r.getStatus());
 
         List<PistetietoDTO> uudetPistetiedot = new Gson().fromJson(
@@ -303,8 +303,8 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     }
 
     private void mockHakuAppKutsu(List<ApplicationAdditionalDataDTO> pistetiedot) {
-        mockToReturnJson(POST,
-                "/haku-app/applications/additionalData",
+        mockToReturnJson(GET,
+                "/haku-app/applications/additionalData/testihaku/testihakukohde",
                 pistetiedot
         );
     }
