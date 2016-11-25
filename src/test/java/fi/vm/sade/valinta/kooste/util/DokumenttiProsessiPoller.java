@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.util.function.Function;
 
 public class DokumenttiProsessiPoller {
-    private static final Duration TIME_TO_WAIT_IN_TOTAL = Duration.ofSeconds(10);
+    private static final Duration TIME_TO_WAIT_IN_TOTAL = Duration.ofSeconds(30);
     private static final Duration REQUEST_INTERVAL = Duration.ofMillis(10);
 
     public static Prosessi pollDokumenttiProsessi(String rootUrl, ProsessiId prosessiId, Function<Prosessi,Boolean> responseProcessor) {
