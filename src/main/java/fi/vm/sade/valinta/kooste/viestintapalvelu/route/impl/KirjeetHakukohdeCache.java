@@ -23,7 +23,7 @@ import static rx.observables.BlockingObservable.from;
 @Component
 public class KirjeetHakukohdeCache {
     private final Logger LOG = LoggerFactory.getLogger(KirjeetHakukohdeCache.class);
-    private final Cache<String, MetaHakukohde> metaHakukohdeCache = CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
+    private final Cache<String, MetaHakukohde> metaHakukohdeCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
 
     @Autowired
     private TarjontaAsyncResource hakuV1AsyncResource;
