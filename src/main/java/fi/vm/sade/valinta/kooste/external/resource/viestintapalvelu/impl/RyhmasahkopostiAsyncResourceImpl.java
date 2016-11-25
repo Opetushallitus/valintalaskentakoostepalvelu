@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
-import fi.vm.sade.valinta.http.HttpExceptionWithStatus;
+import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -37,7 +37,7 @@ public class RyhmasahkopostiAsyncResourceImpl extends AsyncResourceWithCas imple
                     return client;
                 }
         ).onErrorReturn(error -> {
-            if(error instanceof HttpExceptionWithStatus && ((HttpExceptionWithStatus) error).status == 404) {
+            if(error instanceof HttpExceptionWithResponse && ((HttpExceptionWithResponse) error).status == 404) {
                 return Optional.empty();
             }
             if(error instanceof RuntimeException) {
