@@ -90,7 +90,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     @Test
     public void testKoostaaPistetiedotHakemuksille() throws Exception {
 
-        HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/koostaPistetiedotHakemuksille/haku/testihaku/hakukohde/testihakukohde");
+        HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
 
         List<ApplicationAdditionalDataDTO> pistetiedot = readAdditionalData();
         List<String> hakemusOids = pistetiedot.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toList());
@@ -139,7 +139,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     @Test
     public void testTallentaaKoostetutPistetiedotHakukohteelle() throws Exception {
-        HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tallennaKoostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
+        HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
         mockOrganisaatioKutsu();

@@ -64,32 +64,6 @@ public class PistesyottoResource {
     private PistesyottoKoosteService pistesyottoKoosteService;
 
     @GET
-    @Path("/koostaPistetiedotHakemuksille/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
-    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-    public void koostaPistetiedotHakemuksille(
-            @PathParam("hakuOid") String hakuOid,
-            @PathParam("hakukohdeOid") String hakukohdeOid,
-            @Suspended final AsyncResponse response) {
-        response.setTimeout(30L, TimeUnit.SECONDS);
-        response.setTimeoutHandler(handler -> {
-            LOG.error("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu: /koostaPistetiedotHakemuksille/haku/{hakuOid}/hakukohde/{hakukohdeOid}", hakuOid, hakukohdeOid);
-            handler.resume(Response.serverError()
-                    .entity("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu")
-                    .build());
-        });
-        pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid).subscribe(
-                pistetiedot -> response.resume(Response.ok().header("Content-Type", "application/json").entity(pistetiedot).build()),
-                error -> {
-                    logError("koostaPistetiedotHakemuksille epäonnistui", error);
-                    response.resume(Response.serverError().entity(error.getMessage()).build());
-                }
-
-        );
-    }
-
-    @GET
     @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
@@ -126,7 +100,7 @@ public class PistesyottoResource {
             @Suspended final AsyncResponse response) {
         response.setTimeout(30L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
-            LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: /tallennaKoostetutPistetiedot");
+            LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}", hakemusOid);
             handler.resume(Response.serverError()
                     .entity("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu")
                     .build());
@@ -146,11 +120,37 @@ public class PistesyottoResource {
                 .subscribe(onSuccess, onError);
     }
 
+    @GET
+    @Path("/koostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+    public void koostaPistetiedotHakemuksille(
+            @PathParam("hakuOid") String hakuOid,
+            @PathParam("hakukohdeOid") String hakukohdeOid,
+            @Suspended final AsyncResponse response) {
+        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeoutHandler(handler -> {
+            LOG.error("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
+            handler.resume(Response.serverError()
+                    .entity("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu")
+                    .build());
+        });
+        pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid).subscribe(
+                pistetiedot -> response.resume(Response.ok().header("Content-Type", "application/json").entity(pistetiedot).build()),
+                error -> {
+                    logError("koostaPistetiedotHakemuksille epäonnistui", error);
+                    response.resume(Response.serverError().entity(error.getMessage()).build());
+                }
+
+        );
+    }
+
     @PUT
-    @Path("/tallennaKoostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
+    @Path("/koostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+    @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien tallennus hakemuksille ja suoritusrekisteriin")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     public void tallennaKoostetutPistetiedot(
             @PathParam("hakuOid") String hakuOid,
@@ -159,7 +159,7 @@ public class PistesyottoResource {
             @Suspended final AsyncResponse response) {
         response.setTimeout(30L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
-            LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: /tallennaKoostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}", hakuOid, hakukohdeOid);
+            LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
             handler.resume(Response.serverError()
                     .entity("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu")
                     .build());
