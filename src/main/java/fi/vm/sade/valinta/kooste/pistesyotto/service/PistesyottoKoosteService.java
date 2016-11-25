@@ -4,13 +4,17 @@ import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistetietoDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
+import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
@@ -20,7 +24,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,6 +78,34 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             LOG.error(String.format("Ongelma koostettaessa haun %s kohteen %s pistetietoja", hakuOid, hakukohdeOid), e);
             return Observable.error(e);
         }
+    }
+
+    public Observable<Map<String, PistetietoDTO>> koostaOsallistujanPistetiedot(String hakemusOid) {
+        return applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus -> {
+            String hakuOid = hakemus.getApplicationSystemId();
+            HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus);
+            Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
+            Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
+            Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+            return Observable.merge(hakemusDTO.getHakukohteet().stream()
+                .map(hakukohdeDTO -> {
+                    String hakukohdeOid = hakukohdeDTO.getOid();
+                    return Observable.zip(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
+                        koeO,
+                        oppijaO,
+                        parametritO,
+                        (valintaperusteet, valintakoeOsallistuminen, oppija, ohjausparametrit) ->
+                            Pair.of(
+                                hakukohdeOid,
+                                new PistetietoDTO(
+                                    new ApplicationAdditionalDataDTO(hakemusOid, hakemus.getPersonOid(), hakemusDTO.getEtunimi(), hakemusDTO.getSukunimi(), hakemus.getAdditionalInfo()),
+                                    Pair.of(hakukohdeOid, valintaperusteet),
+                                    valintakoeOsallistuminen,
+                                    oppija,
+                                    ohjausparametrit)));
+                }).collect(Collectors.toList())
+            ).toMap(Pair::getLeft, Pair::getRight);
+        });
     }
 
     private static Map<String, HakutoiveDTO> kielikokeidenHakukohteet(ValintakoeOsallistuminenDTO voDTO) {

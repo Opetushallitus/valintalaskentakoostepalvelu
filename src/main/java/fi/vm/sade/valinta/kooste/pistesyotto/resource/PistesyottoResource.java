@@ -38,6 +38,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import rx.functions.Action1;
 
+import static com.sun.org.apache.xalan.internal.xsltc.compiler.sym.error;
 import static java.util.Arrays.*;
 
 @Controller("PistesyottoResource")
@@ -88,13 +89,39 @@ public class PistesyottoResource {
         );
     }
 
+    @GET
+    @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+    public void koostaPistetiedotYhdelleHakemukselle(
+            @PathParam("hakemusOid") String hakemusOid,
+            @Suspended final AsyncResponse response) {
+        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeoutHandler(handler -> {
+            LOG.error("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/hakemus/{}", hakemusOid);
+            handler.resume(Response.serverError()
+                    .entity("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu")
+                    .build());
+        });
+        pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid).subscribe(
+                pistetiedotHakukohteittain -> response.resume(Response.ok().header("Content-Type", "application/json").entity(pistetiedotHakukohteittain).build()),
+                error -> {
+                    logError("koostaPistetiedotHakemuksille epäonnistui", error);
+                    response.resume(Response.serverError().entity(error.getMessage()).build());
+                }
+
+        );
+    }
+
     @PUT
-    @Path("/tallennaKoostetutPistetiedot")
+    @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     public void tallennaKoostetutPistetiedotHakemukselle(
+            @PathParam("hakemusOid") String hakemusOid,
             ApplicationAdditionalDataDTO pistetiedot,
             @Suspended final AsyncResponse response) {
         response.setTimeout(30L, TimeUnit.SECONDS);
@@ -110,6 +137,11 @@ public class PistesyottoResource {
             response.resume(Response.serverError().entity(error.getMessage()).build());
         };
 
+        if (!hakemusOid.equals(pistetiedot.getOid())) {
+            String errorMessage = String.format("URLissa tuli hakemusOid %s , mutta PUT-datassa hakemusOid %s", hakemusOid, pistetiedot.getOid());
+            LOG.error(errorMessage);
+            response.resume(Response.serverError().entity(errorMessage).build());
+        }
         pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(pistetiedot, KoosteAudit.username())
                 .subscribe(onSuccess, onError);
     }
