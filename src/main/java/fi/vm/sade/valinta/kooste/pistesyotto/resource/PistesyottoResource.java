@@ -135,19 +135,24 @@ public class PistesyottoResource {
                     .entity("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu")
                     .build());
         });
-        Action1<Void> onSuccess = (a) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
-        Action1<Throwable> onError = (error) -> {
-            logError("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
-            response.resume(Response.serverError().entity(error.getMessage()).build());
-        };
 
-        if (!hakemusOid.equals(pistetiedot.getOid())) {
-            String errorMessage = String.format("URLissa tuli hakemusOid %s , mutta PUT-datassa hakemusOid %s", hakemusOid, pistetiedot.getOid());
+        if (hakemusOid.equals(pistetiedot.getOid())) {
+            pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(pistetiedot, KoosteAudit.username())
+                    .subscribe(
+                            a -> response.resume(Response.ok().header("Content-Type", "application/json").build()),
+                            error -> {
+                                logError("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
+                                response.resume(Response.serverError().entity(error.getMessage()).build());
+                            }
+                    );
+        } else {
+            String errorMessage = String.format(
+                    "URLissa tuli hakemusOid %s , mutta PUT-datassa hakemusOid %s",
+                    hakemusOid, pistetiedot.getOid()
+            );
             LOG.error(errorMessage);
             response.resume(Response.serverError().entity(errorMessage).build());
         }
-        pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(pistetiedot, KoosteAudit.username())
-                .subscribe(onSuccess, onError);
     }
 
     @GET
