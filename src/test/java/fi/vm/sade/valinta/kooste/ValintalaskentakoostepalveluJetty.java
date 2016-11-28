@@ -87,6 +87,7 @@ public class ValintalaskentakoostepalveluJetty {
                 throw new IllegalStateException("Could not get the server started with " + maxTriesToStart + " attempts.");
             }
         }
+        MockOpintopolkuCasAuthenticationFilter.clear();
     }
 
     private static void startServer() throws Exception {

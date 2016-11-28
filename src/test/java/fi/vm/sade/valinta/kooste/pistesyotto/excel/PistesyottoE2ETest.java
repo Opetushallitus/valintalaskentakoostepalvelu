@@ -69,6 +69,8 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     }
 
     private void setUpMockCalls() throws IOException {
+        MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_1.2.246.562.10.00000000001");
+
         mockToReturnString(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/1.2.246.562.5.85532589612",
                 IOUtils.toString(new ClassPathResource("pistesyotto/List_ValintakoeOsallistuminenDTO.json").getInputStream())
         );

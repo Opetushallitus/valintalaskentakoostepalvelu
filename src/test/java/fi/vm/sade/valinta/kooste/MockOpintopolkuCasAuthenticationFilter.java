@@ -21,17 +21,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MockOpintopolkuCasAuthenticationFilter implements Filter {
-    private static CasAuthenticationToken CAS_AUTHENTICATION_TOKEN;
+    private static CasAuthenticationToken casAuthenticationToken = null;
 
-    static {
-        MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_1.2.246.562.10.00000000001");
+    public static void clear() {
+        casAuthenticationToken = null;
     }
 
     public static void setRolesToReturnInFakeAuthentication(String... roles) {
         String key = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-key";
         String principal = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-principal";
         String credentials = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-creds";
-        CAS_AUTHENTICATION_TOKEN = new CasAuthenticationToken(key, principal, credentials,
+        casAuthenticationToken = new CasAuthenticationToken(key, principal, credentials,
             Stream.of(roles).map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
             new User(MockOpintopolkuCasAuthenticationFilter.class.getSimpleName().toLowerCase(), "salasana", Collections.singletonList(new LdapAuthority("rooli", "dn"))),
             new AssertionImpl(new AttributePrincipalImpl(MockOpintopolkuCasAuthenticationFilter.class.getSimpleName())));
@@ -39,8 +39,11 @@ public class MockOpintopolkuCasAuthenticationFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        if (casAuthenticationToken == null) {
+            throw new RuntimeException("CAS authentication mock not set");
+        }
         SecurityContext context = SecurityContextHolder.getContext();
-        context.setAuthentication(CAS_AUTHENTICATION_TOKEN);
+        context.setAuthentication(casAuthenticationToken);
         chain.doFilter(req, res);
     }
 
