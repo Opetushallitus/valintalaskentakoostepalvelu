@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import rx.Observable;
 import rx.functions.Action1;
 
 import javax.ws.rs.Consumes;
@@ -88,13 +89,32 @@ public class PistesyottoResource {
                     .entity("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu")
                     .build());
         });
-        pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid).subscribe(
-                pistetiedotHakukohteittain -> response.resume(Response.ok().header("Content-Type", "application/json").entity(pistetiedotHakukohteittain).build()),
+        Observable.zip(
+                authorityCheckService.getAuthorityCheckForRoles(asList(
+                        "ROLE_APP_HAKEMUS_READ_UPDATE",
+                        "ROLE_APP_HAKEMUS_READ",
+                        "ROLE_APP_HAKEMUS_CRUD",
+                        "ROLE_APP_HAKEMUS_LISATIETORU",
+                        "ROLE_APP_HAKEMUS_LISATIETOCRUD"
+                )),
+                pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid),
+                (authorityCheck, pistetiedotHakukohteittain) -> {
+                    if (pistetiedotHakukohteittain.keySet().stream()
+                            .anyMatch(hakukohdeOid -> authorityCheck.test(hakukohdeOid))) {
+                        return Response.ok()
+                                .header("Content-Type", "application/json")
+                                .entity(pistetiedotHakukohteittain)
+                                .build();
+                    } else {
+                        return Response.status(Response.Status.FORBIDDEN).build();
+                    }
+                }
+        ).subscribe(
+                entity -> response.resume(entity),
                 error -> {
-                    logError("koostaPistetiedotHakemuksille epäonnistui", error);
+                    logError("koostaPistetiedotYhdelleHakemukselle epäonnistui", error);
                     response.resume(Response.serverError().entity(error.getMessage()).build());
                 }
-
         );
     }
 
