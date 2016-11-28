@@ -67,7 +67,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
-        pistetiedot.stream().forEach(p -> p.getAdditionalData().remove("kielikoe_fi"));
+        pistetiedot.forEach(p -> p.getAdditionalData().remove("kielikoe_fi"));
 
         mockToReturnJsonWithParams(GET,
                 "/suoritusrekisteri/rest/v1/oppijat",
@@ -98,12 +98,10 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
         mockTarjontaHakukohdeCall();
         mockTarjontaHakuCall();
-
         mockOrganisaatioKutsu();
 
         HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tuonti");
 
-        MockServer fakeSure = new MockServer();
         final Semaphore suoritusCounter = new Semaphore(0);
         final Semaphore arvosanaCounter = new Semaphore(0);
         mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
