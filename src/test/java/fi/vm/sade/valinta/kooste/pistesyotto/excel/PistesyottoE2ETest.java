@@ -133,6 +133,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
                         Assert.assertEquals("Editoimattomat lisätietokentät ja kielikoetulokset ohitetaan, eli viedään vain 630/1260.", 630, count);
                         exchange.sendResponseHeaders(200, 0);
+                        exchange.close();
                         counter.release();
                     } catch (Throwable t) {
                         t.printStackTrace();
@@ -172,6 +173,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         mockForward(PUT,
                 fakeHakuApp.addHandler("/haku-app/applications/additionalData/testioidi1/1.2.246.562.5.85532589612", exchange -> {
                     exchange.sendResponseHeaders(200, 0);
+                    exchange.close();
                     counter.release();
                 }));
         Response r = http.getWebClient()
