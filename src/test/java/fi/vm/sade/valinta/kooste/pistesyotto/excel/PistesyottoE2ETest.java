@@ -10,6 +10,7 @@ import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.HttpMethod.PUT;
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
@@ -36,6 +37,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +46,7 @@ import org.springframework.core.io.ClassPathResource;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -190,6 +193,25 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         } catch (InterruptedException e) {
             Assert.fail();
         }
+    }
+
+    @Test
+    public void tuontiEpaOnnistuuJosKayttajallaEiOleOikeuksiaHakukohteeseen() throws Throwable {
+        String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
+        MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + kayttajanOrganisaatioOid);
+
+        String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
+        mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest + ".666");
+
+        HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tuonti");
+        Response r = http.getWebClient()
+                .query("hakuOid", "testioidi1")
+                .query("hakukohdeOid", hakukohdeOidFromUiRequest)
+                .header("Content-Type", "application/octet-stream")
+                .accept(MediaType.APPLICATION_JSON)
+                .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
+        Assert.assertThat(IOUtils.toString((InputStream) r.getEntity()), CoreMatchers.containsString("ei ole oikeuksia käsitellä hakukohteen 1.2.246.562.5.85532589612 pistetietoja"));
+        Assert.assertEquals(FORBIDDEN.getStatusCode(), r.getStatus());
     }
 
     private void mockTarjontaOrganisaatioHakuCall(String kayttajanOrganisaatioOid, String... hakukohdeOidsToReturn) {
