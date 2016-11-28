@@ -213,39 +213,41 @@ public class PistesyottoResource {
 
             authorityCheckService.getAuthorityCheckForRoles(
                 asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD")
-            ).subscribe(hakukohdeOIDAuthorityCheck -> {
-                DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
-                if (hakukohdeOIDAuthorityCheck.test(hakukohdeOid)) {
-                    Optional<ByteArrayOutputStream> xlsxOpt = readFileToBytearray(file);
-                    if (xlsxOpt.isPresent()) {
-                        ByteArrayOutputStream xlsx = xlsxOpt.get();
-                        try {
-                            final String uuid = UUID.randomUUID().toString();
-                            Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
-                            List<String> tags = asList();
-                            dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
+            ).subscribe(
+                hakukohdeOIDAuthorityCheck -> {
+                    DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
+                    if (hakukohdeOIDAuthorityCheck.test(hakukohdeOid)) {
+                        Optional<ByteArrayOutputStream> xlsxOpt = readFileToBytearray(file);
+                        if (xlsxOpt.isPresent()) {
+                            ByteArrayOutputStream xlsx = xlsxOpt.get();
+                            try {
+                                final String uuid = UUID.randomUUID().toString();
+                                Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
+                                List<String> tags = asList();
+                                dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
                                     "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
                                         LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", username, hakuOid, hakukohdeOid, uuid);
                                     }, poikkeus -> {
                                         LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                                                username, hakuOid, hakukohdeOid);
+                                            username, hakuOid, hakukohdeOid);
                                         LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Virheen tiedot", poikkeus), poikkeus);
                                     });
-                        } catch (Throwable t) {
-                            LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
+                            } catch (Throwable t) {
+                                LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
+                            }
+                            dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+                            tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
+                        } else {
+                            LOG.error("Ei pystytty tuomaan excel-tiedostoa.");
                         }
-                        dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-                        tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
                     } else {
-                        LOG.error("Ei pystytty tuomaan excel-tiedostoa.");
+                        String msg = String.format("Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja", username, hakukohdeOid);
+                        LOG.error(msg);
+                        prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", msg));
                     }
-                } else {
-                    String msg = String.format("Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja", username, hakukohdeOid);
-                    LOG.error(msg);
-                    prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", msg));
-                }
-                asyncResponse.resume(prosessi.toProsessiId());
-            }, (error -> LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", error), error)));
+                    asyncResponse.resume(prosessi.toProsessiId());
+                },
+                error -> LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", error), error));
         } catch (Exception e) {
             LOG.error("Odottamaton virhe", e);
             asyncResponse.resume(e);
