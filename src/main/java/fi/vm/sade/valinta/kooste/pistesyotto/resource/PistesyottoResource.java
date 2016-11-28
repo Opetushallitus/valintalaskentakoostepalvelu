@@ -46,10 +46,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Controller("PistesyottoResource")
@@ -99,14 +96,19 @@ public class PistesyottoResource {
                 )),
                 pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid),
                 (authorityCheck, pistetiedotHakukohteittain) -> {
-                    if (pistetiedotHakukohteittain.keySet().stream()
-                            .anyMatch(hakukohdeOid -> authorityCheck.test(hakukohdeOid))) {
+                    Set<String> hakutoiveOids = pistetiedotHakukohteittain.keySet();
+                    if (hakutoiveOids.stream().anyMatch(hakukohdeOid -> authorityCheck.test(hakukohdeOid))) {
                         return Response.ok()
                                 .header("Content-Type", "application/json")
                                 .entity(pistetiedotHakukohteittain)
                                 .build();
                     } else {
-                        return Response.status(Response.Status.FORBIDDEN).build();
+                        String msg = String.format(
+                                "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
+                                KoosteAudit.username(), hakutoiveOids, hakemusOid
+                        );
+                        LOG.error(msg);
+                        return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
                     }
                 }
         ).subscribe(
@@ -185,7 +187,12 @@ public class PistesyottoResource {
                                 .entity(pistetiedot)
                                 .build());
             } else {
-                return Observable.just(Response.status(Response.Status.FORBIDDEN).build());
+                String msg = String.format(
+                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
+                        KoosteAudit.username(), hakukohdeOid
+                );
+                LOG.error(msg);
+                return Observable.just(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
             }
         }).subscribe(
                 entity -> response.resume(entity),
