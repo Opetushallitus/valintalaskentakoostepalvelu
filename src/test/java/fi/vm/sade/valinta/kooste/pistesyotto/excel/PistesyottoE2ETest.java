@@ -38,6 +38,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,11 +53,12 @@ import java.util.concurrent.TimeUnit;
 public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     @Before
-    public void startServer() throws Throwable{
+    public void startServerAndSetupMockCalls() throws Throwable{
         startShared();
+        setUpMockCalls();
     }
-    @Test
-    public void tuonnissaEiYlikirjoitetaEditoimattomiaKenttiaHakemuspalveluun() throws Throwable {
+
+    private void setUpMockCalls() throws IOException {
         mockToReturnString(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/1.2.246.562.5.85532589612",
                 IOUtils.toString(new ClassPathResource("pistesyotto/List_ValintakoeOsallistuminenDTO.json").getInputStream())
         );
@@ -99,13 +101,15 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         mockTarjontaHakukohdeCall();
         mockTarjontaHakuCall();
         mockOrganisaatioKutsu();
+    }
 
-        HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tuonti");
-
+    @Test
+    public void tuonnissaEiYlikirjoitetaEditoimattomiaKenttiaHakemuspalveluun() throws Throwable {
         final Semaphore suoritusCounter = new Semaphore(0);
         final Semaphore arvosanaCounter = new Semaphore(0);
         mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
 
+        HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tuonti");
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);
         mockForward(PUT,
@@ -142,6 +146,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
             Assert.fail();
         }
     }
+
 
     private void mockTarjontaHakuCall() {
         HakuV1RDTO haku = new HakuV1RDTO();
