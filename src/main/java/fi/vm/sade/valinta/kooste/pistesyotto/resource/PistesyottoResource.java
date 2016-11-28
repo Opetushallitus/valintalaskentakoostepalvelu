@@ -166,13 +166,28 @@ public class PistesyottoResource {
                     .entity("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu")
                     .build());
         });
-        pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid).subscribe(
-                pistetiedot -> response.resume(Response.ok().header("Content-Type", "application/json").entity(pistetiedot).build()),
+        authorityCheckService.getAuthorityCheckForRoles(asList(
+                "ROLE_APP_HAKEMUS_READ_UPDATE",
+                "ROLE_APP_HAKEMUS_READ",
+                "ROLE_APP_HAKEMUS_CRUD",
+                "ROLE_APP_HAKEMUS_LISATIETORU",
+                "ROLE_APP_HAKEMUS_LISATIETOCRUD"
+        )).flatMap(authorityCheck -> {
+            if (authorityCheck.test(hakukohdeOid)) {
+                return pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid)
+                        .map(pistetiedot -> Response.ok()
+                                .header("Content-Type", "application/json")
+                                .entity(pistetiedot)
+                                .build());
+            } else {
+                return Observable.just(Response.status(Response.Status.FORBIDDEN).build());
+            }
+        }).subscribe(
+                entity -> response.resume(entity),
                 error -> {
                     logError("koostaPistetiedotHakemuksille epäonnistui", error);
                     response.resume(Response.serverError().entity(error.getMessage()).build());
                 }
-
         );
     }
 
