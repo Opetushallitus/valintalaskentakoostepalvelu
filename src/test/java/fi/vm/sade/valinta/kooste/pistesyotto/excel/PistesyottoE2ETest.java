@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
@@ -28,6 +29,10 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.apache.commons.io.IOUtils;
@@ -46,6 +51,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Jussi Jartamo
@@ -147,6 +154,47 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         }
     }
 
+    @Test
+    public void tuontiOnnistuuKayttajalleJollaOnOikeudetHakukohteeseen() throws Throwable {
+        final Semaphore suoritusCounter = new Semaphore(0);
+        final Semaphore arvosanaCounter = new Semaphore(0);
+        mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
+
+        String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
+        MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + kayttajanOrganisaatioOid);
+
+        mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, "1.2.246.562.5.85532589612");
+
+        HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tuonti");
+        MockServer fakeHakuApp = new MockServer();
+        final Semaphore counter = new Semaphore(0);
+        mockForward(PUT,
+                fakeHakuApp.addHandler("/haku-app/applications/additionalData/testioidi1/1.2.246.562.5.85532589612", exchange -> {
+                    exchange.sendResponseHeaders(200, 0);
+                    counter.release();
+                }));
+        Response r = http.getWebClient()
+                .query("hakuOid", "testioidi1")
+                .query("hakukohdeOid", "1.2.246.562.5.85532589612")
+                .header("Content-Type", "application/octet-stream")
+                .accept(MediaType.APPLICATION_JSON)
+                .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
+        Assert.assertEquals(200, r.getStatus());
+        try {
+            Assert.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
+            Assert.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
+            Assert.assertTrue(counter.tryAcquire(1, 25, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            Assert.fail();
+        }
+    }
+
+    private void mockTarjontaOrganisaatioHakuCall(String kayttajanOrganisaatioOid, String... hakukohdeOidsToReturn) {
+        ResultSearch tarjontaHakukohdeSearchResult = new ResultSearch(new ResultTulos(Collections.singletonList(
+            new ResultOrganization(kayttajanOrganisaatioOid, Stream.of(hakukohdeOidsToReturn).map(ResultHakukohde::new).collect(Collectors.toList())))));
+        mockToReturnJsonWithParams(GET, "/tarjonta-service/rest/v1/hakukohde/search", tarjontaHakukohdeSearchResult,
+            ImmutableMap.of("organisationOid", kayttajanOrganisaatioOid));
+    }
 
     private void mockTarjontaHakuCall() {
         HakuV1RDTO haku = new HakuV1RDTO();
