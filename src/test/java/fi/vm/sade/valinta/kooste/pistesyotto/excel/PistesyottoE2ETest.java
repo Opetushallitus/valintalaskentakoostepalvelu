@@ -163,7 +163,8 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + kayttajanOrganisaatioOid);
 
-        mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, "1.2.246.562.5.85532589612");
+        String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
+        mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest);
 
         HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tuonti");
         MockServer fakeHakuApp = new MockServer();
@@ -175,7 +176,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 }));
         Response r = http.getWebClient()
                 .query("hakuOid", "testioidi1")
-                .query("hakukohdeOid", "1.2.246.562.5.85532589612")
+                .query("hakukohdeOid", hakukohdeOidFromUiRequest)
                 .header("Content-Type", "application/octet-stream")
                 .accept(MediaType.APPLICATION_JSON)
                 .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
