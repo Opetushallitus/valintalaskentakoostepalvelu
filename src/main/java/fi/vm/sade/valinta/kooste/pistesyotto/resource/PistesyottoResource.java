@@ -1,18 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.*;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import static java.util.Arrays.asList;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
@@ -21,8 +9,17 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.*;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -30,16 +27,29 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import rx.functions.Action1;
 
-import static com.sun.org.apache.xalan.internal.xsltc.compiler.sym.error;
-import static java.util.Arrays.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Controller("PistesyottoResource")
 @Path("pistesyotto")
@@ -62,6 +72,10 @@ public class PistesyottoResource {
     private AuthorityCheckService authorityCheckService;
     @Autowired
     private PistesyottoKoosteService pistesyottoKoosteService;
+
+    public PistesyottoResource() {
+        System.err.println("HERE");
+    }
 
     @GET
     @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
@@ -194,30 +208,64 @@ public class PistesyottoResource {
     @Consumes("application/octet-stream")
     @Produces("application/json")
     @ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti taulukkolaskentaan", response = ProsessiId.class)
-    public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file) throws IOException {
-        final String username = KoosteAudit.username();
-        ByteArrayOutputStream xlsx;
-        IOUtils.copy(file, xlsx = new ByteArrayOutputStream());
-        IOUtils.closeQuietly(file);
+    public void tuonti(@QueryParam("hakuOid") String hakuOid,
+                             @QueryParam("hakukohdeOid") String hakukohdeOid,
+                             InputStream file,
+                             @Suspended AsyncResponse asyncResponse) throws IOException {
         try {
-            final String uuid = UUID.randomUUID().toString();
-            Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
-            List<String> tags = asList();
-            dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
-                    "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
-                        LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", username, hakuOid, hakukohdeOid, uuid);
-                    }, poikkeus -> {
-                        LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                                username, hakuOid, hakukohdeOid);
-                        LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Virheen tiedot", poikkeus), poikkeus);
-                    });
-        } catch (Throwable t) {
-            LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
+            final String username = KoosteAudit.username();
+
+            authorityCheckService.getAuthorityCheckForRoles(
+                asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD")
+            ).subscribe(hakukohdeOIDAuthorityCheck -> {
+                DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
+                if (hakukohdeOIDAuthorityCheck.test(hakukohdeOid)) {
+                    Optional<ByteArrayOutputStream> xlsxOpt = readFileToBytearray(file);
+                    if (xlsxOpt.isPresent()) {
+                        ByteArrayOutputStream xlsx = xlsxOpt.get();
+                        try {
+                            final String uuid = UUID.randomUUID().toString();
+                            Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
+                            List<String> tags = asList();
+                            dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
+                                    "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
+                                        LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", username, hakuOid, hakukohdeOid, uuid);
+                                    }, poikkeus -> {
+                                        LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
+                                                username, hakuOid, hakukohdeOid);
+                                        LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Virheen tiedot", poikkeus), poikkeus);
+                                    });
+                        } catch (Throwable t) {
+                            LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
+                        }
+                        dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+                        tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
+                    } else {
+                        LOG.error("Ei pystytty tuomaan excel-tiedostoa.");
+                    }
+                } else {
+                    String msg = String.format("Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja", username, hakukohdeOid);
+                    LOG.error(msg);
+                    prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", msg));
+                }
+                asyncResponse.resume(prosessi.toProsessiId());
+            }, (error -> LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", error), error)));
+        } catch (Exception e) {
+            LOG.error("Odottamaton virhe", e);
+            asyncResponse.resume(e);
         }
-        DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, asList(hakukohdeOid));
-        dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-        tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
-        return prosessi.toProsessiId();
+    }
+
+    private Optional<ByteArrayOutputStream> readFileToBytearray(InputStream file) {
+        try {
+            ByteArrayOutputStream xlsx;
+            IOUtils.copy(file, xlsx = new ByteArrayOutputStream());
+            IOUtils.closeQuietly(file);
+            return Optional.of(xlsx);
+        } catch (IOException e) {
+            LOG.error("Virhe kopioitaessa syötettyä excel-sheettiä", e);
+            return Optional.empty();
+        }
     }
 
     @POST

@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste;
 
 import com.google.common.io.Files;
-import fi.vm.sade.integrationtest.util.PortChecker;
+
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
 import org.apache.commons.io.IOUtils;
@@ -10,15 +10,16 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.DispatcherType;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Optional;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
 /**
  * @author Jussi Jartamo
  *
@@ -92,7 +93,7 @@ public class ValintalaskentakoostepalveluJetty {
         KoosteTestProfileConfiguration.PROXY_SERVER.set(Integraatiopalvelimet.mockServer.getHost() + ":" + Integraatiopalvelimet.mockServer.getPort());
         String root =  ProjectRootFinder.findProjectRoot() + "/valintalaskentakoostepalvelu";
         WebAppContext wac = new WebAppContext();
-
+        wac.addFilter(MockOpintopolkuCasAuthenticationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC, DispatcherType.INCLUDE));
         wac.setResourceBase(root + "/src/main/webapp");
         wac.setContextPath("/valintalaskentakoostepalvelu");
         wac.setParentLoaderPriority(true);

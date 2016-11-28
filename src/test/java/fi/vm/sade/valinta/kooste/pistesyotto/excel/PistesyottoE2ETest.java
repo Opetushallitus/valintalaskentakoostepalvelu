@@ -6,6 +6,7 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWi
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.HttpMethod.PUT;
@@ -17,7 +18,6 @@ import com.google.gson.Gson;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
@@ -148,7 +148,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     private void mockTarjontaHakuCall() {
         HakuV1RDTO haku = new HakuV1RDTO();
         haku.setOid("testioidi1");
-        haku.setHakukohdeOids(Collections.singletonList("1.2.246.562.5.85532589612"));
+        haku.setHakukohdeOids(singletonList("1.2.246.562.5.85532589612"));
         mockToReturnJson(GET,
                 "/tarjonta-service/rest/v1/haku/testioidi1/",
                 new Result(haku));
