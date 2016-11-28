@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Controller("PistesyottoResource")
 @Path("pistesyotto")
@@ -70,6 +72,8 @@ public class PistesyottoResource {
     private AuthorityCheckService authorityCheckService;
     @Autowired
     private PistesyottoKoosteService pistesyottoKoosteService;
+    @Autowired
+    private ApplicationAsyncResource applicationAsyncResource;
 
     @GET
     @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
@@ -221,15 +225,48 @@ public class PistesyottoResource {
                     .entity("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu")
                     .build());
         });
-        Action1<Void> onSuccess = (a) -> response.resume(Response.ok().header("Content-Type", "application/json").build());
-        Action1<Throwable> onError = (error) -> {
-            logError("tallennaKoostetutPistetiedot epäonnistui", error);
-            response.resume(Response.serverError().entity(error.getMessage()).build());
-        };
-
-        pistesyottoKoosteService.tallennaKoostetutPistetiedot(
-                hakuOid, hakukohdeOid, pistetiedot, KoosteAudit.username()
-        ).subscribe(onSuccess, onError);
+        authorityCheckService.getAuthorityCheckForRoles(asList(
+                "ROLE_APP_HAKEMUS_READ_UPDATE",
+                "ROLE_APP_HAKEMUS_CRUD",
+                "ROLE_APP_HAKEMUS_LISATIETORU",
+                "ROLE_APP_HAKEMUS_LISATIETOCRUD"
+        )).flatMap(authorityCheck -> {
+            if (authorityCheck.test(hakukohdeOid)) {
+                return applicationAsyncResource.getShortApplicationsByOid(hakuOid, hakukohdeOid)
+                        .map(shs -> shs.stream().map(sh -> sh.getOid()).collect(Collectors.toSet()))
+                        .flatMap(hakukohteenHakemusOidit -> {
+                            Set<String> eiHakukohteeseenHakeneet = pistetiedot.stream()
+                                    .map(p -> p.getOid())
+                                    .filter(oid -> !hakukohteenHakemusOidit.contains(oid))
+                                    .collect(Collectors.toSet());
+                            if (eiHakukohteeseenHakeneet.isEmpty()) {
+                                return pistesyottoKoosteService.tallennaKoostetutPistetiedot(
+                                        hakuOid, hakukohdeOid, pistetiedot, KoosteAudit.username()
+                                ).map(x -> Response.noContent().build());
+                            } else {
+                                String msg = String.format(
+                                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakemuksien %s pistetietoja, koska niillä ei ole haettu hakukohteeseen %s",
+                                        KoosteAudit.username(), eiHakukohteeseenHakeneet, hakukohdeOid
+                                );
+                                LOG.error(msg);
+                                return Observable.just(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
+                            }
+                        });
+            } else {
+                String msg = String.format(
+                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
+                        KoosteAudit.username(), hakukohdeOid
+                );
+                LOG.error(msg);
+                return Observable.just(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
+            }
+        }).subscribe(
+                entity -> response.resume(entity),
+                error -> {
+                    logError("tallennaKoostetutPistetiedot epäonnistui", error);
+                    response.resume(Response.serverError().entity(error.getMessage()).build());
+                }
+        );
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")

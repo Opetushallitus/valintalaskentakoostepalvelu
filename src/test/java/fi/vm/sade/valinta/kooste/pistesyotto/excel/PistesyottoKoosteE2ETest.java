@@ -28,6 +28,7 @@ import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ShortHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
@@ -144,6 +145,18 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
+        mockToReturnJson(GET, "/haku-app/applications/listshort",
+                pistetiedot.stream().map(p -> new ShortHakemus(
+                        p.getOid(),
+                        "ACTIVE",
+                        new Date().getTime(),
+                        p.getFirstNames(),
+                        p.getLastName(),
+                        p.getPersonOid() + "_hetu",
+                        p.getPersonOid()
+                ))
+                .collect(Collectors.toList())
+        );
         mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();
         mockSureKutsu(createOppijat());
@@ -161,7 +174,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .put(new Gson().toJson(pistetiedot));
-        assertEquals(200, r.getStatus());
+        assertEquals(204, r.getStatus());
 
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(2, 10, TimeUnit.SECONDS));

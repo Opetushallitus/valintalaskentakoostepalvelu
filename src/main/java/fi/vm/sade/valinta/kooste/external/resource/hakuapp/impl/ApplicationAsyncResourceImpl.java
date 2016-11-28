@@ -68,6 +68,15 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
     @Override
+    public Observable<List<ShortHakemus>> getShortApplicationsByOid(String hakuOid, String hakukohdeOid) {
+        return getAsObservable("/applications/listshort", new TypeToken<List<ShortHakemus>>() {}.getType(), client -> {
+            client.query("asId", hakuOid);
+            client.query("aoOid", hakukohdeOid);
+            return client;
+        });
+    }
+
+    @Override
     public Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
         return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), client -> {
             client.query("appState", DEFAULT_STATES.toArray());

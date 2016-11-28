@@ -6,10 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import org.springframework.stereotype.Service;
 import rx.Observable;
@@ -124,6 +121,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     @Override
     public Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
         return getApplicationsByOids(hakuOid, Arrays.asList(hakukohdeOid));
+    }
+
+    @Override
+    public Observable<List<ShortHakemus>> getShortApplicationsByOid(String hakuOid, String hakukohdeOid) {
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override

@@ -4,6 +4,7 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ShortHakemus;
 import rx.Observable;
 
 import javax.ws.rs.core.Response;
@@ -21,6 +22,8 @@ public interface ApplicationAsyncResource {
     int DEFAULT_PART_ROW_LIMIT = 10000;
 
     Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
+
+    Observable<List<ShortHakemus>> getShortApplicationsByOid(String hakuOid, String hakukohdeOid);
 
     Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
 
