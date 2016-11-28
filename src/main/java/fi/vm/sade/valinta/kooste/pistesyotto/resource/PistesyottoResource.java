@@ -73,10 +73,6 @@ public class PistesyottoResource {
     @Autowired
     private PistesyottoKoosteService pistesyottoKoosteService;
 
-    public PistesyottoResource() {
-        System.err.println("HERE");
-    }
-
     @GET
     @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
     @Produces(MediaType.APPLICATION_JSON)
