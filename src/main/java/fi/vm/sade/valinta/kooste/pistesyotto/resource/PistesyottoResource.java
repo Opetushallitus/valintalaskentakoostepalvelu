@@ -215,8 +215,8 @@ public class PistesyottoResource {
                 asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD")
             ).subscribe(
                 hakukohdeOIDAuthorityCheck -> {
-                    DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
                     if (hakukohdeOIDAuthorityCheck.test(hakukohdeOid)) {
+                        DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
                         Optional<ByteArrayOutputStream> xlsxOpt = readFileToBytearray(file);
                         if (xlsxOpt.isPresent()) {
                             ByteArrayOutputStream xlsx = xlsxOpt.get();
@@ -240,12 +240,12 @@ public class PistesyottoResource {
                         } else {
                             LOG.error("Ei pystytty tuomaan excel-tiedostoa.");
                         }
+                        asyncResponse.resume(prosessi.toProsessiId());
                     } else {
                         String msg = String.format("Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja", username, hakukohdeOid);
                         LOG.error(msg);
-                        prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", msg));
+                        asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
                     }
-                    asyncResponse.resume(prosessi.toProsessiId());
                 },
                 error -> LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", error), error));
         } catch (Exception e) {
