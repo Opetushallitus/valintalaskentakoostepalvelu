@@ -378,28 +378,23 @@ public class PistesyottoResource {
                 hakukohdeOIDAuthorityCheck -> {
                     if (hakukohdeOIDAuthorityCheck.test(hakukohdeOid)) {
                         DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
-                        Optional<ByteArrayOutputStream> xlsxOpt = readFileToBytearray(file);
-                        if (xlsxOpt.isPresent()) {
-                            ByteArrayOutputStream xlsx = xlsxOpt.get();
-                            try {
-                                final String uuid = UUID.randomUUID().toString();
-                                Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
-                                List<String> tags = asList();
-                                dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
+                        dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+                        try {
+                            ByteArrayOutputStream xlsx = readFileToBytearray(file);
+                            final String uuid = UUID.randomUUID().toString();
+                            Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
+                            List<String> tags = asList();
+                            dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
                                     "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
                                         LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", username, hakuOid, hakukohdeOid, uuid);
                                     }, poikkeus -> {
                                         LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                                            username, hakuOid, hakukohdeOid);
+                                                username, hakuOid, hakukohdeOid);
                                         LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Virheen tiedot", poikkeus), poikkeus);
                                     });
-                            } catch (Throwable t) {
-                                LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
-                            }
-                            dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                             tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
-                        } else {
-                            LOG.error("Ei pystytty tuomaan excel-tiedostoa.");
+                        } catch (Exception t) {
+                            LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
                         }
                         asyncResponse.resume(prosessi.toProsessiId());
                     } else {
@@ -415,15 +410,14 @@ public class PistesyottoResource {
         }
     }
 
-    private Optional<ByteArrayOutputStream> readFileToBytearray(InputStream file) {
+    private ByteArrayOutputStream readFileToBytearray(InputStream file) {
         try {
-            ByteArrayOutputStream xlsx;
-            IOUtils.copy(file, xlsx = new ByteArrayOutputStream());
+            ByteArrayOutputStream xlsx = new ByteArrayOutputStream();
+            IOUtils.copy(file, xlsx);
             IOUtils.closeQuietly(file);
-            return Optional.of(xlsx);
+            return xlsx;
         } catch (IOException e) {
-            LOG.error("Virhe kopioitaessa syötettyä excel-sheettiä", e);
-            return Optional.empty();
+            throw new RuntimeException("Virhe kopioitaessa syötettyä excel-sheettiä", e);
         }
     }
 
