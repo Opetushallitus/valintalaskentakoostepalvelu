@@ -29,9 +29,8 @@ public class HenkiloAsyncResourceImpl extends UrlConfiguredResource implements H
     }
 
     public Future<List<Henkilo>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
-        String url = getUrl("authentication-service.s2s.koostepalvelu");
         return getWebClient()
-                .path(url)
+                .path(getUrl("authentication-service.s2s.koostepalvelu"))
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(henkiloPrototyypit, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Henkilo>>() {

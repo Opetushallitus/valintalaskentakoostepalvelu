@@ -38,8 +38,8 @@ public class TilaAsyncResourceImpl extends UrlConfiguredResource implements Tila
     }
 
     public Observable<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid) {
-        String url = getUrl("sijoittelu-service.tila.hakukohde.hakukohdeoid", hakukohdeOid);
-        return getAsObservable(url, new TypeToken<List<Valintatulos>>() {
+        return getAsObservable(getUrl("sijoittelu-service.tila.hakukohde.hakukohdeoid", hakukohdeOid),
+                new TypeToken<List<Valintatulos>>() {
             }.getType(), client -> {
                 client.accept(MediaType.WILDCARD);
                 return client;
@@ -48,9 +48,10 @@ public class TilaAsyncResourceImpl extends UrlConfiguredResource implements Tila
 
     @Override
     public Observable<Valintatulos> getHakemuksenSijoittelunTulos(String hakemusOid, String hakuOid, String hakukohdeOid, String valintatapajonoOid) {
-        String url = getUrl("sijoittelu-service.tila.hakemusoid.hakuoid.hakukohdeoid.valintatapajonooid",
-                hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid);
-        return getAsObservable(url, new TypeToken<Valintatulos>() {
+        return getAsObservable(
+                getUrl("sijoittelu-service.tila.hakemusoid.hakuoid.hakukohdeoid.valintatapajonooid",
+                        hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid),
+                new TypeToken<Valintatulos>() {
             }.getType(), client -> {
                 client.accept(MediaType.WILDCARD);
                 return client;
@@ -59,8 +60,9 @@ public class TilaAsyncResourceImpl extends UrlConfiguredResource implements Tila
 
     @Override
     public Observable<List<Valintatulos>> getHakemuksenTulokset(String hakemusOid) {
-        String url = getUrl("sijoittelu-service.tila.hakemusoid", hakemusOid);
-        return getAsObservable(url, new TypeToken<List<Valintatulos>>() {
+        return getAsObservable(
+                getUrl("sijoittelu-service.tila.hakemusoid", hakemusOid),
+                new TypeToken<List<Valintatulos>>() {
             }.getType(), client -> {
                 client.accept(MediaType.WILDCARD);
                 return client;
@@ -69,8 +71,9 @@ public class TilaAsyncResourceImpl extends UrlConfiguredResource implements Tila
 
     @Override
     public Observable<List<Valintatulos>> getValintatuloksetValintatapajonolle(String hakukohdeOid, String valintatapajonoOid) {
-        String url = getUrl("sijoittelu-service.tila.hakukohde.hakukohdeoid.valintatapajonooid", hakukohdeOid, valintatapajonoOid);
-        return getAsObservable(url, new TypeToken<List<Valintatulos>>() {
+        return getAsObservable(
+                getUrl("sijoittelu-service.tila.hakukohde.hakukohdeoid.valintatapajonooid", hakukohdeOid, valintatapajonoOid),
+                new TypeToken<List<Valintatulos>>() {
             }.getType(), client -> {
                 client.accept(MediaType.WILDCARD);
                 return client;

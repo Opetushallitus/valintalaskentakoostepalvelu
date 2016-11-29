@@ -6,10 +6,8 @@ import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import org.apache.cxf.jaxrs.client.WebClient;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -35,8 +33,8 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public Future<Response> haeOrganisaatio(String organisaatioOid) {
-        String url = getUrl("organisaatio-service.organisaatio", organisaatioOid);
-        return getWebClient().path(url)
+        return getWebClient()
+                .path(getUrl("organisaatio-service.organisaatio", organisaatioOid))
                 .accept(MediaType.WILDCARD)
                 .async()
                 .get();

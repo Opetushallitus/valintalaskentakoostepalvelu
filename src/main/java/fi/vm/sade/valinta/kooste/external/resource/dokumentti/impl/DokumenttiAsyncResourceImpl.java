@@ -29,11 +29,8 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
     }
     @Override
     public Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata) {
-        String url = getUrl("dokumenttipalvelu-service.dokumentit.tallenna");
-
-
         return putAsObservable(
-                url,
+                getUrl("dokumenttipalvelu-service.dokumentit.tallenna"),
                 Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM),
                 client -> {
                     client.query("id", id);

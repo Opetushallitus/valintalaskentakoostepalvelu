@@ -70,8 +70,9 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
 
     public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
         LOG.info("Valinnanvaiheiden haku...");
-        String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.ilmanlaskentaa", hakukohdeOid);
-        return getAsObservable(url, new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType());
+        return getAsObservable(
+                getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.ilmanlaskentaa", hakukohdeOid),
+                new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType());
     }
 
     public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {

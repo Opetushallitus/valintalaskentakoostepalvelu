@@ -40,8 +40,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
 
     @Override
     public Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-        String url = getUrl("haku-app.applications.syntheticapplication");
-        return getWebClient().path(url)
+        return getWebClient().path(getUrl("haku-app.applications.syntheticapplication"))
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON), new GenericType<List<Hakemus>>() {});

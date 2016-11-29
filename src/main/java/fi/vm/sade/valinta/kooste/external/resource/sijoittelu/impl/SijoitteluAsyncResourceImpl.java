@@ -49,9 +49,8 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
 
     @Override
     public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
-        String url = getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, SijoitteluResource.LATEST, hakukohdeOid);
         return getAsObservable(
-                url,
+                getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, SijoitteluResource.LATEST, hakukohdeOid),
                 new TypeToken<HakukohdeDTO>() {}.getType(),
                 client -> {
                     client.accept(MediaType.WILDCARD_TYPE);
@@ -62,16 +61,20 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
 
     @Override
     public Observable<HakukohdeDTO> asetaJononValintaesitysHyvaksytyksi(String hakuOid, String hakukohdeOid, String valintatapajonoOid, Boolean hyvaksytty) {
-        String url = getUrl("sijoittelu-service.tila.haku.hakukohde.valintatapajono.valintaesitys", hakuOid, hakukohdeOid, valintatapajonoOid);
-        return postAsObservable(url, HakukohdeDTO.class, Entity.json(""), (webclient) -> webclient.query("hyvaksytty", hyvaksytty));
+        return postAsObservable(
+                getUrl("sijoittelu-service.tila.haku.hakukohde.valintatapajono.valintaesitys", hakuOid, hakukohdeOid, valintatapajonoOid),
+                HakukohdeDTO.class, Entity.json(""), (webclient) -> webclient.query("hyvaksytty", hyvaksytty));
     }
 
     @Override
     public Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) {
-        String url = getUrl("sijoittelu-service.tila.haku.hakukohde", hakuOid, hakukohdeOid);
         try {
             String encodedSelite = URLEncoder.encode(selite, "UTF-8");
-            return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset), (webclient) -> webclient.query("selite", encodedSelite));
+            return postAsObservable(
+                    getUrl("sijoittelu-service.tila.haku.hakukohde", hakuOid, hakukohdeOid),
+                    HakukohteenValintatulosUpdateStatuses.class,
+                    Entity.json(valintatulokset),
+                    (webclient) -> webclient.query("selite", encodedSelite));
         } catch (UnsupportedEncodingException e) {
             return Observable.error(e);
         }
@@ -79,8 +82,8 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
 
     @Override
     public Observable<HakukohteenValintatulosUpdateStatuses> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset) {
-        String url = getUrl("sijoittelu-service.tila.checkstaleread");
-        return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset));
+        return postAsObservable(getUrl("sijoittelu-service.tila.checkstaleread"),
+                HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset));
     }
 
     public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
@@ -94,7 +97,6 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
     }
 
     public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-        ///sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
         String url = getUrl("sijoittelu-service.erillissijoittelu.sijotteluajo.hakukohde", hakuOid, SijoitteluResource.LATEST, hakukohdeOid);
         getWebClient()
                 .path(url)
@@ -119,18 +121,16 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
     }
 
     public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
-        String url = getUrl("sijoittelu-service.tila.hakukohde.hakukohdeoid.valintatapajonooid", hakukohdeOid, valintatapajonoOid);
         return getWebClient()
-                .path(url)
+                .path(getUrl("sijoittelu-service.tila.hakukohde.hakukohdeoid.valintatapajonooid", hakukohdeOid, valintatapajonoOid))
                 .accept(MediaType.WILDCARD)
                 .async()
                 .get(new GenericType<List<Valintatulos>>() {});
     }
 
     public Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid) {
-        String url = getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, SijoitteluResource.LATEST, hakukohdeOid);
         return getWebClient()
-                .path(url)
+                .path(getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, SijoitteluResource.LATEST, hakukohdeOid))
                 .accept(MediaType.WILDCARD)
                 .async()
                 .get(new GenericType<HakukohdeDTO>() {});
@@ -149,9 +149,8 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
     }
 
     public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid) {
-        String url = getUrl("sijoittelu-service.sijottelu.hyvaksytyt", hakuOid);
         return getAsObservable(
-                url,
+                getUrl("sijoittelu-service.sijottelu.hyvaksytyt", hakuOid),
                 new TypeToken<HakijaPaginationObject>() {}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -162,9 +161,8 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
 
     @Override
     public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid) {
-        String url = getUrl("sijoittelu-service.sijoittelu.hyvaksytyt.hakukohde", hakuOid, hakukohdeOid);
         return getAsObservable(
-                url,
+                getUrl("sijoittelu-service.sijoittelu.hyvaksytyt.hakukohde", hakuOid, hakukohdeOid),
                 new TypeToken<HakijaPaginationObject>() {}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -175,9 +173,8 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
 
     @Override
     public Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
-        String url = getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.latest.hakemus", hakuOid, hakemusOid);
         return getAsObservable(
-                url,
+                getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.latest.hakemus", hakuOid, hakemusOid),
                 new TypeToken<HakijaDTO>() {}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -187,9 +184,8 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
     }
 
     public Observable<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid) {
-        String url = getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, sijoitteluAjoId, hakukohdeOid);
         return getAsObservable(
-                url,
+                getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, sijoitteluAjoId, hakukohdeOid),
                 new TypeToken<HakukohdeDTO>() {}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);

@@ -73,24 +73,24 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Future<LetterBatchStatusDto> haeStatus(String letterBatchId) {
-        String url = getUrl("viestintapalvelu.letter.async.letter.status", letterBatchId);
-        return getWebClient().path(url)
+        return getWebClient()
+                .path(getUrl("viestintapalvelu.letter.async.letter.status", letterBatchId))
                 .accept(MediaType.APPLICATION_JSON_TYPE).async()
                 .get(LetterBatchStatusDto.class);
     }
 
     public Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch) {
-        String url = getUrl("viestintapalvelu.letter.async.letter");
         return getWebClient()
-                .path(url)
+                .path(getUrl("viestintapalvelu.letter.async.letter"))
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE), LetterResponse.class);
     }
 
     public Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli) {
-        String url = getUrl("viestintapalvelu.luotettu.letter.count.type.language", hakuOid, tyyppi, kieli);
-        return getAsObservable(url, LetterBatchCountDto.class, client -> { client.accept(MediaType.APPLICATION_JSON_TYPE);return client; });
+        return getAsObservable(
+                getUrl("viestintapalvelu.luotettu.letter.count.type.language", hakuOid, tyyppi, kieli),
+                LetterBatchCountDto.class, client -> { client.accept(MediaType.APPLICATION_JSON_TYPE);return client; });
     }
 
     @Override
