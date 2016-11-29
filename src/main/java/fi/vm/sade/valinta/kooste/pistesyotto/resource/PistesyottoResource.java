@@ -397,29 +397,28 @@ public class PistesyottoResource {
                 return Observable.error(new ForbiddenException(
                         msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
                 ));
+            }).map(x -> {
+                DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
+                dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+                ByteArrayOutputStream xlsx = readFileToBytearray(file);
+                final String uuid = UUID.randomUUID().toString();
+                Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
+                List<String> tags = asList();
+                dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
+                        "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()),
+                        response -> LOG.info(
+                                "Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
+                                username, hakuOid, hakukohdeOid, uuid),
+                        poikkeus -> logError(
+                                String.format(
+                                        "Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
+                                        username, hakuOid, hakukohdeOid),
+                                poikkeus)
+                );
+                tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
+                return prosessi.toProsessiId();
             }).subscribe(
-                    x -> {
-                        DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
-                        dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-                        try {
-                            ByteArrayOutputStream xlsx = readFileToBytearray(file);
-                            final String uuid = UUID.randomUUID().toString();
-                            Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
-                            List<String> tags = asList();
-                            dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
-                                    "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
-                                        LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", username, hakuOid, hakukohdeOid, uuid);
-                                    }, poikkeus -> {
-                                        LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                                                username, hakuOid, hakukohdeOid);
-                                        LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Virheen tiedot", poikkeus), poikkeus);
-                                    });
-                            tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
-                        } catch (Exception t) {
-                            LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
-                        }
-                        asyncResponse.resume(prosessi.toProsessiId());
-                    },
+                    id -> asyncResponse.resume(Response.ok(id).build()),
                     error -> {
                         logError("Tuntematon virhetilanne", error);
                         if (error instanceof WebApplicationException) {
