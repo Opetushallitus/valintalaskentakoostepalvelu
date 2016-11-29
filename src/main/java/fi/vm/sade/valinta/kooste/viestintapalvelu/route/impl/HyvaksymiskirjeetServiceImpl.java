@@ -26,6 +26,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetK
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
 import static rx.Observable.from;
 import static rx.Observable.just;
 import static rx.Observable.zip;
@@ -264,13 +266,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     LOG.error("Viestintapalvelukutsu epaonnistui virheeseen", e);
                     throw new RuntimeException(e);
                 }
-                LOG.info("Saatiin hyvaksymiskirjeiden seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)", batchId.getBatchId());
+
+                int timesToPoll = (int) (VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / pollingIntervalMillis);
+                LOG.info(String.format("Saatiin hyvaksymiskirjeiden seurantaId %s ja aloitetaan valmistumisen pollaus! " +
+                        "(Timeout %s, pollausväli %s ms, pollataan %s kertaa)"
+                    , batchId.getBatchId(), DurationFormatUtils.formatDurationHMS(VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis()), pollingIntervalMillis, timesToPoll));
+
                 prosessi.vaiheValmistui();
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
                             .interval(pollingIntervalMillis, TimeUnit.MILLISECONDS)
-                            .take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
+                            .take(timesToPoll)
                             .takeUntil(stop)
                             .subscribe(
                                     pulse -> {

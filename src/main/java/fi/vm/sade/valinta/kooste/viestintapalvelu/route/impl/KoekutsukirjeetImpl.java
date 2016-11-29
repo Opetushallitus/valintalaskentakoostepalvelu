@@ -235,7 +235,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
                             .interval(1, TimeUnit.SECONDS)
-                            .take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
+                            .take((int) (ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / 1000))
                             .takeUntil(stop)
                             .subscribe(
                                     pulse -> {

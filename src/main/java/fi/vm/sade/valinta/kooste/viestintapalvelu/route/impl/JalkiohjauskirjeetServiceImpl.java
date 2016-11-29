@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiAsiointikielella;
 import static rx.observables.BlockingObservable.from;
@@ -24,6 +25,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,13 +160,18 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 LOG.info("Aloitetaan jalkiohjauskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
                 //TODO: Muuta aidosti asynkroniseksi
                 LetterResponse batchId = from(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)).first();
-                LOG.info("Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)", batchId.getBatchId());
+
+                int timesToPoll = (int) (VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / pollingIntervalMillis);
+                LOG.info(String.format("Saatiin jalkiohjauskirjeen seurantaId %s ja aloitetaan valmistumisen pollaus! " +
+                        "(Timeout %s, pollausväli %s ms, pollataan %s kertaa)",
+                    batchId.getBatchId(), DurationFormatUtils.formatDurationHMS(VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis()), pollingIntervalMillis, timesToPoll));
+
                 prosessi.vaiheValmistui();
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
                             .interval(pollingIntervalMillis, TimeUnit.MILLISECONDS)
-                            .take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
+                            .take(timesToPoll)
                             .takeUntil(stop)
                             .subscribe(
                                     pulse -> {
