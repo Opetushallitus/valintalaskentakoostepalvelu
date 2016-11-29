@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SecurityUtil {
-    private static final String ROOTOID = "1.2.246.562.10.00000000001";
+    public static final String ROOTOID = "1.2.246.562.10.00000000001";
     private static final String ORGANIZATION_OID_PREFIX = "1.2.246.562.10";
     private static final String ORGANIZATION_GROUP_OID_PREFIX = "1.2.246.562.28";
     private static final Logger LOG = LoggerFactory.getLogger(SecurityUtil.class);

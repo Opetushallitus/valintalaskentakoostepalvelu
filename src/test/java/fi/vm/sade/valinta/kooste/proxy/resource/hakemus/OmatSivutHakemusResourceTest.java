@@ -2,7 +2,9 @@ package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
+import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
+import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +29,7 @@ public class OmatSivutHakemusResourceTest {
     @Before
     public void startServer() {
         startShared();
+        MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
     }
 
     @After
