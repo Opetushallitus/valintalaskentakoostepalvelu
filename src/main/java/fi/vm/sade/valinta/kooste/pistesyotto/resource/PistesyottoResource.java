@@ -309,11 +309,38 @@ public class PistesyottoResource {
     @Consumes("application/json")
     @Produces("application/json")
     @ApiOperation(consumes = "application/json", value = "Pistesyötön vienti taulukkolaskentaan", response = ProsessiId.class)
-    public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid) {
-        DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
-        dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-        vientiService.vie(hakuOid, hakukohdeOid, prosessi);
-        return prosessi.toProsessiId();
+    public void vienti(@QueryParam("hakuOid") String hakuOid,
+                             @QueryParam("hakukohdeOid") String hakukohdeOid,
+                             @Suspended AsyncResponse asyncResponse) {
+        authorityCheckService.getAuthorityCheckForRoles(asList(
+                "ROLE_APP_HAKEMUS_READ_UPDATE",
+                "ROLE_APP_HAKEMUS_READ",
+                "ROLE_APP_HAKEMUS_CRUD",
+                "ROLE_APP_HAKEMUS_LISATIETORU",
+                "ROLE_APP_HAKEMUS_LISATIETOCRUD"
+        )).flatMap(authorityCheck -> {
+            if (authorityCheck.test(hakukohdeOid)) {
+                DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
+                dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+                vientiService.vie(hakuOid, hakukohdeOid, prosessi);
+                return Observable.just(prosessi.toProsessiId());
+            } else {
+                return Observable.error(new ForbiddenException(String.format(
+                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
+                        KoosteAudit.username(), hakukohdeOid
+                )));
+            }
+        }).subscribe(
+                id -> asyncResponse.resume(Response.ok(id).build()),
+                error -> {
+                    logError("Pistetietojen vienti epäonnistui", error);
+                    if (error instanceof WebApplicationException) {
+                        asyncResponse.resume(((WebApplicationException) error).getResponse());
+                    } else {
+                        asyncResponse.resume(Response.serverError().entity(error.getMessage()).build());
+                    }
+                }
+        );
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
