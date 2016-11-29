@@ -177,10 +177,13 @@ public class PistesyottoResource {
                                 pistetiedot, KoosteAudit.username()
                         );
                     } else {
-                        return Observable.error(new ForbiddenException(String.format(
+                        String msg = String.format(
                                 "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
                                 KoosteAudit.username(), hakutoiveOids, hakemusOid
-                        )));
+                        );
+                        return Observable.error(new ForbiddenException(
+                                msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
+                        ));
                     }
                 }
         )).subscribe(
@@ -269,10 +272,13 @@ public class PistesyottoResource {
             if (authorityCheck.test(hakukohdeOid)) {
                 return Observable.just(null);
             }
-            return Observable.error(new ForbiddenException(String.format(
+            String msg = String.format(
                     "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
                     KoosteAudit.username(), hakukohdeOid
-            )));
+            );
+            return Observable.error(new ForbiddenException(
+                    msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
+            ));
         }).flatMap(x -> applicationAsyncResource.getShortApplicationsByOid(hakuOid, hakukohdeOid)
                 .map(shs -> shs.stream().map(ShortHakemus::getOid).collect(Collectors.toSet()))
                 .flatMap(hakukohteenHakemusOidit -> {
@@ -333,10 +339,13 @@ public class PistesyottoResource {
                 vientiService.vie(hakuOid, hakukohdeOid, prosessi);
                 return Observable.just(prosessi.toProsessiId());
             } else {
-                return Observable.error(new ForbiddenException(String.format(
+                String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
                         KoosteAudit.username(), hakukohdeOid
-                )));
+                );
+                return Observable.error(new ForbiddenException(
+                        msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
+                ));
             }
         }).subscribe(
                 id -> asyncResponse.resume(Response.ok(id).build()),
@@ -372,11 +381,24 @@ public class PistesyottoResource {
         try {
             final String username = KoosteAudit.username();
 
-            authorityCheckService.getAuthorityCheckForRoles(
-                asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD")
-            ).subscribe(
-                hakukohdeOIDAuthorityCheck -> {
-                    if (hakukohdeOIDAuthorityCheck.test(hakukohdeOid)) {
+            authorityCheckService.getAuthorityCheckForRoles(asList(
+                    "ROLE_APP_HAKEMUS_READ_UPDATE",
+                    "ROLE_APP_HAKEMUS_CRUD",
+                    "ROLE_APP_HAKEMUS_LISATIETORU",
+                    "ROLE_APP_HAKEMUS_LISATIETOCRUD"
+            )).flatMap(authorityCheck -> {
+                if (authorityCheck.test(hakukohdeOid)) {
+                    return Observable.just(null);
+                }
+                String msg = String.format(
+                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
+                        KoosteAudit.username(), hakukohdeOid
+                );
+                return Observable.error(new ForbiddenException(
+                        msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
+                ));
+            }).subscribe(
+                    x -> {
                         DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
                         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                         try {
@@ -397,13 +419,16 @@ public class PistesyottoResource {
                             LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", t), t);
                         }
                         asyncResponse.resume(prosessi.toProsessiId());
-                    } else {
-                        String msg = String.format("Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja", username, hakukohdeOid);
-                        LOG.error(msg);
-                        asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
+                    },
+                    error -> {
+                        logError("Tuntematon virhetilanne", error);
+                        if (error instanceof WebApplicationException) {
+                            asyncResponse.resume(((WebApplicationException) error).getResponse());
+                        } else {
+                            asyncResponse.resume(Response.serverError().entity(error.getMessage()).build());
+                        }
                     }
-                },
-                error -> LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Tuntematon virhetilanne", error), error));
+            );
         } catch (Exception e) {
             LOG.error("Odottamaton virhe", e);
             asyncResponse.resume(e);
