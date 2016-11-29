@@ -88,9 +88,8 @@ public class PistesyottoResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-    public void koostaPistetiedotYhdelleHakemukselle(
-            @PathParam("hakemusOid") String hakemusOid,
-            @Suspended final AsyncResponse response) {
+    public void koostaPistetiedotYhdelleHakemukselle(@PathParam("hakemusOid") String hakemusOid,
+                                                     @Suspended final AsyncResponse response) {
         response.setTimeout(30L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -138,10 +137,9 @@ public class PistesyottoResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-    public void tallennaKoostetutPistetiedotHakemukselle(
-            @PathParam("hakemusOid") String hakemusOid,
-            ApplicationAdditionalDataDTO pistetiedot,
-            @Suspended final AsyncResponse response) {
+    public void tallennaKoostetutPistetiedotHakemukselle(@PathParam("hakemusOid") String hakemusOid,
+                                                         ApplicationAdditionalDataDTO pistetiedot,
+                                                         @Suspended final AsyncResponse response) {
         response.setTimeout(30L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -204,10 +202,9 @@ public class PistesyottoResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-    public void koostaPistetiedotHakemuksille(
-            @PathParam("hakuOid") String hakuOid,
-            @PathParam("hakukohdeOid") String hakukohdeOid,
-            @Suspended final AsyncResponse response) {
+    public void koostaPistetiedotHakemuksille(@PathParam("hakuOid") String hakuOid,
+                                              @PathParam("hakukohdeOid") String hakukohdeOid,
+                                              @Suspended final AsyncResponse response) {
         response.setTimeout(30L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -251,11 +248,10 @@ public class PistesyottoResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(consumes = MediaType.APPLICATION_JSON, value = "Lisätietokenttien tallennus hakemuksille ja suoritusrekisteriin")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-    public void tallennaKoostetutPistetiedot(
-            @PathParam("hakuOid") String hakuOid,
-            @PathParam("hakukohdeOid") String hakukohdeOid,
-            List<ApplicationAdditionalDataDTO> pistetiedot,
-            @Suspended final AsyncResponse response) {
+    public void tallennaKoostetutPistetiedot(@PathParam("hakuOid") String hakuOid,
+                                             @PathParam("hakukohdeOid") String hakukohdeOid,
+                                             List<ApplicationAdditionalDataDTO> pistetiedot,
+                                             @Suspended final AsyncResponse response) {
         response.setTimeout(30L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -316,8 +312,8 @@ public class PistesyottoResource {
     @Produces("application/json")
     @ApiOperation(consumes = "application/json", value = "Pistesyötön vienti taulukkolaskentaan", response = ProsessiId.class)
     public void vienti(@QueryParam("hakuOid") String hakuOid,
-                             @QueryParam("hakukohdeOid") String hakukohdeOid,
-                             @Suspended AsyncResponse asyncResponse) {
+                       @QueryParam("hakukohdeOid") String hakukohdeOid,
+                       @Suspended AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(30L, TimeUnit.SECONDS);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("vienti-palvelukutsu on aikakatkaistu: POST /vienti");
@@ -452,9 +448,9 @@ public class PistesyottoResource {
     @Produces("application/json")
     @ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti hakemuksille ulkoisesta järjestelmästä", response = UlkoinenResponseDTO.class)
     public void ulkoinenTuonti(@QueryParam("hakuOid") String hakuOid,
-                                              @QueryParam("valinnanvaiheOid") String valinnanvaiheOid,
-                                              List<HakemusDTO> hakemukset,
-                                              @Suspended AsyncResponse asyncResponse) {
+                               @QueryParam("valinnanvaiheOid") String valinnanvaiheOid,
+                               List<HakemusDTO> hakemukset,
+                               @Suspended AsyncResponse asyncResponse) {
         try {
             if (hakemukset == null || hakemukset.isEmpty()) {
                 asyncResponse.resume(Response.serverError().entity("Ulkoinen pistesyotto API requires at least one hakemus").build());
