@@ -3,10 +3,12 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.Recipient;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
+import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiResponse;
 import org.apache.cxf.helpers.IOUtils;
@@ -41,6 +43,7 @@ public class EPostinLahetysServiceE2ETest {
     @Before
     public void startServer() throws Throwable{
         startShared();
+        MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
     }
 
     @Test
