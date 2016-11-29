@@ -312,6 +312,14 @@ public class PistesyottoResource {
     public void vienti(@QueryParam("hakuOid") String hakuOid,
                              @QueryParam("hakukohdeOid") String hakukohdeOid,
                              @Suspended AsyncResponse asyncResponse) {
+        asyncResponse.setTimeout(30L, TimeUnit.SECONDS);
+        asyncResponse.setTimeoutHandler(handler -> {
+            LOG.error("vienti-palvelukutsu on aikakatkaistu: POST /vienti");
+            handler.resume(Response.serverError()
+                    .entity("vienti-palvelukutsu on aikakatkaistu")
+                    .build());
+        });
+
         authorityCheckService.getAuthorityCheckForRoles(asList(
                 "ROLE_APP_HAKEMUS_READ_UPDATE",
                 "ROLE_APP_HAKEMUS_READ",
@@ -350,9 +358,17 @@ public class PistesyottoResource {
     @Produces("application/json")
     @ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti taulukkolaskentaan", response = ProsessiId.class)
     public void tuonti(@QueryParam("hakuOid") String hakuOid,
-                             @QueryParam("hakukohdeOid") String hakukohdeOid,
-                             InputStream file,
-                             @Suspended AsyncResponse asyncResponse) throws IOException {
+                       @QueryParam("hakukohdeOid") String hakukohdeOid,
+                       InputStream file,
+                       @Suspended AsyncResponse asyncResponse) throws IOException {
+        asyncResponse.setTimeout(30L, TimeUnit.SECONDS);
+        asyncResponse.setTimeoutHandler(handler -> {
+            LOG.error("tuonti-palvelukutsu on aikakatkaistu: POST /tuonti");
+            handler.resume(Response.serverError()
+                    .entity("tuonti-palvelukutsu on aikakatkaistu")
+                    .build());
+        });
+
         try {
             final String username = KoosteAudit.username();
 
