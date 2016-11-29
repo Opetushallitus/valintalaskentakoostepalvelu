@@ -30,7 +30,7 @@ public class TestCallback {
 
 	@Test
 	public void testListOfHakemuksetCallback() throws IOException {
-		GsonResponseCallback<List<Hakemus>> cb = new GsonResponseCallback<List<Hakemus>>(httpResource.gson(), "", "",
+		GsonResponseCallback<List<Hakemus>> cb = new GsonResponseCallback<List<Hakemus>>(httpResource.gson(), "",
 				obj -> {
 					LOG.error("SUCCESS {}", obj);
 				}, poikkeus -> {
@@ -46,7 +46,7 @@ public class TestCallback {
 	@Test
 	public void testLaskentaDtoCallback() throws IOException {
 
-		GsonResponseCallback<LaskentaDto> cb2 = new GsonResponseCallback<LaskentaDto>(httpResource.gson(), "", "", obj -> {
+		GsonResponseCallback<LaskentaDto> cb2 = new GsonResponseCallback<LaskentaDto>(httpResource.gson(), "", obj -> {
 			LOG.error("SUCCESS {}", obj);
 		}, poikkeus -> {
 			LOG.error("POIKKEUS {}", poikkeus);
