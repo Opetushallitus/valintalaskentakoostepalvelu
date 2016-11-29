@@ -1,21 +1,22 @@
 package fi.vm.sade.valinta.kooste;
 
-import fi.vm.sade.authentication.cas.CasFriendlyCache;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -48,6 +49,8 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.valintaperusteet.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.oppijantunnistus.rest.url", "http://" + proxyServer + "/oppijan-tunnistus");
+        p0.setProperty("valintalaskentakoostepalvelu.jalkiohjauskirjeet.polling.interval.millis", "50");
+        p0.setProperty("valintalaskentakoostepalvelu.hyvaksymiskirjeet.polling.interval.millis", "50");
         p0.setProperty("root.organisaatio.oid", "");
         p0.setProperty("kela.ftp.protocol", "ftp");
         p0.setProperty("kela.ftp.username", "username");

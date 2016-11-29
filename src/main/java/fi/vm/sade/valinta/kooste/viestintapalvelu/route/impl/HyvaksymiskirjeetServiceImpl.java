@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.functions.Action3;
@@ -57,6 +58,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final HaeOsoiteKomponentti haeOsoiteKomponentti;
     private final HakuParametritService hakuParametritService;
+    private final int pollingIntervalMillis;
 
     private SimpleDateFormat pvmMuoto = new SimpleDateFormat("dd.MM.yyyy");
     private SimpleDateFormat kelloMuoto = new SimpleDateFormat("HH.mm");
@@ -69,7 +71,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             ApplicationAsyncResource applicationAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             HaeOsoiteKomponentti haeOsoiteKomponentti,
-            HakuParametritService hakuParametritService) {
+            HakuParametritService hakuParametritService,
+            @Value("${valintalaskentakoostepalvelu.hyvaksymiskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
@@ -77,6 +80,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.haeOsoiteKomponentti = haeOsoiteKomponentti;
         this.hakuParametritService = hakuParametritService;
+        this.pollingIntervalMillis = pollingIntervalMillis;
     }
 
     @Override
@@ -265,7 +269,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
-                            .interval(10, TimeUnit.SECONDS)
+                            .interval(pollingIntervalMillis, TimeUnit.MILLISECONDS)
                             .take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
                             .takeUntil(stop)
                             .subscribe(
