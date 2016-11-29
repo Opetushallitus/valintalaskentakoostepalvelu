@@ -131,14 +131,18 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         return kielikokeidenHakukohteet;
     }
 
-    private static void poistaKielikoepistetiedot(ApplicationAdditionalDataDTO pistetietoDTO) {
-        Iterator<String> i = pistetietoDTO.getAdditionalData().keySet().iterator();
-        while (i.hasNext()) {
-            String key = i.next();
-            if (key.matches(PistesyottoExcel.KIELIKOE_REGEX)) {
-                i.remove();
-            }
-        }
+    private static ApplicationAdditionalDataDTO poistaKielikoepistetiedot(ApplicationAdditionalDataDTO pistetietoDTO) {
+        ApplicationAdditionalDataDTO a = new ApplicationAdditionalDataDTO(
+                pistetietoDTO.getOid(),
+                pistetietoDTO.getPersonOid(),
+                pistetietoDTO.getFirstNames(),
+                pistetietoDTO.getLastName(),
+                new HashMap<>()
+        );
+        pistetietoDTO.getAdditionalData().entrySet().stream()
+                .filter(e -> !e.getKey().matches(PistesyottoExcel.KIELIKOE_REGEX))
+                .forEach(e -> a.getAdditionalData().put(e.getKey(), e.getValue()));
+        return a;
     }
 
     public Observable<Void> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
@@ -148,17 +152,17 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             Map<String, HakutoiveDTO> kh = kielikokeidenHakukohteet(vo);
             Map<String, String> kielikoePistetiedot = pistetietoDTO.getAdditionalData().entrySet().stream()
                     .filter(e -> e.getKey().matches(PistesyottoExcel.KIELIKOE_REGEX))
-                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             if (kielikoePistetiedot.isEmpty()) {
                 return applicationAsyncResource.putApplicationAdditionalData(hakuOid, Collections.singletonList(pistetietoDTO))
                         .map(a -> null);
             } else {
                 return Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
-                    poistaKielikoepistetiedot(pistetietoDTO);
-                    pistetietoDTO.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
+                    ApplicationAdditionalDataDTO a = poistaKielikoepistetiedot(pistetietoDTO);
+                    a.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
                     return tallennaKoostetutPistetiedot(
                             hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(),
-                            Collections.singletonList(pistetietoDTO), username
+                            Collections.singletonList(a), username
                     );
                 }).collect(Collectors.toList()));
             }
