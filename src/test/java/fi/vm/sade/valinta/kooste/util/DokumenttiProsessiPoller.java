@@ -14,17 +14,22 @@ public class DokumenttiProsessiPoller {
     public static Prosessi pollDokumenttiProsessi(String rootUrl, ProsessiId prosessiId, Function<Prosessi,Boolean> responseProcessor) {
         final HttpResource dokumenttiProsessiResource = new HttpResource(rootUrl + "/dokumenttiprosessi/" + prosessiId.getId());
         long pollStarted = System.currentTimeMillis();
+        sleepOneInterval(); // give the server some time to get started
         while (System.currentTimeMillis() < pollStarted + TIME_TO_WAIT_IN_TOTAL.toMillis()) {
             Prosessi prosessiStatusResponse = dokumenttiProsessiResource.getWebClient().get(Prosessi.class);
             if (responseProcessor.apply(prosessiStatusResponse)) {
                 return prosessiStatusResponse;
             }
-            try {
-                Thread.sleep(REQUEST_INTERVAL.toMillis());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            sleepOneInterval();
         }
         throw new RuntimeException("Did not complete within " + TIME_TO_WAIT_IN_TOTAL.toMillis() + " ms.");
+    }
+
+    private static void sleepOneInterval() {
+        try {
+            Thread.sleep(REQUEST_INTERVAL.toMillis());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
