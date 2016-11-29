@@ -1,13 +1,12 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
-import static java.util.Arrays.asList;
 import com.google.common.collect.Lists;
-
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ShortHakemus;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
@@ -15,7 +14,6 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -29,9 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import rx.Observable;
-import rx.functions.Action1;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -39,6 +37,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
@@ -47,9 +46,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
 
 @Controller("PistesyottoResource")
 @Path("pistesyotto")
@@ -101,7 +106,7 @@ public class PistesyottoResource {
                 pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid),
                 (authorityCheck, pistetiedotHakukohteittain) -> {
                     Set<String> hakutoiveOids = pistetiedotHakukohteittain.keySet();
-                    if (hakutoiveOids.stream().anyMatch(hakukohdeOid -> authorityCheck.test(hakukohdeOid))) {
+                    if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return Response.ok()
                                 .header("Content-Type", "application/json")
                                 .entity(pistetiedotHakukohteittain)
@@ -116,7 +121,7 @@ public class PistesyottoResource {
                     }
                 }
         ).subscribe(
-                entity -> response.resume(entity),
+                response::resume,
                 error -> {
                     logError("koostaPistetiedotYhdelleHakemukselle epäonnistui", error);
                     response.resume(Response.serverError().entity(error.getMessage()).build());
@@ -199,7 +204,7 @@ public class PistesyottoResource {
                 return Observable.just(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
             }
         }).subscribe(
-                entity -> response.resume(entity),
+                response::resume,
                 error -> {
                     logError("koostaPistetiedotHakemuksille epäonnistui", error);
                     response.resume(Response.serverError().entity(error.getMessage()).build());
@@ -232,39 +237,38 @@ public class PistesyottoResource {
                 "ROLE_APP_HAKEMUS_LISATIETOCRUD"
         )).flatMap(authorityCheck -> {
             if (authorityCheck.test(hakukohdeOid)) {
-                return applicationAsyncResource.getShortApplicationsByOid(hakuOid, hakukohdeOid)
-                        .map(shs -> shs.stream().map(sh -> sh.getOid()).collect(Collectors.toSet()))
-                        .flatMap(hakukohteenHakemusOidit -> {
-                            Set<String> eiHakukohteeseenHakeneet = pistetiedot.stream()
-                                    .map(p -> p.getOid())
-                                    .filter(oid -> !hakukohteenHakemusOidit.contains(oid))
-                                    .collect(Collectors.toSet());
-                            if (eiHakukohteeseenHakeneet.isEmpty()) {
-                                return pistesyottoKoosteService.tallennaKoostetutPistetiedot(
-                                        hakuOid, hakukohdeOid, pistetiedot, KoosteAudit.username()
-                                ).map(x -> Response.noContent().build());
-                            } else {
-                                String msg = String.format(
-                                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakemuksien %s pistetietoja, koska niillä ei ole haettu hakukohteeseen %s",
-                                        KoosteAudit.username(), eiHakukohteeseenHakeneet, hakukohdeOid
-                                );
-                                LOG.error(msg);
-                                return Observable.just(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
-                            }
-                        });
-            } else {
-                String msg = String.format(
-                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                        KoosteAudit.username(), hakukohdeOid
-                );
-                LOG.error(msg);
-                return Observable.just(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
+                return Observable.just(null);
             }
-        }).subscribe(
-                entity -> response.resume(entity),
+            return Observable.error(new ForbiddenException(String.format(
+                    "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
+                    KoosteAudit.username(), hakukohdeOid
+            )));
+        }).flatMap(x -> applicationAsyncResource.getShortApplicationsByOid(hakuOid, hakukohdeOid)
+                .map(shs -> shs.stream().map(ShortHakemus::getOid).collect(Collectors.toSet()))
+                .flatMap(hakukohteenHakemusOidit -> {
+                    Set<String> eiHakukohteeseenHakeneet = pistetiedot.stream()
+                            .map(ApplicationAdditionalDataDTO::getOid)
+                            .filter(oid -> !hakukohteenHakemusOidit.contains(oid))
+                            .collect(Collectors.toSet());
+                    if (eiHakukohteeseenHakeneet.isEmpty()) {
+                        return Observable.just(null);
+                    }
+                    return Observable.error(new ForbiddenException(String.format(
+                            "Käyttäjällä %s ei ole oikeuksia käsitellä hakemuksien %s pistetietoja, koska niillä ei ole haettu hakukohteeseen %s",
+                            KoosteAudit.username(), eiHakukohteeseenHakeneet, hakukohdeOid
+                    )));
+                })
+        ).flatMap(x -> pistesyottoKoosteService.tallennaKoostetutPistetiedot(
+                hakuOid, hakukohdeOid, pistetiedot, KoosteAudit.username())
+        ).subscribe(
+                x -> response.resume(Response.noContent().build()),
                 error -> {
                     logError("tallennaKoostetutPistetiedot epäonnistui", error);
-                    response.resume(Response.serverError().entity(error.getMessage()).build());
+                    if (error instanceof WebApplicationException) {
+                        response.resume(((WebApplicationException) error).getResponse());
+                    } else {
+                        response.resume(Response.serverError().entity(error.getMessage()).build());
+                    }
                 }
         );
     }
