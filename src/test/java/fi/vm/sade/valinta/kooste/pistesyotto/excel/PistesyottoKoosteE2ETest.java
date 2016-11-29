@@ -197,6 +197,23 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockTarjontaHakukohdeCall();
         mockValintakoe();
 
+        Hakemus hakemusHakuAppista = new Hakemus();
+        hakemusHakuAppista.setAdditionalInfo(pistetieto.getAdditionalData());
+        hakemusHakuAppista.setPersonOid(hakijaOid);
+        hakemusHakuAppista.setOid(pistetieto.getOid());
+        hakemusHakuAppista.setApplicationSystemId("testihaku");
+        Answers answers = new Answers();
+        answers.setHenkilotiedot(new HashMap<>());
+        answers.getHenkilotiedot().put("Etunimet", "Frank");
+        answers.getHenkilotiedot().put("Sukunimi", "Tester");
+        answers.setHakutoiveet(new HashMap<>());
+        answers.getHakutoiveet().put("preference1-Koulutus-id", "testihakukohde");
+        hakemusHakuAppista.setAnswers(answers);
+        mockToReturnJson(GET,
+                "/haku-app/applications/" + pistetieto.getOid(),
+                hakemusHakuAppista
+        );
+
         final Semaphore suoritusCounter = new Semaphore(0);
         final Semaphore arvosanaCounter = new Semaphore(0);
         final Semaphore deleteCounter = new Semaphore(0);
@@ -210,7 +227,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .put(new Gson().toJson(pistetieto));
-        assertEquals(200, r.getStatus());
+        assertEquals(204, r.getStatus());
 
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(0, 10, TimeUnit.SECONDS));
@@ -222,25 +239,8 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 Collections.singletonList(kielikoeFi));
             mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku", new ParametritDTO());
 
-            Hakemus hakemusHakuAppista = new Hakemus();
-            hakemusHakuAppista.setAdditionalInfo(pistetieto.getAdditionalData());
-            hakemusHakuAppista.setPersonOid(hakijaOid);
-            hakemusHakuAppista.setOid(pistetieto.getOid());
-            hakemusHakuAppista.setApplicationSystemId("testihaku");
-            Answers answers = new Answers();
-            answers.setHenkilotiedot(new HashMap<>());
-            answers.getHenkilotiedot().put("Etunimet", "Frank");
-            answers.getHenkilotiedot().put("Sukunimi", "Tester");
-            answers.setHakutoiveet(new HashMap<>());
-            answers.getHakutoiveet().put("preference1-Koulutus-id", "testihakukohde");
-            hakemusHakuAppista.setAnswers(answers);
-            mockToReturnJson(GET,
-                    "/haku-app/applications/" + pistetieto.getOid(),
-                hakemusHakuAppista
-            );
-
             Response singleHakemusResponse = http.getWebClient().accept(MediaType.APPLICATION_JSON).get();
-            assertEquals(200, r.getStatus());
+            assertEquals(200, singleHakemusResponse.getStatus());
             Map<String, PistetietoDTO> tulokset = new Gson().fromJson(
                 new InputStreamReader((InputStream) singleHakemusResponse.getEntity()),
                 new TypeToken<Map<String, PistetietoDTO>>() {

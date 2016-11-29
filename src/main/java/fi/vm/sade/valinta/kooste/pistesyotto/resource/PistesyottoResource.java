@@ -14,9 +14,11 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
+import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.util.IOUtils;
@@ -53,6 +55,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 
@@ -147,23 +150,50 @@ public class PistesyottoResource {
                     .build());
         });
 
-        if (hakemusOid.equals(pistetiedot.getOid())) {
-            pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(pistetiedot, KoosteAudit.username())
-                    .subscribe(
-                            a -> response.resume(Response.ok().header("Content-Type", "application/json").build()),
-                            error -> {
-                                logError("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
-                                response.resume(Response.serverError().entity(error.getMessage()).build());
-                            }
-                    );
-        } else {
+        if (!hakemusOid.equals(pistetiedot.getOid())) {
             String errorMessage = String.format(
                     "URLissa tuli hakemusOid %s , mutta PUT-datassa hakemusOid %s",
                     hakemusOid, pistetiedot.getOid()
             );
             LOG.error(errorMessage);
-            response.resume(Response.serverError().entity(errorMessage).build());
+            response.resume(Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build());
+            return;
         }
+
+        Observable.merge(Observable.zip(
+                authorityCheckService.getAuthorityCheckForRoles(asList(
+                        "ROLE_APP_HAKEMUS_READ_UPDATE",
+                        "ROLE_APP_HAKEMUS_CRUD",
+                        "ROLE_APP_HAKEMUS_LISATIETORU",
+                        "ROLE_APP_HAKEMUS_LISATIETOCRUD"
+                )),
+                applicationAsyncResource.getApplication(hakemusOid),
+                (authorityCheck, hakemus) -> {
+                    List<String> hakutoiveOids = Converter.hakemusToHakemusDTO(hakemus).getHakukohteet().stream()
+                            .map(HakukohdeDTO::getOid)
+                            .collect(Collectors.toList());
+                    if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
+                        return pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(
+                                pistetiedot, KoosteAudit.username()
+                        );
+                    } else {
+                        return Observable.error(new ForbiddenException(String.format(
+                                "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
+                                KoosteAudit.username(), hakutoiveOids, hakemusOid
+                        )));
+                    }
+                }
+        )).subscribe(
+                x -> response.resume(Response.noContent().build()),
+                error -> {
+                    logError("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
+                    if (error instanceof WebApplicationException) {
+                        response.resume(((WebApplicationException) error).getResponse());
+                    } else {
+                        response.resume(Response.serverError().entity(error.getMessage()).build());
+                    }
+                }
+        );
     }
 
     @GET
