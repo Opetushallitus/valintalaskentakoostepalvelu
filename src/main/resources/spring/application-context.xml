@@ -386,9 +386,6 @@
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.komponentti.impl" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.dokumenttipalvelu" />
 
-		<!-- UrlConfiguration -->
-		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.url" />
-
 		<!-- Haku Import -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti" />
