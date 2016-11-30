@@ -1,12 +1,13 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
+import static java.util.Arrays.asList;
 import com.google.common.collect.Lists;
+
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
@@ -54,8 +55,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
 
 @Controller("PistesyottoResource")
 @Path("pistesyotto")
@@ -186,11 +185,7 @@ public class PistesyottoResource {
                 x -> response.resume(Response.noContent().build()),
                 error -> {
                     logError("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
-                    if (error instanceof WebApplicationException) {
-                        response.resume(((WebApplicationException) error).getResponse());
-                    } else {
-                        response.resume(Response.serverError().entity(error.getMessage()).build());
-                    }
+                    resumeWithException(response, error);
                 }
         );
     }
@@ -293,11 +288,7 @@ public class PistesyottoResource {
                 x -> response.resume(Response.noContent().build()),
                 error -> {
                     logError("tallennaKoostetutPistetiedot epäonnistui", error);
-                    if (error instanceof WebApplicationException) {
-                        response.resume(((WebApplicationException) error).getResponse());
-                    } else {
-                        response.resume(Response.serverError().entity(error.getMessage()).build());
-                    }
+                    resumeWithException(response, error);
                 }
         );
     }
@@ -344,11 +335,7 @@ public class PistesyottoResource {
                 id -> asyncResponse.resume(Response.ok(id).build()),
                 error -> {
                     logError("Pistetietojen vienti epäonnistui", error);
-                    if (error instanceof WebApplicationException) {
-                        asyncResponse.resume(((WebApplicationException) error).getResponse());
-                    } else {
-                        asyncResponse.resume(Response.serverError().entity(error.getMessage()).build());
-                    }
+                    resumeWithException(asyncResponse, error);
                 }
         );
     }
@@ -414,11 +401,7 @@ public class PistesyottoResource {
                     id -> asyncResponse.resume(Response.ok(id).build()),
                     error -> {
                         logError("Tuntematon virhetilanne", error);
-                        if (error instanceof WebApplicationException) {
-                            asyncResponse.resume(((WebApplicationException) error).getResponse());
-                        } else {
-                            asyncResponse.resume(Response.serverError().entity(error.getMessage()).build());
-                        }
+                        resumeWithException(asyncResponse, error);
                     }
             );
         } catch (Exception e) {
@@ -484,6 +467,14 @@ public class PistesyottoResource {
         } catch (Exception e) {
             LOG.error("Soteli tuonti epäonnistui", e);
             asyncResponse.resume(Response.serverError().entity(e.toString()).build());
+        }
+    }
+
+    private void resumeWithException(@Suspended AsyncResponse response, Throwable error) {
+        if (error instanceof WebApplicationException) {
+            response.resume(((WebApplicationException) error).getResponse());
+        } else {
+            response.resume(Response.serverError().entity(error.getMessage()).build());
         }
     }
 
