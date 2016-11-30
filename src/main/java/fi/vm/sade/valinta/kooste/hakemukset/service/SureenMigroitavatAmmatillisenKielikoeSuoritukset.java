@@ -210,8 +210,8 @@ class SureenMigroitavatAmmatillisenKielikoeSuoritukset {
                     " tietueesta ei löytynyt tulosta hakemukselle " + hakemusOid + " - ei migroida sitä.");
                 return Optional.empty();
             }
-            SureHyvaksyttyArvosana hyvaksytty = kielikoeResultsOfHakemusByTunniste.get(tunniste);
-            return Optional.of(new AbstractPistesyottoKoosteService.SingleKielikoeTulos(tunniste, hyvaksytty, createdAt));
+            SureHyvaksyttyArvosana arvosana = kielikoeResultsOfHakemusByTunniste.get(tunniste);
+            return Optional.of(new AbstractPistesyottoKoosteService.SingleKielikoeTulos(tunniste, arvosana, createdAt));
         }
     }
 }
