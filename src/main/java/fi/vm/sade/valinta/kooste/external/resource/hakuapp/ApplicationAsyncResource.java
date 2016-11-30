@@ -4,13 +4,13 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ShortHakemus;
 import rx.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -23,7 +23,7 @@ public interface ApplicationAsyncResource {
 
     Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 
-    Observable<List<ShortHakemus>> getShortApplicationsByOid(String hakuOid, String hakukohdeOid);
+    Observable<Set<String>> getApplicationOids(String hakuOid, String hakukohdeOid);
 
     Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
 

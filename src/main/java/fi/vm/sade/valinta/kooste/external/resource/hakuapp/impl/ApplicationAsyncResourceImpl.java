@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static rx.observables.BlockingObservable.from;
 
@@ -68,12 +69,19 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
     @Override
-    public Observable<List<ShortHakemus>> getShortApplicationsByOid(String hakuOid, String hakukohdeOid) {
-        return getAsObservable("/applications/listshort", new TypeToken<List<ShortHakemus>>() {}.getType(), client -> {
-            client.query("asId", hakuOid);
-            client.query("aoOid", hakukohdeOid);
-            return client;
-        });
+    public Observable<Set<String>> getApplicationOids(String hakuOid, String hakukohdeOid) {
+        ListFullSearchDTO s = new ListFullSearchDTO(
+                "",
+                Collections.singletonList(hakukohdeOid),
+                Collections.singletonList(hakuOid),
+                Collections.emptyList(),
+                Collections.singletonList("oid")
+        );
+        return this.<ListFullSearchDTO, List<HakemusOid>>postAsObservable(
+                "/applications/listfull",
+                new TypeToken<List<HakemusOid>>() {}.getType(),
+                Entity.entity(s, MediaType.APPLICATION_JSON_TYPE)
+        ).map(lh -> lh.stream().map(HakemusOid::getOid).collect(Collectors.toSet()));
     }
 
     @Override

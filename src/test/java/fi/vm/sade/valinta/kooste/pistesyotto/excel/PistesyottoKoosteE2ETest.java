@@ -9,9 +9,7 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static javax.ws.rs.HttpMethod.DELETE;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.PUT;
+import static javax.ws.rs.HttpMethod.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -28,7 +26,7 @@ import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ShortHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
@@ -60,6 +58,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -151,17 +150,8 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
-        mockToReturnJson(GET, "/haku-app/applications/listshort",
-                pistetiedot.stream().map(p -> new ShortHakemus(
-                        p.getOid(),
-                        "ACTIVE",
-                        new Date().getTime(),
-                        p.getFirstNames(),
-                        p.getLastName(),
-                        p.getPersonOid() + "_hetu",
-                        p.getPersonOid()
-                ))
-                .collect(Collectors.toList())
+        mockToReturnJson(POST, "/haku-app/applications/listfull",
+                pistetiedot.stream().map(p -> new HakemusOid(p.getOid())).collect(Collectors.toList())
         );
         mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();

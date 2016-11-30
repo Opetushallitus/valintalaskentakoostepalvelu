@@ -124,7 +124,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<ShortHakemus>> getShortApplicationsByOid(String hakuOid, String hakukohdeOid) {
+    public Observable<Set<String>> getApplicationOids(String hakuOid, String hakukohdeOid) {
         throw new UnsupportedOperationException("not implemented");
     }
 

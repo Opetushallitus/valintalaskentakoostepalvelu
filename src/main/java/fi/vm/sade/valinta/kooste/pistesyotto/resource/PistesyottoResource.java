@@ -6,7 +6,7 @@ import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ShortHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
@@ -50,12 +50,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 
@@ -275,8 +273,7 @@ public class PistesyottoResource {
             return Observable.error(new ForbiddenException(
                     msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
             ));
-        }).flatMap(x -> applicationAsyncResource.getShortApplicationsByOid(hakuOid, hakukohdeOid)
-                .map(shs -> shs.stream().map(ShortHakemus::getOid).collect(Collectors.toSet()))
+        }).flatMap(x -> applicationAsyncResource.getApplicationOids(hakuOid, hakukohdeOid)
                 .flatMap(hakukohteenHakemusOidit -> {
                     Set<String> eiHakukohteeseenHakeneet = pistetiedot.stream()
                             .map(ApplicationAdditionalDataDTO::getOid)
