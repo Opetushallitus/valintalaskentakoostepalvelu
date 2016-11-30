@@ -41,7 +41,9 @@ const result = db.application.find(
                { "additionalInfo.kielikoe_fi": { $exists: true } },
                { "additionalInfo.kielikoe_fi": { $ne: "" } }
              ]
-           }
+           },
+           { "additionalInfo.kielikoe_fi-OSALLISTUMINEN": "EI_OSALLISTUNUT" },
+           { "additionalInfo.kielikoe_sv-OSALLISTUMINEN": "EI_OSALLISTUNUT" }
         ]
   }, projection).toArray();
 
