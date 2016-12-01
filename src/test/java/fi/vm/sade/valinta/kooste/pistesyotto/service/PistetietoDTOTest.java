@@ -229,7 +229,7 @@ public class PistetietoDTOTest {
     }
 
     @Test
-    public void testOsallistumistietoVaikkeOsallistumistaJosSyotettavissaKaikille() {
+    public void testOsallistumistietoVaikkeiOsallistumistaJosSyotettavissaKaikille() {
         ValintaperusteDTO syotettavissaKaikille = new ValintaperusteDTO();
         syotettavissaKaikille.setTunniste("syotettavissa_kaikille");
         syotettavissaKaikille.setSyotettavissaKaikille(true);
