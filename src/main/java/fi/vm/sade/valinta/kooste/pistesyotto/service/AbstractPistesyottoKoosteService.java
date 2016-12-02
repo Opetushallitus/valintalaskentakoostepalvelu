@@ -21,7 +21,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistetietoDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviKuuntelija;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AmmatillisenKielikoetulosOperations.CompositeCommand;
@@ -171,7 +171,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     Map<String, Oppija> kielikoetuloksetByPersonOid = kielikoetulokset.stream()
                             .collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o));
                     return lisatiedot.stream().map(l ->
-                            new PistetietoDTO(
+                            new HakemuksenKoetulosYhteenveto(
                                     l,
                                     Pair.of(hakukohdeOid, kokeet),
                                     osallistumistiedotByHakemusOid.get(l.getOid()),

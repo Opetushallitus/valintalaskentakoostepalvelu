@@ -11,7 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistetietoDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -27,7 +27,6 @@ import rx.Observable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,7 +52,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 valintalaskentaValintakoeAsyncResource);
     }
 
-    public Observable<List<PistetietoDTO>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid) {
+    public Observable<List<HakemuksenKoetulosYhteenveto>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid) {
         try {
             return Observable.zip(
                 applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid),
@@ -65,7 +64,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
                 (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) ->
                     additionalDatat.stream().map(additionalData ->
-                        new PistetietoDTO(
+                        new HakemuksenKoetulosYhteenveto(
                             additionalData,
                             Pair.of(hakukohdeOid, valintaperusteet),
                             valintakokeet.get(additionalData.getOid()),
@@ -80,7 +79,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         }
     }
 
-    public Observable<Map<String, PistetietoDTO>> koostaOsallistujanPistetiedot(String hakemusOid) {
+    public Observable<Map<String, HakemuksenKoetulosYhteenveto>> koostaOsallistujanPistetiedot(String hakemusOid) {
         return applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus -> {
             String hakuOid = hakemus.getApplicationSystemId();
             HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus);
@@ -97,7 +96,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                         (valintaperusteet, valintakoeOsallistuminen, oppija, ohjausparametrit) ->
                             Pair.of(
                                 hakukohdeOid,
-                                new PistetietoDTO(
+                                new HakemuksenKoetulosYhteenveto(
                                     new ApplicationAdditionalDataDTO(hakemusOid, hakemus.getPersonOid(), hakemusDTO.getEtunimi(), hakemusDTO.getSukunimi(), hakemus.getAdditionalInfo()),
                                     Pair.of(hakukohdeOid, valintaperusteet),
                                     valintakoeOsallistuminen,

@@ -1,42 +1,40 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 
+import static fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService.KIELIKOE_KEY_PREFIX;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
-import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
-import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
-import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.ARVOSANA_PVM_FORMATTER;
-import static fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService.KIELIKOE_KEY_PREFIX;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
-
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
-public class PistetietoDTO {
+public class HakemuksenKoetulosYhteenveto {
     @JsonProperty
     public final ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
     @JsonProperty
     private final Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
 
     @JsonCreator
-    public PistetietoDTO(
+    public HakemuksenKoetulosYhteenveto(
             @JsonProperty("applicationAdditionalDataDTO")
                     ApplicationAdditionalDataDTO applicationAdditionalDataDTO,
             @JsonProperty("hakukohteidenOsallistumistiedot")
@@ -45,11 +43,11 @@ public class PistetietoDTO {
         this.hakukohteidenOsallistumistiedot = hakukohteidenOsallistumistiedot;
     }
 
-    public PistetietoDTO(ApplicationAdditionalDataDTO additionalData,
-                         Pair<String, List<ValintaperusteDTO>> valintaperusteet,
-                         ValintakoeOsallistuminenDTO kokeet,
-                         Oppija oppija,
-                         ParametritDTO ohjausparametrit) {
+    public HakemuksenKoetulosYhteenveto(ApplicationAdditionalDataDTO additionalData,
+                                        Pair<String, List<ValintaperusteDTO>> valintaperusteet,
+                                        ValintakoeOsallistuminenDTO kokeet,
+                                        Oppija oppija,
+                                        ParametritDTO ohjausparametrit) {
         String hakemusOid = additionalData.getOid();
         Map<String, Pair<Suoritus, Arvosana>> kielikoetulokset = new HashMap<>();
         if (oppija != null) {

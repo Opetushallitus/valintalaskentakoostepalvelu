@@ -42,7 +42,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakukohteenOsallistumistiedotDTO.KokeenOsallistumistietoDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.Osallistumistieto;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistetietoDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -58,7 +58,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -119,9 +118,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 .get();
         assertEquals(200, r.getStatus());
 
-        List<PistetietoDTO> uudetPistetiedot = new Gson().fromJson(
+        List<HakemuksenKoetulosYhteenveto> uudetPistetiedot = new Gson().fromJson(
                 new InputStreamReader((InputStream)r.getEntity()),
-                new TypeToken<List<PistetietoDTO>>(){}.getType());
+                new TypeToken<List<HakemuksenKoetulosYhteenveto>>(){}.getType());
 
         BiFunction<String, String, String> readPistetieto = (personOid, key) ->
             uudetPistetiedot.stream()
@@ -237,14 +236,14 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
             Response singleHakemusResponse = http.getWebClient().accept(MediaType.APPLICATION_JSON).get();
             assertEquals(200, singleHakemusResponse.getStatus());
-            Map<String, PistetietoDTO> tulokset = new Gson().fromJson(
+            Map<String, HakemuksenKoetulosYhteenveto> tulokset = new Gson().fromJson(
                 new InputStreamReader((InputStream) singleHakemusResponse.getEntity()),
-                new TypeToken<Map<String, PistetietoDTO>>() {
+                new TypeToken<Map<String, HakemuksenKoetulosYhteenveto>>() {
                 }.getType()
             );
             assertThat(tulokset, Matchers.hasKey("testihakukohde"));
             assertThat(tulokset.keySet(), Matchers.hasSize(1));
-            PistetietoDTO readPistetieto = tulokset.get("testihakukohde");
+            HakemuksenKoetulosYhteenveto readPistetieto = tulokset.get("testihakukohde");
             KokeenOsallistumistietoDTO osallistumistietoDTO = readPistetieto.osallistumistieto("testihakukohde", "kielikoe_fi");
             assertEquals(Osallistumistieto.OSALLISTUI, osallistumistietoDTO.osallistumistieto);
 
