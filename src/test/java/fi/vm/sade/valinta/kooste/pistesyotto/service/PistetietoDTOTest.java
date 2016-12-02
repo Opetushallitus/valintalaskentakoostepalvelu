@@ -367,4 +367,64 @@ public class PistetietoDTOTest {
         assertEquals("MERKITSEMATTA", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
         assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
     }
+
+    @Test
+    public void testHyvaksyttyArvosanaEriHakemukseltaPiilottaaHylatynArvosananValintalaskennanJalkeen() {
+        Oppija oppija = new Oppija();
+
+        SuoritusJaArvosanat hyvaksyttySuoritus = new SuoritusJaArvosanat();
+        Suoritus sHyv = new Suoritus();
+        sHyv.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
+        sHyv.setMyontaja("hyvaksyttyHakemusOid");
+        hyvaksyttySuoritus.setSuoritus(sHyv);
+        Arvosana aHyv = new Arvosana();
+        aHyv.setLisatieto("FI");
+        aHyv.setMyonnetty("1.4.2016");
+        aHyv.setSource("hyvaksyttyOrganisaatioOid");
+        Arvio arvioHyv = new Arvio();
+        arvioHyv.setArvosana(hyvaksytty.name());
+        aHyv.setArvio(arvioHyv);
+        hyvaksyttySuoritus.setArvosanat(Collections.singletonList(aHyv));
+
+        SuoritusJaArvosanat hylattySuoritus = new SuoritusJaArvosanat();
+        Suoritus sHyl = new Suoritus();
+        sHyl.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
+        sHyl.setMyontaja("hylattyHakemusOid");
+        hylattySuoritus.setSuoritus(sHyl);
+        Arvosana aHyl = new Arvosana();
+        aHyl.setLisatieto("FI");
+        aHyl.setMyonnetty("1.4.2016");
+        aHyl.setSource("hylattyOrganisaatioOid");
+        Arvio arvioHyl = new Arvio();
+        arvioHyl.setArvosana(hylatty.name());
+        aHyl.setArvio(arvioHyl);
+        hylattySuoritus.setArvosanat(Collections.singletonList(aHyl));
+
+        oppija.setSuoritukset(Arrays.asList(hyvaksyttySuoritus, hylattySuoritus));
+
+        ValintakoeOsallistuminenDTO hylatynOsallistuminen = new ValintakoeOsallistuminenDTO();
+        HakutoiveDTO h = new HakutoiveDTO();
+        h.setHakukohdeOid("hakukohdeOid");
+        ValintakoeValinnanvaiheDTO vv = new ValintakoeValinnanvaiheDTO();
+        ValintakoeDTO koe = new ValintakoeDTO();
+        koe.setValintakoeTunniste("kielikoe_fi");
+        OsallistuminenTulosDTO o = new OsallistuminenTulosDTO();
+        o.setOsallistuminen(fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.EI_OSALLISTU);
+        koe.setOsallistuminenTulos(o);
+        vv.setValintakokeet(Collections.singletonList(koe));
+        h.setValinnanVaiheet(Collections.singletonList(vv));
+        hylatynOsallistuminen.setHakutoiveet(Collections.singletonList(h));
+
+        PistetietoDTO p = new PistetietoDTO(
+                new ApplicationAdditionalDataDTO("hylattyHakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
+                hylatynOsallistuminen,
+                oppija,
+                new ParametritDTO()
+        );
+        assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
+        assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+        assertEquals(Osallistumistieto.TOISELLA_HAKEMUKSELLA, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
+        assertEquals("hyvaksyttyOrganisaatioOid", p.osallistumistieto("hakukohdeOid", "kielikoe_fi").lahdeMyontajaOid.get());
+    }
 }
