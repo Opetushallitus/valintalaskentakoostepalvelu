@@ -369,7 +369,7 @@ public class PistetietoDTOTest {
     }
 
     @Test
-    public void testHyvaksyttyArvosanaEriHakemukseltaPiilottaaHylatynArvosananValintalaskennanJalkeen() {
+    public void testHyvaksyttyArvosanaEriHakemukseltaPiilottaaHylatynArvosananValintalaskennanJalkeenVaikkaSeOlisiUudempi() {
         Oppija oppija = new Oppija();
 
         SuoritusJaArvosanat hyvaksyttySuoritus = new SuoritusJaArvosanat();
@@ -379,7 +379,7 @@ public class PistetietoDTOTest {
         hyvaksyttySuoritus.setSuoritus(sHyv);
         Arvosana aHyv = new Arvosana();
         aHyv.setLisatieto("FI");
-        aHyv.setMyonnetty("1.4.2016");
+        aHyv.setMyonnetty("01.04.2016");
         aHyv.setSource("hyvaksyttyOrganisaatioOid");
         Arvio arvioHyv = new Arvio();
         arvioHyv.setArvosana(hyvaksytty.name());
@@ -393,14 +393,14 @@ public class PistetietoDTOTest {
         hylattySuoritus.setSuoritus(sHyl);
         Arvosana aHyl = new Arvosana();
         aHyl.setLisatieto("FI");
-        aHyl.setMyonnetty("1.4.2016");
+        aHyl.setMyonnetty("02.04.2016");
         aHyl.setSource("hylattyOrganisaatioOid");
         Arvio arvioHyl = new Arvio();
         arvioHyl.setArvosana(hylatty.name());
         aHyl.setArvio(arvioHyl);
         hylattySuoritus.setArvosanat(Collections.singletonList(aHyl));
 
-        oppija.setSuoritukset(Arrays.asList(hyvaksyttySuoritus, hylattySuoritus));
+        oppija.setSuoritukset(Arrays.asList(hylattySuoritus, hyvaksyttySuoritus));
 
         ValintakoeOsallistuminenDTO hylatynOsallistuminen = new ValintakoeOsallistuminenDTO();
         HakutoiveDTO h = new HakutoiveDTO();

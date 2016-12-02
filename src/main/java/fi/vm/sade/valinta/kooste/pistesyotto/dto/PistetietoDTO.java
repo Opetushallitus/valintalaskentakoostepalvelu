@@ -59,7 +59,7 @@ public class PistetietoDTO {
             ).forEach(s -> {
                 s.getArvosanat().forEach(a -> {
                     kielikoetulokset.compute(KIELIKOE_KEY_PREFIX + a.getLisatieto().toLowerCase(), (k, p) -> {
-                        if (hyvaksytty.name().equals(a.getArvio().getArvosana()) && (p == null || a.isMyonnettyAfter(p.getRight()))) {
+                        if (hyvaksytty.name().equals(a.getArvio().getArvosana()) && (p == null || !p.getRight().getArvio().getArvosana().equals(hyvaksytty.name()) || a.isMyonnettyAfter(p.getRight()))) {
                             return Pair.of(s.getSuoritus(), a);
                         }
                         if (hakemusOid.equals(s.getSuoritus().getMyontaja()) && p == null) {
