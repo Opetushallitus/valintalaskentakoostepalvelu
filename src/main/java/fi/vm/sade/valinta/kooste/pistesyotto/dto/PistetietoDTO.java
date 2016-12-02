@@ -59,7 +59,7 @@ public class PistetietoDTO {
             ).forEach(s -> {
                 s.getArvosanat().forEach(a -> {
                     kielikoetulokset.compute(KIELIKOE_KEY_PREFIX + a.getLisatieto().toLowerCase(), (k, p) -> {
-                        if (hyvaksytty.name().equals(a.getArvio().getArvosana()) && (p == null || !p.getRight().getArvio().getArvosana().equals(hyvaksytty.name()) || a.isMyonnettyAfter(p.getRight()))) {
+                        if (isHyvaksytty(a) && (p == null || !isHyvaksytty(p.getRight()) || a.isMyonnettyAfter(p.getRight()))) {
                             return Pair.of(s.getSuoritus(), a);
                         }
                         if (hakemusOid.equals(s.getSuoritus().getMyontaja()) && p == null) {
@@ -120,6 +120,10 @@ public class PistetietoDTO {
                             Osallistuminen.EI_VAADITA.toString()
             );
         });
+    }
+
+    private boolean isHyvaksytty(Arvosana a) {
+        return hyvaksytty.name().equals(a.getArvio().getArvosana());
     }
 
     public HakukohteenOsallistumistiedotDTO.KokeenOsallistumistietoDTO osallistumistieto(String hakukohdeOid,
