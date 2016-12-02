@@ -200,7 +200,7 @@ public class PistetietoDTOTest {
         aU.setArvio(arvioU);
         uudempiSuoritus.setArvosanat(Collections.singletonList(aU));
 
-        oppija.setSuoritukset(Arrays.asList(vanhempiSuoritus, uudempiSuoritus));
+        oppija.setSuoritukset(Arrays.asList(uudempiSuoritus, vanhempiSuoritus));
 
         ValintakoeOsallistuminenDTO osallistuminen = new ValintakoeOsallistuminenDTO();
         HakutoiveDTO h = new HakutoiveDTO();
