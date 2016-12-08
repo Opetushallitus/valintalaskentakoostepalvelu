@@ -144,4 +144,8 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
         arvosana.setId(arvosanaId);
         return Observable.just(null);
     }
+
+    public int getLatestId() {
+        return ids.get();
+    }
 }

@@ -68,7 +68,14 @@ public class AmmatillisenKielikoetulosOperationsTest {
     private Function<String, String> findPersonOidByHakemusOid = hakijaOidByHakemusOid::get;
     private List<Suoritus> postedSuoritukset = new LinkedList<>();
     private SuoritusSavingMockSuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusSavingMockSuoritusrekisteriAsyncResource();
-    private final TestSubscriber<Arvosana> testSubscriber = new TestSubscriber<>();
+    private String latestPostedSuoritusId;
+    private final TestSubscriber<Arvosana> testSubscriber = new TestSubscriber<Arvosana>() {
+        @Override
+        public void onNext(Arvosana o) {
+            AmmatillisenKielikoetulosOperationsTest.this.latestPostedSuoritusId = o.getSuoritus();
+            super.onNext(o);
+        }
+    };
 
     @Before
     public void populateTestData() {
@@ -98,15 +105,15 @@ public class AmmatillisenKielikoetulosOperationsTest {
         List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
         Assert.assertThat(receivedArvosanas, Matchers.hasSize(2));
 
-        assertEquals(receivedArvosanas.get(0), (createArvosana("100", "kielikoe", "26.10.2016", SOURCE_OID_2, hyvaksytty, "FI")));
+        assertEquals(receivedArvosanas.get(0), (createArvosana(latestPostedSuoritusId, "kielikoe", "26.10.2016", SOURCE_OID_2, hyvaksytty, "FI")));
 
-        assertEquals(receivedArvosanas.get(1), (createArvosana("100", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV")));
+        assertEquals(receivedArvosanas.get(1), (createArvosana(latestPostedSuoritusId, "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV")));
 
         assertThat(postedSuoritukset, hasSize(1));
         Suoritus postedSuoritus = postedSuoritukset.get(0);
         assertNotEquals(HAKEMUS_OID_1, postedSuoritus.getMyontaja());
         assertEquals(HAKEMUS_OID_2, postedSuoritus.getMyontaja());
-        assertEquals("100", postedSuoritus.getId());
+        assertEquals(latestPostedSuoritusId, postedSuoritus.getId());
         assertEquals(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE, postedSuoritus.getKomo());
         assertEquals(PERSON_OID_2, postedSuoritus.getHenkiloOid());
         assertEquals("26.10.2016", postedSuoritus.getValmistuminen());
@@ -128,14 +135,14 @@ public class AmmatillisenKielikoetulosOperationsTest {
         List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
 
 
-        assertEquals(receivedArvosanas.get(0), createArvosana("101", "kielikoe", "26.10.2016", SOURCE_OID_1, hyvaksytty, "FI"));
-        assertEquals(receivedArvosanas.get(1), createArvosana("101", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV"));
+        assertEquals(receivedArvosanas.get(0), createArvosana(latestPostedSuoritusId, "kielikoe", "26.10.2016", SOURCE_OID_1, hyvaksytty, "FI"));
+        assertEquals(receivedArvosanas.get(1), createArvosana(latestPostedSuoritusId, "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV"));
 
         assertThat(postedSuoritukset, hasSize(1));
         Suoritus postedSuoritus = postedSuoritukset.get(0);
         assertNotEquals(HAKEMUS_OID_1, postedSuoritus.getMyontaja());
         assertEquals(HAKEMUS_OID_2, postedSuoritus.getMyontaja());
-        assertEquals("101", postedSuoritus.getId());
+        assertEquals(latestPostedSuoritusId, postedSuoritus.getId());
         assertEquals(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE, postedSuoritus.getKomo());
         assertEquals(PERSON_OID_2, postedSuoritus.getHenkiloOid());
         assertEquals("26.10.2016", postedSuoritus.getValmistuminen());
@@ -156,14 +163,14 @@ public class AmmatillisenKielikoetulosOperationsTest {
         testSubscriber.assertValueCount(2);
         List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
 
-        assertEquals(receivedArvosanas.get(0), createArvosana("102", "kielikoe", "26.10.2016", SOURCE_OID_3, hyvaksytty, "FI"));
-        assertEquals(receivedArvosanas.get(1), createArvosana("102", "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV"));
+        assertEquals(receivedArvosanas.get(0), createArvosana(latestPostedSuoritusId, "kielikoe", "26.10.2016", SOURCE_OID_3, hyvaksytty, "FI"));
+        assertEquals(receivedArvosanas.get(1), createArvosana(latestPostedSuoritusId, "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV"));
 
         assertThat(postedSuoritukset, hasSize(1));
         Suoritus postedSuoritus = postedSuoritukset.get(0);
         assertNotEquals(HAKEMUS_OID_1, postedSuoritus.getMyontaja());
         assertEquals(HAKEMUS_OID_2, postedSuoritus.getMyontaja());
-        assertEquals("102", postedSuoritus.getId());
+        assertEquals(latestPostedSuoritusId, postedSuoritus.getId());
         assertEquals(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE, postedSuoritus.getKomo());
         assertEquals(PERSON_OID_2, postedSuoritus.getHenkiloOid());
         assertEquals("26.10.2016", postedSuoritus.getValmistuminen());
