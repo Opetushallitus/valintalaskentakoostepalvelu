@@ -123,7 +123,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
         return postAsObservable(
-                "/suoritusrekisteri/rest/v1/suoritukset/", // FIXME: url-props
+                getUrl("suoritusrekisteri.suoritukset"),
                 new TypeToken<Suoritus>(){
                 }.getType(),
                 Entity.entity(gson().toJson(suoritus), MediaType.APPLICATION_JSON_TYPE),
@@ -137,7 +137,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public Observable<Arvosana> postArvosana(Arvosana arvosana) {
         return postAsObservable(
-                "/suoritusrekisteri/rest/v1/arvosanat/", // FIXME: url-props
+                getUrl("suoritusrekisteri.arvosanat"),
                 new TypeToken<Arvosana>(){
                 }.getType(),
                 Entity.entity(gson().toJson(arvosana), MediaType.APPLICATION_JSON_TYPE),
@@ -151,7 +151,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
         return postAsObservable(
-                "/suoritusrekisteri/rest/v1/arvosanat/" + arvosanaId, // FIXME: url-props
+                getUrl("suoritusrekisteri.arvosanat.id",  arvosanaId),
                 new TypeToken<Arvosana>(){}.getType(),
                 Entity.entity(gson().toJson(arvosanaWithUpdatedValues), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
@@ -164,7 +164,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public Observable<Void> deleteSuoritus(String suoritusId) {
         return deleteAsObservable(
-                "/suoritusrekisteri/rest/v1/suoritukset/" + suoritusId, // FIXME: url-props
+                getUrl("suoritusrekisteri.suoritukset.id", suoritusId),
                 new TypeToken<Suoritus>(){
                 }.getType(),
                 client -> {
@@ -177,7 +177,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public Observable<Void> deleteArvosana(String arvosanaId) {
         return deleteAsObservable(
-                "/suoritusrekisteri/rest/v1/arvosanat/" + arvosanaId, new TypeToken<Arvosana>(){}.getType(), // FIXME: url-props
+                getUrl("suoritusrekisteri.arvosanat.id", arvosanaId), new TypeToken<Arvosana>(){}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;

@@ -110,7 +110,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
         mockHakuAppKutsu(pistetiedot);
         mockSureKutsu(createOppijat());
-        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde/",
+        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
                 Collections.singletonList(kielikoeFi));
         mockToReturnJson(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/testihakukohde",
                 Collections.<ValintakoeOsallistuminenDTO>emptyList());
@@ -234,7 +234,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
             Assert.assertTrue(lisatietoCounter.tryAcquire(1, 10, TimeUnit.SECONDS));
 
             mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat/" + hakijaOid, createOppijat().get(1));
-            mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde/",
+            mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
                 Collections.singletonList(kielikoeFi));
             mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku", new ParametritDTO());
 
@@ -290,7 +290,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 hakemusHakuAppista
         );
         mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat/" + hakijaOid, createOppijat().get(1));
-        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde/",
+        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
                 Collections.singletonList(kielikoeFi));
         mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku", new ParametritDTO());
 
@@ -332,7 +332,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 hakemusHakuAppista
         );
         mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat/" + hakijaOid, createOppijat().get(1));
-        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde/",
+        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
                 Collections.singletonList(kielikoeFi));
         mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku", new ParametritDTO());
 
@@ -407,7 +407,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         hakukohdeDTO.setOid("testihakukohde");
         hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
         mockToReturnJson(GET,
-                "/tarjonta-service/rest/v1/hakukohde/testihakukohde/",
+                "/tarjonta-service/rest/v1/hakukohde/testihakukohde",
                 new Result<>(hakukohdeDTO));
     }
 

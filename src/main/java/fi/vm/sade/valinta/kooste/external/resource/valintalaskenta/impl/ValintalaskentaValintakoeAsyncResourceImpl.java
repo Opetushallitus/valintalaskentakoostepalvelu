@@ -60,13 +60,15 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
 
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeAmmatillisenKielikokeenOsallistumiset(Date since) {
-        return getAsObservable("/valintalaskentakoostepalvelu/valintakoe/ammatillisenkielikoeosallistumiset/" + new SimpleDateFormat("yyyy-MM-dd").format(since),
+        return getAsObservable(
+                getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintakoe.ammatillisenkielikoeosallistumiset",
+                        new SimpleDateFormat("yyyy-MM-dd").format(since)),
             new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
     }
 
     @Override
     public Observable<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid) {
-        return getAsObservable("/valintalaskentakoostepalvelu/valintakoe/hakemus/" + hakemusOid, // FIXME: url-props
+        return getAsObservable(getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintakoe.hakemus", hakemusOid),
                 ValintakoeOsallistuminenDTO.class);
     }
 }

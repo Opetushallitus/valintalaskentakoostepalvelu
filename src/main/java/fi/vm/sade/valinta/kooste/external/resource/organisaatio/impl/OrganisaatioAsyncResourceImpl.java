@@ -66,7 +66,7 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
 
 
     private Observable<OrganisaatioTyyppiHierarkia> getOrganisaatioTyyppiHierarkiaObservable(Function<WebClient, WebClient> paramsHeadersAndStuff) {
-        return getAsObservable("/organisaatio/v2/hierarkia/hae/tyyppi", // FIXME: url-props
+        return getAsObservable(getUrl("organisaatio-service.organisaatio.hierarkia.tyyppi"),
             new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType(),
             paramsHeadersAndStuff);
     }

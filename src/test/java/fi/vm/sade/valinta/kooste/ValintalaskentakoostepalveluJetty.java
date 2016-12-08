@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste;
 import com.google.common.io.Files;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -87,6 +88,9 @@ public class ValintalaskentakoostepalveluJetty {
             }
         }
         MockOpintopolkuCasAuthenticationFilter.clear();
+        UrlConfiguration.getInstance()
+                .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
     }
 
     private static void startServer() throws Exception {

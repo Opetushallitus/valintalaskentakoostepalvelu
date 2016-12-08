@@ -1,16 +1,31 @@
 package fi.vm.sade.valinta.kooste.url;
 
 import fi.vm.sade.properties.OphProperties;
+import fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Paths;
 
 public class UrlConfiguration extends OphProperties {
 
+    private static final Logger LOG = LoggerFactory.getLogger(UrlConfiguration.class);
     private volatile static UrlConfiguration instance;
 
     private UrlConfiguration() {
         addFiles("/valintalaskentakoostepalvelu-oph.properties");
         addOptionalFiles(Paths.get(System.getProperties().getProperty("user.home"), "/oph-configuration/common.properties").toString());
+    }
+
+    @Override
+    public String url(String key, Object... params) {
+        try {
+            return super.url(key, params);
+        }
+        catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**

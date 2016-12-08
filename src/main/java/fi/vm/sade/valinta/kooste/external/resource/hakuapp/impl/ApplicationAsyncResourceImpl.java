@@ -61,7 +61,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                 Collections.singletonList("oid")
         );
         return this.<ListFullSearchDTO, List<HakemusOid>>postAsObservable(
-                "/applications/listfull", // FIXME: url-props
+                getUrl("haku-app.applications.listfull"),
                 new TypeToken<List<HakemusOid>>() {}.getType(),
                 Entity.entity(s, MediaType.APPLICATION_JSON_TYPE)
         ).map(lh -> lh.stream().map(HakemusOid::getOid).collect(Collectors.toSet()));
@@ -147,7 +147,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     @Override
     public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids) {
         return postAsObservable(
-                "/applications/additionalData", // FIXME: url-props
+                getUrl("haku-app.applications.additionaldata"),
                 new TypeToken<List<ApplicationAdditionalDataDTO>>(){
                 }.getType(),
                 Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON_TYPE),

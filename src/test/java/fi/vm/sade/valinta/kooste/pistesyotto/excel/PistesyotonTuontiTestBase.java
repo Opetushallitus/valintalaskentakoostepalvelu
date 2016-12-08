@@ -168,10 +168,10 @@ public class PistesyotonTuontiTestBase {
     public static void mockSuoritusrekisteri(final Semaphore suoritusCounter, final Semaphore arvosanaCounter) {
         MockServer fakeSure = new MockServer();
         mockForward(POST,
-                fakeSure.addHandler("/suoritusrekisteri/rest/v1/suoritukset/", exchange -> {
+                fakeSure.addHandler("/suoritusrekisteri/rest/v1/suoritukset", exchange -> {
                     try {
                         Suoritus suoritus = new Gson().fromJson(
-                                IOUtils.toString(exchange.getRequestBody()), new com.google.common.reflect.TypeToken<Suoritus>() {
+                                IOUtils.toString(exchange.getRequestBody()), new TypeToken<Suoritus>() {
                                 }.getType()
                         );
                         suoritus.setId("suoritus" + suoritus.getHenkiloOid());
@@ -183,10 +183,10 @@ public class PistesyotonTuontiTestBase {
                     } catch (Throwable t) {
                         t.printStackTrace();
                     }
-                }).addHandler("/suoritusrekisteri/rest/v1/arvosanat/", exchange -> {
+                }).addHandler("/suoritusrekisteri/rest/v1/arvosanat", exchange -> {
                     try {
                         Arvosana arvosana = new Gson().fromJson(
-                                IOUtils.toString(exchange.getRequestBody()), new com.google.common.reflect.TypeToken<Arvosana>() {
+                                IOUtils.toString(exchange.getRequestBody()), new TypeToken<Arvosana>() {
                                 }.getType()
                         );
                         exchange.sendResponseHeaders(200, 0);

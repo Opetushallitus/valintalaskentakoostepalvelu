@@ -89,7 +89,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 IOUtils.toString(new ClassPathResource("pistesyotto/List_ValintakoeOsallistuminenDTO.json").getInputStream())
         );
         mockToReturnString(GET,
-                "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/1.2.246.562.5.85532589612/",
+                "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/1.2.246.562.5.85532589612",
                 IOUtils.toString(new ClassPathResource("pistesyotto/List_ValintaperusteDTO.json").getInputStream())
         );
 
@@ -242,7 +242,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         haku.setOid("testioidi1");
         haku.setHakukohdeOids(singletonList("1.2.246.562.5.85532589612"));
         mockToReturnJson(GET,
-                "/tarjonta-service/rest/v1/haku/testioidi1/",
+                "/tarjonta-service/rest/v1/haku/testioidi1",
                 new Result(haku));
     }
 
@@ -309,7 +309,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         hakukohdeDTO.setOid("1.2.246.562.5.85532589612");
         hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
         mockToReturnJson(GET,
-                "/tarjonta-service/rest/v1/hakukohde/1.2.246.562.5.85532589612/",
+                "/tarjonta-service/rest/v1/hakukohde/1.2.246.562.5.85532589612",
                 new Result(hakukohdeDTO));
     }
 
