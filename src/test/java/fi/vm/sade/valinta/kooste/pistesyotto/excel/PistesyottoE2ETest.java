@@ -70,16 +70,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     public void init() throws Throwable{
         startShared();
         setUpMockCalls();
-        UrlConfiguration.getInstance()
-                .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
-                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
-    }
-
-    @After
-    public void clean() {
-        UrlConfiguration uc = UrlConfiguration.getInstance();
-        uc.overrides.remove("url-virkailija");
-        uc.overrides.remove("url-ilb");
     }
 
     private void setUpMockCalls() throws IOException {

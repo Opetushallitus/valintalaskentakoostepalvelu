@@ -90,7 +90,8 @@ public class ValintalaskentakoostepalveluJetty {
         MockOpintopolkuCasAuthenticationFilter.clear();
         UrlConfiguration.getInstance()
                 .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
-                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
+                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("baseurl-koodisto-service", "https://itest-virkailija.oph.ware.fi");
     }
 
     private static void startServer() throws Exception {

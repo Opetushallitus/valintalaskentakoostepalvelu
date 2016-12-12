@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static javax.ws.rs.HttpMethod.GET;
 
 /**
@@ -32,18 +33,7 @@ public class HakijatoimistoTest {
 
     @Before
     public void init() {
-        SpringProfile.setProfile("test");
-        UrlConfiguration.getInstance()
-            .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
-            .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
-    }
-
-    @After
-    public void reset() {
-        Integraatiopalvelimet.mockServer.reset();
-        UrlConfiguration uc = UrlConfiguration.getInstance();
-        uc.overrides.remove("url-virkailija");
-        uc.overrides.remove("url-ilb");
+        startShared();
     }
 
     @Test

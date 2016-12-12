@@ -30,17 +30,11 @@ public class OmatSivutHakemusResourceTest {
     public void init() {
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
-        UrlConfiguration.getInstance()
-                .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
-                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
     }
 
     @After
     public void reset() {
         Integraatiopalvelimet.mockServer.reset();
-        UrlConfiguration uc = UrlConfiguration.getInstance();
-        uc.overrides.remove("url-virkailija");
-        uc.overrides.remove("url-ilb");
     }
 
     @Test

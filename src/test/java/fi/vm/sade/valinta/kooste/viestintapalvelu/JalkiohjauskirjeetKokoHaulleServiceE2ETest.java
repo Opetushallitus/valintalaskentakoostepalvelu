@@ -49,18 +49,6 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     public void init() throws Throwable{
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
-        UrlConfiguration.getInstance()
-                .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
-                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
-                .addOverride("baseurl-koodisto-service", "https://itest-virkailija.oph.ware.fi");
-    }
-
-    @After
-    public void clean() {
-        UrlConfiguration uc = UrlConfiguration.getInstance();
-        uc.overrides.remove("url-virkailija");
-        uc.overrides.remove("url-ilb");
-        uc.overrides.remove("baseurl-koodisto-service");
     }
 
     public static class Result<T> {

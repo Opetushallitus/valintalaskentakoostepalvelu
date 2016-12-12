@@ -18,17 +18,6 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsync
 @Ignore
 public class AsyncErrorTest {
 
-    @Before
-    public void init() {
-        UrlConfiguration.getInstance().addOverride("url-virkailija", "https://test-virkailija.oph.ware.fi");
-    }
-
-    @After
-    public void clean() {
-		UrlConfiguration uc = UrlConfiguration.getInstance();
-		uc.overrides.remove("url-virkailija");
-    }
-
 	@Test
 	public void v() throws InterruptedException {
 		ApplicationContext context = null;
