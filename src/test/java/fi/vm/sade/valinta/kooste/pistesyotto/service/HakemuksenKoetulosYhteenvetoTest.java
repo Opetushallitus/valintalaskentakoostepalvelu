@@ -4,6 +4,7 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen;
@@ -40,9 +41,11 @@ public class HakemuksenKoetulosYhteenvetoTest {
         kielikoeFi.setTunniste("kielikoe_fi");
         kielikoeFi.setOsallistuminenTunniste("kielikoe_fi-OSALLISTUMINEN");
         kielikoeFi.setVaatiiOsallistumisen(true);
+        kielikoeFi.setSyotettavissaKaikille(false);
         kielikoeSv.setTunniste("kielikoe_sv");
         kielikoeSv.setOsallistuminenTunniste("kielikoe_sv-OSALLISTUMINEN");
         kielikoeSv.setVaatiiOsallistumisen(true);
+        kielikoeSv.setSyotettavissaKaikille(false);
     }
 
     @Test
@@ -439,5 +442,65 @@ public class HakemuksenKoetulosYhteenvetoTest {
         assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
         assertEquals(Osallistumistieto.TOISELLA_HAKEMUKSELLA, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
         assertEquals("hyvaksyttyOrganisaatioOid", p.osallistumistieto("hakukohdeOid", "kielikoe_fi").lahdeMyontajaOid.get());
+    }
+
+    @Test
+    public void testVirheTilainenKoekutsuSamaKuinEiOsallistu() {
+        ValintakoeOsallistuminenDTO osallistuminen = new ValintakoeOsallistuminenDTO();
+        HakutoiveDTO h = new HakutoiveDTO();
+        h.setHakukohdeOid("hakukohdeOid");
+        ValintakoeValinnanvaiheDTO vv = new ValintakoeValinnanvaiheDTO();
+        ValintakoeDTO koe = new ValintakoeDTO();
+        koe.setValintakoeTunniste("kielikoe_fi");
+        OsallistuminenTulosDTO o = new OsallistuminenTulosDTO();
+        o.setOsallistuminen(fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.VIRHE);
+        koe.setOsallistuminenTulos(o);
+        vv.setValintakokeet(Collections.singletonList(koe));
+        h.setValinnanVaiheet(Collections.singletonList(vv));
+        osallistuminen.setHakutoiveet(Collections.singletonList(h));
+
+        HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
+                osallistuminen,
+                null,
+                new ParametritDTO()
+        );
+        assertTrue(p.applicationAdditionalDataDTO.getAdditionalData().containsKey("kielikoe_fi"));
+        assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+        assertEquals(Osallistumistieto.EI_KUTSUTTU, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
+    }
+
+    @Test
+    public void testSyotettavissaKaikilleArvoSyotettavissaVaikkaVirheTilainenKoekutsu() {
+        ValintakoeOsallistuminenDTO osallistuminen = new ValintakoeOsallistuminenDTO();
+        HakutoiveDTO h = new HakutoiveDTO();
+        h.setHakukohdeOid("hakukohdeOid");
+        ValintakoeValinnanvaiheDTO vv = new ValintakoeValinnanvaiheDTO();
+        ValintakoeDTO koe = new ValintakoeDTO();
+        koe.setValintakoeTunniste("kielikoe_fi");
+        OsallistuminenTulosDTO o = new OsallistuminenTulosDTO();
+        o.setOsallistuminen(fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.VIRHE);
+        koe.setOsallistuminenTulos(o);
+        vv.setValintakokeet(Collections.singletonList(koe));
+        h.setValinnanVaiheet(Collections.singletonList(vv));
+        osallistuminen.setHakutoiveet(Collections.singletonList(h));
+
+        ValintaperusteDTO vp = new ValintaperusteDTO();
+        vp.setTunniste("kielikoe_fi");
+        vp.setOsallistuminenTunniste("kielikoe_fi-OSALLISTUMINEN");
+        vp.setVaatiiOsallistumisen(true);
+        vp.setSyotettavissaKaikille(true);
+
+        HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(vp)),
+                osallistuminen,
+                null,
+                new ParametritDTO()
+        );
+        assertTrue(p.applicationAdditionalDataDTO.getAdditionalData().containsKey("kielikoe_fi"));
+        assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+        assertEquals(Osallistumistieto.OSALLISTUI, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
     }
 }

@@ -115,6 +115,11 @@ public class HakukohteenOsallistumistiedotDTO {
                         this.lahdeMyontajaOid = Optional.empty();
                     }
                     break;
+                case VIRHE:
+                    this.osallistumistieto = Osallistumistieto.EI_KUTSUTTU;
+                    this.lahdeHakemusOid = Optional.empty();
+                    this.lahdeMyontajaOid = Optional.empty();
+                    break;
                 default:
                     throw new RuntimeException(String.format(
                             "Odottamaton koeosallistumisen tila %s", koe.getOsallistuminenTulos().getOsallistuminen()
