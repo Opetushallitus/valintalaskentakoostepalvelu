@@ -1,11 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 
-import static fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService.KIELIKOE_KEY_PREFIX;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -13,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
@@ -20,11 +18,16 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService.KIELIKOE_KEY_PREFIX;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class HakemuksenKoetulosYhteenveto {
@@ -32,6 +35,8 @@ public class HakemuksenKoetulosYhteenveto {
     public final ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
     @JsonProperty
     private final Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
+
+    private final String hakemusOid;
 
     @JsonCreator
     public HakemuksenKoetulosYhteenveto(
@@ -41,6 +46,54 @@ public class HakemuksenKoetulosYhteenveto {
                     Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot) {
         this.applicationAdditionalDataDTO = applicationAdditionalDataDTO;
         this.hakukohteidenOsallistumistiedot = hakukohteidenOsallistumistiedot;
+        this.hakemusOid = applicationAdditionalDataDTO.getOid();
+    }
+
+    private class TaltaHakemukseltaHyvaksyttyTaiUusinHyvaksyttyTaiTaltaHakemukselta implements Comparator<SuoritusJaArvosanat> {
+
+        private final Predicate<Arvosana> tamaKieli;
+
+        private TaltaHakemukseltaHyvaksyttyTaiUusinHyvaksyttyTaiTaltaHakemukselta(String kieli) {
+            this.tamaKieli = isKieli(kieli);
+        }
+
+        @Override
+        public int compare(SuoritusJaArvosanat s1, SuoritusJaArvosanat s2) {
+            if (s1.getArvosanat().stream().noneMatch(tamaKieli)) {
+                return 1;
+            }
+            if (s2.getArvosanat().stream().noneMatch(tamaKieli)) {
+                return -1;
+            }
+            Arvosana a1 = s1.getArvosanat().stream().filter(tamaKieli).findAny().get();
+            Arvosana a2 = s2.getArvosanat().stream().filter(tamaKieli).findAny().get();
+            if (taltaHakemukselta(s1) && hyvaksytty(s1)) {
+                return -1;
+            }
+            if (taltaHakemukselta(s2) && hyvaksytty(s2)) {
+                return 1;
+            }
+            if (hyvaksytty(s1) && hyvaksytty(s2)) {
+                return Arvosana.NEWEST_FIRST.compare(a1, a2);
+            }
+            if (hyvaksytty(s1)) {
+                return -1;
+            }
+            if (hyvaksytty(s2)) {
+                return 1;
+            }
+            if (taltaHakemukselta(s1)) {
+                return -1;
+            }
+            if (taltaHakemukselta(s2)) {
+                return 1;
+            }
+            return 0;
+        }
+
+        private boolean hyvaksytty(SuoritusJaArvosanat s) {
+            return s.getArvosanat().stream().anyMatch(a -> isHyvaksytty(a) && tamaKieli.test(a));
+        }
     }
 
     public HakemuksenKoetulosYhteenveto(ApplicationAdditionalDataDTO additionalData,
@@ -48,33 +101,15 @@ public class HakemuksenKoetulosYhteenveto {
                                         ValintakoeOsallistuminenDTO kokeet,
                                         Oppija oppija,
                                         ParametritDTO ohjausparametrit) {
-        String hakemusOid = additionalData.getOid();
-        Map<String, Pair<Suoritus, Arvosana>> kielikoetulokset = new HashMap<>();
-        if (oppija != null) {
-            OppijaToAvainArvoDTOConverter.removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
-                    oppija.getSuoritukset().stream().filter(SuoritusJaArvosanatWrapper::isAmmatillisenKielikoe),
-                    ohjausparametrit
-            ).forEach(s -> {
-                s.getArvosanat().forEach(a -> {
-                    kielikoetulokset.compute(KIELIKOE_KEY_PREFIX + a.getLisatieto().toLowerCase(), (k, p) -> {
-                        if (isHyvaksytty(a) && (p == null || !isHyvaksytty(p.getRight()) || a.isMyonnettyAfter(p.getRight()))) {
-                            return Pair.of(s.getSuoritus(), a);
-                        }
-                        if (hakemusOid.equals(s.getSuoritus().getMyontaja()) && p == null) {
-                            return Pair.of(s.getSuoritus(), a);
-                        }
-                        return p;
-                    });
-                });
-            });
-        }
+        this.hakemusOid = additionalData.getOid();
+        Map<String, Pair<Suoritus, Arvosana>> naytettavatKielikoetulokset = createKielikoetulokset(oppija, ohjausparametrit, hakemusOid);
         this.hakukohteidenOsallistumistiedot = (kokeet == null ? Stream.<HakutoiveDTO>empty() : kokeet.getHakutoiveet().stream())
                 .collect(Collectors.toMap(
-                        h -> h.getHakukohdeOid(),
-                        h -> new HakukohteenOsallistumistiedotDTO(h, kielikoetulokset, hakemusOid, kokeet.getHakutoiveet())
+                        HakutoiveDTO::getHakukohdeOid,
+                        h -> new HakukohteenOsallistumistiedotDTO(h, naytettavatKielikoetulokset, hakemusOid, kokeet.getHakutoiveet())
                 ));
         this.applicationAdditionalDataDTO = additionalData;
-        kielikoetulokset.forEach((koetunniste, tulos) -> {
+        naytettavatKielikoetulokset.forEach((koetunniste, tulos) -> {
             SureHyvaksyttyArvosana arvosana = SureHyvaksyttyArvosana.valueOf(tulos.getRight().getArvio().getArvosana());
             switch (arvosana) {
                 case hyvaksytty:
@@ -120,8 +155,41 @@ public class HakemuksenKoetulosYhteenveto {
         });
     }
 
-    private boolean isHyvaksytty(Arvosana a) {
-        return hyvaksytty.name().equals(a.getArvio().getArvosana());
+    private Map<String, Pair<Suoritus, Arvosana>> createKielikoetulokset(Oppija oppija, ParametritDTO ohjausparametrit, String hakemusOid) {
+        if (oppija != null) {
+            List<SuoritusJaArvosanat> sal = OppijaToAvainArvoDTOConverter.removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
+                    oppija.getSuoritukset().stream().filter(SuoritusJaArvosanatWrapper::isAmmatillisenKielikoe),
+                    ohjausparametrit
+            ).collect(Collectors.toList());
+            Stream<String> kieletJoilleNaytettaviaTuloksia = sal.stream()
+                    .flatMap(sa -> sa.getArvosanat().stream()
+                            .filter(a -> isHyvaksytty(a) || taltaHakemukselta(sa))
+                            .map(a -> a.getLisatieto().toLowerCase()))
+                    .distinct();
+            return kieletJoilleNaytettaviaTuloksia.collect(Collectors.toMap(
+                    kieli -> KIELIKOE_KEY_PREFIX + kieli,
+                    kieli -> {
+                        SuoritusJaArvosanat sa = sal.stream()
+                                .sorted(new TaltaHakemukseltaHyvaksyttyTaiUusinHyvaksyttyTaiTaltaHakemukselta(kieli))
+                                .findFirst().get();
+                        return Pair.of(sa.getSuoritus(), sa.getArvosanat().stream().filter(isKieli(kieli)).findAny().get());
+                    }
+            ));
+        } else {
+            return new HashMap<>();
+        }
+    }
+
+    private boolean taltaHakemukselta(SuoritusJaArvosanat s) {
+        return this.hakemusOid.equals(s.getSuoritus().getMyontaja());
+    }
+
+    private boolean isHyvaksytty(Arvosana arvosana) {
+        return hyvaksytty.name().equals(arvosana.getArvio().getArvosana());
+    }
+
+    private Predicate<Arvosana> isKieli(String kieli) {
+        return arvosana -> kieli.equals(arvosana.getLisatieto().toLowerCase());
     }
 
     public HakukohteenOsallistumistiedotDTO.KokeenOsallistumistietoDTO osallistumistieto(String hakukohdeOid,

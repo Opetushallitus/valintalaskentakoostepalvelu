@@ -335,7 +335,6 @@ public class HakemuksenKoetulosYhteenvetoTest {
         assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
     }
 
-
     @Test
     public void testToisenHakukohteenTyhjaTietoNaytetaanMuodossaMerkitsemattaToisessaHakutoiveessa() {
         Oppija oppija = new Oppija();
@@ -502,5 +501,61 @@ public class HakemuksenKoetulosYhteenvetoTest {
         assertTrue(p.applicationAdditionalDataDTO.getAdditionalData().containsKey("kielikoe_fi"));
         assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
         assertEquals(Osallistumistieto.OSALLISTUI, p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
+    }
+
+    @Test
+    public void testKaytaTaltaHakemukseltaTulevaaHyvaksyttyaArvosanaaJosUseitaHyvaksyttyja() {
+        Oppija oppija = new Oppija();
+
+        SuoritusJaArvosanat todistusToinen = new SuoritusJaArvosanat();
+        Suoritus sToinen = new Suoritus();
+        sToinen.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
+        sToinen.setMyontaja("toinenHakemusOid");
+        todistusToinen.setSuoritus(sToinen);
+        Arvosana aToinen = new Arvosana();
+        aToinen.setMyonnetty("02.02.2016");
+        aToinen.setLisatieto("FI");
+        Arvio arvioToinen = new Arvio();
+        arvioToinen.setArvosana(hyvaksytty.name());
+        aToinen.setArvio(arvioToinen);
+        todistusToinen.setArvosanat(Collections.singletonList(aToinen));
+
+        SuoritusJaArvosanat todistusTama = new SuoritusJaArvosanat();
+        Suoritus sTama = new Suoritus();
+        sTama.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
+        sTama.setMyontaja("hakemusOid");
+        todistusTama.setSuoritus(sTama);
+        Arvosana aTama = new Arvosana();
+        aTama.setMyonnetty("01.01.2016");
+        aTama.setLisatieto("FI");
+        Arvio arvioTama = new Arvio();
+        arvioTama.setArvosana(hyvaksytty.name());
+        aTama.setArvio(arvioTama);
+        todistusTama.setArvosanat(Collections.singletonList(aTama));
+
+        oppija.setSuoritukset(Arrays.asList(todistusToinen, todistusTama));
+
+        HakemuksenKoetulosYhteenveto toinenEnsin = new HakemuksenKoetulosYhteenveto(
+                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
+                new ValintakoeOsallistuminenDTO(),
+                oppija,
+                new ParametritDTO()
+        );
+        assertEquals("true", toinenEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
+        assertEquals(Osallistuminen.OSALLISTUI.toString(), toinenEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+
+        oppija.setSuoritukset(Arrays.asList(todistusTama, todistusToinen));
+
+        HakemuksenKoetulosYhteenveto tamaEnsin = new HakemuksenKoetulosYhteenveto(
+                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
+                new ValintakoeOsallistuminenDTO(),
+                oppija,
+                new ParametritDTO()
+        );
+        assertEquals("true", tamaEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
+        assertEquals(Osallistuminen.OSALLISTUI.toString(), tamaEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
+
     }
 }
