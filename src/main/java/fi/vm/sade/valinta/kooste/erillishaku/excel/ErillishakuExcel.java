@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import fi.vm.sade.tarjonta.service.types.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
@@ -60,7 +61,9 @@ public class ErillishakuExcel {
         builder.add(new TekstiArvo(HEADER_HYVAKSYMISKIRJE_LAHETETTY));
         builder.add(new TekstiArvo("Vastaanottotila"));
         builder.add(new TekstiArvo("Ilmoittautumistila"));
-        builder.add(new TekstiArvo("Lukuvuosimaksuvelvollisuus"));
+        if (tyyppi == Hakutyyppi.KORKEAKOULU) {
+            builder.add(new TekstiArvo("Lukuvuosimaksuvelvollisuus"));
+        }
         builder.add(new TekstiArvo("Julkaistavissa"));
         builder.add(new TekstiArvo("Asiointikieli"));
         builder.add(new TekstiArvo("Puhelinnumero"));
@@ -158,7 +161,9 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null ? "" : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
-            a.add(new TekstiArvo(rivi.getLukuvuosiMaksuvelvollisuus()));
+            if (tyyppi == Hakutyyppi.KORKEAKOULU) {
+                a.add(new TekstiArvo(rivi.getLukuvuosiMaksuvelvollisuus()));
+            }
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
             a.add(ErillishakuDataRivi.asiointiKieli(rivi.getAsiointikieli()));
             a.add(new TekstiArvo(rivi.getPuhelinnumero(), true, true));
