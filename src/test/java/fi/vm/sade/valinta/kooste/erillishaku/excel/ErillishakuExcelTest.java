@@ -21,10 +21,10 @@ public class ErillishakuExcelTest {
         String syntymaAika = "11.11.2011";
         ErillishakuRivi rivi = new ErillishakuRivi(
                 null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, Sukupuoli.MIES.name(), "", "FI", "HYLATTY", false, null, "", "", false, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "SWE");
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "SWE", "EI");
         rivit.add(rivi);
         ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN.name(), "", "FI", "HYLATTY", false, null, "", "", true, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN");
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN", "EI");
         rivit.add(rivi2);
         return rivit;
     }
@@ -77,8 +77,9 @@ public class ErillishakuExcelTest {
     @Test
     public void testaaVientiKKWithInvalidRow() throws Exception {
         List<ErillishakuRivi> rivit = createErillishakuRivisWithTwoValidRows();
-        ErillishakuRivi rivi3 = new ErillishakuRivi(null, "X-sukunimi", "X-etunimi", null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
-                    null, null, null, false, false, null, null, null, null, null, null, null, null, false, null);
+        ErillishakuRivi rivi3 = new ErillishakuRivi(null, "X-sukunimi", "X-etunimi", null, null, null,
+                Sukupuoli.EI_SUKUPUOLTA, null, null, null, false, null, null, null, false, false, null, null, null,
+                null, null, null, null, null, false, null, null);
         rivit.add(rivi3);
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
         ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());

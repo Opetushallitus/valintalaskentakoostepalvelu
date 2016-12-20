@@ -60,6 +60,7 @@ public class ErillishakuExcel {
         builder.add(new TekstiArvo(HEADER_HYVAKSYMISKIRJE_LAHETETTY));
         builder.add(new TekstiArvo("Vastaanottotila"));
         builder.add(new TekstiArvo("Ilmoittautumistila"));
+        builder.add(new TekstiArvo("Lukuvuosimaksuvelvollisuus"));
         builder.add(new TekstiArvo("Julkaistavissa"));
         builder.add(new TekstiArvo("Asiointikieli"));
         builder.add(new TekstiArvo("Puhelinnumero"));
@@ -129,7 +130,8 @@ public class ErillishakuExcel {
                             "FIN",
                             "HELSINKI",
                             true,
-                            "FIN")).stream();
+                            "FIN",
+                            "TARKISTAMATTA")).stream();
         } else {
             return erillishakurivit.stream();
         }
@@ -156,6 +158,7 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null ? "" : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
+            a.add(new TekstiArvo(rivi.getLukuvuosiMaksuvelvollisuus()));
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
             a.add(ErillishakuDataRivi.asiointiKieli(rivi.getAsiointikieli()));
             a.add(new TekstiArvo(rivi.getPuhelinnumero(), true, true));

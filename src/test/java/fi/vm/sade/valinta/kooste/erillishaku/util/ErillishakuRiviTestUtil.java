@@ -29,14 +29,14 @@ public class ErillishakuRiviTestUtil {
                 AIDINKIELI, HakemuksenTila.HYVAKSYTTY.toString(), false, new Date(),
                 ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN");
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN", "EI");
     }
     public static ErillishakuRivi viallinenRiviPuuttuvillaTunnisteilla() {
         return new ErillishakuRivi(null, SUKUNIMI, ETUNIMI,
                 EMPTY, EMPTY, EMPTY, Sukupuoli.EI_SUKUPUOLTA, EMPTY, EMPTY, HakemuksenTila.HYVAKSYTTY.toString(), false, null,
                 ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN");
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN", "EI");
     }
 
     public static String viallinenJsonRiviPuuttuvillaTunnisteilla() {

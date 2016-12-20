@@ -221,7 +221,8 @@ public class ErillishaunTuontiService {
                         rivi.getKansalaisuus(),
                         rivi.getKotikunta(),
                         rivi.getToisenAsteenSuoritus(),
-                        rivi.getToisenAsteenSuoritusmaa());
+                        rivi.getToisenAsteenSuoritusmaa(),
+                        rivi.getLukuvuosiMaksuvelvollisuus());
             } else {
                 return rivi;
                 }
@@ -360,7 +361,8 @@ public class ErillishaunTuontiService {
                         rivi.getKansalaisuus(),
                         rivi.getKotikunta(),
                         rivi.getToisenAsteenSuoritus(),
-                        rivi.getToisenAsteenSuoritusmaa()
+                        rivi.getToisenAsteenSuoritusmaa(),
+                        rivi.getLukuvuosiMaksuvelvollisuus()
         );
     }
 

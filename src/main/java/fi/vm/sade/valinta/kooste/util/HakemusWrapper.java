@@ -9,6 +9,7 @@ import org.apache.commons.lang.math.NumberUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -316,5 +317,21 @@ public class HakemusWrapper {
         return getHakutoiveet().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
                 .map(entry -> StringUtils.trimToNull(entry.getValue())).filter(Objects::nonNull).collect(Collectors.toSet());
+    }
+
+    public String getLukuvuosiMaksuvelvollisuus() {
+        String result = "";
+        int randomInt = ThreadLocalRandom.current().nextInt(1, 3);
+        switch(randomInt) {
+            case 1:
+                result = "KYLLÄ";
+                break;
+            case 2:
+                result = "EI";
+                break;
+            default:
+                result = "TARKISTAMATTA";
+        }
+        return result;
     }
 }
