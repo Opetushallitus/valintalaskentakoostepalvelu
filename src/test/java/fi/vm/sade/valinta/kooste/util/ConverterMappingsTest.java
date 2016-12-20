@@ -52,7 +52,7 @@ public class ConverterMappingsTest {
         assertTrue(Collections.emptyMap().equals(
                 Converter.mapEligibilityAndStatus(null, null)));
         assertTrue(Converter.mapEligibilityAndStatus(
-                Arrays.asList(new Eligibility("", "", "")), null).isEmpty());
+                Arrays.asList(new Eligibility("", "", "", "")), null).isEmpty());
         Map<String, String> m = Maps.newHashMap();
         m.put("preference1-Koulutus-id", "hk1");
         assertTrue(Converter.mapEligibilityAndStatus(null, m).isEmpty());
@@ -63,7 +63,7 @@ public class ConverterMappingsTest {
         Map<String, String> m = Maps.newHashMap();
         m.put("preference1-Koulutus-id", "hk1");
         assertTrue(Converter.mapEligibilityAndStatus(
-                Arrays.asList(new Eligibility("", "", "")), m).isEmpty());
+                Arrays.asList(new Eligibility("", "", "", "")), m).isEmpty());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class ConverterMappingsTest {
         Map<String, String> m = Maps.newHashMap();
         m.put("preference1-Koulutus-id", "hk1");
         Map<String, String> ans = Converter.mapEligibilityAndStatus(
-                Arrays.asList(new Eligibility("hk1", "status1", "")), m);
+                Arrays.asList(new Eligibility("hk1", "status1", "", "")), m);
         assertFalse(ans.isEmpty());
         assertTrue(ans.size() == 1);
     }
@@ -81,7 +81,7 @@ public class ConverterMappingsTest {
         Map<String, String> m = Maps.newHashMap();
         m.put("preference1-Koulutus-id", "hk1");
         Map<String, String> ans = Converter.mapEligibilityAndStatus(
-                Arrays.asList(new Eligibility("hk1", "AUTOMATICALLY_CHECKED_ELIGIBLE", "")), m);
+                Arrays.asList(new Eligibility("hk1", "AUTOMATICALLY_CHECKED_ELIGIBLE", "", "")), m);
         assertFalse(ans.isEmpty());
         assertTrue(ans.size() == 1);
         assertTrue(ans.entrySet().iterator().next().getValue().equals("ELIGIBLE"));
@@ -93,7 +93,7 @@ public class ConverterMappingsTest {
         m.put("preference1-Koulutus-id", "hk1");
         m.put("preference2-Koulutus-id", "hk2");
         Map<String, String> ans = Converter.mapEligibilityAndStatus(
-                Arrays.asList(new Eligibility("hk1", "status1", "")), m);
+                Arrays.asList(new Eligibility("hk1", "status1", "", "")), m);
         assertFalse(ans.isEmpty());
         assertTrue(ans.size() == 1);
         assertTrue(ans.entrySet().iterator().next().getKey()
@@ -105,8 +105,8 @@ public class ConverterMappingsTest {
         Map<String, String> m = Maps.newHashMap();
         m.put("preference1-Koulutus-id", "hk1");
         Map<String, String> ans = Converter.mapEligibilityAndStatus(Arrays
-                .asList(new Eligibility("hk1", "status1", ""), new Eligibility(
-                        "hk2", "status2", "")), m);
+                .asList(new Eligibility("hk1", "status1", "", ""), new Eligibility(
+                        "hk2", "status2", "", "")), m);
         assertFalse(ans.isEmpty());
         assertTrue(ans.size() == 1);
         assertTrue(ans.entrySet().iterator().next().getValue()

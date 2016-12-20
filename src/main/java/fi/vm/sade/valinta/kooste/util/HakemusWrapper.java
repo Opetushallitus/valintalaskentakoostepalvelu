@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -319,18 +321,18 @@ public class HakemusWrapper {
                 .map(entry -> StringUtils.trimToNull(entry.getValue())).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
-    public String getLukuvuosiMaksuvelvollisuus() {
-        String result = "";
-        int randomInt = ThreadLocalRandom.current().nextInt(1, 3);
-        switch(randomInt) {
-            case 1:
-                result = "KYLLÄ";
-                break;
-            case 2:
-                result = "EI";
-                break;
-            default:
-                result = "TARKISTAMATTA";
+    public String getLukuvuosimaksuvelvollisuus(String hakukohdeOid) {
+        String result = Maksuvelvollisuus.NOT_CKECKED;
+        if (hakukohdeOid != null) {
+            for (Eligibility e : hakemus.getPreferenceEligibilities()) {
+                if (e.getAoId().equals(hakukohdeOid)) {
+                    String maksuvelvollisuus = e.getMaksuvelvollisuus();
+                    if (maksuvelvollisuus != null) {
+                        result = maksuvelvollisuus;
+                    }
+                    break;
+                }
+            }
         }
         return result;
     }

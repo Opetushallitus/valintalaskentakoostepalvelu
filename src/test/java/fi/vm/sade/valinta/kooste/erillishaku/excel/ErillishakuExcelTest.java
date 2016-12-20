@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
-import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class ErillishakuExcelTest {
 
@@ -21,10 +19,10 @@ public class ErillishakuExcelTest {
         String syntymaAika = "11.11.2011";
         ErillishakuRivi rivi = new ErillishakuRivi(
                 null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, Sukupuoli.MIES.name(), "", "FI", "HYLATTY", false, null, "", "", false, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "SWE", "EI");
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "SWE", Maksuvelvollisuus.NOT_CKECKED);
         rivit.add(rivi);
         ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN.name(), "", "FI", "HYLATTY", false, null, "", "", true, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN", "EI");
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN", Maksuvelvollisuus.NOT_CKECKED);
         rivit.add(rivi2);
         return rivit;
     }
