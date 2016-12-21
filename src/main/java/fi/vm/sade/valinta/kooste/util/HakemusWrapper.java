@@ -321,7 +321,7 @@ public class HakemusWrapper {
                 .map(entry -> StringUtils.trimToNull(entry.getValue())).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
-    public String getLukuvuosimaksuvelvollisuus(String hakukohdeOid) {
+    public String getMaksuvelvollisuus(String hakukohdeOid) {
         String result = Maksuvelvollisuus.NOT_CKECKED;
         if (hakukohdeOid != null && hakemus.getPreferenceEligibilities() != null) {
             for (Eligibility e : hakemus.getPreferenceEligibilities()) {

@@ -80,6 +80,6 @@ public class ErillishaunVientiServiceTest {
         assertEquals("Rivi", erillishakuRivi.getEtunimi());
         assertEquals("Esimerkki", erillishakuRivi.getSukunimi());
         assertEquals(false, erillishakuRivi.isJulkaistaankoTiedot());
-        assertEquals(Maksuvelvollisuus.NOT_CKECKED, erillishakuRivi.getLukuvuosiMaksuvelvollisuus());
+        assertEquals(Maksuvelvollisuus.NOT_CKECKED, erillishakuRivi.getMaksuvelvollisuus());
     }
 }
