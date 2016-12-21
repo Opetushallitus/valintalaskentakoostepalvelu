@@ -156,6 +156,8 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
                 answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
                 answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
                 hakemus.setAnswers(answers);
+                Eligibility e = new Eligibility(MockData.kohdeOid, null, null, MockData.maksuvelvollisuus);
+                hakemus.getPreferenceEligibilities().add(e);
                 return Futures.immediateFuture(Arrays.asList(hakemus));
             }
         }));

@@ -26,14 +26,6 @@ public class HakemusPrototyyppi {
     private String toisenAsteenSuoritusmaa;
     private String maksuvelvollisuus;
 
-    public String getMaksuvelvollisuus() {
-        return maksuvelvollisuus;
-    }
-
-    public void setMaksuvelvollisuus(String maksuvelvollisuus) {
-        this.maksuvelvollisuus = maksuvelvollisuus;
-    }
-
     public String getHakijaOid() {
         return hakijaOid;
     }
@@ -180,6 +172,14 @@ public class HakemusPrototyyppi {
 
     public void setToisenAsteenSuoritusmaa(String toisenAsteenSuoritusmaa) {
         this.toisenAsteenSuoritusmaa = toisenAsteenSuoritusmaa;
+    }
+
+    public String getMaksuvelvollisuus() {
+        return maksuvelvollisuus;
+    }
+
+    public void setMaksuvelvollisuus(String maksuvelvollisuus) {
+        this.maksuvelvollisuus = maksuvelvollisuus;
     }
 
     public static String parseDate(final Date syntymaAika) {

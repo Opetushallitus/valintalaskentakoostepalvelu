@@ -183,4 +183,14 @@ public class ErillishakuDataRivi extends DataRivi {
     static MonivalintaArvo asiointiKieli(String arvo) {
         return new MonivalintaArvo(arvo, ASIONTIKIELEN_ARVOT);
     }
+
+    private static final Collection<String> MAKSUVELVOLLISUUS_ARVOT = Arrays.asList(
+            Maksuvelvollisuus.NOT_CKECKED,
+            Maksuvelvollisuus.REQUIRED,
+            Maksuvelvollisuus.NOT_REQUIRED
+    );
+
+    static MonivalintaArvo maksuvelvollisuus(String arvo) {
+        return new MonivalintaArvo(arvo, MAKSUVELVOLLISUUS_ARVOT);
+    }
 }

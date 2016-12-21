@@ -323,13 +323,10 @@ public class HakemusWrapper {
 
     public String getLukuvuosimaksuvelvollisuus(String hakukohdeOid) {
         String result = Maksuvelvollisuus.NOT_CKECKED;
-        if (hakukohdeOid != null) {
+        if (hakukohdeOid != null && hakemus.getPreferenceEligibilities() != null) {
             for (Eligibility e : hakemus.getPreferenceEligibilities()) {
                 if (e.getAoId().equals(hakukohdeOid)) {
-                    String maksuvelvollisuus = e.getMaksuvelvollisuus();
-                    if (maksuvelvollisuus != null) {
-                        result = maksuvelvollisuus;
-                    }
+                    result = e.getMaksuvelvollisuus();
                     break;
                 }
             }

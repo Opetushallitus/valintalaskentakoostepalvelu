@@ -129,6 +129,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals("Tuomas", hakemusProto.getEtunimi());
             assertEquals("Hakkarainen", hakemusProto.getSukunimi());
             assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
+            assertEquals(Maksuvelvollisuus.REQUIRED, hakemusProto.getMaksuvelvollisuus());
 
             assertEquals(1, tilaAsyncResource.results.size());
             final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
@@ -165,6 +166,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals("Tuomas", hakemusProto.getEtunimi());
             assertEquals("Hakkarainen", hakemusProto.getSukunimi());
             assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
+            assertEquals(Maksuvelvollisuus.NOT_REQUIRED, hakemusProto.getMaksuvelvollisuus());
         }
     }
 

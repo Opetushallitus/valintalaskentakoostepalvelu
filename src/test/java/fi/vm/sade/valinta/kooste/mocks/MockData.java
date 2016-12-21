@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
+
 public class MockData {
     public static String hakuOid = "haku1";
     public static String valintatapajonoOid  = "jono1";
@@ -13,4 +15,5 @@ public class MockData {
     public static String syntymaAika = "1.1.1901";
     public static String sukupuoli = "MIES";
     public static String aidinkieli = "FI";
+    public static String maksuvelvollisuus = Maksuvelvollisuus.REQUIRED;
 }

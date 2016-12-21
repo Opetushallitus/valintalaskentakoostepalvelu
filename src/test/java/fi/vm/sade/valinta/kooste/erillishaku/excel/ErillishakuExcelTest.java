@@ -3,9 +3,11 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.FileOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,7 +24,7 @@ public class ErillishakuExcelTest {
                 "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "SWE", Maksuvelvollisuus.NOT_CKECKED);
         rivit.add(rivi);
         ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN.name(), "", "FI", "HYLATTY", false, null, "", "", true, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN", Maksuvelvollisuus.NOT_CKECKED);
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN", Maksuvelvollisuus.REQUIRED);
         rivit.add(rivi2);
         return rivit;
     }

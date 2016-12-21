@@ -162,7 +162,7 @@ public class ErillishakuExcel {
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
             if (tyyppi == Hakutyyppi.KORKEAKOULU) {
-                a.add(new TekstiArvo(rivi.getMaksuvelvollisuus()));
+                a.add(ErillishakuDataRivi.maksuvelvollisuus(rivi.getMaksuvelvollisuus()));
             }
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
             a.add(ErillishakuDataRivi.asiointiKieli(rivi.getAsiointikieli()));
