@@ -134,7 +134,7 @@ public class ErillishakuExcel {
                             "HELSINKI",
                             true,
                             "FIN",
-                            "TARKISTAMATTA")).stream();
+                            "EI_TARKISTETTU")).stream();
         } else {
             return erillishakurivit.stream();
         }

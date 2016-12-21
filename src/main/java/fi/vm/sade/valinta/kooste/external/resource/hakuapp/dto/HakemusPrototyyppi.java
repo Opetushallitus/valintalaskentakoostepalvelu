@@ -24,6 +24,15 @@ public class HakemusPrototyyppi {
     private String kotikunta;
     private Boolean toisenAsteenSuoritus;
     private String toisenAsteenSuoritusmaa;
+    private String maksuvelvollisuus;
+
+    public String getMaksuvelvollisuus() {
+        return maksuvelvollisuus;
+    }
+
+    public void setMaksuvelvollisuus(String maksuvelvollisuus) {
+        this.maksuvelvollisuus = maksuvelvollisuus;
+    }
 
     public String getHakijaOid() {
         return hakijaOid;

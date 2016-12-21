@@ -386,6 +386,7 @@ public class ErillishaunTuontiService {
         hakemus.setSyntymaAika(rivi.getSyntymaAika());
         hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
         hakemus.setToisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa());
+        hakemus.setMaksuvelvollisuus(rivi.getMaksuvelvollisuus());
         return hakemus;
     }
 

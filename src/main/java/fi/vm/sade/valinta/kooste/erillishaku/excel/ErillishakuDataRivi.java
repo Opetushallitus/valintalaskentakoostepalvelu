@@ -52,7 +52,7 @@ public class ErillishakuDataRivi extends DataRivi {
         Date hyvaksymiskirjeLahetetty = parseLahetettyDate(rivi.getArvoAt(index++));
         String vastaanottoTila = rivi.getArvoAt(index++);
         String ilmoittautumisTila = rivi.getArvoAt(index++);
-        String lukuvuosimaksuvelvollisuus = rivi.getArvoAt(index++);
+        String maksuvelvollisuus = rivi.getArvoAt(index++);
         boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(rivi.getArvoAt(index++));
 
         String asiointikieli = rivi.getArvoAt(index++);
@@ -72,7 +72,7 @@ public class ErillishakuDataRivi extends DataRivi {
                     sukupuoli, oid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksytty, hyvaksymiskirjeLahetetty,
                     vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, false, asiointikieli, puhelinnumero,
                     osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus,
-                    toisenAsteenSuoritusmaa, lukuvuosimaksuvelvollisuus));
+                    toisenAsteenSuoritusmaa, maksuvelvollisuus));
         }
         return true;
     }

@@ -178,7 +178,7 @@ public class ErillishakuResourceTest {
                 "Helsinki",
                 hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null,
                 hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "",
-                "TARKISTAMATTA");
+                "EI_TARKISTETTU");
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }
 
