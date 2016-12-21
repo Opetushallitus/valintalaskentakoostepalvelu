@@ -62,7 +62,7 @@ public class ErillishakuExcel {
         builder.add(new TekstiArvo("Vastaanottotila"));
         builder.add(new TekstiArvo("Ilmoittautumistila"));
         if (tyyppi == Hakutyyppi.KORKEAKOULU) {
-            builder.add(new TekstiArvo("Lukuvuosimaksuvelvollisuus"));
+            builder.add(new TekstiArvo("Maksuvelvollisuus"));
         }
         builder.add(new TekstiArvo("Julkaistavissa"));
         builder.add(new TekstiArvo("Asiointikieli"));
@@ -162,7 +162,7 @@ public class ErillishakuExcel {
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
             if (tyyppi == Hakutyyppi.KORKEAKOULU) {
-                a.add(new TekstiArvo(rivi.getLukuvuosiMaksuvelvollisuus()));
+                a.add(new TekstiArvo(rivi.getMaksuvelvollisuus()));
             }
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
             a.add(ErillishakuDataRivi.asiointiKieli(rivi.getAsiointikieli()));

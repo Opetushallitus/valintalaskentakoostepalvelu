@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * @author Jussi Jartamo
@@ -52,6 +53,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
     @Before
     public void startServer() {
         ValintaKoosteJetty.startShared();
+        MockApplicationAsyncResource.serviceIsAvailable.set(true);
     }
 
     @Test
@@ -92,18 +94,9 @@ public class ErillishakuResourceKayttajaPalauteTest {
                 excelClient()
                         .post(Entity.entity(ExcelTestData.kkHakuPuuttuviaPakollisiaTietoja(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
-        assertThat(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
-                // Odotetaan tyhjää datajoukko palautetta!
-                .poikkeukset, equalTo(asList(Poikkeus.koostepalvelupoikkeus(POIKKEUS_VIALLINEN_DATAJOUKKO, asList(
-                new Tunniste(
-                        "Rivi 1: Pakollinen tieto \"toisen asteen pohjakoulutuksen maa\" puuttuu. : Tuomas, Hakkarainen, hakkarainen@tuomas.com, HYVAKSYTTY, Kyllä, , 1.1.1901, MIES, FI, EI_TEHTY, true, Sat Jul 16 00:00:00 EEST 2016, VASTAANOTTANUT_SITOVASTI, true, FI, 045123456, Testitie 1, 00100, Helsinki, FIN, FIN, Helsinki, Kyllä, ",
-                        ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
-                ),
-                new Tunniste(
-                        "Rivi 2: Pakollinen tieto \"asuinmaa\" puuttuu. Pakollinen tieto \"kansalaisuus\" puuttuu. Pakollinen tieto \"kotikunta\" puuttuu. Pakollinen tieto \"toisen asteen suoritus\" puuttuu. : Sakari, Hakkarainen, sakari.hakkarainen@example.com, HYVAKSYTTY, Kyllä, , 1.1.2001, MIES, , EI_TEHTY, true, Sat Jul 16 00:00:00 EEST 2016, VASTAANOTTANUT_SITOVASTI, true, , , , , , , , , , ",
-                        ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
-                )
-        )))));
+        Collection<Poikkeus> poikkeukset = odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId).poikkeukset;
+        assertThat(poikkeukset.size(), equalTo(1));
+        assertThat(poikkeukset.iterator().next().getTunnisteet().size(), equalTo(2));
     }
 
 

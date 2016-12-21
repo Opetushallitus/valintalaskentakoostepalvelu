@@ -44,7 +44,7 @@ public class ErillishakuRivi {
     @ApiModelProperty(required = true)
     private final boolean julkaistaankoTiedot;
     private final boolean poistetaankoRivi;
-    private final String lukuvuosiMaksuvelvollisuus;
+    private final String maksuvelvollisuus;
 
     private final String asiointikieli;
     private final String puhelinnumero;
@@ -57,7 +57,7 @@ public class ErillishakuRivi {
     private final Boolean toisenAsteenSuoritus;
     private final String toisenAsteenSuoritusmaa;
 
-    // FIXME: Nämä konstrukstorihirvitykset kannattaisi korvata Builderillä
+    // Empty constructor for Jackson JSON library. Deserialization fails without this!
     public ErillishakuRivi() {
         this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
                 null, null, null, false, false, null, null, null, null, null, null, null, null, null, null, null);
@@ -70,12 +70,12 @@ public class ErillishakuRivi {
                            boolean poistetaankoRivi, String asiointikieli, String puhelinnumero, String osoite,
                            String postinumero, String postitoimipaikka, String asuinmaa, String kansalaisuus,
                            String kotikunta, Boolean toisenAsteenSuoritus, String toisenAsteenSuoritusmaa,
-                           String lukuvuosiMaksuvelvollisuus) {
+                           String maksuvelvollisuus) {
         this(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, Sukupuoli.fromString(sukupuoli),
                 personOid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty,
                 vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
                 osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus,
-                toisenAsteenSuoritusmaa, lukuvuosiMaksuvelvollisuus);
+                toisenAsteenSuoritusmaa, maksuvelvollisuus);
     }
 
     public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
@@ -85,7 +85,7 @@ public class ErillishakuRivi {
                            boolean poistetaankoRivi, String asiointikieli, String puhelinnumero, String osoite,
                            String postinumero, String postitoimipaikka, String asuinmaa, String kansalaisuus,
                            String kotikunta, Boolean toisenAsteenSuoritus, String toisenAsteenSuoritusmaa,
-                           String lukuvuosiMaksuvelvollisuus) {
+                           String maksuvelvollisuus) {
         this.hakemusOid = hakemusOid;
         this.etunimi = etunimi;
         this.sukunimi = sukunimi;
@@ -113,7 +113,7 @@ public class ErillishakuRivi {
         this.kotikunta = kotikunta;
         this.toisenAsteenSuoritus = toisenAsteenSuoritus;
         this.toisenAsteenSuoritusmaa = toisenAsteenSuoritusmaa;
-        this.lukuvuosiMaksuvelvollisuus = lukuvuosiMaksuvelvollisuus;
+        this.maksuvelvollisuus = maksuvelvollisuus;
     }
 
     public String getHakemusOid() {
@@ -261,7 +261,7 @@ public class ErillishakuRivi {
                 personOid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty,
                 vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
                 osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus,
-                toisenAsteenSuoritusmaa, lukuvuosiMaksuvelvollisuus);
+                toisenAsteenSuoritusmaa, maksuvelvollisuus);
     }
 
     public ErillishakuRivi withHakemusOid(String hakemusOid) {
@@ -269,7 +269,7 @@ public class ErillishakuRivi {
                 personOid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty,
                 vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
                 osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus,
-                toisenAsteenSuoritusmaa, lukuvuosiMaksuvelvollisuus);
+                toisenAsteenSuoritusmaa, maksuvelvollisuus);
     }
 
     public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
@@ -299,7 +299,8 @@ public class ErillishakuRivi {
         return poistetaankoRivi;
     }
 
-    public String getLukuvuosiMaksuvelvollisuus() {
-        return lukuvuosiMaksuvelvollisuus;
+    public String getMaksuvelvollisuus() {
+        return maksuvelvollisuus;
     }
+
 }

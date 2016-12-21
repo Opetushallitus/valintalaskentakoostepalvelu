@@ -222,7 +222,7 @@ public class ErillishaunTuontiService {
                         rivi.getKotikunta(),
                         rivi.getToisenAsteenSuoritus(),
                         rivi.getToisenAsteenSuoritusmaa(),
-                        rivi.getLukuvuosiMaksuvelvollisuus());
+                        rivi.getMaksuvelvollisuus());
             } else {
                 return rivi;
                 }
@@ -362,7 +362,7 @@ public class ErillishaunTuontiService {
                         rivi.getKotikunta(),
                         rivi.getToisenAsteenSuoritus(),
                         rivi.getToisenAsteenSuoritusmaa(),
-                        rivi.getLukuvuosiMaksuvelvollisuus()
+                        rivi.getMaksuvelvollisuus()
         );
     }
 
@@ -676,7 +676,7 @@ public class ErillishaunTuontiService {
                     errors.add("Virheellinen suomalainen postitoimipaikka (" + rivi.getPostinumero() + ").");
                 }
 
-                if (!postinumero.isEmpty() &&
+                if (!postinumero.isEmpty() && postiKoodit.containsKey(postinumero) &&
                         !postiKoodit.get(postinumero).getMetadata().stream().anyMatch(m -> m.getNimi().equalsIgnoreCase(postitoimipaikka))) {
                     errors.add("Annettu suomalainen postinumero (" + rivi.getPostinumero() + ") ei vastaa annettua postitoimipaikkaa ("
                             + rivi.getPostitoimipaikka() + ").");
