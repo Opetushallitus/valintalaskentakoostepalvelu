@@ -26,6 +26,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
@@ -196,33 +197,10 @@ public class ErillishaunTuontiService {
         return rivit.stream().map(rivi -> {
             if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi))
                     && !isUusi(rivi) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.name().equals(rivi.getVastaanottoTila())) {
-                return new ErillishakuRivi(
-                        rivi.getHakemusOid(),
-                        rivi.getSukunimi(),
-                        rivi.getEtunimi(),
-                        rivi.getHenkilotunnus(),
-                        rivi.getSahkoposti(),
-                        rivi.getSyntymaAika(),
-                        rivi.getSukupuoli(),
-                        rivi.getPersonOid(),
-                        rivi.getAidinkieli(),
-                        rivi.getHakemuksenTila(),
-                        rivi.getEhdollisestiHyvaksyttavissa(),
-                        rivi.getHyvaksymiskirjeLahetetty(),
-                        "KESKEN", "EI_TEHTY",
-                        rivi.isJulkaistaankoTiedot(),
-                        rivi.isPoistetaankoRivi(),
-                        rivi.getAsiointikieli(),
-                        rivi.getPuhelinnumero(),
-                        rivi.getOsoite(),
-                        rivi.getPostinumero(),
-                        rivi.getPostitoimipaikka(),
-                        rivi.getAsuinmaa(),
-                        rivi.getKansalaisuus(),
-                        rivi.getKotikunta(),
-                        rivi.getToisenAsteenSuoritus(),
-                        rivi.getToisenAsteenSuoritusmaa(),
-                        rivi.getMaksuvelvollisuus());
+                return ErillishakuRiviBuilder.fromRivi(rivi)
+                        .vastaanottoTila("KESKEN")
+                        .ilmoittautumisTila("EI_TEHTY")
+                        .build();
             } else {
                 return rivi;
                 }
@@ -335,35 +313,17 @@ public class ErillishaunTuontiService {
         String aidinkieli = kielisyysToString(henkilo.getAidinkieli());
         String asiointikieli = kielisyysToString(henkilo.getAsiointiKieli());
         String sukupuoli = henkilo.getSukupuoli();
-        return new ErillishakuRivi(
-                        rivi.getHakemusOid(),
-                        henkilo.getSukunimi(),
-                        henkilo.getEtunimet(),
-                        henkilo.getHetu(),
-                        StringUtils.trimToEmpty(rivi.getSahkoposti()),
-                        HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()),
-                        isNotBlank(sukupuoli) ? sukupuoli : Sukupuoli.toHenkiloString(rivi.getSukupuoli()),
-                        henkilo.getOidHenkilo(),
-                        isNotBlank(aidinkieli) ? aidinkieli : rivi.getAidinkieli(),
-                        rivi.getHakemuksenTila(),
-                        rivi.getEhdollisestiHyvaksyttavissa(),
-                        rivi.getHyvaksymiskirjeLahetetty(),
-                        rivi.getVastaanottoTila(),
-                        rivi.getIlmoittautumisTila(),
-                        rivi.isJulkaistaankoTiedot(),
-                        rivi.isPoistetaankoRivi(),
-                        isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli(),
-                        rivi.getPuhelinnumero(),
-                        rivi.getOsoite(),
-                        rivi.getPostinumero(),
-                        rivi.getPostitoimipaikka(),
-                        rivi.getAsuinmaa(),
-                        rivi.getKansalaisuus(),
-                        rivi.getKotikunta(),
-                        rivi.getToisenAsteenSuoritus(),
-                        rivi.getToisenAsteenSuoritusmaa(),
-                        rivi.getMaksuvelvollisuus()
-        );
+        return ErillishakuRiviBuilder.fromRivi(rivi)
+                .sukunimi(henkilo.getSukunimi())
+                .etunimi(henkilo.getEtunimet())
+                .henkilotunnus(henkilo.getHetu())
+                .sahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()))
+                .syntymaAika(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
+                .sukupuoli(isNotBlank(sukupuoli) ? Sukupuoli.fromString(sukupuoli) : rivi.getSukupuoli())
+                .personOid(henkilo.getOidHenkilo())
+                .aidinkieli(isNotBlank(aidinkieli) ? aidinkieli : rivi.getAidinkieli())
+                .asiointikieli(isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli())
+                .build();
     }
 
     private HakemusPrototyyppi createHakemusprototyyppi(ErillishakuRivi rivi) {

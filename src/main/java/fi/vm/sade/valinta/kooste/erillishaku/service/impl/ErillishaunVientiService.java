@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -166,34 +167,35 @@ public class ErillishaunVientiService {
                                                   String vastaanottoTila, boolean ehdollisestiHyvaksyttavissa,
                                                   Date hyvaksymiskirjeLahetetty, String ilmoittautumisTila,
                                                   boolean julkaistaankoTiedot, String hakukohdeOid) {
-        return new ErillishakuRivi(
-                oid,
-                wrapper.getSukunimi(),
-                wrapper.getEtunimi(),
-                wrapper.getHenkilotunnus(),
-                wrapper.getSahkopostiOsoite(),
-                wrapper.getSyntymaaika(),
-                Sukupuoli.fromString(wrapper.getSukupuoliAsIs()),
-                wrapper.getPersonOid(),
-                wrapper.getAidinkieli(),
-                hakemuksenTila,
-                ehdollisestiHyvaksyttavissa,
-                hyvaksymiskirjeLahetetty,
-                vastaanottoTila,
-                ilmoittautumisTila,
-                julkaistaankoTiedot,
-                false,
-                readAsiointikieli(wrapper),
-                wrapper.getPuhelinnumero(),
-                readLahiosoite(wrapper),
-                readPostinumero(wrapper),
-                readPostitoimipaikka(wrapper),
-                wrapper.getAsuinmaa(),
-                wrapper.getKansalaisuus(),
-                readKotikunta(wrapper),
-                wrapper.getToisenAsteenSuoritus(),
-                wrapper.getToisenAsteenSuoritusmaa(),
-                wrapper.getMaksuvelvollisuus(hakukohdeOid));
+        return new ErillishakuRiviBuilder()
+                .hakemusOid(oid)
+                .sukunimi(wrapper.getSukunimi())
+                .etunimi(wrapper.getEtunimi())
+                .henkilotunnus(wrapper.getHenkilotunnus())
+                .sahkoposti(wrapper.getSahkopostiOsoite())
+                .syntymaAika(wrapper.getSyntymaaika())
+                .sukupuoli(Sukupuoli.fromString(wrapper.getSukupuoliAsIs()))
+                .personOid(wrapper.getPersonOid())
+                .aidinkieli(wrapper.getAidinkieli())
+                .hakemuksenTila(hakemuksenTila)
+                .ehdollisestiHyvaksyttavissa(ehdollisestiHyvaksyttavissa)
+                .hyvaksymiskirjeLahetetty(hyvaksymiskirjeLahetetty)
+                .vastaanottoTila(vastaanottoTila)
+                .ilmoittautumisTila(ilmoittautumisTila)
+                .julkaistaankoTiedot(julkaistaankoTiedot)
+                .poistetaankoRivi(false)
+                .asiointikieli(readAsiointikieli(wrapper))
+                .puhelinnumero(wrapper.getPuhelinnumero())
+                .osoite(readLahiosoite(wrapper))
+                .postinumero(readPostinumero(wrapper))
+                .postitoimipaikka(readPostitoimipaikka(wrapper))
+                .asuinmaa(wrapper.getAsuinmaa())
+                .kansalaisuus(wrapper.getKansalaisuus())
+                .kotikunta(readKotikunta(wrapper))
+                .toisenAsteenSuoritus(wrapper.getToisenAsteenSuoritus())
+                .toisenAsteenSuoritusmaa(wrapper.getToisenAsteenSuoritusmaa())
+                .maksuvelvollisuus(wrapper.getMaksuvelvollisuus(hakukohdeOid))
+                .build();
     }
 
     private String readAsiointikieli(HakemusWrapper wrapper) {

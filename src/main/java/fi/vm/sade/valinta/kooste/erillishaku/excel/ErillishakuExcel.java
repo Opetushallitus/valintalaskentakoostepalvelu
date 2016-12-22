@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.tarjonta.service.types.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
@@ -80,8 +81,8 @@ public class ErillishakuExcel {
         esittelyt.add(builder.build());
 
         Collections.sort(erillishakurivit, (h1, h2) -> {
-            ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(new ErillishakuRivi());
-            ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(new ErillishakuRivi());
+            ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(new ErillishakuRiviBuilder().build());
+            ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(new ErillishakuRiviBuilder().build());
             String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
             String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
             int i = s1.compareTo(s2);
@@ -106,35 +107,34 @@ public class ErillishakuExcel {
 
     private Stream<ErillishakuRivi> arvoRivit(List<ErillishakuRivi> erillishakurivit) {
         if (erillishakurivit.isEmpty()) {
-            return ImmutableList.of(
-                    new ErillishakuRivi(
-                            null,
-                            "Esimerkki",
-                            "Rivi",
-                            "123456-7890",
-                            "esimerkki.rivi@example.com",
-                            "01.01.1901",
-                            Sukupuoli.NAINEN.name(),
-                            "",
-                            "FI",
-                            "HYVAKSYTTY",
-                            false,
-                            new Date(),
-                            "KESKEN",
-                            "EI_TEHTY",
-                            false,
-                            false,
-                            "FI",
-                            "040123456789",
-                            "Esimerkkitie 2",
-                            "00100",
-                            "HELSINKI",
-                            "FIN",
-                            "FIN",
-                            "HELSINKI",
-                            true,
-                            "FIN",
-                            "EI_TARKISTETTU")).stream();
+            return ImmutableList.of(new ErillishakuRiviBuilder()
+                    .sukunimi("Esimerkki")
+                    .etunimi("Rivi")
+                    .henkilotunnus("123456-7890")
+                    .sahkoposti("esimerkki.rivi@example.com")
+                    .syntymaAika("01.01.1901")
+                    .sukupuoli(Sukupuoli.NAINEN)
+                    .personOid("")
+                    .aidinkieli("FI")
+                    .hakemuksenTila(HakemuksenTila.HYVAKSYTTY.toString())
+                    .ehdollisestiHyvaksyttavissa(false)
+                    .hyvaksymiskirjeLahetetty(new Date())
+                    .vastaanottoTila("KESKEN")
+                    .ilmoittautumisTila("EI_TEHTY")
+                    .julkaistaankoTiedot(false)
+                    .poistetaankoRivi(false)
+                    .asiointikieli("FI")
+                    .puhelinnumero("040123456789")
+                    .osoite("Esimerkkitie 2")
+                    .postinumero("00100")
+                    .postitoimipaikka("HELSINKI")
+                    .asuinmaa("FIN")
+                    .kansalaisuus("FIN")
+                    .kotikunta("HELSINKI")
+                    .toisenAsteenSuoritus(true)
+                    .toisenAsteenSuoritusmaa("FIN")
+                    .maksuvelvollisuus(Maksuvelvollisuus.NOT_CKECKED)
+                    .build()).stream();
         } else {
             return erillishakurivit.stream();
         }

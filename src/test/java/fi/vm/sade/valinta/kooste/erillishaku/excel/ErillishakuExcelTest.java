@@ -3,11 +3,9 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.FileOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,12 +17,63 @@ public class ErillishakuExcelTest {
     private static List<ErillishakuRivi> createErillishakuRivisWithTwoValidRows() {
         List<ErillishakuRivi> rivit = Lists.newArrayList();
         String syntymaAika = "11.11.2011";
-        ErillishakuRivi rivi = new ErillishakuRivi(
-                null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, Sukupuoli.MIES.name(), "", "FI", "HYLATTY", false, null, "", "", false, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "SWE", Maksuvelvollisuus.NOT_CKECKED);
+        ErillishakuRivi rivi = new ErillishakuRiviBuilder()
+                .sukunimi("sukunimi")
+                .etunimi("etunimi1")
+                .henkilotunnus("hetu")
+                .sahkoposti("test.email@example.com")
+                .syntymaAika(syntymaAika)
+                .sukupuoli(Sukupuoli.MIES)
+                .personOid("")
+                .aidinkieli("FI")
+                .hakemuksenTila("HYLATTY")
+                .ehdollisestiHyvaksyttavissa(false)
+                .hyvaksymiskirjeLahetetty(null)
+                .vastaanottoTila("")
+                .ilmoittautumisTila("")
+                .julkaistaankoTiedot(false)
+                .poistetaankoRivi(false)
+                .asiointikieli("FI")
+                .puhelinnumero("040123456789")
+                .osoite("Esimerkkitie 2")
+                .postinumero("00100")
+                .postitoimipaikka("HELSINKI")
+                .asuinmaa("FIN")
+                .kansalaisuus("FIN")
+                .kotikunta("HELSINKI")
+                .toisenAsteenSuoritus(true)
+                .toisenAsteenSuoritusmaa("SWE")
+                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CKECKED)
+                .build();
         rivit.add(rivi);
-        ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN.name(), "", "FI", "HYLATTY", false, null, "", "", true, false, "FI",
-                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "FIN", "FIN", "HELSINKI", true, "FIN", Maksuvelvollisuus.REQUIRED);
+        ErillishakuRivi rivi2 = new ErillishakuRiviBuilder()
+                .sukunimi("sukunimi")
+                .etunimi("etunimi2")
+                .henkilotunnus("hetu")
+                .sahkoposti("test.email@example.com")
+                .syntymaAika(syntymaAika)
+                .sukupuoli(Sukupuoli.NAINEN)
+                .personOid("")
+                .aidinkieli("FI")
+                .hakemuksenTila("HYLATTY")
+                .ehdollisestiHyvaksyttavissa(false)
+                .hyvaksymiskirjeLahetetty(null)
+                .vastaanottoTila("")
+                .ilmoittautumisTila("")
+                .julkaistaankoTiedot(true)
+                .poistetaankoRivi(false)
+                .asiointikieli("FI")
+                .puhelinnumero("040123456789")
+                .osoite("Esimerkkitie 2")
+                .postinumero("00100")
+                .postitoimipaikka("HELSINKI")
+                .asuinmaa("FIN")
+                .kansalaisuus("FIN")
+                .kotikunta("HELSINKI")
+                .toisenAsteenSuoritus(true)
+                .toisenAsteenSuoritusmaa("FIN")
+                .maksuvelvollisuus(Maksuvelvollisuus.REQUIRED)
+                .build();
         rivit.add(rivi2);
         return rivit;
     }
@@ -48,7 +97,7 @@ public class ErillishakuExcelTest {
     @Test
     public void testaaVienti() throws Exception {
         List<ErillishakuRivi> rivit = createErillishakuRivisWithTwoValidRows();
-        ErillishakuRivi rivi3 = new ErillishakuRivi();
+        ErillishakuRivi rivi3 = new ErillishakuRiviBuilder().build();
         rivit.add(rivi3);
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
         ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
@@ -77,9 +126,7 @@ public class ErillishakuExcelTest {
     @Test
     public void testaaVientiKKWithInvalidRow() throws Exception {
         List<ErillishakuRivi> rivit = createErillishakuRivisWithTwoValidRows();
-        ErillishakuRivi rivi3 = new ErillishakuRivi(null, "X-sukunimi", "X-etunimi", null, null, null,
-                Sukupuoli.EI_SUKUPUOLTA, null, null, null, false, null, null, null, false, false, null, null, null,
-                null, null, null, null, null, false, null, null);
+        ErillishakuRivi rivi3 = new ErillishakuRiviBuilder().sukunimi("X-sukunimi").etunimi("X-etunimi").build();
         rivit.add(rivi3);
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
         ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
@@ -98,7 +145,7 @@ public class ErillishakuExcelTest {
     @Test
     public void testaaVientiToinenAste() throws Exception {
         List<ErillishakuRivi> rivit = createErillishakuRivisWithTwoValidRows();
-        ErillishakuRivi rivi3 = new ErillishakuRivi();
+        ErillishakuRivi rivi3 = new ErillishakuRiviBuilder().build();
         rivit.add(rivi3);
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
         ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());

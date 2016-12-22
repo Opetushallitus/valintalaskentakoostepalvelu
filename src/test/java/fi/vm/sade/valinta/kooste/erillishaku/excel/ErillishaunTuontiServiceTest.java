@@ -212,8 +212,35 @@ public class ErillishaunTuontiServiceTest {
     }
 
     private static ErillishakuRivi createRow(String henkilotunnus, String personOid, String hakemusOid) {
-        return new ErillishakuRivi(hakemusOid, "Toppurainen", "Joonas", henkilotunnus, "tuomas.toppurainen@example.com", "10.12.1975", "MIES", personOid,
-            "FI", "HYVAKSYTTY", false, new Date(), "KESKEN", "EI_TEHTY", false, false, "FI", "045-6709709", "Kaisaniemenkatu 2 B", "00100", "Helsinki", "FIN", "FIN", "Helsinki", true, "FIN", "TARKISTAMATTA");
+        return new ErillishakuRiviBuilder()
+                .hakemusOid(hakemusOid)
+                .sukunimi("Toppurainen")
+                .etunimi("Joonas")
+                .henkilotunnus(henkilotunnus)
+                .sahkoposti("tuomas.toppurainen@example.com")
+                .syntymaAika("10.12.1975")
+                .sukupuoli(Sukupuoli.MIES)
+                .personOid(personOid)
+                .aidinkieli("FI")
+                .hakemuksenTila("HYVAKSYTTY")
+                .ehdollisestiHyvaksyttavissa(false)
+                .hyvaksymiskirjeLahetetty(new Date())
+                .vastaanottoTila("KESKEN")
+                .ilmoittautumisTila("EI_TEHTY")
+                .julkaistaankoTiedot(false)
+                .poistetaankoRivi(false)
+                .asiointikieli("FI")
+                .puhelinnumero("045-6709709")
+                .osoite("Kaisaniemenkatu 2 B")
+                .postinumero("00100")
+                .postitoimipaikka("Helsinki")
+                .asuinmaa("FIN")
+                .kansalaisuus("FIN")
+                .kotikunta("Helsinki")
+                .toisenAsteenSuoritus(true)
+                .toisenAsteenSuoritusmaa("FIN")
+                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CKECKED)
+                .build();
     }
 
     public final static class TuntemattomallaAidinkielella extends ErillisHakuTuontiTestCase {

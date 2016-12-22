@@ -67,12 +67,34 @@ public class ErillishakuDataRivi extends DataRivi {
         String toisenAsteenSuoritusmaa = rivi.getArvoAt(index++);
 
         if (isDataRow(rivi, sukunimi, etunimi, oid)) {
-            kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
-                    sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
-                    sukupuoli, oid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksytty, hyvaksymiskirjeLahetetty,
-                    vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, false, asiointikieli, puhelinnumero,
-                    osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus,
-                    toisenAsteenSuoritusmaa, maksuvelvollisuus));
+            kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRiviBuilder()
+                    .sukunimi(sukunimi)
+                    .etunimi(etunimi)
+                    .henkilotunnus(henkilotunnus)
+                    .sahkoposti(sahkoposti)
+                    .syntymaAika(syntymaAika)
+                    .sukupuoli(sukupuoli)
+                    .personOid(oid)
+                    .aidinkieli(aidinkieli)
+                    .hakemuksenTila(hakemuksenTila)
+                    .ehdollisestiHyvaksyttavissa(ehdollisestiHyvaksytty)
+                    .hyvaksymiskirjeLahetetty(hyvaksymiskirjeLahetetty)
+                    .vastaanottoTila(vastaanottoTila)
+                    .ilmoittautumisTila(ilmoittautumisTila)
+                    .julkaistaankoTiedot(julkaistaankoTiedot)
+                    .poistetaankoRivi(false)
+                    .asiointikieli(asiointikieli)
+                    .puhelinnumero(puhelinnumero)
+                    .osoite(osoite)
+                    .postinumero(postinumero)
+                    .postitoimipaikka(postitoimipaikka)
+                    .asuinmaa(asuinmaa)
+                    .kansalaisuus(kansalaisuus)
+                    .kotikunta(kotikunta)
+                    .toisenAsteenSuoritus(toisenAsteenSuoritus)
+                    .toisenAsteenSuoritusmaa(toisenAsteenSuoritusmaa)
+                    .maksuvelvollisuus(maksuvelvollisuus)
+                    .build());
         }
         return true;
     }

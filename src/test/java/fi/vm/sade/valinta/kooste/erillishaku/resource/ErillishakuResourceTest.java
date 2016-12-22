@@ -7,8 +7,7 @@ import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
@@ -30,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class ErillishakuResourceTest {
@@ -151,34 +151,36 @@ public class ErillishakuResourceTest {
                 "SV",
                 null);
         assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO(null));
-        final ErillishakuRivi expectedRivi = new ErillishakuRivi(
-                MockData.hakemusOid,
-                MockData.sukunimi,
-                MockData.etunimi,
-                MockData.hetu,
-                "testi@testi.fi",
-                MockData.syntymaAika,
-                "MIES",
-                "",
-                "SV",
-                "KESKEN",
-                false,
-                null,
-                "",
-                "",
-                false,
-                false,
-                "SV",
-                "040123",
-                "Testitie 2",
-                "00100",
-                "HELSINKI",
-                "FIN",
-                "FIN",
-                "Helsinki",
-                hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null,
-                hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "",
-                "EI_TARKISTETTU");
+
+        final ErillishakuRivi expectedRivi = new ErillishakuRiviBuilder()
+                .hakemusOid(MockData.hakemusOid)
+                .sukunimi(MockData.sukunimi)
+                .etunimi(MockData.etunimi)
+                .henkilotunnus(MockData.hetu)
+                .sahkoposti("testi@testi.fi")
+                .syntymaAika(MockData.syntymaAika)
+                .sukupuoli(Sukupuoli.MIES)
+                .personOid("")
+                .aidinkieli("SV")
+                .hakemuksenTila("KESKEN")
+                .ehdollisestiHyvaksyttavissa(false)
+                .hyvaksymiskirjeLahetetty(null)
+                .vastaanottoTila("")
+                .ilmoittautumisTila("")
+                .julkaistaankoTiedot(false)
+                .poistetaankoRivi(false)
+                .asiointikieli("SV")
+                .puhelinnumero("040123")
+                .osoite("Testitie 2")
+                .postinumero("00100")
+                .postitoimipaikka("HELSINKI")
+                .asuinmaa("FIN")
+                .kansalaisuus("FIN")
+                .kotikunta("Helsinki")
+                .toisenAsteenSuoritus(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null)
+                .toisenAsteenSuoritusmaa(hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "")
+                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CKECKED)
+                .build();
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }
 

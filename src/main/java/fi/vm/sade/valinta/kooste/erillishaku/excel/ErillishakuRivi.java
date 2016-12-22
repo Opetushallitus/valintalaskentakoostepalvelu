@@ -1,11 +1,9 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.DateDeserializers;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
-import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil;
 import org.apache.commons.lang.StringUtils;
@@ -61,21 +59,6 @@ public class ErillishakuRivi {
     public ErillishakuRivi() {
         this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false,
                 null, null, null, false, false, null, null, null, null, null, null, null, null, null, null, null);
-    }
-
-    public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
-                           String syntymaAika, String sukupuoli, String personOid, String aidinkieli,
-                           String hakemuksenTila, boolean ehdollisestiHyvaksyttavissa, Date hyvaksymiskirjeLahetetty,
-                           String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot,
-                           boolean poistetaankoRivi, String asiointikieli, String puhelinnumero, String osoite,
-                           String postinumero, String postitoimipaikka, String asuinmaa, String kansalaisuus,
-                           String kotikunta, Boolean toisenAsteenSuoritus, String toisenAsteenSuoritusmaa,
-                           String maksuvelvollisuus) {
-        this(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, Sukupuoli.fromString(sukupuoli),
-                personOid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty,
-                vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
-                osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus,
-                toisenAsteenSuoritusmaa, maksuvelvollisuus);
     }
 
     public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
@@ -257,19 +240,11 @@ public class ErillishakuRivi {
     }
 
     public ErillishakuRivi withAidinkieli(String aidinkieli) {
-        return new ErillishakuRivi(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, sukupuoli,
-                personOid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty,
-                vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
-                osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus,
-                toisenAsteenSuoritusmaa, maksuvelvollisuus);
+        return ErillishakuRiviBuilder.fromRivi(this).aidinkieli(aidinkieli).build();
     }
 
     public ErillishakuRivi withHakemusOid(String hakemusOid) {
-        return new ErillishakuRivi(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, sukupuoli,
-                personOid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksyttavissa, hyvaksymiskirjeLahetetty,
-                vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi, asiointikieli, puhelinnumero,
-                osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta, toisenAsteenSuoritus,
-                toisenAsteenSuoritusmaa, maksuvelvollisuus);
+        return ErillishakuRiviBuilder.fromRivi(this).hakemusOid(hakemusOid).build();
     }
 
     public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
