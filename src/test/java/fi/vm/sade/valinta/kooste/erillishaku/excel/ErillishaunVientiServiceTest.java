@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
@@ -80,6 +79,6 @@ public class ErillishaunVientiServiceTest {
         assertEquals("Rivi", erillishakuRivi.getEtunimi());
         assertEquals("Esimerkki", erillishakuRivi.getSukunimi());
         assertEquals(false, erillishakuRivi.isJulkaistaankoTiedot());
-        assertEquals(Maksuvelvollisuus.NOT_CKECKED, erillishakuRivi.getMaksuvelvollisuus());
+        assertEquals(Maksuvelvollisuus.NOT_CHECKED, erillishakuRivi.getMaksuvelvollisuus());
     }
 }

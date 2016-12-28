@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
-import fi.vm.sade.tarjonta.service.types.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
@@ -133,7 +132,7 @@ public class ErillishakuExcel {
                     .kotikunta("HELSINKI")
                     .toisenAsteenSuoritus(true)
                     .toisenAsteenSuoritusmaa("FIN")
-                    .maksuvelvollisuus(Maksuvelvollisuus.NOT_CKECKED)
+                    .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
                     .build()).stream();
         } else {
             return erillishakurivit.stream();

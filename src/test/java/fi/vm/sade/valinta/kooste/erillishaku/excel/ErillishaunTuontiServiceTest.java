@@ -239,7 +239,7 @@ public class ErillishaunTuontiServiceTest {
                 .kotikunta("Helsinki")
                 .toisenAsteenSuoritus(true)
                 .toisenAsteenSuoritusmaa("FIN")
-                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CKECKED)
+                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
                 .build();
     }
 

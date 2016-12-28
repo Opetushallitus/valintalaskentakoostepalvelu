@@ -52,7 +52,7 @@ public class ErillishakuDataRivi extends DataRivi {
         Date hyvaksymiskirjeLahetetty = parseLahetettyDate(rivi.getArvoAt(index++));
         String vastaanottoTila = rivi.getArvoAt(index++);
         String ilmoittautumisTila = rivi.getArvoAt(index++);
-        String maksuvelvollisuus = rivi.getArvoAt(index++);
+        String maksuvelvollisuus = tyyppi == KORKEAKOULU ? rivi.getArvoAt(index++) : Maksuvelvollisuus.NOT_CHECKED;
         boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(rivi.getArvoAt(index++));
 
         String asiointikieli = rivi.getArvoAt(index++);
@@ -63,8 +63,8 @@ public class ErillishakuDataRivi extends DataRivi {
         String asuinmaa = rivi.getArvoAt(index++);
         String kansalaisuus = rivi.getArvoAt(index++);
         String kotikunta = rivi.getArvoAt(index++);
-        Boolean toisenAsteenSuoritus = getBoolean(rivi.getArvoAt(index++));
-        String toisenAsteenSuoritusmaa = rivi.getArvoAt(index++);
+        Boolean toisenAsteenSuoritus = tyyppi == KORKEAKOULU ? getBoolean(rivi.getArvoAt(index++)) : null;
+        String toisenAsteenSuoritusmaa = tyyppi == KORKEAKOULU ? rivi.getArvoAt(index++) : "";
 
         if (isDataRow(rivi, sukunimi, etunimi, oid)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRiviBuilder()
@@ -207,7 +207,7 @@ public class ErillishakuDataRivi extends DataRivi {
     }
 
     private static final Collection<String> MAKSUVELVOLLISUUS_ARVOT = Arrays.asList(
-            Maksuvelvollisuus.NOT_CKECKED,
+            Maksuvelvollisuus.NOT_CHECKED,
             Maksuvelvollisuus.REQUIRED,
             Maksuvelvollisuus.NOT_REQUIRED
     );

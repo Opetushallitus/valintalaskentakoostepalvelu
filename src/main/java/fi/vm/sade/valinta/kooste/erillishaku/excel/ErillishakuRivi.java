@@ -226,6 +226,7 @@ public class ErillishakuRivi {
                 ehdollisestiHyvaksyttavissa + ", " +
                 hyvaksymiskirjeLahetetty + ", " +
                 vastaanottoTila + ", " +
+                maksuvelvollisuus + ", " +
                 julkaistaankoTiedot + ", " +
                 asiointikieli + ", " +
                 puhelinnumero + ", " +

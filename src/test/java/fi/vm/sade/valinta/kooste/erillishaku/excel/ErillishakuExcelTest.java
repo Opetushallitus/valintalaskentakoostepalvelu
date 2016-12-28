@@ -43,7 +43,7 @@ public class ErillishakuExcelTest {
                 .kotikunta("HELSINKI")
                 .toisenAsteenSuoritus(true)
                 .toisenAsteenSuoritusmaa("SWE")
-                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CKECKED)
+                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
                 .build();
         rivit.add(rivi);
         ErillishakuRivi rivi2 = new ErillishakuRiviBuilder()

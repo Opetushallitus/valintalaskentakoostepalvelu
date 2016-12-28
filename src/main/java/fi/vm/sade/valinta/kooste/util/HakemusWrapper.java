@@ -11,7 +11,6 @@ import org.apache.commons.lang.math.NumberUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -322,7 +321,7 @@ public class HakemusWrapper {
     }
 
     public String getMaksuvelvollisuus(String hakukohdeOid) {
-        String result = Maksuvelvollisuus.NOT_CKECKED;
+        String result = Maksuvelvollisuus.NOT_CHECKED;
         if (hakukohdeOid != null && hakemus.getPreferenceEligibilities() != null) {
             for (Eligibility e : hakemus.getPreferenceEligibilities()) {
                 if (e.getAoId().equals(hakukohdeOid)) {

@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
@@ -12,6 +13,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
@@ -27,9 +29,8 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 public class ErillishakuResourceTest {
@@ -179,7 +180,7 @@ public class ErillishakuResourceTest {
                 .kotikunta("Helsinki")
                 .toisenAsteenSuoritus(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null)
                 .toisenAsteenSuoritusmaa(hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "")
-                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CKECKED)
+                .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
                 .build();
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }

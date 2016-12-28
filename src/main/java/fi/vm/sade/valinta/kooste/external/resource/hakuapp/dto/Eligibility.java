@@ -41,7 +41,7 @@ public class Eligibility {
 
     public String getMaksuvelvollisuus() {
         if (maksuvelvollisuus == null) {
-            return Maksuvelvollisuus.NOT_CKECKED;
+            return Maksuvelvollisuus.NOT_CHECKED;
         }
         return maksuvelvollisuus;
     }
