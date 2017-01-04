@@ -44,7 +44,7 @@ public class ErillishakuExcel {
         esittelyt.add(Collections.singletonList(new TekstiArvo(tarjoajaNimi, true, false, 4)));
         esittelyt.add(Collections.singletonList(new TekstiArvo(StringUtils.EMPTY)));
 
-        ImmutableList.Builder builder = ImmutableList.builder();
+        ImmutableList.Builder<Arvo> builder = ImmutableList.builder();
         builder.add(new TekstiArvo("Sukunimi"));
         builder.add(new TekstiArvo("Etunimi"));
         builder.add(new TekstiArvo("Henkilötunnus"));
