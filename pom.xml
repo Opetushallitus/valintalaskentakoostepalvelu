@@ -668,14 +668,6 @@
 			<scope>test</scope>
 		</dependency>
 
-
-		<!-- UUID generator used from here -->
-		<dependency>
-			<groupId>org.jgroups</groupId>
-			<artifactId>jgroups</artifactId>
-			<version>2.10.0.GA</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.mock-server</groupId>
 			<artifactId>mockserver-netty</artifactId>

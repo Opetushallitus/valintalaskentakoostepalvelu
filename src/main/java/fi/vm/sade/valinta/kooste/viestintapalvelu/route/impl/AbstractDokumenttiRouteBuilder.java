@@ -15,7 +15,7 @@ import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
-import org.jgroups.util.UUID;
+import java.util.UUID;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
