@@ -372,7 +372,7 @@ class ErillisHakuTuontiTestCase {
 
     protected void importRows(List<ErillishakuRivi> rivit, MockHenkiloAsyncResource mockHenkiloAsyncResource) {
         final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, mockHenkiloAsyncResource, valintaTulosServiceAsyncResource, koodistoCachedAsyncResource, Schedulers.immediate());
-        tuontiService.tuoJson("frank", prosessi, erillisHaku, rivit);
+        tuontiService.tuoJson("frank", prosessi, erillisHaku, rivit, false);
         Mockito.verify(prosessi).valmistui("ok");
     }
 }

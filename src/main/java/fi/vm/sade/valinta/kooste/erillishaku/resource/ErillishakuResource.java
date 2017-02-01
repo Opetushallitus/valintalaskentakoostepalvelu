@@ -147,7 +147,42 @@ public class ErillishakuResource {
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoJson(
                 KoosteAudit.username(),
-                prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit());
+                prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit(), true);
+        return prosessi.toProsessiId();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
+    @POST
+    @Path("/tuonti/ui")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti JSON-tietueella", response = ProsessiId.class)
+    public ProsessiId tuontiJsonFromUI(
+            @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU")
+            @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
+            @QueryParam("hakuOid") String hakuOid,
+            @QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("valintatapajonoOid") String valintatapajonoOid,
+            @QueryParam("valintatapajononNimi") String valintatapajononNimi,
+            @ApiParam("maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>" +
+                    "hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>" +
+                    "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>" +
+                    "ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]<br>" +
+                    "sukupuoli=[MIES|NAINEN|1|2]<br>" +
+                    "aidinkieli=[fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|<br>" +
+                    "ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|<br>" +
+                    "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>" +
+                    "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>" +
+                    "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
+                    ErillishakuJson json) throws Exception {
+        LOG.info("Käyttäjä " + KoosteAudit.username() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
+        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
+        ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
+        dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+        tuontiService.tuoJson(
+                KoosteAudit.username(),
+                prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit(), false);
         return prosessi.toProsessiId();
     }
 

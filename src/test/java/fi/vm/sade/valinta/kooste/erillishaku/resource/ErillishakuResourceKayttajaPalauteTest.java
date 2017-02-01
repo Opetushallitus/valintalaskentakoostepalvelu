@@ -47,7 +47,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
     String hakukohdeOid = "1.2.246.562.5.72607738902";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
-    final HttpResource jsonResource = new HttpResource(root + "/erillishaku/tuonti/json");
+    final HttpResource jsonResource = new HttpResource(root + "/erillishaku/tuonti/ui");
     final HttpResource excelResource = new HttpResource(root + "/erillishaku/tuonti");
 
     @Before

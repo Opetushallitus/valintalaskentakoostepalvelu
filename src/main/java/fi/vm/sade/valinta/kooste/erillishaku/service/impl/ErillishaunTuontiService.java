@@ -122,8 +122,8 @@ public class ErillishaunTuontiService {
         tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data), true);
     }
 
-    public void tuoJson(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit) {
-        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit), false);
+    public void tuoJson(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit, final boolean saveApplications) {
+        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit), saveApplications);
     }
 
     private void tuoData(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer, final boolean saveApplications) {
