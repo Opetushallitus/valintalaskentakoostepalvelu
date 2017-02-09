@@ -71,7 +71,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
-        return getAsObservable(getUrl("valinta-tulos-service.virkailija.haku.hakukohde", hakuOid, hakukohdeOid), new GenericType<List<Valintatulos>>() {}.getType());
+        return getAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.haku.hakukohde", hakuOid, hakukohdeOid), new GenericType<List<Valintatulos>>() {}.getType());
     }
 
     @Override
