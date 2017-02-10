@@ -88,7 +88,7 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
 
     public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
         ///erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
-        String url = "/erillissijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
+        String url = getUrl("sijoittelu-service.erillissijoittelu.sijotteluajo.hakukohde", hakuOid, sijoitteluAjoId, hakukohdeOid);
         getWebClient()
                 .path(url)
                 .accept(MediaType.WILDCARD)

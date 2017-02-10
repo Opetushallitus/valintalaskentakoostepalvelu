@@ -42,7 +42,7 @@ public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource imp
     @Override
     public Observable<Response> previewSecureLink(TokensRequest tokensRequest) {
         return getAsObservable(
-                "/api/v1/preview/haku/" + tokensRequest.getHakuOid() + "/template/" + tokensRequest.getTemplatename() + "/lang/" + tokensRequest.getLang(),
+                getUrl("oppijan-tunnistus.preview.haku.template.lang", tokensRequest.getHakuOid(), tokensRequest.getTemplatename(), tokensRequest.getLang()),
                 client -> {
                     client.accept(EML_TYPE);
                     client.query("callback-url", tokensRequest.getUrl());
