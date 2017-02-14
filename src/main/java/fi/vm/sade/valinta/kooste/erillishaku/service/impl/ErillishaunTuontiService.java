@@ -406,7 +406,8 @@ public class ErillishaunTuontiService {
                         rivi.getSukunimi(),
                         Optional.of(true),
                         rivi.getHyvaksymiskirjeLahetetty(),
-                        Lists.newArrayList()))
+                        Lists.newArrayList(),
+                        "","","",""))
                 .collect(Collectors.toList());
         try {
             if (!poistettavatDtos.isEmpty()) {
@@ -539,7 +540,8 @@ public class ErillishaunTuontiService {
                 rivi.getSukunimi(),
                 Optional.of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
                 rivi.getHyvaksymiskirjeLahetetty(),
-                Lists.newArrayList()));
+                Lists.newArrayList(),
+                "", "", "", ""));
     }
 
     private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja, String selite) {
