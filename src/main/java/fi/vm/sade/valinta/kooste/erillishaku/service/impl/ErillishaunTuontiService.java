@@ -11,7 +11,7 @@ import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkista
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static rx.schedulers.Schedulers.newThread;
-import com.google.common.collect.Iterables;
+
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
@@ -43,10 +43,11 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValinta
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValinnantulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
@@ -71,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -118,20 +120,20 @@ public class ErillishaunTuontiService {
                 newThread());
     }
 
-    public void tuoExcelistä(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
-        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data), true);
+    public void tuoExcelistä(AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
+        tuoData(auditSession, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data), true);
     }
 
-    public void tuoJson(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit, final boolean saveApplications) {
-        tuoData(username, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit), saveApplications);
+    public void tuoJson(AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit, final boolean saveApplications) {
+        tuoData(auditSession, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit), saveApplications);
     }
 
-    private void tuoData(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer, final boolean saveApplications) {
+    private void tuoData(AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer, final boolean saveApplications) {
         Observable.just(erillishaku).subscribeOn(scheduler).subscribe(haku -> {
             final ImportedErillisHakuExcel erillishakuExcel;
             try {
                 erillishakuExcel = importer.apply(haku);
-                tuoHakijatJaLuoHakemukset(username, prosessi, erillishakuExcel, saveApplications, haku);
+                tuoHakijatJaLuoHakemukset(auditSession, prosessi, erillishakuExcel, saveApplications, haku);
             } catch(ErillishaunDataException dataException) {
                 LOG.warn("excel ei validi:", dataException);
                 prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
@@ -207,7 +209,7 @@ public class ErillishaunTuontiService {
             }).collect(Collectors.toList());
         }
 
-    private void tuoHakijatJaLuoHakemukset(final String username, final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final boolean saveApplications, final ErillishakuDTO haku) throws Exception {
+    private void tuoHakijatJaLuoHakemukset(final AuditSession auditSession, final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final boolean saveApplications, final ErillishakuDTO haku) throws Exception {
         LOG.info("Aloitetaan tuonti. Rivit=" + erillishakuExcel.rivit.size());
         final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
 
@@ -238,7 +240,7 @@ public class ErillishaunTuontiService {
             lisattavatTaiKeskeneraiset = kasitteleHakemukset(haku, henkilot, lisattavatTaiKeskeneraiset, saveApplications, prosessi);
         }
         LOG.info("Viedaan hakijoita ({}kpl) jonoon {}", lisattavatTaiKeskeneraiset.size(), haku.getValintatapajononNimi());
-        tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, prosessi);
+        tuoErillishaunTilat(auditSession, haku, lisattavatTaiKeskeneraiset, poistettavat, prosessi);
     }
 
     private String convertKansalaisuusKoodi(String kansalaisuus) {
@@ -381,7 +383,9 @@ public class ErillishaunTuontiService {
         return resultDTO;
     }
 
-    private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat, final KirjeProsessi prosessi) {
+    private void tuoErillishaunTilat(final AuditSession auditSession, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat, final KirjeProsessi prosessi) {
+        final String username = auditSession.getPersonOid();
+
         final List<ErillishaunHakijaDTO> hakijat = lisattavatTaiKeskeneraiset.stream().flatMap(rivi ->
                 toErillishaunHakijaStream(haku, rivi)).collect(Collectors.toList());
 
@@ -418,7 +422,7 @@ public class ErillishaunTuontiService {
                         .collect(Collectors.toList());
 
                 Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus =
-                        doTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla, prosessi);
+                        doVastaanottoTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla, prosessi);
                 vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
                     List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
                     epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
@@ -457,8 +461,10 @@ public class ErillishaunTuontiService {
                                             .add("ilmoittautumistila", h.getIlmoittautumisTila())
                                             .build())
                             );
-                            prosessi.vaiheValmistui();
-                            prosessi.valmistui("ok");
+                            doValinnantilojenTallennusValintaTulosServiceen(auditSession, haku, hakijatJaPoistettavat,(ok) -> {
+                                prosessi.vaiheValmistui();
+                                prosessi.valmistui(ok);
+                            });
                         },
                         poikkeus -> {
                             LOG.error("Erillishaun tilojen tuonti epäonnistui", poikkeus);
@@ -473,7 +479,7 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private Observable<List<VastaanottoResultDTO>> doTilojenTallennusValintaTulosServiceen(String username, List<ErillishaunHakijaDTO> hakijat, final KirjeProsessi prosessi) {
+    private Observable<List<VastaanottoResultDTO>> doVastaanottoTilojenTallennusValintaTulosServiceen(String username, List<ErillishaunHakijaDTO> hakijat, final KirjeProsessi prosessi) {
         if(hakijat.isEmpty()) {
             return Observable.just(Collections.emptyList());
         } else {
@@ -482,6 +488,25 @@ public class ErillishaunTuontiService {
                         LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-serviceen", e);
                         prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE, e.getMessage()));
                     });
+        }
+    }
+
+    private void doValinnantilojenTallennusValintaTulosServiceen(final AuditSession auditSession, final ErillishakuDTO haku, List<ErillishaunHakijaDTO> hakijatJaPoistettavat, Consumer<String> ready) {
+        try {
+            valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid(), hakijatJaPoistettavat.stream().map(hakijaDTO ->
+                    Valinnantulos.of(hakijaDTO)).collect(Collectors.toList())).subscribe(
+                    done -> {
+                        LOG.info("Erillishaun tulokset tallennettu onnistuneesti Valintarekisteriin.");
+                        ready.accept("ok");
+                    },
+                    poikkeus -> {
+                        LOG.warn("Erillishaun tulosten tallennus Valintarekisteriin epäonnistui", poikkeus);
+                        ready.accept("ok");
+                    }
+            );
+        } catch(Exception e) {
+            LOG.error("Erillishaun tulosten tallennus Valintarekisteriin epäonnistui", e);
+            ready.accept("ok");
         }
     }
 

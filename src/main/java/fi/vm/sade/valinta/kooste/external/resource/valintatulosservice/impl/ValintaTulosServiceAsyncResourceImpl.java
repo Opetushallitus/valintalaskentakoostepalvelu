@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -10,8 +11,7 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
@@ -20,14 +20,18 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoR
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -125,6 +129,20 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 getUrl("valinta-tulos-service.virkailija.vastaanotto"),
                 new GenericType<List<VastaanottoResultDTO>>() {}.getType(),
                 Entity.json(tallennettavat));
+    }
+
+    @Override
+    public Observable<List<ValinnantulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
+        return postAsObservable("/erillishaku/valinnan-tulos/" + valintatapajonoOid,
+                new TypeToken<List<ValinnantulosUpdateStatus>>() {}.getType(),
+                Entity.entity(new ValinnantulosRequest(auditSession, valinnantulokset), MediaType.APPLICATION_JSON),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    if(auditSession.getIfUnmodifiedSince().isPresent()) {
+                        client.header("If-Unmodified-Since", auditSession.getIfUnmodifiedSince().get());
+                    }
+                    return client;
+                });
     }
 
     private static class VtsDateTimeJsonDeserializer implements JsonDeserializer<DateTime> {

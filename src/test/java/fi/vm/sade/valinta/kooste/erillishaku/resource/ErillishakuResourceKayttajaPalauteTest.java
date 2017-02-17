@@ -141,6 +141,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
                 .query("tarjoajaOid", tarjoajaOid)
                 .query("valintatapajonoOid", valintatapajonoOid)
                 .query("valintatapajononNimi", "varsinainen jono")
+                .header("If-Unmodified-Since", "Tue, 3 Jun 2008 11:05:30 GMT")
                 .accept(MediaType.APPLICATION_JSON);
     }
     private WebClient excelClient() {

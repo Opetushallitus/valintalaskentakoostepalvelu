@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.oidHaustaJaHakukohteesta;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
 import static rx.observables.BlockingObservable.from;
+
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -23,18 +25,29 @@ import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller("ErillishakuResource")
 @Path("erillishaku")
@@ -65,6 +78,9 @@ public class ErillishakuResource {
     private ErillishaunVientiService vientiService;
     @Autowired
     private TarjontaAsyncResource tarjontaResource;
+
+    @Context
+    HttpServletRequest httpServletRequest =null;
 
     @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
     @POST
@@ -108,7 +124,7 @@ public class ErillishakuResource {
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoExcelistä(
-                KoosteAudit.username(),
+                createAuditSession(),
                 prosessi,
                 new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi),
                 new ByteArrayInputStream(b.toByteArray())
@@ -146,7 +162,7 @@ public class ErillishakuResource {
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoJson(
-                KoosteAudit.username(),
+                createAuditSession(),
                 prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit(), true);
         return prosessi.toProsessiId();
     }
@@ -181,9 +197,44 @@ public class ErillishakuResource {
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoJson(
-                KoosteAudit.username(),
+                createAuditSession(true),
                 prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit(), false);
         return prosessi.toProsessiId();
     }
 
+    private AuditSession createAuditSession() {
+        return createAuditSession(false);
+    }
+
+    private AuditSession createAuditSession(boolean isUnmodifiedSinceMandatory) {
+        AuditSession session = new AuditSession();
+        session.setPersonOid(KoosteAudit.username());
+        session.setInetAddress(Optional.ofNullable(httpServletRequest.getHeader("X-Forwarded-For")).orElse(httpServletRequest.getRemoteAddr()));
+        session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
+        session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory));
+        session.setRoles(getRoles());
+        return session;
+    }
+
+    private Optional<String> readIfUnmodifiedSince(boolean isUnmodifiedSinceMandatory) {
+        Optional<String> isUnmodifiedSinceHeader = Optional.ofNullable(httpServletRequest.getHeader("If-Unmodified-Since"));
+        if(isUnmodifiedSinceMandatory && !isUnmodifiedSinceHeader.isPresent()) {
+            throw new IllegalArgumentException("If-Unmodified-Since on pakollinen otsake.");
+        } else if(isUnmodifiedSinceMandatory) {
+            try {
+                DateTimeFormatter.RFC_1123_DATE_TIME.parse(isUnmodifiedSinceHeader.get());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Otsake If-Unmodified-Since on väärässä formaatissa: " + isUnmodifiedSinceHeader.get());
+            }
+        }
+        return isUnmodifiedSinceHeader;
+    }
+
+    private List<String> getRoles() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(null == authentication) {
+            return new ArrayList<>();
+        }
+        return authentication.getAuthorities().stream().map(a -> ((GrantedAuthority)a).getAuthority()).collect(Collectors.toList());
+    }
 }

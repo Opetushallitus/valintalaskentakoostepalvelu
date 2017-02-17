@@ -1,0 +1,144 @@
+package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto;
+
+import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
+import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
+import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
+import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
+
+import java.util.Optional;
+
+public class Valinnantulos {
+    private String hakukohdeOid;
+    private String valintatapajonoOid;
+    private String hakemusOid;
+    private String henkiloOid;
+    private Optional<Boolean> ehdollisestiHyvaksyttavissa = Optional.empty();
+    private Optional<Boolean> julkaistavissa = Optional.empty();
+    private Optional<Boolean> hyvaksyttyVarasijalta = Optional.empty();
+    private Optional<Boolean> hyvaksyPeruuntunut = Optional.empty();
+    private Optional<Boolean> poistettava = Optional.empty();
+    private IlmoittautumisTila ilmoittautumistila;
+    private HakemuksenTila valinnantila;
+    private ValintatuloksenTila vastaanottotila;
+
+    public String getHakukohdeOid() {
+        return hakukohdeOid;
+    }
+
+    public void setHakukohdeOid(String hakukohdeOid) {
+        this.hakukohdeOid = hakukohdeOid;
+    }
+
+    public String getValintatapajonoOid() {
+        return valintatapajonoOid;
+    }
+
+    public void setValintatapajonoOid(String valintatapajonoOid) {
+        this.valintatapajonoOid = valintatapajonoOid;
+    }
+
+    public String getHakemusOid() {
+        return hakemusOid;
+    }
+
+    public void setHakemusOid(String hakemusOid) {
+        this.hakemusOid = hakemusOid;
+    }
+
+    public String getHenkiloOid() {
+        return henkiloOid;
+    }
+
+    public void setHenkiloOid(String henkiloOid) {
+        this.henkiloOid = henkiloOid;
+    }
+
+    public Optional<Boolean> getEhdollisestiHyvaksyttavissa() {
+        return ehdollisestiHyvaksyttavissa;
+    }
+
+    public void setEhdollisestiHyvaksyttavissa(Optional<Boolean> ehdollisestiHyvaksyttavissa) {
+        this.ehdollisestiHyvaksyttavissa = ehdollisestiHyvaksyttavissa;
+    }
+
+    public Optional<Boolean> getJulkaistavissa() {
+        return julkaistavissa;
+    }
+
+    public void setJulkaistavissa(Optional<Boolean> julkaistavissa) {
+        this.julkaistavissa = julkaistavissa;
+    }
+
+    public Optional<Boolean> getHyvaksyttyVarasijalta() {
+        return hyvaksyttyVarasijalta;
+    }
+
+    public void setHyvaksyttyVarasijalta(Optional<Boolean> hyvaksyttyVarasijalta) {
+        this.hyvaksyttyVarasijalta = hyvaksyttyVarasijalta;
+    }
+
+    public Optional<Boolean> getHyvaksyPeruuntunut() {
+        return hyvaksyPeruuntunut;
+    }
+
+    public void setHyvaksyPeruuntunut(Optional<Boolean> hyvaksyPeruuntunut) {
+        this.hyvaksyPeruuntunut = hyvaksyPeruuntunut;
+    }
+
+    public Optional<Boolean> getPoistettava() {
+        return poistettava;
+    }
+
+    public void setPoistettava(Optional<Boolean> poistettava) {
+        this.poistettava = poistettava;
+    }
+
+    public IlmoittautumisTila getIlmoittautumistila() {
+        return ilmoittautumistila;
+    }
+
+    public void setIlmoittautumistila(IlmoittautumisTila ilmoittautumistila) {
+        this.ilmoittautumistila = ilmoittautumistila;
+    }
+
+    public HakemuksenTila getValinnantila() {
+        return valinnantila;
+    }
+
+    public void setValinnantila(HakemuksenTila valinnantila) {
+        this.valinnantila = valinnantila;
+    }
+
+    public ValintatuloksenTila getVastaanottotila() {
+        return vastaanottotila;
+    }
+
+    public void setVastaanottotila(ValintatuloksenTila vastaanottotila) {
+        this.vastaanottotila = vastaanottotila;
+    }
+
+    public static Valinnantulos of(ErillishaunHakijaDTO hakija) {
+        Valinnantulos valinnantulos = new Valinnantulos();
+        valinnantulos.setHakemusOid(hakija.hakemusOid);
+        valinnantulos.setHenkiloOid(hakija.hakijaOid);
+        valinnantulos.setHakukohdeOid(hakija.hakukohdeOid);
+        valinnantulos.setValintatapajonoOid(hakija.valintatapajonoOid);
+
+        valinnantulos.setEhdollisestiHyvaksyttavissa(Optional.of(hakija.ehdollisestiHyvaksyttavissa));
+        valinnantulos.setJulkaistavissa(Optional.of(hakija.julkaistavissa));
+
+        if(hakija.poistetaankoTulokset) {
+            valinnantulos.setPoistettava(Optional.of(true));
+        }
+
+        valinnantulos.setValinnantila(hakija.hakemuksenTila);
+        valinnantulos.setVastaanottotila(hakija.valintatuloksenTila);
+        valinnantulos.setIlmoittautumistila(hakija.ilmoittautumisTila);
+
+        //TODO valinnantulos.setHyvaksyPeruuntunut(???);
+        //TODO valinnantulos.setHyvaksyttyVarasijalta(???);
+
+        return valinnantulos;
+    }
+
+}
