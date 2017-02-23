@@ -25,13 +25,12 @@ import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -80,7 +79,7 @@ public class ErillishakuResource {
     private TarjontaAsyncResource tarjontaResource;
 
     @Context
-    HttpServletRequest httpServletRequest =null;
+    private HttpServletRequest httpServletRequestJaxRS;
 
     @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
     @POST
@@ -206,7 +205,26 @@ public class ErillishakuResource {
         return createAuditSession(false);
     }
 
+    private HttpServletRequest request() {
+        if(null != httpServletRequestJaxRS) {
+            //Käytetään unit-testeissä
+            return httpServletRequestJaxRS;
+        }
+        RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
+        if(null != attributes) {
+            if(attributes instanceof ServletRequestAttributes) {
+                return ((ServletRequestAttributes)attributes).getRequest();
+            } else {
+                LOG.info("RequestContextHolderin request on vääränlainen:" + attributes.getClass().getName());
+                throw new IllegalStateException("Ei löydetty validia HTTP requestia.");
+            }
+        }
+        LOG.error("Ei löydetty HTTP requestia.");
+        throw new InternalError("Ei löydetty HTTP requestia.");
+    }
+
     private AuditSession createAuditSession(boolean isUnmodifiedSinceMandatory) {
+        HttpServletRequest httpServletRequest = request();
         AuditSession session = new AuditSession();
         session.setPersonOid(KoosteAudit.username());
         session.setInetAddress(Optional.ofNullable(httpServletRequest.getHeader("X-Forwarded-For")).orElse(httpServletRequest.getRemoteAddr()));
@@ -217,7 +235,7 @@ public class ErillishakuResource {
     }
 
     private Optional<String> readIfUnmodifiedSince(boolean isUnmodifiedSinceMandatory) {
-        Optional<String> isUnmodifiedSinceHeader = Optional.ofNullable(httpServletRequest.getHeader("If-Unmodified-Since"));
+        Optional<String> isUnmodifiedSinceHeader = Optional.ofNullable(request().getHeader("If-Unmodified-Since"));
         if(isUnmodifiedSinceMandatory && !isUnmodifiedSinceHeader.isPresent()) {
             throw new IllegalArgumentException("If-Unmodified-Since on pakollinen otsake.");
         } else if(isUnmodifiedSinceMandatory) {
