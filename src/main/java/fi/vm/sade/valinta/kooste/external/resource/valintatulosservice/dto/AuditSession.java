@@ -59,4 +59,15 @@ public class AuditSession {
     public void setIfUnmodifiedSince(Optional<String> ifUnmodifiedSince) {
         this.ifUnmodifiedSince = ifUnmodifiedSince;
     }
+
+    @Override
+    public String toString() {
+        return "AuditSession{" +
+                "personOid='" + personOid + '\'' +
+                ", roles=" + roles +
+                ", userAgent='" + userAgent + '\'' +
+                ", inetAddress='" + inetAddress + '\'' +
+                ", ifUnmodifiedSince=" + ifUnmodifiedSince +
+                '}';
+    }
 }

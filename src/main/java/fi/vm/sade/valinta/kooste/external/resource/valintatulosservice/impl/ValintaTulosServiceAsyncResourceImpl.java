@@ -19,6 +19,8 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoR
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -36,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource implements ValintaTulosServiceAsyncResource {
+
+    private final Logger LOG = LoggerFactory.getLogger(ValintaTulosServiceAsyncResourceImpl.class);
 
     public ValintaTulosServiceAsyncResourceImpl() {
         super(TimeUnit.MINUTES.toMillis(30));
@@ -133,6 +137,20 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<ValinnantulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
+        String debug = "";
+        for(Valinnantulos tulos : valinnantulokset) {
+            debug += tulos.toString();
+        }
+
+        LOG.info("Kustutaan osoitetta " + "/erillishaku/valinnan-tulos/" + valintatapajonoOid
+                + ", audit info on " + auditSession.toString() + " ja valinnantulokset " + debug);
+
+        try {
+            LOG.info("Json " + gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset)));
+        } catch (Exception e) {
+            LOG.error("Ei voitu generoida jsonia", e);
+        }
+
         return postAsObservable("/erillishaku/valinnan-tulos/" + valintatapajonoOid,
                 new TypeToken<List<ValinnantulosUpdateStatus>>() {}.getType(),
                 Entity.entity(new ValinnantulosRequest(auditSession, valinnantulokset), MediaType.APPLICATION_JSON),

@@ -141,4 +141,21 @@ public class Valinnantulos {
         return valinnantulos;
     }
 
+    @Override
+    public String toString() {
+        return "Valinnantulos{" +
+                "hakukohdeOid='" + hakukohdeOid + '\'' +
+                ", valintatapajonoOid='" + valintatapajonoOid + '\'' +
+                ", hakemusOid='" + hakemusOid + '\'' +
+                ", henkiloOid='" + henkiloOid + '\'' +
+                ", ehdollisestiHyvaksyttavissa=" + ehdollisestiHyvaksyttavissa +
+                ", julkaistavissa=" + julkaistavissa +
+                ", hyvaksyttyVarasijalta=" + hyvaksyttyVarasijalta +
+                ", hyvaksyPeruuntunut=" + hyvaksyPeruuntunut +
+                ", poistettava=" + poistettava +
+                ", ilmoittautumistila=" + ilmoittautumistila +
+                ", valinnantila=" + valinnantila +
+                ", vastaanottotila=" + vastaanottotila +
+                '}';
+    }
 }
