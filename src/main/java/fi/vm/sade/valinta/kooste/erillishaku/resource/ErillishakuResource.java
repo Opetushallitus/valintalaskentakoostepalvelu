@@ -253,6 +253,6 @@ public class ErillishakuResource {
         if(null == authentication) {
             return new ArrayList<>();
         }
-        return authentication.getAuthorities().stream().map(a -> ((GrantedAuthority)a).getAuthority()).collect(Collectors.toList());
+        return authentication.getAuthorities().stream().map(a -> ((GrantedAuthority)a).getAuthority()).map(r -> r.replace("ROLE_", "")).collect(Collectors.toList());
     }
 }
