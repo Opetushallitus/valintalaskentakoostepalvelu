@@ -461,7 +461,14 @@ public class ErillishaunTuontiService {
                                             .add("ilmoittautumistila", h.getIlmoittautumisTila())
                                             .build())
                             );
-                            doValinnantilojenTallennusValintaTulosServiceen(auditSession, haku, hakijatJaPoistettavat,(ok) -> {
+                            Supplier<List<Valinnantulos>> valinnantuloksetForValintaTulosService = () -> {
+                                List<Valinnantulos> valinnantulokset = poistettavat.stream().flatMap(rivi ->
+                                        toErillishaunHakijaStream(haku, rivi)).map(hakijaDTO -> Valinnantulos.of(hakijaDTO)).collect(Collectors.toList());
+                                valinnantulokset.addAll(hakijat.stream().map(hakijaDTO -> Valinnantulos.of(hakijaDTO)).collect(Collectors.toList()));
+                                return valinnantulokset;
+                            };
+
+                            doValinnantilojenTallennusValintaTulosServiceen(auditSession, haku, valinnantuloksetForValintaTulosService.get(),(ok) -> {
                                 prosessi.vaiheValmistui();
                                 prosessi.valmistui(ok);
                             });
@@ -486,15 +493,15 @@ public class ErillishaunTuontiService {
             return valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijat, username, "Erillishaun tuonti")).doOnError(
                     e -> {
                         LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-serviceen", e);
+                        LOG.error("", e.getCause());
                         prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE, e.getMessage()));
                     });
         }
     }
 
-    private void doValinnantilojenTallennusValintaTulosServiceen(final AuditSession auditSession, final ErillishakuDTO haku, List<ErillishaunHakijaDTO> hakijatJaPoistettavat, Consumer<String> ready) {
+    private void doValinnantilojenTallennusValintaTulosServiceen(final AuditSession auditSession, final ErillishakuDTO haku, List<Valinnantulos> valinnantulokset, Consumer<String> ready) {
         try {
-            valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid(), hakijatJaPoistettavat.stream().map(hakijaDTO ->
-                    Valinnantulos.of(hakijaDTO)).collect(Collectors.toList())).subscribe(
+            valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid(), valinnantulokset).subscribe(
                     done -> {
                         LOG.info("Erillishaun tulokset tallennettu onnistuneesti Valintarekisteriin.");
                         ready.accept("ok");
