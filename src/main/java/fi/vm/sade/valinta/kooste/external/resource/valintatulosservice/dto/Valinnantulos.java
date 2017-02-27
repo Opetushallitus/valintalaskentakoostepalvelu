@@ -130,10 +130,10 @@ public class Valinnantulos {
         if(hakija.poistetaankoTulokset) {
             valinnantulos.setPoistettava(Optional.of(true));
         }
-
+        
         valinnantulos.setValinnantila(hakija.hakemuksenTila);
-        valinnantulos.setVastaanottotila(hakija.valintatuloksenTila);
-        valinnantulos.setIlmoittautumistila(hakija.ilmoittautumisTila);
+        valinnantulos.setVastaanottotila(Optional.ofNullable(hakija.valintatuloksenTila).orElse(ValintatuloksenTila.KESKEN));
+        valinnantulos.setIlmoittautumistila(Optional.ofNullable(hakija.ilmoittautumisTila).orElse(IlmoittautumisTila.EI_TEHTY));
 
         //TODO valinnantulos.setHyvaksyPeruuntunut(???);
         //TODO valinnantulos.setHyvaksyttyVarasijalta(???);
