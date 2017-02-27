@@ -12,11 +12,11 @@ public class Valinnantulos {
     private String valintatapajonoOid;
     private String hakemusOid;
     private String henkiloOid;
-    private Optional<Boolean> ehdollisestiHyvaksyttavissa = Optional.empty();
-    private Optional<Boolean> julkaistavissa = Optional.empty();
-    private Optional<Boolean> hyvaksyttyVarasijalta = Optional.empty();
-    private Optional<Boolean> hyvaksyPeruuntunut = Optional.empty();
-    private Optional<Boolean> poistettava = Optional.empty();
+    private Boolean ehdollisestiHyvaksyttavissa = null;
+    private Boolean julkaistavissa = null;
+    private Boolean hyvaksyttyVarasijalta = null;
+    private Boolean hyvaksyPeruuntunut = null;
+    private Boolean poistettava = null;
     private IlmoittautumisTila ilmoittautumistila;
     private HakemuksenTila valinnantila;
     private ValintatuloksenTila vastaanottotila;
@@ -53,43 +53,43 @@ public class Valinnantulos {
         this.henkiloOid = henkiloOid;
     }
 
-    public Optional<Boolean> getEhdollisestiHyvaksyttavissa() {
+    public Boolean getEhdollisestiHyvaksyttavissa() {
         return ehdollisestiHyvaksyttavissa;
     }
 
-    public void setEhdollisestiHyvaksyttavissa(Optional<Boolean> ehdollisestiHyvaksyttavissa) {
+    public void setEhdollisestiHyvaksyttavissa(Boolean ehdollisestiHyvaksyttavissa) {
         this.ehdollisestiHyvaksyttavissa = ehdollisestiHyvaksyttavissa;
     }
 
-    public Optional<Boolean> getJulkaistavissa() {
+    public Boolean getJulkaistavissa() {
         return julkaistavissa;
     }
 
-    public void setJulkaistavissa(Optional<Boolean> julkaistavissa) {
+    public void setJulkaistavissa(Boolean julkaistavissa) {
         this.julkaistavissa = julkaistavissa;
     }
 
-    public Optional<Boolean> getHyvaksyttyVarasijalta() {
+    public Boolean getHyvaksyttyVarasijalta() {
         return hyvaksyttyVarasijalta;
     }
 
-    public void setHyvaksyttyVarasijalta(Optional<Boolean> hyvaksyttyVarasijalta) {
+    public void setHyvaksyttyVarasijalta(Boolean hyvaksyttyVarasijalta) {
         this.hyvaksyttyVarasijalta = hyvaksyttyVarasijalta;
     }
 
-    public Optional<Boolean> getHyvaksyPeruuntunut() {
+    public Boolean getHyvaksyPeruuntunut() {
         return hyvaksyPeruuntunut;
     }
 
-    public void setHyvaksyPeruuntunut(Optional<Boolean> hyvaksyPeruuntunut) {
+    public void setHyvaksyPeruuntunut(Boolean hyvaksyPeruuntunut) {
         this.hyvaksyPeruuntunut = hyvaksyPeruuntunut;
     }
 
-    public Optional<Boolean> getPoistettava() {
+    public Boolean getPoistettava() {
         return poistettava;
     }
 
-    public void setPoistettava(Optional<Boolean> poistettava) {
+    public void setPoistettava(Boolean poistettava) {
         this.poistettava = poistettava;
     }
 
@@ -124,13 +124,13 @@ public class Valinnantulos {
         valinnantulos.setHakukohdeOid(hakija.hakukohdeOid);
         valinnantulos.setValintatapajonoOid(hakija.valintatapajonoOid);
 
-        valinnantulos.setEhdollisestiHyvaksyttavissa(Optional.of(hakija.ehdollisestiHyvaksyttavissa));
-        valinnantulos.setJulkaistavissa(Optional.of(hakija.julkaistavissa));
+        valinnantulos.setEhdollisestiHyvaksyttavissa(hakija.ehdollisestiHyvaksyttavissa);
+        valinnantulos.setJulkaistavissa(hakija.julkaistavissa);
 
         if(hakija.poistetaankoTulokset) {
-            valinnantulos.setPoistettava(Optional.of(true));
+            valinnantulos.setPoistettava(true);
         }
-        
+
         valinnantulos.setValinnantila(hakija.hakemuksenTila);
         valinnantulos.setVastaanottotila(Optional.ofNullable(hakija.valintatuloksenTila).orElse(ValintatuloksenTila.KESKEN));
         valinnantulos.setIlmoittautumistila(Optional.ofNullable(hakija.ilmoittautumisTila).orElse(IlmoittautumisTila.EI_TEHTY));
