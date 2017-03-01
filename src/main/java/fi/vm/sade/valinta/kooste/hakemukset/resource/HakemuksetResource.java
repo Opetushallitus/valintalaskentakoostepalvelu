@@ -72,7 +72,9 @@ public class HakemuksetResource {
                             },
                             exception -> {
                                 long duration = (System.currentTimeMillis() - started) / 1000;
-                                LOG.error("hakemusten listaaminen epäonnistui (valinnanvaihe {}, haku {}, kesto {} sekuntia", valinnanvaiheOid, hakuOid, duration);
+                                LOG.error(
+                                    String.format("hakemusten listaaminen epäonnistui (valinnanvaihe %s, haku %s, kesto %d sekuntia", valinnanvaiheOid, hakuOid, duration),
+                                    exception);
                                 asyncResponse.cancel();
                             }
                     );
