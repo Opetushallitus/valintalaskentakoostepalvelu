@@ -126,15 +126,9 @@ public class ErillishaunVientiService {
         List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(hakemus -> {
             Optional<HakemusDTO> hakemusDTO = Optional.ofNullable(oidToHakemus.get(hakemus.getOid()));
             Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(HakemusDTO::getTila);
-            Valintatulos tulos = Optional.ofNullable(valintatulokset.get(hakemus.getOid())).orElse(new Valintatulos());
+            Valintatulos valintatulos = Optional.ofNullable(valintatulokset.get(hakemus.getOid())).orElse(new Valintatulos());
             return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus),
-                    hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"),
-                    objectToString(tulos.getTila()),
-                    tulos.getEhdollisestiHyvaksyttavissa(),
-                    tulos.getHyvaksymiskirjeLahetetty(),
-                    objectToString(tulos.getIlmoittautumisTila()),
-                    tulos.getJulkaistavissa(),
-                    hakukohde.getOid());
+                    hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"), valintatulos, hakukohde.getOid());
         }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
     }
@@ -149,7 +143,7 @@ public class ErillishaunVientiService {
         List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(hakemus -> {
                 Optional<HakemusDTO> hakemusDTO = Optional.ofNullable(oidToHakemus.get(hakemus.getOid()));
             Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(HakemusDTO::getTila);
-            return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"), "", false, null, "", false, hakukohde.getOid());
+            return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"), null, hakukohde.getOid());
             }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
     }
@@ -158,16 +152,14 @@ public class ErillishaunVientiService {
                                                                 final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde) {
         LOG.info("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus ->
-            createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), "KESKEN", "", false, null, "", false, tarjontaHakukohde.getOid())
+            createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), "KESKEN", null, tarjontaHakukohde.getOid())
         ).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), rivit);
     }
 
     private ErillishakuRivi createErillishakuRivi(String oid, HakemusWrapper wrapper, String hakemuksenTila,
-                                                  String vastaanottoTila, boolean ehdollisestiHyvaksyttavissa,
-                                                  Date hyvaksymiskirjeLahetetty, String ilmoittautumisTila,
-                                                  boolean julkaistaankoTiedot, String hakukohdeOid) {
-        return new ErillishakuRiviBuilder()
+                                                  Valintatulos valintatulos, String hakukohdeOid) {
+        ErillishakuRiviBuilder builder = new ErillishakuRiviBuilder()
                 .hakemusOid(oid)
                 .sukunimi(wrapper.getSukunimi())
                 .etunimi(wrapper.getEtunimi())
@@ -178,11 +170,6 @@ public class ErillishaunVientiService {
                 .personOid(wrapper.getPersonOid())
                 .aidinkieli(wrapper.getAidinkieli())
                 .hakemuksenTila(hakemuksenTila)
-                .ehdollisestiHyvaksyttavissa(ehdollisestiHyvaksyttavissa)
-                .hyvaksymiskirjeLahetetty(hyvaksymiskirjeLahetetty)
-                .vastaanottoTila(vastaanottoTila)
-                .ilmoittautumisTila(ilmoittautumisTila)
-                .julkaistaankoTiedot(julkaistaankoTiedot)
                 .poistetaankoRivi(false)
                 .asiointikieli(readAsiointikieli(wrapper))
                 .puhelinnumero(wrapper.getPuhelinnumero())
@@ -194,8 +181,18 @@ public class ErillishaunVientiService {
                 .kotikunta(readKotikunta(wrapper))
                 .toisenAsteenSuoritus(wrapper.getToisenAsteenSuoritus())
                 .toisenAsteenSuoritusmaa(wrapper.getToisenAsteenSuoritusmaa())
-                .maksuvelvollisuus(wrapper.getMaksuvelvollisuus(hakukohdeOid))
-                .build();
+                .maksuvelvollisuus(wrapper.getMaksuvelvollisuus(hakukohdeOid));
+
+        if (valintatulos != null) {
+            builder
+                .ehdollisestiHyvaksyttavissa(valintatulos.getEhdollisestiHyvaksyttavissa())
+                .hyvaksymiskirjeLahetetty(valintatulos.getHyvaksymiskirjeLahetetty())
+                .vastaanottoTila(objectToString(valintatulos.getTila()))
+                .ilmoittautumisTila(objectToString(valintatulos.getIlmoittautumisTila()))
+                .julkaistaankoTiedot(valintatulos.getJulkaistavissa());
+        }
+
+        return builder.build();
     }
 
     private String readAsiointikieli(HakemusWrapper wrapper) {

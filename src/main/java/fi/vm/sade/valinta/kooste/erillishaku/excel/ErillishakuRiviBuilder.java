@@ -1,11 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
-import org.apache.commons.lang.StringUtils;
-
 import java.util.Date;
-
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 public class ErillishakuRiviBuilder {
     private String etunimi;
@@ -20,8 +15,8 @@ public class ErillishakuRiviBuilder {
     private String hakemuksenTila;
     private boolean ehdollisestiHyvaksyttavissa = false;
     private Date hyvaksymiskirjeLahetetty;
-    private String vastaanottoTila;
-    private String ilmoittautumisTila;
+    private String vastaanottoTila = "";
+    private String ilmoittautumisTila = "";
     private boolean julkaistaankoTiedot = false;
     private boolean poistetaankoRivi = false;
     private String maksuvelvollisuus;
