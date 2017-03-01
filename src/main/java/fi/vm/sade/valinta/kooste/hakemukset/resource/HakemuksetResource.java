@@ -57,7 +57,7 @@ public class HakemuksetResource {
                 .setOperaatio(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU)
                 .build());
 
-        LOG.warn("Aloitetaan hakemusten listaaminen valinnenvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
+        LOG.warn("Aloitetaan hakemusten listaaminen valinnanvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
         Long started = System.currentTimeMillis();
 
         authorityCheckService.getAuthorityCheckForRoles(
@@ -67,12 +67,12 @@ public class HakemuksetResource {
                     valinnanvaiheenValintakoekutsutService.hae(valinnanvaiheOid, hakuOid, authCheck,
                             hakemusDTOs -> {
                                 long duration = (System.currentTimeMillis() - started) / 1000;
-                                LOG.warn("hakemusten listaaminen valinnenvaiheelle {} haussa {} kesti {} sekuntia", valinnanvaiheOid, hakuOid, duration);
+                                LOG.warn("hakemusten listaaminen valinnanvaiheelle {} haussa {} kesti {} sekuntia", valinnanvaiheOid, hakuOid, duration);
                                 asyncResponse.resume(Response.ok(hakemusDTOs).build());
                             },
                             exception -> {
                                 long duration = (System.currentTimeMillis() - started) / 1000;
-                                LOG.error("hakemusten listaaminen epäonnistui (valinnenvaihe {}, haku {}, kesto {} sekuntia", valinnanvaiheOid, hakuOid, duration);
+                                LOG.error("hakemusten listaaminen epäonnistui (valinnanvaihe {}, haku {}, kesto {} sekuntia", valinnanvaiheOid, hakuOid, duration);
                                 asyncResponse.cancel();
                             }
                     );
