@@ -239,9 +239,10 @@ public class PistesyottoExternalTuontiService {
         final Set<String> onnistuneetKokeet =
                 hakemuksenKokeetStream.stream().filter(k -> !k.virhe.isPresent()).map(k -> k.tunniste).collect(Collectors.toSet());
 
-        return hakemuksenKokeetStream.stream()
-                // filter virheet where koe with same tunniste succeeded in another hakutoive
-                .filter(k -> !k.virhe.isPresent() || !onnistuneetKokeet.contains(k.tunniste));
+        Stream<OsallistuminenHakutoiveeseen> osallistuminenHakutoiveeseenStream = hakemuksenKokeetStream.stream()
+            // filter virheet where koe with same tunniste succeeded in another hakutoive
+            .filter(k -> !(k.virhe.isPresent() && onnistuneetKokeet.contains(k.tunniste)));
+        return osallistuminenHakutoiveeseenStream;
     }
 
     private List<HakemusJaHakutoiveet> collect(List<HakemusDTO> hakemukset, List<Hakemus> hakemuses) {
