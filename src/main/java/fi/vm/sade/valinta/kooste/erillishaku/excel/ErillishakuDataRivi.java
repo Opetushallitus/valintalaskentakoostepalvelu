@@ -25,7 +25,7 @@ import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.TOISEN_ASTEEN
 
 public class ErillishakuDataRivi extends DataRivi {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
-    public final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
+    final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
     private final ErillishakuRiviKuuntelija kuuntelija;
     private final Hakutyyppi tyyppi;
 
@@ -48,7 +48,7 @@ public class ErillishakuDataRivi extends DataRivi {
         String aidinkieli = rivi.getArvoAt(index++);
 
         String hakemuksenTila = rivi.getArvoAt(index++);
-        boolean ehdollisestiHyvaksytty = tyyppi == KORKEAKOULU ? TOSI.equals(rivi.getArvoAt(index++)) : false;
+        boolean ehdollisestiHyvaksytty = tyyppi == KORKEAKOULU && TOSI.equals(rivi.getArvoAt(index++));
         String ehdollisestiHyvaksymisenEhtoKoodi = rivi.getArvoAt(index++);
         Date hyvaksymiskirjeLahetetty = parseLahetettyDate(rivi.getArvoAt(index++));
         String vastaanottoTila = rivi.getArvoAt(index++);
@@ -65,7 +65,7 @@ public class ErillishakuDataRivi extends DataRivi {
         String kansalaisuus = rivi.getArvoAt(index++);
         String kotikunta = rivi.getArvoAt(index++);
         Boolean toisenAsteenSuoritus = tyyppi == KORKEAKOULU ? getBoolean(rivi.getArvoAt(index++)) : null;
-        String toisenAsteenSuoritusmaa = tyyppi == KORKEAKOULU ? rivi.getArvoAt(index++) : "";
+        String toisenAsteenSuoritusmaa = tyyppi == KORKEAKOULU ? rivi.getArvoAt(index) : "";
 
         if (isDataRow(rivi, sukunimi, etunimi, oid)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRiviBuilder()
@@ -120,8 +120,8 @@ public class ErillishakuDataRivi extends DataRivi {
                 && ((StringUtils.isNotBlank(sukunimi) && StringUtils.isNotBlank(etunimi)) || StringUtils.isNotBlank(oid));
     }
 
-    public final static String TOSI = "Kyllä";
-    public final static String EPATOSI = "Ei";
+    final static String TOSI = "Kyllä";
+    final static String EPATOSI = "Ei";
     final static Collection<String> TOTUUSARVO = Arrays.asList(EPATOSI, TOSI);
 
     public static String getTotuusarvoString(Boolean b){
@@ -131,7 +131,7 @@ public class ErillishakuDataRivi extends DataRivi {
         return getTotuusarvoString(b.booleanValue());
     }
 
-    public static Boolean getBoolean(String totuusarvo){
+    private static Boolean getBoolean(String totuusarvo){
         if(TOSI.equals(totuusarvo)) {
             return Boolean.TRUE;
         }
@@ -141,20 +141,20 @@ public class ErillishakuDataRivi extends DataRivi {
         return null;
     }
 
-    public static String getTotuusarvoString(boolean b){
+    static String getTotuusarvoString(boolean b){
         return b ? TOSI : EPATOSI;
     }
 
-    static final Collection<String> SUKUPUOLEN_ARVOT = Arrays.asList(Sukupuoli.values()).stream().map(Object::toString).collect(Collectors.toList());
+    static final Collection<String> SUKUPUOLEN_ARVOT = Arrays.stream(Sukupuoli.values()).map(Object::toString).collect(Collectors.toList());
     private static final Collection<String> HAKEMUKSENTILA_ARVOT = Stream.concat(Stream.of("KESKEN"),
-            Arrays.asList(HakemuksenTila.values()).stream().map(Enum::toString)).collect(Collectors.toList());
+            Arrays.stream(HakemuksenTila.values()).map(Enum::toString)).collect(Collectors.toList());
     private static final Collection<String> HAKEMUKSENTILA_ARVOT_TOINEN_ASTE = Stream.concat(Stream.of("KESKEN"),
-            Arrays.asList(HakemuksenTila.values()).stream().map(Enum::toString)).collect(Collectors.toList());
+            Arrays.stream(HakemuksenTila.values()).map(Enum::toString)).collect(Collectors.toList());
     private static final Collection<String> HAKEMUKSENTILA_ARVOT_KK = Stream.concat(Stream.of("KESKEN"),
-            Arrays.asList(HakemuksenTila.values()).stream().filter(t -> !HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY.equals(t)).map(Enum::toString)).collect(Collectors.toList());
-    private static final Collection<String> VASTAANOTTOTILA_ARVOT = Arrays.asList(ValintatuloksenTila.values()).stream().map(Enum::toString).collect(Collectors.toList());
+            Arrays.stream(HakemuksenTila.values()).filter(t -> !HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY.equals(t)).map(Enum::toString)).collect(Collectors.toList());
+    private static final Collection<String> VASTAANOTTOTILA_ARVOT = Arrays.stream(ValintatuloksenTila.values()).map(Enum::toString).collect(Collectors.toList());
     private static final Collection<String> VASTAANOTTOTILA_ARVOT_KK =
-            Arrays.asList(
+            Stream.of(
                     // KORKEAKOULUJEN VALINTATULOKSEN TILAT
                     ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA,
                     ValintatuloksenTila.PERUNUT,
@@ -162,18 +162,18 @@ public class ErillishakuDataRivi extends DataRivi {
                     ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI,
                     ValintatuloksenTila.KESKEN
                     //
-            ).stream().map(Enum::toString).collect(Collectors.toList());
+            ).map(Enum::toString).collect(Collectors.toList());
     private static final Collection<String> VASTAANOTTOTILA_ARVOT_TOINEN_ASTE =
-            Arrays.asList(
+            Stream.of(
                     // TOISEN ASTEEN VALINTATULOKSEN TILAT
                     ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI,
                     ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA,
                     ValintatuloksenTila.PERUNUT,
                     ValintatuloksenTila.KESKEN
                     //
-            ).stream().map(Enum::toString).collect(Collectors.toList());
+            ).map(Enum::toString).collect(Collectors.toList());
     private static final Collection<String> ILMOITTAUTUMISTILA_ARVOT =
-            Arrays.asList(IlmoittautumisTila.values()).stream().map(Enum::toString).collect(Collectors.toList());
+            Arrays.stream(IlmoittautumisTila.values()).map(Enum::toString).collect(Collectors.toList());
     private static final String LUPA_JULKAISUUN = "JULKAISTAVISSA";
     private static final String EI_LUPAA_JULKAISUUN = "EI JULKAISTAVISSA";
     private static final Collection<String> JULKAISU_LUPA_ARVOT =
