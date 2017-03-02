@@ -36,14 +36,19 @@ import java.util.stream.Stream;
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
-public class PistesyottoTuontiSoteliService {
-    private static final Logger LOG = LoggerFactory.getLogger(PistesyottoTuontiSoteliService.class);
+/**
+ * Used when importing points from outside, such as
+ * - Soteli
+ * - DIA-yhteisvalinta
+ */
+public class PistesyottoExternalTuontiService {
+    private static final Logger LOG = LoggerFactory.getLogger(PistesyottoExternalTuontiService.class);
     private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
     private final ValintaperusteetAsyncResource valintaperusteetResource;
     private final ApplicationAsyncResource applicationAsyncResource;
 
     @Autowired
-    public PistesyottoTuontiSoteliService(
+    public PistesyottoExternalTuontiService(
             ValintalaskentaValintakoeAsyncResource valintakoeResource,
             ValintaperusteetAsyncResource valintaperusteetResource, ApplicationAsyncResource applicationAsyncResource) {
         this.valintakoeResource = valintakoeResource;

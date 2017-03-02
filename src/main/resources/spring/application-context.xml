@@ -343,8 +343,8 @@
 			  class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
 		<bean id="AuthorityCheckService"
 			  class="fi.vm.sade.valinta.kooste.security.AuthorityCheckService"/>
-		<bean id="PistesyottoTuontiSoteliService"
-			  class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService"/>
+		<bean id="PistesyottoExternalTuontiService"
+			  class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService"/>
 		<bean id="PistesyottoTuontiService"
 			  class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService" />
 		<bean id="PistesyottoVientiService"

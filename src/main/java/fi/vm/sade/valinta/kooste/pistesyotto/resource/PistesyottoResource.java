@@ -12,7 +12,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.Converter;
@@ -72,7 +72,7 @@ public class PistesyottoResource {
     @Autowired
     private PistesyottoTuontiService tuontiService;
     @Autowired
-    private PistesyottoTuontiSoteliService tuontiSoteliService;
+    private PistesyottoExternalTuontiService externalTuontiService;
     @Autowired
     private AuthorityCheckService authorityCheckService;
     @Autowired
@@ -447,7 +447,7 @@ public class PistesyottoResource {
                 ).subscribe(
                         authorityCheck -> {
                             LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
-                            tuontiSoteliService.tuo(authorityCheck, hakemukset, username, hakuOid, valinnanvaiheOid,
+                            externalTuontiService.tuo(authorityCheck, hakemukset, username, hakuOid, valinnanvaiheOid,
                                     (onnistuneet, validointivirheet) -> {
                                         UlkoinenResponseDTO response = new UlkoinenResponseDTO();
                                         response.setKasiteltyOk(onnistuneet);
@@ -455,17 +455,17 @@ public class PistesyottoResource {
                                         asyncResponse.resume(Response.ok(response).build());
                                     },
                                     sisainenPoikkeus -> {
-                                        logError("Soteli tuonti epaonnistui!", sisainenPoikkeus);
+                                        logError("Tuonti ulkoisesta jarjestelmasta epaonnistui!", sisainenPoikkeus);
                                         asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
                                     });
                         },
                         sisainenPoikkeus -> {
-                            logError("Soteli tuonti epaonnistui!", sisainenPoikkeus);
+                            logError("Tuonti ulkoisesta jarjestelmasta epaonnistui!", sisainenPoikkeus);
                             asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
                         });
             }
         } catch (Exception e) {
-            LOG.error("Soteli tuonti epäonnistui", e);
+            LOG.error("Tuonti ulkoisesta järjestelmästä epäonnistui", e);
             asyncResponse.resume(Response.serverError().entity(e.toString()).build());
         }
     }
