@@ -106,7 +106,7 @@ public class PistesyottoExternalTuontiService {
                 }
                 if (peruste.getArvot() != null && !peruste.getArvot().isEmpty()) {
                     // Diskreettiarvo
-                    boolean diskreettiArvoLoytyi = peruste.getArvot().stream().map(a -> new BigDecimal(a)).filter(a -> pisteet.equals(a)).findFirst().isPresent();
+                    boolean diskreettiArvoLoytyi = peruste.getArvot().stream().map(BigDecimal::new).anyMatch(pisteet::equals);
                     if (diskreettiArvoLoytyi) {
                         return Optional.empty();
                     } else {
