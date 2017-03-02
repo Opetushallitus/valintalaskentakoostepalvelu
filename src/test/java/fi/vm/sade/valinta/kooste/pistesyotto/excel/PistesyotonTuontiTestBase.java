@@ -41,9 +41,9 @@ import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 public class PistesyotonTuontiTestBase {
-    final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    String pistesyottoResurssi(String resurssi) throws IOException {
+    private String pistesyottoResurssi(String resurssi) throws IOException {
         InputStream i;
         String s = IOUtils.toString(i = new ClassPathResource("pistesyotto/" + resurssi).getInputStream(), "UTF-8");
         IOUtils.closeQuietly(i);
@@ -115,7 +115,7 @@ public class PistesyotonTuontiTestBase {
         muplaa(pistesyottoTuontiAdapteri, pistetiedot);
     }
 
-    void muplaa(final PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, final List<ApplicationAdditionalDataDTO> pistetiedot) {
+    private void muplaa(final PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, final List<ApplicationAdditionalDataDTO> pistetiedot) {
         Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = mapByOid(pistetiedot);
         List<ApplicationAdditionalDataDTO> uudetPistetiedot = Lists.newArrayList();
         for (PistesyottoRivi rivi : pistesyottoTuontiAdapteri.getRivit()) {
