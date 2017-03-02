@@ -6,6 +6,15 @@ public class ValintakoeDTO {
     private Osallistuminen osallistuminen;
     private String pisteet;
 
+    public ValintakoeDTO() {
+    }
+
+    public ValintakoeDTO(String tunniste, Osallistuminen osallistuminen, String pisteet) {
+        this.tunniste = tunniste;
+        this.osallistuminen = osallistuminen;
+        this.pisteet = pisteet;
+    }
+
     public String getTunniste() {
         return tunniste;
     }

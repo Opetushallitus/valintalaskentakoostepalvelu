@@ -99,10 +99,15 @@ public class PistesyottoExternalTuontiService {
         if(fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO.Osallistuminen.OSALLISTUI.equals(koe.getOsallistuminen())) {
             if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(peruste.getFunktiotyyppi())) {
                 BigDecimal pisteet;
+                Optional<String> badPointsMessage = Optional.of(
+                    String.format("Pisteiden arvon '%s' muuntaminen numeroksi ei onnistunut", koe.getPisteet()));
                 try {
+                    if (koe.getPisteet() == null) {
+                        return badPointsMessage;
+                    }
                     pisteet = new BigDecimal(koe.getPisteet());
                 } catch (NumberFormatException ne) {
-                    return Optional.of("Arvon muuntaminen numeroksi " + koe.getPisteet() + " ei onnistunut");
+                    return badPointsMessage;
                 }
                 if (peruste.getArvot() != null && !peruste.getArvot().isEmpty()) {
                     // Diskreettiarvo

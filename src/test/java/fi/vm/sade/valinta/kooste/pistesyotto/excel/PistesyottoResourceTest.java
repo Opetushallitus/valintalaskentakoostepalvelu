@@ -8,6 +8,7 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
@@ -17,12 +18,14 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
@@ -38,8 +41,6 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditi
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
@@ -50,6 +51,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResourc
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
@@ -75,10 +77,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -330,6 +332,70 @@ public class PistesyottoResourceTest {
 
 
         System.out.println(prettyJsonString);
+    }
+
+
+    @Test
+    public void pistesyottoUlkoinenTuontiResourceWithBadInput() throws Exception {
+        final String tunniste1 = "1234";
+        final String hakemusOid1 = "12316.7.7.74";
+        final String hakemusPersonOid1 = "1.2.4124.41214";
+        final String hakukohdeOid1 = "1.2.3.4";
+        final String hakukohdeOid2 = "1.2.3.5";
+
+        cleanMocks();
+
+        List<Hakemus> hakemuses = Collections.singletonList(new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).build());
+        MockApplicationAsyncResource.setResult(hakemuses);
+        MockApplicationAsyncResource.setResultByOid(hakemuses);
+
+        HakukohdeJaValintaperusteDTO vp = new HakukohdeJaValintaperusteDTO(hakukohdeOid1,
+            Collections.singletonList(
+                new ValintaperusteetSpec.ValintaperusteBuilder().setTunniste(tunniste1).setLukuarvofunktio().setArvot("8.34", "5.00").build()));
+        HakukohdeJaValintaperusteDTO vp2 = new HakukohdeJaValintaperusteDTO(hakukohdeOid2,
+            Collections.singletonList(
+                new ValintaperusteetSpec.ValintaperusteBuilder().setTunniste(tunniste1).setLukuarvofunktio().setArvot("8.34", "5.00").build()));
+        MockValintaperusteetAsyncResource.setHakukohdeValintaperusteResult(Arrays.asList(vp, vp2));
+
+        HakukohdeJaValintakoeDTO vk = new HakukohdeJaValintakoeDTO(hakukohdeOid1,
+            Collections.singletonList(
+                new ValintaperusteetSpec.ValintakoeDTOBuilder().setTunniste(tunniste1).setKaikkiKutsutaan().build()));
+        MockValintaperusteetAsyncResource.setHakukohdeResult(Collections.singletonList(vk));
+
+        List<ValintakoeOsallistuminenDTO> osallistuminenDTOs =
+            Collections.singletonList(new ValintalaskentaSpec.ValintakoeOsallistuminenBuilder().hakutoive().setHakukohdeOid(hakukohdeOid1).build().build());
+        MockValintalaskentaValintakoeAsyncResource.setResult(osallistuminenDTOs);
+
+        ValintakoeDTO koeToInput = new ValintakoeDTO(tunniste1, ValintakoeDTO.Osallistuminen.OSALLISTUI, "5.00");
+        List<HakemusDTO> hakemusesToInput = Collections.singletonList(new HakemusDTO(hakemusOid1, hakemusPersonOid1, Collections.singletonList(koeToInput)));
+
+        JsonObject goodResponseJson = postPisteet(hakemusesToInput);
+        assertEquals(goodResponseJson.get("kasiteltyOk").getAsInt(), 1);
+        assertThat(Lists.newArrayList(goodResponseJson.get("virheet").getAsJsonArray()), hasSize(0));
+
+        koeToInput.setPisteet(null);
+
+        JsonObject badResponseJson = postPisteet(hakemusesToInput);
+        assertEquals(badResponseJson.get("kasiteltyOk").getAsInt(), 0);
+        ArrayList<JsonElement> errors = Lists.newArrayList(badResponseJson.get("virheet").getAsJsonArray());
+        assertThat(errors, hasSize(1));
+        assertThat(errors.get(0).getAsJsonObject().get("virhe").getAsString(), equalTo(
+            "Validointivirhe pisteiden (null) tuonnissa tunnisteelle 1234. " +
+                "Pisteiden arvon 'null' muuntaminen numeroksi ei onnistunut"));
+    }
+
+    private JsonObject postPisteet(List<HakemusDTO> hakemusesToInput) {
+        Response goodInputResponse = pistesyottoUlkoinenTuontiResource.getWebClient()
+                .query("hakuOid", "HAKUOID").post(Entity.entity(hakemusesToInput, MediaType.APPLICATION_JSON_TYPE));
+        assertEquals(200, goodInputResponse.getStatus());
+        return parseJson(goodInputResponse);
+    }
+
+    private JsonObject parseJson(Response goodInputResponse) {
+        String goodResponseJson = goodInputResponse.readEntity(String.class);
+        JsonParser jp = new JsonParser();
+        JsonElement je = jp.parse(goodResponseJson);
+        return je.getAsJsonObject();
     }
 
     @Test

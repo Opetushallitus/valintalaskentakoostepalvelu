@@ -3,10 +3,18 @@ package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 import java.util.List;
 
 public class HakemusDTO {
-
     private String hakemusOid;
     private String henkiloOid;
     private List<ValintakoeDTO> valintakokeet;
+
+    public HakemusDTO() {
+    }
+
+    public HakemusDTO(String hakemusOid, String henkiloOid, List<ValintakoeDTO> valintakokeet) {
+        this.hakemusOid = hakemusOid;
+        this.henkiloOid = henkiloOid;
+        this.valintakokeet = valintakokeet;
+    }
 
     public String getHakemusOid() {
         return hakemusOid;
