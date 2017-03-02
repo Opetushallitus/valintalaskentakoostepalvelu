@@ -55,8 +55,8 @@ public class ErillishakuExcel {
         builder.add(new TekstiArvo("Äidinkieli"));
         builder.add(new TekstiArvo("Hakemuksentila"));
         if (tyyppi == Hakutyyppi.KORKEAKOULU) {
-            // 'Ehdollinen valinta' -sarake halutaan näyttää vain jos kyseessä KK-haku
             builder.add(new TekstiArvo("Ehdollinen valinta"));
+            builder.add(new TekstiArvo("Hyväksymisen ehto"));
         }
         builder.add(new TekstiArvo(HEADER_HYVAKSYMISKIRJE_LAHETETTY));
         builder.add(new TekstiArvo("Vastaanottotila"));
@@ -154,8 +154,8 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
             if (tyyppi == Hakutyyppi.KORKEAKOULU) {
-                // Ehdollinen valinta - sarake halutaan näyttää vain jos kyseessä KK-haku
                 a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
+                a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), true, true));
             }
             a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null ? "" : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));

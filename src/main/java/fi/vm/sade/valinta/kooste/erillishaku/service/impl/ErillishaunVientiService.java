@@ -186,6 +186,7 @@ public class ErillishaunVientiService {
         if (valintatulos != null) {
             builder
                 .ehdollisestiHyvaksyttavissa(valintatulos.getEhdollisestiHyvaksyttavissa())
+                .ehdollisenHyvaksymisenEhtoKoodi(valintatulos.getEhdollisenHyvaksymisenEhtoKoodi())
                 .hyvaksymiskirjeLahetetty(valintatulos.getHyvaksymiskirjeLahetetty())
                 .vastaanottoTila(objectToString(valintatulos.getTila()))
                 .ilmoittautumisTila(objectToString(valintatulos.getIlmoittautumisTila()))

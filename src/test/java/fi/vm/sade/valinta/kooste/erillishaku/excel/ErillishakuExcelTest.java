@@ -3,9 +3,11 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.FileOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,7 +58,8 @@ public class ErillishakuExcelTest {
                 .personOid("")
                 .aidinkieli("FI")
                 .hakemuksenTila("HYLATTY")
-                .ehdollisestiHyvaksyttavissa(false)
+                .ehdollisestiHyvaksyttavissa(true)
+                .ehdollisenHyvaksymisenEhtoKoodi("hyväksymisen ehto")
                 .hyvaksymiskirjeLahetetty(null)
                 .vastaanottoTila("")
                 .ilmoittautumisTila("")
@@ -120,7 +123,7 @@ public class ErillishakuExcelTest {
         assertEquals(2, tarkistusTapahtui.get());
 
         // Tulosta tiedostoksi testausta varten
-        // IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
+        IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
     }
 
     @Test

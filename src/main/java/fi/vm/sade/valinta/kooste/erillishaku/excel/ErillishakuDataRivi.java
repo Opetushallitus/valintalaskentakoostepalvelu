@@ -49,6 +49,7 @@ public class ErillishakuDataRivi extends DataRivi {
 
         String hakemuksenTila = rivi.getArvoAt(index++);
         boolean ehdollisestiHyvaksytty = tyyppi == KORKEAKOULU ? TOSI.equals(rivi.getArvoAt(index++)) : false;
+        String ehdollisestiHyvaksymisenEhtoKoodi = rivi.getArvoAt(index++);
         Date hyvaksymiskirjeLahetetty = parseLahetettyDate(rivi.getArvoAt(index++));
         String vastaanottoTila = rivi.getArvoAt(index++);
         String ilmoittautumisTila = rivi.getArvoAt(index++);
@@ -78,6 +79,7 @@ public class ErillishakuDataRivi extends DataRivi {
                     .aidinkieli(aidinkieli)
                     .hakemuksenTila(hakemuksenTila)
                     .ehdollisestiHyvaksyttavissa(ehdollisestiHyvaksytty)
+                    .ehdollisenHyvaksymisenEhtoKoodi(ehdollisestiHyvaksymisenEhtoKoodi)
                     .hyvaksymiskirjeLahetetty(hyvaksymiskirjeLahetetty)
                     .vastaanottoTila(vastaanottoTila)
                     .ilmoittautumisTila(ilmoittautumisTila)

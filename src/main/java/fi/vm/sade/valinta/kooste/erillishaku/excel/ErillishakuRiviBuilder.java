@@ -14,6 +14,7 @@ public class ErillishakuRiviBuilder {
     private String personOid;
     private String hakemuksenTila;
     private boolean ehdollisestiHyvaksyttavissa = false;
+    private String ehdollisenHyvaksymisenEhtoKoodi = "";
     private Date hyvaksymiskirjeLahetetty;
     private String vastaanottoTila = "";
     private String ilmoittautumisTila = "";
@@ -119,6 +120,11 @@ public class ErillishakuRiviBuilder {
         return this;
     }
 
+    public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
+        this.ehdollisenHyvaksymisenEhtoKoodi = ehdollisenHyvaksymisenEhtoKoodi;
+        return this;
+    }
+
     public ErillishakuRiviBuilder hyvaksymiskirjeLahetetty(Date hyvaksymiskirjeLahetetty) {
         this.hyvaksymiskirjeLahetetty = hyvaksymiskirjeLahetetty;
         return this;
@@ -212,6 +218,7 @@ public class ErillishakuRiviBuilder {
                 aidinkieli,
                 hakemuksenTila,
                 ehdollisestiHyvaksyttavissa,
+                ehdollisenHyvaksymisenEhtoKoodi,
                 hyvaksymiskirjeLahetetty,
                 vastaanottoTila,
                 ilmoittautumisTila,
