@@ -123,7 +123,7 @@ public class ErillishakuExcelTest {
         assertEquals(2, tarkistusTapahtui.get());
 
         // Tulosta tiedostoksi testausta varten
-        IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
+        // IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
     }
 
     @Test
