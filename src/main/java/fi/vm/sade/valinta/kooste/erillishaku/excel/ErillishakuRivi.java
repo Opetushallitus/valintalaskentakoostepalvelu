@@ -37,6 +37,9 @@ public class ErillishakuRivi {
     private final String hakemuksenTila;
     private final boolean ehdollisestiHyvaksyttavissa;
     private final String ehdollisenHyvaksymisenEhtoKoodi;
+    private final String ehdollisenHyvaksymisenEhtoFI;
+    private final String ehdollisenHyvaksymisenEhtoSV;
+    private final String ehdollisenHyvaksymisenEhtoEN;
     private final Date hyvaksymiskirjeLahetetty;
     private final String vastaanottoTila;
     private final String ilmoittautumisTila;
@@ -58,14 +61,16 @@ public class ErillishakuRivi {
 
     // Empty constructor for Jackson JSON library. Deserialization fails without this!
     public ErillishakuRivi() {
-        this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false, null,
+        this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false, null, null, null, null,
                 null, null, null, false, false, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
                            String syntymaAika, Sukupuoli sukupuoli, String personOid, String aidinkieli,
                            String hakemuksenTila, boolean ehdollisestiHyvaksyttavissa,
-                           String ehdollisenHyvaksymisenEhtoKoodi, Date hyvaksymiskirjeLahetetty,
+                           String ehdollisenHyvaksymisenEhtoKoodi, String ehdollisenHyvaksymisenEhtoFI,
+                           String ehdollisenHyvaksymisenEhtoSV, String ehdollisenHyvaksymisenEhtoEN,
+                           Date hyvaksymiskirjeLahetetty,
                            String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot,
                            boolean poistetaankoRivi, String asiointikieli, String puhelinnumero, String osoite,
                            String postinumero, String postitoimipaikka, String asuinmaa, String kansalaisuus,
@@ -83,6 +88,9 @@ public class ErillishakuRivi {
         this.hakemuksenTila = hakemuksenTila;
         this.ehdollisestiHyvaksyttavissa = ehdollisestiHyvaksyttavissa;
         this.ehdollisenHyvaksymisenEhtoKoodi = ehdollisenHyvaksymisenEhtoKoodi;
+        this.ehdollisenHyvaksymisenEhtoFI = ehdollisenHyvaksymisenEhtoFI;
+        this.ehdollisenHyvaksymisenEhtoSV = ehdollisenHyvaksymisenEhtoSV;
+        this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
         this.hyvaksymiskirjeLahetetty = hyvaksymiskirjeLahetetty;
         this.vastaanottoTila = vastaanottoTila;
         this.ilmoittautumisTila = ilmoittautumisTila;
@@ -155,6 +163,18 @@ public class ErillishakuRivi {
 
     public String getEhdollisenHyvaksymisenEhtoKoodi() {
         return ehdollisenHyvaksymisenEhtoKoodi;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoFI() {
+        return ehdollisenHyvaksymisenEhtoFI;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoSV() {
+        return ehdollisenHyvaksymisenEhtoSV;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoEN() {
+        return ehdollisenHyvaksymisenEhtoEN;
     }
 
     public Date getHyvaksymiskirjeLahetetty() {
