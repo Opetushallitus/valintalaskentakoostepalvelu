@@ -503,7 +503,12 @@ public class ErillishaunTuontiService {
         try {
             valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid(), valinnantulokset).subscribe(
                     done -> {
-                        LOG.info("Erillishaun tulokset tallennettu onnistuneesti Valintarekisteriin.");
+                        if(done.isEmpty()) {
+                            LOG.info("Erillishaun tulokset tallennettu onnistuneesti Valintarekisteriin.");
+                        } else {
+                            LOG.info("Saatiin 200 erillishaun tulosten tallennuksessa Valintarekisteriin, mutta kaikkien tulosten tallennus ei onnistunut: " +
+                              String.join("\n", done.stream().map(status -> status.toString()).collect(Collectors.toList())));
+                        }
                         ready.accept("ok");
                     },
                     poikkeus -> {

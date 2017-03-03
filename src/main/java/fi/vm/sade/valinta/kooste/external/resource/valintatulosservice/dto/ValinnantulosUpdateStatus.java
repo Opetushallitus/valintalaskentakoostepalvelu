@@ -37,4 +37,14 @@ public class ValinnantulosUpdateStatus {
     public void setHakemusOid(String hakemusOid) {
         this.hakemusOid = hakemusOid;
     }
+
+    @Override
+    public String toString() {
+        return "ValinnantulosUpdateStatus{" +
+                "status=" + status +
+                ", message='" + message + '\'' +
+                ", valintatapajonoOid='" + valintatapajonoOid + '\'' +
+                ", hakemusOid='" + hakemusOid + '\'' +
+                '}';
+    }
 }
