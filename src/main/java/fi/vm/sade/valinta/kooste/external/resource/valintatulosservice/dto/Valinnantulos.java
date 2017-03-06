@@ -17,6 +17,7 @@ public class Valinnantulos {
     private Boolean hyvaksyttyVarasijalta = null;
     private Boolean hyvaksyPeruuntunut = null;
     private Boolean poistettava = null;
+    private Boolean ohitaVastaanotto = null;
     private IlmoittautumisTila ilmoittautumistila;
     private HakemuksenTila valinnantila;
     private ValintatuloksenTila vastaanottotila;
@@ -93,6 +94,14 @@ public class Valinnantulos {
         this.poistettava = poistettava;
     }
 
+    public Boolean getOhitaVastaanotto() {
+        return ohitaVastaanotto;
+    }
+
+    public void setOhitaVastaanotto(Boolean ohitaVastaanotto) {
+        this.ohitaVastaanotto = ohitaVastaanotto;
+    }
+
     public IlmoittautumisTila getIlmoittautumistila() {
         return ilmoittautumistila;
     }
@@ -118,6 +127,10 @@ public class Valinnantulos {
     }
 
     public static Valinnantulos of(ErillishaunHakijaDTO hakija) {
+        return of(hakija, null);
+    }
+
+    public static Valinnantulos of(ErillishaunHakijaDTO hakija, Boolean ohitaVastaanotto) {
         Valinnantulos valinnantulos = new Valinnantulos();
         valinnantulos.setHakemusOid(hakija.hakemusOid);
         valinnantulos.setHenkiloOid(hakija.hakijaOid);
@@ -129,6 +142,10 @@ public class Valinnantulos {
 
         if(hakija.poistetaankoTulokset) {
             valinnantulos.setPoistettava(true);
+        }
+
+        if(null != ohitaVastaanotto && ohitaVastaanotto) {
+            valinnantulos.setOhitaVastaanotto(true);
         }
 
         valinnantulos.setValinnantila(hakija.hakemuksenTila);
@@ -153,6 +170,7 @@ public class Valinnantulos {
                 ", hyvaksyttyVarasijalta=" + hyvaksyttyVarasijalta +
                 ", hyvaksyPeruuntunut=" + hyvaksyPeruuntunut +
                 ", poistettava=" + poistettava +
+                ", ohitaVastaanotto=" + ohitaVastaanotto +
                 ", ilmoittautumistila=" + ilmoittautumistila +
                 ", valinnantila=" + valinnantila +
                 ", vastaanottotila=" + vastaanottotila +

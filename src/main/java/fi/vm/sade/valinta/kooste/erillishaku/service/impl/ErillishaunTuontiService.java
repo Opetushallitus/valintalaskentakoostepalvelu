@@ -464,7 +464,7 @@ public class ErillishaunTuontiService {
                             Supplier<List<Valinnantulos>> valinnantuloksetForValintaTulosService = () -> {
                                 List<Valinnantulos> valinnantulokset = poistettavat.stream().flatMap(rivi ->
                                         toErillishaunHakijaStream(haku, rivi)).map(hakijaDTO -> Valinnantulos.of(hakijaDTO)).collect(Collectors.toList());
-                                valinnantulokset.addAll(hakijat.stream().map(hakijaDTO -> Valinnantulos.of(hakijaDTO)).collect(Collectors.toList()));
+                                valinnantulokset.addAll(hakijat.stream().map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO))).collect(Collectors.toList()));
                                 return valinnantulokset;
                             };
 
