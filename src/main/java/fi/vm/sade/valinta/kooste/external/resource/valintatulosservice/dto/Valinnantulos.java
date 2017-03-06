@@ -18,6 +18,7 @@ public class Valinnantulos {
     private Boolean hyvaksyPeruuntunut = null;
     private Boolean poistettava = null;
     private Boolean ohitaVastaanotto = null;
+    private Boolean ohitaIlmoittautuminen = null;
     private IlmoittautumisTila ilmoittautumistila;
     private HakemuksenTila valinnantila;
     private ValintatuloksenTila vastaanottotila;
@@ -102,6 +103,14 @@ public class Valinnantulos {
         this.ohitaVastaanotto = ohitaVastaanotto;
     }
 
+    public Boolean getOhitaIlmoittautuminen() {
+        return ohitaIlmoittautuminen;
+    }
+
+    public void setOhitaIlmoittautuminen(Boolean ohitaIlmoittautuminen) {
+        this.ohitaIlmoittautuminen = ohitaIlmoittautuminen;
+    }
+
     public IlmoittautumisTila getIlmoittautumistila() {
         return ilmoittautumistila;
     }
@@ -148,6 +157,10 @@ public class Valinnantulos {
             valinnantulos.setOhitaVastaanotto(true);
         }
 
+        if(null == hakija.ilmoittautumisTila) {
+            valinnantulos.setOhitaIlmoittautuminen(true);
+        }
+
         valinnantulos.setValinnantila(hakija.hakemuksenTila);
         valinnantulos.setVastaanottotila(Optional.ofNullable(hakija.valintatuloksenTila).orElse(ValintatuloksenTila.KESKEN));
         valinnantulos.setIlmoittautumistila(Optional.ofNullable(hakija.ilmoittautumisTila).orElse(IlmoittautumisTila.EI_TEHTY));
@@ -171,6 +184,7 @@ public class Valinnantulos {
                 ", hyvaksyPeruuntunut=" + hyvaksyPeruuntunut +
                 ", poistettava=" + poistettava +
                 ", ohitaVastaanotto=" + ohitaVastaanotto +
+                ", ohitaIlmoittautuminen=" + ohitaIlmoittautuminen +
                 ", ilmoittautumistila=" + ilmoittautumistila +
                 ", valinnantila=" + valinnantila +
                 ", vastaanottotila=" + vastaanottotila +
