@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.*;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -103,9 +104,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 hakukohde
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertEquals(41, solut(HAKEMUS1, rivit).size());
-        assertEquals(41, solut(HAKEMUS2, rivit).size());
-        assertEquals(41, solut(HAKEMUS3, rivit).size());
+        assertEquals(43, solut(HAKEMUS1, rivit).size());
+        assertEquals(43, solut(HAKEMUS2, rivit).size());
+        assertEquals(43, solut(HAKEMUS3, rivit).size());
     }
 
     @Test
@@ -126,6 +127,37 @@ public class SijoittelunTulosExcelKomponenttiTest {
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'SV'", cellTexts(rivit, HAKEMUS1).contains("SV"));
     }
+
+    @Test
+    public void addEhdollinenValinta() throws Throwable {
+        HakukohdeDTO hakukohde = new HakukohdeDTO();
+        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+
+        HakemusDTO hakemusDTO = new HakemusDTO();
+        hakemusDTO.setHakemusOid(HAKEMUS1);
+
+        ValintatapajonoDTO jono = new ValintatapajonoDTO();
+        jono.setHakemukset(Arrays.asList(hakemusDTO));
+
+        HashMap<String, String> lisatiedot = new HashMap<>();
+        lisatiedot.put("asiointikieli", "SV");
+
+        Answers answers = new Answers();
+        answers.setLisatiedot(lisatiedot);
+
+        Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
+
+        Valintatulos valintatulos = new Valintatulos();
+        valintatulos.setEhdollisestiHyvaksyttavissa(true, "", "");
+        valintatulos.setEhdollisenHyvaksymisenEhtoKoodi("JOKU_EHTOKOODI", "", "");
+
+        InputStream inputStream = excelKomponentti.luoXls(Arrays.asList(valintatulos), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+
+        Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
+        assertTrue("Cell texts should contain text 'JOKU_EHTOKOODI'", cellTexts(rivit, HAKEMUS1).contains("JOKU_EHTOKOODI"));
+    }
+
+
 
     @Test
     public void defaultAsiointikieliWhenNoAnswer() throws Throwable {
