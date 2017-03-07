@@ -166,7 +166,8 @@ public class Valinnantulos {
         valinnantulos.setIlmoittautumistila(Optional.ofNullable(hakija.ilmoittautumisTila).orElse(IlmoittautumisTila.EI_TEHTY));
 
         //TODO valinnantulos.setHyvaksyPeruuntunut(???);
-        //TODO valinnantulos.setHyvaksyttyVarasijalta(???);
+
+        valinnantulos.setHyvaksyttyVarasijalta(hakija.getHakemuksenTila() == HakemuksenTila.VARASIJALTA_HYVAKSYTTY);
 
         return valinnantulos;
     }
