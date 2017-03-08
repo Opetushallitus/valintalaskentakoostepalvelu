@@ -195,4 +195,8 @@ public class HakemusUtil {
             return tila.toString();
         }
     }
+
+    public static String ehdollinenValinta(boolean ehdollisestiHyvaksytty) {
+        return ehdollisestiHyvaksytty ? "Kyllä" : "Ei";
+    }
 }

@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
-import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.domain.*;
+import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.*;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -104,7 +106,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 hakukohde
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertEquals(43, solut(HAKEMUS1, rivit).size());
+        assertEquals(47, solut(HAKEMUS1, rivit).size());
         assertEquals(43, solut(HAKEMUS2, rivit).size());
         assertEquals(43, solut(HAKEMUS3, rivit).size());
     }
@@ -150,6 +152,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
         Valintatulos valintatulos = new Valintatulos();
         valintatulos.setEhdollisestiHyvaksyttavissa(true, "", "");
         valintatulos.setEhdollisenHyvaksymisenEhtoKoodi("JOKU_EHTOKOODI", "", "");
+        valintatulos.setTila(ValintatuloksenTila.KESKEN, "", "");
+        valintatulos.setValintatapajonoOid("jono1", "", "");
+        valintatulos.setHakemusOid(HAKEMUS1, "", "");
 
         InputStream inputStream = excelKomponentti.luoXls(Arrays.asList(valintatulos), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
 

@@ -35,7 +35,7 @@ public class SijoittelunTulosExcelKomponentti {
     @Autowired
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
-    public InputStream luoXls(List<Valintatulos> tilat, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, HakukohdeDTO hakukohde) {
+    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, HakukohdeDTO hakukohde) {
         Map<String, Koodi> countryCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
@@ -115,7 +115,15 @@ public class SijoittelunTulosExcelKomponentti {
                 ++index;
                 boolean highlight = index % 2 == 1;
                 valintatapajonoOtsikkoRivi.add(new Span("Valintatapajono: " + jono.getNimi(), 6, highlight));
-                List<Object> otsikot = Arrays.asList("Jonosija", "Pisteet", "Sijoittelun tila", "Vastaanottotieto", "Ilmoittautumistieto", "Muokattu");
+                List<Object> otsikot = Arrays.asList(
+                    "Jonosija",
+                    "Pisteet",
+                    "Sijoittelun tila",
+                    "Vastaanottotieto",
+                    "Ilmoittautumistieto",
+                    "Ehdollinen valinta",
+                    "Ehdollisen hyväksymisen ehto",
+                    "Muokattu");
                 if (highlight) {
                     otsikot = otsikot.stream().map(Highlight::new).collect(Collectors.toList());
                 }
@@ -129,7 +137,7 @@ public class SijoittelunTulosExcelKomponentti {
                 .collect(Collectors.toMap(ValintatapajonoDTO::getOid, v -> v.getHakemukset().stream().collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h))));
 
 
-        Map<String, IlmoittautumisTila> hakemusJaJonoMappaus = valintatapajononTilat(tilat);
+        Map<String, IlmoittautumisTila> hakemusJaJonoMappaus = valintatapajononTilat(valintatulokset);
         for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
             String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimet();
@@ -165,19 +173,26 @@ public class SijoittelunTulosExcelKomponentti {
                 ++index;
                 Map<String, HakemusDTO> jonoOidToHakemusOid = jonoOidHakemusOidHakemusDto.get(jono.getOid());
                 if (jonoOidToHakemusOid.containsKey(hDto.getHakemusOid())) {
+
                     HakemusDTO hakemusDto = jonoOidHakemusOidHakemusDto.get(jono.getOid()).get(hDto.getHakemusOid());
                     String hakemusOid = hakemusDto.getHakemusOid();
+
                     String ilmoittautumistieto =
                             HakemusUtil.tilaConverter(hakemusJaJonoMappaus.get(hakemusOidJaValintatapajonoOidYhdiste(hakemusOid, jono.getOid())), preferoitukielikoodi);
 
-                    List<Valintatulos> valintaTulos = tilat.stream()
+                    List<Valintatulos> hakemuksenValintatulokset = valintatulokset.stream()
                             .filter(t -> hakemusOid.equals(t.getHakemusOid()))
                             .collect(Collectors.toList());
+
                     String valintaTieto = StringUtils.EMPTY;
-                    for (Valintatulos valinta : valintaTulos) {
-                        if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
-                            if (valinta.getTila() != null) {
-                                valintaTieto = HakemusUtil.tilaConverter(valinta.getTila(), preferoitukielikoodi);
+                    String ehdollinenValinta = StringUtils.EMPTY;
+                    String ehdollisenHyvaksymisenEhto = StringUtils.EMPTY;
+                    for (Valintatulos valintatulos : hakemuksenValintatulokset) {
+                        if (jono.getOid().equals(valintatulos.getValintatapajonoOid())) {
+                            if (valintatulos.getTila() != null) {
+                                valintaTieto = HakemusUtil.tilaConverter(valintatulos.getTila(), preferoitukielikoodi);
+                                ehdollinenValinta = HakemusUtil.ehdollinenValinta(valintatulos.getEhdollisestiHyvaksyttavissa());
+                                ehdollisenHyvaksymisenEhto = valintatulos.getEhdollisenHyvaksymisenEhtoKoodi();
                             }
                             break;
                         }
@@ -195,6 +210,8 @@ public class SijoittelunTulosExcelKomponentti {
                             ),
                             valintaTieto,
                             ilmoittautumistieto,
+                            ehdollinenValinta,
+                            ehdollisenHyvaksymisenEhto,
                             muokattu(hakemusDto.getTilaHistoria())
                     );
 
