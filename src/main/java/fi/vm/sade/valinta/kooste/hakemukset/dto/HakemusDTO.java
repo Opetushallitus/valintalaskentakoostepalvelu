@@ -1,7 +1,10 @@
 package fi.vm.sade.valinta.kooste.hakemukset.dto;
 
+import io.swagger.annotations.ApiModel;
+
 import java.util.List;
 
+@ApiModel(value = "valinta.kooste.hakemukset.dto.HakemusDTO", description = "Yhden hakemuksen tiedot")
 public class HakemusDTO {
 
     private String hakemusOid;

@@ -1,7 +1,10 @@
 package fi.vm.sade.valinta.kooste.hakemukset.dto;
 
+import io.swagger.annotations.ApiModel;
+
 import java.util.List;
 
+@ApiModel(value = "valinta.kooste.hakemukset.dto.Hakukohde", description = "Hakukohde")
 public class HakukohdeDTO {
 
     private String hakukohdeOid;
