@@ -137,13 +137,13 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<ValinnantulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
+        String url = getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid);
         String debug = "";
         for(Valinnantulos tulos : valinnantulokset) {
             debug += tulos.toString();
         }
 
-        LOG.info("Kustutaan osoitetta " + "/erillishaku/valinnan-tulos/" + valintatapajonoOid
-                + ", audit info on " + auditSession.toString() + " ja valinnantulokset " + debug);
+        LOG.info("Kustutaan osoitetta " + url + ", audit info on " + auditSession.toString() + " ja valinnantulokset " + debug);
 
         try {
             LOG.info("Json " + gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset)));
@@ -151,7 +151,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
             LOG.error("Ei voitu generoida jsonia", e);
         }
 
-        return postAsObservable("/erillishaku/valinnan-tulos/" + valintatapajonoOid,
+        return postAsObservable(url,
                 new TypeToken<List<ValinnantulosUpdateStatus>>() {}.getType(),
                 Entity.entity(new ValinnantulosRequest(auditSession, valinnantulokset), MediaType.APPLICATION_JSON),
                 client -> {
