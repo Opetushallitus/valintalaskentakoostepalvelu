@@ -212,7 +212,7 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     @Override
     public Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
         return getWebClient()
-                .path(getUrl("", hakukohdeOid))
+                .path(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintakoe", hakukohdeOid))
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .get(new GenericType<List<ValintakoeDTO>>() {});
