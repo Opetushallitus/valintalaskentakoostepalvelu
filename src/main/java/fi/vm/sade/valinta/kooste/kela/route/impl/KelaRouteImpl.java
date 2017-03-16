@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fi.vm.sade.organisaatio.resource.api.KelaResource;
+import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
@@ -316,11 +317,11 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                     };
 
                     TutkinnontasoSource tutkinnontasoSource = new TutkinnontasoSource() {
-                        Map<String, String> c = Maps.newHashMap();
+                        Map<String, TasoJaLaajuusDTO> c = Maps.newHashMap();
                         Map<String, String> d = Maps.newHashMap();
 
                         @Override
-                        public String getTutkinnontaso(String hakukohdeOid) {
+                        public TasoJaLaajuusDTO getTutkinnontaso(String hakukohdeOid) {
                             if (!c.containsKey(hakukohdeOid)) {
                                 try {
                                     c.put(hakukohdeOid, kelaResource.tutkinnontaso(hakukohdeOid));

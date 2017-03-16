@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
+import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
+
 import java.util.Date;
 
 public class KelaHakijaRivi {
@@ -11,7 +13,7 @@ public class KelaHakijaRivi {
     private final String etunimi;
     private final String sukunimi;
     private final Date lukuvuosi;
-    private final String tutkinnontaso;
+    private final TasoJaLaajuusDTO tasoLaajuus;
     private final Date poimintapaivamaara;
     private final Date valintapaivamaara;
     private final String oppilaitosnumero;
@@ -24,7 +26,7 @@ public class KelaHakijaRivi {
                           String henkilotunnus, Date lukuvuosi, Date poimintapaivamaara,
                           Date valintapaivamaara, String oppilaitosnumero, String organisaatio, String haku, // seurattavuuden vuoksi
                           String hakukohde,
-                          String syntymaaika, String tutkinnontaso) {
+                          String syntymaaika, TasoJaLaajuusDTO tasoLaajuus) {
         this.hakemusOid = hakemusOid;
         this.hakuOid = haku;
         this.siirtotunnus = siirtotunnus;
@@ -38,7 +40,7 @@ public class KelaHakijaRivi {
         this.organisaatio = organisaatio;
         this.hakukohde = hakukohde;
         this.syntymaaika = syntymaaika;
-        this.tutkinnontaso = tutkinnontaso;
+        this.tasoLaajuus = tasoLaajuus;
     }
 
     public String getHakuOid() {
@@ -97,7 +99,7 @@ public class KelaHakijaRivi {
         return hakukohde;
     }
 
-    public String getTutkinnontaso() {
-        return tutkinnontaso;
+    public TasoJaLaajuusDTO getTasoLaajuus() {
+        return this.tasoLaajuus;
     }
 }

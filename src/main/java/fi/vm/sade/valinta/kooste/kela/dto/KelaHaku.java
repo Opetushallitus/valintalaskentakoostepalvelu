@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -90,7 +91,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
                                     oppilaitosnumero = oppilaitosSource.getOppilaitosnumero(organisaatioOid);
                                 }
 
-                                final String tutkinnontaso = tutkinnontasoSource.getTutkinnontaso(hakukohdeOid);
+                                final TasoJaLaajuusDTO tutkinnontaso = tutkinnontasoSource.getTutkinnontaso(hakukohdeOid);
                                 final String siirtotunnus = tutkinnontasoSource.getKoulutusaste(hakukohdeOid);
 
                                 valitut.add(new KelaHakijaRivi(hakemus.getOid(), siirtotunnus, etunimi, sukunimi,

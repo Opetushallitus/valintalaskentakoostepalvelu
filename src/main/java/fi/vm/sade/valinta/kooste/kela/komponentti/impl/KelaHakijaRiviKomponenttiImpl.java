@@ -16,7 +16,7 @@ public class KelaHakijaRiviKomponenttiImpl {
     public TKUVAYHVA luo(KelaHakijaRivi hakija) {
         TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
         builder.setSiirtotunnus(hakija.getSiirtotunnus());
-        builder.setTutkinnontaso1(hakija.getTutkinnontaso());
+        builder.setTutkinnontaso1(hakija.getTasoLaajuus().getTasoCode());
         builder.setOppilaitosnumero(hakija.getOppilaitosnumero());
         builder.setOrganisaatio(hakija.getOrganisaatio());
         builder.setHakukohde(hakija.getHakukohde());
@@ -42,6 +42,9 @@ public class KelaHakijaRiviKomponenttiImpl {
         } else {
             builder.setKevaallaAlkavaKoulutus();
         }
+        builder.setTutkinnonLaajuus1(hakija.getTasoLaajuus().getLaajuus1());
+        builder.setTutkinnonLaajuus2(hakija.getTasoLaajuus().getLaajuus2());
+
         return builder.build();
     }
 
