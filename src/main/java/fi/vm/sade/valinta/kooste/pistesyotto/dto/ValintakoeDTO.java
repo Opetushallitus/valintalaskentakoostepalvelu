@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel(value = "valinta.kooste.pistesyotto.dto.ValintakoeDTO", description = "Valintakoe")
 public class ValintakoeDTO {
 
     private String tunniste;
