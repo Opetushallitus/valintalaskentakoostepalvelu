@@ -130,8 +130,8 @@ public class HakemusUtil {
         return VARASIJAT.get(preferoitukielikoodi) + numero;
     }
 
-    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean ehdollinen) {
-        return tilaConverter(tila, preferoitukielikoodi, harkinnanvarainen, ehdollinen, false, null);
+    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean ehdollinen, String ehdollisenHyvaksymisenEhto) {
+        return tilaConverter(tila, preferoitukielikoodi, harkinnanvarainen, ehdollinen, false, null, ehdollisenHyvaksymisenEhto);
     }
 
     public static String tilaConverter(IlmoittautumisTila tila, String preferoitukielikoodi) {
@@ -173,7 +173,7 @@ public class HakemusUtil {
     }
 
 
-    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean ehdollinen, boolean lisaaVarasijanNumero, Integer varasijanNumero) {
+    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean ehdollinen, boolean lisaaVarasijanNumero, Integer varasijanNumero, String ehdollisenHyvaksymisenEhto) {
         if (tila == null) {
             return StringUtils.EMPTY;
         }
@@ -187,6 +187,9 @@ public class HakemusUtil {
                 return new StringBuilder().append(baseTila).append(" (").append(varasijanNumero).append(")").toString();
             }
             if(lopullinenTila.isHyvaksytty() && ehdollinen) {
+                if(!ehdollisenHyvaksymisenEhto.equals("")){
+                    return baseTila + " (" + ehdollisenHyvaksymisenEhto + ")";
+                }
                 return baseTila + EHDOLLINEN.get(preferoitukielikoodi);
             }
             return baseTila;

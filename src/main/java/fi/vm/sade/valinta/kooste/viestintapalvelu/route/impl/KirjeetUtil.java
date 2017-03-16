@@ -107,7 +107,16 @@ public class KirjeetUtil {
                 tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(firstValintatapajono.getVarasijanNumero(), preferoituKielikoodi));
             }
             tulokset.put("hylkaysperuste", StringUtils.trimToNull(hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
-            tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti(), firstValintatapajono.isEhdollisestiHyvaksyttavissa()));
+            String ehdollinenSyy = "";
+            if(firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi() != null && !firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi().equals("")){
+                ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoFI();
+                if(preferoituKielikoodi == "sv"){
+                    ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoSV();
+                } else if(preferoituKielikoodi == "en"){
+                    ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoEN();
+                }
+            }
+            tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti(), firstValintatapajono.isEhdollisestiHyvaksyttavissa(), ehdollinenSyy));
         }
     }
 

@@ -206,7 +206,8 @@ public class SijoittelunTulosExcelKomponentti {
                                     hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
                                     false,
                                     true,
-                                    hakemusDto.getVarasijanNumero()
+                                    hakemusDto.getVarasijanNumero(),
+                                    ehdollisenHyvaksymisenEhto
                             ),
                             valintaTieto,
                             ilmoittautumistieto,
