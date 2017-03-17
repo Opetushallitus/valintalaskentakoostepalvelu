@@ -333,11 +333,15 @@
 		<ctx:component-scan
 				base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl" />
 
-		<!-- Valintatapajono -->
+		<!-- Valintatapajonot -->
 		<bean id="ValintatapajonoResource"
 			  class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource" />
 		<ctx:component-scan
 				base-package="fi.vm.sade.valinta.kooste.valintatapajono" />
+
+		<bean id="ValintaperusteetResource"
+			  class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource" />
+
 		<!-- Pistesyotto -->
 		<bean id="PistesyottoResource"
 			  class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
@@ -502,6 +506,7 @@
 				<ref bean="ValintalaskentaKerrallaResource"/>
 				<ref bean="ValintalaskentaExcelResource"/>
 				<ref bean="ValintatapajonoResource"/>
+				<ref bean="ValintaperusteetResource"/>
 				<ref bean="DokumenttiProsessiResource"/>
 				<ref bean="ViestintapalveluAktivointiResource"/>
 				<ref bean="ValintaTulosServiceProxyResource"/>

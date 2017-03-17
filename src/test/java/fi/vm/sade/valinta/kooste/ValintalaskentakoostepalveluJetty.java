@@ -47,6 +47,7 @@ public class ValintalaskentakoostepalveluJetty {
 
     public static void main(String[] args) throws Exception{
         startShared();
+        //MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_VALINTAPERUSTEET_READ_1.2.246.562.10.00000000001");
     }
 
     public final static String resourcesAddress = "http://localhost:" + ValintalaskentakoostepalveluJetty.port + "/valintalaskentakoostepalvelu/resources";
@@ -91,6 +92,7 @@ public class ValintalaskentakoostepalveluJetty {
         UrlConfiguration.getInstance()
                 .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
                 .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
+                //.addOverride("baseurl-valintaperusteet-service", "https://itest-virkailija.oph.ware.fi")
                 .addOverride("baseurl-koodisto-service", "https://itest-virkailija.oph.ware.fi");
     }
 

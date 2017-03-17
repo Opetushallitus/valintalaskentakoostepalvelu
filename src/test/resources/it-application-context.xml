@@ -72,6 +72,9 @@
 
   <bean class="fi.vm.sade.security.OidProvider" />
 
+  <bean id="ValintaperusteetResource"
+        class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource" />
+
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
@@ -112,6 +115,7 @@
         <ref bean="ViestintapalveluAktivointiResource"/>
         <ref bean="ValintalaskentaExcelResource"/>
         <ref bean="HakemuksetResource"/>
+        <ref bean="ValintaperusteetResource"/>
       </jaxrs:serviceBeans>
       <jaxrs:providers>
         <ref bean="jsonProvider" />

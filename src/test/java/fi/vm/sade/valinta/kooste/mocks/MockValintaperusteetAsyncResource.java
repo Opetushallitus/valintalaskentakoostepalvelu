@@ -28,6 +28,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     private static AtomicReference<List<HakukohdeJaValintaperusteDTO>> hakukohdeJaValintaperusteetResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference = new AtomicReference<>();
+    private static AtomicReference<List<ValintaperusteetDTO>> hakukohteenValintaperusteetReference = new AtomicReference<>();
 
     public static void setValintaperusteetResult(List<ValintaperusteDTO> result) {
         valintaperusteetResultReference.set(result);
@@ -36,6 +37,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     public static void setHakukohteetValinnanvaiheelleResult(Set<String> result) {
         hakukohteetValinnanvaiheelleResultReference.set(result);
     }
+
     public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids) {
         return null;
     }
@@ -46,8 +48,13 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
-        return null;
+        return Observable.just(hakukohteenValintaperusteetReference.get());
     }
+
+    public static void setHakukohteenValintaperusteetResult(List<ValintaperusteetDTO> hakukohteenValintaperusteetResult) {
+        MockValintaperusteetAsyncResource.hakukohteenValintaperusteetReference.set(hakukohteenValintaperusteetResult);
+    }
+
     public static void setHakukohdeValintaperusteResult(List<HakukohdeJaValintaperusteDTO> result) {
         hakukohdeJaValintaperusteetResultReference.set(result);
     }
