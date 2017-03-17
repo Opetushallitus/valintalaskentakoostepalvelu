@@ -35,7 +35,7 @@ public class ValintaperusteetResource {
         this.resource = resource;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_APP_VALINTAPERUSTEET_READ')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_VALINTAPERUSTEET_READ', 'ROLE_APP_VALINTAPERUSTEET_CRUD')")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/hakukohde/{hakukohdeOid}/kayttaaValintalaskentaa")
