@@ -121,10 +121,12 @@
         <ref bean="jsonProvider" />
         <ref bean="cors-filter"/>
         <ref bean="cxfExceptionLogger"/>
+        <ref bean="springAccessDeniedExceptionMapper"/>
       </jaxrs:providers>
 
     </jaxrs:server>
     <bean id="cxfExceptionLogger" class="fi.vm.sade.valinta.http.CxfExceptionLogger"/>
+    <bean id="springAccessDeniedExceptionMapper" class="fi.vm.sade.valinta.http.SpringAccessDeniedExceptionMapper"/>
 
       <ctx:mbean-export/>
   </beans>

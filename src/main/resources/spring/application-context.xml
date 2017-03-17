@@ -519,12 +519,14 @@
 				<ref bean="jsonProvider" />
 				<ref bean="cors-filter"/>
 				<ref bean="cxfExceptionLogger"/>
+				<ref bean="springAccessDeniedExceptionMapper"/>
 			</jaxrs:providers>
 			<jaxrs:features>
 				<ref bean="swagger2Feature" />
 			</jaxrs:features>
 		</jaxrs:server>
 		<bean id="cxfExceptionLogger" class="fi.vm.sade.valinta.http.CxfExceptionLogger"/>
+		<bean id="springAccessDeniedExceptionMapper" class="fi.vm.sade.valinta.http.SpringAccessDeniedExceptionMapper"/>
 
 		<!-- Tarjonnan ajastettu synkronointi -->
 		<bean id="tarjontaSyncService"
