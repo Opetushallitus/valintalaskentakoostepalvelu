@@ -518,11 +518,13 @@
 			<jaxrs:providers>
 				<ref bean="jsonProvider" />
 				<ref bean="cors-filter"/>
+				<ref bean="cxfExceptionLogger"/>
 			</jaxrs:providers>
 			<jaxrs:features>
 				<ref bean="swagger2Feature" />
 			</jaxrs:features>
 		</jaxrs:server>
+		<bean id="cxfExceptionLogger" class="fi.vm.sade.valinta.http.CxfExceptionLogger"/>
 
 		<!-- Tarjonnan ajastettu synkronointi -->
 		<bean id="tarjontaSyncService"
