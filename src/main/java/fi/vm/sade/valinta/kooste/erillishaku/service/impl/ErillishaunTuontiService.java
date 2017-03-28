@@ -541,7 +541,7 @@ public class ErillishaunTuontiService {
                 Optional.of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
                 rivi.getHyvaksymiskirjeLahetetty(),
                 Lists.newArrayList(),
-                "", "", "", ""));
+                rivi.getEhdollisenHyvaksymisenEhtoKoodi(), rivi.getEhdollisenHyvaksymisenEhtoFI(), rivi.getEhdollisenHyvaksymisenEhtoSV(), rivi.getEhdollisenHyvaksymisenEhtoEN()));
     }
 
     private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja, String selite) {
