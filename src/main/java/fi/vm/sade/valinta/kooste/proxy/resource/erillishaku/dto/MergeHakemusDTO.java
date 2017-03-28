@@ -32,6 +32,10 @@ public class MergeHakemusDTO {
     private HakemuksenTila hakemuksentila;
     private Map<String, String> hakemuksenTilaKuvaus;
     private boolean ehdollisestiHyvaksyttavissa;
+    private String ehdollisenHyvaksymisenEhtoKoodi;
+    private String ehdollisenHyvaksymisenEhtoFI;
+    private String ehdollisenHyvaksymisenEhtoSV;
+    private String ehdollisenHyvaksymisenEhtoEN;
     private ValintatuloksenTila valintatuloksenTilaHakijalle;
     private ValintatuloksenTila valintatuloksentila;
     private IlmoittautumisTila ilmoittautumistila;
@@ -273,6 +277,31 @@ public class MergeHakemusDTO {
 
     public void setEhdollisestiHyvaksyttavissa(boolean ehdollisestiHyvaksytty) {
         this.ehdollisestiHyvaksyttavissa = ehdollisestiHyvaksytty;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoKoodi() {
+        return ehdollisenHyvaksymisenEhtoKoodi;
+    }
+    public void setEhdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi){
+        this.ehdollisenHyvaksymisenEhtoKoodi = ehdollisenHyvaksymisenEhtoKoodi;
+    }
+    public String getEhdollisenHyvaksymisenEhtoFI() {
+        return ehdollisenHyvaksymisenEhtoFI;
+    }
+    public void setEhdollisenHyvaksymisenEhtoFI(String ehdollisenHyvaksymisenEhtoFI){
+        this.ehdollisenHyvaksymisenEhtoFI = ehdollisenHyvaksymisenEhtoFI;
+    }
+    public String getEhdollisenHyvaksymisenEhtoSV() {
+        return ehdollisenHyvaksymisenEhtoSV;
+    }
+    public void setEhdollisenHyvaksymisenEhtoSV(String ehdollisenHyvaksymisenEhtoSV){
+        this.ehdollisenHyvaksymisenEhtoSV = ehdollisenHyvaksymisenEhtoSV;
+    }
+    public String getEhdollisenHyvaksymisenEhtoEN() {
+        return ehdollisenHyvaksymisenEhtoEN;
+    }
+    public void setEhdollisenHyvaksymisenEhtoEN(String ehdollisenHyvaksymisenEhtoEN){
+        this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
     }
 
     public Date getHyvaksymiskirjeLahetetty() {

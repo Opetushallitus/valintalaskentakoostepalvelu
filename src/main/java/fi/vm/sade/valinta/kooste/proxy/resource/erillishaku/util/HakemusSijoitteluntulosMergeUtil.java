@@ -368,6 +368,10 @@ public class HakemusSijoitteluntulosMergeUtil {
         dto.setHakemuksenTilaKuvaus(h.getTilanKuvaukset());
         if (valintatulos.isPresent()) {
             dto.setEhdollisestiHyvaksyttavissa(valintatulos.get().getEhdollisestiHyvaksyttavissa());
+            dto.setEhdollisenHyvaksymisenEhtoKoodi(valintatulos.get().getEhdollisenHyvaksymisenEhtoKoodi());
+            dto.setEhdollisenHyvaksymisenEhtoFI(valintatulos.get().getEhdollisenHyvaksymisenEhtoFI());
+            dto.setEhdollisenHyvaksymisenEhtoSV(valintatulos.get().getEhdollisenHyvaksymisenEhtoSV());
+            dto.setEhdollisenHyvaksymisenEhtoEN(valintatulos.get().getEhdollisenHyvaksymisenEhtoEN());
             dto.setValintatuloksentila(valintatulos.get().getTila());
             dto.setValintatuloksenTilaHakijalle(valintatulos.get().getTilaHakijalle());
             dto.setIlmoittautumistila(valintatulos.get().getIlmoittautumisTila());
