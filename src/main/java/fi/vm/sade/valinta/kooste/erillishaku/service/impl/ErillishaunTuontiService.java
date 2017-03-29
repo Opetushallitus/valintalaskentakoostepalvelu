@@ -407,7 +407,10 @@ public class ErillishaunTuontiService {
                         Optional.of(true),
                         rivi.getHyvaksymiskirjeLahetetty(),
                         Lists.newArrayList(),
-                        "","","",""))
+                        rivi.getEhdollisenHyvaksymisenEhtoKoodi(),
+                        rivi.getEhdollisenHyvaksymisenEhtoFI(),
+                        rivi.getEhdollisenHyvaksymisenEhtoSV(),
+                        rivi.getEhdollisenHyvaksymisenEhtoEN()))
                 .collect(Collectors.toList());
         try {
             if (!poistettavatDtos.isEmpty()) {

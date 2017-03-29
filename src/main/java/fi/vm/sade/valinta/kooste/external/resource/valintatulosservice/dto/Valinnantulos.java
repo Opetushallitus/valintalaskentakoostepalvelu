@@ -22,6 +22,10 @@ public class Valinnantulos {
     private IlmoittautumisTila ilmoittautumistila;
     private HakemuksenTila valinnantila;
     private ValintatuloksenTila vastaanottotila;
+    private String ehdollisenHyvaksymisenEhtoKoodi;
+    private String ehdollisenHyvaksymisenEhtoFI;
+    private String ehdollisenHyvaksymisenEhtoSV;
+    private String ehdollisenHyvaksymisenEhtoEN;
 
     public String getHakukohdeOid() {
         return hakukohdeOid;
@@ -61,6 +65,30 @@ public class Valinnantulos {
 
     public void setEhdollisestiHyvaksyttavissa(Boolean ehdollisestiHyvaksyttavissa) {
         this.ehdollisestiHyvaksyttavissa = ehdollisestiHyvaksyttavissa;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoKoodi() { return ehdollisenHyvaksymisenEhtoKoodi; }
+
+    public void setEhdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
+        this.ehdollisenHyvaksymisenEhtoKoodi = ehdollisenHyvaksymisenEhtoKoodi;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoFI() { return ehdollisenHyvaksymisenEhtoFI;}
+
+    public void setEhdollisenHyvaksymisenEhtoFI(String ehdollisenHyvaksymisenEhtoFI) {
+        this.ehdollisenHyvaksymisenEhtoFI = ehdollisenHyvaksymisenEhtoFI;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoSV() { return ehdollisenHyvaksymisenEhtoSV;}
+
+    public void setEhdollisenHyvaksymisenEhtoSV(String ehdollisenHyvaksymisenEhtoSV) {
+        this.ehdollisenHyvaksymisenEhtoSV = ehdollisenHyvaksymisenEhtoSV;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoEN() { return ehdollisenHyvaksymisenEhtoEN;}
+
+    public void setEhdollisenHyvaksymisenEhtoEN(String ehdollisenHyvaksymisenEhtoEN) {
+        this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
     }
 
     public Boolean getJulkaistavissa() {
@@ -147,6 +175,10 @@ public class Valinnantulos {
         valinnantulos.setValintatapajonoOid(hakija.valintatapajonoOid);
 
         valinnantulos.setEhdollisestiHyvaksyttavissa(hakija.ehdollisestiHyvaksyttavissa);
+        valinnantulos.setEhdollisenHyvaksymisenEhtoKoodi(hakija.ehdollisenHyvaksymisenEhtoKoodi);
+        valinnantulos.setEhdollisenHyvaksymisenEhtoFI(hakija.ehdollisenHyvaksymisenEhtoFI);
+        valinnantulos.setEhdollisenHyvaksymisenEhtoSV(hakija.ehdollisenHyvaksymisenEhtoSV);
+        valinnantulos.setEhdollisenHyvaksymisenEhtoEN(hakija.ehdollisenHyvaksymisenEhtoEN);
         valinnantulos.setJulkaistavissa(hakija.julkaistavissa);
 
         if(hakija.poistetaankoTulokset) {
@@ -180,6 +212,10 @@ public class Valinnantulos {
                 ", hakemusOid='" + hakemusOid + '\'' +
                 ", henkiloOid='" + henkiloOid + '\'' +
                 ", ehdollisestiHyvaksyttavissa=" + ehdollisestiHyvaksyttavissa +
+                ", ehdollisenHyvaksymisenEhtoKoodi=" + ehdollisenHyvaksymisenEhtoKoodi +
+                ", ehdollisenHyvaksymisenEhtoFI=" + ehdollisenHyvaksymisenEhtoFI +
+                ", ehdollisenHyvaksymisenEhtoSV=" + ehdollisenHyvaksymisenEhtoSV +
+                ", ehdollisenHyvaksymisenEhtoEN=" + ehdollisenHyvaksymisenEhtoEN +
                 ", julkaistavissa=" + julkaistavissa +
                 ", hyvaksyttyVarasijalta=" + hyvaksyttyVarasijalta +
                 ", hyvaksyPeruuntunut=" + hyvaksyPeruuntunut +
