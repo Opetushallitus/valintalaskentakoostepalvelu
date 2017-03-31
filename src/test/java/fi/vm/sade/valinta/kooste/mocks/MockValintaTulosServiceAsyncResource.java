@@ -83,5 +83,10 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
         return Observable.just(Lists.newArrayList());
     }
 
+    @Override
+    public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid) {
+        return Observable.just(Lists.newArrayList());
+    }
+
 
 }

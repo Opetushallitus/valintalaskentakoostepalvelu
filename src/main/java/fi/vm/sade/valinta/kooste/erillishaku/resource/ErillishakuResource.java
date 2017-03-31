@@ -97,7 +97,7 @@ public class ErillishakuResource {
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-        vientiService.vie(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi));
+        vientiService.vie(createAuditSession(), prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi));
         return prosessi.toProsessiId();
     }
 
@@ -231,6 +231,10 @@ public class ErillishakuResource {
         session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
         session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory));
         session.setRoles(getRoles());
+        Optional<String> uid = KoosteAudit.uid();
+        if(uid.isPresent()) {
+            session.setUid(uid.get());
+        }
         return session;
     }
 

@@ -143,7 +143,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
             debug += tulos.toString();
         }
 
-        LOG.info("Kustutaan osoitetta " + url + ", audit info on " + auditSession.toString() + " ja valinnantulokset " + debug);
+        LOG.info("Kutsutaan osoitetta " + url + ", audit info on " + auditSession.toString() + " ja valinnantulokset " + debug);
 
         try {
             LOG.info("Json " + gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset)));
@@ -161,6 +161,20 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                     }
                     return client;
                 });
+    }
+
+    @Override
+    public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid) {
+        return getAsObservable(
+          getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid) ,
+          new GenericType<List<Valinnantulos>>() {}.getType(),
+            client -> {
+                client.accept(MediaType.APPLICATION_JSON_TYPE);
+                client.query("uid", auditSession.getUid());
+                client.query("inetAddress", auditSession.getInetAddress());
+                client.query("userAgent", auditSession.getUserAgent());
+                return client;
+            });
     }
 
     private static class VtsDateTimeJsonDeserializer implements JsonDeserializer<DateTime> {
