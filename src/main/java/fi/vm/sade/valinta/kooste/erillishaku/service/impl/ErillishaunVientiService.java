@@ -107,46 +107,6 @@ public class ErillishaunVientiService {
                 prosessi.keskeyta();
             }
         );
-
-        /*Observable<List<Hakemus>> hakemusObservable = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
-        Observable<HakukohdeDTO> hakukohdeFuture = useVtsData ? Observable.empty() : from(sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()));
-        Observable<List<Valintatulos>> valintatulosObservable = useVtsData ?
-                tilaAsyncResource.getErillishaunValinnantulokset("", null, erillishaku.getValintatapajonoOid()):
-                tilaAsyncResource.findValintatulokset(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
-        Observable<HakuV1RDTO> hakuFuture = hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid());
-        Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());
-
-        zip(hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, valintatulosObservable, from(hakukohdeFuture),
-                (hakemukset, haku, tarjontaHakukohde, valintatulos, hakukohde) -> {
-                    Map<String, Valintatulos> valintatulokset = getValintatulokset(erillishaku, valintatulos);
-                    if (MapUtils.isEmpty(valintatulokset) && hakukohde.getSijoitteluajoId() == null) {
-                        // ei viela tuloksia, joten tehdaan tuonti haetuista hakemuksista
-                        return generoiIlmanHakukohdettaJaTuloksia(erillishaku, hakemukset, haku, tarjontaHakukohde);
-                    } else if(MapUtils.isEmpty(valintatulokset) && hakukohde.getSijoitteluajoId() != null) {
-                        return generoiHakukohteella(erillishaku, hakemukset, haku, tarjontaHakukohde, hakukohde);
-                    } else {
-                        return generoiHakukohteellaJaTuloksilla(erillishaku, hakemukset, haku, tarjontaHakukohde, hakukohde, valintatulokset);
-                    }
-
-            })
-            .subscribeOn(Schedulers.newThread())
-            .subscribe(
-                excel -> {
-                    LOG.info("Aloitetaan dokumenttipalveluun tallennus");
-                    String uuid = UUID.randomUUID().toString();
-                    dokumenttiResource.tallenna(uuid, "erillishaku.xlsx", DateTime.now().plusHours(1).toDate().getTime(),
-                            Collections.singletonList("erillishaku"), "application/octet-stream", excel.getExcel().vieXlsx());
-                    prosessi.vaiheValmistui();
-                    prosessi.valmistui(uuid);
-                },
-                poikkeus -> {
-                    LOG.error("Erillishaun vienti keskeytyi virheeseen", poikkeus);
-                    prosessi.keskeyta();
-                },
-                () -> {
-                    LOG.info("Erillishaun vienti onnistui!");
-                    prosessi.keskeyta();
-                });*/
     }
 
     private String objectToString(Object o) {
@@ -237,7 +197,7 @@ public class ErillishaunVientiService {
                              tulos.getVastaanottotila(),
                              tulos.getEhdollisestiHyvaksyttavissa(),
                              tulos.getValintatapajonoOid(),
-                             null,
+                             null == tulos.getHyvaksymiskirjeLahetetty() ? null : tulos.getHyvaksymiskirjeLahetetty().toDate(),
                              tulos.getEhdollisenHyvaksymisenEhtoKoodi(),
                              tulos.getEhdollisenHyvaksymisenEhtoFI(),
                              tulos.getEhdollisenHyvaksymisenEhtoSV(),

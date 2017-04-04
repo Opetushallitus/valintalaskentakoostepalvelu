@@ -4,6 +4,7 @@ import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
+import org.joda.time.DateTime;
 
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ public class Valinnantulos {
     private String ehdollisenHyvaksymisenEhtoFI;
     private String ehdollisenHyvaksymisenEhtoSV;
     private String ehdollisenHyvaksymisenEhtoEN;
+    private DateTime hyvaksymiskirjeLahetetty;
 
     public String getHakukohdeOid() {
         return hakukohdeOid;
@@ -163,6 +165,14 @@ public class Valinnantulos {
         this.vastaanottotila = vastaanottotila;
     }
 
+    public DateTime getHyvaksymiskirjeLahetetty() {
+        return hyvaksymiskirjeLahetetty;
+    }
+
+    public void setHyvaksymiskirjeLahetetty(DateTime hyvaksymiskirjeLahetetty) {
+        this.hyvaksymiskirjeLahetetty = hyvaksymiskirjeLahetetty;
+    }
+
     public static Valinnantulos of(ErillishaunHakijaDTO hakija) {
         return of(hakija, null);
     }
@@ -225,6 +235,7 @@ public class Valinnantulos {
                 ", ilmoittautumistila=" + ilmoittautumistila +
                 ", valinnantila=" + valinnantila +
                 ", vastaanottotila=" + vastaanottotila +
+                ", hyvaksymiskirjeLahetetty=" + hyvaksymiskirjeLahetetty +
                 '}';
     }
 }
