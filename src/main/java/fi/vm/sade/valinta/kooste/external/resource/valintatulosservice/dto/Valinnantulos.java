@@ -202,6 +202,9 @@ public class Valinnantulos {
         if(null == hakija.ilmoittautumisTila) {
             valinnantulos.setOhitaIlmoittautuminen(true);
         }
+        if(null != hakija.getHyvaksymiskirjeLahetetty()) {
+            valinnantulos.setHyvaksymiskirjeLahetetty(new DateTime(hakija.getHyvaksymiskirjeLahetetty()));
+        }
 
         valinnantulos.setValinnantila(hakija.hakemuksenTila);
         valinnantulos.setVastaanottotila(Optional.ofNullable(hakija.valintatuloksenTila).orElse(ValintatuloksenTila.KESKEN));
