@@ -57,7 +57,7 @@ public class ErillishaunVientiService {
 
     @Autowired
     public ErillishaunVientiService(
-            @Value("${valintalaskentakoostepalvelu.read-from-valintarekisteri}") String useVtsData,
+            @Value("${valintalaskenta-ui.read-from-valintarekisteri}") String useVtsData,
             ValintaTulosServiceAsyncResource tilaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             SijoitteluAsyncResource sijoitteluAsyncResource,

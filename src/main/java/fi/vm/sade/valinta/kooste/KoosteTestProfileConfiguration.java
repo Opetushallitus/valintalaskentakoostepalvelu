@@ -41,7 +41,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.valintatulosservice.rest.url",Optional.ofNullable(System.getProperty("vts_server")).orElse("http://" + proxyServer) + "/valinta-tulos-service");
         p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url",Optional.ofNullable(System.getProperty("sijoittelu_server")).orElse("http://" + proxyServer) + "/sijoittelu-service/resources");
-        p0.setProperty("valintalaskentakoostepalvelu.read-from-valintarekisteri", "false");
+        p0.setProperty("valintalaskenta-ui.read-from-valintarekisteri", "false");
 
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://" + proxyServer + "/organisaatio-service/rest");
