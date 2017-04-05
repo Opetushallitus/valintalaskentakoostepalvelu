@@ -173,6 +173,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 client.query("uid", auditSession.getUid());
                 client.query("inetAddress", auditSession.getInetAddress());
                 client.query("userAgent", auditSession.getUserAgent());
+                client.query("hyvaksymiskirjeet", "true");
                 return client;
             });
     }
