@@ -1,11 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
+import com.google.gson.*;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.http.DateDeserializer;
@@ -50,6 +46,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     protected Gson createGson() {
         return DateDeserializer.gsonBuilder()
                 .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonDeserializer())
+                .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonSerializer())
                 .create();
     }
 
@@ -188,6 +185,13 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
             } catch (IllegalArgumentException iae) {
                 return DateTime.parse(dateAsString, ISODateTimeFormat.dateTime());
             }
+        }
+    }
+
+    private static class VtsDateTimeJsonSerializer implements JsonSerializer<DateTime> {
+        @Override
+        public JsonElement serialize(DateTime dateTime, Type type, JsonSerializationContext jsonSerializationContext) {
+            return new JsonPrimitive(ISODateTimeFormat.dateTime().print(dateTime));
         }
     }
 }
