@@ -19,6 +19,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoR
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,7 +183,11 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
         @Override
         public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             String dateAsString = json.getAsString();
-            return DateTime.parse(dateAsString, valintaTulosServiceCompatibleFormatter);
+            try {
+                return DateTime.parse(dateAsString, valintaTulosServiceCompatibleFormatter);
+            } catch (IllegalArgumentException iae) {
+                return DateTime.parse(dateAsString, ISODateTimeFormat.dateTime());
+            }
         }
     }
 }
