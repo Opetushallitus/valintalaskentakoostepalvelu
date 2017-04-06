@@ -143,15 +143,12 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
         LOG.info("Kutsutaan osoitetta " + url + ", audit info on " + auditSession.toString() + " ja valinnantulokset " + debug);
 
-        try {
-            LOG.info("Json " + gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset)));
-        } catch (Exception e) {
-            LOG.error("Ei voitu generoida jsonia", e);
-        }
+        String jsonBody = gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset));
+        LOG.info("Json " + jsonBody);
 
         return postAsObservable(url,
                 new TypeToken<List<ValinnantulosUpdateStatus>>() {}.getType(),
-                Entity.entity(new ValinnantulosRequest(auditSession, valinnantulokset), MediaType.APPLICATION_JSON),
+                Entity.entity(jsonBody, MediaType.APPLICATION_JSON),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     if(auditSession.getIfUnmodifiedSince().isPresent()) {
