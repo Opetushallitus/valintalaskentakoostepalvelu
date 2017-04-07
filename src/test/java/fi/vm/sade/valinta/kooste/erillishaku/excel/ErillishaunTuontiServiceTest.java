@@ -136,7 +136,6 @@ public class ErillishaunTuontiServiceTest {
             final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
             assertEquals(MockData.hakuOid, tilaResult.hakuOid);
             assertEquals(MockData.kohdeOid, tilaResult.hakukohdeOid);
-            assertEquals("varsinainen jono", tilaResult.valintatapajononNimi);
             assertEquals(1, tilaResult.erillishaunHakijat.size());
             final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
             assertEquals("Tuomas", hakija.etunimi);
@@ -199,7 +198,6 @@ public class ErillishaunTuontiServiceTest {
             final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
             assertEquals(MockData.hakuOid, tilaResult.hakuOid);
             assertEquals(MockData.kohdeOid, tilaResult.hakukohdeOid);
-            assertEquals("varsinainen jono", tilaResult.valintatapajononNimi);
             assertEquals(1, tilaResult.erillishaunHakijat.size());
             final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
             assertEquals(erillishakuRivi.getEtunimi(), hakija.etunimi);
@@ -277,7 +275,7 @@ public class ErillishaunTuontiServiceTest {
         public void tilojenTuontiEpaonnistuu() {
             final TilaAsyncResource failingResource = mock(TilaAsyncResource.class);
             ResponseImpl response = (ResponseImpl)Response.ok(new HakukohteenValintatulosUpdateStatuses("viesti", new ArrayList<>()), MediaType.APPLICATION_JSON_TYPE).build();
-            when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any()))
                     .thenReturn(Observable.error(new FailedHttpException(response)));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(failingResource, applicationAsyncResource, henkiloAsyncResource, valintaTulosServiceAsyncResource, koodistoCachedAsyncResource, Schedulers.immediate());
             assertEquals(0, applicationAsyncResource.results.size());
@@ -308,7 +306,7 @@ class ErillisHakuTuontiTestCase {
     final KirjeProsessi prosessi = mock(KirjeProsessi.class);
     final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource = mock(ValintaTulosServiceAsyncResource.class);
     final KoodistoCachedAsyncResource koodistoCachedAsyncResource = mock(KoodistoCachedAsyncResource.class);
-    final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1", "varsinainen jono");
+    final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1");
 
     @Before
     public void before() {

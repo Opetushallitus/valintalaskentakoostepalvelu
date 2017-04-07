@@ -34,7 +34,7 @@ public class ErillishaunVientiServiceTest {
     @Test
     public void suoritaVientiTest() {
         when(mockTilaAsyncResource.findValintatulokset(anyString(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
-        final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1", "varsinainen jono");
+        final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
         final ErillishaunVientiService erillishaunVientiService =
                 new ErillishaunVientiService("false", mockTilaAsyncResource, mockApplicationAsyncResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource, mockKoodistoCachedAsyncResource);
@@ -45,7 +45,7 @@ public class ErillishaunVientiServiceTest {
 
     @Test
     public void suoritaEpaonnistunutVientiTest() {
-        final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1", "varsinainen jono");
+        final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
         final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
         final ErillishaunVientiService erillishaunVientiService =
@@ -57,7 +57,7 @@ public class ErillishaunVientiServiceTest {
 
     @Test
     public void suoriteVientiIlmanhakemuksia() throws IOException {
-        final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "2", "1", "1", "varsinainen jono");
+        final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "2", "1", "1");
         final ErillishakuProsessiDTO prosessi = spy(new ErillishakuProsessiDTO(1));
 
         ApplicationAsyncResource applicationMock = mock(ApplicationAsyncResource.class);

@@ -10,7 +10,7 @@ import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import rx.Observable;
 
 public interface TilaAsyncResource {
-    Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat);
+    Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, Collection<ErillishaunHakijaDTO> erillishaunHakijat);
 
     Observable<List<Valintatulos>> getValintatuloksetValintatapajonolle(String hakukohdeOid, String valintatapajonoOid);
 

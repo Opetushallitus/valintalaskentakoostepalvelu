@@ -240,7 +240,7 @@ public class ErillishaunTuontiService {
             LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
             lisattavatTaiKeskeneraiset = kasitteleHakemukset(haku, henkilot, lisattavatTaiKeskeneraiset, saveApplications, prosessi);
         }
-        LOG.info("Viedaan hakijoita ({}kpl) jonoon {}", lisattavatTaiKeskeneraiset.size(), haku.getValintatapajononNimi());
+        LOG.info("Viedaan hakijoita ({}kpl) jonoon {}", lisattavatTaiKeskeneraiset.size(), haku.getValintatapajonoOid());
         tuoErillishaunTilat(auditSession, haku, lisattavatTaiKeskeneraiset, poistettavat, prosessi);
     }
 
@@ -432,7 +432,7 @@ public class ErillishaunTuontiService {
                     List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
                     epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
                     if (epaonnistuneet.isEmpty()) {
-                        return tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat).doOnError(
+                        return tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), hakijatJaPoistettavat).doOnError(
                                 e -> {
                                     LOG.error("Erillishaun tuonti epäonnistui", e);
                                     List<ValintatulosUpdateStatus> statuses = ((FailedHttpException) e).response.readEntity(HakukohteenValintatulosUpdateStatuses.class).statuses;

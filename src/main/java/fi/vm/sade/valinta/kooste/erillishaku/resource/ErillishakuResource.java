@@ -91,13 +91,12 @@ public class ErillishakuResource {
             @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-            @QueryParam("valintatapajononNimi") String valintatapajononNimi) throws Exception {
+            @QueryParam("valintatapajonoOid") String valintatapajonoOid) throws Exception {
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-        vientiService.vie(createAuditSession(), prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi));
+        vientiService.vie(createAuditSession(), prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))));
         return prosessi.toProsessiId();
     }
 
@@ -112,7 +111,6 @@ public class ErillishakuResource {
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-            @QueryParam("valintatapajononNimi") String valintatapajononNimi,
             InputStream file) throws Exception {
         LOG.info("Käyttäjä " + KoosteAudit.username() + " tuo excelillä hakuun " + hakuOid + " hakemuksia");
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
@@ -125,7 +123,7 @@ public class ErillishakuResource {
         tuontiService.tuoExcelistä(
                 createAuditSession(),
                 prosessi,
-                new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi),
+                new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))),
                 new ByteArrayInputStream(b.toByteArray())
         );
         return prosessi.toProsessiId();
@@ -143,7 +141,6 @@ public class ErillishakuResource {
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-            @QueryParam("valintatapajononNimi") String valintatapajononNimi,
             @ApiParam("maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>" +
                     "hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>" +
                     "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>" +
@@ -162,7 +159,7 @@ public class ErillishakuResource {
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoJson(
                 createAuditSession(),
-                prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit(), true);
+                prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))), json.getRivit(), true);
         return prosessi.toProsessiId();
     }
 
@@ -178,7 +175,6 @@ public class ErillishakuResource {
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-            @QueryParam("valintatapajononNimi") String valintatapajononNimi,
             @ApiParam("maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>" +
                     "hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>" +
                     "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>" +
@@ -197,7 +193,7 @@ public class ErillishakuResource {
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoJson(
                 createAuditSession(true),
-                prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit(), false);
+                prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))), json.getRivit(), false);
         return prosessi.toProsessiId();
     }
 

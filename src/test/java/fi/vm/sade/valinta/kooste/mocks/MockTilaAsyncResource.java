@@ -19,13 +19,11 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
     public static class Result {
         public final String hakuOid;
         public final String hakukohdeOid;
-        public final String valintatapajononNimi;
         public final Collection<ErillishaunHakijaDTO> erillishaunHakijat;
 
-        public Result(final String hakuOid, final String hakukohdeOid, final String valintatapajononNimi, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+        public Result(final String hakuOid, final String hakukohdeOid, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
             this.hakuOid = hakuOid;
             this.hakukohdeOid = hakukohdeOid;
-            this.valintatapajononNimi = valintatapajononNimi;
             this.erillishaunHakijat = erillishaunHakijat;
         }
     }
@@ -52,8 +50,8 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
 
     public final List<Result> results = new ArrayList<>();
     @Override
-    public Observable<Response> tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final String valintatapajononNimi, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
-        results.add(new Result(hakuOid, hakukohdeOid, valintatapajononNimi, erillishaunHakijat));
+    public Observable<Response> tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+        results.add(new Result(hakuOid, hakukohdeOid, erillishaunHakijat));
         return Observable.just(null);
     }
 

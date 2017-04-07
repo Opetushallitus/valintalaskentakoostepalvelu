@@ -81,12 +81,9 @@ public class TilaAsyncResourceImpl extends UrlConfiguredResource implements Tila
     }
 
     @Override
-    public Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+    public Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
         String url = getUrl("sijoittelu-service.tila.erillishaku.hakukohde", hakuOid, hakukohdeOid);
-        LOG.info("Asynkroninen kutsu: {}?hyvaksytyt=true&hakukohdeOid={}&valintatapajononNimi={}", url, hakukohdeOid, valintatapajononNimi);
-        return postAsObservable(url, Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE), client -> {
-            client.query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY));
-            return client;
-        });
+        LOG.info("Asynkroninen kutsu: {}", url);
+        return postAsObservable(url, Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE));
     }
 }
