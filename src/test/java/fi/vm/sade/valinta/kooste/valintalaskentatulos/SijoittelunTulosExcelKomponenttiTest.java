@@ -106,9 +106,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 hakukohde
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertEquals(47, solut(HAKEMUS1, rivit).size());
-        assertEquals(43, solut(HAKEMUS2, rivit).size());
-        assertEquals(43, solut(HAKEMUS3, rivit).size());
+        assertEquals(56, solut(HAKEMUS1, rivit).size());
+        assertEquals(46, solut(HAKEMUS2, rivit).size());
+        assertEquals(46, solut(HAKEMUS3, rivit).size());
     }
 
     @Test
@@ -152,6 +152,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
         Valintatulos valintatulos = new Valintatulos();
         valintatulos.setEhdollisestiHyvaksyttavissa(true, "", "");
         valintatulos.setEhdollisenHyvaksymisenEhtoKoodi("JOKU_EHTOKOODI", "", "");
+        valintatulos.setEhdollisenHyvaksymisenEhtoFI("ehto suomi", "", "");
+        valintatulos.setEhdollisenHyvaksymisenEhtoSV("ehto ruotsi", "", "");
+        valintatulos.setEhdollisenHyvaksymisenEhtoEN("ehto englanti", "", "");
         valintatulos.setTila(ValintatuloksenTila.KESKEN, "", "");
         valintatulos.setValintatapajonoOid("jono1", "", "");
         valintatulos.setHakemusOid(HAKEMUS1, "", "");
@@ -160,6 +163,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'JOKU_EHTOKOODI'", cellTexts(rivit, HAKEMUS1).contains("JOKU_EHTOKOODI"));
+        assertTrue("Cell texts should contain text 'ehto suomi'", cellTexts(rivit, HAKEMUS1).contains("ehto suomi"));
+        assertTrue("Cell texts should contain text 'ehto ruotsi'", cellTexts(rivit, HAKEMUS1).contains("ehto ruotsi"));
+        assertTrue("Cell texts should contain text 'ehto englanti'", cellTexts(rivit, HAKEMUS1).contains("ehto englanti"));
     }
 
 

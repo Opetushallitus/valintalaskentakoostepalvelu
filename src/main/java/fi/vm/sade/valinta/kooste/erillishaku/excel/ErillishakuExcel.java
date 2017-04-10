@@ -57,6 +57,9 @@ public class ErillishakuExcel {
         if (tyyppi == Hakutyyppi.KORKEAKOULU) {
             builder.add(new TekstiArvo("Ehdollinen valinta"));
             builder.add(new TekstiArvo("Hyväksymisen ehto"));
+            builder.add(new TekstiArvo("Hyväksymisen ehto FI"));
+            builder.add(new TekstiArvo("Hyväksymisen ehto SV"));
+            builder.add(new TekstiArvo("Hyväksymisen ehto EN"));
         }
         builder.add(new TekstiArvo(HEADER_HYVAKSYMISKIRJE_LAHETETTY));
         builder.add(new TekstiArvo("Vastaanottotila"));
@@ -156,6 +159,9 @@ public class ErillishakuExcel {
             if (tyyppi == Hakutyyppi.KORKEAKOULU) {
                 a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
                 a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), true, true));
+                a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
+                a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
+                a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoEN(), true, true));
             }
             a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null ? "" : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));

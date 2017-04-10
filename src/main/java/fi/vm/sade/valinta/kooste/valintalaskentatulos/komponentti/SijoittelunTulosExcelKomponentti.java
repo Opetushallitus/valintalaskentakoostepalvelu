@@ -123,6 +123,9 @@ public class SijoittelunTulosExcelKomponentti {
                     "Ilmoittautumistieto",
                     "Ehdollinen valinta",
                     "Ehdollisen hyväksymisen ehto",
+                    "Ehdollisen hyväksymisen FI",
+                    "Ehdollisen hyväksymisen SV",
+                    "Ehdollisen hyväksymisen EN",
                     "Muokattu");
                 if (highlight) {
                     otsikot = otsikot.stream().map(Highlight::new).collect(Collectors.toList());
@@ -187,12 +190,18 @@ public class SijoittelunTulosExcelKomponentti {
                     String valintaTieto = StringUtils.EMPTY;
                     String ehdollinenValinta = StringUtils.EMPTY;
                     String ehdollisenHyvaksymisenEhto = StringUtils.EMPTY;
+                    String ehdollisenHyvaksymisenEhtoFI = StringUtils.EMPTY;
+                    String ehdollisenHyvaksymisenEhtoSV = StringUtils.EMPTY;
+                    String ehdollisenHyvaksymisenEhtoEN = StringUtils.EMPTY;
                     for (Valintatulos valintatulos : hakemuksenValintatulokset) {
                         if (jono.getOid().equals(valintatulos.getValintatapajonoOid())) {
                             if (valintatulos.getTila() != null) {
                                 valintaTieto = HakemusUtil.tilaConverter(valintatulos.getTila(), preferoitukielikoodi);
                                 ehdollinenValinta = HakemusUtil.ehdollinenValinta(valintatulos.getEhdollisestiHyvaksyttavissa());
                                 ehdollisenHyvaksymisenEhto = valintatulos.getEhdollisenHyvaksymisenEhtoKoodi();
+                                ehdollisenHyvaksymisenEhtoFI = valintatulos.getEhdollisenHyvaksymisenEhtoFI();
+                                ehdollisenHyvaksymisenEhtoSV = valintatulos.getEhdollisenHyvaksymisenEhtoSV();
+                                ehdollisenHyvaksymisenEhtoEN = valintatulos.getEhdollisenHyvaksymisenEhtoEN();
                             }
                             break;
                         }
@@ -213,6 +222,9 @@ public class SijoittelunTulosExcelKomponentti {
                             ilmoittautumistieto,
                             ehdollinenValinta,
                             ehdollisenHyvaksymisenEhto,
+                            ehdollisenHyvaksymisenEhtoFI,
+                            ehdollisenHyvaksymisenEhtoSV,
+                            ehdollisenHyvaksymisenEhtoEN,
                             muokattu(hakemusDto.getTilaHistoria())
                     );
 

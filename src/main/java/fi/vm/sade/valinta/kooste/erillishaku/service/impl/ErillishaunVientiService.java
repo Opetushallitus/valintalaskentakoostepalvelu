@@ -187,6 +187,9 @@ public class ErillishaunVientiService {
             builder
                 .ehdollisestiHyvaksyttavissa(valintatulos.getEhdollisestiHyvaksyttavissa())
                 .ehdollisenHyvaksymisenEhtoKoodi(valintatulos.getEhdollisenHyvaksymisenEhtoKoodi())
+                .ehdollisenHyvaksymisenEhtoFI(valintatulos.getEhdollisenHyvaksymisenEhtoFI())
+                .ehdollisenHyvaksymisenEhtoSV(valintatulos.getEhdollisenHyvaksymisenEhtoSV())
+                .ehdollisenHyvaksymisenEhtoEN(valintatulos.getEhdollisenHyvaksymisenEhtoEN())
                 .hyvaksymiskirjeLahetetty(valintatulos.getHyvaksymiskirjeLahetetty())
                 .vastaanottoTila(objectToString(valintatulos.getTila()))
                 .ilmoittautumisTila(objectToString(valintatulos.getIlmoittautumisTila()))
