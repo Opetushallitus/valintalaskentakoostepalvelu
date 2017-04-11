@@ -26,6 +26,7 @@ import rx.observables.BlockingObservable;
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -174,10 +175,11 @@ public class OppijanSuorituksetProxyResource {
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}")
     public void getSuorituksetForOpiskelijas(
             @PathParam("hakuOid") String hakuOid,
-            List<HakemusHakija> allHakemus,
+            final List<HakemusHakija> allHakemus,
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             @Suspended final AsyncResponse asyncResponse) {
 
@@ -189,6 +191,11 @@ public class OppijanSuorituksetProxyResource {
                     .build());
         });
 
+        if (allHakemus == null || allHakemus.isEmpty()) {
+            asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
+            return;
+        }
+
         final List<Map<String, String>> allData = new ArrayList<>();
         final BlockingObservable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).toBlocking();
         HakuV1RDTO haku = hakuObservable.first();
@@ -198,17 +205,24 @@ public class OppijanSuorituksetProxyResource {
                 Map<String, String> data = hakemusDTO.getAvaimet().stream()
                         .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
                         .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
-                allData.add(data);
+                if(!data.isEmpty()) {
+                    allData.add(data);
+                }
             }, poikkeus -> {
                 LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
                 asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
             });
         }
-        asyncResponse.resume(Response
-                .ok()
-                .header("Content-Type", "application/json")
-                .entity(allData)
-                .build());
+
+        if(allData.isEmpty()) {
+            asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
+        } else {
+            asyncResponse.resume(Response
+                    .ok()
+                    .header("Content-Type", "application/json")
+                    .entity(allData)
+                    .build());
+        }
     }
 
     private void resolveHakemusDTO(HakuV1RDTO haku, String opiskeljaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
@@ -220,11 +234,11 @@ public class OppijanSuorituksetProxyResource {
                 suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskeljaOid);
         Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(haku.getOid()).doOnError(throwableConsumer);
         Observable.combineLatest(suorituksetByOppija, hakemusObservable, parametritDTOObservable,
-                (suoritukset, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
+                (oppija, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
                         haku,
                         "",
                         Collections.singletonList(hakemus),
-                        Collections.singletonList(suoritukset),
+                        Collections.singletonList(oppija),
                         ohjausparametrit,
                         fetchEnsikertalaisuus).get(0)
         ).subscribe(hakemusDTOConsumer, throwableConsumer);
