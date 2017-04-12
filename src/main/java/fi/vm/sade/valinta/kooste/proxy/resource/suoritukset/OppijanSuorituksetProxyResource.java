@@ -200,6 +200,15 @@ public class OppijanSuorituksetProxyResource {
         final BlockingObservable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).toBlocking();
         HakuV1RDTO haku = hakuObservable.first();
 
+        if(haku == null) {
+            String msg = String.format("Hakua %s ei löytynyt", hakuOid);
+            asyncResponse.resume(Response
+                    .noContent()
+                    .entity(msg)
+                    .build());
+            return;
+        }
+
         for (final HakemusHakija hakemus : allHakemus) {
             resolveHakemusDTO(haku, hakemus.getOpiskelijaOid(), Observable.just(hakemus.getHakemus()), fetchEnsikertalaisuus, hakemusDTO -> {
                 Map<String, String> data = hakemusDTO.getAvaimet().stream()
