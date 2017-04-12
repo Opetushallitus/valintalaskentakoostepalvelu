@@ -196,7 +196,7 @@ public class OppijanSuorituksetProxyResource {
             return;
         }
 
-        final List<Map<String, String>> allData = new ArrayList<>();
+        final Map<String, Map<String, String>> allData = new HashMap<>();
         final BlockingObservable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).toBlocking();
         HakuV1RDTO haku = hakuObservable.first();
 
@@ -206,7 +206,7 @@ public class OppijanSuorituksetProxyResource {
                         .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
                         .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
                 if(!data.isEmpty()) {
-                    allData.add(data);
+                    allData.put(hakemus.getOpiskelijaOid(), data);
                 }
             }, poikkeus -> {
                 LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
@@ -176,14 +177,17 @@ public class OppijanSuorituksetProxyResourceTest {
         assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
         String json = getJsonFromResponse(response);
 
-        List<Map<String, String>> oppijanSuoritukset = GSON.
-                fromJson(json, new TypeToken<List<Map<String, String>>>() {
+        Map<String, Map<String, String>> oppijanSuoritukset = GSON.
+                fromJson(json, new TypeToken<Map<String, Map<String, String>>>() {
                 }.getType());
-        oppijanSuoritukset.forEach(stringStringMap -> LOG.info(stringStringMap.toString()));
+        oppijanSuoritukset.entrySet().forEach(entry -> LOG.info(entry.toString()));
         assertTrue(!oppijanSuoritukset.isEmpty());
 
+        List<String> poids = Arrays.asList(personoids);
+        assertTrue(oppijanSuoritukset.keySet().stream().allMatch(poids::contains));
+
         assertTrue("At least some of the response answers should contain 9 as POHJAKOULUTUS",
-                oppijanSuoritukset.stream().anyMatch(stringStringMap -> "9".equals(stringStringMap.get("POHJAKOULUTUS"))));
+                oppijanSuoritukset.values().stream().anyMatch(stringStringMap -> "9".equals(stringStringMap.get("POHJAKOULUTUS"))));
 
         MockSuoritusrekisteriAsyncResource.clear();
 
