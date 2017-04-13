@@ -223,15 +223,11 @@ public class OppijanSuorituksetProxyResource {
             });
         }
 
-        if(allData.isEmpty()) {
-            asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
-        } else {
-            asyncResponse.resume(Response
-                    .ok()
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(allData)
-                    .build());
-        }
+        asyncResponse.resume(Response
+                .ok()
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(allData)
+                .build());
     }
 
     private void resolveHakemusDTO(HakuV1RDTO haku, String opiskeljaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
