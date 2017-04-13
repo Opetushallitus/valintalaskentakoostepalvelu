@@ -162,7 +162,7 @@ public class OppijanSuorituksetProxyResource {
         resolveHakemusDTO(hakuOid, opiskeljaOid, Observable.just(hakemus), fetchEnsikertalaisuus, hakemusDTO -> {
             asyncResponse.resume(Response
                     .ok()
-                    .header("Content-Type", "application/json")
+                    .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(hakemusDTO.getAvaimet().stream()
                             .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
                             .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)))
@@ -228,7 +228,7 @@ public class OppijanSuorituksetProxyResource {
         } else {
             asyncResponse.resume(Response
                     .ok()
-                    .header("Content-Type", "application/json")
+                    .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(allData)
                     .build());
         }
