@@ -8,6 +8,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -110,9 +111,9 @@ public class KirjeetUtil {
             String ehdollinenSyy = "";
             if(firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi() != null && !firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi().equals("")){
                 ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoFI();
-                if(preferoituKielikoodi == "sv"){
+                if(preferoituKielikoodi == KieliUtil.RUOTSI){
                     ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoSV();
-                } else if(preferoituKielikoodi == "en"){
+                } else if(preferoituKielikoodi == KieliUtil.ENGLANTI){
                     ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoEN();
                 }
             }
