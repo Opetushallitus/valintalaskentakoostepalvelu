@@ -30,6 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -209,18 +210,22 @@ public class OppijanSuorituksetProxyResource {
             return;
         }
 
+         Action1<Throwable> exceptionConsumer = (Throwable poikkeus) -> {
+            LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
+            asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
+        };
+
+        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(haku.getOid()).doOnError(exceptionConsumer);
+
         for (final HakemusHakija hakemus : allHakemus) {
-            resolveHakemusDTO(haku, hakemus.getOpiskelijaOid(), Observable.just(hakemus.getHakemus()), fetchEnsikertalaisuus, hakemusDTO -> {
+            resolveHakemusDTO(haku, parametritDTOObservable, hakemus.getOpiskelijaOid(), Observable.just(hakemus.getHakemus()), fetchEnsikertalaisuus, hakemusDTO -> {
                 Map<String, String> data = hakemusDTO.getAvaimet().stream()
                         .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
                         .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
                 if(!data.isEmpty()) {
                     allData.put(hakemus.getOpiskelijaOid(), data);
                 }
-            }, poikkeus -> {
-                LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-                asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
-            });
+            }, exceptionConsumer);
         }
 
         asyncResponse.resume(Response
@@ -230,14 +235,14 @@ public class OppijanSuorituksetProxyResource {
                 .build());
     }
 
-    private void resolveHakemusDTO(HakuV1RDTO haku, String opiskeljaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
+    private void resolveHakemusDTO(HakuV1RDTO haku, Observable<ParametritDTO> parametritDTOObservable, String opiskelijaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
                                    Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
         hakemusObservable.doOnError(throwableConsumer);
 
         Observable<Oppija> suorituksetByOppija = fetchEnsikertalaisuus ?
-                suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, haku.getOid()).doOnError(throwableConsumer) :
-                suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskeljaOid);
-        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(haku.getOid()).doOnError(throwableConsumer);
+                suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskelijaOid, haku.getOid()).doOnError(throwableConsumer) :
+                suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOid);
+
         Observable.combineLatest(suorituksetByOppija, hakemusObservable, parametritDTOObservable,
                 (oppija, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
                         haku,
