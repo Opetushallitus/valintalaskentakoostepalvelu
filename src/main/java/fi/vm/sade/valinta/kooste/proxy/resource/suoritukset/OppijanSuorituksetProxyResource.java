@@ -215,17 +215,24 @@ public class OppijanSuorituksetProxyResource {
             asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
         };
 
-        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(haku.getOid()).doOnError(exceptionConsumer);
+        List<String> hakemusOids = allHakemus.stream().map(HakemusHakija::getOpiskelijaOid).collect(Collectors.toList());
 
-        for (final HakemusHakija hakemus : allHakemus) {
-            resolveHakemusDTO(haku, parametritDTOObservable, hakemus.getOpiskelijaOid(), Observable.just(hakemus.getHakemus()), fetchEnsikertalaisuus, hakemusDTO -> {
-                Map<String, String> data = hakemusDTO.getAvaimet().stream()
-                        .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
-                        .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
-                if(!data.isEmpty()) {
-                    allData.put(hakemus.getOpiskelijaOid(), data);
-                }
-            }, exceptionConsumer);
+        List<HakemusDTO> hakemusDTOs = new ArrayList<>();
+
+        resolveHakemusDTOs(hakuOid, hakemusOids, fetchEnsikertalaisuus,
+                (hakemusDTOs::addAll),
+                (exception -> {
+                    LOG.error("OppijanSuorituksetProxyResource exception", exception);
+                    asyncResponse.resume(Response.serverError().entity(exception.getMessage()).build());
+                }));
+
+        for (final HakemusDTO hakemusDTO : hakemusDTOs) {
+            Map<String, String> data = hakemusDTO.getAvaimet().stream()
+                    .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
+                    .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
+            if(!data.isEmpty()) {
+                allData.put(hakemusDTO.getHakijaOid(), data);
+            }
         }
 
         asyncResponse.resume(Response
@@ -294,15 +301,13 @@ public class OppijanSuorituksetProxyResource {
 
         // Fetch Oppija (suoritusdata) for each personOid in hakemukset
         Observable<List<String>>  opiskelijaOidsObservable = hakemuksetObservable.flatMap(Observable::from).map(Hakemus::getPersonOid).toList();
-        Observable<List<Oppija>>  suorituksetObservable    = opiskelijaOidsObservable.flatMap(Observable::from)
-                .flatMap(o -> {
-                            if (fetchEnsikertalaisuus) {
-                                return suoritusrekisteriAsyncResource.getSuorituksetByOppija(o, hakuOid).doOnError(onError);
-                            } else {
-                                return suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(o).doOnError(onError);
-                            }
-                        })
-                .toList();
+        Observable<List<Oppija>>  suorituksetObservable    = opiskelijaOidsObservable.flatMap(os -> {
+            if (fetchEnsikertalaisuus) {
+                return suoritusrekisteriAsyncResource.getSuorituksetByOppijas(os, hakuOid).doOnError(onError);
+            } else {
+                return suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(os).doOnError(onError);
+            }
+        });
 
         /**
          * Combine observables using zip
