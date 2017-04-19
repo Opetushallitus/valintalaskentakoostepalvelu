@@ -138,21 +138,21 @@ public class OppijanSuorituksetProxyResource {
      */
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @POST
-    @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskelijaOid/{opiskeljaOid}")
+    @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskelijaOid/{opiskelijaOid}")
     public void getSuoritukset(
             @PathParam("hakuOid") String hakuOid,
-            @PathParam("opiskeljaOid") String opiskeljaOid,
+            @PathParam("opiskelijaOid") String opiskelijaOid,
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             Hakemus hakemus,
             @Suspended final AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
-            LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}", opiskeljaOid);
+            LOG.error("suorituksetByOpiskelijaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskelijaOid/{oid}", opiskelijaOid);
             handler.resume(Response.serverError()
                     .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
                     .build());
         });
-        resolveHakemusDTO(hakuOid, opiskeljaOid, Observable.just(hakemus), fetchEnsikertalaisuus, hakemusDTO -> {
+        resolveHakemusDTO(hakuOid, opiskelijaOid, Observable.just(hakemus), fetchEnsikertalaisuus, hakemusDTO -> {
             asyncResponse.resume(Response
                     .ok()
                     .type(MediaType.APPLICATION_JSON_TYPE)
