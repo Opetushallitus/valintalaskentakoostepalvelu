@@ -94,9 +94,9 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
-        String joinedOids = String.join(",", opiskelijaOids);
-        return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid.many", joinedOids),
+        return postAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid"),
                 new TypeToken<List<Oppija>>() { }.getType(),
+                Entity.entity(gson().toJson(opiskelijaOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("haku", hakuOid);
@@ -116,9 +116,9 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public
     Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
-        String joinedOids = String.join(",", opiskelijaOids);
-        return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid.many", joinedOids),
+        return postAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid"),
                 new TypeToken<List<Oppija>>() { }.getType(),
+                Entity.entity(gson().toJson(opiskelijaOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;
