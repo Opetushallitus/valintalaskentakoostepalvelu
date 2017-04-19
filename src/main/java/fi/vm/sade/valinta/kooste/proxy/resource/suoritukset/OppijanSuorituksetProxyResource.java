@@ -30,9 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Controller("SuorituksenArvosanatProxyResource")
 @Path("/proxy/suoritukset")
@@ -72,9 +70,7 @@ public class OppijanSuorituksetProxyResource {
             asyncResponse.resume(Response
                     .ok()
                     .header("Content-Type", "application/json")
-                    .entity(hakemusDTO.getAvaimet().stream()
-                            .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
-                            .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)))
+                    .entity(getAvainArvoMap(hakemusDTO))
                     .build());
         }, poikkeus -> {
             LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
@@ -104,11 +100,7 @@ public class OppijanSuorituksetProxyResource {
 
         resolveHakemusDTOs(hakuOid, hakemusOids, fetchEnsikertalaisuus,
                 (hakemusDTOs -> {
-                    List<Map<String, String>> listOfMaps = hakemusDTOs.stream()
-                            .map(h -> h.getAvaimet().stream()
-                                    .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
-                                    .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)))
-                            .collect(Collectors.toList());
+                    List<Map<String, String>> listOfMaps = hakemusDTOs.stream().map(this::getAvainArvoMap).collect(Collectors.toList());
 
                     Response resp = Response.ok()
                                     .header("Content-Type", "application/json")
@@ -164,9 +156,7 @@ public class OppijanSuorituksetProxyResource {
             asyncResponse.resume(Response
                     .ok()
                     .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(hakemusDTO.getAvaimet().stream()
-                            .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
-                            .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)))
+                    .entity(getAvainArvoMap(hakemusDTO))
                     .build());
         }, poikkeus -> {
             LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
@@ -201,7 +191,7 @@ public class OppijanSuorituksetProxyResource {
         final BlockingObservable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).toBlocking();
         HakuV1RDTO haku = hakuObservable.first();
 
-        if(haku == null) {
+        if (haku == null) {
             String msg = String.format("Hakua %s ei löytynyt", hakuOid);
             asyncResponse.resume(Response
                     .noContent()
@@ -227,10 +217,8 @@ public class OppijanSuorituksetProxyResource {
                 }));
 
         for (final HakemusDTO hakemusDTO : hakemusDTOs) {
-            Map<String, String> data = hakemusDTO.getAvaimet().stream()
-                    .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
-                    .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
-            if(!data.isEmpty()) {
+            Map<String, String> data = getAvainArvoMap(hakemusDTO);
+            if (!data.isEmpty()) {
                 allData.put(hakemusDTO.getHakijaOid(), data);
             }
         }
@@ -240,6 +228,14 @@ public class OppijanSuorituksetProxyResource {
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(allData)
                 .build());
+    }
+
+    private Map<String,String> getAvainArvoMap(HakemusDTO hakemusDTO) {
+        return hakemusDTO.getAvaimet().stream().map(a ->
+                a.getAvain().endsWith("_SUORITETTU")
+                        ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S")
+                        : a
+        ).collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
     }
 
     private void resolveHakemusDTO(HakuV1RDTO haku, Observable<ParametritDTO> parametritDTOObservable, String opiskelijaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
