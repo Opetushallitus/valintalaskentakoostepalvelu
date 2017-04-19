@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.authentication.model.Kielisyys;
+import fi.vm.sade.sijoittelu.domain.EhdollisenHyvaksymisenEhtoKoodi;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
@@ -692,7 +693,7 @@ public class ErillishaunTuontiService {
             errors.add("Virheellinen puhelinnumero (" + rivi.getPuhelinnumero() + ").");
         }
 
-        if(saveApplications && tyyppi == Hakutyyppi.KORKEAKOULU) {
+        if (saveApplications && tyyppi == Hakutyyppi.KORKEAKOULU) {
             validateRequiredValue(asuinmaa, "asuinmaa", errors);
             validateRequiredValue(kansalaisuus, "kansalaisuus", errors);
             validateRequiredValue(kotikunta, "kotikunta", errors);
@@ -705,6 +706,13 @@ public class ErillishaunTuontiService {
                 errors.add("Toisen asteen pohjakoulutuksen suoritusmaata (" + rivi.getToisenAsteenSuoritusmaa() + ") ei saa antaa, jos ei toisen asteen pohjakoulutusta ole suoritettu.");
             }
         }
+
+        if (rivi.getEhdollisestiHyvaksyttavissa() && rivi.getEhdollisenHyvaksymisenEhtoKoodi().equals(EhdollisenHyvaksymisenEhtoKoodi.EHTO_MUU)) {
+            if (StringUtils.isEmpty(rivi.getEhdollisenHyvaksymisenEhtoFI())) errors.add("Ehdollisen hyväksynnän ehto FI -kenttä oli tyhjä");
+            if (StringUtils.isEmpty(rivi.getEhdollisenHyvaksymisenEhtoSV())) errors.add("Ehdollisen hyväksynnän ehto SV -kenttä oli tyhjä");
+            if (StringUtils.isEmpty(rivi.getEhdollisenHyvaksymisenEhtoEN())) errors.add("Ehdollisen hyväksynnän ehto EN -kenttä oli tyhjä");
+        }
+
         return errors;
     }
 
