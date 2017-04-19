@@ -707,7 +707,8 @@ public class ErillishaunTuontiService {
             }
         }
 
-        if (rivi.getEhdollisestiHyvaksyttavissa() && rivi.getEhdollisenHyvaksymisenEhtoKoodi().equals(EhdollisenHyvaksymisenEhtoKoodi.EHTO_MUU)) {
+        if (rivi.getEhdollisestiHyvaksyttavissa() && rivi.getEhdollisenHyvaksymisenEhtoKoodi() != null &&
+                rivi.getEhdollisenHyvaksymisenEhtoKoodi().equals(EhdollisenHyvaksymisenEhtoKoodi.EHTO_MUU)) {
             if (StringUtils.isEmpty(rivi.getEhdollisenHyvaksymisenEhtoFI())) errors.add("Ehdollisen hyväksynnän ehto FI -kenttä oli tyhjä");
             if (StringUtils.isEmpty(rivi.getEhdollisenHyvaksymisenEhtoSV())) errors.add("Ehdollisen hyväksynnän ehto SV -kenttä oli tyhjä");
             if (StringUtils.isEmpty(rivi.getEhdollisenHyvaksymisenEhtoEN())) errors.add("Ehdollisen hyväksynnän ehto EN -kenttä oli tyhjä");
