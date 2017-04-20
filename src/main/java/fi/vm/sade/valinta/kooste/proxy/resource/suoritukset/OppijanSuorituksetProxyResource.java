@@ -297,13 +297,15 @@ public class OppijanSuorituksetProxyResource {
 
         // Fetch Oppija (suoritusdata) for each personOid in hakemukset
         Observable<List<String>>  opiskelijaOidsObservable = hakemuksetObservable.flatMap(Observable::from).map(Hakemus::getPersonOid).toList();
-        Observable<List<Oppija>>  suorituksetObservable    = opiskelijaOidsObservable.flatMap(os -> {
-            if (fetchEnsikertalaisuus) {
-                return suoritusrekisteriAsyncResource.getSuorituksetByOppijas(os, hakuOid).doOnError(onError);
-            } else {
-                return suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(os).doOnError(onError);
-            }
-        });
+        Observable<List<Oppija>>  suorituksetObservable    = opiskelijaOidsObservable.flatMap(Observable::from)
+                .flatMap(o -> {
+                            if (fetchEnsikertalaisuus) {
+                                return suoritusrekisteriAsyncResource.getSuorituksetByOppija(o, hakuOid).doOnError(onError);
+                            } else {
+                                return suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(o).doOnError(onError);
+                            }
+                        })
+                .toList();
 
         /**
          * Combine observables using zip
