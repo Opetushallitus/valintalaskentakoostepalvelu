@@ -149,7 +149,7 @@ public class HakemusWrapper {
     }
 
     public boolean isMaksuvelvollinen(String hakukohdeOid) {
-        List<Eligibility> eligibilities = Optional.ofNullable(hakemus.getPreferenceEligibilities()).orElse(emptyList());
+        List<Eligibility> eligibilities = Optional.ofNullable(hakemus).map(Hakemus::getPreferenceEligibilities).filter(Objects::nonNull).orElse(emptyList());
         Optional<Eligibility> eligibilityForHakukohde = eligibilities.stream().filter(e -> hakukohdeOid.equals(e.getAoId())).findAny();
         boolean isRequiredEligibility = eligibilityForHakukohde.filter(e -> Maksuvelvollisuus.REQUIRED.equals(e.getMaksuvelvollisuus())).isPresent();
         return isRequiredEligibility;
