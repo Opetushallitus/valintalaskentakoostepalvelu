@@ -14,6 +14,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.*;
+
 /**
  *         Hakemustietojen luku hakemustietueesta vikasietoisesti
  */
@@ -53,10 +55,10 @@ public class HakemusWrapper {
 
     public HakemusWrapper(Hakemus hakemus) {
         if (hakemus == null) {
-            this.henkilotiedot = Collections.emptyMap();
-            this.lisatiedot = Collections.emptyMap();
-            this.hakutoiveet = Collections.emptyMap();
-            this.koulutustausta = Collections.emptyMap();
+            this.henkilotiedot = emptyMap();
+            this.lisatiedot = emptyMap();
+            this.hakutoiveet = emptyMap();
+            this.koulutustausta = emptyMap();
         }
         this.hakemus = hakemus;
     }
@@ -144,6 +146,13 @@ public class HakemusWrapper {
             this.yhteystiedot = Yhteystiedot.yhteystiedotHakemukselta(hakemus);
         }
         return yhteystiedot.getPuhelinnumerotAsString();
+    }
+
+    public boolean isMaksuvelvollinen(String hakukohdeOid) {
+        List<Eligibility> eligibilities = Optional.ofNullable(hakemus.getPreferenceEligibilities()).orElse(emptyList());
+        Optional<Eligibility> eligibilityForHakukohde = eligibilities.stream().filter(e -> hakukohdeOid.equals(e.getAoId())).findAny();
+        boolean isRequiredEligibility = eligibilityForHakukohde.filter(e -> Maksuvelvollisuus.REQUIRED.equals(e.getMaksuvelvollisuus())).isPresent();
+        return isRequiredEligibility;
     }
 
     public String getSahkopostiOsoite() {

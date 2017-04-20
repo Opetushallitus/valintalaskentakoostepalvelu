@@ -9,6 +9,8 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +27,8 @@ import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoi
 import fi.vm.sade.valinta.kooste.util.excel.Highlight;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
 
+import static java.util.Optional.*;
+
 /**
  *         Komponentti luo sijoittelun tulokset excel tiedostoksi!
  */
@@ -35,7 +39,7 @@ public class SijoittelunTulosExcelKomponentti {
     @Autowired
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
-    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, HakukohdeDTO hakukohde) {
+    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, List<Lukuvuosimaksu> lukuvuosimaksut, HakukohdeDTO hakukohde) {
         Map<String, Koodi> countryCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
@@ -44,7 +48,7 @@ public class SijoittelunTulosExcelKomponentti {
             throw new SijoittelultaEiSisaltoaPoikkeus("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
         }
         List<Object[]> rivit = new ArrayList<>();
-        List<ValintatapajonoDTO> valintatapajonot = Optional.ofNullable(hakukohde.getValintatapajonot()).orElse(Collections.emptyList()).stream()
+        List<ValintatapajonoDTO> valintatapajonot = ofNullable(hakukohde.getValintatapajonot()).orElse(Collections.emptyList()).stream()
                 .filter(v -> v.getHakemukset() != null && !v.getHakemukset().isEmpty())
                 .collect(Collectors.toList());
         if (valintatapajonot.isEmpty()) {
@@ -102,6 +106,7 @@ public class SijoittelunTulosExcelKomponentti {
                 "Asuinmaa",
                 "Kansallinen ID",
                 "Passin numero",
+                "Maksun tila",
                 "Sähköposti",
                 "Puhelinnumero",
                 "Lupa julkaisuun",
@@ -139,13 +144,14 @@ public class SijoittelunTulosExcelKomponentti {
         Map<String, Map<String, HakemusDTO>> jonoOidHakemusOidHakemusDto = valintatapajonot.stream()
                 .collect(Collectors.toMap(ValintatapajonoDTO::getOid, v -> v.getHakemukset().stream().collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h))));
 
+        Map<String, Lukuvuosimaksu> personOidToLukuvuosimaksu = lukuvuosimaksut.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l));
 
         Map<String, IlmoittautumisTila> hakemusJaJonoMappaus = valintatapajononTilat(valintatulokset);
         for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
             String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimet();
             List<Object> hakemusRivi = Lists.newArrayList();
-
+            Maksuntila maksuntila = ofNullable(personOidToLukuvuosimaksu.get(hDto.getHakijaOid())).map(l -> l.getMaksuntila()).orElse(Maksuntila.MAKSAMATTA);
             hakemusRivi.addAll(Arrays.asList(
                     hDto.getHakemusOid(),
                     nimi,
@@ -164,6 +170,7 @@ public class SijoittelunTulosExcelKomponentti {
                     countryNameInEnglish(countryCodes, wrapper),
                     wrapper.getKansallinenId(),
                     wrapper.getPassinnumero(),
+                    wrapper.isMaksuvelvollinen(hakukohdeOid) ? maksuntila.toString() : "",
                     wrapper.getSahkopostiOsoite(),
                     wrapper.getPuhelinnumero(),
                     HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()),
@@ -288,7 +295,7 @@ public class SijoittelunTulosExcelKomponentti {
      * @return Lista HakijaryhmaDTO-olioita
      */
     private List<HakijaryhmaDTO> getHakijaryhmatWithHakemuksia(HakukohdeDTO hakukohde) {
-        return Optional.ofNullable(hakukohde.getHakijaryhmat()).orElse(Collections.emptyList())
+        return ofNullable(hakukohde.getHakijaryhmat()).orElse(Collections.emptyList())
                 .stream()
                 .filter(h -> h.getHakemusOid() != null && !h.getHakemusOid().isEmpty())
                 .collect(Collectors.toList());

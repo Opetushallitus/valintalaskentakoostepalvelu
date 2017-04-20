@@ -89,6 +89,11 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     }
 
     @Override
+    public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid) {
+        return getAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid), new GenericType<List<Lukuvuosimaksu>>() {}.getType());
+    }
+
+    @Override
     public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid) {
         return getAsObservable(
                 getUrl("valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde", hakuOid, hakukohdeOid),

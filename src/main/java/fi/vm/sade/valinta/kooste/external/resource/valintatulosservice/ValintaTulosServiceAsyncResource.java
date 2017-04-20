@@ -34,6 +34,8 @@ public interface ValintaTulosServiceAsyncResource {
 
     Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid);
 
+    Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid);
+
     Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid);
 
     Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid);

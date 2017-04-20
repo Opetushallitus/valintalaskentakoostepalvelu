@@ -123,15 +123,17 @@ public class ValintalaskentaExcelResource {
             Observable.combineLatest(
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                     valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
+                    valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid),
                     sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
-                    (tarjonta, valintatulokset, hakukohde, hakemukset) -> {
+                    (tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset) -> {
                         try {
                             String opetuskieli = KirjeetHakukohdeCache.getOpetuskieli(tarjonta.getOpetusKielet());
                             Teksti hakukohteenNimet = new Teksti(tarjonta.getHakukohteenNimet());
                             Teksti tarjoajaNimet = new Teksti(tarjonta.getTarjoajaNimet());
 
-                            InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(VastaanottoFilterUtil.nullifyVastaanottoBasedOnHakemuksenTila(valintatulokset, hakukohde), opetuskieli, hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, hakukohde);
+                            InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(VastaanottoFilterUtil.nullifyVastaanottoBasedOnHakemuksenTila(valintatulokset, hakukohde), opetuskieli,
+                                    hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, lukuvuosimaksut, hakukohde);
                             String id = UUID.randomUUID().toString();
                             Observable<Response> response = dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", DateTime.now().plusHours(24).toDate().getTime(), Arrays.asList(), "application/vnd.ms-excel", xls);
                             response.subscribe(

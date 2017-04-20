@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.*;
+import static java.util.Collections.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -54,8 +56,8 @@ public class SijoittelunTulosExcelKomponenttiTest {
         ValintatapajonoDTO jono = new ValintatapajonoDTO();
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(HAKEMUS1);
-        jono.setHakemukset(Arrays.asList(hakemusDTO));
-        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        jono.setHakemukset(asList(hakemusDTO));
+        hakukohde.setValintatapajonot(asList(createValintatapajonot("jono1", asList(HAKEMUS1))));
         Answers answers = new Answers();
         HashMap<String, String> henkilotiedot = new HashMap<>();
         henkilotiedot.put("Kutsumanimi", "Pekka");
@@ -63,7 +65,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         henkilotiedot.put("Sukunimi", "Alamäki");
         answers.setHenkilotiedot(henkilotiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus), emptyList(), hakukohde);
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue(cellTexts(rivit, HAKEMUS1).contains("Alamäki, Pekka Johannes"));
     }
@@ -71,16 +73,17 @@ public class SijoittelunTulosExcelKomponenttiTest {
     @Test
     public void addsEachHakemusExactlyOnce() throws Throwable {
         HakukohdeDTO hakukohde = new HakukohdeDTO();
-        ValintatapajonoDTO jono1 = createValintatapajonot("jono1", Arrays.asList(HAKEMUS1, HAKEMUS2));
-        ValintatapajonoDTO jono2 = createValintatapajonot("jono2", Arrays.asList(HAKEMUS2, HAKEMUS3));
-        hakukohde.setValintatapajonot(Arrays.asList(jono1, jono2));
+        ValintatapajonoDTO jono1 = createValintatapajonot("jono1", asList(HAKEMUS1, HAKEMUS2));
+        ValintatapajonoDTO jono2 = createValintatapajonot("jono2", asList(HAKEMUS2, HAKEMUS3));
+        hakukohde.setValintatapajonot(asList(jono1, jono2));
         InputStream inputStream = excelKomponentti.luoXls(
                 new ArrayList<>(),
                 "FI",
                 "Konetekniikka",
                 "Aalto yliopisto",
                 "hakukohde1",
-                Arrays.asList(createHakemus(HAKEMUS1), createHakemus(HAKEMUS2), createHakemus(HAKEMUS3)),
+                asList(createHakemus(HAKEMUS1), createHakemus(HAKEMUS2), createHakemus(HAKEMUS3)),
+                emptyList(),
                 hakukohde
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
@@ -92,23 +95,24 @@ public class SijoittelunTulosExcelKomponenttiTest {
     @Test
     public void addsCellsForEachHakemusAndEachJono() throws Throwable {
         HakukohdeDTO hakukohde = new HakukohdeDTO();
-        ValintatapajonoDTO jono1 = createValintatapajonot("jono1", Arrays.asList(HAKEMUS1));
-        ValintatapajonoDTO jono2 = createValintatapajonot("jono2", Arrays.asList(HAKEMUS1, HAKEMUS3));
-        ValintatapajonoDTO jono3 = createValintatapajonot("jono3", Arrays.asList(HAKEMUS1, HAKEMUS2));
-        hakukohde.setValintatapajonot(Arrays.asList(jono1, jono2, jono3));
+        ValintatapajonoDTO jono1 = createValintatapajonot("jono1", asList(HAKEMUS1));
+        ValintatapajonoDTO jono2 = createValintatapajonot("jono2", asList(HAKEMUS1, HAKEMUS3));
+        ValintatapajonoDTO jono3 = createValintatapajonot("jono3", asList(HAKEMUS1, HAKEMUS2));
+        hakukohde.setValintatapajonot(asList(jono1, jono2, jono3));
         InputStream inputStream = excelKomponentti.luoXls(
                 new ArrayList<>(),
                 "FI",
                 "Konetekniikka",
                 "Aalto yliopisto",
                 "hakukohde1",
-                Arrays.asList(createHakemus(HAKEMUS1), createHakemus(HAKEMUS2), createHakemus(HAKEMUS3)),
+                asList(createHakemus(HAKEMUS1), createHakemus(HAKEMUS2), createHakemus(HAKEMUS3)),
+                emptyList(),
                 hakukohde
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertEquals(56, solut(HAKEMUS1, rivit).size());
-        assertEquals(46, solut(HAKEMUS2, rivit).size());
-        assertEquals(46, solut(HAKEMUS3, rivit).size());
+        assertEquals(57, solut(HAKEMUS1, rivit).size());
+        assertEquals(47, solut(HAKEMUS2, rivit).size());
+        assertEquals(47, solut(HAKEMUS3, rivit).size());
     }
 
     @Test
@@ -117,14 +121,14 @@ public class SijoittelunTulosExcelKomponenttiTest {
         ValintatapajonoDTO jono = new ValintatapajonoDTO();
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(HAKEMUS1);
-        jono.setHakemukset(Arrays.asList(hakemusDTO));
-        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        jono.setHakemukset(asList(hakemusDTO));
+        hakukohde.setValintatapajonot(asList(createValintatapajonot("jono1", asList(HAKEMUS1))));
         Answers answers = new Answers();
         HashMap<String, String> lisatiedot = new HashMap<>();
         lisatiedot.put("asiointikieli", "SV");
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde);
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'SV'", cellTexts(rivit, HAKEMUS1).contains("SV"));
@@ -133,13 +137,13 @@ public class SijoittelunTulosExcelKomponenttiTest {
     @Test
     public void addEhdollinenValinta() throws Throwable {
         HakukohdeDTO hakukohde = new HakukohdeDTO();
-        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        hakukohde.setValintatapajonot(asList(createValintatapajonot("jono1", asList(HAKEMUS1))));
 
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(HAKEMUS1);
 
         ValintatapajonoDTO jono = new ValintatapajonoDTO();
-        jono.setHakemukset(Arrays.asList(hakemusDTO));
+        jono.setHakemukset(asList(hakemusDTO));
 
         HashMap<String, String> lisatiedot = new HashMap<>();
         lisatiedot.put("asiointikieli", "SV");
@@ -159,7 +163,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         valintatulos.setValintatapajonoOid("jono1", "", "");
         valintatulos.setHakemusOid(HAKEMUS1, "", "");
 
-        InputStream inputStream = excelKomponentti.luoXls(Arrays.asList(valintatulos), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(asList(valintatulos), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde);
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'JOKU_EHTOKOODI'", cellTexts(rivit, HAKEMUS1).contains("JOKU_EHTOKOODI"));
@@ -176,13 +180,13 @@ public class SijoittelunTulosExcelKomponenttiTest {
         ValintatapajonoDTO jono = new ValintatapajonoDTO();
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(HAKEMUS1);
-        jono.setHakemukset(Arrays.asList(hakemusDTO));
-        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        jono.setHakemukset(asList(hakemusDTO));
+        hakukohde.setValintatapajonot(asList(createValintatapajonot("jono1", asList(HAKEMUS1))));
         Answers answers = new Answers();
         HashMap<String, String> lisatiedot = new HashMap<>();
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde);
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'FI'", cellTexts(rivit, HAKEMUS1).contains("FI"));
@@ -194,14 +198,14 @@ public class SijoittelunTulosExcelKomponenttiTest {
         ValintatapajonoDTO jono = new ValintatapajonoDTO();
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(HAKEMUS1);
-        jono.setHakemukset(Arrays.asList(hakemusDTO));
-        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        jono.setHakemukset(asList(hakemusDTO));
+        hakukohde.setValintatapajonot(asList(createValintatapajonot("jono1", asList(HAKEMUS1))));
         Answers answers = new Answers();
         HashMap<String, String> lisatiedot = new HashMap<>();
         lisatiedot.put("lupatiedot-sahkoinen-viestinta", "true");
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde);
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'Lupa sähköiseen asiointiin'",
@@ -214,13 +218,13 @@ public class SijoittelunTulosExcelKomponenttiTest {
         ValintatapajonoDTO jono = new ValintatapajonoDTO();
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(HAKEMUS1);
-        jono.setHakemukset(Arrays.asList(hakemusDTO));
-        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        jono.setHakemukset(asList(hakemusDTO));
+        hakukohde.setValintatapajonot(asList(createValintatapajonot("jono1", asList(HAKEMUS1))));
         Answers answers = new Answers();
         HashMap<String, String> lisatiedot = new HashMap<>();
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus), emptyList(),hakukohde);
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertFalse("Cell texts should not contain text 'Lupa sähköiseen asiointiin'",
@@ -245,12 +249,12 @@ public class SijoittelunTulosExcelKomponenttiTest {
         hakemusDTO.setHakemusOid(HAKEMUS1);
         hakemusDTO.getHyvaksyttyHakijaryhmista().add(HAKIJARYHMA1);
 
-        jono.setHakemukset(Arrays.asList(hakemusDTO));
-        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        jono.setHakemukset(asList(hakemusDTO));
+        hakukohde.setValintatapajonot(asList(createValintatapajonot("jono1", asList(HAKEMUS1))));
         Answers answers = new Answers();
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
 
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde);
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'Hakijaryhmä 1'", cellTexts(rivit, HAKEMUS1).contains("Hakijaryhmä 1"));
@@ -280,12 +284,12 @@ public class SijoittelunTulosExcelKomponenttiTest {
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(HAKEMUS1);
 
-        jono.setHakemukset(Arrays.asList(hakemusDTO));
-        hakukohde.setValintatapajonot(Arrays.asList(createValintatapajonot("jono1", Arrays.asList(HAKEMUS1))));
+        jono.setHakemukset(asList(hakemusDTO));
+        hakukohde.setValintatapajonot(asList(createValintatapajonot("jono1", asList(HAKEMUS1))));
         Answers answers = new Answers();
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
 
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde);
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'Hakijaryhmä 1, Hakijaryhmä 2'",
