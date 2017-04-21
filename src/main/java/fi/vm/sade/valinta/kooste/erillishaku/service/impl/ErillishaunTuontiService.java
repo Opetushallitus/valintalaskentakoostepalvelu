@@ -46,7 +46,6 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdate
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValinnantulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
@@ -73,7 +72,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -475,10 +473,31 @@ public class ErillishaunTuontiService {
                                             .map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO)))
                             ).collect(Collectors.toList());
 
-                            doValinnantilojenTallennusValintaTulosServiceen(auditSession, haku, valinnantuloksetForValintaTulosService, (ok) -> {
-                                prosessi.vaiheValmistui();
-                                prosessi.valmistui(ok);
-                            });
+                            valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(
+                                    auditSession,
+                                    haku.getValintatapajonoOid(),
+                                    valinnantuloksetForValintaTulosService
+                            ).subscribe(
+                                    statuses -> {
+                                        if (!statuses.isEmpty()) {
+                                            List<String> messages = statuses.stream()
+                                                    .map(ValintatulosUpdateStatus::toString)
+                                                    .collect(Collectors.toList());
+                                            LOG.warn(String.format(
+                                                    "Osa erillishaun %s tulosten tallennuksesta Valintarekisteriin epäonnistui: %s",
+                                                    String.join(", ", messages),
+                                                    haku.getHakuOid()
+                                            ));
+                                        }
+                                        prosessi.vaiheValmistui();
+                                        prosessi.valmistui("ok");
+                                    },
+                                    t -> {
+                                        LOG.warn(String.format("Erillishaun %s tulosten tallennus Valintarekisteriin epäonnistui", haku.getHakuOid()), t);
+                                        prosessi.vaiheValmistui();
+                                        prosessi.valmistui("ok");
+                                    }
+                            );
                         },
                         poikkeus -> {
                             LOG.error("Erillishaun tilojen tuonti epäonnistui", poikkeus);
@@ -503,29 +522,6 @@ public class ErillishaunTuontiService {
                         LOG.error("", e.getCause());
                         prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE, e.getMessage()));
                     });
-        }
-    }
-
-    private void doValinnantilojenTallennusValintaTulosServiceen(final AuditSession auditSession, final ErillishakuDTO haku, List<Valinnantulos> valinnantulokset, Consumer<String> ready) {
-        try {
-            valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid(), valinnantulokset).subscribe(
-                    done -> {
-                        if(done.isEmpty()) {
-                            LOG.info("Erillishaun tulokset tallennettu onnistuneesti Valintarekisteriin.");
-                        } else {
-                            LOG.info("Saatiin 200 erillishaun tulosten tallennuksessa Valintarekisteriin, mutta kaikkien tulosten tallennus ei onnistunut: " +
-                              String.join("\n", done.stream().map(status -> status.toString()).collect(Collectors.toList())));
-                        }
-                        ready.accept("ok");
-                    },
-                    poikkeus -> {
-                        LOG.warn("Erillishaun tulosten tallennus Valintarekisteriin epäonnistui", poikkeus);
-                        ready.accept("ok");
-                    }
-            );
-        } catch(Exception e) {
-            LOG.error("Erillishaun tulosten tallennus Valintarekisteriin epäonnistui", e);
-            ready.accept("ok");
         }
     }
 

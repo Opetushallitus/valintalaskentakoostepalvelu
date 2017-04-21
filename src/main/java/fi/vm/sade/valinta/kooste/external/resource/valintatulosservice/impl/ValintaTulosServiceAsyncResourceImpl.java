@@ -6,6 +6,7 @@ import com.google.gson.*;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
@@ -30,6 +31,9 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +49,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     @Override
     protected Gson createGson() {
         return DateDeserializer.gsonBuilder()
+                .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonSerializer())
                 .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonDeserializer())
                 .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonSerializer())
                 .create();
@@ -134,21 +139,11 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     }
 
     @Override
-    public Observable<List<ValinnantulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
-        String url = getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid);
-        String debug = "";
-        for(Valinnantulos tulos : valinnantulokset) {
-            debug += tulos.toString();
-        }
-
-        LOG.info("Kutsutaan osoitetta " + url + ", audit info on " + auditSession.toString() + " ja valinnantulokset " + debug);
-
-        String jsonBody = gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset));
-        LOG.info("Json " + jsonBody);
-
-        return postAsObservable(url,
-                new TypeToken<List<ValinnantulosUpdateStatus>>() {}.getType(),
-                Entity.entity(jsonBody, MediaType.APPLICATION_JSON),
+    public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
+        return postAsObservable(
+                getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid),
+                new TypeToken<List<ValintatulosUpdateStatus>>() {}.getType(),
+                Entity.entity(gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset)), MediaType.APPLICATION_JSON),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     if(auditSession.getIfUnmodifiedSince().isPresent()) {
@@ -171,6 +166,13 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 client.query("hyvaksymiskirjeet", "true");
                 return client;
             });
+    }
+
+    private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
+        @Override
+        public JsonElement serialize(OffsetDateTime dateTime, Type type, JsonSerializationContext jsonSerializationContext) {
+            return new JsonPrimitive(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(dateTime.atZoneSameInstant(ZoneId.of("Europe/Helsinki"))));
+        }
     }
 
     private static class VtsDateTimeJsonDeserializer implements JsonDeserializer<DateTime> {
