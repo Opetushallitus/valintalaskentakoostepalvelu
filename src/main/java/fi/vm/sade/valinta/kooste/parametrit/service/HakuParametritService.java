@@ -39,36 +39,13 @@ public class HakuParametritService {
 
     public ParametritParser getParametritForHaku(String hakuOid) {
         try {
-            return haunOhjausParametritCache.get(hakuOid, () -> fetchParametrit(hakuOid));
+            return haunOhjausParametritCache.get(hakuOid, () -> {
+                ParametritDTO first = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).toBlocking().first();
+                return new ParametritParser(first,this.rootOrganisaatioOid);
+            });
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private ParametritParser fetchParametrit(String hakuOid) {
-        final CompletableFuture<ParametritDTO> promise = new CompletableFuture<>();
-        // ohjausparametrit-service returns 404 for haku without parameters
-        ohjausparametritAsyncResource.haeHaunOhjausparametrit(
-                hakuOid,
-                parametrit -> {
-                    promise.complete(parametrit);
-                },
-                (Throwable t) -> {
-                    if(t instanceof HttpExceptionWithResponse && ((HttpExceptionWithResponse)t).status == 404) {
-                        promise.complete(new ParametritDTO());
-                    } else {
-                        promise.completeExceptionally(t);
-                    }
-                }
-        );
-
-        try {
-            ParametritParser ret = new ParametritParser(promise.get(requestTimeoutSeconds, TimeUnit.SECONDS), this.rootOrganisaatioOid);
-            return ret;
-        } catch (Throwable e) {
-            LOG.error("Ohjausparametrien luku epäonnistui haulle {}", hakuOid, e);
-        }
-        return null;
     }
 
 }
