@@ -387,8 +387,9 @@ public class ErillishaunTuontiService {
     private void tuoErillishaunTilat(final AuditSession auditSession, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat, final KirjeProsessi prosessi) {
         final String username = auditSession.getPersonOid();
 
-        final List<ErillishaunHakijaDTO> hakijat = lisattavatTaiKeskeneraiset.stream().flatMap(rivi ->
-                toErillishaunHakijaStream(haku, rivi)).collect(Collectors.toList());
+        final List<ErillishaunHakijaDTO> hakijat = lisattavatTaiKeskeneraiset.stream()
+                .map(rivi -> toErillishaunHakijaStream(haku, rivi))
+                .collect(Collectors.toList());
 
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(
@@ -468,7 +469,7 @@ public class ErillishaunTuontiService {
                             );
                             List<Valinnantulos> valinnantuloksetForValintaTulosService = Stream.concat(
                                     poistettavat.stream()
-                                            .flatMap(rivi -> toErillishaunHakijaStream(haku, rivi))
+                                            .map(rivi -> toErillishaunHakijaStream(haku, rivi))
                                             .map(Valinnantulos::of),
                                     hakijat.stream()
                                             .map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO)))
@@ -528,8 +529,8 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private Stream<ErillishaunHakijaDTO> toErillishaunHakijaStream(ErillishakuDTO haku, ErillishakuRivi rivi) {
-        return Stream.of(new ErillishaunHakijaDTO(
+    private ErillishaunHakijaDTO toErillishaunHakijaStream(ErillishakuDTO haku, ErillishakuRivi rivi) {
+        return new ErillishaunHakijaDTO(
                 haku.getValintatapajonoOid(),
                 rivi.getHakemusOid(),
                 haku.getHakukohdeOid(),
@@ -546,7 +547,8 @@ public class ErillishaunTuontiService {
                 Optional.of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
                 rivi.getHyvaksymiskirjeLahetetty(),
                 Lists.newArrayList(),
-                rivi.getEhdollisenHyvaksymisenEhtoKoodi(), rivi.getEhdollisenHyvaksymisenEhtoFI(), rivi.getEhdollisenHyvaksymisenEhtoSV(), rivi.getEhdollisenHyvaksymisenEhtoEN()));
+                rivi.getEhdollisenHyvaksymisenEhtoKoodi(), rivi.getEhdollisenHyvaksymisenEhtoFI(), rivi.getEhdollisenHyvaksymisenEhtoSV(), rivi.getEhdollisenHyvaksymisenEhtoEN()
+        );
     }
 
     private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja, String selite) {
