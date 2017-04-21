@@ -431,15 +431,8 @@ public class ErillishaunTuontiService {
                     List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
                     epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
                     if (epaonnistuneet.isEmpty()) {
-                        return tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), hakijatJaPoistettavat).doOnError(
-                                e -> {
-                                    LOG.error("Erillishaun tuonti epäonnistui", e);
-                                    List<ValintatulosUpdateStatus> statuses = ((FailedHttpException) e).response.readEntity(HakukohteenValintatulosUpdateStatuses.class).statuses;
-                                    prosessi.keskeyta(statuses.stream()
-                                            .map(s -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.SIJOITTELU,
-                                                    s.message, new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)))
-                                            .collect(Collectors.toList()));
-                                });
+                        return tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), hakijatJaPoistettavat)
+                                .doOnError(t -> prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.SIJOITTELU, t.getMessage())));
                     } else {
                         List<Poikkeus> poikkeukset = epaonnistuneet.stream()
                                 .map(v -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE,
@@ -449,7 +442,22 @@ public class ErillishaunTuontiService {
                         return Observable.error(new RuntimeException("Error when updating vastaanotto statuses"));
                     }
                 }).subscribe(
-                        done -> {
+                        statuses -> {
+                            if (!statuses.isEmpty()) {
+                                List<String> messages = statuses.stream()
+                                        .map(ValintatulosUpdateStatus::toString)
+                                        .collect(Collectors.toList());
+                                LOG.error(String.format(
+                                        "Osa erillishaun %s tulosten tallennuksesta sijoittelu-serviceen epäonnistui: %s",
+                                        String.join(", ", messages),
+                                        haku.getHakuOid()
+                                ));
+                                prosessi.keskeyta(statuses.stream()
+                                        .map(s -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.SIJOITTELU,
+                                                s.message, new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)))
+                                        .collect(Collectors.toList()));
+                                return;
+                            }
                             hakijatJaPoistettavat.forEach(h ->
                                     AUDIT.log(builder()
                                             .id(username)
@@ -478,9 +486,9 @@ public class ErillishaunTuontiService {
                                     haku.getValintatapajonoOid(),
                                     valinnantuloksetForValintaTulosService
                             ).subscribe(
-                                    statuses -> {
-                                        if (!statuses.isEmpty()) {
-                                            List<String> messages = statuses.stream()
+                                    vtsStatuses -> {
+                                        if (!vtsStatuses.isEmpty()) {
+                                            List<String> messages = vtsStatuses.stream()
                                                     .map(ValintatulosUpdateStatus::toString)
                                                     .collect(Collectors.toList());
                                             LOG.warn(String.format(

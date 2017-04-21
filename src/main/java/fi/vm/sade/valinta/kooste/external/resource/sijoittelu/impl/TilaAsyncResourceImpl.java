@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -9,7 +10,10 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.http.FailedHttpException;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -81,9 +85,22 @@ public class TilaAsyncResourceImpl extends UrlConfiguredResource implements Tila
     }
 
     @Override
-    public Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
-        String url = getUrl("sijoittelu-service.tila.erillishaku.hakukohde", hakuOid, hakukohdeOid);
-        LOG.info("Asynkroninen kutsu: {}", url);
-        return postAsObservable(url, Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE));
+    public Observable<List<ValintatulosUpdateStatus>> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+        Observable<List<ValintatulosUpdateStatus>> r = postAsObservable(
+                getUrl("sijoittelu-service.tila.erillishaku.hakukohde", hakuOid, hakukohdeOid),
+                Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE)
+        ).map(s -> Collections.emptyList());
+        return r.onErrorResumeNext(t -> {
+            HakukohteenValintatulosUpdateStatuses h = ((FailedHttpException) t).response.readEntity(HakukohteenValintatulosUpdateStatuses.class);
+            if (h.message == null) {
+                if (h.statuses.isEmpty()) {
+                    return Observable.error(t);
+                } else {
+                    return Observable.just(h.statuses);
+                }
+            } else {
+                return Observable.error(new RuntimeException(h.message));
+            }
+        });
     }
 }

@@ -5,6 +5,7 @@ import static fi.vm.sade.valinta.kooste.mocks.MockData.*;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -50,9 +51,9 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
 
     public final List<Result> results = new ArrayList<>();
     @Override
-    public Observable<Response> tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+    public Observable<List<ValintatulosUpdateStatus>> tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
         results.add(new Result(hakuOid, hakukohdeOid, erillishaunHakijat));
-        return Observable.just(null);
+        return Observable.just(Collections.emptyList());
     }
 
 }

@@ -11,7 +11,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
@@ -274,14 +276,13 @@ public class ErillishaunTuontiServiceTest {
         @Test
         public void tilojenTuontiEpaonnistuu() {
             final TilaAsyncResource failingResource = mock(TilaAsyncResource.class);
-            ResponseImpl response = (ResponseImpl)Response.ok(new HakukohteenValintatulosUpdateStatuses("viesti", new ArrayList<>()), MediaType.APPLICATION_JSON_TYPE).build();
             when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any()))
-                    .thenReturn(Observable.error(new FailedHttpException(response)));
+                    .thenReturn(Observable.error(new RuntimeException("viesti")));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(failingResource, applicationAsyncResource, henkiloAsyncResource, valintaTulosServiceAsyncResource, koodistoCachedAsyncResource, Schedulers.immediate());
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             tuontiService.tuoExcelistä(new AuditSession("bob", new ArrayList<String>(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
-            Mockito.verify(prosessi).keskeyta((Collection<Poikkeus>)Matchers.any());
+            Mockito.verify(prosessi).keskeyta(any(Poikkeus.class));
         }
 
         @Test
@@ -321,8 +322,11 @@ class ErillisHakuTuontiTestCase {
                     dto.setResult(result);
                     return dto;
                 }).collect(Collectors.toList())));
-
-
+        when(valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(
+                any(AuditSession.class),
+                anyString(),
+                any(List.class)
+        )).thenReturn(Observable.just(Collections.emptyList()));
         mockKoodisto();
     }
 
