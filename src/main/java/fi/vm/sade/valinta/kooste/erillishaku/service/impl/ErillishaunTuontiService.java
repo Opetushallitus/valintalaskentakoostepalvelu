@@ -466,14 +466,15 @@ public class ErillishaunTuontiService {
                                             .add("ilmoittautumistila", h.getIlmoittautumisTila())
                                             .build())
                             );
-                            Supplier<List<Valinnantulos>> valinnantuloksetForValintaTulosService = () -> {
-                                List<Valinnantulos> valinnantulokset = poistettavat.stream().flatMap(rivi ->
-                                        toErillishaunHakijaStream(haku, rivi)).map(hakijaDTO -> Valinnantulos.of(hakijaDTO)).collect(Collectors.toList());
-                                valinnantulokset.addAll(hakijat.stream().map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO))).collect(Collectors.toList()));
-                                return valinnantulokset;
-                            };
+                            List<Valinnantulos> valinnantuloksetForValintaTulosService = Stream.concat(
+                                    poistettavat.stream()
+                                            .flatMap(rivi -> toErillishaunHakijaStream(haku, rivi))
+                                            .map(Valinnantulos::of),
+                                    hakijat.stream()
+                                            .map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO)))
+                            ).collect(Collectors.toList());
 
-                            doValinnantilojenTallennusValintaTulosServiceen(auditSession, haku, valinnantuloksetForValintaTulosService.get(),(ok) -> {
+                            doValinnantilojenTallennusValintaTulosServiceen(auditSession, haku, valinnantuloksetForValintaTulosService, (ok) -> {
                                 prosessi.vaiheValmistui();
                                 prosessi.valmistui(ok);
                             });
