@@ -205,22 +205,15 @@ public class OppijanSuorituksetProxyResource {
             asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
         };
 
-        List<String> hakemusOids = allHakemus.stream().map(HakemusHakija::getOpiskelijaOid).collect(Collectors.toList());
+        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(haku.getOid()).doOnError(exceptionConsumer);
 
-        List<HakemusDTO> hakemusDTOs = new ArrayList<>();
+        LOG.info("Hae suoritukset {} hakemukselle", allHakemus.size());
 
-        resolveHakemusDTOs(hakuOid, hakemusOids, fetchEnsikertalaisuus,
-                (hakemusDTOs::addAll),
-                (exception -> {
-                    LOG.error("OppijanSuorituksetProxyResource exception", exception);
-                    asyncResponse.resume(Response.serverError().entity(exception.getMessage()).build());
-                }));
-
-        for (final HakemusDTO hakemusDTO : hakemusDTOs) {
-            Map<String, String> data = getAvainArvoMap(hakemusDTO);
-            if (!data.isEmpty()) {
-                allData.put(hakemusDTO.getHakijaOid(), data);
-            }
+        for (final HakemusHakija hakemus : allHakemus) {
+            resolveHakemusDTO(haku, parametritDTOObservable, hakemus.getOpiskelijaOid(), Observable.just(hakemus.getHakemus()), fetchEnsikertalaisuus, hakemusDTO -> {
+                Map<String, String> data = getAvainArvoMap(hakemusDTO);
+                allData.put(hakemus.getOpiskelijaOid(), data);
+            }, exceptionConsumer);
         }
 
         asyncResponse.resume(Response
