@@ -92,14 +92,14 @@ public class TilaAsyncResourceImpl extends UrlConfiguredResource implements Tila
         ).map(s -> Collections.emptyList());
         return r.onErrorResumeNext(t -> {
             HakukohteenValintatulosUpdateStatuses h = ((FailedHttpException) t).response.readEntity(HakukohteenValintatulosUpdateStatuses.class);
-            if (h.message == null) {
-                if (h.statuses.isEmpty()) {
+            if (h.statuses.isEmpty()) {
+                if (h.message == null) {
                     return Observable.error(t);
                 } else {
-                    return Observable.just(h.statuses);
+                    return Observable.error(new RuntimeException(h.message));
                 }
             } else {
-                return Observable.error(new RuntimeException(h.message));
+                return Observable.just(h.statuses);
             }
         });
     }

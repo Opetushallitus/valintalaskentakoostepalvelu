@@ -58,6 +58,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
@@ -68,9 +69,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -87,6 +90,7 @@ public class ErillishaunTuontiService {
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final Scheduler scheduler;
+    private final boolean useVtsData;
 
     private static final String PHONE_PATTERN = "^$|^([0-9\\(\\)\\/\\+ \\-]*)$";
 
@@ -96,13 +100,15 @@ public class ErillishaunTuontiService {
                                     HenkiloAsyncResource henkiloAsyncResource,
                                     ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
                                     KoodistoCachedAsyncResource koodistoCachedAsyncResource,
-                                    Scheduler scheduler) {
+                                    Scheduler scheduler,
+                                    @Value("${valintalaskenta-ui.read-from-valintarekisteri}") String useVtsData) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.tilaAsyncResource = tilaAsyncResource;
         this.henkiloAsyncResource = henkiloAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.scheduler = scheduler;
+        this.useVtsData = "TRUE".equals(useVtsData);
     }
 
     @Autowired
@@ -110,13 +116,15 @@ public class ErillishaunTuontiService {
                                     ApplicationAsyncResource applicationAsyncResource,
                                     HenkiloAsyncResource henkiloAsyncResource,
                                     ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
-                                    KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+                                    KoodistoCachedAsyncResource koodistoCachedAsyncResource,
+                                    @Value("${valintalaskenta-ui.read-from-valintarekisteri}") String useVtsData) {
         this(tilaAsyncResource,
                 applicationAsyncResource,
                 henkiloAsyncResource,
                 valintaTulosServiceAsyncResource,
                 koodistoCachedAsyncResource,
-                newThread());
+                newThread(),
+                useVtsData);
     }
 
     public void tuoExcelistä(AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
@@ -412,125 +420,173 @@ public class ErillishaunTuontiService {
                         rivi.getEhdollisenHyvaksymisenEhtoSV(),
                         rivi.getEhdollisenHyvaksymisenEhtoEN()))
                 .collect(Collectors.toList());
-        try {
-            if (!poistettavatDtos.isEmpty()) {
-                List<String> hakemusOidit = poistettavatDtos.stream().map(ErillishaunHakijaDTO::getHakemusOid).collect(Collectors.toList());
-                applicationAsyncResource.changeStateOfApplicationsToPassive(hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä").toBlocking().first();
-            }
-            List<ErillishaunHakijaDTO> hakijatJaPoistettavat = new ArrayList<>();
-            hakijatJaPoistettavat.addAll(hakijat);
-            hakijatJaPoistettavat.addAll(poistettavatDtos);
-            if (!hakijatJaPoistettavat.isEmpty()) {
-                final List<ErillishaunHakijaDTO> hakijatKaikillaTilaPaivityksilla = hakijat.stream()
-                        .filter(h -> !ainoastaanHakemuksenTilaPaivitys(h) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(h.valintatuloksenTila))
-                        .collect(Collectors.toList());
-
-                Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus =
-                        doVastaanottoTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla, prosessi);
-                vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
-                    List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
-                    epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
-                    if (epaonnistuneet.isEmpty()) {
-                        return tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), hakijatJaPoistettavat)
-                                .doOnError(t -> prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.SIJOITTELU, t.getMessage())));
-                    } else {
-                        List<Poikkeus> poikkeukset = epaonnistuneet.stream()
-                                .map(v -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE,
-                                        v.getResult().getMessage(), new Tunniste(v.getHakemusOid(), Poikkeus.HAKEMUSOID)))
-                                .collect(Collectors.toList());
-                        prosessi.keskeyta(poikkeukset);
-                        return Observable.error(new RuntimeException("Error when updating vastaanotto statuses"));
-                    }
-                }).subscribe(
-                        statuses -> {
-                            if (!statuses.isEmpty()) {
-                                List<String> messages = statuses.stream()
-                                        .map(ValintatulosUpdateStatus::toString)
-                                        .collect(Collectors.toList());
-                                LOG.error(String.format(
-                                        "Osa erillishaun %s tulosten tallennuksesta sijoittelu-serviceen epäonnistui: %s",
-                                        String.join(", ", messages),
-                                        haku.getHakuOid()
-                                ));
-                                prosessi.keskeyta(statuses.stream()
-                                        .map(s -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.SIJOITTELU,
-                                                s.message, new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)))
-                                        .collect(Collectors.toList()));
-                                return;
-                            }
-                            hakijatJaPoistettavat.forEach(h ->
-                                    AUDIT.log(builder()
-                                            .id(username)
-                                            .hakuOid(haku.getHakuOid())
-                                            .hakukohdeOid(haku.getHakukohdeOid())
-                                            .hakemusOid(h.getHakemusOid())
-                                            //.henkiloOid(h.getHakijaOid())
-                                            .valintatapajonoOid(haku.getValintatapajonoOid())
-                                            .setOperaatio(h.getPoistetaankoTulokset() ? ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO :
-                                                    ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS)
-                                            .add("hakemuksentila", h.getHakemuksenTila())
-                                            .add("valintatuloksentila", h.getValintatuloksenTila())
-                                            .add("ilmoittautumistila", h.getIlmoittautumisTila())
-                                            .build())
-                            );
-                            List<Valinnantulos> valinnantuloksetForValintaTulosService = Stream.concat(
-                                    poistettavat.stream()
-                                            .map(rivi -> toErillishaunHakijaStream(haku, rivi))
-                                            .map(Valinnantulos::of),
-                                    hakijat.stream()
-                                            .map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO)))
-                            ).collect(Collectors.toList());
-
-                            valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(
-                                    auditSession,
-                                    haku.getValintatapajonoOid(),
-                                    valinnantuloksetForValintaTulosService
-                            ).subscribe(
-                                    vtsStatuses -> {
-                                        if (!vtsStatuses.isEmpty()) {
-                                            List<String> messages = vtsStatuses.stream()
-                                                    .map(ValintatulosUpdateStatus::toString)
-                                                    .collect(Collectors.toList());
-                                            LOG.warn(String.format(
-                                                    "Osa erillishaun %s tulosten tallennuksesta Valintarekisteriin epäonnistui: %s",
-                                                    String.join(", ", messages),
-                                                    haku.getHakuOid()
-                                            ));
-                                        }
-                                        prosessi.vaiheValmistui();
-                                        prosessi.valmistui("ok");
-                                    },
-                                    t -> {
-                                        LOG.warn(String.format("Erillishaun %s tulosten tallennus Valintarekisteriin epäonnistui", haku.getHakuOid()), t);
-                                        prosessi.vaiheValmistui();
-                                        prosessi.valmistui("ok");
-                                    }
-                            );
-                        },
-                        poikkeus -> {
-                            LOG.error("Erillishaun tilojen tuonti epäonnistui", poikkeus);
-                        });
-            } else {
-                prosessi.vaiheValmistui();
-                prosessi.valmistui("ok");
-            }
-        } catch (Exception e) {
-            LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
-            throw new RuntimeException(e);
+        if (!poistettavatDtos.isEmpty()) {
+            List<String> hakemusOidit = poistettavatDtos.stream().map(ErillishaunHakijaDTO::getHakemusOid).collect(Collectors.toList());
+            applicationAsyncResource.changeStateOfApplicationsToPassive(hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä").toBlocking().first();
         }
+        List<ErillishaunHakijaDTO> hakijatJaPoistettavat = new ArrayList<>();
+        hakijatJaPoistettavat.addAll(hakijat);
+        hakijatJaPoistettavat.addAll(poistettavatDtos);
+        final List<ErillishaunHakijaDTO> hakijatKaikillaTilaPaivityksilla = hakijat.stream()
+                .filter(h -> !ainoastaanHakemuksenTilaPaivitys(h) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(h.valintatuloksenTila))
+                .collect(Collectors.toList());
+
+        doVastaanottoTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla).flatMap(poikkeukset -> {
+            if (poikkeukset.isEmpty()) {
+                if (useVtsData) {
+                    return doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, poistettavat, hakijat);
+                } else {
+                    return doValinnantuloksenTallennusSijoitteluServiceen(
+                            haku.getHakuOid(),
+                            haku.getHakukohdeOid(),
+                            hakijatJaPoistettavat
+                    ).map(ps -> {
+                        if (ps.isEmpty()) {
+                            doThrowawayValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, poistettavat, hakijat);
+                        }
+                        return ps;
+                    });
+                }
+            } else {
+                return Observable.just(poikkeukset);
+            }
+        }).subscribe(
+                poikkeukset -> {
+                    Set<String> epaonnistuneet = poikkeukset.stream()
+                            .flatMap(p -> p.getTunnisteet().stream())
+                            .filter(t -> t.getTyyppi().equals(Poikkeus.HAKEMUSOID))
+                            .map(Tunniste::getTunniste)
+                            .collect(Collectors.toSet());
+                    hakijatJaPoistettavat.stream()
+                            .filter(h -> !epaonnistuneet.contains(h.getHakemusOid()))
+                            .forEach(h -> AUDIT.log(builder()
+                                    .id(username)
+                                    .hakuOid(haku.getHakuOid())
+                                    .hakukohdeOid(haku.getHakukohdeOid())
+                                    .hakemusOid(h.getHakemusOid())
+                                    //.henkiloOid(h.getHakijaOid())
+                                    .valintatapajonoOid(haku.getValintatapajonoOid())
+                                    .setOperaatio(h.getPoistetaankoTulokset() ? ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO :
+                                            ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS)
+                                    .add("hakemuksentila", h.getHakemuksenTila())
+                                    .add("valintatuloksentila", h.getValintatuloksenTila())
+                                    .add("ilmoittautumistila", h.getIlmoittautumisTila())
+                                    .build())
+                            );
+                    if (poikkeukset.isEmpty()) {
+                        prosessi.vaiheValmistui();
+                        prosessi.valmistui("ok");
+                    } else {
+                        String messages = poikkeukset.stream()
+                                .map(Poikkeus::getViesti)
+                                .collect(Collectors.joining(", "));
+                        LOG.error(String.format(
+                                "Osa erillishaun %s tulosten tallennuksesta epäonnistui: %s",
+                                messages,
+                                haku.getHakuOid()
+                        ));
+                        prosessi.keskeyta(poikkeukset);
+                    }
+                },
+                t -> {
+                    LOG.error("Erillishaun tallennus epäonnistui", t);
+                    prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, "", t.getMessage()));
+                }
+        );
     }
 
-    private Observable<List<VastaanottoResultDTO>> doVastaanottoTilojenTallennusValintaTulosServiceen(String username, List<ErillishaunHakijaDTO> hakijat, final KirjeProsessi prosessi) {
+    private void doThrowawayValinnantuloksenTallennusValintaTulosServiceen(
+            AuditSession auditSession,
+            ErillishakuDTO haku,
+            List<ErillishakuRivi> poistettavat,
+            List<ErillishaunHakijaDTO> hakijat) {
+        doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, poistettavat, hakijat).subscribe(
+                poikkeukset -> {
+                    if (!poikkeukset.isEmpty()) {
+                        String messages = poikkeukset.stream()
+                                .map(Poikkeus::getViesti)
+                                .collect(Collectors.joining(", "));
+                        LOG.warn(String.format(
+                                "Osa erillishaun %s tulosten tallennuksesta valinta-tulos-serviceen epäonnistui kun valintarekisteri ei vielä lukukäytössä: %s",
+                                messages,
+                                haku.getHakuOid()
+                        ));
+                    }
+                },
+                t -> LOG.warn(String.format(
+                        "Erillishaun %s valinnantulosten tallennus valinta-tulos-serviceen epäonnistui kun valintarekisteri ei vielä lukukäytössä",
+                        haku.getHakuOid()
+                ), t)
+        );
+    }
+
+    private Observable<List<Poikkeus>> doValinnantuloksenTallennusValintaTulosServiceen(
+            AuditSession auditSession,
+            ErillishakuDTO haku,
+            List<ErillishakuRivi> poistettavat,
+            List<ErillishaunHakijaDTO> hakijat) {
+        List<Valinnantulos> valinnantuloksetForValintaTulosService = Stream.concat(
+                poistettavat.stream()
+                        .map(rivi -> toErillishaunHakijaStream(haku, rivi))
+                        .map(Valinnantulos::of),
+                hakijat.stream()
+                        .map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO)))
+        ).collect(Collectors.toList());
+
+        if (valinnantuloksetForValintaTulosService.isEmpty()) {
+            return Observable.just(Collections.emptyList());
+        }
+        return valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(
+                auditSession,
+                haku.getValintatapajonoOid(),
+                valinnantuloksetForValintaTulosService)
+                .map(r -> r.stream().map(s -> new Poikkeus(
+                        Poikkeus.KOOSTEPALVELU,
+                        Poikkeus.VALINTA_TULOS_SERVICE,
+                        s.message,
+                        new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)
+                )).collect(Collectors.toList()))
+                .onErrorResumeNext(t -> Observable.error(new RuntimeException(String.format(
+                        "Erillishaun %s valinnantulosten tallennus valinta-tulos-serviceen epäonnistui",
+                        haku.getHakuOid()
+                ), t)));
+    }
+
+    private Observable<List<Poikkeus>> doValinnantuloksenTallennusSijoitteluServiceen(String hakuOid, String hakukohdeOid, List<ErillishaunHakijaDTO> hakijatJaPoistettavat) {
+        if (hakijatJaPoistettavat.isEmpty()) {
+            return Observable.just(Collections.emptyList());
+        }
+        return tilaAsyncResource.tuoErillishaunTilat(hakuOid, hakukohdeOid, hakijatJaPoistettavat)
+                .map(r -> r.stream()
+                        .map(s -> new Poikkeus(
+                                Poikkeus.KOOSTEPALVELU,
+                                Poikkeus.SIJOITTELU,
+                                s.message,
+                                new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)
+                        )).collect(Collectors.toList()))
+                .onErrorResumeNext(t -> Observable.error(new RuntimeException(String.format(
+                        "Erillishaun %s valinnantulosten tallennus sijoittelu-serviceen epäonnistui",
+                        hakuOid
+                ), t)));
+    }
+
+    private Observable<List<Poikkeus>> doVastaanottoTilojenTallennusValintaTulosServiceen(String username, List<ErillishaunHakijaDTO> hakijat) {
         if(hakijat.isEmpty()) {
             return Observable.just(Collections.emptyList());
-        } else {
-            return valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijat, username, "Erillishaun tuonti")).doOnError(
-                    e -> {
-                        LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-serviceen", e);
-                        LOG.error("", e.getCause());
-                        prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE, e.getMessage()));
-                    });
         }
+        return valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijat, username, "Erillishaun tuonti"))
+                .map(r -> r.stream()
+                        .filter(VastaanottoResultDTO::isFailed)
+                        .map(s -> new Poikkeus(
+                                Poikkeus.KOOSTEPALVELU,
+                                Poikkeus.VALINTA_TULOS_SERVICE,
+                                s.getResult().getMessage(),
+                                new Tunniste(s.getHakemusOid(), Poikkeus.HAKEMUSOID)))
+                        .collect(Collectors.toList()))
+                .onErrorResumeNext(t -> Observable.error(new RuntimeException(String.format(
+                        "Erillishaun %s vastaanottojen tallennus valintarekisteriin epäonnistui",
+                        hakijat.get(0).getHakuOid()
+                ), t)));
     }
 
     private ErillishaunHakijaDTO toErillishaunHakijaStream(ErillishakuDTO haku, ErillishakuRivi rivi) {
