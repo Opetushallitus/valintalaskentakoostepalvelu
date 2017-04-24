@@ -16,4 +16,12 @@ public class LukuvuosimaksuMuutos {
     public void setMaksuntila(Maksuntila maksuntila) {
         this.maksuntila = maksuntila;
     }
+
+    public String getPersonOid() {
+        return personOid;
+    }
+
+    public void setPersonOid(String personOid) {
+        this.personOid = personOid;
+    }
 }
