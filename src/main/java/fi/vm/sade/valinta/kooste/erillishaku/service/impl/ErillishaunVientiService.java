@@ -197,7 +197,7 @@ public class ErillishaunVientiService {
                              tulos.getVastaanottotila(),
                              tulos.getEhdollisestiHyvaksyttavissa(),
                              tulos.getValintatapajonoOid(),
-                             null == tulos.getHyvaksymiskirjeLahetetty() ? null : tulos.getHyvaksymiskirjeLahetetty().toDate(),
+                             null == tulos.getHyvaksymiskirjeLahetetty() ? null : Date.from(tulos.getHyvaksymiskirjeLahetetty().toInstant()),
                              tulos.getEhdollisenHyvaksymisenEhtoKoodi(),
                              tulos.getEhdollisenHyvaksymisenEhtoFI(),
                              tulos.getEhdollisenHyvaksymisenEhtoSV(),

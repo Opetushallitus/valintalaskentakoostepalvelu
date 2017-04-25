@@ -1,11 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto;
 
-import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
-import org.joda.time.DateTime;
+import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 public class Valinnantulos {
@@ -27,7 +28,7 @@ public class Valinnantulos {
     private String ehdollisenHyvaksymisenEhtoFI;
     private String ehdollisenHyvaksymisenEhtoSV;
     private String ehdollisenHyvaksymisenEhtoEN;
-    private DateTime hyvaksymiskirjeLahetetty;
+    private OffsetDateTime hyvaksymiskirjeLahetetty;
 
     public String getHakukohdeOid() {
         return hakukohdeOid;
@@ -165,11 +166,11 @@ public class Valinnantulos {
         this.vastaanottotila = vastaanottotila;
     }
 
-    public DateTime getHyvaksymiskirjeLahetetty() {
+    public OffsetDateTime getHyvaksymiskirjeLahetetty() {
         return hyvaksymiskirjeLahetetty;
     }
 
-    public void setHyvaksymiskirjeLahetetty(DateTime hyvaksymiskirjeLahetetty) {
+    public void setHyvaksymiskirjeLahetetty(OffsetDateTime hyvaksymiskirjeLahetetty) {
         this.hyvaksymiskirjeLahetetty = hyvaksymiskirjeLahetetty;
     }
 
@@ -203,7 +204,7 @@ public class Valinnantulos {
             valinnantulos.setOhitaIlmoittautuminen(true);
         }
         if(null != hakija.getHyvaksymiskirjeLahetetty()) {
-            valinnantulos.setHyvaksymiskirjeLahetetty(new DateTime(hakija.getHyvaksymiskirjeLahetetty()));
+            valinnantulos.setHyvaksymiskirjeLahetetty(OffsetDateTime.ofInstant(hakija.getHyvaksymiskirjeLahetetty().toInstant(), ZoneId.of("Europe/Helsinki")));
         }
 
         valinnantulos.setValinnantila(hakija.hakemuksenTila);
