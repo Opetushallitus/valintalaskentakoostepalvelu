@@ -210,9 +210,9 @@ public class OppijanSuorituksetProxyResource {
         LOG.info("Hae suoritukset {} hakemukselle", allHakemus.size());
 
         for (final HakemusHakija hakemus : allHakemus) {
-            resolveHakemusDTO(haku, parametritDTOObservable, hakemus.getOpiskelijaOid(), Observable.just(hakemus.getHakemus()), fetchEnsikertalaisuus, hakemusDTO -> {
+            resolveHakemusDTO(haku, parametritDTOObservable, hakemus.getOppija(), Observable.just(hakemus.getHakemus()), fetchEnsikertalaisuus, hakemusDTO -> {
                 Map<String, String> data = getAvainArvoMap(hakemusDTO);
-                allData.put(hakemus.getOpiskelijaOid(), data);
+                allData.put(hakemus.getOppija().getOppijanumero(), data);
             }, exceptionConsumer);
         }
 
@@ -241,6 +241,21 @@ public class OppijanSuorituksetProxyResource {
 
         Observable.combineLatest(suorituksetByOppija, hakemusObservable, parametritDTOObservable,
                 (oppija, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
+                        haku,
+                        "",
+                        Collections.singletonList(hakemus),
+                        Collections.singletonList(oppija),
+                        ohjausparametrit,
+                        fetchEnsikertalaisuus).get(0)
+        ).subscribe(hakemusDTOConsumer, throwableConsumer);
+    }
+
+    private void resolveHakemusDTO(HakuV1RDTO haku, Observable<ParametritDTO> parametritDTOObservable, Oppija oppija, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
+                                    Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
+        hakemusObservable.doOnError(throwableConsumer);
+
+        Observable.combineLatest(hakemusObservable, parametritDTOObservable,
+                (hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
                         haku,
                         "",
                         Collections.singletonList(hakemus),

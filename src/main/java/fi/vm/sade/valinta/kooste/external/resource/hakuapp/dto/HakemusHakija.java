@@ -1,23 +1,24 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HakemusHakija {
 
     private Hakemus hakemus;
-    private String opiskelijaOid;
+    private Oppija oppija;
 
-    public void setOpiskelijaOid(String opiskelijaOid) {
-        this.opiskelijaOid = opiskelijaOid;
+    public Oppija getOppija() {
+        return oppija;
     }
 
     public void setHakemus(Hakemus hakemus) {
         this.hakemus = hakemus;
     }
 
-    public String getOpiskelijaOid() {
-        return opiskelijaOid;
+    public void setOppija(Oppija oppija) {
+        this.oppija = oppija;
     }
 
     public Hakemus getHakemus() {
