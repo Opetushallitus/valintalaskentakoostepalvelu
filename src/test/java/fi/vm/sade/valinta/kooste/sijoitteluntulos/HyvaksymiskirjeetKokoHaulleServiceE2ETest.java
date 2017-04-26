@@ -24,6 +24,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
@@ -49,6 +50,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     @Before
     public void init() throws Throwable {
         startShared();
+        mockParams();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
     }
 
@@ -319,7 +321,10 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         hp.setTotalCount(hp.getResults().size());
         mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/hyvaksytyt/.*", hp);
     }
+    private void mockParams() {
+        mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/HAKU1", new ParametritDTO());
 
+    }
     private void mockHakukohde1Kutsu() {
         HakukohdeV1RDTO hk = new HakukohdeV1RDTO();
         hk.setOpetusKielet(Sets.newHashSet("FI"));
