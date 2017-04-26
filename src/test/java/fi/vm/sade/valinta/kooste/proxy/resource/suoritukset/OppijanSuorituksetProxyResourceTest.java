@@ -11,12 +11,11 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -32,7 +31,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -149,26 +147,8 @@ public class OppijanSuorituksetProxyResourceTest {
             String personoid = personoids[i];
             String applicationOid = applicationoids[i];
 
-
-            String valmistuminen = new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(new Date());
-            Oppija oppija = new Oppija();
-            Suoritus suoritus = new Suoritus();
-            oppija.setOppijanumero(personoid);
-            suoritus.setHenkiloOid(personoid);
-            suoritus.setTila(AbstractPistesyottoKoosteService.KIELIKOE_SUORITUS_TILA);
-            suoritus.setYksilollistaminen(AbstractPistesyottoKoosteService.KIELIKOE_SUORITUS_YKSILOLLISTAMINEN);
-            suoritus.setVahvistettu(true);
-            suoritus.setKomo(SuoritusJaArvosanatWrapper.YO_KOMO);
-            suoritus.setValmistuminen(valmistuminen);
-            Arvosana arvosana = new Arvosana();
-            arvosana.setAine(AbstractPistesyottoKoosteService.KIELIKOE_ARVOSANA_AINE);
-            SuoritusJaArvosanat suoritusJaArvosanat = new SuoritusJaArvosanat();
-            suoritusJaArvosanat.setSuoritus(suoritus);
-            suoritusJaArvosanat.setArvosanat(Collections.singletonList(arvosana));
-            oppija.setSuoritukset(Collections.singletonList(suoritusJaArvosanat));
-
             HakemusHakija hakemusHakija = new HakemusHakija();
-            hakemusHakija.setOppija(oppija);
+            hakemusHakija.setOpiskelijaOid(personoid);
 
             Hakemus hakemus = new Hakemus();
             hakemus.setOid(applicationOid);
@@ -181,7 +161,7 @@ public class OppijanSuorituksetProxyResourceTest {
             hakemus.setAnswers(ans);
 
             hakemus.setApplicationSystemId("1.2.246.562.29.90697286251");
-            hakemus.setPersonOid(oppija.getOppijanumero());
+            hakemus.setPersonOid(hakemusHakija.getOpiskelijaOid());
             hakemusHakija.setHakemus(hakemus);
             allHakemus.add(hakemusHakija);
         }
