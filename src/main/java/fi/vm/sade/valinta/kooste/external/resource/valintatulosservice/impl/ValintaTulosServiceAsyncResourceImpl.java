@@ -90,13 +90,13 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, AuditSession session) {
-        return getAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid), new GenericType<List<Lukuvuosimaksu>>() {}.getType(),
+        return postAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "read", hakukohdeOid), new GenericType<List<Lukuvuosimaksu>>() {}.getType(),
                 Entity.json(of("auditSession", session)));
     }
 
     @Override
     public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
-        return postAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid),
+        return postAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "write", hakukohdeOid),
                 Void.class,
                 Entity.json(of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session)));
     }
