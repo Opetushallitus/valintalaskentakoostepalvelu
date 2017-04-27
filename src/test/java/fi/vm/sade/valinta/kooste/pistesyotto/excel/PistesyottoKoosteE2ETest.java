@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
@@ -15,12 +13,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpHandler;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.*;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.http.HttpResourceImpl;
@@ -67,12 +66,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -195,6 +189,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();
         mockValintakoe();
+        mockTarjontaHakukohdeRyhmaCall();
 
         Hakemus hakemusHakuAppista = new Hakemus();
         hakemusHakuAppista.setAdditionalInfo(pistetieto.getAdditionalData());
@@ -272,6 +267,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();
         mockValintakoe();
+        mockTarjontaHakukohdeRyhmaCall();
 
         Hakemus hakemusHakuAppista = new Hakemus();
         hakemusHakuAppista.setAdditionalInfo(pistetieto.getAdditionalData());
@@ -314,6 +310,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();
         mockValintakoe();
+        mockTarjontaHakukohdeRyhmaCall();
 
         Hakemus hakemusHakuAppista = new Hakemus();
         hakemusHakuAppista.setAdditionalInfo(pistetieto.getAdditionalData());
@@ -409,6 +406,13 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockToReturnJson(GET,
                 "/tarjonta-service/rest/v1/hakukohde/testihakukohde",
                 new Result<>(hakukohdeDTO));
+    }
+
+    private void mockTarjontaHakukohdeRyhmaCall() {
+        String s = "{\"result\": {\"tulokset\": [{\"oid\": \"1.2.246.562.10.49710460723\",\"tulokset\": [{\"oid\": \"1.2.246.562.20.50849071738\",\"ryhmaliitokset\": [{\"ryhmaOid\": \"1.2.246.562.28.77463971187\"},{\"ryhmaOid\": \"1.2.246.562.28.10942030083\"},{\"ryhmaOid\": \"1.2.246.562.28.92529355477\"}]},{\"oid\": \"1.2.246.562.20.52702700353\",\"ryhmaliitokset\": []}]}],\"tuloksia\": 1}}";
+        mockToReturnString(GET,
+                "/tarjonta-service/rest/v1/hakukohde/search",
+                s);
     }
 
     private void mockOrganisaatioKutsu() {

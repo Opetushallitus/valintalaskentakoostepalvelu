@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.server.MockServer;
@@ -12,6 +9,7 @@ import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Parameter;
 import org.mockserver.model.RegexBody;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
@@ -173,26 +171,29 @@ public class Integraatiopalvelimet {
     }
     public static void mockToReturnString(String method, String p, String r) {
         mockToReturnValue(method, p, r);
+        System.err.println(r);
     }
 
     public static class ClientAndServerWithHost extends ClientAndServer {
-        public ClientAndServerWithHost(int port){
+        ClientAndServerWithHost(int port){
             super(port);
         }
 
-        public String getHost() {
+        String getHost() {
             return super.host;
         }
 
         public String getUrl() {
-            return new StringBuilder("http://").append(super.host).append(":").append(port).toString();
+            return "http://" + super.host + ":" + port;
         }
     }
 
     private static JsonSerializer<Date> dateJsonSerializer = (Date src, Type typeOfSrc, JsonSerializationContext context)
             -> src == null ? null : new JsonPrimitive(src.getTime());
 
-    private static Gson gson = DateDeserializer.gsonBuilder().registerTypeAdapter(Date.class, dateJsonSerializer).create();
+    private static Gson gson = DateDeserializer.gsonBuilder()
+            .registerTypeAdapter(Date.class, dateJsonSerializer)
+            .create();
 
     public static Gson gson() {
         return gson;

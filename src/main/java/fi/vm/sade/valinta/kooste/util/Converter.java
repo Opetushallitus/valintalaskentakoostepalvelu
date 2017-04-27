@@ -61,7 +61,7 @@ public class Converter {
         return arvo;
     }
 
-    public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus) {
+    public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         HakemusDTO hakemusTyyppi = new HakemusDTO();
         hakemusTyyppi.setHakemusoid(hakemus.getOid());
         hakemusTyyppi.setHakijaOid(hakemus.getPersonOid());
@@ -136,6 +136,7 @@ public class Converter {
                                 hk.setOid(hakutoive.getHakukohdeOid());
                                 hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
                                 hk.setPrioriteetti(e.getKey());
+                                hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(hakutoive.getHakukohdeOid()));
                                 hakemusTyyppi.getHakukohteet().add(hk);
                             }
                         }

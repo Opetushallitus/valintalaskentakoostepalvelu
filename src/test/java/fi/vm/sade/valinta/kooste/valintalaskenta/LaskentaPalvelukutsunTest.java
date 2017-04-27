@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,6 +48,7 @@ public class LaskentaPalvelukutsunTest {
 	private static final UuidHakukohdeJaOrganisaatio HAKUKOHDE_OID = new UuidHakukohdeJaOrganisaatio("uuid",new HakukohdeJaOrganisaatio(
 			"hk.oid", "org.oid"));
 	private static final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+	private static final TarjontaAsyncResource tarjontaAsyncResource = new MockTarjontaAsyncService();
 
 	static {
 		hakuDTO.setOid(HAKU_OID);
@@ -84,7 +87,7 @@ public class LaskentaPalvelukutsunTest {
 		LaskentaPalvelukutsu laskentaPalvelukutsu = new AbstraktiLaskentaPalvelukutsu(
 				hakuDTO,
 				null,
-				HAKUKOHDE_OID, palvelukutsut) {
+				HAKUKOHDE_OID, palvelukutsut, tarjontaAsyncResource) {
 			@Override
 			public void vapautaResurssit() {
 				// TODO Auto-generated method stub

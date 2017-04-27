@@ -72,7 +72,7 @@ public class EligibilitiesKonvertointiTest {
 					//
 					.map(h -> {
 						try {
-							return Converter.hakemusToHakemusDTO(h);
+							return Converter.hakemusToHakemusDTO(h, Maps.newHashMap());
 						} catch (Exception e) {
 							epaonnistuneetKonversiot.put(h.getOid(), e);
 							return null;

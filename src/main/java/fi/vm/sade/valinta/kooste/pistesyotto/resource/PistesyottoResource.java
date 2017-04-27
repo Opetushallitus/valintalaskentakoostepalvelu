@@ -3,11 +3,13 @@ package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 import static java.util.Arrays.asList;
 import com.google.common.collect.Lists;
 
+import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
@@ -49,10 +51,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -79,6 +78,8 @@ public class PistesyottoResource {
     private PistesyottoKoosteService pistesyottoKoosteService;
     @Autowired
     private ApplicationAsyncResource applicationAsyncResource;
+    @Autowired
+    private TarjontaAsyncResource tarjontaAsyncResource;
 
     @GET
     @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
@@ -164,7 +165,9 @@ public class PistesyottoResource {
                 )),
                 applicationAsyncResource.getApplication(hakemusOid),
                 (authorityCheck, hakemus) -> {
-                    List<String> hakutoiveOids = Converter.hakemusToHakemusDTO(hakemus).getHakukohteet().stream()
+                    // HakuOid tarvitaan hakemukselta, siksi blocking.
+                    Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakemus.getApplicationSystemId()).toBlocking().single();
+                    List<String> hakutoiveOids = Converter.hakemusToHakemusDTO(hakemus, hakukohdeRyhmasForHakukohdes).getHakukohteet().stream()
                             .map(HakukohdeDTO::getOid)
                             .collect(Collectors.toList());
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {

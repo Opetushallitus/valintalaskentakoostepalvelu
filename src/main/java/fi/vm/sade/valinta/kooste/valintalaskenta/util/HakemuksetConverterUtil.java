@@ -12,7 +12,10 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
-import fi.vm.sade.valintalaskenta.domain.dto.*;
+import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
+import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -39,10 +42,12 @@ public class HakemuksetConverterUtil {
 
     public static final String KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO = "haunkohdejoukko_11";
 
-    public static List<HakemusDTO> muodostaHakemuksetDTO(HakuV1RDTO haku, String hakukohdeOid, List<Hakemus> hakemukset,
-                                                         List<Oppija> oppijat, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
+    public static List<HakemusDTO> muodostaHakemuksetDTO(HakuV1RDTO haku, String hakukohdeOid,
+                                                         Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
+                                                         List<Hakemus> hakemukset, List<Oppija> oppijat,
+                                                         ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
         ensurePersonOids(hakemukset, hakukohdeOid);
-        List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset);
+        List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, hakukohdeRyhmasForHakukohdes);
         Map<String, Exception> errors = Maps.newHashMap();
         try {
             if (oppijat != null) {
@@ -105,7 +110,7 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<Hakemus> hakemukset) {
+    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<Hakemus> hakemukset, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         List<HakemusDTO> hakemusDtot;
         Map<String, Exception> epaonnistuneetKonversiot = Maps.newConcurrentMap();
         try {
@@ -113,7 +118,7 @@ public class HakemuksetConverterUtil {
                     .filter(Objects::nonNull)
                     .map(h -> {
                         try {
-                            return Converter.hakemusToHakemusDTO(h);
+                            return Converter.hakemusToHakemusDTO(h, hakukohdeRyhmasForHakukohdes);
                         } catch (Exception e) {
                             epaonnistuneetKonversiot.put(h.getOid(), e);
                             return null;

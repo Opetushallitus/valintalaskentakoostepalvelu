@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import rx.Observable;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import static fi.vm.sade.valinta.kooste.mocks.MockData.*;
 
@@ -58,6 +60,11 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
         set.add(hakuOid);
         set.add(hakuOid + "-1");
         return Observable.just(set);
+    }
+
+    @Override
+    public Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
+        return Observable.just(Maps.newHashMap());
     }
 
     public static void setMockHaku(HakuV1RDTO mockHaku) {

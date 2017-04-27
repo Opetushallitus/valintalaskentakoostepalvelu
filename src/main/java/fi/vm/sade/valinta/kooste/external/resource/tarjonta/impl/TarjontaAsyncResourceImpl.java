@@ -1,5 +1,19 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
+import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonObject;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.*;
+import fi.vm.sade.valinta.http.DateDeserializer;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.*;
+import javafx.util.Pair;
+import org.springframework.stereotype.Service;
+import rx.Observable;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -7,24 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonObject;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.*;
-import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.google.common.reflect.TypeToken;
-
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import rx.Observable;
+import java.util.stream.Collectors;
 
 @Service
 public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements TarjontaAsyncResource {
@@ -93,5 +90,27 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
     public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
         return this.<ResultV1RDTO<Set<String>>>getAsObservable(getUrl("tarjonta-service.haku.findoidstosynctarjontafor"), new TypeToken<ResultV1RDTO<Set<String>>>() {
         }.getType()).map(result -> result.getResult());
+    }
+
+    @Override
+    public Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
+        return this.<ResultSearch>getAsObservable(
+                getUrl("tarjonta-service.hakukohde.search"),
+                new TypeToken<ResultSearch>() {
+                }.getType(), client -> {
+                    client.query("hakuOid", hakuOid);
+                    return client;
+                })
+                .map(ResultSearch::getResult)
+                .map(ResultTulos::getTulokset)
+                .flatMap(Observable::from)
+                .map(ResultOrganization::getTulokset)
+                .flatMap(Observable::from)
+                .map((ResultHakukohde s) -> new Pair<>(
+                        s.getOid(),
+                        s.getRyhmaliitokset().stream()
+                                .map(ResultRyhmaliitos::getRyhmaOid)
+                                .collect(Collectors.toList())))
+                .toMap(Pair::getKey, Pair::getValue);
     }
 }

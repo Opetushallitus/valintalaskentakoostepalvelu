@@ -4,8 +4,6 @@ import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.security.OidProvider;
 import fi.vm.sade.security.OrganisationHierarchyAuthorizer;
 import fi.vm.sade.security.ThreadLocalAuthorizer;
-import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusDTOConverter;
-import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.spring.SpringCamelContext;
@@ -16,7 +14,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 
 @Configuration
@@ -53,7 +50,7 @@ public class KoostepalveluContext {
                 ApplicationContext applicationContext, RoutesBuilder[] routes)
                 throws Exception {
             SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
-            camelContext.getTypeConverterRegistry().addTypeConverter(HakemusDTO.class, Hakemus.class, new HakemusToHakemusDTOConverter());
+//            camelContext.getTypeConverterRegistry().addTypeConverter(HakemusDTO.class, Hakemus.class, new HakemusToHakemusDTOConverter());
             camelContext.disableJMX();
             camelContext.setAutoStartup(true);
             for (RoutesBuilder route : routes) {

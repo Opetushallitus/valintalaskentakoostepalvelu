@@ -1,19 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.AbstraktiPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsuLaskuri;
@@ -21,6 +13,16 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.Palvel
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import rx.Observable;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 
 /**
@@ -35,12 +37,18 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends AbstraktiPalvelukuts
     private final Consumer<Palvelukutsu> laskuri;
     private final HakuV1RDTO haku;
     private final ParametritDTO parametritDTO;
+    private final Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesObservable;
     private volatile HakukohdeTila tila = HakukohdeTila.TEKEMATTA;
     private final AtomicReference<Consumer<LaskentaPalvelukutsu>> takaisinkutsu;
 
-    public AbstraktiLaskentaPalvelukutsu(HakuV1RDTO haku, ParametritDTO parametritDTO, UuidHakukohdeJaOrganisaatio kuvaus, Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut) {
+    public AbstraktiLaskentaPalvelukutsu(HakuV1RDTO haku,
+                                         ParametritDTO parametritDTO,
+                                         UuidHakukohdeJaOrganisaatio kuvaus,
+                                         Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut,
+                                         TarjontaAsyncResource tarjontaAsyncResource) {
         super(kuvaus);
         this.haku = haku;
+        this.hakukohdeRyhmasForHakukohdesObservable = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid());
         this.parametritDTO = parametritDTO;
         this.palvelukutsut = palvelukutsut;
         this.takaisinkutsu = new AtomicReference<>();
@@ -119,6 +127,8 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends AbstraktiPalvelukuts
     }
 
     protected List<HakemusDTO> muodostaHakemuksetDTO(String hakukohdeOid, List<Hakemus> hakemukset, List<Oppija> oppijat) {
-        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, hakemukset, oppijat, parametritDTO, true);
+        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = hakukohdeRyhmasForHakukohdesObservable.toBlocking().first();
+        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, hakukohdeRyhmasForHakukohdes, hakemukset, oppijat, parametritDTO, true);
     }
+
 }

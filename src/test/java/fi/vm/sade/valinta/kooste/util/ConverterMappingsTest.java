@@ -34,7 +34,7 @@ public class ConverterMappingsTest {
         Hakemus hakemus = hakemukset.stream()
                 .filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid()))
                 .distinct().iterator().next();
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus);
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, Maps.newHashMap());
         // LOG.error("\r\n{}", new GsonBuilder().setPrettyPrinting().create()
         // .toJson(dto));
         assertTrue(dto
@@ -123,7 +123,7 @@ public class ConverterMappingsTest {
         Hakemus hakemus = hakemukset.stream()
                 .filter(h -> "1.2.246.562.11.00003000803".equals(h.getOid()))
                 .distinct().iterator().next();
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus);
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, Maps.newHashMap());
 
         final int prefixes = dto.getAvaimet().stream()
                 .filter(a -> a.getAvain().startsWith("PK_") || a.getAvain().startsWith("LK_"))

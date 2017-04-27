@@ -33,7 +33,8 @@ public class Mocks {
             applicationAsyncResource,
             valintaperusteetAsyncResource,
             laskentaSeurantaAsyncResource,
-            suoritusrekisteriAsyncResource
+            suoritusrekisteriAsyncResource,
+            tarjontaAsyncResource
     ), 8));
 
     public static void resetMocks() {

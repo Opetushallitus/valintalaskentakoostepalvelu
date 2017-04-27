@@ -259,10 +259,12 @@ public class OppijanSuorituksetProxyResource {
                 suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid).doOnError(throwableConsumer) :
                 suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskeljaOid);
         Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(throwableConsumer);
-        Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable,
-                (haku, suoritukset, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
+        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesObservable = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid);
+        Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable, hakukohdeRyhmasForHakukohdesObservable,
+                (haku, suoritukset, hakemus, ohjausparametrit, hakukohdeRyhmasForHakukohdes) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
                         haku,
                         "",
+                        hakukohdeRyhmasForHakukohdes,
                         Collections.singletonList(hakemus),
                         Collections.singletonList(suoritukset),
                         ohjausparametrit,
@@ -340,7 +342,8 @@ public class OppijanSuorituksetProxyResource {
                                                 ParametritDTO parametrit,
                                                 Boolean fetchEnsikertalaisuus) {
 
-        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, "", hakemukset, suoritukset, parametrit, fetchEnsikertalaisuus);
+        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid()).toBlocking().first();
+        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, suoritukset, parametrit, fetchEnsikertalaisuus);
     }
 
 

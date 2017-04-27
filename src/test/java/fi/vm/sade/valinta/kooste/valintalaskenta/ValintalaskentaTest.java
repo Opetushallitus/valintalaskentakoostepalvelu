@@ -76,7 +76,8 @@ public class ValintalaskentaTest {
 				applicationAsyncResource,
 				valintaperusteetAsyncResource,
 				seurantaAsyncResource,
-				suoritusrekisteriAsyncResource
+				suoritusrekisteriAsyncResource,
+				tarjontaAsyncResource
 		), 8);
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;

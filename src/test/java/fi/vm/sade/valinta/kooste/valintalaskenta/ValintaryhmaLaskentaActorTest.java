@@ -4,7 +4,9 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
@@ -32,6 +34,7 @@ import static org.mockito.Matchers.any;
 public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
     private final LaskentaSupervisor laskentaSupervisor = Mockito.mock(LaskentaSupervisor.class);
+    private final TarjontaAsyncResource tarjontaAsyncResource = new MockTarjontaAsyncService();
 
     @Test
     public void testaaValintaryhmaActorYhdellaHakukohteellaKunKaikkiMeneeHyvin() {
@@ -71,7 +74,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource
+                suoritusrekisteriAsyncResource,
+                tarjontaAsyncResource
         );
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
         LaskentaStartParams laskentaStartParams = new LaskentaStartParams(
@@ -131,7 +135,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource
+                suoritusrekisteriAsyncResource,
+                tarjontaAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
@@ -192,7 +197,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource
+                suoritusrekisteriAsyncResource,
+                tarjontaAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
@@ -254,7 +260,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource
+                suoritusrekisteriAsyncResource,
+                tarjontaAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
@@ -316,7 +323,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource
+                suoritusrekisteriAsyncResource,
+                tarjontaAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
@@ -383,7 +391,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource
+                suoritusrekisteriAsyncResource,
+                tarjontaAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));

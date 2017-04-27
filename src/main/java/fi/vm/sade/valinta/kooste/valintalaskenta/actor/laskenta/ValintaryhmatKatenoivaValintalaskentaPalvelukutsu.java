@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,13 +45,15 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
             List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakemuksetPalvelukutsu>> hakemuksetPalvelukutsut,
             List<PalvelukutsuJaPalvelukutsuStrategiaImpl<ValintaperusteetPalvelukutsu>> valintaperusteetPalvelukutsut,
             List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakijaryhmatPalvelukutsu>> hakijaryhmatPalvelukutsut,
-            List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut
+            List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut,
+            TarjontaAsyncResource tarjontaAsyncResource
     ) {
         super(
                 haku,
                 parametritDTO,
                 hakukohdeOid,
-                Lists.newArrayList(Iterables.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut, hakijaryhmatPalvelukutsut, suoritusrekisteriPalvelukutsut))
+                Lists.newArrayList(Iterables.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut, hakijaryhmatPalvelukutsut, suoritusrekisteriPalvelukutsut)),
+                tarjontaAsyncResource
         );
         this.uuid = hakukohdeOid.getUuid();
         this.erillishaku = erillishaku;
@@ -98,6 +101,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
     @Override
     public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
         try {
+
             aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> valintalaskentaAsyncResource.laskeJaSijoittele(muodostaLaskeDTOs(),
                     laskentaCallback -> takaisinkutsu.accept(ValintaryhmatKatenoivaValintalaskentaPalvelukutsu.this),
                     failureCallback(takaisinkutsu)

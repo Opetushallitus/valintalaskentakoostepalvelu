@@ -82,7 +82,8 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     public Observable<Map<String, HakemuksenKoetulosYhteenveto>> koostaOsallistujanPistetiedot(String hakemusOid) {
         return applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus -> {
             String hakuOid = hakemus.getApplicationSystemId();
-            HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus);
+            Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid).toBlocking().first();
+            HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus, hakukohdeRyhmasForHakukohdes);
             Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
             Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
             Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);

@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
@@ -10,6 +11,7 @@ import rx.Observable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface TarjontaAsyncResource {
@@ -26,4 +28,6 @@ public interface TarjontaAsyncResource {
      * @return Set of hakuOids as strings.
      */
     Observable<Set<String>> findHakuOidsForAutosyncTarjonta();
+
+    Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid);
 }
