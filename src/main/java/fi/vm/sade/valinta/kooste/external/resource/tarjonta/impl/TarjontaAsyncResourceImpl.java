@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
@@ -23,6 +23,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImplHelper.getGson;
+import static fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap;
+
 @Service
 public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements TarjontaAsyncResource {
 
@@ -32,23 +35,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     protected Gson createGson() {
-        return DateDeserializer.gsonBuilder()
-            .registerTypeAdapter(ResultV1RDTO.class, (JsonDeserializer) (json, typeOfT, context) -> {
-                Type accessRightsType = new TypeToken<Map<String, Boolean>>() {}.getType();
-                Type errorsType = new TypeToken<List<ErrorV1RDTO>>() {}.getType();
-                Type paramsType = new TypeToken<GenericSearchParamsV1RDTO>() {}.getType();
-                Type resultType = ((ParameterizedType) typeOfT).getActualTypeArguments()[0];
-                Type statusType = new TypeToken<ResultV1RDTO.ResultStatus>() {}.getType();
-                JsonObject o = json.getAsJsonObject();
-                ResultV1RDTO r = new ResultV1RDTO();
-                r.setAccessRights(context.deserialize(o.get("accessRights"), accessRightsType));
-                r.setErrors(context.deserialize(o.get("errors"), errorsType));
-                r.setParams(context.deserialize(o.get("params"), paramsType));
-                r.setResult(context.deserialize(o.get("result"), resultType));
-                r.setStatus(context.deserialize(o.get("status"), statusType));
-                return r;
-            })
-            .create();
+        return getGson();
     }
 
     @Override
@@ -94,23 +81,56 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     public Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
-        return this.<ResultSearch>getAsObservable(
+        Observable<ResultSearch> s = this.<ResultSearch>getAsObservable(
                 getUrl("tarjonta-service.hakukohde.search"),
                 new TypeToken<ResultSearch>() {
                 }.getType(), client -> {
                     client.query("hakuOid", hakuOid);
                     return client;
-                })
-                .map(ResultSearch::getResult)
+                });
+        return resultSearchToHakukohdeRyhmaMap(s);
+    }
+}
+
+class TarjontaAsyncResourceImplHelper {
+    static Observable<Map<String, List<String>>> resultSearchToHakukohdeRyhmaMap(Observable<ResultSearch> observable) {
+        return observable.map(ResultSearch::getResult)
                 .map(ResultTulos::getTulokset)
                 .flatMap(Observable::from)
                 .map(ResultOrganization::getTulokset)
                 .flatMap(Observable::from)
                 .map((ResultHakukohde s) -> new Pair<>(
                         s.getOid(),
-                        s.getRyhmaliitokset().stream()
-                                .map(ResultRyhmaliitos::getRyhmaOid)
-                                .collect(Collectors.toList())))
+                        getRyhmaList(s)))
                 .toMap(Pair::getKey, Pair::getValue);
     }
+
+    private static List<String> getRyhmaList (ResultHakukohde hk) {
+        if (hk.getRyhmaliitokset () != null)
+            return hk.getRyhmaliitokset ().stream ()
+                    .map (ResultRyhmaliitos::getRyhmaOid)
+                    .collect (Collectors.toList ());
+        return Lists.newArrayList ();
+    }
+
+    static Gson getGson () {
+        return DateDeserializer.gsonBuilder ()
+                .registerTypeAdapter (ResultV1RDTO.class, (JsonDeserializer) (json, typeOfT, context) -> {
+                    Type accessRightsType = new TypeToken<Map<String, Boolean>> () {}.getType ();
+                    Type errorsType = new TypeToken<List<ErrorV1RDTO>> () {}.getType ();
+                    Type paramsType = new TypeToken<GenericSearchParamsV1RDTO> () {}.getType ();
+                    Type resultType = ((ParameterizedType) typeOfT).getActualTypeArguments ()[0];
+                    Type statusType = new TypeToken<ResultV1RDTO.ResultStatus> () {}.getType ();
+                    JsonObject o = json.getAsJsonObject ();
+                    ResultV1RDTO r = new ResultV1RDTO ();
+                    r.setAccessRights (context.deserialize (o.get ("accessRights"), accessRightsType));
+                    r.setErrors (context.deserialize (o.get ("errors"), errorsType));
+                    r.setParams (context.deserialize (o.get ("params"), paramsType));
+                    r.setResult (context.deserialize (o.get ("result"), resultType));
+                    r.setStatus (context.deserialize (o.get ("status"), statusType));
+                    return r;
+                })
+                .create ();
+    }
+
 }
