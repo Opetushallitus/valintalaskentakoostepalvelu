@@ -227,6 +227,7 @@ public class ErillishakuResource {
         session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
         session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory));
         session.setRoles(getRoles());
+        session.setSessionId(httpServletRequest.getSession().getId());
         Optional<String> uid = KoosteAudit.uid();
         if(uid.isPresent()) {
             session.setUid(uid.get());

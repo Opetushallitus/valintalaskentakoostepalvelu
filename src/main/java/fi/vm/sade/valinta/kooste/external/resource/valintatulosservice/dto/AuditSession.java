@@ -10,6 +10,7 @@ public class AuditSession {
     private String inetAddress;
     private Optional<String> ifUnmodifiedSince;
     private String uid;
+    private String sessionId;
 
     public AuditSession() {}
 
@@ -69,15 +70,24 @@ public class AuditSession {
         this.uid = uid;
     }
 
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
     @Override
     public String toString() {
         return "AuditSession{" +
-                "personOid='" + personOid + '\'' +
-                ", roles=" + roles +
-                ", userAgent='" + userAgent + '\'' +
-                ", inetAddress='" + inetAddress + '\'' +
-                ", ifUnmodifiedSince=" + ifUnmodifiedSince +
-                ", uid='" + uid + '\'' +
-                '}';
+            "personOid='" + personOid + '\'' +
+            ", roles=" + roles +
+            ", userAgent='" + userAgent + '\'' +
+            ", inetAddress='" + inetAddress + '\'' +
+            ", ifUnmodifiedSince=" + ifUnmodifiedSince +
+            ", uid='" + uid + '\'' +
+            ", sessionId='" + sessionId + '\'' +
+            '}';
     }
 }

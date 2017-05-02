@@ -160,6 +160,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
           new GenericType<List<Valinnantulos>>() {}.getType(),
             client -> {
                 client.accept(MediaType.APPLICATION_JSON_TYPE);
+                client.query("sessionId", auditSession.getSessionId());
                 client.query("uid", auditSession.getUid());
                 client.query("inetAddress", auditSession.getInetAddress());
                 client.query("userAgent", auditSession.getUserAgent());
