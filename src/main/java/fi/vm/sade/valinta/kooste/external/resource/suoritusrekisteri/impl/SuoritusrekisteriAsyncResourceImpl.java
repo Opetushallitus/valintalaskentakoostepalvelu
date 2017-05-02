@@ -98,7 +98,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
-        return postAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid"),
+        return postAsObservable(getUrl("suoritusrekisteri.oppijat"),
                 new TypeToken<List<Oppija>>() { }.getType(),
                 Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
@@ -122,7 +122,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public
     Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
-        return postAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid"),
+        return postAsObservable(getUrl("suoritusrekisteri.oppijat"),
                 new TypeToken<List<Oppija>>() { }.getType(),
                 Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
