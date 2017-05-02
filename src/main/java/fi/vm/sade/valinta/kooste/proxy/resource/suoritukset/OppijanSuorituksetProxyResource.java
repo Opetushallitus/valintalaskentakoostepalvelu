@@ -214,15 +214,13 @@ public class OppijanSuorituksetProxyResource {
                 Map<String, String> data = getAvainArvoMap(hakemusDTO);
                 allData.put(hakemusDTO.getHakijaOid(), data);
             });
+            LOG.info("Haettiin {} hakemukselle {} suoritustietoa", allHakemus.size(), allData.size());
+            asyncResponse.resume(Response
+                    .ok()
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(allData)
+                    .build());
         }, exceptionConsumer);
-
-        LOG.info("Haettiin {} hakemukselle {} suoritustietoa", allHakemus.size(), allData.size());
-
-        asyncResponse.resume(Response
-                .ok()
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(allData)
-                .build());
     }
 
     private Map<String,String> getAvainArvoMap(HakemusDTO hakemusDTO) {
