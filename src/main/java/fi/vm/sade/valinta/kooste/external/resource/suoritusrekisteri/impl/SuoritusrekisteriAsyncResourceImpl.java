@@ -8,6 +8,8 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import java.util.function.Consumer;
 
 @Service
 public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource implements SuoritusrekisteriAsyncResource {
+    private static final Logger LOG = LoggerFactory.getLogger(SuoritusrekisteriAsyncResourceImpl.class);
 
     @Autowired
     public SuoritusrekisteriAsyncResourceImpl(
@@ -88,6 +91,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
             client.query("haku", hakuOid);
+            LOG.info("Calling url {}", client.getCurrentURI());
             return client;
         });
     }
@@ -96,10 +100,11 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
         return postAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid"),
                 new TypeToken<List<Oppija>>() { }.getType(),
-                Entity.entity(gson().toJson(opiskelijaOids), MediaType.APPLICATION_JSON_TYPE),
+                Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("haku", hakuOid);
+                    LOG.info("Calling url {} with opiskelijaOids {}", client.getCurrentURI(), opiskelijaOids);
                     return client;
                 }
         );
@@ -109,6 +114,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
         return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
+            LOG.info("Calling url {}", client.getCurrentURI());
             return client;
         });
     }
@@ -118,9 +124,10 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
         return postAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid"),
                 new TypeToken<List<Oppija>>() { }.getType(),
-                Entity.entity(gson().toJson(opiskelijaOids), MediaType.APPLICATION_JSON_TYPE),
+                Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    LOG.info("Calling url {} with opiskelijaOids {}", client.getCurrentURI(), opiskelijaOids);
                     return client;
                 }
         );
