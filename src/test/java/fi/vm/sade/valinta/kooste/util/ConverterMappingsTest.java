@@ -1,8 +1,11 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -14,10 +17,7 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
@@ -44,7 +44,25 @@ public class ConverterMappingsTest {
                         .equals(pari.getAvain())
                         && "NOT_CHECKED".equals(pari.getArvo())).distinct()
                 .iterator().hasNext());
+    }
 
+    @Test
+    public void testaaHakukohderyhmienLisaysOikeallaDatalla()
+            throws JsonSyntaxException, IOException {
+        List<Hakemus> hakemukset = new Gson().fromJson(IOUtils
+                .toString(new ClassPathResource("listfull2_eligibilities.json")
+                        .getInputStream()), new TypeToken<List<Hakemus>>() {
+        }.getType());
+        Hakemus hakemus = hakemukset.stream()
+                .filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid()))
+                .distinct().iterator().next();
+
+
+        ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
+        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.49132232288", a);
+
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, hakukohdeRyhmasForHakukohdes);
+        assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
     }
 
     @Test
