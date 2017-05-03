@@ -22,10 +22,13 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import com.google.common.collect.Lists;
 
 @Service
 public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource implements SuoritusrekisteriAsyncResource {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritusrekisteriAsyncResourceImpl.class);
+
+    private int maxOppijatPostSize = 5000;
 
     @Autowired
     public SuoritusrekisteriAsyncResourceImpl(
@@ -99,15 +102,21 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
         String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=true" + "&haku=" + hakuOid;
-        return postAsObservable(url,
-                new TypeToken<List<Oppija>>() { }.getType(),
-                Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    LOG.info("Calling url {} with opiskelijaOids {}", client.getCurrentURI(), opiskelijaOids);
-                    return client;
-                }
+
+        List<List<String>> opiskelijaOidBatches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
+
+        Observable<Observable<List<Oppija>>> obses = Observable.from(opiskelijaOidBatches).map(oidBatch ->
+                postAsObservable(url,
+                        new TypeToken<List<Oppija>>() { }.getType(),
+                        Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
+                        client -> {
+                            client.accept(MediaType.APPLICATION_JSON_TYPE);
+                            LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), oidBatch.size());
+                            return client;
+                })
         );
+
+        return Observable.concat(obses);
     }
 
     @Override
@@ -123,15 +132,21 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     public
     Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
         String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=false";
-        return postAsObservable(url,
-                new TypeToken<List<Oppija>>() { }.getType(),
-                Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    LOG.info("Calling url {} with opiskelijaOids {}", client.getCurrentURI(), opiskelijaOids);
-                    return client;
-                }
+
+        List<List<String>> opiskelijaOidBatches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
+
+        Observable<Observable<List<Oppija>>> obses = Observable.from(opiskelijaOidBatches).map(oidBatch ->
+                postAsObservable(url,
+                    new TypeToken<List<Oppija>>() { }.getType(),
+                    Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
+                    client -> {
+                        client.accept(MediaType.APPLICATION_JSON_TYPE);
+                        LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), oidBatch.size());
+                        return client;
+                })
         );
+
+        return Observable.concat(obses);
     }
 
     @Override
