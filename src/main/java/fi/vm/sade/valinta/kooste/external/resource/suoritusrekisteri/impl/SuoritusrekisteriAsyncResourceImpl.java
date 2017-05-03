@@ -108,7 +108,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         Observable<Observable<List<Oppija>>> obses = Observable.from(opiskelijaOidBatches).map(oidBatch ->
                 postAsObservable(url,
                         new TypeToken<List<Oppija>>() { }.getType(),
-                        Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
+                        Entity.entity(oidBatch, MediaType.APPLICATION_JSON_TYPE),
                         client -> {
                             client.accept(MediaType.APPLICATION_JSON_TYPE);
                             LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), oidBatch.size());
@@ -138,7 +138,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         Observable<Observable<List<Oppija>>> obses = Observable.from(opiskelijaOidBatches).map(oidBatch ->
                 postAsObservable(url,
                     new TypeToken<List<Oppija>>() { }.getType(),
-                    Entity.entity(opiskelijaOids, MediaType.APPLICATION_JSON_TYPE),
+                    Entity.entity(oidBatch, MediaType.APPLICATION_JSON_TYPE),
                     client -> {
                         client.accept(MediaType.APPLICATION_JSON_TYPE);
                         LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), oidBatch.size());
