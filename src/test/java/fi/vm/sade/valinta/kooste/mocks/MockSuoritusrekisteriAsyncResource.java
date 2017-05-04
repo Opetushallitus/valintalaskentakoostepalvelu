@@ -20,13 +20,19 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Service
 public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyncResource {
     private static AtomicReference<Oppija> oppijaRef = new AtomicReference<>();
+    private static AtomicReference<List<Oppija>> oppijatRef = new AtomicReference<>();
 
     public static void setResult(Oppija oppija) {
         oppijaRef.set(oppija);
+    }
+
+    public static void setResults(List<Oppija> oppijat) {
+        oppijatRef.set(oppijat);
     }
 
     public static AtomicReference<List<Suoritus>> suorituksetRef = new AtomicReference<>(new ArrayList<>());
@@ -43,6 +49,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     public static void clear() {
         postException = Optional.empty();
         oppijaRef.set(null);
+        oppijatRef.set(null);
         suorituksetRef.set(new ArrayList<>());
         createdArvosanatRef.set(new ArrayList<>());
         updatedArvosanatRef.set(new ArrayList<>());
@@ -77,13 +84,31 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
+    public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
+        return Observable.just(oppijatRef.get());
+    }
+
+    @Override
     public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
         return Observable.just(oppijaRef.get());
     }
 
     @Override
-    public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
-        return Observable.just(oppijaRef.get());
+    public Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
+        return Observable.just(oppijatRef.get());
+    }
+
+    @Override
+    public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(final String opiskelijaOid) {
+        Oppija oppija = oppijaRef.get();
+        if (oppija == null) {
+            List<Oppija> oppijas = oppijatRef.get();
+            Optional<Oppija> first = oppijas.stream()
+                    .filter(oppija1 -> oppija1.getOppijanumero().equalsIgnoreCase(opiskelijaOid))
+                    .findFirst();
+            oppija = first.get();
+        }
+        return Observable.just(oppija);
     }
 
     @Override

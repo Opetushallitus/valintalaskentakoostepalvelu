@@ -8,6 +8,8 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -16,13 +18,19 @@ import rx.Observable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import com.google.common.collect.Lists;
+import rx.observables.BlockingObservable;
 
 @Service
 public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource implements SuoritusrekisteriAsyncResource {
+    private static final Logger LOG = LoggerFactory.getLogger(SuoritusrekisteriAsyncResourceImpl.class);
+
+    private int maxOppijatPostSize = 5000;
 
     @Autowired
     public SuoritusrekisteriAsyncResourceImpl(
@@ -88,16 +96,56 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
             client.query("haku", hakuOid);
+            LOG.info("Calling url {}", client.getCurrentURI());
             return client;
         });
+    }
+
+    @Override
+    public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
+        String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=true" + "&haku=" + hakuOid;
+        List<Oppija> oppijat = batchedPostOppijas(opiskelijaOids, url);
+        return Observable.just(oppijat);
     }
 
     @Override
     public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
         return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
+            LOG.info("Calling url {}", client.getCurrentURI());
             return client;
         });
+    }
+
+    @Override
+    public
+    Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
+        String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=false";
+        List<Oppija> oppijat = batchedPostOppijas(opiskelijaOids, url);
+        return Observable.just(oppijat);
+    }
+
+    private List<Oppija> batchedPostOppijas(List<String> opiskelijaOids, String url) {
+        List<List<String>> batches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
+        LOG.info("Batched POST: {} oids partitioned into {} batches", opiskelijaOids.size(), batches.size());
+
+        List<Oppija> oppijat = new ArrayList<>();
+        batches.forEach(batch -> {
+            Observable<List<Oppija>> obs = postAsObservable(url,
+                    new TypeToken<List<Oppija>>() { }.getType(),
+                    Entity.entity(batch, MediaType.APPLICATION_JSON_TYPE),
+                    client -> {
+                        client.accept(MediaType.APPLICATION_JSON_TYPE);
+                        LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), batch.size());
+                        return client;
+                    });
+
+            BlockingObservable<List<Oppija>> blocking = obs.toBlocking();
+            blocking.getIterator().forEachRemaining(oppijat::addAll);
+        });
+
+        LOG.info("Batched POST complete");
+        return oppijat;
     }
 
     @Override
