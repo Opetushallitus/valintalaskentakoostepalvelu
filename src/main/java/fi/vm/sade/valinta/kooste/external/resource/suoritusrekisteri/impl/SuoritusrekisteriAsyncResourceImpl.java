@@ -144,7 +144,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
             blocking.getIterator().forEachRemaining(oppijat::addAll);
         });
 
-        LOG.info("Batched POST complete";
+        LOG.info("Batched POST complete");
         return oppijat;
     }
 
