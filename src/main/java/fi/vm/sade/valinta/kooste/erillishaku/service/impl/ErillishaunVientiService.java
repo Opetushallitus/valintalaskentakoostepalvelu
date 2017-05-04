@@ -70,7 +70,7 @@ public class ErillishaunVientiService {
         this.applicationAsyncResource = applicationAsyncResource;
         this.dokumenttiResource = dokumenttiResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-        this.useVtsData = "TRUE".equalsIgnoreCase(useVtsData);
+        this.useVtsData = Boolean.parseBoolean(useVtsData);
         if(this.useVtsData) {
             LOG.info("Luetaan valinnantulokset ja sijoittelu valinta-tulos-servicestä!!!!!!!");
         }

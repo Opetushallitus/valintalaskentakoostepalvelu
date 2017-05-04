@@ -108,7 +108,7 @@ public class ErillishaunTuontiService {
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.scheduler = scheduler;
-        this.useVtsData = "TRUE".equals(useVtsData);
+        this.useVtsData = Boolean.parseBoolean(useVtsData);
     }
 
     @Autowired
