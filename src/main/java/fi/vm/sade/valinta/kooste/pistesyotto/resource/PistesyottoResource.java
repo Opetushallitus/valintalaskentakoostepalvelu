@@ -87,7 +87,7 @@ public class PistesyottoResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     public void koostaPistetiedotYhdelleHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                      @Suspended final AsyncResponse response) {
-        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/hakemus/{}", hakemusOid);
             handler.resume(Response.serverError()
@@ -137,7 +137,7 @@ public class PistesyottoResource {
     public void tallennaKoostetutPistetiedotHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                          ApplicationAdditionalDataDTO pistetiedot,
                                                          @Suspended final AsyncResponse response) {
-        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}", hakemusOid);
             handler.resume(Response.serverError()
@@ -198,7 +198,7 @@ public class PistesyottoResource {
     public void koostaPistetiedotHakemuksille(@PathParam("hakuOid") String hakuOid,
                                               @PathParam("hakukohdeOid") String hakukohdeOid,
                                               @Suspended final AsyncResponse response) {
-        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
             handler.resume(Response.serverError()
@@ -245,7 +245,7 @@ public class PistesyottoResource {
                                              @PathParam("hakukohdeOid") String hakukohdeOid,
                                              List<ApplicationAdditionalDataDTO> pistetiedot,
                                              @Suspended final AsyncResponse response) {
-        response.setTimeout(30L, TimeUnit.SECONDS);
+        response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
             handler.resume(Response.serverError()
@@ -302,7 +302,7 @@ public class PistesyottoResource {
     public void vienti(@QueryParam("hakuOid") String hakuOid,
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @Suspended AsyncResponse asyncResponse) {
-        asyncResponse.setTimeout(30L, TimeUnit.SECONDS);
+        asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("vienti-palvelukutsu on aikakatkaistu: POST /vienti");
             handler.resume(Response.serverError()
@@ -350,7 +350,7 @@ public class PistesyottoResource {
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        InputStream file,
                        @Suspended AsyncResponse asyncResponse) throws IOException {
-        asyncResponse.setTimeout(30L, TimeUnit.SECONDS);
+        asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("tuonti-palvelukutsu on aikakatkaistu: POST /tuonti");
             handler.resume(Response.serverError()
@@ -435,7 +435,7 @@ public class PistesyottoResource {
             if (hakemukset == null || hakemukset.isEmpty()) {
                 asyncResponse.resume(Response.serverError().entity("Ulkoinen pistesyotto API requires at least one hakemus").build());
             } else {
-                asyncResponse.setTimeout(30L, TimeUnit.MINUTES);
+                asyncResponse.setTimeout(120L, TimeUnit.MINUTES);
                 asyncResponse.setTimeoutHandler(asyncResponse1 -> {
                     LOG.error("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu: /haku/{}", hakuOid);
                     asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
