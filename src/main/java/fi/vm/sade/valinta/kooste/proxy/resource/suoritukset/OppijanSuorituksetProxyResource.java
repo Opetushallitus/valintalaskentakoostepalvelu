@@ -239,11 +239,12 @@ public class OppijanSuorituksetProxyResource {
         Observable<Oppija> suorituksetByOppija = fetchEnsikertalaisuus ?
                 suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskelijaOid, haku.getOid()).doOnError(throwableConsumer) :
                 suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOid).doOnError(throwableConsumer);
-
-        Observable.combineLatest(suorituksetByOppija, hakemusObservable, parametritDTOObservable,
-                (oppija, hakemus, ohjausparametrit) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
+        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesObservable = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid());
+        Observable.combineLatest(suorituksetByOppija, hakemusObservable, parametritDTOObservable, hakukohdeRyhmasForHakukohdesObservable,
+                (oppija, hakemus, ohjausparametrit, hakukohdeRyhmasForHakukohdes) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
                         haku,
                         "",
+                        hakukohdeRyhmasForHakukohdes,
                         Collections.singletonList(hakemus),
                         Collections.singletonList(oppija),
                         ohjausparametrit,
