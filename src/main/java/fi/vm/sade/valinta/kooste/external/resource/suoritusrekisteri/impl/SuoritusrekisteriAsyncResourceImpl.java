@@ -24,7 +24,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import com.google.common.collect.Lists;
-import rx.observables.BlockingObservable;
 
 @Service
 public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource implements SuoritusrekisteriAsyncResource {
@@ -104,8 +103,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
         String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=true" + "&haku=" + hakuOid;
-        List<Oppija> oppijat = batchedPostOppijas(opiskelijaOids, url);
-        return Observable.just(oppijat);
+        return batchedPostOppijas(opiskelijaOids, url);
     }
 
     @Override
@@ -121,31 +119,32 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     public
     Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
         String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=false";
-        List<Oppija> oppijat = batchedPostOppijas(opiskelijaOids, url);
-        return Observable.just(oppijat);
+        return batchedPostOppijas(opiskelijaOids, url);
     }
 
-    private List<Oppija> batchedPostOppijas(List<String> opiskelijaOids, String url) {
-        List<List<String>> batches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
-        LOG.info("Batched POST: {} oids partitioned into {} batches", opiskelijaOids.size(), batches.size());
+    private Observable<List<Oppija>> batchedPostOppijas(List<String> opiskelijaOids, String url) {
+        List<List<String>> oidBatches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
+        LOG.info("Batched POST: {} oids partitioned into {} batches", opiskelijaOids.size(), oidBatches.size());
 
-        List<Oppija> oppijat = new ArrayList<>();
-        batches.forEach(batch -> {
-            Observable<List<Oppija>> obs = postAsObservable(url,
-                    new TypeToken<List<Oppija>>() { }.getType(),
-                    Entity.entity(batch, MediaType.APPLICATION_JSON_TYPE),
-                    client -> {
-                        client.accept(MediaType.APPLICATION_JSON_TYPE);
-                        LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), batch.size());
-                        return client;
-                    });
+        Observable<Observable<List<Oppija>>> obses = Observable.from(oidBatches).map(oidBatch ->
+                postAsObservable(url,
+                        new TypeToken<List<Oppija>>() { }.getType(),
+                        Entity.entity(oidBatch, MediaType.APPLICATION_JSON_TYPE),
+                        client -> {
+                            client.accept(MediaType.APPLICATION_JSON_TYPE);
+                            LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), oidBatch.size());
+                            return client;
+                        })
+        );
 
-            BlockingObservable<List<Oppija>> blocking = obs.toBlocking();
-            blocking.getIterator().forEachRemaining(oppijat::addAll);
+        // Add the elements returned by each response to one master list
+        Observable<List<Oppija>> allOppijas = Observable.concat(obses).collect(Lists::<Oppija>newArrayList, List::addAll);
+
+        allOppijas.subscribe(l -> {
+            LOG.info("Finished batched POST with {} results", l.size());
         });
 
-        LOG.info("Batched POST complete");
-        return oppijat;
+        return allOppijas;
     }
 
     @Override
