@@ -25,10 +25,7 @@ import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.http.FailedHttpException;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
@@ -44,8 +41,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValinta
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
@@ -397,6 +393,8 @@ public class ErillishaunTuontiService {
                 .map(rivi -> toErillishaunHakijaStream(haku, rivi))
                 .collect(Collectors.toList());
 
+        final Map<String, Maksuntila> maksuntilat = lisattavatTaiKeskeneraiset.stream().filter(l -> Maksuvelvollisuus.REQUIRED.equals(l.getMaksuvelvollisuus())).collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
+
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(
                         haku.getValintatapajonoOid(),
@@ -431,7 +429,10 @@ public class ErillishaunTuontiService {
                 .filter(h -> !ainoastaanHakemuksenTilaPaivitys(h) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(h.valintatuloksenTila))
                 .collect(Collectors.toList());
 
-        doVastaanottoTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla).flatMap(poikkeukset -> {
+        Observable<Void> maksuntilojenTallennus = doMaksuntilojenTallennusValintaTulosServiceen(username, haku.getHakukohdeOid(), maksuntilat, prosessi);
+
+
+        Observable<List<Poikkeus>> vastaanottotilojenTallennus = doVastaanottoTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla).flatMap(poikkeukset -> {
             if (poikkeukset.isEmpty()) {
                 if (useVtsData) {
                     return doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, poistettavat, hakijat);
@@ -450,7 +451,9 @@ public class ErillishaunTuontiService {
             } else {
                 return Observable.just(poikkeukset);
             }
-        }).subscribe(
+        });
+
+        Observable.combineLatest(maksuntilojenTallennus, vastaanottotilojenTallennus, (m, poikkeukset) -> poikkeukset).subscribe(
                 poikkeukset -> {
                     Set<String> epaonnistuneet = poikkeukset.stream()
                             .flatMap(p -> p.getTunnisteet().stream())
@@ -493,6 +496,18 @@ public class ErillishaunTuontiService {
                     prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, "", t.getMessage()));
                 }
         );
+    }
+
+    private Observable<Void> doMaksuntilojenTallennusValintaTulosServiceen(String username, String hakukohdeOid, Map<String, Maksuntila> uudetMaksuntilat, final KirjeProsessi prosessi) {
+        return valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, username).flatMap(nykyisetLukuvuosimaksut -> {
+            Map<String, Maksuntila> vanhatMaksuntilat = nykyisetLukuvuosimaksut.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
+            List<LukuvuosimaksuMuutos> muuttuneetLukuvuosimaksut = uudetMaksuntilat.entrySet().stream().filter(e -> {
+                final String personOid = e.getKey();
+                return !e.getValue().equals(vanhatMaksuntilat.get(personOid));
+            }).map(e -> new LukuvuosimaksuMuutos(e.getKey(), e.getValue())).collect(Collectors.toList());
+
+            return valintaTulosServiceAsyncResource.saveLukuvuosimaksut(hakukohdeOid, username, muuttuneetLukuvuosimaksut);
+        });
     }
 
     private void doThrowawayValinnantuloksenTallennusValintaTulosServiceen(

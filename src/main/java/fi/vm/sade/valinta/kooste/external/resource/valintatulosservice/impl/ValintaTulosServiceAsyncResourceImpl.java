@@ -86,8 +86,15 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     }
 
     @Override
-    public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid) {
-        return getAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid, AuthorizationUtil.getCurrentUser()), new GenericType<List<Lukuvuosimaksu>>() {}.getType());
+    public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, String username) {
+        return getAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid, username), new GenericType<List<Lukuvuosimaksu>>() {}.getType());
+    }
+
+    @Override
+    public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, String username, List<LukuvuosimaksuMuutos> muutokset) {
+        return postAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid, username),
+                Void.class,
+                Entity.json(muutokset));
     }
 
     @Override

@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -219,8 +220,15 @@ public class ErillishakuDataRivi extends DataRivi {
             Maksuvelvollisuus.REQUIRED,
             Maksuvelvollisuus.NOT_REQUIRED
     );
-
+    private static final Collection<String> MAKSUNTILA_ARVOT = Arrays.asList(
+            Maksuntila.MAKSAMATTA.toString(),
+            Maksuntila.MAKSETTU.toString(),
+            Maksuntila.VAPAUTETTU.toString()
+    );
     static MonivalintaArvo maksuvelvollisuus(String arvo) {
         return new MonivalintaArvo(arvo, MAKSUVELVOLLISUUS_ARVOT);
+    }
+    static MonivalintaArvo maksuntila(String arvo) {
+        return new MonivalintaArvo(arvo, MAKSUNTILA_ARVOT);
     }
 }

@@ -123,7 +123,7 @@ public class ValintalaskentaExcelResource {
             Observable.combineLatest(
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                     valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
-                    valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid),
+                    valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, ""),
                     sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
                     (tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset) -> {

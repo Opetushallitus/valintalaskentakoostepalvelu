@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoR
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -60,8 +61,13 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     }
 
     @Override
-    public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid) {
-        return Observable.just(Lists.newArrayList());
+    public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, String username) {
+        return Observable.just(Collections.emptyList());
+    }
+
+    @Override
+    public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, String username, List<LukuvuosimaksuMuutos> muutokset) {
+        return Observable.just(null);
     }
 
     @Override
