@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
+import static fi.vm.sade.valinta.kooste.AuthorizationUtil.*;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.oidHaustaJaHakukohteesta;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
 import static rx.observables.BlockingObservable.from;
 
+import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -96,7 +98,7 @@ public class ErillishakuResource {
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-        vientiService.vie(createAuditSession(), prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))));
+        vientiService.vie(createAuditSession(httpServletRequestJaxRS), prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))));
         return prosessi.toProsessiId();
     }
 
@@ -121,7 +123,7 @@ public class ErillishakuResource {
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoExcelistä(
-                createAuditSession(),
+                createAuditSession(httpServletRequestJaxRS),
                 prosessi,
                 new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))),
                 new ByteArrayInputStream(b.toByteArray())
@@ -159,7 +161,7 @@ public class ErillishakuResource {
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoJson(
-                createAuditSession(),
+                createAuditSession(httpServletRequestJaxRS),
                 prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))), json.getRivit(), true);
         return prosessi.toProsessiId();
     }
@@ -194,68 +196,10 @@ public class ErillishakuResource {
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoJson(
-                createAuditSession(true),
+                createAuditSession(true, httpServletRequestJaxRS),
                 prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))), json.getRivit(), false);
         return prosessi.toProsessiId();
     }
 
-    private AuditSession createAuditSession() {
-        return createAuditSession(false);
-    }
 
-    private HttpServletRequest request() {
-        if(null != httpServletRequestJaxRS) {
-            //Käytetään unit-testeissä
-            return httpServletRequestJaxRS;
-        }
-        RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
-        if(null != attributes) {
-            if(attributes instanceof ServletRequestAttributes) {
-                return ((ServletRequestAttributes)attributes).getRequest();
-            } else {
-                LOG.info("RequestContextHolderin request on vääränlainen:" + attributes.getClass().getName());
-                throw new IllegalStateException("Ei löydetty validia HTTP requestia.");
-            }
-        }
-        LOG.error("Ei löydetty HTTP requestia.");
-        throw new InternalError("Ei löydetty HTTP requestia.");
-    }
-
-    private AuditSession createAuditSession(boolean isUnmodifiedSinceMandatory) {
-        HttpServletRequest httpServletRequest = request();
-        AuditSession session = new AuditSession();
-        session.setPersonOid(KoosteAudit.username());
-        session.setInetAddress(Optional.ofNullable(httpServletRequest.getHeader("X-Forwarded-For")).orElse(httpServletRequest.getRemoteAddr()));
-        session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
-        session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory));
-        session.setRoles(getRoles());
-        session.setSessionId(httpServletRequest.getSession().getId());
-        Optional<String> uid = KoosteAudit.uid();
-        if(uid.isPresent()) {
-            session.setUid(uid.get());
-        }
-        return session;
-    }
-
-    private Optional<String> readIfUnmodifiedSince(boolean isUnmodifiedSinceMandatory) {
-        Optional<String> isUnmodifiedSinceHeader = Optional.ofNullable(request().getHeader("If-Unmodified-Since"));
-        if(isUnmodifiedSinceMandatory && !isUnmodifiedSinceHeader.isPresent()) {
-            throw new IllegalArgumentException("If-Unmodified-Since on pakollinen otsake.");
-        } else if(isUnmodifiedSinceMandatory) {
-            try {
-                DateTimeFormatter.RFC_1123_DATE_TIME.parse(isUnmodifiedSinceHeader.get());
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Otsake If-Unmodified-Since on väärässä formaatissa: " + isUnmodifiedSinceHeader.get());
-            }
-        }
-        return isUnmodifiedSinceHeader;
-    }
-
-    private List<String> getRoles() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(null == authentication) {
-            return new ArrayList<>();
-        }
-        return authentication.getAuthorities().stream().map(a -> ((GrantedAuthority)a).getAuthority()).map(r -> r.replace("ROLE_", "")).collect(Collectors.toList());
-    }
 }

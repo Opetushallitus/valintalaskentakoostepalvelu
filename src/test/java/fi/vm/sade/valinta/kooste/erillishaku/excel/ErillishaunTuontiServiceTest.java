@@ -299,7 +299,7 @@ public class ErillishaunTuontiServiceTest {
                     "FALSE"
             );
             ResponseImpl response = (ResponseImpl)Response.ok(new HakukohteenValintatulosUpdateStatuses("viesti", new ArrayList<>()), MediaType.APPLICATION_JSON_TYPE).build();
-            when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(Mockito.anyString(), Mockito.anyString())).thenReturn(just(emptyList()));
+            when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(Mockito.anyString(), Mockito.any())).thenReturn(just(emptyList()));
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             tuontiService.tuoExcelistä(new AuditSession("bob", new ArrayList<String>(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
@@ -342,7 +342,7 @@ class ErillisHakuTuontiTestCase {
 
     @Before
     public void before() {
-        when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(anyString(), anyString())).thenReturn(just(emptyList()));
+        when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(anyString(), any())).thenReturn(just(emptyList()));
         when(valintaTulosServiceAsyncResource.tallenna(anyListOf(VastaanottoRecordDTO.class))).then(invocation -> Observable
                 .just(((List<VastaanottoRecordDTO>) invocation.getArguments()[0]).stream().map(v -> {
                     VastaanottoResultDTO dto = new VastaanottoResultDTO();

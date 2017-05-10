@@ -3,9 +3,12 @@ package fi.vm.sade.valinta.kooste.sijoitteluntulos.resource;
 import java.util.Arrays;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetHaulleHakukohteittain;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetKokoHaulleService;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
@@ -50,6 +53,8 @@ public class SijoittelunTulosHaulleResource {
     @Autowired
     private HyvaksymiskirjeetHaulleHakukohteittain hyvaksymiskirjeetHakukohteittain;
 
+    @Context
+    private HttpServletRequest httpServletRequestJaxRS;
     @POST
     @Path("/osoitetarrat")
     @Consumes("application/json")
@@ -114,7 +119,7 @@ public class SijoittelunTulosHaulleResource {
             SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
                     null, // ei asiointikielirajausta
                     "taulukkolaskennat", "Luo taulukkolaskennat haulle", null, Arrays.asList("taulukkolaskennat", "haulle"));
-            sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(prosessi, hakuOid, SijoitteluResource.LATEST, SecurityContextHolder.getContext().getAuthentication());
+            sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(prosessi, hakuOid, SijoitteluResource.LATEST, AuthorizationUtil.createAuditSession(httpServletRequestJaxRS), SecurityContextHolder.getContext().getAuthentication());
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
@@ -48,6 +49,10 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
 
     protected String hakuOid(Exchange exchange) {
         return exchange.getProperty(OPH.HAKUOID, String.class);
+    }
+
+    protected AuditSession auditSession(Exchange exchange) {
+        return exchange.getProperty("AuditSession", AuditSession.class);
     }
 
     protected String sijoitteluajoId(Exchange exchange) {

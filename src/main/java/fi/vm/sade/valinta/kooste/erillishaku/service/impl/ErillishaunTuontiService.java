@@ -430,7 +430,7 @@ public class ErillishaunTuontiService {
                 .filter(h -> !ainoastaanHakemuksenTilaPaivitys(h) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(h.valintatuloksenTila))
                 .collect(Collectors.toList());
 
-        Observable<Void> maksuntilojenTallennus = doMaksuntilojenTallennusValintaTulosServiceen(username, haku.getHakukohdeOid(), maksuntilat, prosessi);
+        Observable<Void> maksuntilojenTallennus = doMaksuntilojenTallennusValintaTulosServiceen(auditSession, haku.getHakukohdeOid(), maksuntilat, prosessi);
 
 
         Observable<List<Poikkeus>> vastaanottotilojenTallennus = doVastaanottoTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla).flatMap(poikkeukset -> {
@@ -519,8 +519,8 @@ public class ErillishaunTuontiService {
         };
     }
 
-    private Observable<Void> doMaksuntilojenTallennusValintaTulosServiceen(String username, String hakukohdeOid, Map<String, Maksuntila> uudetMaksuntilat, final KirjeProsessi prosessi) {
-        return valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, username).flatMap(nykyisetLukuvuosimaksut -> {
+    private Observable<Void> doMaksuntilojenTallennusValintaTulosServiceen(AuditSession session, String hakukohdeOid, Map<String, Maksuntila> uudetMaksuntilat, final KirjeProsessi prosessi) {
+        return valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, session).flatMap(nykyisetLukuvuosimaksut -> {
             Map<String, Maksuntila> vanhatMaksuntilat = nykyisetLukuvuosimaksut.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
             List<LukuvuosimaksuMuutos> muuttuneetLukuvuosimaksut = uudetMaksuntilat.entrySet().stream().filter(e -> {
                 final String personOid = e.getKey();
@@ -529,7 +529,7 @@ public class ErillishaunTuontiService {
             if(muuttuneetLukuvuosimaksut.isEmpty()) {
                 return Observable.just(null);
             } else {
-                return valintaTulosServiceAsyncResource.saveLukuvuosimaksut(hakukohdeOid, username, muuttuneetLukuvuosimaksut);
+                return valintaTulosServiceAsyncResource.saveLukuvuosimaksut(hakukohdeOid, session, muuttuneetLukuvuosimaksut);
             }
         });
     }

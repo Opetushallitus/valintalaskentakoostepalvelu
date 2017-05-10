@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.route;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import org.apache.camel.Property;
 import org.springframework.security.core.Authentication;
 
@@ -22,5 +23,6 @@ public interface SijoittelunTulosTaulukkolaskentaRoute {
             @Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) SijoittelunTulosProsessi prosessi,
             @Property(OPH.HAKUOID) String hakuOid,
             @Property(OPH.SIJOITTELUAJOID) String sijoitteluAjoId,
+            @Property("AuditSession") AuditSession session,
             @Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
 }

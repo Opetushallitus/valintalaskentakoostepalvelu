@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 import java.io.InputStream;
 import java.util.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -11,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -106,6 +108,8 @@ public class ValintalaskentaExcelResource {
     private TarjontaAsyncResource tarjontaResource;
     @Autowired
     private ApplicationAsyncResource applicationResource;
+    @Context
+    private HttpServletRequest httpServletRequestJaxRS;
 
     @POST
     @Path("/valintakoekutsut/aktivoi")
@@ -154,7 +158,7 @@ public class ValintalaskentaExcelResource {
             Observable.combineLatest(
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                     valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
-                    valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.getCurrentUser()),
+                    valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.createAuditSession(httpServletRequestJaxRS)),
                     sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
                     (tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset) -> {

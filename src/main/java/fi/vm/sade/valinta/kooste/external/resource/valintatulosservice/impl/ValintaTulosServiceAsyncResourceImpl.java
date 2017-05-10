@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
@@ -39,6 +40,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static com.google.common.collect.ImmutableMap.of;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource implements ValintaTulosServiceAsyncResource {
@@ -86,15 +89,16 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     }
 
     @Override
-    public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, String username) {
-        return getAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid, username), new GenericType<List<Lukuvuosimaksu>>() {}.getType());
+    public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, AuditSession session) {
+        return getAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid), new GenericType<List<Lukuvuosimaksu>>() {}.getType(),
+                Entity.json(of("auditSession", session)));
     }
 
     @Override
-    public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, String username, List<LukuvuosimaksuMuutos> muutokset) {
-        return postAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid, username),
+    public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
+        return postAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", hakukohdeOid),
                 Void.class,
-                Entity.json(muutokset));
+                Entity.json(of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session)));
     }
 
     @Override
