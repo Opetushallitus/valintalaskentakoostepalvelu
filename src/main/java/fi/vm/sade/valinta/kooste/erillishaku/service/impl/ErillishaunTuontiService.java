@@ -432,7 +432,7 @@ public class ErillishaunTuontiService {
                 .filter(h -> !ainoastaanHakemuksenTilaPaivitys(h) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(h.valintatuloksenTila))
                 .collect(Collectors.toList());
 
-        Observable<Void> maksuntilojenTallennus = doMaksuntilojenTallennusValintaTulosServiceen(auditSession, haku.getHakukohdeOid(), maksuntilat, prosessi);
+        Observable<Void> maksuntilojenTallennus = doMaksuntilojenTallennusValintaTulosServiceen(auditSession, haku.getHakukohdeOid(), maksuntilat);
 
 
         Observable<List<Poikkeus>> vastaanottotilojenTallennus = doVastaanottoTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla).flatMap(poikkeukset -> {
@@ -501,27 +501,7 @@ public class ErillishaunTuontiService {
         );
     }
 
-    private Action1<Throwable> onLukuvuosimaksujenTallennusFails(KirjeProsessi prosessi) {
-        return e -> {
-            LOG.error("Erillishaun tuonti epäonnistui lukuvuosimaksujen tallennukseen", e);
-
-            prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE,
-                    e.getMessage()));
-        };
-    }
-
-    private Action1<Throwable> onErillishaunTuontiFails(KirjeProsessi prosessi) {
-        return e -> {
-            LOG.error("Erillishaun tuonti epäonnistui", e);
-            List<ValintatulosUpdateStatus> statuses = ((FailedHttpException) e).response.readEntity(HakukohteenValintatulosUpdateStatuses.class).statuses;
-            prosessi.keskeyta(statuses.stream()
-                    .map(s -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.SIJOITTELU,
-                            s.message, new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)))
-                    .collect(Collectors.toList()));
-        };
-    }
-
-    private Observable<Void> doMaksuntilojenTallennusValintaTulosServiceen(AuditSession session, String hakukohdeOid, Map<String, Maksuntila> uudetMaksuntilat, final KirjeProsessi prosessi) {
+    private Observable<Void> doMaksuntilojenTallennusValintaTulosServiceen(AuditSession session, String hakukohdeOid, Map<String, Maksuntila> uudetMaksuntilat) {
         return valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, session).flatMap(nykyisetLukuvuosimaksut -> {
             Map<String, Maksuntila> vanhatMaksuntilat = nykyisetLukuvuosimaksut.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
             List<LukuvuosimaksuMuutos> muuttuneetLukuvuosimaksut = uudetMaksuntilat.entrySet().stream().filter(e -> {
