@@ -9,7 +9,7 @@ public enum Maksuntila {
         try {
             return Maksuntila.valueOf(s);
         } catch(IllegalArgumentException e) {
-            return null;
+            return Maksuntila.MAKSAMATTA;
         }
     }
 }

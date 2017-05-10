@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCre
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
@@ -182,7 +183,7 @@ public class ErillishakuResourceTest {
                 .toisenAsteenSuoritus(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null)
                 .toisenAsteenSuoritusmaa(hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "")
                 .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
-                .maksuntila(null)
+                .maksuntila(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Maksuntila.MAKSAMATTA : null)
                 .build();
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }

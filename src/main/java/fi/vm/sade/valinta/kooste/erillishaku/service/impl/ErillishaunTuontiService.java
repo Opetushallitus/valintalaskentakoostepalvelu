@@ -8,6 +8,7 @@ import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
 import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
+import static java.util.Optional.*;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static rx.schedulers.Schedulers.newThread;
@@ -71,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -411,7 +413,7 @@ public class ErillishaunTuontiService {
                         null,
                         rivi.getEtunimi(),
                         rivi.getSukunimi(),
-                        Optional.of(true),
+                        of(true),
                         rivi.getHyvaksymiskirjeLahetetty(),
                         Lists.newArrayList(),
                         rivi.getEhdollisenHyvaksymisenEhtoKoodi(),
@@ -524,7 +526,8 @@ public class ErillishaunTuontiService {
             Map<String, Maksuntila> vanhatMaksuntilat = nykyisetLukuvuosimaksut.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
             List<LukuvuosimaksuMuutos> muuttuneetLukuvuosimaksut = uudetMaksuntilat.entrySet().stream().filter(e -> {
                 final String personOid = e.getKey();
-                return !e.getValue().equals(vanhatMaksuntilat.get(personOid));
+                Maksuntila vanhaMaksuntila = ofNullable(vanhatMaksuntilat.get(personOid)).filter(Objects::nonNull).orElse(Maksuntila.MAKSAMATTA);
+                return !e.getValue().equals(vanhaMaksuntila);
             }).map(e -> new LukuvuosimaksuMuutos(e.getKey(), e.getValue())).collect(Collectors.toList());
             if(muuttuneetLukuvuosimaksut.isEmpty()) {
                 return Observable.just(null);
@@ -643,7 +646,7 @@ public class ErillishaunTuontiService {
                 hakemuksenTila(rivi),
                 rivi.getEtunimi(),
                 rivi.getSukunimi(),
-                Optional.of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
+                of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila())),
                 rivi.getHyvaksymiskirjeLahetetty(),
                 Lists.newArrayList(),
                 rivi.getEhdollisenHyvaksymisenEhtoKoodi(), rivi.getEhdollisenHyvaksymisenEhtoFI(), rivi.getEhdollisenHyvaksymisenEhtoSV(), rivi.getEhdollisenHyvaksymisenEhtoEN()
@@ -658,7 +661,7 @@ public class ErillishaunTuontiService {
 
 
     private static HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
-        return Optional.ofNullable(nullIfFails(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()))).orElse(HakemuksenTila.HYLATTY);
+        return ofNullable(nullIfFails(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()))).orElse(HakemuksenTila.HYLATTY);
     }
 
     private static IlmoittautumisTila ilmoittautumisTila(ErillishakuRivi rivi) {
