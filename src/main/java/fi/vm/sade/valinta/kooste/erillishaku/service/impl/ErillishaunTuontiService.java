@@ -499,6 +499,15 @@ public class ErillishaunTuontiService {
         );
     }
 
+    private Action1<Throwable> onLukuvuosimaksujenTallennusFails(KirjeProsessi prosessi) {
+        return e -> {
+            LOG.error("Erillishaun tuonti epäonnistui lukuvuosimaksujen tallennukseen", e);
+
+            prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE,
+                    e.getMessage()));
+        };
+    }
+
     private Action1<Throwable> onErillishaunTuontiFails(KirjeProsessi prosessi) {
         return e -> {
             LOG.error("Erillishaun tuonti epäonnistui", e);
