@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -200,7 +201,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             tilat = tilaResource.hakukohteelle(hakukohdeOid);
                             hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
                             hk = sijoitteluResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, SijoitteluResource.LATEST, hakukohdeOid);
-                            lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, "").toBlocking().toFuture().get();
+                            lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.getCurrentUser()).toBlocking().toFuture().get();
                         } catch (Exception e) {
                             //todo: fix this
                         }

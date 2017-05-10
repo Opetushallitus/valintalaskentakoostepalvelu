@@ -1,5 +1,36 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
+import java.io.InputStream;
+import java.util.*;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import fi.vm.sade.valinta.kooste.AuthorizationUtil;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.util.VastaanottoFilterUtil;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+
 import com.google.common.collect.Sets;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
@@ -123,7 +154,7 @@ public class ValintalaskentaExcelResource {
             Observable.combineLatest(
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                     valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
-                    valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, ""),
+                    valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.getCurrentUser()),
                     sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
                     (tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset) -> {

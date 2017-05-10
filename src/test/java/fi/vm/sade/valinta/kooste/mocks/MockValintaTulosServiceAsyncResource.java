@@ -62,13 +62,14 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
 
     @Override
     public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, String username) {
-        return Observable.just(Collections.emptyList());
+        return Observable.just(Lists.newArrayList());
     }
 
     @Override
     public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, String username, List<LukuvuosimaksuMuutos> muutokset) {
-        return Observable.just(null);
+        return Observable.empty();
     }
+
 
     @Override
     public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid) {

@@ -58,6 +58,7 @@ public class ErillishakuDataRivi extends DataRivi {
         String vastaanottoTila = rivi.getArvoAt(index++);
         String ilmoittautumisTila = rivi.getArvoAt(index++);
         String maksuvelvollisuus = tyyppi == KORKEAKOULU ? rivi.getArvoAt(index++) : Maksuvelvollisuus.NOT_CHECKED;
+        Maksuntila maksuntila = tyyppi == KORKEAKOULU ? Maksuntila.fromString(rivi.getArvoAt(index++)) : null;
         boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(rivi.getArvoAt(index++));
 
         String asiointikieli = rivi.getArvoAt(index++);
@@ -103,6 +104,7 @@ public class ErillishakuDataRivi extends DataRivi {
                     .toisenAsteenSuoritus(toisenAsteenSuoritus)
                     .toisenAsteenSuoritusmaa(toisenAsteenSuoritusmaa)
                     .maksuvelvollisuus(maksuvelvollisuus)
+                    .maksuntila(maksuntila)
                     .build());
         }
         return true;
@@ -221,6 +223,7 @@ public class ErillishakuDataRivi extends DataRivi {
             Maksuvelvollisuus.NOT_REQUIRED
     );
     private static final Collection<String> MAKSUNTILA_ARVOT = Arrays.asList(
+            "",
             Maksuntila.MAKSAMATTA.toString(),
             Maksuntila.MAKSETTU.toString(),
             Maksuntila.VAPAUTETTU.toString()

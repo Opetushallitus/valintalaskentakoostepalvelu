@@ -6,6 +6,7 @@ import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisH
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.kkHakuToisenAsteenValintatuloksella;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.puutteellisiaTietojaAutotayttoaVarten;
+import static java.util.Collections.*;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,6 +17,8 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static rx.Observable.*;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.gson.Gson;
@@ -183,9 +186,9 @@ public class ErillishaunTuontiServiceTest {
                 Henkilo henkiloJollaOnEriOid = MockHenkiloAsyncResource.toHenkilo(dtos.get(0));
                 henkiloJollaOnEriOid.setOidHenkilo(personOidHenkiloPalvelusta);
                 henkiloPrototyypit.addAll(dtos);
-                return Futures.immediateFuture(Collections.singletonList(henkiloJollaOnEriOid));
+                return Futures.immediateFuture(singletonList(henkiloJollaOnEriOid));
             });
-            importRows(Collections.singletonList(erillishakuRivi), mockHenkiloAsyncResource);
+            importRows(singletonList(erillishakuRivi), mockHenkiloAsyncResource);
 
             assertEquals(1, henkiloPrototyypit.size());
             final HenkiloCreateDTO henkilo = henkiloPrototyypit.get(0);
@@ -295,10 +298,14 @@ public class ErillishaunTuontiServiceTest {
                     Schedulers.immediate(),
                     "FALSE"
             );
+            ResponseImpl response = (ResponseImpl)Response.ok(new HakukohteenValintatulosUpdateStatuses("viesti", new ArrayList<>()), MediaType.APPLICATION_JSON_TYPE).build();
+            when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(Mockito.anyString(), Mockito.anyString())).thenReturn(just(emptyList()));
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             tuontiService.tuoExcelistä(new AuditSession("bob", new ArrayList<String>(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             Mockito.verify(prosessi).keskeyta(any(Poikkeus.class));
+            tuontiService.tuoExcelistä(new AuditSession("bob", emptyList(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
+            Mockito.verify(prosessi).keskeyta((Collection<Poikkeus>)Matchers.any());
         }
 
         @Test
@@ -335,6 +342,7 @@ class ErillisHakuTuontiTestCase {
 
     @Before
     public void before() {
+        when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(anyString(), anyString())).thenReturn(just(emptyList()));
         when(valintaTulosServiceAsyncResource.tallenna(anyListOf(VastaanottoRecordDTO.class))).then(invocation -> Observable
                 .just(((List<VastaanottoRecordDTO>) invocation.getArguments()[0]).stream().map(v -> {
                     VastaanottoResultDTO dto = new VastaanottoResultDTO();

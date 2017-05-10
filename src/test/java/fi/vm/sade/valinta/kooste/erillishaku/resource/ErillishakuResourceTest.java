@@ -182,6 +182,7 @@ public class ErillishakuResourceTest {
                 .toisenAsteenSuoritus(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null)
                 .toisenAsteenSuoritusmaa(hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "")
                 .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
+                .maksuntila(null)
                 .build();
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
     }

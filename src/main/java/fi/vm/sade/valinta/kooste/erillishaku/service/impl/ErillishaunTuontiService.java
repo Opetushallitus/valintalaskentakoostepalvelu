@@ -58,6 +58,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
+import rx.functions.Action1;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
@@ -393,7 +394,7 @@ public class ErillishaunTuontiService {
                 .map(rivi -> toErillishaunHakijaStream(haku, rivi))
                 .collect(Collectors.toList());
 
-        final Map<String, Maksuntila> maksuntilat = lisattavatTaiKeskeneraiset.stream().filter(l -> Maksuvelvollisuus.REQUIRED.equals(l.getMaksuvelvollisuus())).collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
+        final Map<String, Maksuntila> maksuntilat = lisattavatTaiKeskeneraiset.stream().filter(l -> l.getMaksuntila() != null).filter(l -> Maksuvelvollisuus.REQUIRED.equals(l.getMaksuvelvollisuus())).collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
 
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(
@@ -498,6 +499,17 @@ public class ErillishaunTuontiService {
         );
     }
 
+    private Action1<Throwable> onErillishaunTuontiFails(KirjeProsessi prosessi) {
+        return e -> {
+            LOG.error("Erillishaun tuonti epäonnistui", e);
+            List<ValintatulosUpdateStatus> statuses = ((FailedHttpException) e).response.readEntity(HakukohteenValintatulosUpdateStatuses.class).statuses;
+            prosessi.keskeyta(statuses.stream()
+                    .map(s -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.SIJOITTELU,
+                            s.message, new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)))
+                    .collect(Collectors.toList()));
+        };
+    }
+
     private Observable<Void> doMaksuntilojenTallennusValintaTulosServiceen(String username, String hakukohdeOid, Map<String, Maksuntila> uudetMaksuntilat, final KirjeProsessi prosessi) {
         return valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, username).flatMap(nykyisetLukuvuosimaksut -> {
             Map<String, Maksuntila> vanhatMaksuntilat = nykyisetLukuvuosimaksut.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
@@ -505,8 +517,11 @@ public class ErillishaunTuontiService {
                 final String personOid = e.getKey();
                 return !e.getValue().equals(vanhatMaksuntilat.get(personOid));
             }).map(e -> new LukuvuosimaksuMuutos(e.getKey(), e.getValue())).collect(Collectors.toList());
-
-            return valintaTulosServiceAsyncResource.saveLukuvuosimaksut(hakukohdeOid, username, muuttuneetLukuvuosimaksut);
+            if(muuttuneetLukuvuosimaksut.isEmpty()) {
+                return Observable.just(null);
+            } else {
+                return valintaTulosServiceAsyncResource.saveLukuvuosimaksut(hakukohdeOid, username, muuttuneetLukuvuosimaksut);
+            }
         });
     }
 
