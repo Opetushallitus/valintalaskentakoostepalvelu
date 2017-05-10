@@ -289,6 +289,7 @@ public class ErillishaunTuontiServiceTest {
             final TilaAsyncResource failingResource = mock(TilaAsyncResource.class);
             when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any()))
                     .thenReturn(Observable.error(new RuntimeException("viesti")));
+            when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(Mockito.anyString(), Mockito.any())).thenReturn(just(emptyList()));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
                     failingResource,
                     applicationAsyncResource,
@@ -298,14 +299,8 @@ public class ErillishaunTuontiServiceTest {
                     Schedulers.immediate(),
                     "FALSE"
             );
-            ResponseImpl response = (ResponseImpl)Response.ok(new HakukohteenValintatulosUpdateStatuses("viesti", new ArrayList<>()), MediaType.APPLICATION_JSON_TYPE).build();
-            when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(Mockito.anyString(), Mockito.any())).thenReturn(just(emptyList()));
-            assertEquals(0, applicationAsyncResource.results.size());
-            assertNull(henkiloAsyncResource.henkiloPrototyypit);
-            tuontiService.tuoExcelistä(new AuditSession("bob", new ArrayList<String>(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
-            Mockito.verify(prosessi).keskeyta(any(Poikkeus.class));
             tuontiService.tuoExcelistä(new AuditSession("bob", emptyList(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
-            Mockito.verify(prosessi).keskeyta((Collection<Poikkeus>)Matchers.any());
+            Mockito.verify(prosessi).keskeyta(Matchers.<Poikkeus>any());
         }
 
         @Test
