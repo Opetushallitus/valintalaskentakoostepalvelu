@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
+
 import java.util.Date;
 
 public class ErillishakuRiviBuilder {
@@ -24,6 +26,7 @@ public class ErillishakuRiviBuilder {
     private boolean julkaistaankoTiedot = false;
     private boolean poistetaankoRivi = false;
     private String maksuvelvollisuus;
+    private Maksuntila maksuntila;
     private String asiointikieli;
     private String puhelinnumero;
     private String osoite;
@@ -69,7 +72,8 @@ public class ErillishakuRiviBuilder {
                 .kotikunta(rivi.getKotikunta())
                 .toisenAsteenSuoritus(rivi.getToisenAsteenSuoritus())
                 .toisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa())
-                .maksuvelvollisuus(rivi.getMaksuvelvollisuus());
+                .maksuvelvollisuus(rivi.getMaksuvelvollisuus())
+                .maksuntila(rivi.getMaksuntila());
     }
 
     public ErillishakuRiviBuilder etunimi(String etunimi) {
@@ -177,6 +181,11 @@ public class ErillishakuRiviBuilder {
         return this;
     }
 
+    public ErillishakuRiviBuilder maksuntila(Maksuntila maksuntila) {
+        this.maksuntila = maksuntila;
+        return this;
+    }
+
     public ErillishakuRiviBuilder asiointikieli(String asiointikieli) {
         this.asiointikieli = asiointikieli;
         return this;
@@ -258,7 +267,8 @@ public class ErillishakuRiviBuilder {
                 kotikunta,
                 toisenAsteenSuoritus,
                 toisenAsteenSuoritusmaa,
-                maksuvelvollisuus
+                maksuvelvollisuus,
+                maksuntila
         );
     }
 }

@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
@@ -47,6 +48,7 @@ public class ErillishakuRivi {
     private final boolean julkaistaankoTiedot;
     private final boolean poistetaankoRivi;
     private final String maksuvelvollisuus;
+    private final Maksuntila maksuntila;
 
     private final String asiointikieli;
     private final String puhelinnumero;
@@ -62,7 +64,7 @@ public class ErillishakuRivi {
     // Empty constructor for Jackson JSON library. Deserialization fails without this!
     public ErillishakuRivi() {
         this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false, null, null, null, null,
-                null, null, null, false, false, null, null, null, null, null, null, null, null, null, null, null);
+                null, null, null, false, false, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
@@ -75,7 +77,7 @@ public class ErillishakuRivi {
                            boolean poistetaankoRivi, String asiointikieli, String puhelinnumero, String osoite,
                            String postinumero, String postitoimipaikka, String asuinmaa, String kansalaisuus,
                            String kotikunta, Boolean toisenAsteenSuoritus, String toisenAsteenSuoritusmaa,
-                           String maksuvelvollisuus) {
+                           String maksuvelvollisuus, Maksuntila maksuntila) {
         this.hakemusOid = hakemusOid;
         this.etunimi = etunimi;
         this.sukunimi = sukunimi;
@@ -107,6 +109,7 @@ public class ErillishakuRivi {
         this.toisenAsteenSuoritus = toisenAsteenSuoritus;
         this.toisenAsteenSuoritusmaa = toisenAsteenSuoritusmaa;
         this.maksuvelvollisuus = maksuvelvollisuus;
+        this.maksuntila = maksuntila;
     }
 
     public String getHakemusOid() {
@@ -253,6 +256,7 @@ public class ErillishakuRivi {
                 hyvaksymiskirjeLahetetty + ", " +
                 vastaanottoTila + ", " +
                 maksuvelvollisuus + ", " +
+                maksuntila + ", " +
                 julkaistaankoTiedot + ", " +
                 asiointikieli + ", " +
                 puhelinnumero + ", " +
@@ -305,4 +309,7 @@ public class ErillishakuRivi {
         return maksuvelvollisuus;
     }
 
+    public Maksuntila getMaksuntila() {
+        return maksuntila;
+    }
 }
