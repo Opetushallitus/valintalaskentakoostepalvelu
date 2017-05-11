@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Arvosana {
     public static final DescendingMyonnettyOrder NEWEST_FIRST = new DescendingMyonnettyOrder();
@@ -108,6 +106,14 @@ public class Arvosana {
 
     public String getLisatieto() {
         return lisatieto;
+    }
+
+    public Optional<String> getAineyhdistelmarooli() {
+        return Optional.ofNullable(getLahdeArvot()).map(m -> m.get("aineyhdistelmarooli")).filter(Objects::nonNull);
+    }
+
+    public Optional<String> getKoetunnus() {
+        return Optional.ofNullable(getLahdeArvot()).map(m -> m.get("koetunnus")).filter(Objects::nonNull);
     }
 
     public Map<String, String> getLahdeArvot() {

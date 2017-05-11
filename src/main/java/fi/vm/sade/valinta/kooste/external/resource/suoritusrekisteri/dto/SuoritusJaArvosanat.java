@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.comparators.BooleanComparator;
 import org.joda.time.DateTime;
@@ -12,11 +13,11 @@ import java.util.Map;
 
 public class SuoritusJaArvosanat implements Comparable<SuoritusJaArvosanat> {
 
-    private final Map<String, Integer> tilaToPrioriteetti = new HashMap<String, Integer>() {{
-        put("VALMIS", 1);
-        put("KESKEN", 2);
-        put("KESKEYTYNYT", 3);
-    }};
+    private static final Map<String, Integer> tilaToPrioriteetti = ImmutableMap.of(
+        "VALMIS", 1,
+        "KESKEN", 2,
+        "KESKEYTYNYT", 3
+    );
 
     private Suoritus suoritus;
     private List<Arvosana> arvosanat = Lists.newArrayList();

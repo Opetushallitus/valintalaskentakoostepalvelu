@@ -52,7 +52,7 @@ public class YoToAvainSuoritustietoDTOConverter {
             x.put("PISTEET", "" + pisteet);
         });
         x.put("ARVO", "" + a.getArvio().getArvosana());
-        Optional.ofNullable(a.getLahdeArvot().get("aineyhdistelmarooli")).ifPresent(rooli -> {
+        a.getAineyhdistelmarooli().ifPresent(rooli -> {
             x.put("ROOLI", "" + rooli);
         });
         lisaaSuorituspvm(a, x);
@@ -66,7 +66,7 @@ public class YoToAvainSuoritustietoDTOConverter {
         });
         x.put("ARVO", "" + a.getArvio().getArvosana());
         lisaaSuorituspvm(a, x);
-        Optional.ofNullable(a.getLahdeArvot().get("aineyhdistelmarooli")).ifPresent(rooli -> {
+        a.getAineyhdistelmarooli().ifPresent(rooli -> {
             x.put("ROOLI", "" + rooli);
         });
         return x;
@@ -138,13 +138,11 @@ public class YoToAvainSuoritustietoDTOConverter {
     }
 
     private static String aineMapper(Arvosana a) {
-        if (StringUtils.isNotEmpty(a.getLahdeArvot().get("koetunnus"))) {
-            //return a.getLahdeArvot().get("koetunnus");
-            return koetunnusMapper(a.getLahdeArvot().get("koetunnus"));
-        }
-        String aine = aineMapper(a.getAine(), a.getLisatieto());
-        LOG.warn("No koetunnus in YO arvosana: mapped aine '" + a.getAine() + "' and lisatieto '" + a.getLisatieto() + "' to aine " + aine);
-        return aine;
+        return a.getKoetunnus().map(YoToAvainSuoritustietoDTOConverter::koetunnusMapper).orElseGet(() -> {
+            String aine = aineMapper(a.getAine(), a.getLisatieto());
+            LOG.warn("No koetunnus in YO arvosana: mapped aine '" + a.getAine() + "' and lisatieto '" + a.getLisatieto() + "' to aine " + aine);
+            return aine;
+        });
     }
 
     private static String koetunnusMapper(String koetunnus) {
