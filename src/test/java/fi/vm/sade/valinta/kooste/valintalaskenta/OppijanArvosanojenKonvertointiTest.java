@@ -55,6 +55,36 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
         }
     }
     @Test
+    public void aineyhdistelmäroolimuunnin() {
+        Oppija suoritus = oppija()
+                .suoritus()
+                .setHenkiloOid("HENKILO1")
+                .setSource("HENKILO1")
+                .setYo()
+                .setValmis()
+                .arvosana()
+                .setAine("AINEREAALI")
+                .setLisatieto("PS")
+                .setAsteikko_yo()
+                .setArvosana("M")
+                .setPisteet(20)
+                .setMyonnetty("01.08.2014")
+                .build()
+                .arvosana()
+                .setAineyhdistelmarooli("")
+                .setAine("AINEREAALI")
+                .setLisatieto("PS")
+                .setAsteikko_yo()
+                .setArvosana("L")
+                .setPisteet(120)
+                .setMyonnetty("30.03.2015")
+                .build()
+                .build()
+                .build();
+        LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(suoritus));
+    }
+
+    @Test
     public void yoArvosanatOtetaanHuomioonVaikkaKirjausOlisiTehtyLiianMyohaan() {
         DateTime nyt = DateTime.now();
 
