@@ -109,7 +109,8 @@ public class Arvosana {
     }
 
     public Optional<String> getAineyhdistelmarooli() {
-        return Optional.ofNullable(getLahdeArvot()).map(m -> m.get("aineyhdistelmarooli")).filter(Objects::nonNull);
+        return Optional.ofNullable(getLahdeArvot()).map(m -> m.getOrDefault("aineyhdistelmarooliLegacy", m.get("aineyhdistelmarooli"))
+        ).filter(Objects::nonNull);
     }
 
     public Optional<String> getKoetunnus() {
