@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
+import fi.vm.sade.valinta.kooste.cas.ComparingTicketCachePolicy;
+import fi.vm.sade.valinta.kooste.cas.ConcurrentTicketCachePolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -134,6 +136,7 @@ public class CasInterceptors {
     private fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor createCasInterceptor(
             String webCasUrl,String targetService,String appClientUsername,String appClientPassword) {
         CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
+        cas.setTicketCachePolicy(new ComparingTicketCachePolicy(new ConcurrentTicketCachePolicy()));
         cas.setWebCasUrl(webCasUrl);
         cas.setTargetService(targetService);
         cas.setAppClientUsername(appClientUsername);
