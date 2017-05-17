@@ -131,11 +131,10 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private void waitIfNotFirstUsageAndTicketNotOlderThanSecond(Ticket currentTicket) {
         final boolean isNotFirstUsage = currentTicket.counter.getAndIncrement() != 0;
         if(isNotFirstUsage) {
-            final boolean isNotOlderThanSecond = !currentTicket.isOlderThanMilliseconds(ON_NEW_TICKET_WAIT_AT_LEAST);
-            if(isNotOlderThanSecond) {
+            while (!currentTicket.isOlderThanMilliseconds(ON_NEW_TICKET_WAIT_AT_LEAST)) {
                 try {
-                    Thread.sleep(1000L);
-                } catch (Exception dontcare) {}
+                    Thread.sleep(100);
+                } catch (Exception ignored) {}
             }
         }
     }
