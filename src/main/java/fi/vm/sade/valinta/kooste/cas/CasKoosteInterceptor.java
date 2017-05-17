@@ -18,11 +18,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
+    private static final long ON_NEW_TICKET_WAIT_AT_LEAST = TimeUnit.SECONDS.toMillis(1L);
+    private static final long NEVER_INVALIDATE_TICKET_LESS_THAN = TimeUnit.SECONDS.toMillis(5L);
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CasKoosteInterceptor.class);
     private static class Ticket {
         public final Date created = new Date();
@@ -30,6 +34,10 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         public final AtomicInteger counter = new AtomicInteger(0);
         public Ticket(String ticket) {
             this.ticket = ticket;
+        }
+        public boolean isOlderThanMilliseconds(long milliseconds) {
+            final Date millisecondsAgo = new Date(System.currentTimeMillis() - milliseconds);
+            return created.before(millisecondsAgo);
         }
     }
 
@@ -51,7 +59,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private Ticket updateTicket(Ticket oldTicket) {
         if(oldTicket == null) {
             String ticket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService);
-
+            LOGGER.debug("Expensive fetch ticket happened: {}", ticket);
             return new Ticket(ticket);
         } else {
             return oldTicket;
@@ -73,9 +81,13 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
                 throw new RuntimeException("Current ticket can't be null because old ticket was " + oldTicket + "!");
             } else {
                 final boolean currentTicketIsTheOneThatFailed = currentTicket.ticket.equals(oldTicket);
-                if(currentTicketIsTheOneThatFailed) {
+                final boolean isSoonEnoughToInvalidate = currentTicket.isOlderThanMilliseconds(NEVER_INVALIDATE_TICKET_LESS_THAN);
+                if(currentTicketIsTheOneThatFailed && isSoonEnoughToInvalidate) {
+                    LOGGER.debug("Invalidating ticket: {}", oldTicket);
                     return null; // invalidate
                 } else {
+                    LOGGER.debug("Didn't invalidate ticket({}) because currentTicketIsTheOneThatFailed({}) and isSoonEnoughToInvalidate({})",
+                            oldTicket, currentTicketIsTheOneThatFailed, isSoonEnoughToInvalidate);
                     return currentTicket;
                 }
             }
@@ -119,8 +131,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private void waitIfNotFirstUsageAndTicketNotOlderThanSecond(Ticket currentTicket) {
         final boolean isNotFirstUsage = currentTicket.counter.getAndIncrement() != 0;
         if(isNotFirstUsage) {
-            final Date secondAgo = new Date(System.currentTimeMillis() - 1000L);
-            final boolean isNotOlderThanSecond = currentTicket.created.after(secondAgo);
+            final boolean isNotOlderThanSecond = !currentTicket.isOlderThanMilliseconds(ON_NEW_TICKET_WAIT_AT_LEAST);
             if(isNotOlderThanSecond) {
                 try {
                     Thread.sleep(1000L);
