@@ -74,8 +74,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
             } else {
                 final boolean currentTicketIsTheOneThatFailed = currentTicket.ticket.equals(oldTicket);
                 if(currentTicketIsTheOneThatFailed) {
-                    String ticket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService);
-                    return new Ticket(ticket);
+                    return null; // invalidate
                 } else {
                     return currentTicket;
                 }
