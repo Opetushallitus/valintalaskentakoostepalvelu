@@ -10,7 +10,8 @@ import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.*;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -99,7 +100,7 @@ class TarjontaAsyncResourceImplHelper {
                 .flatMap(Observable::from)
                 .map(ResultOrganization::getTulokset)
                 .flatMap(Observable::from)
-                .map((ResultHakukohde s) -> new Pair<>(
+                .map((ResultHakukohde s) -> new ImmutablePair<>(
                         s.getOid(),
                         getRyhmaList(s)))
                 .toMap(Pair::getKey, Pair::getValue);
