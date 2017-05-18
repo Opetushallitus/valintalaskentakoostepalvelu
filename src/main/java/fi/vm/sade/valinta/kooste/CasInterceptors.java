@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste;
 
-import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.valinta.kooste.cas.CasKoosteInterceptor;
-import fi.vm.sade.valinta.kooste.cas.ComparingTicketCachePolicy;
-import fi.vm.sade.valinta.kooste.cas.ConcurrentTicketCachePolicy;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Value;
