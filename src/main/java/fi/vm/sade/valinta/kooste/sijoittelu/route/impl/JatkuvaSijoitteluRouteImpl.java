@@ -1,26 +1,5 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.impl.DefaultExchange;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
@@ -30,8 +9,21 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.ModuloiPaivamaaraJaTunni
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.impl.DefaultExchange;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 
-import static org.apache.commons.lang.StringUtils.*;
+import javax.ws.rs.NotAuthorizedException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaSijoittelu {
     private static final Logger LOG = LoggerFactory.getLogger(JatkuvaSijoitteluRouteImpl.class);
@@ -143,6 +135,15 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
     }
 
     private Map<String, SijoitteluDto> getAktiivisetSijoittelut() {
+        try {
+            return _getAktiivisetSijoittelut();
+        } catch(NotAuthorizedException e) {
+            LOG.info("Aktiivisten sijoittelujen haku epäonnistui. Yritetään uudelleen. " + e.getMessage());
+            return _getAktiivisetSijoittelut(); // FIXME kill me OK-152!
+        }
+    }
+
+    private Map<String, SijoitteluDto> _getAktiivisetSijoittelut() {
         return sijoittelunSeurantaResource
                     .hae().stream().filter(Objects::nonNull)
                     .filter(sijoitteluDto -> {

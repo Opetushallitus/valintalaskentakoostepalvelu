@@ -19,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -136,6 +139,14 @@ public class ValintalaskentaKerrallaService {
     private void createLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<TunnisteDto> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = toHakukohdeDto(hakukohdeData);
         validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
+        seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos, (TunnisteDto uuid) -> laskennanAloitus.accept(uuid),
+                (Throwable t) -> {
+                    LOG.info("Seurannasta uuden laskennan haku paatyi virheeseen. Yritetään uudelleen.", t.getMessage());
+                    createLaskentaRetry(hakukohdeDtos, laskennanAloitus, laskentaParams, callbackResponse); //FIXME kill me OK-152!
+                });
+    }
+
+    private void createLaskentaRetry(List<HakukohdeDto> hakukohdeDtos, Consumer<TunnisteDto> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos, (TunnisteDto uuid) -> laskennanAloitus.accept(uuid),
                 (Throwable t) -> {
                     LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
