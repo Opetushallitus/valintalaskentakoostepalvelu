@@ -141,7 +141,7 @@ public class ValintalaskentaKerrallaService {
         validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
         seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos, (TunnisteDto uuid) -> laskennanAloitus.accept(uuid),
                 (Throwable t) -> {
-                    LOG.info("Seurannasta uuden laskennan haku paatyi virheeseen. Yritetään uudelleen.", t.getMessage());
+                    LOG.info("Seurannasta uuden laskennan haku paatyi virheeseen. Yritetään uudelleen.", t);
                     createLaskentaRetry(hakukohdeDtos, laskennanAloitus, laskentaParams, callbackResponse); //FIXME kill me OK-152!
                 });
     }

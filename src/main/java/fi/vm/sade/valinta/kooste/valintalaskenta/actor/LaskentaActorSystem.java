@@ -107,7 +107,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
                 this::startLaskentaIfWorkAvailable,
                 (Throwable t) -> {
-                    LOG.info("Uutta laskentaa ei saatu tyon alle seurannasta. Yritetään uudelleen", t.getMessage());
+                    LOG.warn("Uutta laskentaa ei saatu tyon alle seurannasta. Yritetään uudelleen.", t);
                     _fetchAndStartLaskentaRetry(); //FIXME kill me OK-152
                 });
     }

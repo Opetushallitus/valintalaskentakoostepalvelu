@@ -138,7 +138,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
         try {
             return _getAktiivisetSijoittelut();
         } catch(NotAuthorizedException e) {
-            LOG.info("Aktiivisten sijoittelujen haku epäonnistui. Yritetään uudelleen. " + e.getMessage());
+            LOG.warn("Aktiivisten sijoittelujen haku epäonnistui. Yritetään uudelleen.", e);
             return _getAktiivisetSijoittelut(); // FIXME kill me OK-152!
         }
     }
