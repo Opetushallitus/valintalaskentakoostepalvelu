@@ -92,6 +92,8 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
             if (!ajossaHakuOids.containsKey(hakuOid) && hakuEiJonossa) {
                 if(sijoitteluDto.getAloitusajankohta() == null || sijoitteluDto.getAjotiheys() == null) {
                     LOG.warn("Jatkuvaa sijoittelua ei suoriteta haulle {} koska siltä puuttuu pakollisia parametreja.", hakuOid);
+                } else if (sijoitteluDto.getAjotiheys() <= 0) {
+                    LOG.warn("Jatkuvaa sijoittelua ei suoriteta haulle {} koska ajotieheys {} ei ole positiivinen.", hakuOid, sijoitteluDto.getAjotiheys());
                 } else {
                     DateTime asetusAjankohta = aloitusajankohtaTaiNyt(sijoitteluDto);
                     Integer intervalli = ajotiheysTaiVakio(sijoitteluDto.getAjotiheys());
