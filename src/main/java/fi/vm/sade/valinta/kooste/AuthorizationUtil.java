@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -12,9 +13,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.servlet.http.Cookie;
 
 /**
  * TODO maybe move to java-cas or some other suitable place on a sunnier day.
@@ -43,6 +47,8 @@ public class AuthorizationUtil {
     public static AuditSession createAuditSession(boolean isUnmodifiedSinceMandatory, HttpServletRequest httpServletRequestJaxRS) {
         HttpServletRequest httpServletRequest = request(httpServletRequestJaxRS);
         AuditSession session = new AuditSession();
+        session.setSessionId(httpServletRequest.getSession().getId());
+        session.setUid(KoosteAudit.uid().orElse("Unknown user"));
         session.setPersonOid(KoosteAudit.username());
         session.setInetAddress(Optional.ofNullable(httpServletRequest.getHeader("X-Forwarded-For")).orElse(httpServletRequest.getRemoteAddr()));
         session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
