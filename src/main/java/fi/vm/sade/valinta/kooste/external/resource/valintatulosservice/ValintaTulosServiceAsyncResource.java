@@ -21,6 +21,8 @@ public interface ValintaTulosServiceAsyncResource {
 
     Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid);
 
+    Observable<List<Muutoshistoria>> getMuutoshistoria(String hakemusOid, String valintatapajonoOid);
+
     Observable<ValintaTulosServiceDto> getHakemuksenValintatulos(String hakuOid, String hakemusOid);
 
     Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid);

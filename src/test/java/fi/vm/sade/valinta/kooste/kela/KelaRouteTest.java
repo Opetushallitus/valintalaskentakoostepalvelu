@@ -195,7 +195,7 @@ public class KelaRouteTest extends CamelTestSupport {
 				haunTyyppiKomponentti, applicationResource,
 				oppilaitosKomponentti, linjakoodiKomponentti,
 				hakukohdeResource, valintaTulosServiceAsyncResource,
-				null,null);
+				null);
 	}
 
 	private HakuV1RDTO createHaku(String oid) {

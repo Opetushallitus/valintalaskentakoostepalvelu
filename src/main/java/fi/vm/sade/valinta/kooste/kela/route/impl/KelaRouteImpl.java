@@ -2,10 +2,7 @@ package fi.vm.sade.valinta.kooste.kela.route.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import fi.vm.sade.organisaatio.resource.api.KelaResource;
 import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
@@ -19,6 +16,8 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Change;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.kela.dto.*;
 import fi.vm.sade.valinta.kooste.kela.komponentti.*;
@@ -36,16 +35,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import rx.Observable;
 import rx.observables.BlockingObservable;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 
 @Component
 public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
@@ -65,7 +67,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final HakukohdeResource hakukohdeResource;
     private final String kelaLuonti;
     private final KelaResource kelaResource;
-    private final TilaResource tilaResource;
 
     @Autowired
     public KelaRouteImpl(
@@ -80,8 +81,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
             LinjakoodiKomponentti linjakoodiKomponentti,
             HakukohdeResource hakukohdeResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
-            KelaResource kelaResource,
-            TilaResource tilaResource) {
+            KelaResource kelaResource) {
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.hakukohdeResource = hakukohdeResource;
         this.oppilaitosKomponentti = oppilaitosKomponentti;
@@ -94,7 +94,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.kelaDokumentinLuontiKomponentti = kelaDokumentinLuontiKomponentti;
         this.applicationResource = applicationResource;
         this.kelaResource = kelaResource;
-        this.tilaResource = tilaResource;
     }
 
     private DefaultErrorHandlerBuilder deadLetterChannel() {
@@ -353,22 +352,22 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         }
                     };
                     TilaSource tilaSource = (hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid) -> {
-                        Valintatulos valintatulos = null;
-                        int tries = 0;
-
-                        while (true) {
+                        final int maxTries = 20;
+                        for(int tries = 0; tries < maxTries; ++tries) {
                             try {
-                                valintatulos = tilaResource.hakemus(hakuOid, hakukohdeOid, valintatapajonoOid, hakemusOid);
-                                if (tries > 0) {
-                                    LOG.error("retry ok");
-                                }
-                                break;
+                                List<Muutoshistoria> muutoshistoriat =
+                                        BlockingObservable.from(valintaTulosServiceAsyncResource.getMuutoshistoria(hakemusOid, valintatapajonoOid)).first();
+
+                                final Predicate<Change> isVastaanottoChange = (change) -> "vastaanottotila".equals(change.getField());
+                                final Predicate<Map.Entry<String, Date>> isVastaanotto = entry -> asList("VASTAANOTTANUT_SITOVASTI", "VASTAANOTTANUT", "EHDOLLISESTI_VASTAANOTTANUT").contains(entry.getKey());
+
+                                Optional<Map.Entry<String, Date>> newestVastaanottoFieldStatus = muutoshistoriat.stream()
+                                        .flatMap(m -> m.getChanges().stream().filter(isVastaanottoChange)
+                                                .map(c -> Maps.immutableEntry(c.getTo(), m.getTimestamp())))
+                                        .sorted(Comparator.<Map.Entry<String, Date>, Date>comparing(Map.Entry::getValue).reversed()).findFirst();
+
+                                return newestVastaanottoFieldStatus.filter(isVastaanotto).map(Map.Entry::getValue).orElse(null);
                             } catch (Exception e) {
-                                if (tries == 20) {
-                                    LOG.error("give up");
-                                    throw e;
-                                }
-                                tries++;
                                 LOG.error("tilaResource ei jaksa palvella {}. Yritetään vielä uudestaan. " + tries + "/20...", e);
                                 try {
                                     Thread.sleep(10000L);
@@ -376,24 +375,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 }
                             }
                         }
-
-                        for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                            if (logEntry.getMuutos().trim().toUpperCase().endsWith("VASTAANOTTANUT_SITOVASTI")) {
-                                return logEntry;
-                            }
-                        }
-                        for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                            if (logEntry.getMuutos().trim().toUpperCase().endsWith("VASTAANOTTANUT")) {
-                                return logEntry;
-                            }
-                        }
-                        for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                            if (logEntry.getMuutos().trim().toUpperCase().endsWith("EHDOLLISESTI_VASTAANOTTANUT")) {
-                                return logEntry;
-                            }
-                        }
-                        LOG.error("No logentries for event VASTAANOTTANUT_SITOVASTI, VASTAANOTTANUT or EHDOLLISESTI_VASTAANOTTANUT for hakuOid:" + hakuOid + ",hakukohdeOid:" + hakukohdeOid + ", valintatapajonoOid:" + valintatapajonoOid + ", hakemusOid:" + hakemusOid + " valintatulos tila:" + valintatulos.getTila());
-                        return (LogEntry) null;
+                        throw new RuntimeException("Tried "+maxTries+" times to get muutoshistoriat from VTS and gave up!");
                     };
                     for (KelaAbstraktiHaku kelahaku : luontiJaRivit
                             .getHaut()) {

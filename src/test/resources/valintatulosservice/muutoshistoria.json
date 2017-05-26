@@ -1,0 +1,53 @@
+[
+  {
+    "changes": [
+      {
+        "field": "ilmoittautumistila",
+        "to": "LASNA_KOKO_LUKUVUOSI"
+      }
+    ],
+    "timestamp": "2017-05-26T09:40:42.976377+03:00"
+  },
+  {
+    "changes": [
+      {
+        "field": "valinnantilanViimeisinMuutos",
+        "to": "2017-04-13T20:24:48.142+03:00"
+      },
+      {
+        "field": "valinnantila",
+        "to": "HYVAKSYTTY"
+      },
+      {
+        "field": "hyvaksyttyVarasijalta",
+        "to": false
+      },
+      {
+        "field": "ehdollisestiHyvaksyttavissa",
+        "to": false
+      },
+      {
+        "field": "hyvaksyPeruuntunut",
+        "to": false
+      },
+      {
+        "field": "julkaistavissa",
+        "to": true
+      },
+      {
+        "field": "vastaanottotila",
+        "to": "EHDOLLISESTI_VASTAANOTTANUT"
+      }
+    ],
+    "timestamp": "2017-05-13T00:16:02.412033+03:00"
+  },
+  {
+    "changes": [
+      {
+        "field": "vastaanottotila",
+        "to": "VASTAANOTTANUT_SITOVASTI"
+      }
+    ],
+    "timestamp": "2016-06-21T11:34:26.720362+03:00"
+  }
+]

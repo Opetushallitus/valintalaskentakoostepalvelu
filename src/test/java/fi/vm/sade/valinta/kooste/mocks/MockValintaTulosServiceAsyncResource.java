@@ -18,12 +18,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Collections.*;
+
 @Service
 public class MockValintaTulosServiceAsyncResource implements ValintaTulosServiceAsyncResource {
 
     @Override
     public Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid) {
         return Observable.just(Lists.newArrayList());
+    }
+    @Override
+    public Observable<List<Muutoshistoria>> getMuutoshistoria(String hakemusOid, String valintatapajonoOid) {
+        return Observable.just(emptyList());
     }
 
     @Override

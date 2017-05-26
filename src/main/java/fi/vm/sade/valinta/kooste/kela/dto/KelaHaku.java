@@ -66,14 +66,13 @@ public class KelaHaku extends KelaAbstraktiHaku {
                                 final String syntymaaika = henkilotiedot.get(SYNTYMAAIKA);
                                 final Date lukuvuosi = getPaivamaaraSource().lukuvuosi(getHaku(), hakukohdeOid);
                                 final Date poimintapaivamaara = getPaivamaaraSource().poimintapaivamaara(getHaku());
-                                LogEntry valintaEntry = tilaSource.getVastaanottopvm(hakemus.getOid(), hakuOid, hakukohdeOid, hakutoive.getValintatapajonoOid());
 
-                                if (valintaEntry == null) {
+                                Date valintapaivamaara = tilaSource.getVastaanottopvm(hakemus.getOid(), hakuOid, hakukohdeOid, hakutoive.getValintatapajonoOid());
+
+                                if (valintapaivamaara == null) {
                                     LOG.error("ERROR vastaanottopaivamaaraa ei löytynyt (tila ei VASTAANOTTANUT_SITOVASTI tai EHDOLLISESTI_VASTAANOTTANUT) :" + hakutoive.getTarjoajaOid() + ":" + sukunimi + " " + etunimi + "(" + henkilotunnus + ") hakukohde:" + hakukohdeOid + " ");
                                     return;
                                 }
-
-                                final Date valintapaivamaara = valintaEntry.getLuotu();
 
                                 if (valintapaivamaara == null
                                         || valintapaivamaara.compareTo(alkuPvm) <= 0
