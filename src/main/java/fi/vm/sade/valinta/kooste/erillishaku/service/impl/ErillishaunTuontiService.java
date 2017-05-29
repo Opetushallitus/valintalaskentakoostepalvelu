@@ -488,8 +488,8 @@ public class ErillishaunTuontiService {
                                 .collect(Collectors.joining(", "));
                         LOG.error(String.format(
                                 "Osa erillishaun %s tulosten tallennuksesta epäonnistui: %s",
-                                messages,
-                                haku.getHakuOid()
+                                haku.getHakuOid(),
+                                messages
                         ));
                         prosessi.keskeyta(poikkeukset);
                     }
