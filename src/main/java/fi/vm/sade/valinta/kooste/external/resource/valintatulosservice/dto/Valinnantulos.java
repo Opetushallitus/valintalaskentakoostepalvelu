@@ -15,7 +15,7 @@ public class Valinnantulos {
     private String hakemusOid;
     private String henkiloOid;
     private Boolean ehdollisestiHyvaksyttavissa = null;
-    private Boolean julkaistavissa = null;
+    private boolean julkaistavissa;
     private Boolean hyvaksyttyVarasijalta = null;
     private Boolean hyvaksyPeruuntunut = null;
     private Boolean poistettava = null;
@@ -94,11 +94,11 @@ public class Valinnantulos {
         this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
     }
 
-    public Boolean getJulkaistavissa() {
+    public boolean getJulkaistavissa() {
         return julkaistavissa;
     }
 
-    public void setJulkaistavissa(Boolean julkaistavissa) {
+    public void setJulkaistavissa(boolean julkaistavissa) {
         this.julkaistavissa = julkaistavissa;
     }
 
