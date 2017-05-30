@@ -12,6 +12,8 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
@@ -183,6 +185,18 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 client.query("hyvaksymiskirjeet", "true");
                 return client;
             });
+    }
+
+    @Override
+    public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
+        return getAsObservable(
+                getUrl("valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, SijoitteluResource.LATEST, hakukohdeOid),
+                new TypeToken<HakukohdeDTO>() {}.getType(),
+                client -> {
+                    client.accept(MediaType.WILDCARD_TYPE);
+                    return client;
+                }
+        );
     }
 
     private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {

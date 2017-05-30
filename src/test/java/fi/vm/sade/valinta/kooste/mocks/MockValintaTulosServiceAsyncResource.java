@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
@@ -99,6 +100,11 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     @Override
     public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid) {
         return Observable.just(Lists.newArrayList());
+    }
+
+    @Override
+    public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
+        return Observable.just(new HakukohdeDTO());
     }
 
 

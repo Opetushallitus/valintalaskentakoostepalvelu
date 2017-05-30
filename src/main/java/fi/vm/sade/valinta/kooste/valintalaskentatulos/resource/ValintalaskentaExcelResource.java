@@ -30,6 +30,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
@@ -144,6 +145,8 @@ public class ValintalaskentaExcelResource {
     private DokumenttiAsyncResource dokumenttiAsyncResource;
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
+    @Value("${valintalaskenta-ui.read-from-valintarekisteri}")
+    private String useVtsData;
 
     @POST
     @Path("/sijoitteluntulos/aktivoi")
@@ -159,7 +162,9 @@ public class ValintalaskentaExcelResource {
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                     valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
                     valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.createAuditSession(httpServletRequestJaxRS)),
-                    sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
+                    (Boolean.parseBoolean(useVtsData) ?
+                            valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid) :
+                            sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid)),
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
                     (tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset) -> {
                         try {
