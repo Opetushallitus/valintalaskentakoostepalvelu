@@ -17,7 +17,7 @@ public class Valinnantulos {
     private Boolean ehdollisestiHyvaksyttavissa = null;
     private boolean julkaistavissa;
     private boolean hyvaksyttyVarasijalta;
-    private Boolean hyvaksyPeruuntunut = null;
+    private boolean hyvaksyPeruuntunut;
     private Boolean poistettava = null;
     private Boolean ohitaVastaanotto = null;
     private Boolean ohitaIlmoittautuminen = null;
@@ -110,11 +110,11 @@ public class Valinnantulos {
         this.hyvaksyttyVarasijalta = hyvaksyttyVarasijalta;
     }
 
-    public Boolean getHyvaksyPeruuntunut() {
+    public boolean getHyvaksyPeruuntunut() {
         return hyvaksyPeruuntunut;
     }
 
-    public void setHyvaksyPeruuntunut(Boolean hyvaksyPeruuntunut) {
+    public void setHyvaksyPeruuntunut(boolean hyvaksyPeruuntunut) {
         this.hyvaksyPeruuntunut = hyvaksyPeruuntunut;
     }
 
@@ -192,6 +192,7 @@ public class Valinnantulos {
         valinnantulos.setEhdollisenHyvaksymisenEhtoEN(hakija.ehdollisenHyvaksymisenEhtoEN);
         valinnantulos.setJulkaistavissa(hakija.julkaistavissa);
         valinnantulos.setHyvaksyttyVarasijalta(false);
+        valinnantulos.setHyvaksyPeruuntunut(false);
 
         if(hakija.poistetaankoTulokset) {
             valinnantulos.setPoistettava(true);
@@ -211,8 +212,6 @@ public class Valinnantulos {
         valinnantulos.setValinnantila(hakija.hakemuksenTila);
         valinnantulos.setVastaanottotila(Optional.ofNullable(hakija.valintatuloksenTila).orElse(ValintatuloksenTila.KESKEN));
         valinnantulos.setIlmoittautumistila(Optional.ofNullable(hakija.ilmoittautumisTila).orElse(IlmoittautumisTila.EI_TEHTY));
-
-        //TODO valinnantulos.setHyvaksyPeruuntunut(???);
 
         return valinnantulos;
     }
