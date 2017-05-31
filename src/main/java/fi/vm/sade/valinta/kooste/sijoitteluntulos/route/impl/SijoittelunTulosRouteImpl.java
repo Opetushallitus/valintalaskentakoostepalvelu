@@ -16,12 +16,14 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -98,6 +100,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final String muodostaDokumentit;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
+    private final HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti;
 
     @Autowired
     public SijoittelunTulosRouteImpl(
@@ -117,7 +120,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             ApplicationResource applicationResource, TilaResource tilaResource,
             DokumenttiResource dokumenttiResource,
             SijoitteluResource sijoitteluResource,
-            ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource
+            ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
+            HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti
     ) {
         this.valintaTulosServiceAsyncResource= valintaTulosServiceAsyncResource;
         this.sijoitteluResource = sijoitteluResource;
@@ -139,6 +143,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.dokumenttiResource = dokumenttiResource;
         this.taulukkolaskenta = taulukkolaskenta;
         this.hyvaksymiskirjeet = hyvaksymiskirjeet;
+        this.haeHakuTarjonnaltaKomponentti = haeHakuTarjonnaltaKomponentti;
     }
 
     public void configure() throws Exception {
@@ -199,11 +204,13 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         List<Hakemus> hakemukset = Collections.emptyList();
                         List<Lukuvuosimaksu> lukuvuosimaksus = Collections.emptyList();
                         fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hk = null;
+                        HakuV1RDTO hakuDTO = null;
                         try {
                             tilat = tilaResource.hakukohteelle(hakukohdeOid);
                             hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
                             hk = sijoitteluResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, SijoitteluResource.LATEST, hakukohdeOid);
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).toBlocking().toFuture().get();
+                            hakuDTO = haeHakuTarjonnaltaKomponentti.getHaku(hakuOid);
                         } catch (Exception e) {
                             //todo: fix this
                         }
@@ -211,11 +218,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         try {
                             if (pakkaaTiedostotTarriin) {
                                 Tiedosto tiedosto = new Tiedosto("sijoitteluntulos_" + hakukohdeOid + ".xls", IOUtils.toByteArray(
-                                        sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk)));
+                                        sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk, hakuDTO)));
                                 prosessi.getValmiit().add(new Valmis(tiedosto, hakukohdeOid, tarjoajaOid));
                                 return;
                             } else {
-                                InputStream input = sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk);
+                                InputStream input = sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk, hakuDTO);
                                 try {
                                     String id = generateId();
                                     dokumenttiResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", getTimeToLive(),

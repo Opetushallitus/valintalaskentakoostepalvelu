@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.*;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
@@ -39,10 +40,11 @@ public class SijoittelunTulosExcelKomponentti {
     @Autowired
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
-    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, List<Lukuvuosimaksu> lukuvuosimaksut, HakukohdeDTO hakukohde) {
+    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, List<Lukuvuosimaksu> lukuvuosimaksut, HakukohdeDTO hakukohde, HakuV1RDTO hakuDTO) {
         Map<String, Koodi> countryCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
+        boolean isKkHaku = hakuDTO.getKohdejoukkoUri().startsWith("haunkohdejoukko_12");
         if (hakukohde == null) {
             LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
             throw new SijoittelultaEiSisaltoaPoikkeus("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
@@ -120,7 +122,8 @@ public class SijoittelunTulosExcelKomponentti {
                 ++index;
                 boolean highlight = index % 2 == 1;
                 valintatapajonoOtsikkoRivi.add(new Span("Valintatapajono: " + jono.getNimi(), 6, highlight));
-                List<Object> otsikot = Arrays.asList(
+                List<Object> otsikot = isKkHaku ?
+                        Arrays.asList(
                     "Jonosija",
                     "Pisteet",
                     "Sijoittelun tila",
@@ -131,7 +134,14 @@ public class SijoittelunTulosExcelKomponentti {
                     "Ehdollisen hyväksymisen FI",
                     "Ehdollisen hyväksymisen SV",
                     "Ehdollisen hyväksymisen EN",
-                    "Muokattu");
+                    "Muokattu") :
+                Arrays.asList(
+                        "Jonosija",
+                        "Pisteet",
+                        "Sijoittelun tila",
+                        "Vastaanottotieto",
+                        "Ilmoittautumistieto",
+                        "Muokattu");
                 if (highlight) {
                     otsikot = otsikot.stream().map(Highlight::new).collect(Collectors.toList());
                 }
@@ -213,27 +223,45 @@ public class SijoittelunTulosExcelKomponentti {
                             break;
                         }
                     }
-                    List<Object> jonoHakemusSarakkeet = Arrays.asList(
+                    List<Object> jonoHakemusSarakkeet = isKkHaku ?
+                            Arrays.asList(
+                                hakemusDto.getJonosija(),
+                                Formatter.suomennaNumero(hakemusDto.getPisteet()),
+                                HakemusUtil.tilaConverter(
+                                        hakemusDto.getTila(),
+                                        preferoitukielikoodi,
+                                        hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
+                                        false,
+                                        true,
+                                        hakemusDto.getVarasijanNumero(),
+                                        ehdollisenHyvaksymisenEhto
+                                ),
+                                valintaTieto,
+                                ilmoittautumistieto,
+                                ehdollinenValinta,
+                                ehdollisenHyvaksymisenEhto,
+                                ehdollisenHyvaksymisenEhtoFI,
+                                ehdollisenHyvaksymisenEhtoSV,
+                                ehdollisenHyvaksymisenEhtoEN,
+                                muokattu(hakemusDto.getTilaHistoria()
+                            )) :
+                            Arrays.asList(
                             hakemusDto.getJonosija(),
-                            Formatter.suomennaNumero(hakemusDto.getPisteet()),
-                            HakemusUtil.tilaConverter(
-                                    hakemusDto.getTila(),
-                                    preferoitukielikoodi,
-                                    hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
-                                    false,
-                                    true,
-                                    hakemusDto.getVarasijanNumero(),
-                                    ehdollisenHyvaksymisenEhto
-                            ),
-                            valintaTieto,
-                            ilmoittautumistieto,
-                            ehdollinenValinta,
-                            ehdollisenHyvaksymisenEhto,
-                            ehdollisenHyvaksymisenEhtoFI,
-                            ehdollisenHyvaksymisenEhtoSV,
-                            ehdollisenHyvaksymisenEhtoEN,
-                            muokattu(hakemusDto.getTilaHistoria())
-                    );
+                                Formatter.suomennaNumero(hakemusDto.getPisteet()),
+                                HakemusUtil.tilaConverter(
+                                        hakemusDto.getTila(),
+                                        preferoitukielikoodi,
+                                        hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
+                                        false,
+                                        true,
+                                        hakemusDto.getVarasijanNumero(),
+                                        ehdollisenHyvaksymisenEhto
+                                ),
+                                valintaTieto,
+                                ilmoittautumistieto,
+                                muokattu(hakemusDto.getTilaHistoria()
+                            )
+                            );
 
                     if (index % 2 == 1) {
                         jonoHakemusSarakkeet = jonoHakemusSarakkeet.stream()

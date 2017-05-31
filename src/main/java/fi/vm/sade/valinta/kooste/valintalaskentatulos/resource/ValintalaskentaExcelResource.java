@@ -159,6 +159,7 @@ public class ValintalaskentaExcelResource {
             final DokumenttiProsessi p = new DokumenttiProsessi("Sijoitteluntulosexcel", "Sijoitteluntulokset taulukkolaskenta tiedosto", "", Arrays.asList("sijoitteluntulos", "taulukkolaskenta"));
             p.setKokonaistyo(1);
             Observable.combineLatest(
+                    tarjontaAsyncResource.haeHaku(hakuOid),
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                     valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
                     valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.createAuditSession(httpServletRequestJaxRS)),
@@ -166,14 +167,14 @@ public class ValintalaskentaExcelResource {
                             valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid) :
                             sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid)),
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
-                    (tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset) -> {
+                    (haku, tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset) -> {
                         try {
                             String opetuskieli = KirjeetHakukohdeCache.getOpetuskieli(tarjonta.getOpetusKielet());
                             Teksti hakukohteenNimet = new Teksti(tarjonta.getHakukohteenNimet());
                             Teksti tarjoajaNimet = new Teksti(tarjonta.getTarjoajaNimet());
 
                             InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(VastaanottoFilterUtil.nullifyVastaanottoBasedOnHakemuksenTila(valintatulokset, hakukohde), opetuskieli,
-                                    hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, lukuvuosimaksut, hakukohde);
+                                    hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, lukuvuosimaksut, hakukohde, haku);
                             String id = UUID.randomUUID().toString();
                             Observable<Response> response = dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", DateTime.now().plusHours(24).toDate().getTime(), Arrays.asList(), "application/vnd.ms-excel", xls);
                             response.subscribe(
