@@ -54,6 +54,7 @@ import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusS
 @Path("proxy/erillishaku")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/proxy/erillishaku", description = "Käyttöliittymäkutsujen välityspalvelin haku-app:n ja valinta-tulos-serviceen")
+@Deprecated  //Käyttää Sijoittelu-Mongoa! Ei pitäisi olla käytössä Valintarekisterin kanssa
 public class ErillishakuProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishakuProxyResource.class);
 
@@ -78,6 +79,7 @@ public class ErillishakuProxyResource {
     @Consumes("application/json")
     @ApiOperation(consumes = "application/json", value = "Hakukohteen valintatulokset", response = ProsessiId.class)
 // TODO
+    @Deprecated
     public void vienti(
             @PathParam("hakuOid") String hakuOid,
             @PathParam("hakukohdeOid") String hakukohdeOid,
