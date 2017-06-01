@@ -55,6 +55,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     protected Gson createGson() {
         return DateDeserializer.gsonBuilder()
                 .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonSerializer())
+                .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonDeserializer())
                 .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonDeserializer())
                 .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonSerializer())
                 .create();
@@ -203,6 +204,13 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
         @Override
         public JsonElement serialize(OffsetDateTime dateTime, Type type, JsonSerializationContext jsonSerializationContext) {
             return new JsonPrimitive(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(dateTime.atZoneSameInstant(ZoneId.of("Europe/Helsinki"))));
+        }
+    }
+
+    private static class OffsetDateTimeJsonDeserializer implements JsonDeserializer<OffsetDateTime> {
+        @Override
+        public OffsetDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return OffsetDateTime.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(json.getAsString()));
         }
     }
 
