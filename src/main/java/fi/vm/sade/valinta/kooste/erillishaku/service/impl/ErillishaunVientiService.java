@@ -30,6 +30,7 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,11 +203,11 @@ public class ErillishaunVientiService {
                                     tulos.getHakukohdeOid(),
                                     haku.getOid(),
                                     0, // NB: hakutoive aina 0!
-                                    tulos.getHyvaksyttyVarasijalta(),
+                                    BooleanUtils.isTrue(tulos.getHyvaksyttyVarasijalta()),
                                     tulos.getIlmoittautumistila(),
-                                    tulos.getJulkaistavissa(),
+                                    BooleanUtils.isTrue(tulos.getJulkaistavissa()),
                                     tulos.getVastaanottotila(),
-                                    tulos.getEhdollisestiHyvaksyttavissa(),
+                                    BooleanUtils.isTrue(tulos.getEhdollisestiHyvaksyttavissa()),
                                     tulos.getValintatapajonoOid(),
                                     null == tulos.getHyvaksymiskirjeLahetetty() ? null : Date.from(tulos.getHyvaksymiskirjeLahetetty().toInstant()),
                                     tulos.getEhdollisenHyvaksymisenEhtoKoodi(),
