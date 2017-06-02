@@ -201,7 +201,7 @@ public class ErillishaunVientiService {
                                     tulos.getHenkiloOid(),
                                     tulos.getHakukohdeOid(),
                                     haku.getOid(),
-                                    0,
+                                    0, // NB: hakutoive aina 0!
                                     tulos.getHyvaksyttyVarasijalta(),
                                     tulos.getIlmoittautumistila(),
                                     tulos.getJulkaistavissa(),
