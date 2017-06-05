@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
@@ -41,7 +42,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetHaulleHakukohteittain.class);
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ApplicationAsyncResource applicationAsyncResource;
-    private final SijoitteluAsyncResource sijoitteluAsyncResource;
+    private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
@@ -51,12 +52,12 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
 
     @Autowired
     public HyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti, ApplicationAsyncResource applicationAsyncResource,
-                                                  SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource tarjontaAsyncResource, DokumenttiAsyncResource dokumenttiAsyncResource,
+                                                  ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource, TarjontaAsyncResource tarjontaAsyncResource, DokumenttiAsyncResource dokumenttiAsyncResource,
                                                   OrganisaatioAsyncResource organisaatioAsyncResource, ViestintapalveluAsyncResource viestintapalveluAsyncResource,
                                                   HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl, HakuParametritService hakuParametritService) {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
-        this.sijoitteluAsyncResource = sijoitteluAsyncResource;
+        this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
@@ -68,7 +69,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     public void muodostaKirjeet(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
 
         Observable<List<HakukohdeJaResurssit>> hakukohdeJaResurssitObs =
-                ViestintapalveluObservables.hakukohteetJaResurssit(sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), (oids) ->
+                ViestintapalveluObservables.hakukohteetJaResurssit(valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid), (oids) ->
                         Observable.just(applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)))
                         .doOnNext(list -> prosessi.setKokonaistyo(list.size()));
 
