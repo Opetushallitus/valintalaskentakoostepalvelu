@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
@@ -55,7 +56,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetServiceImpl.class);
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
-    private final SijoitteluAsyncResource sijoitteluAsyncResource;
+    private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final HaeOsoiteKomponentti haeOsoiteKomponentti;
@@ -69,7 +70,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     public HyvaksymiskirjeetServiceImpl(
             ViestintapalveluAsyncResource viestintapalveluAsyncResource,
             HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
-            SijoitteluAsyncResource sijoitteluAsyncResource,
+            ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             HaeOsoiteKomponentti haeOsoiteKomponentti,
@@ -77,7 +78,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             @Value("${valintalaskentakoostepalvelu.hyvaksymiskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
-        this.sijoitteluAsyncResource = sijoitteluAsyncResource;
+        this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.haeOsoiteKomponentti = haeOsoiteKomponentti;
@@ -96,7 +97,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
             Observable<List<Hakemus>> hakemuksetFuture = just(applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS));
-            Observable<List<HakijaDTO>> hakijatFuture = Observable.from(hakemusOids).concatMap(hakemus -> sijoitteluAsyncResource.getHakijaByHakemus(hakuOid, hakemus)).toList();
+            Observable<List<HakijaDTO>> hakijatFuture = Observable.from(hakemusOids).concatMap(hakemus -> valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemus)).toList();
             Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
 
             zip(
@@ -146,11 +147,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     @Override
     public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
-        Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKaikkiHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKaikkiHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
         zip(
                 hakemuksetObservable,
-                from(hakijatFuture),
+                hakijatObservable,
                 from(organisaatioFuture),
                 (hakemukset, hakijat, organisaatioResponse) -> {
                     LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
@@ -206,7 +207,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         final String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
 
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
-        Observable<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Observable<HakijaPaginationObject> hakijatFuture = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
 

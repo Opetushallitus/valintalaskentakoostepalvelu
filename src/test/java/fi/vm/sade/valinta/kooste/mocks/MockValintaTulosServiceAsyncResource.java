@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.mocks;
 import com.google.common.collect.Lists;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
@@ -113,5 +115,18 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
         return Observable.just(new HakukohdeDTO());
     }
 
+    @Override
+    public Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
+        return Observable.just(new HakijaPaginationObject());
+    }
 
+    @Override
+    public Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
+        return Observable.just(new HakijaDTO());
+    }
+
+    @Override
+    public Observable<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
+        return Observable.just(new HakijaPaginationObject());
+    }
 }

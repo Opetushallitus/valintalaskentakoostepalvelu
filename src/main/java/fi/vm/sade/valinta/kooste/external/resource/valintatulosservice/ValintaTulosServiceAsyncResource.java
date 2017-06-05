@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
@@ -54,4 +56,10 @@ public interface ValintaTulosServiceAsyncResource {
     Observable<List<Valinnantulos>> getErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid);
 
     Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);
+
+    Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid);
+
+    Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid);
+
+    Observable<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid);
 }

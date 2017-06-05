@@ -13,6 +13,8 @@ import com.google.gson.JsonSerializer;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
@@ -91,6 +93,38 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
         return getStringAsObservable(
                 getUrl("valinta-tulos-service.haku.hakuoid.hakemus", hakuOid, hakemusOid));
     }
+
+    @Override
+    public Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
+        return getAsObservable(getUrl("valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
+                new GenericType<List<HakijaPaginationObject>>(){}.getType());
+    }
+
+    @Override
+    public Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
+        return getAsObservable(
+                getUrl("valinta-tulos-service.haku.sijoitteluajo.latest.hakemus", hakuOid, hakemusOid),
+                new TypeToken<fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO>() {}.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Observable<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
+        return getAsObservable(
+                getUrl("valinta-tulos-service.haku.sijoitteluajo.latest.hakemukset", hakuOid),
+                new GenericType<List<HakijaPaginationObject>>(){}.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    client.query("hakukohdeOid", hakukohdeOid);
+                    return client;
+                }
+        );
+    }
+
 
     @Override
     public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
