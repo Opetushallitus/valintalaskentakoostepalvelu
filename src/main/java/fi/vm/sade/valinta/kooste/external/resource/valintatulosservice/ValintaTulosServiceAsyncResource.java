@@ -62,4 +62,6 @@ public interface ValintaTulosServiceAsyncResource {
     Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid);
 
     Observable<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid);
+
+    Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 }

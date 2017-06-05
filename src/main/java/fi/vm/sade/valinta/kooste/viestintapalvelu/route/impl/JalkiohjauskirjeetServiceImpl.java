@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
@@ -59,7 +60,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
     private final static Logger LOG = LoggerFactory.getLogger(JalkiohjauskirjeetServiceImpl.class);
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private final JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
-    private final SijoitteluAsyncResource sijoitteluAsyncResource;
+    private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
     private final TarjontaAsyncResource hakuV1AsyncResource;
@@ -69,14 +70,14 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
     public JalkiohjauskirjeetServiceImpl(
         ViestintapalveluAsyncResource viestintapalveluAsyncResource,
         JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti,
-        SijoitteluAsyncResource sijoitteluAsyncResource,
+        ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
         ApplicationAsyncResource applicationAsyncResource,
         KirjeetHakukohdeCache kirjeetHakukohdeCache,
         TarjontaAsyncResource hakuV1AsyncResource,
         @Value("${valintalaskentakoostepalvelu.jalkiohjauskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
-        this.sijoitteluAsyncResource = sijoitteluAsyncResource;
+        this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
@@ -85,7 +86,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     @Override
     public void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids) {
-            sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
+        valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
             .subscribeOn(Schedulers.newThread())
             .subscribe(
                     hakijat -> {
@@ -109,7 +110,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     @Override
     public void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
-            sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
+        valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
             .subscribeOn(Schedulers.newThread())
             .subscribe(
                     hakijat -> {

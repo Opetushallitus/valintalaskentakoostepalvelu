@@ -252,7 +252,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         HakijaPaginationObject hp = new HakijaPaginationObject();
         hp.setResults(Collections.singletonList(hakija1));
         hp.setTotalCount(hp.getResults().size());
-        mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/sijoitteluajo/latest/hakemukset.*", hp);
+        mockToReturnJson(GET, "/valinta-tulos-service/haku/HAKU1/ilmanHyvaksyntaa", hp);
     }
 
     private void mockMolemmatHylattyKutsu() {
@@ -275,7 +275,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         HakijaPaginationObject hp = new HakijaPaginationObject();
         hp.setResults(Arrays.asList(hakija1, hakija2));
         hp.setTotalCount(hp.getResults().size());
-        mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/sijoitteluajo/latest/hakemukset.*", hp);
+        mockToReturnJson(GET, "/valinta-tulos-service/haku/HAKU1/ilmanHyvaksyntaa", hp);
     }
 
     private void mockHakukohde1Kutsu() {

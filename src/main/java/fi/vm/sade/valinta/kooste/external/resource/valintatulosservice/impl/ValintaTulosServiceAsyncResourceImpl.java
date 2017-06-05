@@ -97,7 +97,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     @Override
     public Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
         return getAsObservable(getUrl("valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
-                new GenericType<List<HakijaPaginationObject>>(){}.getType(),
+                new GenericType<HakijaPaginationObject>(){}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;
@@ -121,7 +121,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     public Observable<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
         return getAsObservable(
                 getUrl("valinta-tulos-service.haku.hakukohde.hakijat", hakuOid, hakukohdeOid),
-                new GenericType<List<HakijaPaginationObject>>(){}.getType(),
+                new GenericType<HakijaPaginationObject>(){}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;
@@ -129,6 +129,17 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
         );
     }
 
+    @Override
+    public Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
+        return getAsObservable(
+                getUrl("valinta-tulos-service.haku.ilmanhyvaksyntaa", hakuOid),
+                new GenericType<HakijaPaginationObject>(){}.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
 
     @Override
     public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
