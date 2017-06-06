@@ -34,20 +34,7 @@ public class HaunTyyppiKomponentti {
         Integer koodiVersio = TarjontaUriToKoodistoUtil.stripVersion(haunTyyppiUri);
         SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
 
-        List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
-        if (koodiTypes.isEmpty()) {
-            throw new KoodistoException("Koodisto palautti tyhjän koodijoukon urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
-        }
-        for (KoodiType koodi : koodiTypes) {
-            String arvo = koodi.getKoodiArvo();
-            if (arvo != null) {
-                LOG.error("HaunTyyppiUri {} == {}", haunTyyppiUri, arvo);
-                return arvo;
-            } else {
-                LOG.error("Koodistosta palautui null arvo uri:lle {}, versio {}", new Object[]{koodiUri, koodiVersio});
-            }
-        }
-        throw new KoodistoException("Koodistosta ei saatu arvoa urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
+        return getKoodiForUri(haunTyyppiUri, koodiUri, koodiVersio, koodistoHaku);
     }
 
     public String haunKohdejoukko(String haunKohdejoukkoUri) {
@@ -55,6 +42,11 @@ public class HaunTyyppiKomponentti {
         String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunKohdejoukkoUri);
         Integer koodiVersio = TarjontaUriToKoodistoUtil.stripVersion(haunKohdejoukkoUri);
         SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
+        return getKoodiForUri(haunKohdejoukkoUri, koodiUri, koodiVersio, koodistoHaku);
+    }
+
+    private String getKoodiForUri(String haunKohdejoukkoUri, String koodiUri, Integer koodiVersio, SearchKoodisCriteriaType koodistoHaku) {
+        /*
         List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
         if (koodiTypes.isEmpty()) {
             throw new KoodistoException("Koodisto palautti tyhjän koodijoukon urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
@@ -69,5 +61,12 @@ public class HaunTyyppiKomponentti {
             }
         }
         throw new KoodistoException("Koodistosta ei saatu arvoa urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
+        */
+        try {
+            return koodiUri.split("_")[0];
+        } catch (Exception e) {
+            LOG.error("Could not get koodi from {}: {}", koodiUri, e);
+            throw e;
+        }
     }
 }
