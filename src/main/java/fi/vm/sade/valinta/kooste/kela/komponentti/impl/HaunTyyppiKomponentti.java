@@ -1,7 +1,16 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti.impl;
 
+import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.properties.OphProperties;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import org.apache.commons.io.input.AutoCloseInputStream;
+import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +22,8 @@ import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.valinta.kooste.exception.KoodistoException;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 
+
+
 /**
  *         Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti!
  *         Proxy provides retries!
@@ -21,6 +32,9 @@ import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 public class HaunTyyppiKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HaunTyyppiKomponentti.class);
     private final KoodiService koodiService;
+    private final Gson GSON = new GsonBuilder().create();
+    private static final Type LIST_ITEM_TYPE = new TypeToken<List<Map<String,Object>>>() {}.getType();
+    private final UrlConfiguration CONFIG = UrlConfiguration.getInstance();
 
     @Autowired
     public HaunTyyppiKomponentti(KoodiService koodiService) {
@@ -46,27 +60,16 @@ public class HaunTyyppiKomponentti {
     }
 
     private String getKoodiForUri(String haunKohdejoukkoUri, String koodiUri, Integer koodiVersio, SearchKoodisCriteriaType koodistoHaku) {
-        /*
-        List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
-        if (koodiTypes.isEmpty()) {
-            throw new KoodistoException("Koodisto palautti tyhjän koodijoukon urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
-        }
-        for (KoodiType koodi : koodiTypes) {
-            String arvo = koodi.getKoodiArvo();
-            if (arvo != null) {
-                LOG.error("HaunTyyppiUri {} == {}", haunKohdejoukkoUri, arvo);
-                return arvo;
-            } else {
-                LOG.error("Koodistosta palautui null arvo uri:lle {}, versio {}", new Object[]{koodiUri, koodiVersio});
-            }
-        }
-        throw new KoodistoException("Koodistosta ei saatu arvoa urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
-        */
+        String koodistoJson = null;
         try {
-            return koodiUri.split("_")[0];
+            koodistoJson = IOUtils.toString(new AutoCloseInputStream(new URL(CONFIG.url("koodisto-service.koodiuri", koodiUri)).openStream()));
+            List<Map<String,Object>> json = GSON.fromJson(koodistoJson, LIST_ITEM_TYPE);
+            Map<String, Object> kobject = json.iterator().next();
+            return kobject.get("koodiArvo").toString();
         } catch (Exception e) {
-            LOG.error("Could not get koodi from {}: {}", koodiUri, e);
-            throw e;
+            LOG.error("Unable to fetch 'koodiuri' {} from koodisto!", koodiUri, e);
+            throw new RuntimeException(e);
         }
+
     }
 }
