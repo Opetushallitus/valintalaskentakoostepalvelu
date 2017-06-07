@@ -104,6 +104,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     hakijatFuture,
                     hakutoimistoObservable,
                     (hakemukset, hakijat, hakutoimisto) -> {
+                        LOG.info("Saatiin " + hakijat.size() + "kpl hakemuksia Valintarekisteristä.");
                         LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
                         final Set<String> kohdeHakijat = Sets.newHashSet(hakemusOids);
                         Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.stream()
@@ -206,13 +207,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         final String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
 
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
-        Observable<HakijaPaginationObject> hakijatFuture = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
 
         zip(
                 hakemuksetObservable,
-                hakijatFuture,
+                hakijatObservable,
                 hakutoimistoObservable,
                 (hakemukset, hakijat, hakutoimisto) -> {
                     LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi. {}", hakutoimisto);
