@@ -204,7 +204,7 @@ public class LaskentaActorFactory {
     private static final BiFunction<String, String, Action1<Throwable>> resurssiException = (uuid, hakukohde) -> error -> {
         String message = HttpExceptionWithResponse.appendWrappedResponse(String.format("(Uuid=%s) Resurssin lataus epäonnistui hakukohteelle %s", uuid, hakukohde)
             , error);
-        LOG.warn(message, error);
+        LOG.error(message, error);
     };
 
     public LaskentaActor createValintalaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
