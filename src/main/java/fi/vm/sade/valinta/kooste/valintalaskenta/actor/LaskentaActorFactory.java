@@ -170,13 +170,13 @@ public class LaskentaActorFactory {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                     Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
-                    valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("valintaperusteetAsyncResource.haeValintaperusteet", uuid, hakukohdeOid));
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
-                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("applicationAsyncResource.getApplicationsByOid", uuid, hakukohdeOid));
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), haku.getOid());
-                    oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("suoritusrekisteriAsyncResource.getOppijatByHakukohde", uuid, hakukohdeOid));
                     Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid());
-                    hakukohdeRyhmasForHakukohdes.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    hakukohdeRyhmasForHakukohdes.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes", uuid, hakukohdeOid));
 
 
                     return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
@@ -201,11 +201,13 @@ public class LaskentaActorFactory {
     }
 
     private static final BiFunction<String, String, Action1<? super Object>> resurssiOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Saatiin resurssi hakukohteelle {}", uuid, hakukohde);
-    private static final BiFunction<String, String, Action1<Throwable>> resurssiException = (uuid, hakukohde) -> error -> {
-        String message = HttpExceptionWithResponse.appendWrappedResponse(String.format("(Uuid=%s) Resurssin lataus epäonnistui hakukohteelle %s", uuid, hakukohde)
-            , error);
-        LOG.error(message, error);
-    };
+    private static final Action1<Throwable> resurssiException(String resurssi, String uuid, String hakukohde) {
+        return error -> {
+            String message = HttpExceptionWithResponse.appendWrappedResponse(String.format("(Uuid=%s) Resurssin %s lataus epäonnistui hakukohteelle %s", uuid, resurssi, hakukohde)
+                    , error);
+            LOG.warn(message, error);
+        };
+    }
 
     public LaskentaActor createValintalaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
@@ -214,16 +216,16 @@ public class LaskentaActorFactory {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                     Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
-                    valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("valintaperusteetAsyncResource.haeValintaperusteet", uuid, hakukohdeOid));
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
-                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("applicationAsyncResource.getApplicationsByOid", uuid, hakukohdeOid));
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), haku.getOid());
-                    oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("suoritusrekisteriAsyncResource.getOppijatByHakukohde", uuid, hakukohdeOid));
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
-                    hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("valintaperusteetAsyncResource.haeHakijaryhmat", uuid, hakukohdeOid));
 
                     Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(actorParams.getHakuOid());
-                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",uuid, hakukohdeOid));
 
 
                     return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
@@ -262,15 +264,15 @@ public class LaskentaActorFactory {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan + valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                     Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
-                    valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("valintaperusteetAsyncResource.haeValintaperusteet", uuid, hakukohdeOid));
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
-                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("applicationAsyncResource.getApplicationsByOid",uuid, hakukohdeOid));
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), haku.getOid());
-                    oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("suoritusrekisteriAsyncResource.getOppijatByHakukohde",uuid, hakukohdeOid));
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
-                    hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("valintaperusteetAsyncResource.haeHakijaryhmat", uuid, hakukohdeOid));
                     Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid());
-                    hakukohdeRyhmasForHakukohdes.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+                    hakukohdeRyhmasForHakukohdes.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes", uuid, hakukohdeOid));
 
                     return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                             hakijaryhmat,
