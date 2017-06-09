@@ -35,4 +35,12 @@ public class LetterResponse {
         this.errors = errors;
     }
 
+    @Override
+    public String toString() {
+        return "LetterResponse{" +
+                "batchId='" + batchId + '\'' +
+                ", status='" + status + '\'' +
+                ", errors=" + errors +
+                '}';
+    }
 }
