@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -81,7 +82,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     }
 
     private final boolean pakkaaTiedostotTarriin;
-    private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
     private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
     private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
     private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
@@ -132,7 +132,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.osoiteKomponentti = osoiteKomponentti;
         this.osoitetarrat = osoitetarrat;
         this.viestintapalveluResource = viestintapalveluResource;
-        this.sijoitteluProxy = sijoitteluProxy;
         this.nimiTarjonnalta = nimiTarjonnalta;
         this.dokumenttipalveluUrl = dokumenttipalveluUrl;
         this.muodostaDokumentit = "direct:sijoitteluntulos_muodosta_dokumentit";
@@ -286,7 +285,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
                             Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
                             List<HakijaDTO> l = Lists.newArrayList();
-                            for (HakijaDTO hakija : sijoitteluProxy.koulutuspaikalliset(hakuOid(exchange), hakukohdeOid, SijoitteluResource.LATEST)) {
+                            HakijaPaginationObject hakijat = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid(exchange), hakukohdeOid).toBlocking().toFuture().get();
+                            for (HakijaDTO hakija : hakijat.getResults()) {
                                 l.add(hakija);
                             }
                             o = l.stream()
@@ -316,7 +316,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, id));
                             }
                         } catch (Exception e) {
-                            LOG.error("Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
+                            LOG.error("Osoitetarrojen luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
                             prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Ei saatu sijoittelun tuloksia tai hakukohteita! " + e.getMessage()));
                             prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
                         }

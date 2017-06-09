@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
@@ -46,7 +47,7 @@ public class OsoitetarratService {
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private final ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource;
     private final ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
-    private final SijoitteluAsyncResource sijoitteluAsyncResource;
+    private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
 
     @Autowired
     public OsoitetarratService(ApplicationAsyncResource applicationAsyncResource,
@@ -54,7 +55,7 @@ public class OsoitetarratService {
                                DokumenttiAsyncResource dokumenttiAsyncResource,
                                ViestintapalveluAsyncResource viestintapalveluAsyncResource,
                                ValintaperusteetAsyncResource valintaperusteetValintakoeResource,
-                               SijoitteluAsyncResource sijoitteluAsyncResource,
+                               ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
                                ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource,
                                HaeOsoiteKomponentti osoiteKomponentti) {
         this.applicationAsyncResource = applicationAsyncResource;
@@ -63,7 +64,7 @@ public class OsoitetarratService {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.valintaperusteetValintakoeResource = valintaperusteetValintakoeResource;
         this.valintalaskentaValintakoeAsyncResource = valintalaskentaValintakoeAsyncResource;
-        this.sijoitteluAsyncResource = sijoitteluAsyncResource;
+        this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.osoiteKomponentti = osoiteKomponentti;
     }
 
@@ -89,25 +90,28 @@ public class OsoitetarratService {
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
-            sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hakuOid, hakukohdeOid, hakijat -> {
-                List<String> hyvaksytytHakijat = hakijat.getResults().stream().filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
-                                .map(h -> h.getHakemusOid())
-                                .collect(Collectors.toList());
-                boolean onkoHyvaksyttyjaHakijoita = !hyvaksytytHakijat.isEmpty();
-                if (onkoHyvaksyttyjaHakijoita) {
-                    applicationAsyncResource.getApplicationsByOids(hyvaksytytHakijat, hakemukset -> {
-                        haetutHakemuksetRef.set(hakemukset);
-                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                    }, poikkeuskasittelija);
-                } else {
-                    LOG.error("Sijoittelussa ei ole hyväksyttyjä hakijoita");
-                    prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen luonti epäonnistui:", "Sijoittelussa ei ole hyväksyttyjä hakijoita"));
-                }
-            }, poikkeuskasittelija);
+
+            valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid, hakukohdeOid).subscribe(
+                hakijaPaginationObject -> {
+                    List<String> hyvaksytytHakijat = hakijaPaginationObject.getResults().stream()
+                            .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
+                            .map(h -> h.getHakemusOid())
+                            .collect(Collectors.toList());
+                    boolean onkoHyvaksyttyjaHakijoita = !hyvaksytytHakijat.isEmpty();
+                    if (onkoHyvaksyttyjaHakijoita) {
+                        applicationAsyncResource.getApplicationsByOids(hyvaksytytHakijat, hakemukset -> {
+                            haetutHakemuksetRef.set(hakemukset);
+                            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                        }, poikkeuskasittelija);
+                    } else {
+                        LOG.error("Sijoittelussa ei ole hyväksyttyjä hakijoita");
+                        prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen luonti epäonnistui:", "Sijoittelussa ei ole hyväksyttyjä hakijoita"));
+                    }
+                }, poikkeuskasittelija::accept
+            );
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
-
     }
 
     public void osoitetarratValintakokeeseenOsallistujille(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, Set<String> selvitetytTunnisteet) {
