@@ -207,7 +207,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         try {
                             tilat = tilaResource.hakukohteelle(hakukohdeOid);
                             hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
-                            hk = sijoitteluResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, SijoitteluResource.LATEST, hakukohdeOid);
+                            hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).toBlocking().toFuture().get();
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).toBlocking().toFuture().get();
                             hakuDTO = haeHakuTarjonnaltaKomponentti.getHaku(hakuOid);
                         } catch (Exception e) {
