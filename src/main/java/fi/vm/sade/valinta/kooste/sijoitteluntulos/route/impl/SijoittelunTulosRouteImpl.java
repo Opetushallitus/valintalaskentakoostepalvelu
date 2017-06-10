@@ -234,6 +234,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                     prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
                                 }
                             }
+                            LOG.info("Sijoitteluntulosexcelin luonti onnistui hakukohteelle " + hakukohdeOid);
                         } catch (SijoittelultaEiSisaltoaPoikkeus e) {
                             prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
                         } catch (Exception e) {
@@ -315,6 +316,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         dokumenttiprosessi(exchange).getTags(), "application/pdf", input);
                                 prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, id));
                             }
+                            LOG.info("Osoitetarrojen luonti onnistui hakukohteelle " + hakukohdeOid);
                         } catch (Exception e) {
                             LOG.error("Osoitetarrojen luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
                             prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Ei saatu sijoittelun tuloksia tai hakukohteita! " + e.getMessage()));
