@@ -72,6 +72,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponent
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
+import org.springframework.util.StopWatch;
 
 @Component
 public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
@@ -274,6 +275,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         SijoittelunTulosProsessi prosessi = prosessi(exchange);
                         HakukohdeTyyppi hakukohde = exchange.getIn().getBody(HakukohdeTyyppi.class);
                         String hakukohdeOid = hakukohde.getOid();
+                        StopWatch stopWatch = new StopWatch("Hakukohteen " + hakukohdeOid + " osoitetarrojen muodostus");
+                        stopWatch.start("Tiedot tarjonnasta");
                         String tarjoajaOid = StringUtils.EMPTY;
                         try {
                             HakukohdeDTO nimi = nimiTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
@@ -281,12 +284,17 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         } catch (Exception e) {
                             prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Hakukohteelle ei saatu tarjoajaOidia!"));
                         }
+                        stopWatch.stop();
                         List<String> o;
                         try {
+                            stopWatch.start("Tiedot koodistosta");
                             Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
                             Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
+                            stopWatch.stop();
                             List<HakijaDTO> l = Lists.newArrayList();
+                            stopWatch.start("Tiedot valintarekisteristä");
                             HakijaPaginationObject hakijat = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid(exchange), hakukohdeOid).toBlocking().toFuture().get();
+                            stopWatch.stop();
                             for (HakijaDTO hakija : hakijat.getResults()) {
                                 l.add(hakija);
                             }
@@ -298,12 +306,15 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
                                 return;
                             }
+                            stopWatch.start("Tiedot hakemuksilta");
                             List<Hakemus> hakemukset = applicationResource.getApplicationsByOids(o);
+                            stopWatch.stop();
                             List<Osoite> addressLabels = Lists.newArrayList();
 
                             for (Hakemus h : hakemukset) {
                                 addressLabels.add(HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, h));
                             }
+                            stopWatch.start("Tarrat viestintäpalvelulta");
                             Osoitteet osoitteet = new Osoitteet(addressLabels);
                             if (pakkaaTiedostotTarriin) {
                                 Tiedosto tiedosto = new Tiedosto("osoitetarrat_" + hakukohdeOid + ".pdf", IOUtils.toByteArray(viestintapalveluResource.haeOsoitetarratSync(osoitteet)));
@@ -316,6 +327,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         dokumenttiprosessi(exchange).getTags(), "application/pdf", input);
                                 prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, id));
                             }
+                            stopWatch.stop();
+                            LOG.info(stopWatch.prettyPrint());
                             LOG.info("Osoitetarrojen luonti onnistui hakukohteelle " + hakukohdeOid);
                         } catch (Exception e) {
                             LOG.error("Osoitetarrojen luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
@@ -395,6 +408,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         String hakuOid = hakuOid(exchange);
+                        StopWatch stopWatch = new StopWatch("Haun " + hakuOid + " hakukohteiden haku tarjonnasta");
+                        stopWatch.start();
                         try {
                             dokumenttiprosessi(exchange)
                                     .getVaroitukset()
@@ -409,6 +424,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             LOG.error("Hakukohteiden haku epäonnistui!", e);
                             throw kasittelePoikkeus(Poikkeus.TARJONTA, exchange, e);
                         }
+                        stopWatch.stop();
+                        LOG.info(stopWatch.prettyPrint());
                     }
                 });
     }
