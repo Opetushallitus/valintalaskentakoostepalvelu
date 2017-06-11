@@ -97,7 +97,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                 .stream()
                                 .filter(h -> whitelist.contains(h.getHakemusOid()))
                                 .collect(Collectors.toList());
-                        muodostaKirjeet(false).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), whitelistinJalkeen, jalkiohjauskirjeDTO));
+                        muodostaKirjeet(true).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), whitelistinJalkeen, jalkiohjauskirjeDTO));
                     },
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
@@ -115,7 +115,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     hakijat -> {
                         //VIALLISET DATA POIS FILTTEROINTI
                         Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
-                        muodostaKirjeet(isKorkeakouluhaku(jalkiohjauskirjeDTO.getHakuOid())).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), vainHakeneetJalkiohjattavat, jalkiohjauskirjeDTO));
+                        muodostaKirjeet(false).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), vainHakeneetJalkiohjattavat, jalkiohjauskirjeDTO));
                     },
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
@@ -152,13 +152,13 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         return haunKohdejoukkoUri.startsWith("haunkohdejoukko_12"); //"kohdejoukkoUri": "haunkohdejoukko_12#1"
     }
 
-    private Action3<KirjeProsessi, JalkiohjauskirjeDTO, Supplier<HaunResurssit>> muodostaKirjeet(boolean sahkoinenKorkeakoulunMassaposti) {
+    private Action3<KirjeProsessi, JalkiohjauskirjeDTO, Supplier<HaunResurssit>> muodostaKirjeet(boolean tallennaTuloksetDokumenttiPalveluun) {
         return (prosessi, kirje, haeHaunResurssit) -> {
             HaunResurssit haunResurssit = haeHaunResurssit.get();
             final Map<String, MetaHakukohde> metaKohteet = getStringMetaHakukohdeMap(haunResurssit.hakijat);
             LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(
                     kirje.getKielikoodi(), haunResurssit.hakijat, haunResurssit.hakemukset, metaKohteet, kirje.getHakuOid(),
-                    kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag(), sahkoinenKorkeakoulunMassaposti);
+                    kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag(), !tallennaTuloksetDokumenttiPalveluun);
             try {
                 if (prosessi.isKeskeytetty()) {
                     LOG.warn("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta ennen siirto viestintapalveluun!");
@@ -192,7 +192,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                                 return;
                                             }
                                             if ("error".equals(status.getStatus())) {
-                                                LOG.error("Jalkiohjauskirjeiden muodstuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen!");
+                                                LOG.error("Jalkiohjauskirjeiden muodstuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen: {}", letterBatch);
                                                 prosessi.keskeyta();
                                                 stop.onNext(null);
                                             }
