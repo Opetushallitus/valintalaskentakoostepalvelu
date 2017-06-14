@@ -88,7 +88,7 @@ public class SijoittelunTulosExcelKomponentti {
         sortHakemuksetByTila(distinctHakemuksetFromAllQueues);
 
         List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
-        valintatapajonoOtsikkoRivi.addAll(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
+        valintatapajonoOtsikkoRivi.addAll(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
         List<Object> otsikkoRivi = Lists.newArrayList();
         otsikkoRivi.addAll(Arrays.asList(
                 "Hakemus",
@@ -121,7 +121,8 @@ public class SijoittelunTulosExcelKomponentti {
             for (ValintatapajonoDTO jono : valintatapajonot) {
                 ++index;
                 boolean highlight = index % 2 == 1;
-                valintatapajonoOtsikkoRivi.add(new Span("Valintatapajono: " + jono.getNimi(), 6, highlight));
+                int spanColumns = isKkHaku ? 11 : 6;
+                valintatapajonoOtsikkoRivi.add(new Span("Valintatapajono: " + jono.getNimi(), spanColumns, highlight));
                 List<Object> otsikot = isKkHaku ?
                         Arrays.asList(
                     "Jonosija",
