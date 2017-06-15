@@ -87,8 +87,6 @@ public class SijoittelunTulosExcelKomponentti {
         // Järjestetään hakemukset tilan mukaan
         sortHakemuksetByTila(distinctHakemuksetFromAllQueues);
 
-        List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
-        valintatapajonoOtsikkoRivi.addAll(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
         List<Object> otsikkoRivi = Lists.newArrayList();
         otsikkoRivi.addAll(Arrays.asList(
                 "Hakemus",
@@ -116,6 +114,7 @@ public class SijoittelunTulosExcelKomponentti {
                 "Hakutoive",
                 "Hakijaryhmät"
         ));
+        List<Object> valintatapajonoOtsikkoRivi = new ArrayList<>(Collections.nCopies(otsikkoRivi.size(), "")); // alun tyhjat pystyrivit
         {
             int index = 0;
             for (ValintatapajonoDTO jono : valintatapajonot) {
