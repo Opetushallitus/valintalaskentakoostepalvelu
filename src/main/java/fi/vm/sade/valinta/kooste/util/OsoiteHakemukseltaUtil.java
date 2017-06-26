@@ -95,7 +95,7 @@ public class OsoiteHakemukseltaUtil {
             maa = "";
         }
 
-        String nimi = nimiPaattelyStrategy.paatteleNimi(kutsumanimi, etunimet, sukunimi);
+        String nimi = nimiPaattelyStrategy.paatteleNimi(kutsumanimi, etunimet);
 
         return new OsoiteBuilder()
                 .setFirstName(nimi)

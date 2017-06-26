@@ -101,6 +101,11 @@ public class KirjeetUtil {
         return HYLATTY.equals(hakutoiveenValintatapajonot.get(0).getTila()) ? new Teksti(lastJono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, "") : "";
     }
 
+    public static String peruuntumisenSyyText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
+        HakutoiveenValintatapajonoDTO lastJono = hakutoiveenValintatapajonot.get(hakutoiveenValintatapajonot.size() - 1);
+        return PERUUNTUNUT.equals(hakutoiveenValintatapajonot.get(0).getTila()) ? new Teksti(lastJono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, "") : "";
+    }
+
     public static void putValinnanTulosHylkausPerusteAndVarasijaData(String preferoituKielikoodi, Map<String, Object> tulokset, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
         if (!hakutoiveenValintatapajonot.isEmpty()) {
             HakutoiveenValintatapajonoDTO firstValintatapajono = hakutoiveenValintatapajonot.get(0);
@@ -111,12 +116,14 @@ public class KirjeetUtil {
             String ehdollinenSyy = "";
             if(firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi() != null && !firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi().equals("")){
                 ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoFI();
-                if(preferoituKielikoodi == KieliUtil.RUOTSI){
+                if (preferoituKielikoodi.equals(KieliUtil.RUOTSI)) {
                     ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoSV();
-                } else if(preferoituKielikoodi == KieliUtil.ENGLANTI){
+                } else if (preferoituKielikoodi.equals(KieliUtil.ENGLANTI)) {
                     ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoEN();
                 }
             }
+            tulokset.put("ehdollinenSyy", ehdollinenSyy);
+            tulokset.put("peruuntumisenSyy", StringUtils.trimToNull(peruuntumisenSyyText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
             tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti(), firstValintatapajono.isEhdollisestiHyvaksyttavissa(), ehdollinenSyy));
         }
     }
