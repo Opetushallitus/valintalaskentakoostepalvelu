@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -312,7 +312,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             List<Osoite> addressLabels = Lists.newArrayList();
 
                             for (Hakemus h : hakemukset) {
-                                addressLabels.add(HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, h));
+                                addressLabels.add(HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, h, new NimiPaattelyStrategy()));
                             }
                             stopWatch.start("Tarrat viestintäpalvelulta");
                             Osoitteet osoitteet = new Osoitteet(addressLabels);

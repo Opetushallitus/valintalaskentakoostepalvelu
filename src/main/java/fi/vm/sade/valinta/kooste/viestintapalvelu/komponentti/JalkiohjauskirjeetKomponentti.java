@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +11,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -36,7 +36,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 
 @Component
@@ -79,7 +78,7 @@ public class JalkiohjauskirjeetKomponentti {
                 continue;
             }
             final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid);
-            final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
+            final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new NimiPaattelyStrategy());
             final List<Map<String, Object>> tulosList = new ArrayList<>();
             if (!kaytetaanYlikirjoitettuKielikoodia) {
                 preferoituKielikoodi = new HakemusWrapper(hakemus).getAsiointikieli();

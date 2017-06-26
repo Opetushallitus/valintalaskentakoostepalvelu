@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -104,7 +105,7 @@ public class HaeOsoiteKomponentti {
         return StringUtils.EMPTY;
     }
 
-    public static Osoite haeOsoite(Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, Hakemus hakemus) {
+    public static Osoite haeOsoite(Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, Hakemus hakemus, NimiPaattelyStrategy nimiPaattelyStrategy) {
         HakemusWrapper wrapper = new HakemusWrapper(hakemus);
         Koodi postiKoodi = posti.get(wrapper.getSuomalainenPostinumero());
         String postitoimipaikka = KoodistoCachedAsyncResource.haeKoodistaArvo(postiKoodi, KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());
@@ -117,7 +118,7 @@ public class HaeOsoiteKomponentti {
             String asuinmaaEnglanniksi = KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa());
             maakoodi = new Maakoodi(postitoimipaikka, asuinmaaEnglanniksi);
         }
-        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maakoodi.getMaa(), maakoodi.getPostitoimipaikka());
+        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maakoodi.getMaa(), maakoodi.getPostitoimipaikka(), nimiPaattelyStrategy);
     }
 
     private static String getNimi(List<KoodiMetadataType> meta) {

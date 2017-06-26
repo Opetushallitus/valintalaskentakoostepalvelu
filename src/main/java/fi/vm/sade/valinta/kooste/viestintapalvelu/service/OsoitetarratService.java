@@ -6,12 +6,12 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -233,7 +233,7 @@ public class OsoitetarratService {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             Osoitteet osoitteet = new Osoitteet(haetutHakemukset.stream().map(h ->
-                    HaeOsoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h)).collect(Collectors.toList()));
+                    HaeOsoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h, new NimiPaattelyStrategy())).collect(Collectors.toList()));
             // Aakkosjarjestykseen
             osoitteet.getAddressLabels().sort(
                     (o1, o2) -> {

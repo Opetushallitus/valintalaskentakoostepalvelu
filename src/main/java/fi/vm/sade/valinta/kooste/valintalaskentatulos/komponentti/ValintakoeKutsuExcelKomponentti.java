@@ -8,8 +8,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -22,8 +21,6 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeNimi;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeRivi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -94,7 +91,7 @@ public class ValintakoeKutsuExcelKomponentti {
                             continue;
                         }
                         HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-                        Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null);
+                        Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null, new NimiPaattelyStrategy());
                         ValintakoeRivi v = new ValintakoeRivi(wrapper.getSukunimi(), wrapper.getEtunimi(),
                                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
                                 KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa()),
@@ -181,7 +178,7 @@ public class ValintakoeKutsuExcelKomponentti {
                 osallistumistiedot.put(tunniste.getSelvitettyTunniste(), "Määrittelemätön");
             }
         }
-        Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, null, null);
+        Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, null, null, new NimiPaattelyStrategy());
         HakemusWrapper wrapper = new HakemusWrapper(h);
         return new ValintakoeRivi(o.getSukunimi(), o.getEtunimi(),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),

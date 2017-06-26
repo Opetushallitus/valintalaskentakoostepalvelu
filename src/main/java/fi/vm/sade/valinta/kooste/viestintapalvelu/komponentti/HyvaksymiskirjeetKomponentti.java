@@ -5,17 +5,16 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.TuloskirjeNimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
@@ -25,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -183,7 +181,7 @@ public class HyvaksymiskirjeetKomponentti {
                 String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
                 final String hakemusOid = hakija.getHakemusOid();
                 final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
-                final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
+                final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new TuloskirjeNimiPaattelyStrategy());
                 final List<Map<String, Object>> tulosList = new ArrayList<>();
 
                 for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -221,15 +219,16 @@ public class HyvaksymiskirjeetKomponentti {
                 } else {
                     LOG.error("Hakijalle (hakemusOid={},hakijaOid={}) hakutoiveessa={} ei saatu hakijapalveluiden osoitetta tarjoajalle {}", hakija.getHakemusOid(), hakija.getHakijaOid(), hakukohdeOid, tarjoajaOid);
                 }
-                replacements.put("henkilotunnus", new HakemusWrapper(hakemus).getHenkilotunnus());
+                HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+                replacements.put("henkilotunnus", hakemusWrapper.getHenkilotunnus());
                 replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
                 replacements.put("hakemusOid", hakemus.getOid());
 
                 replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
                 replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)));
                 replacements.put("ohjeetUudelleOpiskelijalle", hyvaksyttyMeta.getOhjeetUudelleOpiskelijalle());
+                replacements.put("syntymaaika", hakemusWrapper.getSyntymaaika());
 
-                HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
                 String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
                 boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
                 kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(),

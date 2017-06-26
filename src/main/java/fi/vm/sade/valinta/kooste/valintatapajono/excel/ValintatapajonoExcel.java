@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.collections.comparators.ComparatorChain;
@@ -140,7 +141,7 @@ public class ValintatapajonoExcel {
             } else {
                 s.add(new NumeroArvo(null, 0, hakemukset.size()));
             }
-            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(data, null, null);
+            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(data, null, null, new NimiPaattelyStrategy());
             s.add(new TekstiArvo(osoite.getLastName() + " " + osoite.getFirstName()));
             s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))), VAIHTOEHDOT));
             if(kokonaispisteet.containsKey(hakemusOid) && null != kokonaispisteet.get(hakemusOid)) {

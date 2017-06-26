@@ -112,7 +112,7 @@ public class HakemusWrapper {
     }
 
     public Osoite getOsoite() {
-        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null);
+        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null, new NimiPaattelyStrategy());
     }
 
     public String getAsuinmaa() {

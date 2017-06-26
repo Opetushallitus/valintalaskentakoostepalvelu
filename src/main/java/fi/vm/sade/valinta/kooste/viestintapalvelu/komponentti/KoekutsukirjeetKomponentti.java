@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -104,7 +105,7 @@ public class KoekutsukirjeetKomponentti {
             Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
             for (Hakemus hakemus : hakemukset) {
                 HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
-                Osoite addressLabel = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
+                Osoite addressLabel = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new NimiPaattelyStrategy());
 
                 hakukohdeNimiTietyllaKielella = kohdeHakukohdeNimi.getHakukohdeNimi().getTeksti(opetuskieli);
                 tarjoajaNimiTietyllaKielella = kohdeHakukohdeNimi.getTarjoajaNimi().getTeksti(opetuskieli);

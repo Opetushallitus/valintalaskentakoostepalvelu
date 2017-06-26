@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public class OsoiteHakemukseltaUtil {
     private final static String KUTSUMANIMI = "Kutsumanimi";
     private final static String SUKUNIMI = "Sukunimi";
 
-    public static Osoite osoiteHakemuksesta(Hakemus hakemus, String maa, String postitoimipaikka) {
+    public static Osoite osoiteHakemuksesta(Hakemus hakemus, String maa, String postitoimipaikka, NimiPaattelyStrategy nimiPaattelyStrategy) {
         if (postitoimipaikka == null) {
             postitoimipaikka = "";
         }
@@ -95,13 +94,9 @@ public class OsoiteHakemukseltaUtil {
         if (maa == null) {
             maa = "";
         }
-        // VT-836
-        String nimi;
-        if (StringUtils.isBlank(kutsumanimi)) {
-            nimi = etunimet;
-        } else {
-            nimi = kutsumanimi;
-        }
+
+        String nimi = nimiPaattelyStrategy.paatteleNimi(kutsumanimi, etunimet, sukunimi);
+
         return new OsoiteBuilder()
                 .setFirstName(nimi)
                 .setLastName(sukunimi)
