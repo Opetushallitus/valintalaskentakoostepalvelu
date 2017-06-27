@@ -1,20 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
-import static com.codepoetics.protonpack.StreamUtils.zip;
-import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
-import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
-import static java.util.Optional.*;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static rx.schedulers.Schedulers.newThread;
-
 import com.google.common.collect.Lists;
-
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.authentication.model.Kielisyys;
@@ -23,10 +9,13 @@ import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
-import fi.vm.sade.valinta.http.FailedHttpException;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
@@ -38,11 +27,12 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyypp
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
@@ -59,7 +49,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
-import rx.functions.Action1;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
@@ -67,17 +56,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.codepoetics.protonpack.StreamUtils.zip;
+import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
+import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static rx.schedulers.Schedulers.newThread;
 
 @Service
 public class ErillishaunTuontiService {
@@ -691,7 +693,11 @@ public class ErillishaunTuontiService {
         if(!isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
             errors.add("Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen.");
         }
-        if (!rivi.isJulkaistaankoTiedot() && !(ValintatuloksenTila.KESKEN.name().equals(rivi.getVastaanottoTila()) || StringUtils.isEmpty(rivi.getVastaanottoTila()))) {
+        if (!rivi.isJulkaistaankoTiedot()
+            && !(ValintatuloksenTila.KESKEN.name().equals(rivi.getVastaanottoTila())
+                 || ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.name().equals(rivi.getVastaanottoTila())
+                 || StringUtils.isEmpty(rivi.getVastaanottoTila()))) {
+
             errors.add("Vastaanottotietoa ei voi päivittää jos valinta ei ole julkaistavissa tai vastaanottotieto ei ole kesken");
         }
         if (!"KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
