@@ -102,8 +102,13 @@ public class KirjeetUtil {
     }
 
     public static String peruuntumisenSyyText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
-        HakutoiveenValintatapajonoDTO lastJono = hakutoiveenValintatapajonot.get(hakutoiveenValintatapajonot.size() - 1);
-        return PERUUNTUNUT.equals(hakutoiveenValintatapajonot.get(0).getTila()) ? new Teksti(lastJono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, "") : "";
+        for (HakutoiveenValintatapajonoDTO hakutoiveenValintatapajono : hakutoiveenValintatapajonot) {
+            if (PERUUNTUNUT.equals(hakutoiveenValintatapajono.getTila())) {
+                return new Teksti(hakutoiveenValintatapajono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, "");
+            }
+        }
+
+        return "";
     }
 
     public static void putValinnanTulosHylkausPerusteAndVarasijaData(String preferoituKielikoodi, Map<String, Object> tulokset, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
