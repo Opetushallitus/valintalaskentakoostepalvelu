@@ -118,7 +118,7 @@ public class KirjeetUtil {
                 tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(firstValintatapajono.getVarasijanNumero(), preferoituKielikoodi));
             }
             tulokset.put("hylkaysperuste", StringUtils.trimToNull(hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
-            String ehdollinenSyy = null;
+            String ehdollinenSyy = "";
             if(firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi() != null && !firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi().equals("")){
                 ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoFI();
                 if (preferoituKielikoodi.equals(KieliUtil.RUOTSI)) {
@@ -127,7 +127,6 @@ public class KirjeetUtil {
                     ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoEN();
                 }
             }
-            tulokset.put("ehdollinenSyy", ehdollinenSyy);
             tulokset.put("peruuntumisenSyy", StringUtils.trimToNull(peruuntumisenSyyText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
             tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti(), firstValintatapajono.isEhdollisestiHyvaksyttavissa(), ehdollinenSyy));
         }
