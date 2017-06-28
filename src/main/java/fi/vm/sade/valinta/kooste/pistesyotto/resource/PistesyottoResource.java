@@ -88,6 +88,7 @@ public class PistesyottoResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     public void koostaPistetiedotYhdelleHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                      @Suspended final AsyncResponse response) {
+        final String username = KoosteAudit.username();
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -114,7 +115,7 @@ public class PistesyottoResource {
                     } else {
                         String msg = String.format(
                                 "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
-                                KoosteAudit.username(), hakutoiveOids, hakemusOid
+                                username, hakutoiveOids, hakemusOid
                         );
                         LOG.error(msg);
                         return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
@@ -138,6 +139,7 @@ public class PistesyottoResource {
     public void tallennaKoostetutPistetiedotHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                          ApplicationAdditionalDataDTO pistetiedot,
                                                          @Suspended final AsyncResponse response) {
+        final String username = KoosteAudit.username();
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -172,12 +174,12 @@ public class PistesyottoResource {
                             .collect(Collectors.toList());
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(
-                                pistetiedot, KoosteAudit.username()
+                                pistetiedot, username
                         );
                     } else {
                         String msg = String.format(
                                 "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
-                                KoosteAudit.username(), hakutoiveOids, hakemusOid
+                                username, hakutoiveOids, hakemusOid
                         );
                         return Observable.error(new ForbiddenException(
                                 msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
@@ -201,6 +203,7 @@ public class PistesyottoResource {
     public void koostaPistetiedotHakemuksille(@PathParam("hakuOid") String hakuOid,
                                               @PathParam("hakukohdeOid") String hakukohdeOid,
                                               @Suspended final AsyncResponse response) {
+        final String username = KoosteAudit.username();
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -224,7 +227,7 @@ public class PistesyottoResource {
             } else {
                 String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                        KoosteAudit.username(), hakukohdeOid
+                        username, hakukohdeOid
                 );
                 LOG.error(msg);
                 return Observable.just(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
@@ -248,6 +251,7 @@ public class PistesyottoResource {
                                              @PathParam("hakukohdeOid") String hakukohdeOid,
                                              List<ApplicationAdditionalDataDTO> pistetiedot,
                                              @Suspended final AsyncResponse response) {
+        final String username = KoosteAudit.username();
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -266,7 +270,7 @@ public class PistesyottoResource {
             }
             String msg = String.format(
                     "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                    KoosteAudit.username(), hakukohdeOid
+                    username, hakukohdeOid
             );
             return Observable.error(new ForbiddenException(
                     msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
@@ -282,11 +286,11 @@ public class PistesyottoResource {
                     }
                     return Observable.error(new ForbiddenException(String.format(
                             "Käyttäjällä %s ei ole oikeuksia käsitellä hakemuksien %s pistetietoja, koska niillä ei ole haettu hakukohteeseen %s",
-                            KoosteAudit.username(), eiHakukohteeseenHakeneet, hakukohdeOid
+                            username, eiHakukohteeseenHakeneet, hakukohdeOid
                     )));
                 })
         ).flatMap(x -> pistesyottoKoosteService.tallennaKoostetutPistetiedot(
-                hakuOid, hakukohdeOid, pistetiedot, KoosteAudit.username())
+                hakuOid, hakukohdeOid, pistetiedot, username)
         ).subscribe(
                 x -> response.resume(Response.noContent().build()),
                 error -> {
@@ -305,6 +309,7 @@ public class PistesyottoResource {
     public void vienti(@QueryParam("hakuOid") String hakuOid,
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @Suspended AsyncResponse asyncResponse) {
+        final String username = KoosteAudit.username();
         asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("vienti-palvelukutsu on aikakatkaistu: POST /vienti");
@@ -328,7 +333,7 @@ public class PistesyottoResource {
             } else {
                 String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                        KoosteAudit.username(), hakukohdeOid
+                        username, hakukohdeOid
                 );
                 return Observable.error(new ForbiddenException(
                         msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
@@ -375,7 +380,7 @@ public class PistesyottoResource {
                 }
                 String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                        KoosteAudit.username(), hakukohdeOid
+                        username, hakukohdeOid
                 );
                 return Observable.error(new ForbiddenException(
                         msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
