@@ -118,7 +118,7 @@ public class KirjeetUtil {
                 tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(firstValintatapajono.getVarasijanNumero(), preferoituKielikoodi));
             }
             tulokset.put("hylkaysperuste", StringUtils.trimToNull(hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
-            String ehdollinenSyy = null;
+            String ehdollinenSyy = "";
             if(firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi() != null && !firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi().equals("")){
                 ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoFI();
                 if (preferoituKielikoodi.equals(KieliUtil.RUOTSI)) {
