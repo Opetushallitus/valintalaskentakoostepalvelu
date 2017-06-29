@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.TuloskirjeNimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -78,7 +79,7 @@ public class JalkiohjauskirjeetKomponentti {
                 continue;
             }
             final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid);
-            final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new NimiPaattelyStrategy());
+            final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new TuloskirjeNimiPaattelyStrategy());
             final List<Map<String, Object>> tulosList = new ArrayList<>();
             if (!kaytetaanYlikirjoitettuKielikoodia) {
                 preferoituKielikoodi = new HakemusWrapper(hakemus).getAsiointikieli();
