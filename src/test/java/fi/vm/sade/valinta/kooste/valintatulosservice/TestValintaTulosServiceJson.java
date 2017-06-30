@@ -50,7 +50,7 @@ public class TestValintaTulosServiceJson {
 
 		Optional<Map.Entry<String, Date>> newestVastaanottoFieldStatus = muutoshistoriat.stream()
 				.flatMap(m -> m.getChanges().stream().filter(isVastaanottoChange)
-						.map(c -> Maps.immutableEntry(c.getTo(), m.getTimestamp())))
+						.map(c -> Maps.immutableEntry(c.getTo(), Date.from(m.getTimestamp().toInstant()) )))
 				.sorted(Comparator.<Map.Entry<String, Date>, Date>comparing(Map.Entry::getValue).reversed()).findFirst();
 
 		Map.Entry<String, Date> newestVastaanotto = newestVastaanottoFieldStatus.get();

@@ -363,7 +363,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 
                                 Optional<Map.Entry<String, Date>> newestVastaanottoFieldStatus = muutoshistoriat.stream()
                                         .flatMap(m -> m.getChanges().stream().filter(isVastaanottoChange)
-                                                .map(c -> Maps.immutableEntry(c.getTo(), m.getTimestamp())))
+                                                .map(c -> Maps.immutableEntry(c.getTo(), Date.from(m.getTimestamp().toInstant()))))
                                         .sorted(Comparator.<Map.Entry<String, Date>, Date>comparing(Map.Entry::getValue).reversed()).findFirst();
 
                                 return newestVastaanottoFieldStatus.filter(isVastaanotto).map(Map.Entry::getValue).orElse(null);

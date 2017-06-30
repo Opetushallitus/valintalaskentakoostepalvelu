@@ -1,18 +1,19 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto;
 
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 
 public class Muutoshistoria {
 
     private List<Change> changes;
-    private Date timestamp;
+    private OffsetDateTime timestamp;
 
     public List<Change> getChanges() {
         return changes;
     }
 
-    public Date getTimestamp() {
+    public OffsetDateTime getTimestamp() {
         return timestamp;
     }
 }
