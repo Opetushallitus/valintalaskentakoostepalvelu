@@ -106,11 +106,12 @@ public class JalkiohjauskirjeetKomponentti {
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());
                 tulosList.add(tulokset);
             }
+            HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
             Map<String, Object> replacements = Maps.newHashMap();
             replacements.put("tulokset", tulosList);
-            replacements.put("henkilotunnus", new HakemusWrapper(hakemus).getHenkilotunnus());
+            replacements.put("henkilotunnus", hakemusWrapper.getHenkilotunnus());
+            replacements.put("syntymaaika", hakemusWrapper.getSyntymaaika());
 
-            HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
             String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
             boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : false;
             kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements,
