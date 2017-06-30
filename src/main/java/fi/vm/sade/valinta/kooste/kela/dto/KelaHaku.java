@@ -75,7 +75,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
                                 }
 
                                 if (valintapaivamaara == null
-                                        || valintapaivamaara.compareTo(alkuPvm) <= 0
+                                        || valintapaivamaara.compareTo(alkuPvm) < 0
                                         || valintapaivamaara.compareTo(loppuPvm) >= 0) {
                                     return;
                                 }
