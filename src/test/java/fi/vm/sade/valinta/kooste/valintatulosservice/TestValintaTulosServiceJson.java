@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Change;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
@@ -33,7 +34,8 @@ public class TestValintaTulosServiceJson {
 
 	@Test
 	public void testaaMuutoshistoriaJson() throws JsonSyntaxException, IOException {
-		Gson GSON = new Gson();
+		Gson GSON = Converters.registerOffsetDateTime(new GsonBuilder()).create();
+
 		List<Muutoshistoria> muutoshistoriat = GSON
 				.fromJson(
 						IOUtils.toString(new ClassPathResource(
