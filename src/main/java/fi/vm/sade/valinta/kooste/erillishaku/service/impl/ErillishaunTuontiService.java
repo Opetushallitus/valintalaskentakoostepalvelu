@@ -202,11 +202,11 @@ public class ErillishaunTuontiService {
     }
 
     private static List<ErillishakuRivi> autoTaytto(final List<ErillishakuRivi> rivit) {
-        // jos hakemuksentila on hylatty tai varalla niin autotaytetaan loput tilat KESKEN, EI_TEHTY
+        // jos hakemuksentila on hylatty, varalla, peruuntunut tai kesken niin autotaytetaan loput tilat KESKEN, EI_TEHTY
 
         return rivit.stream().map(rivi -> {
-            if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi))
-                    && !isUusi(rivi) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.name().equals(rivi.getVastaanottoTila())) {
+            if ((VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi))
+                    && !isUusi(rivi) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.name().equals(rivi.getVastaanottoTila())) || rivi.getHakemuksenTila().equals("KESKEN")) {
                 return ErillishakuRiviBuilder.fromRivi(rivi)
                         .vastaanottoTila("KESKEN")
                         .ilmoittautumisTila("EI_TEHTY")
@@ -643,7 +643,7 @@ public class ErillishaunTuontiService {
 
 
     private static HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
-        return ofNullable(nullIfFails(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()))).orElse(HakemuksenTila.HYLATTY);
+        return nullIfFails(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()));
     }
 
     private static IlmoittautumisTila ilmoittautumisTila(ErillishakuRivi rivi) {
@@ -700,6 +700,17 @@ public class ErillishaunTuontiService {
 
             errors.add("Vastaanottotietoa ei voi päivittää jos valinta ei ole julkaistavissa tai vastaanottotieto ei ole kesken");
         }
+
+        if(!rivi.getHakemuksenTila().equals("KESKEN") && hakemuksenTila(rivi) == null) {
+            errors.add("Annettu HakemuksenTila ei ole sallittu arvo. ("+ rivi.getHakemuksenTila() + ")");
+        }
+        if(!rivi.getIlmoittautumisTila().isEmpty() && ilmoittautumisTila(rivi) == null) {
+            errors.add("Ilmoittautumistilan tulee olla joko tyhjä tai jokin hyväksytyistä arvoista. ("+rivi.getIlmoittautumisTila()+")" );
+        }
+        if(!rivi.getVastaanottoTila().isEmpty() && valintatuloksenTila(rivi) == null) {
+            errors.add("Vastaanottotilan tulee olla joko tyhjä tai jokin hyväksytyistä arvoista. ("+rivi.getVastaanottoTila()+")" );
+        }
+
         if (!"KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
             ValintatuloksenTila vt = valintatuloksenTila(rivi);
             String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vt, ilmoittautumisTila(rivi));
@@ -797,6 +808,21 @@ public class ErillishaunTuontiService {
                 errors.add("Toisen asteen pohjakoulutuksen suoritusmaata (" + rivi.getToisenAsteenSuoritusmaa() + ") ei saa antaa, jos ei toisen asteen pohjakoulutusta ole suoritettu.");
             }
         }
+
+        /*
+        //Tämä on toimiva validaatio, mutta sitä kannattaa käyttää vasta kun vaihtoehdot ehdolliselle hyväksymiselle saadaan valittua excelin pudotusvalikosta.
+        if(rivi.getEhdollisestiHyvaksyttavissa()) {
+            Map<String, Koodi> ehdot = koodistoCachedAsyncResource.haeKoodisto("hyvaksynnanehdot");
+            if(!ehdot.isEmpty()) {
+                Boolean sallittuehto = ehdot.values().stream()
+                        .flatMap(x -> x.getMetadata().stream())
+                        .map(Metadata::getNimi)
+                        .anyMatch(x -> x.equalsIgnoreCase(rivi.getEhdollisenHyvaksymisenEhtoKoodi()));
+                if (!sallittuehto)
+                    errors.add("Jos ehdollinen hyväksyntä on aktiivinen, on hyväksymisen ehdon oltava jokin pudotusvalikon arvoista.");
+            }
+        }
+        */
 
         if (rivi.getEhdollisestiHyvaksyttavissa() && rivi.getEhdollisenHyvaksymisenEhtoKoodi() != null &&
                 rivi.getEhdollisenHyvaksymisenEhtoKoodi().equals(EhdollisenHyvaksymisenEhtoKoodi.EHTO_MUU)) {
