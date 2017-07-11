@@ -36,6 +36,7 @@
 		<dependency>
 			<groupId>fi.vm.sade</groupId>
 			<artifactId>auditlogger</artifactId>
+			<version>${auditlog.api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

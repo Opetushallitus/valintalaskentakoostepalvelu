@@ -280,7 +280,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     .hakukohdeOid(hakukohdeOid)
                     .hakijaOid(personOid)
                     .hakemusOid(hakemusOid)
-                    .addAll(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
+                    .messageJson(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
                     .setOperaatio(auditLogOperation)
                     .build()));
 
@@ -305,7 +305,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                 .hakukohdeOid(hakukohdeOid)
                                 .hakijaOid(p.getPersonOid())
                                 .hakemusOid(p.getOid())
-                                .addAll(p.getAdditionalData())
+                                .messageJson(p.getAdditionalData())
                                 .setOperaatio(auditLogOperation)
                                 .build())));
     }

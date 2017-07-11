@@ -329,7 +329,7 @@ public class PistesyottoExternalTuontiService {
                                         .hakuOid(hakuOid)
                                         .hakijaOid(p.getPersonOid())
                                         .hakemusOid(p.getOid())
-                                        .addAll(p.getAdditionalData())
+                                        .messageJson(p.getAdditionalData())
                                         .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
                                         .build())
                         );
