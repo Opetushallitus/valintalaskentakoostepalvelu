@@ -36,15 +36,7 @@ import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -85,12 +77,18 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     @Override
     public void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids) {
-        valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
-            .subscribeOn(Schedulers.newThread())
+        final boolean onlyOne = hakemusOids.size() == 1;
+        Observable<List<HakijaDTO>> hakijatObs;
+        if(onlyOne) {
+            hakijatObs = valintaTulosServiceAsyncResource.getHakijaByHakemus(jalkiohjauskirjeDTO.getHakuOid(), hakemusOids.iterator().next()).map(Collections::singletonList);
+        } else {
+            hakijatObs = valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid()).map(h -> h.getResults());
+        }
+        hakijatObs.subscribeOn(Schedulers.newThread())
             .subscribe(
                     hakijat -> {
                         // VIALLISET DATA POIS FILTTEROINTI
-                        Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
+                        Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat);
                         //WHITELIST FILTTEROINTI
                         Set<String> whitelist = Sets.newHashSet(hakemusOids);
                         Collection<HakijaDTO> whitelistinJalkeen = vainHakeneetJalkiohjattavat
