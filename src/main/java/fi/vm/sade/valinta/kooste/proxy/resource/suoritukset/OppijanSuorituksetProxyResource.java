@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
+import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,9 +63,7 @@ public class OppijanSuorituksetProxyResource {
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}", opiskeljaOid);
-            handler.resume(Response.serverError()
-                    .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
-                    .build());
+            respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
         resolveHakemusDTO(hakuOid, opiskeljaOid, applicationAsyncResource.getApplication(hakemusOid), true, hakemusDTO -> {
             asyncResponse.resume(Response
@@ -74,7 +73,7 @@ public class OppijanSuorituksetProxyResource {
                     .build());
         }, poikkeus -> {
             LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-            asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
+            respondWithError(asyncResponse, poikkeus.getMessage());
         });
     }
 
@@ -93,9 +92,7 @@ public class OppijanSuorituksetProxyResource {
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{hakuOid}", hakuOid);
-            handler.resume(Response.serverError()
-                    .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
-                    .build());
+            respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
 
         resolveHakemusDTOs(hakuOid, hakemusOids, fetchEnsikertalaisuus,
@@ -111,7 +108,7 @@ public class OppijanSuorituksetProxyResource {
                 }),
                 (exception -> {
                     LOG.error("OppijanSuorituksetProxyResource exception", exception);
-                    asyncResponse.resume(Response.serverError().entity(exception.getMessage()).build());
+                    respondWithError(asyncResponse, exception.getMessage());
                 })
         );
     }
@@ -148,9 +145,7 @@ public class OppijanSuorituksetProxyResource {
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskelijaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskelijaOid/{oid}", opiskelijaOid);
-            handler.resume(Response.serverError()
-                    .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
-                    .build());
+            respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
         resolveHakemusDTO(hakuOid, opiskelijaOid, Observable.just(hakemus), fetchEnsikertalaisuus, hakemusDTO -> {
             asyncResponse.resume(Response
@@ -160,7 +155,7 @@ public class OppijanSuorituksetProxyResource {
                     .build());
         }, poikkeus -> {
             LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-            asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
+            respondWithError(asyncResponse, poikkeus.getMessage());
         });
     }
 
@@ -177,9 +172,7 @@ public class OppijanSuorituksetProxyResource {
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu");
-            handler.resume(Response.serverError()
-                    .entity("Suoritus proxy -palvelukutsu on aikakatkaistu")
-                    .build());
+            respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
 
         if (allHakemus == null || allHakemus.isEmpty()) {
@@ -192,17 +185,13 @@ public class OppijanSuorituksetProxyResource {
         HakuV1RDTO haku = hakuObservable.first();
 
         if (haku == null) {
-            String msg = String.format("Hakua %s ei löytynyt", hakuOid);
-            asyncResponse.resume(Response
-                    .noContent()
-                    .entity(msg)
-                    .build());
+            respondWithError(asyncResponse, String.format("Hakua %s ei löytynyt", hakuOid));
             return;
         }
 
          Action1<Throwable> exceptionConsumer = (Throwable poikkeus) -> {
             LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-            asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
+            respondWithError(asyncResponse, poikkeus.getMessage());
         };
 
         LOG.info("Hae suoritukset {} hakemukselle", allHakemus.size());

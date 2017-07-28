@@ -1,11 +1,12 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import static fi.vm.sade.valinta.kooste.KoosteAudit.username;
+import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.common.collect.ImmutableMap;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
@@ -198,13 +199,6 @@ public class ValintaTulosServiceProxyResource {
             LOG.error(timeoutMessage);
             respondWithError(asyncResponse, "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu");
         });
-    }
-
-    private void respondWithError(AsyncResponse asyncResponse, String error) {
-        asyncResponse.resume(Response.serverError()
-                .entity(ImmutableMap.of("error", error))
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .build());
     }
 
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
