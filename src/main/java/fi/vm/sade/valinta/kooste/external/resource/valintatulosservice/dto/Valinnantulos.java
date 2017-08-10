@@ -179,6 +179,10 @@ public class Valinnantulos {
     }
 
     public static Valinnantulos of(ErillishaunHakijaDTO hakija, Boolean ohitaVastaanotto) {
+        return of(hakija, ohitaVastaanotto, null);
+    }
+
+    public static Valinnantulos of(ErillishaunHakijaDTO hakija, Boolean ohitaVastaanotto, HakemuksenTila valinnantila) {
         Valinnantulos valinnantulos = new Valinnantulos();
         valinnantulos.setHakemusOid(hakija.hakemusOid);
         valinnantulos.setHenkiloOid(hakija.hakijaOid);
@@ -209,7 +213,12 @@ public class Valinnantulos {
             valinnantulos.setHyvaksymiskirjeLahetetty(OffsetDateTime.ofInstant(hakija.getHyvaksymiskirjeLahetetty().toInstant(), ZoneId.of("Europe/Helsinki")));
         }
 
-        valinnantulos.setValinnantila(hakija.hakemuksenTila);
+        if( null == hakija.hakemuksenTila) {
+            valinnantulos.setValinnantila(valinnantila);
+        } else {
+            valinnantulos.setValinnantila(hakija.hakemuksenTila);
+        }
+
         valinnantulos.setVastaanottotila(Optional.ofNullable(hakija.valintatuloksenTila).orElse(ValintatuloksenTila.KESKEN));
         valinnantulos.setIlmoittautumistila(Optional.ofNullable(hakija.ilmoittautumisTila).orElse(IlmoittautumisTila.EI_TEHTY));
 
