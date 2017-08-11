@@ -145,8 +145,6 @@ public class ValintalaskentaExcelResource {
     private DokumenttiAsyncResource dokumenttiAsyncResource;
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
-    @Value("${valintalaskenta-ui.read-from-valintarekisteri}")
-    private String useVtsData;
 
     @POST
     @Path("/sijoitteluntulos/aktivoi")
@@ -163,9 +161,7 @@ public class ValintalaskentaExcelResource {
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                     valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
                     valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.createAuditSession(httpServletRequestJaxRS)),
-                    (Boolean.parseBoolean(useVtsData) ?
-                            valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid) :
-                            sijoitteluAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid)),
+                    valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
                     (haku, tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset) -> {
                         try {

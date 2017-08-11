@@ -56,11 +56,9 @@ public class ErillishaunVientiService {
     private final ApplicationAsyncResource applicationAsyncResource;
     private final DokumenttiResource dokumenttiResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-    private final boolean useVtsData;
 
     @Autowired
     public ErillishaunVientiService(
-            @Value("${valintalaskenta-ui.read-from-valintarekisteri}") String useVtsData,
             ValintaTulosServiceAsyncResource tilaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             SijoitteluAsyncResource sijoitteluAsyncResource,
@@ -73,10 +71,7 @@ public class ErillishaunVientiService {
         this.applicationAsyncResource = applicationAsyncResource;
         this.dokumenttiResource = dokumenttiResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-        this.useVtsData = Boolean.parseBoolean(useVtsData);
-        if(this.useVtsData) {
-            LOG.info("Luetaan valinnantulokset ja sijoittelu valinta-tulos-servicestä!!!!!!!");
-        }
+        LOG.info("Luetaan valinnantulokset ja sijoittelu valinta-tulos-servicestä!!!!!!!");
     }
 
     private String teksti(final Map<String, String> nimi) {
@@ -89,9 +84,8 @@ public class ErillishaunVientiService {
         Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());
         Observable<List<Lukuvuosimaksu>> lukuvuosimaksutObs = tilaAsyncResource.fetchLukuvuosimaksut(erillishaku.getHakukohdeOid(), auditSession);
 
-        Observable<ErillishakuExcel> erillishakuExcel = useVtsData ?
-                generoiValintarekisterista(auditSession, erillishaku, hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, lukuvuosimaksutObs) :
-                generoiSijoittelusta(erillishaku, hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, lukuvuosimaksutObs);
+        Observable<ErillishakuExcel> erillishakuExcel =
+                generoiValintarekisterista(auditSession, erillishaku, hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, lukuvuosimaksutObs);
 
         erillishakuExcel.subscribeOn(Schedulers.newThread()).subscribe(
             excel -> {
