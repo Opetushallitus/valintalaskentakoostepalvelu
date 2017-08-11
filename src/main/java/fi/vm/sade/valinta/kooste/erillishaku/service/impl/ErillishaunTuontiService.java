@@ -282,11 +282,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                         .map(rivi -> toErillishaunHakijaDTO(haku, rivi))
                         .filter(hakijaDTO -> vanhatValinnantulokset.containsKey(hakijaDTO.hakemusOid))
                         .map(hakijaDTO -> {
-                            Valinnantulos vanhaValinnantulos = vanhatValinnantulokset.get(hakijaDTO.hakemusOid);
-                            Valinnantulos valinnantulos = Valinnantulos.of(hakijaDTO);
-                            valinnantulos.setValinnantila(vanhaValinnantulos.getValinnantila());
-                            valinnantulos.setIlmoittautumistila(vanhaValinnantulos.getIlmoittautumistila());
-                            valinnantulos.setVastaanottotila(vanhaValinnantulos.getVastaanottotila());
+                            Valinnantulos valinnantulos = vanhatValinnantulokset.get(hakijaDTO.hakemusOid);
                             valinnantulos.setPoistettava(true);
                             return valinnantulos;
                         })
