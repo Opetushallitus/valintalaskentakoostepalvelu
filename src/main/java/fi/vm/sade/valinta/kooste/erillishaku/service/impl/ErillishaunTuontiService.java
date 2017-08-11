@@ -271,7 +271,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             kesken.stream()
                     .map(rivi -> toErillishaunHakijaDTO(haku, rivi)).forEach(hakijaDTO -> {
                         if(vanhatValinnantulokset.containsKey(hakijaDTO.hakemusOid)) {
-                            keskeneraisetValinnantulokset.add(Valinnantulos.of(hakijaDTO, true, vanhatValinnantulokset.get(hakijaDTO.hakemusOid).getValinnantila()));
+                            keskeneraisetValinnantulokset.add(Valinnantulos.of(hakijaDTO, false, vanhatValinnantulokset.get(hakijaDTO.hakemusOid).getValinnantila()));
                         } else {
                             LOG.info("Kesken-tilaiselle hakijalle {} ei löytynyt vanhaa valinnantulosta haussa {} jonossa {}", hakijaDTO.getHakemusOid(), haku.getHakuOid(), haku.getTarjoajaOid());
                         }
