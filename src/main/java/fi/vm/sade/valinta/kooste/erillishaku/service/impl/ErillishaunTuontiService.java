@@ -34,12 +34,7 @@ import rx.Observable;
 import rx.Scheduler;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -252,49 +247,50 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 .filter(h -> !ainoastaanHakemuksenTilaPaivitys(h) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(h.valintatuloksenTila))
                 .collect(Collectors.toList());
 
+        List<ErillishakuRivi> lisattavat = lisattavatTaiKeskeneraiset.stream().filter(rivi -> !isKesken(rivi)).collect(Collectors.toList());
+        List<ErillishakuRivi> kesken = lisattavatTaiKeskeneraiset.stream().filter(rivi -> isKesken(rivi)).collect(Collectors.toList());
+
+        final Map<String, Valinnantulos> vanhatValinnantulokset = new HashMap<>();
+        if(kesken.size() > 0) {
+            vanhatValinnantulokset.putAll(valintaTulosServiceAsyncResource.getErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid())
+                    .toBlocking().first().stream().collect(Collectors.toMap(Valinnantulos::getHakemusOid, v -> v)));
+        }
+
         return doVastaanottoTilojenTallennusValintaTulosServiceen(auditSession.getPersonOid(), hakijatKaikillaTilaPaivityksilla).flatMap(poikkeukset -> {
             if (poikkeukset.isEmpty()) {
-                List<ErillishakuRivi> lisattavat = lisattavatTaiKeskeneraiset.stream().filter(rivi -> !isKesken(rivi)).collect(Collectors.toList());
-                List<ErillishakuRivi> kesken = lisattavatTaiKeskeneraiset.stream().filter(rivi -> isKesken(rivi)).collect(Collectors.toList());
-                return doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, createValinnantuloksetForValintaTulosService(auditSession, haku, lisattavat, kesken, poistettavat));
+                return doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, createValinnantuloksetForValintaTulosService(haku, lisattavat, kesken, poistettavat, vanhatValinnantulokset));
             } else {
                 return Observable.just(poikkeukset);
             }
         });
     }
 
-    private List<Valinnantulos> createValinnantuloksetForValintaTulosService(final AuditSession auditSession, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavat, final List<ErillishakuRivi> kesken, final List<ErillishakuRivi> poistettavat) {
-
-        List<Valinnantulos> keskeneraisetValinnantulokset = new ArrayList<>();
-        if(kesken.size() > 0) {
-            Map<String, Valinnantulos> vanhatValinnantulokset = valintaTulosServiceAsyncResource.getErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid()).toBlocking().first().stream().collect(Collectors.toMap(Valinnantulos::getHakemusOid, v -> v));
-            kesken.stream()
-                    .map(rivi -> toErillishaunHakijaDTO(haku, rivi)).forEach(hakijaDTO -> {
-                        if(vanhatValinnantulokset.containsKey(hakijaDTO.hakemusOid)) {
-                            Valinnantulos vanhaValinnantulos = vanhatValinnantulokset.get(hakijaDTO.hakemusOid);
-                            Valinnantulos valinnantulos = Valinnantulos.of(hakijaDTO);
-                            valinnantulos.setValinnantila(vanhaValinnantulos.getValinnantila());
-                            valinnantulos.setIlmoittautumistila(vanhaValinnantulos.getIlmoittautumistila());
-                            valinnantulos.setVastaanottotila(vanhaValinnantulos.getVastaanottotila());
-                            valinnantulos.setPoistettava(true);
-                            keskeneraisetValinnantulokset.add(valinnantulos);
-                        } else {
-                            LOG.info("Kesken-tilaiselle hakijalle {} ei löytynyt vanhaa valinnantulosta haussa {} jonossa {}", hakijaDTO.getHakemusOid(), haku.getHakuOid(), haku.getTarjoajaOid());
-                        }
-                    }
-            );
-        }
-
-        List<Valinnantulos> valinnantulokset = Stream.concat(
+    private List<Valinnantulos> createValinnantuloksetForValintaTulosService(final ErillishakuDTO haku,
+                                                                             final List<ErillishakuRivi> lisattavat,
+                                                                             final List<ErillishakuRivi> kesken,
+                                                                             final List<ErillishakuRivi> poistettavat,
+                                                                             final Map<String, Valinnantulos> vanhatValinnantulokset) {
+        return Stream.concat(Stream.concat(
                 poistettavat.stream()
                         .map(rivi -> toErillishaunHakijaDTO(haku, rivi))
                         .map(Valinnantulos::of),
                 lisattavat.stream()
                         .map(rivi -> toErillishaunHakijaDTO(haku, rivi))
                         .map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO)))
+                ),
+                kesken.stream()
+                        .map(rivi -> toErillishaunHakijaDTO(haku, rivi))
+                        .filter(hakijaDTO -> vanhatValinnantulokset.containsKey(hakijaDTO.hakemusOid))
+                        .map(hakijaDTO -> {
+                            Valinnantulos vanhaValinnantulos = vanhatValinnantulokset.get(hakijaDTO.hakemusOid);
+                            Valinnantulos valinnantulos = Valinnantulos.of(hakijaDTO);
+                            valinnantulos.setValinnantila(vanhaValinnantulos.getValinnantila());
+                            valinnantulos.setIlmoittautumistila(vanhaValinnantulos.getIlmoittautumistila());
+                            valinnantulos.setVastaanottotila(vanhaValinnantulos.getVastaanottotila());
+                            valinnantulos.setPoistettava(true);
+                            return valinnantulos;
+                        })
         ).collect(Collectors.toList());
-        valinnantulokset.addAll(keskeneraisetValinnantulokset);
-        return valinnantulokset;
     }
 
 
