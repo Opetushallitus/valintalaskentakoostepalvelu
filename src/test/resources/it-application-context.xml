@@ -107,7 +107,6 @@
     <jaxrs:server id="koostepalveluResurssit">
       <jaxrs:serviceBeans>
         <ref bean="ErillishakuResource"/>
-        <ref bean="ErillishakuProxyResource"/>
         <ref bean="PistesyottoResource"/>
         <ref bean="SuorituksenArvosanatProxyResource"/>
         <ref bean="DokumenttiProsessiResource"/>

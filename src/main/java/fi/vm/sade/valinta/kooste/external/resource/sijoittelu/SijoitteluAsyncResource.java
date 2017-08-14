@@ -4,7 +4,6 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
 
 import java.util.List;
@@ -16,14 +15,6 @@ import java.util.function.Consumer;
  * @Deprecated Pitäisi käyttää Valintarekisteriä
  */
 public interface SijoitteluAsyncResource {
-
-    @Deprecated
-    Future<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid);
-
-    @Deprecated
-    Peruutettava getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback);
-
-    Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 
     @Deprecated
     Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid);

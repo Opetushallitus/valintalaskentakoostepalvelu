@@ -86,24 +86,8 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
-    public Peruutettava getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(paginationResultReference.get());
-        return new PeruutettavaImpl(Futures.immediateFuture(paginationResultReference.get()));
-    }
-
-    @Override
     public Observable<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid) {
         return null;
-    }
-
-    @Override
-    public Future<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
