@@ -156,11 +156,6 @@ public class KoosteTestProfileConfiguration {
         return INTERCEPTOR;
     }
 
-    @Bean(name = "sijoitteluTilaServiceRestClientCasInterceptor")
-    public AbstractPhaseInterceptor<Message> getSijoitteluTilaServiceRestClientCasInterceptor() {
-        return INTERCEPTOR;
-    }
-
     @Bean(name = "SijoitteluServiceRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getSijoitteluServiceRestClientCasInterceptor() {
         return INTERCEPTOR;

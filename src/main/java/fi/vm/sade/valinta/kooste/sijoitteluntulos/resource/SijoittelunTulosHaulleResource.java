@@ -24,7 +24,7 @@ import org.springframework.stereotype.Controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+//import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosHyvaksymiskirjeetRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
@@ -66,7 +66,7 @@ public class SijoittelunTulosHaulleResource {
             SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
                     null, // ei asiointikielirajausta
                     "osoitetarrat", "Luo osoitetarrat haulle", null, Arrays.asList("osoitetarrat", "haulle"));
-            sijoittelunTulosOsoitetarratRoute.osoitetarratHaulle(prosessi, hakuOid, SijoitteluResource.LATEST, SecurityContextHolder.getContext().getAuthentication());
+            sijoittelunTulosOsoitetarratRoute.osoitetarratHaulle(prosessi, hakuOid, "latest", SecurityContextHolder.getContext().getAuthentication());
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
         } catch (Exception e) {
@@ -119,7 +119,7 @@ public class SijoittelunTulosHaulleResource {
             SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
                     null, // ei asiointikielirajausta
                     "taulukkolaskennat", "Luo taulukkolaskennat haulle", null, Arrays.asList("taulukkolaskennat", "haulle"));
-            sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(prosessi, hakuOid, SijoitteluResource.LATEST, AuthorizationUtil.createAuditSession(httpServletRequestJaxRS), SecurityContextHolder.getContext().getAuthentication());
+            sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(prosessi, hakuOid, "latest", AuthorizationUtil.createAuditSession(httpServletRequestJaxRS), SecurityContextHolder.getContext().getAuthentication());
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
         } catch (Exception e) {

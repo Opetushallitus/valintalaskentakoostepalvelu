@@ -92,11 +92,6 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
-    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-        hakukohde.accept(resultMap.get(Long.valueOf(sijoitteluAjoId)));
-    }
-
-    @Override
     public Observable<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid) {
         return null;
     }

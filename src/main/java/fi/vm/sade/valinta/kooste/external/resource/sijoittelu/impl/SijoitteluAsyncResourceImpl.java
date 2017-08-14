@@ -86,16 +86,6 @@ public class SijoitteluAsyncResourceImpl extends UrlConfiguredResource implement
                 HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset));
     }
 
-    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-        ///erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
-        String url = getUrl("sijoittelu-service.erillissijoittelu.sijotteluajo.hakukohde", hakuOid, sijoitteluAjoId, hakukohdeOid);
-        getWebClient()
-                .path(url)
-                .accept(MediaType.WILDCARD)
-                .async()
-                .get(new GsonResponseCallback<HakukohdeDTO>(GSON, url, hakukohde, poikkeus, new TypeToken<HakukohdeDTO>() {}.getType()));
-    }
-
     public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
         String url = getUrl("sijoittelu-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, SijoitteluResource.LATEST, hakukohdeOid);
         getWebClient()

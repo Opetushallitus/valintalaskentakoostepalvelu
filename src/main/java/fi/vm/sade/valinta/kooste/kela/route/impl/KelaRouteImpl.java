@@ -25,7 +25,6 @@ import fi.vm.sade.valinta.kooste.kela.komponentti.impl.*;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.LogEntry;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
-import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 import org.apache.camel.Endpoint;

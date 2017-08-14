@@ -51,7 +51,6 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
-import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Tiedosto;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
@@ -86,7 +85,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
     private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
     private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
-    private final TilaResource tilaResource;
     private final SijoitteluResource sijoitteluResource;
     private final DokumenttiResource dokumenttiResource;
     private final ViestintapalveluResource viestintapalveluResource;
@@ -118,7 +116,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
             ViestintapalveluResource viestintapalveluResource,
             HaeOsoiteKomponentti osoiteKomponentti,
-            ApplicationResource applicationResource, TilaResource tilaResource,
+            ApplicationResource applicationResource,
             DokumenttiResource dokumenttiResource,
             SijoitteluResource sijoitteluResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
@@ -127,7 +125,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.valintaTulosServiceAsyncResource= valintaTulosServiceAsyncResource;
         this.sijoitteluResource = sijoitteluResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-        this.tilaResource = tilaResource;
         this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
         this.applicationResource = applicationResource;
         this.osoiteKomponentti = osoiteKomponentti;
@@ -206,7 +203,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hk = null;
                         HakuV1RDTO hakuDTO = null;
                         try {
-                            tilat = tilaResource.hakukohteelle(hakukohdeOid);
                             hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
                             hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).toBlocking().toFuture().get();
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).toBlocking().toFuture().get();

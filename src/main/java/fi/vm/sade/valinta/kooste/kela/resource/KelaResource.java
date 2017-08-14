@@ -22,7 +22,6 @@ import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
-import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
@@ -47,9 +46,6 @@ public class KelaResource {
 
     @Autowired
     private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
-
-    @Autowired
-    private TilaResource tilaResource;
 
     @POST
     @Path("/aktivoi")

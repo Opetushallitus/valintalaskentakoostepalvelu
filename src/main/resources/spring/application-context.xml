@@ -136,21 +136,6 @@
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
-		<jaxrs-client:client id="sijoitteluTilaServiceRestClient"
-							 address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
-							 serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource"
-							 inheritHeaders="true">
-			<jaxrs-client:outInterceptors>
-				<ref bean="sijoitteluTilaServiceRestClientCasInterceptor"/>
-			</jaxrs-client:outInterceptors>
-			<jaxrs-client:inInterceptors>
-				<ref bean="sijoitteluTilaServiceRestClientCasInterceptor"/>
-			</jaxrs-client:inInterceptors>
-			<jaxrs-client:providers>
-				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-			</jaxrs-client:providers>
-		</jaxrs-client:client>
 		<jaxrs-client:client id="SijoitteluServiceRestClient"
 							 address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
 							 serviceClass="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource"
