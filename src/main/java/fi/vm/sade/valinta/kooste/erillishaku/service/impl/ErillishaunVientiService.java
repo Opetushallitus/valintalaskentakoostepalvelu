@@ -134,48 +134,6 @@ public class ErillishaunVientiService {
         );
     }
 
-    private Observable<ErillishakuExcel> generoiSijoittelusta(ErillishakuDTO erillishaku,
-                                                              Observable<List<Hakemus>> hakemusObservable,
-                                                              Observable<HakuV1RDTO> hakuFuture,
-                                                              Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable,
-                                                              Observable<List<Lukuvuosimaksu>> lukuvuosimaksuObs) {
-
-        Observable<List<Valintatulos>> valintatulosObservable = tilaAsyncResource.findValintatulokset(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
-        Future<HakukohdeDTO> hakukohdeFuture = sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
-
-        return zip(hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, valintatulosObservable, from(hakukohdeFuture), lukuvuosimaksuObs,
-            (hakemukset, haku, tarjontaHakukohde, valintatulos, hakukohde, lukuvuosimaksus) -> {
-                Map<String, Valintatulos> valintatulokset = getValintatulokset(erillishaku, valintatulos);
-                if (MapUtils.isEmpty(valintatulokset) && hakukohde.getSijoitteluajoId() == null) {
-                    // ei viela tuloksia, joten tehdaan tuonti haetuista hakemuksista
-                    return generoiIlmanHakukohdettaJaTuloksia(erillishaku, hakemukset,lukuvuosimaksus, haku, tarjontaHakukohde);
-                } else if(MapUtils.isEmpty(valintatulokset) && hakukohde.getSijoitteluajoId() != null) {
-                    return generoiHakukohteella(erillishaku, hakemukset,lukuvuosimaksus, haku, tarjontaHakukohde, hakukohde);
-                } else {
-                    return generoiHakukohteellaJaTuloksilla(erillishaku, hakemukset,lukuvuosimaksus, haku, tarjontaHakukohde, hakukohde, valintatulokset);
-                }
-            }
-        );
-    }
-
-    private ErillishakuExcel generoiHakukohteellaJaTuloksilla(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
-                                                              final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde,
-                                                              final HakukohdeDTO hakukohde, final Map<String, Valintatulos> valintatulokset) {
-        LOG.info("Muodostetaan Excel valintaperusteista!");
-        Map<String, HakemusDTO> oidToHakemus = hakukohde
-                .getValintatapajonot().stream()
-                .flatMap(v -> v.getHakemukset().stream()).collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h));
-        Map<String, Maksuntila> personOidToMaksuntila = lukuvuosimaksus.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
-        List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(hakemus -> {
-            Optional<HakemusDTO> hakemusDTO = ofNullable(oidToHakemus.get(hakemus.getOid()));
-            Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(HakemusDTO::getTila);
-            Valintatulos valintatulos = ofNullable(valintatulokset.get(hakemus.getOid())).orElse(new Valintatulos());
-            return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), ofNullable(personOidToMaksuntila.get(hakemus.getPersonOid())),
-                    hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"), valintatulos, hakukohde.getOid());
-        }).collect(Collectors.toList());
-        return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
-    }
-
     private ErillishakuExcel generoiValinnantuloksista(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
                                                        final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde,
                                                        final List<Valinnantulos> valinnantulos) {

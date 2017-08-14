@@ -20,29 +20,6 @@ public interface SijoitteluAsyncResource {
     Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid);
 
     @Deprecated
-    void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
-
-    @Deprecated
-    Observable<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid);
-
-    @Deprecated
-    Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid);
-
-    @Deprecated
     Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid);
 
-    @Deprecated
-    Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid);
-
-    @Deprecated
-    Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);
-
-    @Deprecated
-    Observable<HakukohdeDTO> asetaJononValintaesitysHyvaksytyksi(String hakuOid, String hakukohdeOid, String valintatapajonoOid, Boolean hyvaksytty);
-
-    @Deprecated
-    Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite);
-
-    @Deprecated
-    Observable<HakukohteenValintatulosUpdateStatuses> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset);
 }

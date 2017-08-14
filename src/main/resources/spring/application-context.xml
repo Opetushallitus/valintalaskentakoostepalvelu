@@ -427,8 +427,6 @@
 				class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl" />
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.authentication.impl.HenkiloAsyncResourceImpl" />
-		<bean
-				class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.TilaAsyncResourceImpl" />
 		<!-- Vipa Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />

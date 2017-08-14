@@ -42,51 +42,7 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
-    public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
-        return null;
-    }
-
-    @Override
-    public Observable<HakukohdeDTO> asetaJononValintaesitysHyvaksytyksi(String hakuOid, String hakukohdeOid, String valintatapajonoOid, Boolean hyvaksytty) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Observable<HakukohteenValintatulosUpdateStatuses> tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(List<Valintatulos> valintatulokset) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid) {
-        return null;
-    }
-
-    @Override
-    public Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
-        throw new UnsupportedOperationException();
-    }
-
-    public static Map<Long, HakukohdeDTO> getResultMap() {
-        return resultMap;
-    }
-
-    @Override
-    public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-        hakukohde.accept(resultReference.get());
-    }
-
-    @Override
-    public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid) {
-        return null;
-    }
-
-    @Override
-    public Observable<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid) {
         return null;
     }
 
