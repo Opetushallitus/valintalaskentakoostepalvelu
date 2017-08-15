@@ -34,6 +34,7 @@ public class ErillishaunVientiServiceTest {
         AuditSession auditSession = new AuditSession();
         when(mockTilaAsyncResource.getErillishaunValinnantulokset(anyObject(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
         when(mockTilaAsyncResource.fetchLukuvuosimaksut(anyString(),any())).thenReturn(Observable.just(Lists.newArrayList()));
+        when(mockTilaAsyncResource.getErillishaunValinnantulokset(any(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
         final ErillishaunVientiService erillishaunVientiService =
