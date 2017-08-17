@@ -64,12 +64,6 @@ public class OsoitetarratServiceTest {
         try {
             String HAKU2 = "1.2.246.562.5.2013080813081926341927";
             String HAKUKOHDE2 = "1.2.246.562.5.39836447563";
-            MockSijoitteluAsyncResource.setPaginationResult(
-                    osoitetarratResource.gson().fromJson(
-                            IOUtils.toString(
-                                    OsoitetarratServiceTest.class.getResourceAsStream("/viestintapalvelu/data/sijoittelussa_hyvaksytyt.json"))
-                            , HakijaPaginationObject.class)
-            );
             Response r =
                     osoitetarratSijoittelussaHyvaksytyilleResource.getWebClient()
                             .query("hakuOid", HAKU2)

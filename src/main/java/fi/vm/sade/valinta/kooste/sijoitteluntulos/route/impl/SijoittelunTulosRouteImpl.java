@@ -43,14 +43,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Tiedosto;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
@@ -85,7 +83,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
     private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
     private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
-    private final SijoitteluResource sijoitteluResource;
     private final DokumenttiResource dokumenttiResource;
     private final ViestintapalveluResource viestintapalveluResource;
     private final HaeOsoiteKomponentti osoiteKomponentti;
@@ -113,17 +110,14 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
             HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta,
             HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
-            SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
             ViestintapalveluResource viestintapalveluResource,
             HaeOsoiteKomponentti osoiteKomponentti,
             ApplicationResource applicationResource,
             DokumenttiResource dokumenttiResource,
-            SijoitteluResource sijoitteluResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti
     ) {
         this.valintaTulosServiceAsyncResource= valintaTulosServiceAsyncResource;
-        this.sijoitteluResource = sijoitteluResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
         this.applicationResource = applicationResource;

@@ -15,7 +15,6 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
@@ -257,7 +256,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     @Override
     public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
         return getAsObservable(
-                getUrl("valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, SijoitteluResource.LATEST, hakukohdeOid),
+                getUrl("valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, "latest", hakukohdeOid),
                 new TypeToken<HakukohdeDTO>() {}.getType(),
                 client -> {
                     client.accept(MediaType.WILDCARD_TYPE);

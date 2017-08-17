@@ -8,7 +8,6 @@ import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -47,18 +46,17 @@ public class HakijatoimistoTest {
 
         OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl();
         final String host= Integraatiopalvelimet.mockServer.getUrl();
-        SijoitteluAsyncResourceImpl s = new SijoitteluAsyncResourceImpl(null);
         ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(null);
         Observable<List<Hakemus>> hakemuksetObservable = a.getApplicationsByOid(hakuOid, hakukohdeOid);
-        Observable<HakijaPaginationObject> hakijatFuture = s.getKoulutuspaikkalliset(hakuOid, hakukohdeOid);
+        //Observable<HakijaPaginationObject> hakijatFuture = s.getKoulutuspaikkalliset(hakuOid, hakukohdeOid);
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = o.haeHakutoimisto(tarjoajaOid);
         final Semaphore counter = new Semaphore(0);
         final AtomicReference<Optional<HakutoimistoDTO>> option = new AtomicReference<>();
         Observable.zip(
                 hakemuksetObservable,
-                hakijatFuture,
+                //hakijatFuture,
                 hakutoimistoObservable,
-                (hakemukset, hakijat, hakutoimisto) -> hakutoimisto
+                (hakemukset, /*hakijat,*/ hakutoimisto) -> hakutoimisto
         ).subscribe(
                 hakutoimisto -> {
                     option.set(hakutoimisto);

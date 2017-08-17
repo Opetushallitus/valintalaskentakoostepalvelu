@@ -9,9 +9,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -47,9 +44,6 @@ import java.util.stream.Stream;
 @Path("/proxy/valintatulosservice")
 public class ValintaTulosServiceProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(ValintaTulosServiceProxyResource.class);
-
-//    @Autowired
-//    private SijoitteluAsyncResource sijoitteluResource;
 
     @Autowired
     private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
@@ -134,60 +128,6 @@ public class ValintaTulosServiceProxyResource {
                 }
             );
     }
-//
-//    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-//    @POST
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-//    public void muutaHakemustenTilaa(@PathParam("hakuOid") String hakuOid,
-//                                     @PathParam("hakukohdeOid") String hakukohdeOid,
-//                                     List<Valintatulos> valintatulokset,
-//                                     @QueryParam("selite") String selite,
-//                                     @Suspended AsyncResponse asyncResponse) throws UnsupportedEncodingException {
-//        setAsyncTimeout(asyncResponse,
-//                String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s?selite=%s",
-//                        hakuOid, hakukohdeOid, selite));
-//
-//        String muokkaaja = username();
-//        sijoitteluResource.tarkistaEtteivatValintatuloksetMuuttuneetHakemisenJalkeen(valintatulokset).flatMap(staleReadCheckResponse -> {
-//            if (staleReadCheckResponse.statuses.isEmpty()) {
-//                List<VastaanottoRecordDTO> tallennettavat = null;
-//                try {
-//                    tallennettavat = createVastaanottoRecordsFrom(valintatulokset, muokkaaja, selite);
-//                } catch (Exception e) {
-//                    return Observable.error(e);
-//                }
-//                Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(tallennettavat);
-//                vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
-//                return vastaanottoTilojenTallennus;
-//            } else {
-//                return Observable.error(new StaleReadCheckFailureException(staleReadCheckResponse));
-//            }
-//        }).flatMap(vastaanottoResponse -> {
-//            Stream<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed);
-//            List<ValintatulosUpdateStatus> failedUpdateStatuses = epaonnistuneet.map(v -> {
-//                LOG.warn(v.toString());
-//                return new ValintatulosUpdateStatus(Response.Status.FORBIDDEN.getStatusCode(), v.getResult().getMessage(), null, v.getHakemusOid());
-//            }).collect(Collectors.toList());
-//            if (failedUpdateStatuses.isEmpty()) {
-//                valintatulokset.forEach(valintatulos -> valintatulos.setRead(new Date()));
-//                return sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite)
-//                        .doOnError(throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
-//            } else {
-//                return Observable.error(new VastaanottoUpdateFailuresException(failedUpdateStatuses));
-//            }
-//        }).subscribe(
-//                updateStatuses -> asyncResponse.resume(Response.ok(updateStatuses).build()),
-//                poikkeus -> {
-//                    if (poikkeus instanceof  StaleReadCheckFailureException) {
-//                        asyncResponse.resume(Response.serverError().entity(((StaleReadCheckFailureException) poikkeus).updateStatuses).build());
-//                    } else {
-//                        List<ValintatulosUpdateStatus> failedUpdateStatuses = poikkeus instanceof VastaanottoUpdateFailuresException ?
-//                                ((VastaanottoUpdateFailuresException) poikkeus).failedUpdateStatuses : Collections.emptyList();
-//                        asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(poikkeus.getMessage(), failedUpdateStatuses)).build());
-//                    }
-//                });
-//    }
 
     private List<VastaanottoRecordDTO> createVastaanottoRecordsFrom(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
         return valintatulokset.stream().map(v -> VastaanottoRecordDTO.of(v, muokkaaja, selite)).collect(Collectors.toList());

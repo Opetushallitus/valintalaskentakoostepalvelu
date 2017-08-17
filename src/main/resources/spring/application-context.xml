@@ -136,21 +136,6 @@
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
-		<jaxrs-client:client id="SijoitteluServiceRestClient"
-							 address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
-							 serviceClass="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource"
-							 inheritHeaders="true">
-			<jaxrs-client:outInterceptors>
-				<ref bean="SijoitteluServiceRestClientCasInterceptor"/>
-			</jaxrs-client:outInterceptors>
-			<jaxrs-client:inInterceptors>
-				<ref bean="SijoitteluServiceRestClientCasInterceptor"/>
-			</jaxrs-client:inInterceptors>
-			<jaxrs-client:providers>
-				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-			</jaxrs-client:providers>
-		</jaxrs-client:client>
 		<jaxrs-client:client id="ValintalaskentaHakukohdeRestClient"
 							 address="https://${host.virkailija}"
 							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource"
@@ -423,8 +408,6 @@
 		<!-- Sijoittelu Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteleAsyncResourceImpl" />
-		<bean
-				class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl" />
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.authentication.impl.HenkiloAsyncResourceImpl" />
 		<!-- Vipa Async -->

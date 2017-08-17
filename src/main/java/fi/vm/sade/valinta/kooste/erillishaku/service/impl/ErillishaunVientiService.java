@@ -1,56 +1,43 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
-import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
-import rx.functions.Func5;
 import rx.schedulers.Schedulers;
 
 import java.util.*;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static rx.Observable.from;
 import static rx.Observable.zip;
 
 @Service
 public class ErillishaunVientiService {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishaunVientiService.class);
-    private final SijoitteluAsyncResource sijoitteluAsyncResource;
     private final ValintaTulosServiceAsyncResource tilaAsyncResource;
     private final TarjontaAsyncResource hakuV1AsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
@@ -61,11 +48,9 @@ public class ErillishaunVientiService {
     public ErillishaunVientiService(
             ValintaTulosServiceAsyncResource tilaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
-            SijoitteluAsyncResource sijoitteluAsyncResource,
             TarjontaAsyncResource hakuV1AsyncResource,
             DokumenttiResource dokumenttiResource,
             KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
-        this.sijoitteluAsyncResource = sijoitteluAsyncResource;
         this.tilaAsyncResource = tilaAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
@@ -178,22 +163,6 @@ public class ErillishaunVientiService {
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakuRivit);
     }
 
-    private ErillishakuExcel generoiHakukohteella(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
-                                                  final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde,
-                                                  final HakukohdeDTO hakukohde) {
-        LOG.info("Muodostetaan Excel valintaperusteista!");
-        Map<String, HakemusDTO> oidToHakemus = hakukohde
-                .getValintatapajonot().stream()
-                .flatMap(v -> v.getHakemukset().stream()).collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h));
-        Map<String, Maksuntila> personOidToMaksuntila = lukuvuosimaksus.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
-        List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(hakemus -> {
-                Optional<HakemusDTO> hakemusDTO = ofNullable(oidToHakemus.get(hakemus.getOid()));
-            Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(HakemusDTO::getTila);
-            return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), ofNullable(personOidToMaksuntila.get(hakemus.getPersonOid())), hakemuksenTila.map(HakemuksenTila::toString).orElse("KESKEN"), null, hakukohde.getOid());
-            }).collect(Collectors.toList());
-        return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
-    }
-
     private ErillishakuExcel generoiIlmanHakukohdettaJaTuloksia(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
                                                                 final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde) {
         LOG.info("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
@@ -279,18 +248,5 @@ public class ErillishaunVientiService {
 
     private String readPostinumero(HakemusWrapper wrapper) {
         return isNotBlank(wrapper.getSuomalainenPostinumero()) ? wrapper.getSuomalainenPostinumero() : wrapper.getUlkomainenPostinumero();
-    }
-
-    private Map<String, Valintatulos> getValintatulokset(final ErillishakuDTO erillishaku, final List<Valintatulos> valintatulos) {
-        try {
-            return valintatulos.stream()
-                    .filter(v -> erillishaku.getValintatapajonoOid().equals(v.getValintatapajonoOid()))
-                    .collect(Collectors.toMap(Valintatulos::getHakemusOid, v -> v));
-        } catch (Exception e1) {
-            LOG.error("Sijoittelusta ei saatu tietoja hakukohteelle vientia varten! Resurssi /sijoittelu/{}/sijoitteluajo/{}/hakukohde/{} ",
-                    erillishaku.getHakuOid(), erillishaku.getHakukohdeOid(), SijoitteluResource.LATEST);
-            LOG.error("Stack trace", e1);
-            throw new RuntimeException(e1);
-        }
     }
 }
