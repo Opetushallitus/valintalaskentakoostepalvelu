@@ -12,23 +12,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static rx.Observable.*;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
-import com.google.gson.Gson;
 
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
-import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
-import fi.vm.sade.valinta.http.FailedHttpException;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
@@ -40,20 +35,19 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyypp
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockTilaAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO.Result;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
-import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -63,8 +57,6 @@ import org.mockito.Mockito;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -78,15 +70,13 @@ public class ErillishaunTuontiServiceTest {
         @Test
         public void tuodaanHylattyjaJaPeruutettujaJaVarallaOleviaPuutteellisinTiedoinAutosyotonTestaamiseksi() {
             importData(puutteellisiaTietojaAutotayttoaVarten());
-            assertEquals(1, tilaAsyncResource.results.size());
-            assertEquals(6, tilaAsyncResource.results.stream()
-                    .flatMap(r -> r.erillishaunHakijat.stream()).count());
-            tilaAsyncResource.results.stream()
-                    .flatMap(r -> r.erillishaunHakijat.stream())
-                    .forEach(r -> {
-                        assertEquals(ValintatuloksenTila.KESKEN, r.getValintatuloksenTila());
-                        assertEquals(IlmoittautumisTila.EI_TEHTY, r.getIlmoittautumisTila());
-                    });
+
+            assertEquals(1, erillishaunValinnantulokset.size());
+            assertEquals(5, erillishaunValinnantulokset.get("jono1").size()); //KESKEN-tilainen puuttuu
+            erillishaunValinnantulokset.get("jono1").stream().forEach(v -> {
+                assertEquals(IlmoittautumisTila.EI_TEHTY, v.getIlmoittautumistila());
+                assertEquals(ValintatuloksenTila.KESKEN, v.getVastaanottotila());
+            });
         }
     }
     public final static class KorkeaKouluHaku extends ErillisHakuTuontiTestCase {
@@ -96,14 +86,12 @@ public class ErillishaunTuontiServiceTest {
 
             assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
             assertEquals(1, applicationAsyncResource.results.size());
-            assertEquals(1, tilaAsyncResource.results.size());
-            final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
-            assertEquals(MockData.hakuOid, tilaResult.hakuOid);
-            assertEquals(1, tilaResult.erillishaunHakijat.size());
-            final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
-            assertEquals(MockData.valintatapajonoOid, hakija.valintatapajonoOid);
-            assertEquals(ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI, hakija.getValintatuloksenTila());
-            System.out.println(new Gson().toJson(tilaAsyncResource.results));
+            assertEquals(1, erillishaunValinnantulokset.size());
+            assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
+            erillishaunValinnantulokset.get("jono1").stream().forEach(v -> {
+                assertEquals(IlmoittautumisTila.EI_TEHTY, v.getIlmoittautumistila());
+                assertEquals(ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI, v.getVastaanottotila());
+            });
         }
 
     }
@@ -137,20 +125,18 @@ public class ErillishaunTuontiServiceTest {
             assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
             assertEquals(Maksuvelvollisuus.REQUIRED, hakemusProto.getMaksuvelvollisuus());
 
-            assertEquals(1, tilaAsyncResource.results.size());
-            final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
-            assertEquals(MockData.hakuOid, tilaResult.hakuOid);
-            assertEquals(MockData.kohdeOid, tilaResult.hakukohdeOid);
-            assertEquals(1, tilaResult.erillishaunHakijat.size());
-            final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
-            assertEquals("Tuomas", hakija.etunimi);
-            assertEquals("Hakkarainen", hakija.sukunimi);
-            assertEquals(MockData.valintatapajonoOid, hakija.valintatapajonoOid);
-            assertEquals("hakemus1", hakija.hakemusOid);
-            assertEquals("hakija1", hakija.hakijaOid);
-            assertEquals(true, hakija.julkaistavissa);
-            assertEquals(true, hakija.ehdollisestiHyvaksyttavissa);
-            System.out.println(new Gson().toJson(tilaAsyncResource.results));
+            assertEquals(1, erillishaunValinnantulokset.size());
+            assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
+            erillishaunValinnantulokset.get("jono1").stream().forEach(v -> {
+                assertEquals(IlmoittautumisTila.EI_TEHTY, v.getIlmoittautumistila());
+                assertEquals(ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI, v.getVastaanottotila());
+                assertEquals(MockData.valintatapajonoOid, v.getValintatapajonoOid());
+                assertEquals("hakemus1", v.getHakemusOid());
+                assertEquals("hakija1", v.getHenkiloOid());
+                assertEquals(true, v.getJulkaistavissa());
+                assertEquals(true, v.getEhdollisestiHyvaksyttavissa());
+                assertEquals(MockData.kohdeOid, v.getHakukohdeOid());
+            });
         }
     }
 
@@ -199,19 +185,18 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(SYNTYMAAIKAFORMAT.parseDateTime(erillishakuRivi.getSyntymaAika()).toDate(), henkilo.syntymaaika);
             assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
 
-            assertEquals(1, tilaAsyncResource.results.size());
-            final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
-            assertEquals(MockData.hakuOid, tilaResult.hakuOid);
-            assertEquals(MockData.kohdeOid, tilaResult.hakukohdeOid);
-            assertEquals(1, tilaResult.erillishaunHakijat.size());
-            final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
-            assertEquals(erillishakuRivi.getEtunimi(), hakija.etunimi);
-            assertEquals(erillishakuRivi.getSukunimi(), hakija.sukunimi);
-            assertEquals(MockData.valintatapajonoOid, hakija.valintatapajonoOid);
-            assertEquals("hakemus1", hakija.hakemusOid);
-            assertEquals(personOidHenkiloPalvelusta, hakija.hakijaOid);
-            assertEquals(erillishakuRivi.isJulkaistaankoTiedot(), hakija.julkaistavissa);
-            assertEquals(erillishakuRivi.isJulkaistaankoTiedot(), hakija.ehdollisestiHyvaksyttavissa);
+            assertEquals(1, erillishaunValinnantulokset.size());
+            assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
+            erillishaunValinnantulokset.get("jono1").stream().forEach(v -> {
+                assertEquals(IlmoittautumisTila.EI_TEHTY, v.getIlmoittautumistila());
+                assertEquals(ValintatuloksenTila.KESKEN, v.getVastaanottotila());
+                assertEquals(MockData.valintatapajonoOid, v.getValintatapajonoOid());
+                assertEquals("hakemus1", v.getHakemusOid());
+                assertEquals(personOidHenkiloPalvelusta, v.getHenkiloOid());
+                assertEquals(erillishakuRivi.isJulkaistaankoTiedot(), v.getJulkaistavissa());
+                assertEquals(erillishakuRivi.getEhdollisestiHyvaksyttavissa(), v.getEhdollisestiHyvaksyttavissa());
+                assertEquals(MockData.kohdeOid, v.getHakukohdeOid());
+            });
         }
     }
 
@@ -270,15 +255,12 @@ public class ErillishaunTuontiServiceTest {
             final HenkiloAsyncResource failingHenkiloResource = mock(HenkiloAsyncResource.class);
             when(failingHenkiloResource.haeTaiLuoHenkilot(Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
-                    tilaAsyncResource,
                     applicationAsyncResource,
                     failingHenkiloResource,
                     valintaTulosServiceAsyncResource,
                     koodistoCachedAsyncResource,
-                    Schedulers.immediate(),
-                    "FALSE"
+                    Schedulers.immediate()
             );
-            assertEquals(0, tilaAsyncResource.results.size());
             assertEquals(0, applicationAsyncResource.results.size());
             tuontiService.tuoExcelistä(null, prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             Mockito.verify(prosessi).keskeyta();
@@ -286,21 +268,35 @@ public class ErillishaunTuontiServiceTest {
 
         @Test
         public void tilojenTuontiEpaonnistuu() {
-            final TilaAsyncResource failingResource = mock(TilaAsyncResource.class);
-            when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any()))
-                    .thenReturn(Observable.error(new RuntimeException("viesti")));
-            when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(Mockito.anyString(), Mockito.any())).thenReturn(just(emptyList()));
+            final ValintaTulosServiceAsyncResource failingValintaTuloseServiceAsyncResource = mock(ValintaTulosServiceAsyncResource.class);
+            when(failingValintaTuloseServiceAsyncResource.postErillishaunValinnantulokset(anyObject(), anyString(), anyList())).thenAnswer(i -> {
+                String valintatapajonoOid = i.getArgumentAt(1, String.class);
+                return Observable.just(((List<Valinnantulos>)i.getArgumentAt(2, List.class)).stream().map(v ->
+                        new ValintatulosUpdateStatus(500, "Something wrong", valintatapajonoOid, v.getHakemusOid())).collect(Collectors.toList()));
+            });
+            when(failingValintaTuloseServiceAsyncResource.tallenna(anyListOf(VastaanottoRecordDTO.class))).then(invocation -> Observable
+                    .just(((List<VastaanottoRecordDTO>) invocation.getArguments()[0]).stream().map(v -> {
+                        VastaanottoResultDTO dto = new VastaanottoResultDTO();
+                        dto.setHakemusOid(v.getHakemusOid());
+                        dto.setHakukohdeOid(v.getHakukohdeOid());
+                        dto.setHenkiloOid(v.getHenkiloOid());
+                        Result result = new Result();
+                        result.setStatus(OK.getStatusCode());
+                        dto.setResult(result);
+                        return dto;
+                    }).collect(Collectors.toList()))
+            );
+            when(failingValintaTuloseServiceAsyncResource.fetchLukuvuosimaksut(anyString(), any())).thenReturn(just(emptyList()));
+
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
-                    failingResource,
                     applicationAsyncResource,
                     henkiloAsyncResource,
-                    valintaTulosServiceAsyncResource,
+                    failingValintaTuloseServiceAsyncResource,
                     koodistoCachedAsyncResource,
-                    Schedulers.immediate(),
-                    "FALSE"
+                    Schedulers.immediate()
             );
             tuontiService.tuoExcelistä(new AuditSession("bob", emptyList(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
-            Mockito.verify(prosessi).keskeyta(Matchers.<Poikkeus>any());
+            Mockito.verify(prosessi).keskeyta(Matchers.<Collection<Poikkeus>>any());
         }
 
         @Test
@@ -308,19 +304,17 @@ public class ErillishaunTuontiServiceTest {
             final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
             when(failingResource.putApplicationPrototypes(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
-                    tilaAsyncResource,
                     failingResource,
                     henkiloAsyncResource,
                     valintaTulosServiceAsyncResource,
                     koodistoCachedAsyncResource,
-                    Schedulers.immediate(),
-                    "FALSE"
+                    Schedulers.immediate()
             );
-            assertEquals(0, tilaAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             KirjeProsessi prosessi = new ErillishakuProsessiDTO(1);
 
             tuontiService.tuoExcelistä(null,prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
+            assertEquals(0, erillishaunValinnantulokset.size());
             assertTrue(prosessi.isKeskeytetty());
         }
     }
@@ -329,31 +323,14 @@ public class ErillishaunTuontiServiceTest {
 class ErillisHakuTuontiTestCase {
     final MockHenkiloAsyncResource henkiloAsyncResource = new MockHenkiloAsyncResource();
     final MockApplicationAsyncResource applicationAsyncResource = new MockApplicationAsyncResource();
-    final MockTilaAsyncResource tilaAsyncResource = new MockTilaAsyncResource();
     final KirjeProsessi prosessi = mock(KirjeProsessi.class);
-    final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource = mock(ValintaTulosServiceAsyncResource.class);
+    final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource = new MockValintaTulosServiceAsyncResource();
+    final Map<String,List<Valinnantulos>> erillishaunValinnantulokset = ((MockValintaTulosServiceAsyncResource)valintaTulosServiceAsyncResource).erillishaunValinnantulokset;
     final KoodistoCachedAsyncResource koodistoCachedAsyncResource = mock(KoodistoCachedAsyncResource.class);
     final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1");
 
     @Before
     public void before() {
-        when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(anyString(), any())).thenReturn(just(emptyList()));
-        when(valintaTulosServiceAsyncResource.tallenna(anyListOf(VastaanottoRecordDTO.class))).then(invocation -> Observable
-                .just(((List<VastaanottoRecordDTO>) invocation.getArguments()[0]).stream().map(v -> {
-                    VastaanottoResultDTO dto = new VastaanottoResultDTO();
-                    dto.setHakemusOid(v.getHakemusOid());
-                    dto.setHakukohdeOid(v.getHakukohdeOid());
-                    dto.setHenkiloOid(v.getHenkiloOid());
-                    Result result = new Result();
-                    result.setStatus(OK.getStatusCode());
-                    dto.setResult(result);
-                    return dto;
-                }).collect(Collectors.toList())));
-        when(valintaTulosServiceAsyncResource.postErillishaunValinnantulokset(
-                any(AuditSession.class),
-                anyString(),
-                any(List.class)
-        )).thenReturn(Observable.just(Collections.emptyList()));
         mockKoodisto();
     }
 
@@ -396,13 +373,11 @@ class ErillisHakuTuontiTestCase {
 
     protected void importData(InputStream data) {
         final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
-                tilaAsyncResource,
                 applicationAsyncResource,
                 henkiloAsyncResource,
                 valintaTulosServiceAsyncResource,
                 koodistoCachedAsyncResource,
-                Schedulers.immediate(),
-                "FALSE"
+                Schedulers.immediate()
         );
         tuontiService.tuoExcelistä(new AuditSession("frank", new ArrayList<String>(), "", ""), prosessi, erillisHaku, data);
         Mockito.verify(prosessi).valmistui("ok");
@@ -410,13 +385,11 @@ class ErillisHakuTuontiTestCase {
 
     protected void importRows(List<ErillishakuRivi> rivit, MockHenkiloAsyncResource mockHenkiloAsyncResource) {
         final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
-                tilaAsyncResource,
                 applicationAsyncResource,
                 mockHenkiloAsyncResource,
                 valintaTulosServiceAsyncResource,
                 koodistoCachedAsyncResource,
-                Schedulers.immediate(),
-                "FALSE"
+                Schedulers.immediate()
         );
         tuontiService.tuoJson(new AuditSession("frank", new ArrayList<String>(), "", ""), prosessi, erillisHaku, rivit, false);
         Mockito.verify(prosessi).valmistui("ok");

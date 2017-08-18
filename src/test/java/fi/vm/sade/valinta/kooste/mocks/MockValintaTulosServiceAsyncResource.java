@@ -16,11 +16,11 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoR
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.*;
+import static javax.ws.rs.core.Response.Status.OK;
 
 @Service
 public class MockValintaTulosServiceAsyncResource implements ValintaTulosServiceAsyncResource {
@@ -56,7 +56,17 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
 
     @Override
     public Observable<List<VastaanottoResultDTO>> tallenna(List<VastaanottoRecordDTO> tallennettavat) {
-        return Observable.just(Lists.newArrayList());
+        return Observable.just(tallennettavat.stream().map(v -> {
+            VastaanottoResultDTO dto = new VastaanottoResultDTO();
+            dto.setHakemusOid(v.getHakemusOid());
+            dto.setHakukohdeOid(v.getHakukohdeOid());
+            dto.setHenkiloOid(v.getHenkiloOid());
+            VastaanottoResultDTO.Result result = new VastaanottoResultDTO.Result();
+            result.setStatus(OK.getStatusCode());
+            dto.setResult(result);
+            return dto;
+        }).collect(Collectors.toList()));
+        //return Observable.just(Lists.newArrayList());
     }
 
     @Override
@@ -100,9 +110,17 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
         return Observable.just(Lists.newArrayList());
     }
 
+    public Map<String,List<Valinnantulos>> erillishaunValinnantulokset = new HashMap<>();
+
     @Override
     public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
+        erillishaunValinnantulokset.put(valintatapajonoOid, valinnantulokset);
         return Observable.just(Lists.newArrayList());
+        /*return Observable.just(
+            valinnantulokset.stream().map(v -> {
+                return new ValintatulosUpdateStatus(200, "Kaikki ok", valintatapajonoOid, v.getHakemusOid());
+            }).collect(Collectors.toList())
+        );*/
     }
 
     @Override

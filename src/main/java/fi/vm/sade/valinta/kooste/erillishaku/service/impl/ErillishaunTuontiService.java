@@ -55,45 +55,35 @@ import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuon
 public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishaunTuontiService.class);
 
-    private final TilaAsyncResource tilaAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final Scheduler scheduler;
-    private final boolean useVtsData;
 
-    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource,
-                                    ApplicationAsyncResource applicationAsyncResource,
+    public ErillishaunTuontiService(ApplicationAsyncResource applicationAsyncResource,
                                     HenkiloAsyncResource henkiloAsyncResource,
                                     ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
                                     KoodistoCachedAsyncResource koodistoCachedAsyncResource,
-                                    Scheduler scheduler,
-                                    @Value("${valintalaskenta-ui.read-from-valintarekisteri}") String useVtsData) {
+                                    Scheduler scheduler) {
         super(koodistoCachedAsyncResource);
         this.applicationAsyncResource = applicationAsyncResource;
-        this.tilaAsyncResource = tilaAsyncResource;
         this.henkiloAsyncResource = henkiloAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.scheduler = scheduler;
-        this.useVtsData = Boolean.parseBoolean(useVtsData);
     }
 
     @Autowired
-    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource,
-                                    ApplicationAsyncResource applicationAsyncResource,
+    public ErillishaunTuontiService(ApplicationAsyncResource applicationAsyncResource,
                                     HenkiloAsyncResource henkiloAsyncResource,
                                     ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
-                                    KoodistoCachedAsyncResource koodistoCachedAsyncResource,
-                                    @Value("${valintalaskenta-ui.read-from-valintarekisteri}") String useVtsData) {
-        this(tilaAsyncResource,
-                applicationAsyncResource,
-                henkiloAsyncResource,
-                valintaTulosServiceAsyncResource,
-                koodistoCachedAsyncResource,
-                newThread(),
-                useVtsData);
+                                    KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+        this(applicationAsyncResource,
+             henkiloAsyncResource,
+             valintaTulosServiceAsyncResource,
+             koodistoCachedAsyncResource,
+             newThread());
     }
 
     public void tuoExcelistä(AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
