@@ -66,7 +66,6 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
             dto.setResult(result);
             return dto;
         }).collect(Collectors.toList()));
-        //return Observable.just(Lists.newArrayList());
     }
 
     @Override
@@ -116,11 +115,6 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
         erillishaunValinnantulokset.put(valintatapajonoOid, valinnantulokset);
         return Observable.just(Lists.newArrayList());
-        /*return Observable.just(
-            valinnantulokset.stream().map(v -> {
-                return new ValintatulosUpdateStatus(200, "Kaikki ok", valintatapajonoOid, v.getHakemusOid());
-            }).collect(Collectors.toList())
-        );*/
     }
 
     @Override
