@@ -330,7 +330,10 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 List<HakemusPrototyyppi> hakemusPrototyypit = rivitWithHenkiloData.stream().map(rivi -> createHakemusprototyyppi(rivi, convertKuntaNimiToKuntaKoodi(rivi.getKotikunta()))).collect(Collectors.toList());
                 LOG.info("Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
                 final List<Hakemus> hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
-                assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
+                if (hakemukset.size() != lisattavatTaiKeskeneraiset.size()) { // 1-1 relationship assumed
+                    LOG.warn("Hakemuspalveluun tallennettujen hakemusten lukumäärä {}kpl on väärä!! Odotettiin {}kpl.",
+                            hakemukset.size(), lisattavatTaiKeskeneraiset.size());
+                }
                 return zip(hakemukset.stream(), rivitWithHenkiloData.stream(), (hakemus, rivi) ->
                         rivi.withHakemusOid(hakemus.getOid())).collect(Collectors.toList());
             } else {
