@@ -297,23 +297,6 @@ public class ErillishaunTuontiServiceTest {
             );
             tuontiService.tuoExcelistä(new AuditSession("bob", emptyList(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             Mockito.verify(prosessi).keskeyta(Matchers.<Collection<Poikkeus>>any());
-            try {
-                Mockito.reset(valintaTulosServiceAsyncResource);
-                when(valintaTulosServiceAsyncResource.tallenna(Mockito.any()))
-                        .thenReturn(Observable.error(new RuntimeException("viesti")));
-                when(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(Mockito.anyString(), Mockito.any())).thenReturn(just(emptyList()));
-                final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
-                        applicationAsyncResource,
-                        henkiloAsyncResource,
-                        valintaTulosServiceAsyncResource,
-                        koodistoCachedAsyncResource,
-                        Schedulers.immediate()
-                );
-                tuontiService.tuoExcelistä(new AuditSession("bob", emptyList(), "", ""), prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
-                Mockito.verify(prosessi).keskeyta(Matchers.<Poikkeus>any());
-            } finally {
-
-            }
         }
 
         @Test
