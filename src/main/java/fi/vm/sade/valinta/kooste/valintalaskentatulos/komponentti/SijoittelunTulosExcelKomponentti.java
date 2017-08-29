@@ -120,13 +120,14 @@ public class SijoittelunTulosExcelKomponentti {
             for (ValintatapajonoDTO jono : valintatapajonot) {
                 ++index;
                 boolean highlight = index % 2 == 1;
-                int spanColumns = isKkHaku ? 11 : 6;
+                int spanColumns = isKkHaku ? 12 : 7;
                 valintatapajonoOtsikkoRivi.add(new Span("Valintatapajono: " + jono.getNimi(), spanColumns, highlight));
                 List<Object> otsikot = isKkHaku ?
                         Arrays.asList(
                     "Jonosija",
                     "Pisteet",
                     "Sijoittelun tila",
+                    "Hylkäyksen syy",
                     "Vastaanottotieto",
                     "Ilmoittautumistieto",
                     "Ehdollinen valinta",
@@ -139,6 +140,7 @@ public class SijoittelunTulosExcelKomponentti {
                         "Jonosija",
                         "Pisteet",
                         "Sijoittelun tila",
+                        "Hylkäyksen syy",
                         "Vastaanottotieto",
                         "Ilmoittautumistieto",
                         "Muokattu");
@@ -204,6 +206,10 @@ public class SijoittelunTulosExcelKomponentti {
                             .filter(t -> hakemusOid.equals(t.getHakemusOid()))
                             .collect(Collectors.toList());
 
+                    String hylkayksenSyy = "-";
+                    if(hakemusDto.getTila() == HakemuksenTila.HYLATTY)
+                        hylkayksenSyy = "Hakemus hylätty, placeholder";
+                    
                     String valintaTieto = StringUtils.EMPTY;
                     String ehdollinenValinta = StringUtils.EMPTY;
                     String ehdollisenHyvaksymisenEhto = StringUtils.EMPTY;
@@ -236,6 +242,7 @@ public class SijoittelunTulosExcelKomponentti {
                                         hakemusDto.getVarasijanNumero(),
                                         ehdollisenHyvaksymisenEhto
                                 ),
+                                hylkayksenSyy,
                                 valintaTieto,
                                 ilmoittautumistieto,
                                 ehdollinenValinta,
@@ -257,6 +264,7 @@ public class SijoittelunTulosExcelKomponentti {
                                         hakemusDto.getVarasijanNumero(),
                                         ehdollisenHyvaksymisenEhto
                                 ),
+                                hylkayksenSyy,
                                 valintaTieto,
                                 ilmoittautumistieto,
                                 muokattu(hakemusDto.getTilaHistoria()
