@@ -26,8 +26,10 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuv
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
@@ -196,11 +198,14 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         List<Lukuvuosimaksu> lukuvuosimaksus = Collections.emptyList();
                         fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hk = null;
                         HakuV1RDTO hakuDTO = null;
+                        List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
                         try {
                             hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
                             hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).toBlocking().toFuture().get();
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).toBlocking().toFuture().get();
                             hakuDTO = haeHakuTarjonnaltaKomponentti.getHaku(hakuOid);
+                            //valinnanvaiheet = ListUtils.EMPTY_LIST;
+
                         } catch (Exception e) {
                             //todo: fix this
                         }
@@ -208,11 +213,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         try {
                             if (pakkaaTiedostotTarriin) {
                                 Tiedosto tiedosto = new Tiedosto("sijoitteluntulos_" + hakukohdeOid + ".xls", IOUtils.toByteArray(
-                                        sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk, hakuDTO)));
+                                        sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk, hakuDTO, valinnanvaiheet)));
                                 prosessi.getValmiit().add(new Valmis(tiedosto, hakukohdeOid, tarjoajaOid));
                                 return;
                             } else {
-                                InputStream input = sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk, hakuDTO);
+                                InputStream input = sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk, hakuDTO, valinnanvaiheet);
                                 try {
                                     String id = generateId();
                                     dokumenttiResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", getTimeToLive(),

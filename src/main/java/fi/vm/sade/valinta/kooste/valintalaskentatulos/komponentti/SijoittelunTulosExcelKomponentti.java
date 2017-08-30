@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuv
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class SijoittelunTulosExcelKomponentti {
     @Autowired
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
-    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, List<Lukuvuosimaksu> lukuvuosimaksut, HakukohdeDTO hakukohde, HakuV1RDTO hakuDTO) {
+    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, List<Lukuvuosimaksu> lukuvuosimaksut, HakukohdeDTO hakukohde, HakuV1RDTO hakuDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet) {
         Map<String, Koodi> countryCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
@@ -206,10 +207,18 @@ public class SijoittelunTulosExcelKomponentti {
                             .filter(t -> hakemusOid.equals(t.getHakemusOid()))
                             .collect(Collectors.toList());
 
+                    //Etsitään nyt käsiteltävää sijoittelujonoa vastaava valintalaskennan valintatietojono. Huom. Eri DTO kuin ylempänä samalla nimellä, eri sisältö.
+                    fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO valintatietoJono = valinnanVaiheet.stream()
+                            .flatMap(vaihe -> vaihe.getValintatapajonot().stream().filter(j -> j.getOid().equals(jono.getOid())))
+                            .collect(Collectors.toList()).get(0);
+
                     String hylkayksenSyy = "-";
-                    if(hakemusDto.getTila() == HakemuksenTila.HYLATTY)
-                        hylkayksenSyy = "Hakemus hylätty, placeholder";
-                    
+                    if(hakemusDto.getTila() == HakemuksenTila.HYLATTY) {
+                        hylkayksenSyy = valintatietoJono.getJonosijat().stream()
+                                .filter(sija -> sija.getHakemusOid().equals(hakemusOid))
+                                .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus().toString();
+                    }
+
                     String valintaTieto = StringUtils.EMPTY;
                     String ehdollinenValinta = StringUtils.EMPTY;
                     String ehdollisenHyvaksymisenEhto = StringUtils.EMPTY;

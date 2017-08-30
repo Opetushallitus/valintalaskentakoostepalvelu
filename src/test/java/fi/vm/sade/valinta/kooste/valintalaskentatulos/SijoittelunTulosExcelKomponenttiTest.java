@@ -66,7 +66,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         henkilotiedot.put("Sukunimi", "Alamäki");
         answers.setHenkilotiedot(henkilotiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus), emptyList(), hakukohde, getKkHaku());
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus), emptyList(), hakukohde, getKkHaku(), emptyList());
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue(cellTexts(rivit, HAKEMUS1).contains("Alamäki, Pekka Johannes"));
     }
@@ -86,7 +86,8 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 asList(createHakemus(HAKEMUS1), createHakemus(HAKEMUS2), createHakemus(HAKEMUS3)),
                 emptyList(),
                 hakukohde,
-                getKkHaku()
+                getKkHaku(),
+                emptyList()
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertEquals(1, rowsContaining(HAKEMUS1, rivit).size());
@@ -110,7 +111,8 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 asList(createHakemus(HAKEMUS1), createHakemus(HAKEMUS2), createHakemus(HAKEMUS3)),
                 emptyList(),
                 hakukohde,
-                getKkHaku()
+                getKkHaku(),
+                emptyList()
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertEquals(57, solut(HAKEMUS1, rivit).size());
@@ -131,7 +133,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         lisatiedot.put("asiointikieli", "SV");
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku());
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku(), emptyList());
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'SV'", cellTexts(rivit, HAKEMUS1).contains("SV"));
@@ -166,7 +168,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         valintatulos.setValintatapajonoOid("jono1", "", "");
         valintatulos.setHakemusOid(HAKEMUS1, "", "");
 
-        InputStream inputStream = excelKomponentti.luoXls(asList(valintatulos), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku());
+        InputStream inputStream = excelKomponentti.luoXls(asList(valintatulos), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku(), emptyList());
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'JOKU_EHTOKOODI'", cellTexts(rivit, HAKEMUS1).contains("JOKU_EHTOKOODI"));
@@ -189,7 +191,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         HashMap<String, String> lisatiedot = new HashMap<>();
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku());
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku(), emptyList());
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'FI'", cellTexts(rivit, HAKEMUS1).contains("FI"));
@@ -208,7 +210,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         lisatiedot.put("lupatiedot-sahkoinen-viestinta", "true");
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku());
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku(), emptyList());
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'Lupa sähköiseen asiointiin'",
@@ -227,7 +229,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         HashMap<String, String> lisatiedot = new HashMap<>();
         answers.setLisatiedot(lisatiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus), emptyList(), hakukohde, getKkHaku());
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus), emptyList(), hakukohde, getKkHaku(), emptyList());
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertFalse("Cell texts should not contain text 'Lupa sähköiseen asiointiin'",
@@ -257,7 +259,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         Answers answers = new Answers();
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
 
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku());
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus), emptyList(), hakukohde, getKkHaku(), emptyList());
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'Hakijaryhmä 1'", cellTexts(rivit, HAKEMUS1).contains("Hakijaryhmä 1"));
@@ -292,7 +294,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         Answers answers = new Answers();
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
 
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku());
+        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", asList(hakemus),emptyList(), hakukohde, getKkHaku(), emptyList());
 
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertTrue("Cell texts should contain text 'Hakijaryhmä 1, Hakijaryhmä 2'",
