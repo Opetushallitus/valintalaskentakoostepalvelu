@@ -212,11 +212,11 @@ public class SijoittelunTulosExcelKomponentti {
                             .flatMap(vaihe -> vaihe.getValintatapajonot().stream().filter(j -> j.getOid().equals(jono.getOid())))
                             .collect(Collectors.toList()).get(0);
 
-                    String hylkayksenSyy = "-";
+                    String hylkayksenSyy = StringUtils.EMPTY;
                     if(hakemusDto.getTila() == HakemuksenTila.HYLATTY) {
                         hylkayksenSyy = valintatietoJono.getJonosijat().stream()
                                 .filter(sija -> sija.getHakemusOid().equals(hakemusOid))
-                                .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus().toString();
+                                .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus().get(preferoitukielikoodi);
                     }
 
                     String valintaTieto = StringUtils.EMPTY;
