@@ -20,6 +20,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
@@ -99,6 +100,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti;
+    private final ValintalaskentaAsyncResource valintalaskentaResource;
 
     @Autowired
     public SijoittelunTulosRouteImpl(
@@ -117,7 +119,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             ApplicationResource applicationResource,
             DokumenttiResource dokumenttiResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
-            HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti
+            HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti,
+            ValintalaskentaAsyncResource valintalaskentaResource
     ) {
         this.valintaTulosServiceAsyncResource= valintaTulosServiceAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
@@ -137,6 +140,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.taulukkolaskenta = taulukkolaskenta;
         this.hyvaksymiskirjeet = hyvaksymiskirjeet;
         this.haeHakuTarjonnaltaKomponentti = haeHakuTarjonnaltaKomponentti;
+        this.valintalaskentaResource = valintalaskentaResource;
     }
 
     public void configure() throws Exception {
@@ -203,8 +207,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
                             hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).toBlocking().toFuture().get();
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).toBlocking().toFuture().get();
+                            valinnanvaiheet = valintalaskentaResource.laskennantulokset(hakukohdeOid).toBlocking().toFuture().get();
                             hakuDTO = haeHakuTarjonnaltaKomponentti.getHaku(hakuOid);
-                            //valinnanvaiheet = ListUtils.EMPTY_LIST;
 
                         } catch (Exception e) {
                             //todo: fix this

@@ -208,13 +208,13 @@ public class SijoittelunTulosExcelKomponentti {
                             .collect(Collectors.toList());
 
                     //Etsitään nyt käsiteltävää sijoittelujonoa vastaava valintalaskennan valintatietojono. Huom. Eri DTO kuin ylempänä samalla nimellä, eri sisältö.
-                    fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO valintatietoJono = valinnanVaiheet.stream()
+                    List<fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO> valintatietoJono = valinnanVaiheet.stream()
                             .flatMap(vaihe -> vaihe.getValintatapajonot().stream().filter(j -> j.getOid().equals(jono.getOid())))
-                            .collect(Collectors.toList()).get(0);
+                            .collect(Collectors.toList());
 
                     String hylkayksenSyy = StringUtils.EMPTY;
-                    if(hakemusDto.getTila() == HakemuksenTila.HYLATTY) {
-                        hylkayksenSyy = valintatietoJono.getJonosijat().stream()
+                    if(!valintatietoJono.isEmpty() && hakemusDto.getTila() == HakemuksenTila.HYLATTY) {
+                        hylkayksenSyy = valintatietoJono.get(0).getJonosijat().stream()
                                 .filter(sija -> sija.getHakemusOid().equals(hakemusOid))
                                 .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus().get(preferoitukielikoodi);
                     }
