@@ -115,9 +115,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 emptyList()
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertEquals(57, solut(HAKEMUS1, rivit).size());
-        assertEquals(47, solut(HAKEMUS2, rivit).size());
-        assertEquals(47, solut(HAKEMUS3, rivit).size());
+        assertEquals(60, solut(HAKEMUS1, rivit).size());
+        assertEquals(48, solut(HAKEMUS2, rivit).size());
+        assertEquals(48, solut(HAKEMUS3, rivit).size());
     }
 
     @Test
