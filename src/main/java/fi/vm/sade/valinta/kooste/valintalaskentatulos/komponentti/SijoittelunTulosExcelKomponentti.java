@@ -214,9 +214,24 @@ public class SijoittelunTulosExcelKomponentti {
 
                     String hylkayksenSyy = StringUtils.EMPTY;
                     if(!valintatietoJono.isEmpty() && hakemusDto.getTila() == HakemuksenTila.HYLATTY) {
-                        hylkayksenSyy = valintatietoJono.get(0).getJonosijat().stream()
+                        Map<String,String> hylkayksenSyyt = valintatietoJono.get(0).getJonosijat().stream()
                                 .filter(sija -> sija.getHakemusOid().equals(hakemusOid))
-                                .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus().get(preferoitukielikoodi);
+                                .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus();
+
+                        //Näytetään löytynyt kuvaus preferoidulla kielellä jos mahdollista, mutta fallback muille kielille tarvittaessa: FI > SV > EN
+                        hylkayksenSyy = hylkayksenSyyt.get(preferoitukielikoodi);
+                        if(hylkayksenSyy.isEmpty()) {
+                            String FI = hylkayksenSyyt.get("FI");
+                            String SV = hylkayksenSyyt.get("SV");
+                            String EN = hylkayksenSyyt.get("EN");
+                            if(!FI.isEmpty())
+                                hylkayksenSyy=FI;
+                            else if(!SV.isEmpty())
+                                hylkayksenSyy=SV;
+                            else
+                                hylkayksenSyy=EN;
+                        }
+
                     }
 
                     String valintaTieto = StringUtils.EMPTY;
