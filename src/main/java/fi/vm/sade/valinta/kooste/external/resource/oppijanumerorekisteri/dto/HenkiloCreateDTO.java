@@ -1,31 +1,29 @@
-package fi.vm.sade.valinta.kooste.external.resource.authentication.dto;
+package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto;
 
-import java.util.Date;
-
-import fi.vm.sade.authentication.model.Kansalaisuus;
-import fi.vm.sade.authentication.model.Kielisyys;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import fi.vm.sade.authentication.model.HenkiloTyyppi;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
-public class HenkiloCreateDTO {
+public class HenkiloCreateDTO implements Serializable {
 
     public final String etunimet;
     public final String kutsumanimi;
-    public final  String sukunimi;
+    public final String sukunimi;
     public final String hetu;
-    public final Date syntymaaika;
+    public final String syntymaaika;
     public final String oidHenkilo;
     public final HenkiloTyyppi henkiloTyyppi;
     public final String sukupuoli; //MIES tai NAINEN
-    public final Kielisyys aidinkieli;
-    public final Kielisyys asiointiKieli;
-    public final Kansalaisuus kansalaisuus;
+    public final KielisyysDto aidinkieli;
+    public final KielisyysDto asiointiKieli;
+    public final Set<KansalaisuusDto> kansalaisuus;
 
 
-    public HenkiloCreateDTO(String aidinkieli, String sukupuoli, String etunimet, String sukunimi, String hetu, Date syntymaaika, String oidHenkilo,
+    public HenkiloCreateDTO(String aidinkieli, String sukupuoli, String etunimet, String sukunimi, String hetu, String syntymaaika, String oidHenkilo,
                             HenkiloTyyppi henkiloTyyppi, String asiointiKieli, String kansalaisuus) {
         this.aidinkieli = createKielisyys(aidinkieli);
         this.sukupuoli = sukupuoli;
@@ -37,26 +35,28 @@ public class HenkiloCreateDTO {
         this.oidHenkilo = oidHenkilo;
         this.henkiloTyyppi = henkiloTyyppi;
         this.asiointiKieli = createKielisyys(asiointiKieli);
-        this.kansalaisuus = createKansalaisuus(kansalaisuus);
+        this.kansalaisuus = createKansalaisuusSet(kansalaisuus);
     }
 
-    private Kielisyys createKielisyys(String kielikoodi) {
+    private KielisyysDto createKielisyys(String kielikoodi) {
         if (null == StringUtils.trimToNull(kielikoodi)) {
             return null;
         } else {
-            Kielisyys kielisyys = new Kielisyys();
+            KielisyysDto kielisyys = new KielisyysDto();
             kielisyys.setKieliKoodi(kielikoodi.toLowerCase());
             return kielisyys;
         }
     }
 
-    private Kansalaisuus createKansalaisuus(String maakoodi) {
+    private Set<KansalaisuusDto> createKansalaisuusSet(String maakoodi) {
         if (null == StringUtils.trimToNull(maakoodi)) {
             return null;
         } else {
-            Kansalaisuus kansalaisuus = new Kansalaisuus();
+            Set<KansalaisuusDto> kansalaisuusSet = new HashSet<>();
+            KansalaisuusDto kansalaisuus = new KansalaisuusDto();
             kansalaisuus.setKansalaisuusKoodi(maakoodi.toLowerCase());
-            return kansalaisuus;
+            kansalaisuusSet.add(kansalaisuus);
+            return kansalaisuusSet;
         }
     }
 

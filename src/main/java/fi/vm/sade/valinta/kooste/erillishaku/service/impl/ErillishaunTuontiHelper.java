@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.authentication.model.Henkilo;
-import fi.vm.sade.authentication.model.Kielisyys;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
@@ -12,6 +10,8 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -90,7 +90,7 @@ public class ErillishaunTuontiHelper {
         }
     }
 
-    public static ErillishakuRivi etsiHenkiloaVastaavaRivi(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
+    public static ErillishakuRivi etsiHenkiloaVastaavaRivi(HenkiloPerustietoDto henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
         Optional<ErillishakuRivi> riviOidinMukaan = kaikkiLisattavatTaiKeskeneraiset.stream().filter(r ->
                 StringUtils.isNotBlank(r.getPersonOid()) && r.getPersonOid().equals(henkilo.getOidHenkilo())).findFirst();
         if (riviOidinMukaan.isPresent()) {
@@ -109,7 +109,7 @@ public class ErillishaunTuontiHelper {
                 .filter(r -> r.parseSyntymaAika() != null)
                 .filter(r ->
                         HakemusPrototyyppi.parseDate(r.parseSyntymaAika()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika())) &&
-                                r.getSukupuoli().equals(Sukupuoli.fromString(henkilo.getSukupuoli()))
+                                r.getSukupuoli().equals(henkilo.getSukupuoli())
                 ).findFirst();
         if (riviSyntymaajanJaSukupuolenMukaan.isPresent()) {
             return riviSyntymaajanJaSukupuolenMukaan.get();
@@ -117,12 +117,12 @@ public class ErillishaunTuontiHelper {
         throw new HenkilonRivinPaattelyEpaonnistuiException("Ei löytynyt " + kaikkiLisattavatTaiKeskeneraiset.size() + " tuodusta rivistä henkilöä " + henkilo);
     }
 
-    public static ErillishakuRivi riviWithHenkiloData(Henkilo henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
+    public static ErillishakuRivi riviWithHenkiloData(HenkiloPerustietoDto henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
         ErillishakuRivi rivi = etsiHenkiloaVastaavaRivi(henkilo, kaikkiLisattavatTaiKeskeneraiset);
         return riviWithHenkiloData(henkilo, rivi);
     }
 
-    public static  ErillishakuRivi riviWithHenkiloData(Henkilo henkilo, ErillishakuRivi rivi) {
+    public static  ErillishakuRivi riviWithHenkiloData(HenkiloPerustietoDto henkilo, ErillishakuRivi rivi) {
         String aidinkieli = kielisyysToString(henkilo.getAidinkieli());
         String asiointikieli = kielisyysToString(henkilo.getAsiointiKieli());
         String sukupuoli = henkilo.getSukupuoli();
@@ -132,7 +132,7 @@ public class ErillishaunTuontiHelper {
                 .henkilotunnus(henkilo.getHetu())
                 .sahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()))
                 .syntymaAika(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
-                .sukupuoli(isNotBlank(sukupuoli) ? Sukupuoli.fromString(sukupuoli) : rivi.getSukupuoli())
+                .sukupuoli(isNotBlank(sukupuoli) ? Sukupuoli.toSukupuoliEnum(sukupuoli) : rivi.getSukupuoli())
                 .personOid(henkilo.getOidHenkilo())
                 .aidinkieli(isNotBlank(aidinkieli) ? aidinkieli : rivi.getAidinkieli())
                 .asiointikieli(isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli())
@@ -163,7 +163,7 @@ public class ErillishaunTuontiHelper {
         return hakemus;
     }
 
-    public static String kielisyysToString(Kielisyys kielisyys) {
+    public static String kielisyysToString(KielisyysDto kielisyys) {
         if(kielisyys == null) {
             return "";
         } else {

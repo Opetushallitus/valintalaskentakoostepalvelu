@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
-import fi.vm.sade.authentication.model.Henkilo;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
@@ -10,7 +10,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
@@ -27,7 +27,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
@@ -55,19 +54,19 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishaunTuontiService.class);
 
     private final ApplicationAsyncResource applicationAsyncResource;
-    private final HenkiloAsyncResource henkiloAsyncResource;
+    private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final Scheduler scheduler;
 
     public ErillishaunTuontiService(ApplicationAsyncResource applicationAsyncResource,
-                                    HenkiloAsyncResource henkiloAsyncResource,
+                                    OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
                                     ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
                                     KoodistoCachedAsyncResource koodistoCachedAsyncResource,
                                     Scheduler scheduler) {
         super(koodistoCachedAsyncResource);
         this.applicationAsyncResource = applicationAsyncResource;
-        this.henkiloAsyncResource = henkiloAsyncResource;
+        this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.scheduler = scheduler;
@@ -75,14 +74,14 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
 
     @Autowired
     public ErillishaunTuontiService(ApplicationAsyncResource applicationAsyncResource,
-                                    HenkiloAsyncResource henkiloAsyncResource,
+                                    OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
                                     ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
                                     KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         this(applicationAsyncResource,
-             henkiloAsyncResource,
-             valintaTulosServiceAsyncResource,
-             koodistoCachedAsyncResource,
-             newThread());
+            oppijanumerorekisteriAsyncResource,
+            valintaTulosServiceAsyncResource,
+            koodistoCachedAsyncResource,
+            newThread());
     }
 
     public void tuoExcelistä(AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
@@ -212,9 +211,9 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         LOG.info("lisattavatTaiKeskeneraiset="+lisattavatTaiKeskeneraiset.size());
         if(!lisattavatTaiKeskeneraiset.isEmpty()) {
             LOG.info("Haetaan/luodaan henkilöt");
-            final List<Henkilo> henkilot;
+            final List<HenkiloPerustietoDto> henkilot;
             try {
-                henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(
+                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(
                         lisattavatTaiKeskeneraiset.stream()
                                 .map(rivi -> rivi.toHenkiloCreateDTO(convertKansalaisuusKoodi(rivi.getKansalaisuus())))
                                 .collect(Collectors.toList()))
@@ -293,7 +292,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 ), t)));
     }
 
-    private List<ErillishakuRivi> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, boolean saveApplications, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
+    private List<ErillishakuRivi> kasitteleHakemukset(ErillishakuDTO haku, List<HenkiloPerustietoDto> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, boolean saveApplications, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
         try {
             final List<ErillishakuRivi> rivitWithHenkiloData = henkilot.stream().map(h -> riviWithHenkiloData(h, lisattavatTaiKeskeneraiset)).collect(Collectors.toList());
             if(saveApplications) {

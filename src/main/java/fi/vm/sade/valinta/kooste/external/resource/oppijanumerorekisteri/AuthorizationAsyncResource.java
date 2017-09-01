@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.external.resource.authentication;
+package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri;
 
 import org.springframework.security.core.Authentication;
 

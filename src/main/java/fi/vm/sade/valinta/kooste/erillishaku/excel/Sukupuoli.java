@@ -33,4 +33,30 @@ public enum Sukupuoli {
         }
         return "";
     }
+
+    public static Sukupuoli toSukupuoliEnum(String sukupuoli) {
+        if (MIES.name().equalsIgnoreCase(sukupuoli)) {
+            return MIES;
+        } else if ("1".equalsIgnoreCase(sukupuoli)) {
+            return MIES;
+        } else if (NAINEN.name().equalsIgnoreCase(sukupuoli)) {
+            return NAINEN;
+        } else if ("2".equalsIgnoreCase(sukupuoli)) {
+            return NAINEN;
+        }
+        return EI_SUKUPUOLTA;
+    }
+
+    public static String toSukupuoliString(String sukupuoli) {
+        if (MIES.name().equalsIgnoreCase(sukupuoli)) {
+            return MIES.name();
+        } else if ("1".equalsIgnoreCase(sukupuoli)) {
+            return MIES.name();
+        } else if (NAINEN.name().equalsIgnoreCase(sukupuoli)) {
+            return NAINEN.name();
+        } else if ("2".equalsIgnoreCase(sukupuoli)) {
+            return NAINEN.name();
+        }
+        return EI_SUKUPUOLTA.name();
+    }
 }

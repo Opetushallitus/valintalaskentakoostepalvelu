@@ -1,9 +1,8 @@
-package fi.vm.sade.valinta.kooste.external.resource.authentication.impl;
+package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.impl;
 
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.AuthorizationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.AuthorizationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

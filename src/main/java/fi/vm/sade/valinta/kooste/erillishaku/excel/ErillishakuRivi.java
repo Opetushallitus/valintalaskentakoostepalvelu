@@ -1,15 +1,16 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
+import fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import fi.vm.sade.authentication.model.HenkiloTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
-import fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,8 @@ import static org.apache.commons.lang.StringUtils.*;
 @ApiModel
 public class ErillishakuRivi {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
-    public final static DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy");
+    public final static DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    public final static DateTimeFormatter SYNTYMAAIKAFORMAT_JSON = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final String etunimi;
     private final String sukunimi;
@@ -280,19 +282,37 @@ public class ErillishakuRivi {
 
     public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
         return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().name(), getEtunimi(), getSukunimi(),
-                getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli(), kansalaisuus);
+                getHenkilotunnus(), parseSyntymaAikaJson(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli(), kansalaisuus);
     }
 
     public Date parseSyntymaAika() {
+        final String syntymaAika = getSyntymaAika();
         try {
-            String s = trimToNull(getSyntymaAika());
+            String s = trimToNull(syntymaAika);
             if (s == null) {
                 return null;
             } else {
-                return SYNTYMAAIKAFORMAT.parseDateTime(s).toDate();
+                LocalDate localDate = LocalDate.parse(s, SYNTYMAAIKAFORMAT);
+                return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             }
         } catch (Exception e) {
-            LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", getSyntymaAika());
+            LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", syntymaAika);
+            return null;
+        }
+    }
+
+    private String parseSyntymaAikaJson() {
+        final String syntymaAika = getSyntymaAika();
+        try {
+            String s = trimToNull(syntymaAika);
+            if (s == null) {
+                return null;
+            } else {
+                LocalDate localDate = LocalDate.parse(s, SYNTYMAAIKAFORMAT_JSON);
+                return localDate.format(SYNTYMAAIKAFORMAT_JSON);
+            }
+        } catch (Exception e) {
+            LOG.error("Syntymäaikaa {} ei voitu parsia muodossa yyyy-dd-mm", syntymaAika);
             return null;
         }
     }

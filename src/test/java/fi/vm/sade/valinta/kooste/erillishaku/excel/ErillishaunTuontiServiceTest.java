@@ -20,16 +20,16 @@ import static rx.Observable.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 
-import fi.vm.sade.authentication.model.Henkilo;
-import fi.vm.sade.authentication.model.HenkiloTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -41,7 +41,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Audit
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
-import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
@@ -168,8 +168,8 @@ public class ErillishaunTuontiServiceTest {
             String personOidHenkiloPalvelusta = "eri.henkiloOid.henkiloPalvelusta";
             ErillishakuRivi erillishakuRivi = createRow("101275-937P", hakemusOidOnHakemusAndSijoittelu, "hakemus1");
             List<HenkiloCreateDTO> henkiloPrototyypit = new ArrayList<>();
-            MockHenkiloAsyncResource mockHenkiloAsyncResource = new MockHenkiloAsyncResource(dtos -> {
-                Henkilo henkiloJollaOnEriOid = MockHenkiloAsyncResource.toHenkilo(dtos.get(0));
+            MockOppijanumerorekisteriAsyncResource mockHenkiloAsyncResource = new MockOppijanumerorekisteriAsyncResource(dtos -> {
+                HenkiloPerustietoDto henkiloJollaOnEriOid = MockOppijanumerorekisteriAsyncResource.toHenkiloPerustietoDto(dtos.get(0));
                 henkiloJollaOnEriOid.setOidHenkilo(personOidHenkiloPalvelusta);
                 henkiloPrototyypit.addAll(dtos);
                 return Futures.immediateFuture(singletonList(henkiloJollaOnEriOid));
@@ -182,7 +182,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(erillishakuRivi.getEtunimi(), henkilo.kutsumanimi);
             assertEquals(erillishakuRivi.getSukunimi(), henkilo.sukunimi);
             assertEquals(erillishakuRivi.getHenkilotunnus(), henkilo.hetu);
-            assertEquals(SYNTYMAAIKAFORMAT.parseDateTime(erillishakuRivi.getSyntymaAika()).toDate(), henkilo.syntymaaika);
+            assertEquals(SYNTYMAAIKAFORMAT.parse(erillishakuRivi.getSyntymaAika()), henkilo.syntymaaika);
             assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
 
             assertEquals(1, erillishaunValinnantulokset.size());
@@ -252,7 +252,7 @@ public class ErillishaunTuontiServiceTest {
 
         @Test
         public void henkilonLuontiEpaonnistuu() {
-            final HenkiloAsyncResource failingHenkiloResource = mock(HenkiloAsyncResource.class);
+            final OppijanumerorekisteriAsyncResource failingHenkiloResource = mock(OppijanumerorekisteriAsyncResource.class);
             when(failingHenkiloResource.haeTaiLuoHenkilot(Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
                     applicationAsyncResource,
@@ -309,7 +309,7 @@ public class ErillishaunTuontiServiceTest {
 }
 
 class ErillisHakuTuontiTestCase {
-    final MockHenkiloAsyncResource henkiloAsyncResource = new MockHenkiloAsyncResource();
+    final MockOppijanumerorekisteriAsyncResource henkiloAsyncResource = new MockOppijanumerorekisteriAsyncResource();
     final MockApplicationAsyncResource applicationAsyncResource = new MockApplicationAsyncResource();
     final KirjeProsessi prosessi = mock(KirjeProsessi.class);
     final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource = new MockValintaTulosServiceAsyncResource();
@@ -371,7 +371,7 @@ class ErillisHakuTuontiTestCase {
         Mockito.verify(prosessi).valmistui("ok");
     }
 
-    protected void importRows(List<ErillishakuRivi> rivit, MockHenkiloAsyncResource mockHenkiloAsyncResource) {
+    protected void importRows(List<ErillishakuRivi> rivit, MockOppijanumerorekisteriAsyncResource mockHenkiloAsyncResource) {
         final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
                 applicationAsyncResource,
                 mockHenkiloAsyncResource,

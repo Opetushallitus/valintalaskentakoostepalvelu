@@ -1,9 +1,6 @@
-package fi.vm.sade.valinta.kooste.external.resource.authentication.dto;
+package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto;
 
-import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import org.junit.Test;
-
-import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +12,7 @@ public class HenkiloCreateDTOTest {
         String etunimet = "Matti";
         String sukunimi = "Meikäläinen";
         String hetu = "123456-789A";
-        Date syntymaAika = new Date();
+        String syntymaAika = "11.11.2011";
         String henkiloOid = "henkilo1";
         HenkiloTyyppi henkiloTyyppi = HenkiloTyyppi.OPPIJA;
         String asiointikieli = "fi";

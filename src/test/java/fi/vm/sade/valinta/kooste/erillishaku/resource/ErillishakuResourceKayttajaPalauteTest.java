@@ -20,7 +20,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
@@ -115,7 +115,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
     @Test
     public void tuontiVirheHenkilopalveluKutsussaPalaute() {
         try {
-            MockHenkiloAsyncResource.serviceIsAvailable.set(false);
+            MockOppijanumerorekisteriAsyncResource.serviceIsAvailable.set(false);
             final ProsessiId prosessiId =
                     jsonClient()
                             .post(Entity.json(new ErillishakuJson(asList(laillinenRivi())))
@@ -126,7 +126,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
                     // Odotetaan hakemuspalvelun epäonnistumisesta johtuvaa palautetta!
                     .poikkeukset, equalTo(asList(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE))));
         } finally {
-            MockHenkiloAsyncResource.serviceIsAvailable.set(true);
+            MockOppijanumerorekisteriAsyncResource.serviceIsAvailable.set(true);
         }
     }
     private Prosessi odotaVirhettaTaiEpaonnistuTimeouttiin(final ProsessiId prosessiId) {

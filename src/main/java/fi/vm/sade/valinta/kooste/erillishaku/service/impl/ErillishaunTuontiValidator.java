@@ -132,7 +132,7 @@ public class ErillishaunTuontiValidator {
         // Syntymäaika oikeassa formaatissa
         if (!isBlank(rivi.getSyntymaAika())) {
             try {
-                ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime(rivi.getSyntymaAika());
+                ErillishakuRivi.SYNTYMAAIKAFORMAT.parse(rivi.getSyntymaAika());
             } catch(Exception e) {
                 errors.add("Syntymäaika '" + rivi.getSyntymaAika() + "' on väärin muotoiltu (syötettävä muodossa pp.mm.vvvv).");
             }

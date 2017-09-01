@@ -75,6 +75,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("cas.service.valintalaskentakoostepalvelu", "");
         p0.setProperty("cas.service.haku-service", "");
         p0.setProperty("cas.service.authentication-service", "");
+        p0.setProperty("cas.service.oppijanumerorekisteri-service", "");
         p0.setProperty("valintalaskentakoostepalvelu.authentication.rest.url", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.username.to.sijoittelu", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.password.to.sijoittelu", "");
@@ -143,6 +144,11 @@ public class KoosteTestProfileConfiguration {
 
     @Bean(name = "AuthenticationServiceRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getAuthenticationServiceRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+
+    @Bean(name = "OppijanumerorekisteriServiceRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getOppijanumerorekisteriServiceRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
 

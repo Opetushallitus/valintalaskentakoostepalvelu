@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
@@ -183,7 +185,20 @@ public class HakemusPrototyyppi {
     }
 
     public static String parseDate(final Date syntymaAika) {
-        if (syntymaAika == null) return null;
-        return ErillishakuRivi.SYNTYMAAIKAFORMAT.print(syntymaAika.getTime());
+        if (syntymaAika == null) {
+            return null;
+        }
+
+        LocalDate localDate = syntymaAika.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return localDate.format(ErillishakuRivi.SYNTYMAAIKAFORMAT);
+    }
+
+    public static String parseDate(final LocalDate syntymaAika) {
+        if (syntymaAika == null) {
+            return null;
+        }
+
+        Date date = Date.from(syntymaAika.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        return parseDate(date);
     }
 }
