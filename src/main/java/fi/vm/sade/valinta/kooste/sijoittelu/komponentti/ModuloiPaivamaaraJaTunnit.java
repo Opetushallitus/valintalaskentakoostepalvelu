@@ -10,7 +10,8 @@ public class ModuloiPaivamaaraJaTunnit {
     private static final Logger LOG = LoggerFactory.getLogger(ModuloiPaivamaaraJaTunnit.class);
 
     public static DateTime moduloiSeuraava(DateTime start, DateTime now, int moduloitavaTuntiMaara) {
-        if (now.isBefore(start)) {
+        //if (now.isBefore(start))
+        if (now.isBefore(start.minusHours(1))) {
             LOG.error("Yritettiin moduloida seuraavaa suoritusaikaa vaikka aloitusaika ei ole viela tapahtunut! Aloituspvm {} mutta nyt on {}",
                     Formatter.paivamaara(start.toDate()), Formatter.paivamaara(now.toDate()));
             throw new RuntimeException("Yritettiin moduloida seuraavaa suoritusaikaa vaikka aloitusaika ei ole viela tapahtunut!");
