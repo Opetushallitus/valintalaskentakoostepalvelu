@@ -220,18 +220,18 @@ public class SijoittelunTulosExcelKomponentti {
 
                         //Näytetään löytynyt kuvaus preferoidulla kielellä jos mahdollista, mutta fallback muille kielille tarvittaessa: FI > SV > EN
                         hylkayksenSyy = hylkayksenSyyt.get(preferoitukielikoodi);
-                        if(hylkayksenSyy.isEmpty()) {
-                            String FI = hylkayksenSyyt.get("FI");
-                            String SV = hylkayksenSyyt.get("SV");
-                            String EN = hylkayksenSyyt.get("EN");
-                            if(!FI.isEmpty())
-                                hylkayksenSyy=FI;
-                            else if(!SV.isEmpty())
-                                hylkayksenSyy=SV;
-                            else
-                                hylkayksenSyy=EN;
+                        if (hylkayksenSyy.isEmpty()) {
+                            String fi = hylkayksenSyyt.get("FI");
+                            String sv = hylkayksenSyyt.get("SV");
+                            String en = hylkayksenSyyt.get("EN");
+                            if (!fi.isEmpty()) {
+                                hylkayksenSyy = fi;
+                            } else if (!sv.isEmpty()) {
+                                hylkayksenSyy = sv;
+                            } else {
+                                hylkayksenSyy = en;
+                            }
                         }
-
                     }
 
                     String valintaTieto = StringUtils.EMPTY;
