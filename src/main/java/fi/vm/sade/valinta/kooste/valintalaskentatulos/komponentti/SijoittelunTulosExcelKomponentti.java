@@ -213,10 +213,10 @@ public class SijoittelunTulosExcelKomponentti {
                             .collect(Collectors.toList());
 
                     String hylkayksenSyy = StringUtils.EMPTY;
-                    if(!valintatietoJono.isEmpty() && hakemusDto.getTila() == HakemuksenTila.HYLATTY) {
-                        Map<String,String> hylkayksenSyyt = valintatietoJono.get(0).getJonosijat().stream()
-                                .filter(sija -> sija.getHakemusOid().equals(hakemusOid))
-                                .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus();
+                    if (!valintatietoJono.isEmpty() && hakemusDto.getTila() == HakemuksenTila.HYLATTY) {
+                        Map<String, String> hylkayksenSyyt = valintatietoJono.get(0).getJonosijat().stream()
+                            .filter(sija -> sija.getHakemusOid().equals(hakemusOid))
+                            .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus();
 
                         //Näytetään löytynyt kuvaus preferoidulla kielellä jos mahdollista, mutta fallback muille kielille tarvittaessa: FI > SV > EN
                         hylkayksenSyy = hylkayksenSyyt.get(preferoitukielikoodi);
