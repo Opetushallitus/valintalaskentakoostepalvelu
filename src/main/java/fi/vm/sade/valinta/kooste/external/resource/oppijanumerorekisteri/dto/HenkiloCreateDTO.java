@@ -42,8 +42,7 @@ public class HenkiloCreateDTO implements Serializable {
         if (null == StringUtils.trimToNull(kielikoodi)) {
             return null;
         } else {
-            KielisyysDto kielisyys = new KielisyysDto();
-            kielisyys.setKieliKoodi(kielikoodi.toLowerCase());
+            KielisyysDto kielisyys = new KielisyysDto(kielikoodi.toLowerCase());
             return kielisyys;
         }
     }
@@ -53,8 +52,7 @@ public class HenkiloCreateDTO implements Serializable {
             return null;
         } else {
             Set<KansalaisuusDto> kansalaisuusSet = new HashSet<>();
-            KansalaisuusDto kansalaisuus = new KansalaisuusDto();
-            kansalaisuus.setKansalaisuusKoodi(maakoodi.toLowerCase());
+            KansalaisuusDto kansalaisuus = new KansalaisuusDto(maakoodi.toLowerCase());
             kansalaisuusSet.add(kansalaisuus);
             return kansalaisuusSet;
         }

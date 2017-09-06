@@ -106,10 +106,11 @@ public class ErillishaunTuontiHelper {
             return loytynyt;
         }
         Optional<ErillishakuRivi> riviSyntymaajanJaSukupuolenMukaan = kaikkiLisattavatTaiKeskeneraiset.stream()
-                .filter(r -> r.parseSyntymaAika() != null)
+                .filter(r -> r.formatSyntymaAikaAsDate() != null)
+                .filter(r -> r.getSukupuoli() != null && henkilo.getSukupuoli() != null)
                 .filter(r ->
-                        HakemusPrototyyppi.parseDate(r.parseSyntymaAika()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika())) &&
-                                r.getSukupuoli().equals(henkilo.getSukupuoli())
+                        HakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika())) &&
+                                r.getSukupuoli().toString().equals(henkilo.getSukupuoli())
                 ).findFirst();
         if (riviSyntymaajanJaSukupuolenMukaan.isPresent()) {
             return riviSyntymaajanJaSukupuolenMukaan.get();

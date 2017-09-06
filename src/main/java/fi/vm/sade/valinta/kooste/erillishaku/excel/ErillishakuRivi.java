@@ -22,7 +22,6 @@ import static org.apache.commons.lang.StringUtils.*;
 public class ErillishakuRivi {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
     public final static DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    public final static DateTimeFormatter SYNTYMAAIKAFORMAT_JSON = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final String etunimi;
     private final String sukunimi;
@@ -282,37 +281,37 @@ public class ErillishakuRivi {
 
     public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
         return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().name(), getEtunimi(), getSukunimi(),
-                getHenkilotunnus(), parseSyntymaAikaJson(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli(), kansalaisuus);
+                getHenkilotunnus(), formatSyntymaAikaAsString(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli(), kansalaisuus);
     }
 
-    public Date parseSyntymaAika() {
+    public Date formatSyntymaAikaAsDate() {
         final String syntymaAika = getSyntymaAika();
         try {
             String s = trimToNull(syntymaAika);
             if (s == null) {
                 return null;
-            } else {
-                LocalDate localDate = LocalDate.parse(s, SYNTYMAAIKAFORMAT);
-                return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             }
+
+            LocalDate localDate = LocalDate.parse(s, SYNTYMAAIKAFORMAT);
+            return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
             LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", syntymaAika);
             return null;
         }
     }
 
-    private String parseSyntymaAikaJson() {
+    private String formatSyntymaAikaAsString() {
         final String syntymaAika = getSyntymaAika();
         try {
             String s = trimToNull(syntymaAika);
             if (s == null) {
                 return null;
-            } else {
-                LocalDate localDate = LocalDate.parse(s, SYNTYMAAIKAFORMAT_JSON);
-                return localDate.format(SYNTYMAAIKAFORMAT_JSON);
             }
+
+            LocalDate localDate = LocalDate.parse(s, SYNTYMAAIKAFORMAT);
+            return localDate.format(SYNTYMAAIKAFORMAT);
         } catch (Exception e) {
-            LOG.error("Syntymäaikaa {} ei voitu parsia muodossa yyyy-dd-mm", syntymaAika);
+            LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", syntymaAika);
             return null;
         }
     }

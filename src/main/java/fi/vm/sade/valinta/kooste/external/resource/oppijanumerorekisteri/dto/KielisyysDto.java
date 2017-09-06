@@ -6,7 +6,11 @@ public class KielisyysDto implements Serializable {
     private static final long serialVersionUID = 7217945009330980201L;
 
     private String kieliKoodi;
-    private String kieliTyyppi;
+//    private String kieliTyyppi;
+
+    public KielisyysDto(String kieliKoodi) {
+        this.kieliKoodi = kieliKoodi;
+    }
 
     public String getKieliKoodi() {
         return kieliKoodi;
@@ -16,11 +20,26 @@ public class KielisyysDto implements Serializable {
         this.kieliKoodi = kieliKoodi;
     }
 
-    public String getKieliTyyppi() {
-        return kieliTyyppi;
+//    public String getKieliTyyppi() {
+//        return kieliTyyppi;
+//    }
+//
+//    public void setKieliTyyppi(String kieliTyyppi) {
+//        this.kieliTyyppi = kieliTyyppi;
+//    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        KielisyysDto that = (KielisyysDto) o;
+
+        return kieliKoodi.equals(that.kieliKoodi);
     }
 
-    public void setKieliTyyppi(String kieliTyyppi) {
-        this.kieliTyyppi = kieliTyyppi;
+    @Override
+    public int hashCode() {
+        return kieliKoodi.hashCode();
     }
 }

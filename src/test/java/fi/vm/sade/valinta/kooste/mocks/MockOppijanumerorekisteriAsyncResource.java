@@ -32,7 +32,7 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
                 throw new RuntimeException("Null-prototyyppi lista!");
             }
             //this.henkiloPrototyypit = henkiloPrototyypit;
-            LOG.info("MockHenkilöAsyncResource sai {}kpl henkilöitä. Tehdään konversio ja palautetaan immediate future.", hp.size());
+            LOG.info("MockOppijanumerorekisteriAsyncResource sai {} kpl henkilöitä. Tehdään konversio ja palautetaan immediate future.", hp.size());
             henkiloPrototyypit = hp;
             return Futures.immediateFuture(henkiloPrototyypit.stream()
                     .map(MockOppijanumerorekisteriAsyncResource::toHenkiloPerustietoDto)
@@ -62,7 +62,7 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
     }
     private static <T> Future<T> serviceAvailableCheck() {
         if(!serviceIsAvailable.get()) {
-            return Futures.immediateFailedFuture(new RuntimeException("MockHenkilöpalvelu on kytketty pois päältä!"));
+            return Futures.immediateFailedFuture(new RuntimeException("MockOppijanumerorekisteripalvelu on kytketty pois päältä!"));
         }
         return null;
     }

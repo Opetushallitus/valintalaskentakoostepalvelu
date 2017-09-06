@@ -198,7 +198,6 @@ public class HakemusPrototyyppi {
             return null;
         }
 
-        Date date = Date.from(syntymaAika.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-        return parseDate(date);
+        return syntymaAika.format(ErillishakuRivi.SYNTYMAAIKAFORMAT);
     }
 }
