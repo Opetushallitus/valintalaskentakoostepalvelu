@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuv
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -211,25 +212,25 @@ public class SijoittelunTulosExcelKomponentti {
                     List<fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO> valintatietoJono = valinnanVaiheet.stream()
                             .flatMap(vaihe -> vaihe.getValintatapajonot().stream().filter(j -> j.getOid().equals(jono.getOid())))
                             .collect(Collectors.toList());
-
                     String hylkayksenSyy = StringUtils.EMPTY;
                     if (!valintatietoJono.isEmpty() && hakemusDto.getTila() == HakemuksenTila.HYLATTY) {
-                        Map<String, String> hylkayksenSyyt = valintatietoJono.get(0).getJonosijat().stream()
-                            .filter(sija -> sija.getHakemusOid().equals(hakemusOid))
-                            .collect(Collectors.toList()).get(0).getJarjestyskriteerit().first().getKuvaus();
-
+                        JonosijaDTO jonosija = valintatietoJono.get(0).getJonosijat().stream()
+                                .filter(sija -> hakemusOid.equals(sija.getHakemusOid())).findFirst().orElse(null);
                         //Näytetään löytynyt kuvaus preferoidulla kielellä jos mahdollista, mutta fallback muille kielille tarvittaessa: FI > SV > EN
-                        hylkayksenSyy = hylkayksenSyyt.get(preferoitukielikoodi);
-                        if (StringUtils.isEmpty(hylkayksenSyy)) {
-                            String fi = hylkayksenSyyt.get("FI");
-                            String sv = hylkayksenSyyt.get("SV");
-                            String en = hylkayksenSyyt.get("EN");
-                            if (StringUtils.isNotEmpty(fi)) {
-                                hylkayksenSyy = fi;
-                            } else if (StringUtils.isNotEmpty(sv)) {
-                                hylkayksenSyy = sv;
-                            } else {
-                                hylkayksenSyy = en;
+                        if(jonosija != null ) {
+                            Map<String, String> hylkayksenSyyt = jonosija.getJarjestyskriteerit().first().getKuvaus();
+                            hylkayksenSyy = hylkayksenSyyt.get(preferoitukielikoodi);
+                            if (StringUtils.isEmpty(hylkayksenSyy)) {
+                                String fi = hylkayksenSyyt.get("FI");
+                                String sv = hylkayksenSyyt.get("SV");
+                                String en = hylkayksenSyyt.get("EN");
+                                if (StringUtils.isNotEmpty(fi)) {
+                                    hylkayksenSyy = fi;
+                                } else if (StringUtils.isNotEmpty(sv)) {
+                                    hylkayksenSyy = sv;
+                                } else {
+                                    hylkayksenSyy = en;
+                                }
                             }
                         }
                     }
@@ -327,7 +328,6 @@ public class SijoittelunTulosExcelKomponentti {
     private String hakemusOidJaValintatapajonoOidYhdiste(String hakemusOid, String valintatapajonoOid) {
         return new StringBuilder().append(hakemusOid).append("_").append(valintatapajonoOid).toString();
     }
-
     private Map<String, IlmoittautumisTila> valintatapajononTilat(List<Valintatulos> tilat) {
         Map<String, IlmoittautumisTila> t = Maps.newHashMap();
         try {
@@ -339,7 +339,6 @@ public class SijoittelunTulosExcelKomponentti {
         }
         return t;
     }
-
     private String postitoimipaikka(Map<String, Koodi> postCodes, HakemusWrapper wrapper) {
         return KoodistoCachedAsyncResource.haeKoodistaArvo(postCodes.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());
     }
