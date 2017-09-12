@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.sijoitteluntulos;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS2;
@@ -24,6 +25,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
@@ -34,16 +36,21 @@ import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
+import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
@@ -67,7 +74,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws InterruptedException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws InterruptedException, IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -84,8 +91,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
 
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
+        mockKoodisto();
 
         mockLetterKutsut("^(?!.*HAKEMUS2).*HAKEMUS1.*$");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -94,7 +100,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleKaksiHyvaksyttyaHakija() throws InterruptedException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleKaksiHyvaksyttyaHakija() throws InterruptedException, IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -111,9 +117,8 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
 
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
 
+        mockKoodisto();
         mockLetterKutsut(".*HAKEMUS1.*HAKEMUS2.*|.*HAKEMUS2.*HAKEMUS1.*");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
@@ -121,7 +126,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleSuodataAsiointikielella() throws InterruptedException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleSuodataAsiointikielella() throws InterruptedException, IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -138,8 +143,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
 
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
+        mockKoodisto();
 
         mockLetterKutsut("^(?!.*HAKEMUS2).*HAKEMUS1.*$");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -150,7 +154,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     //skipIPosti
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleVainSahkoposti() throws InterruptedException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleVainSahkoposti() throws InterruptedException, IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -171,8 +175,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
 
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
+        mockKoodisto();
 
         mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":true).*HAKEMUS2.*(?=skipIPosti\":true).*");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -181,7 +184,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleToiselleHakijalleEiIPostia() throws InterruptedException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleToiselleHakijalleEiIPostia() throws InterruptedException, IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -200,8 +203,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
 
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
+        mockKoodisto();
 
         mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":true).*");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -210,7 +212,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleIPostia() throws InterruptedException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleIPostia() throws InterruptedException, IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -229,8 +231,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
 
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
+        mockKoodisto();
 
         mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":false).*");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -239,7 +240,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleIPostiToinenAste() throws InterruptedException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleIPostiToinenAste() throws InterruptedException, IOException {
 
         mockHakukohde1Kutsu();
         mockToinenAsteHaku1Kutsu();
@@ -260,8 +261,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .build()
         ));
 
-        //TODO: Don't use Luokka (see KoosteTestProfileConfiguration)
-        //mockToReturnJson(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", Collections.singletonList(templateHistory));
+        mockKoodisto();
 
         mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":false).*");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -361,4 +361,12 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
         Assert.assertEquals(false, valmisProsessi.keskeytetty);
     }
+
+    private void mockKoodisto() throws IOException {
+        final String maatjavaltiot1 = IOUtils.toString(new ClassPathResource("/koodisto/maatjavaltiot1.json").getInputStream());
+        mockToReturnString(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", maatjavaltiot1);
+        final String posti = IOUtils.toString(new ClassPathResource("/koodisto/posti.json").getInputStream());
+        mockToReturnString(GET, "/koodisto-service/rest/json/posti/koodi", posti);
+    }
+
 }

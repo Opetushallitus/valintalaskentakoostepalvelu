@@ -91,9 +91,7 @@ public class ValintalaskentakoostepalveluJetty {
         MockOpintopolkuCasAuthenticationFilter.clear();
         UrlConfiguration.getInstance()
                 .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
-                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
-                //.addOverride("baseurl-valintaperusteet-service", "https://itest-virkailija.oph.ware.fi")
-                .addOverride("baseurl-koodisto-service", "https://itest-virkailija.oph.ware.fi");
+                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
     }
 
     private static void startServer() throws Exception {

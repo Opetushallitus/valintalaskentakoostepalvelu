@@ -49,11 +49,11 @@ public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements 
             return getWebClient()
                     .path(getUrl("koodisto-service.json.oid.koodi", koodistoUri))
                     .query("onlyValidKoodis", true)
-                            //.query("koodistoVersio", 1)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
                     .get(new GenericType<List<Koodi>>() {
                     });
+
         } catch (Exception e) {
             return Futures.immediateFailedFuture(e);
         }
