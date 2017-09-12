@@ -19,18 +19,22 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
+import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS1;
@@ -61,7 +65,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testJalkiohjauskirjeetYksiHylatty() throws InterruptedException {
+    public void testJalkiohjauskirjeetYksiHylatty() throws Exception {
         mockYksiHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -78,12 +82,13 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
         mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
+        mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
     }
 
     @Test
-    public void testJalkiohjauskirjeetMolemmatHylatty() throws InterruptedException {
+    public void testJalkiohjauskirjeetMolemmatHylatty() throws Exception {
         mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -100,12 +105,13 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
         mockLetterKutsut(".*010111A321.*010111A123.*|.*010111A123.*010111A321.*");
+        mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
     }
 
     @Test
-    public void testJalkiohjauskirjeetSuodataAsiointikielella() throws InterruptedException {
+    public void testJalkiohjauskirjeetSuodataAsiointikielella() throws Exception {
         mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -122,12 +128,13 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
         mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
+        mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
     }
 
     @Test
-    public void testJalkiohjauskirjeetMolemmilleVainSahkopostia() throws InterruptedException {
+    public void testJalkiohjauskirjeetMolemmilleVainSahkopostia() throws Exception {
         mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -148,12 +155,13 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":true).*010111A321.*(?=skipIPosti\":true).*");
+        mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
     }
 
     @Test
-    public void testJalkiohjauskirjeetLahetaIPostiToiselle() throws InterruptedException {
+    public void testJalkiohjauskirjeetLahetaIPostiToiselle() throws Exception {
         mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -172,12 +180,13 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":true).*");
+        mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
     }
 
     @Test
-    public void testJalkiohjauskirjeetLahetaIPostiMolemmille() throws InterruptedException {
+    public void testJalkiohjauskirjeetLahetaIPostiMolemmille() throws Exception {
         mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -196,12 +205,13 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":false).*");
+        mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
     }
 
     @Test
-    public void testJalkiohjauskirjeetIPostiToinenAste() throws InterruptedException {
+    public void testJalkiohjauskirjeetIPostiToinenAste() throws Exception {
         mockMolemmatHylattyKutsu();
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -220,6 +230,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockHaku1KutsuToinenAste();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":false).*");
+        mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
     }
@@ -314,5 +325,12 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(resourcesAddress, dokumenttiId, Prosessi::valmis);
         Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
         Assert.assertEquals(false, valmisProsessi.keskeytetty);
+    }
+
+    private void mockKoodisto() throws IOException {
+        final String maatjavaltiot1 = IOUtils.toString(new ClassPathResource("/koodisto/maatjavaltiot1.json").getInputStream());
+        mockToReturnString(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", maatjavaltiot1);
+        final String posti = IOUtils.toString(new ClassPathResource("/koodisto/posti.json").getInputStream());
+        mockToReturnString(GET, "/koodisto-service/rest/json/posti/koodi", posti);
     }
 }
