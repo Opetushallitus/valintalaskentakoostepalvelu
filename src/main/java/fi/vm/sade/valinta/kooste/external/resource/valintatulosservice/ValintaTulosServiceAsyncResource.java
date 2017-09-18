@@ -31,10 +31,6 @@ public interface ValintaTulosServiceAsyncResource {
 
     Observable<List<VastaanottoRecordDTO>> hakukohteenVastaanotot(String hakukohdeOid);
 
-    Observable<Void> poista(PoistaVastaanottoDTO poistaVastaanottoDTO);
-
-    Observable<List<VastaanottoResultDTO>> tallenna(List<VastaanottoRecordDTO> tallennettavat);
-
     Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid);
 
     Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid);

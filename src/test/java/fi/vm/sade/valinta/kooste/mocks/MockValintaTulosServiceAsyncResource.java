@@ -50,25 +50,6 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     }
 
     @Override
-    public Observable<Void> poista(PoistaVastaanottoDTO poistaVastaanottoDTO) {
-        return Observable.empty();
-    }
-
-    @Override
-    public Observable<List<VastaanottoResultDTO>> tallenna(List<VastaanottoRecordDTO> tallennettavat) {
-        return Observable.just(tallennettavat.stream().map(v -> {
-            VastaanottoResultDTO dto = new VastaanottoResultDTO();
-            dto.setHakemusOid(v.getHakemusOid());
-            dto.setHakukohdeOid(v.getHakukohdeOid());
-            dto.setHenkiloOid(v.getHenkiloOid());
-            VastaanottoResultDTO.Result result = new VastaanottoResultDTO.Result();
-            result.setStatus(OK.getStatusCode());
-            dto.setResult(result);
-            return dto;
-        }).collect(Collectors.toList()));
-    }
-
-    @Override
     public Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid) {
         return Observable.just(Lists.newArrayList());
     }

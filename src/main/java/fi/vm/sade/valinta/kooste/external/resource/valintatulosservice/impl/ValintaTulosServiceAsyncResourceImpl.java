@@ -207,22 +207,6 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     }
 
     @Override
-    public Observable<Void> poista(PoistaVastaanottoDTO poistaVastaanottoDTO) {
-        return postAsObservable(
-                getUrl("valinta-tulos-service.virkailija.vastaanotto.poista"),
-                Void.class,
-                Entity.json(poistaVastaanottoDTO));
-    }
-
-    @Override
-    public Observable<List<VastaanottoResultDTO>> tallenna(List<VastaanottoRecordDTO> tallennettavat) {
-        return postAsObservable(
-                getUrl("valinta-tulos-service.virkailija.vastaanotto"),
-                new GenericType<List<VastaanottoResultDTO>>() {}.getType(),
-                Entity.json(tallennettavat));
-    }
-
-    @Override
     public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
         return postAsObservable(
                 getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid),

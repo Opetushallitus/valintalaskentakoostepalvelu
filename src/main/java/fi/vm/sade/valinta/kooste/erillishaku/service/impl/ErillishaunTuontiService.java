@@ -232,10 +232,6 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     }
 
     private Observable<List<Poikkeus>> vastaanotonJaValinnantuloksenTallennus(final AuditSession auditSession, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat) {
-        final List<ErillishaunHakijaDTO> hakijatKaikillaTilaPaivityksilla = lisattavatTaiKeskeneraiset.stream().map(rivi -> toErillishaunHakijaDTO(haku, rivi))
-                .filter(h -> !ainoastaanHakemuksenTilaPaivitys(h) && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.equals(h.valintatuloksenTila))
-                .collect(Collectors.toList());
-
         List<ErillishakuRivi> lisattavat = lisattavatTaiKeskeneraiset.stream().filter(rivi -> !isKesken(rivi)).collect(Collectors.toList());
         List<ErillishakuRivi> kesken = lisattavatTaiKeskeneraiset.stream().filter(rivi -> isKesken(rivi)).collect(Collectors.toList());
 
@@ -245,13 +241,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                     .toBlocking().first().stream().collect(Collectors.toMap(Valinnantulos::getHakemusOid, v -> v)));
         }
 
-        return doVastaanottoTilojenTallennusValintaTulosServiceen(auditSession.getPersonOid(), hakijatKaikillaTilaPaivityksilla).flatMap(poikkeukset -> {
-            if (poikkeukset.isEmpty()) {
-                return doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, createValinnantuloksetForValintaTulosService(haku, lisattavat, kesken, poistettavat, vanhatValinnantulokset));
-            } else {
-                return Observable.just(poikkeukset);
-            }
-        });
+        return doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, createValinnantuloksetForValintaTulosService(haku, lisattavat, kesken, poistettavat, vanhatValinnantulokset));
     }
 
     private List<Valinnantulos> createValinnantuloksetForValintaTulosService(final ErillishakuDTO haku,
@@ -300,25 +290,6 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 .onErrorResumeNext(t -> Observable.error(new RuntimeException(String.format(
                         "Erillishaun %s valinnantulosten tallennus valinta-tulos-serviceen epäonnistui",
                         haku.getHakuOid()
-                ), t)));
-    }
-
-    private Observable<List<Poikkeus>> doVastaanottoTilojenTallennusValintaTulosServiceen(String username, List<ErillishaunHakijaDTO> hakijat) {
-        if(hakijat.isEmpty()) {
-            return Observable.just(Collections.emptyList());
-        }
-        return valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijat, username, "Erillishaun tuonti"))
-                .map(r -> r.stream()
-                        .filter(VastaanottoResultDTO::isFailed)
-                        .map(s -> new Poikkeus(
-                                Poikkeus.KOOSTEPALVELU,
-                                Poikkeus.VALINTA_TULOS_SERVICE,
-                                s.getResult().getMessage(),
-                                new Tunniste(s.getHakemusOid(), Poikkeus.HAKEMUSOID)))
-                        .collect(Collectors.toList()))
-                .onErrorResumeNext(t -> Observable.error(new RuntimeException(String.format(
-                        "Erillishaun %s vastaanottojen tallennus valintarekisteriin epäonnistui",
-                        hakijat.get(0).getHakuOid()
                 ), t)));
     }
 

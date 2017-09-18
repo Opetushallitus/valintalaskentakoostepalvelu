@@ -274,18 +274,6 @@ public class ErillishaunTuontiServiceTest {
                 return Observable.just(((List<Valinnantulos>)i.getArgumentAt(2, List.class)).stream().map(v ->
                         new ValintatulosUpdateStatus(500, "Something wrong", valintatapajonoOid, v.getHakemusOid())).collect(Collectors.toList()));
             });
-            when(failingValintaTuloseServiceAsyncResource.tallenna(anyListOf(VastaanottoRecordDTO.class))).then(invocation -> Observable
-                    .just(((List<VastaanottoRecordDTO>) invocation.getArguments()[0]).stream().map(v -> {
-                        VastaanottoResultDTO dto = new VastaanottoResultDTO();
-                        dto.setHakemusOid(v.getHakemusOid());
-                        dto.setHakukohdeOid(v.getHakukohdeOid());
-                        dto.setHenkiloOid(v.getHenkiloOid());
-                        Result result = new Result();
-                        result.setStatus(OK.getStatusCode());
-                        dto.setResult(result);
-                        return dto;
-                    }).collect(Collectors.toList()))
-            );
             when(failingValintaTuloseServiceAsyncResource.fetchLukuvuosimaksut(anyString(), any())).thenReturn(just(emptyList()));
 
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(

@@ -58,13 +58,6 @@ public class ErillishaunTuontiHelper {
         }).collect(Collectors.toList());
     }
 
-    public static List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja, String selite) {
-        return hakijatJaPoistettavat.stream().map(erillishaunHakijaDTO ->
-                VastaanottoRecordDTO.of(erillishaunHakijaDTO, muokkaaja, selite)).
-                collect(Collectors.toList());
-    }
-
-
     public static HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
         return nullIfFails(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()));
     }
