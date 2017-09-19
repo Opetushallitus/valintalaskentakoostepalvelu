@@ -50,8 +50,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> true,
-                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
+                (hakukohde, hakuOid) -> true,
+                Collections.emptyList()
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
@@ -110,8 +110,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> true,
-                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
+                (hakukohde, hakuOid) -> true,
+                Collections.emptyList()
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
@@ -172,8 +172,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> true,
-                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
+                (hakukohde, hakuOid) -> true,
+                Collections.emptyList()
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
@@ -235,8 +235,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> true,
-                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
+                (hakukohde, hakuOid) -> true,
+                Collections.emptyList()
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
@@ -298,8 +298,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> true,
-                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
+                (hakukohde, hakuOid) -> true,
+                Collections.emptyList()
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
@@ -358,8 +358,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter((haku, hakukohde) -> true, Collections.EMPTY_LIST).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> true,
-                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
+                (hakukohde, hakuOid) -> true,
+                Collections.emptyList()
         ).build();
         final AtomicInteger ekaOnnistuu = new AtomicInteger(0);
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);

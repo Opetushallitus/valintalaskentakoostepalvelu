@@ -199,35 +199,31 @@ public class ValintalaskentaSpec {
         }
     }
     public static class SuoritusrekisteriMock {
-        private final Map<BiPredicate<String,String>, BiConsumer<Consumer<List<Oppija>>, Consumer<Throwable>>> filters = Maps.newHashMap();
+        private final Map<BiPredicate<String,String>, List<Oppija>> filters = Maps.newHashMap();
 
-        public SuoritusrekisteriMock addFilter(BiPredicate<String,String> hakukohdeOidJaReferenssiPvmPredicate,
-                                               BiConsumer<Consumer<List<Oppija>>, Consumer<Throwable>>  callback) {
-            filters.put(hakukohdeOidJaReferenssiPvmPredicate, callback);
+        public SuoritusrekisteriMock addFilter(BiPredicate<String,String> hakukohdeOidJaHakuOidPredicate, List<Oppija> oppijat) {
+            filters.put(hakukohdeOidJaHakuOidPredicate, oppijat);
             return this;
         }
         public SuoritusrekisteriAsyncResource build() {
             SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = Mockito.mock(SuoritusrekisteriAsyncResource.class);
             Mockito.when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(
-                    Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any())).then(
+                    Mockito.anyString(), Mockito.anyString())).then(
                     answer -> {
-                        Consumer<List<Oppija>> cb =(Consumer<List<Oppija>>) answer.getArguments()[2];
-                        Consumer<Throwable> cb2 =(Consumer<Throwable>) answer.getArguments()[3];
-                        final String hakuOid = (String)answer.getArguments()[0];
-                        final String referenssiPvm = (String)answer.getArguments()[1];
-                        if(filters.entrySet().stream().anyMatch(a -> a.getKey().test(hakuOid, referenssiPvm))) {
-                            filters.entrySet().stream().filter(
-                                    a -> a.getKey().test(hakuOid, referenssiPvm)
-                            ).findFirst().ifPresent(
-                                    (a) -> {
-                                        a.getValue().accept(cb, cb2);
-                                    }
-                            );
+                        final String hakuOid = (String) answer.getArguments()[0];
+                        final String hakukohdeOid = (String) answer.getArguments()[1];
+                        if(filters.entrySet().stream().anyMatch(a -> a.getKey().test(hakuOid, hakukohdeOid))) {
+                            final Optional<List<Oppija>> oppijat = filters.entrySet().stream().filter(entry -> entry.getKey().test(hakuOid, hakukohdeOid)).map(entry -> entry.getValue()).findFirst();
+                            if (oppijat.isPresent()) {
+                                return Observable.just(oppijat.get());
+                            } else {
+                                return Observable.just(Collections.EMPTY_LIST);
+                            }
                         } else {
-                            cb2.accept(new RuntimeException("Ei paluuarvoa!"));
+                            return Observable.error(new RuntimeException("Ei paluuarvoa!"));
                         }
-                        return new PeruutettavaMock(cb2);
                     }
+
             );
             return suoritusrekisteriAsyncResource;
         }

@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -12,6 +13,7 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
+import rx.Observable;
 import rx.Subscription;
 
 public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Palvelukutsu {
@@ -33,19 +35,19 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Pal
     }
 
     public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
-        aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
-            public Peruutettava get() {
-                return toPeruutettava(applicationAsyncResource.getApplicationsByOid(hakuOid, getHakukohdeOid()).subscribe(hakemukset -> {
+        aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> toPeruutettava(applicationAsyncResource.getApplicationsByOid(hakuOid, getHakukohdeOid())
+                .retryWhen(errors -> errors.zipWith(Observable.range(1,2), (n, i) -> i)
+                        .flatMap(i -> Observable.timer(5*i, TimeUnit.SECONDS)
+                        ))
+                .subscribe(hakemukset -> {
                     if (hakemukset == null) {
                         LOG.error("Hakemuksetpalvelu palautti null datajoukon!");
                         failureCallback(takaisinkutsu);
-                        return;
+                    } else {
+                        HakemuksetPalvelukutsu.this.hakemukset.set(hakemukset);
+                        takaisinkutsu.accept(HakemuksetPalvelukutsu.this);
                     }
-                    HakemuksetPalvelukutsu.this.hakemukset.set(hakemukset);
-                    takaisinkutsu.accept(HakemuksetPalvelukutsu.this);
-                }, failureCallback(takaisinkutsu)));
-            }
-        });
+                }, failureCallback(takaisinkutsu))));
         return this;
     }
 
