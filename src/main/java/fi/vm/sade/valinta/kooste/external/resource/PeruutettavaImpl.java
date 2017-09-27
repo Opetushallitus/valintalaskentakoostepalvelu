@@ -17,4 +17,8 @@ public class PeruutettavaImpl implements Peruutettava {
     public boolean onTehty() {
         return future.isDone();
     }
+
+    public Future<?> getFuture() {
+        return this.future;
+    }
 }
