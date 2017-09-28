@@ -1,15 +1,18 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
+import static fi.vm.sade.valinta.kooste.AuthorizationUtil.*;
 import static java.util.Arrays.asList;
 import com.google.common.collect.Lists;
 
 import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
@@ -33,6 +36,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import rx.Observable;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
@@ -45,6 +49,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
@@ -80,6 +85,8 @@ public class PistesyottoResource {
     private ApplicationAsyncResource applicationAsyncResource;
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
+    @Context
+    private HttpServletRequest httpServletRequestJaxRS;
 
     @GET
     @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
@@ -204,6 +211,7 @@ public class PistesyottoResource {
                                               @PathParam("hakukohdeOid") String hakukohdeOid,
                                               @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -219,7 +227,7 @@ public class PistesyottoResource {
                 "ROLE_APP_HAKEMUS_LISATIETOCRUD"
         )).flatMap(authorityCheck -> {
             if (authorityCheck.test(hakukohdeOid)) {
-                return pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid)
+                return pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid, auditSession)
                         .map(pistetiedot -> Response.ok()
                                 .header("Content-Type", "application/json")
                                 .entity(pistetiedot)

@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
@@ -30,13 +31,13 @@ import static fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoK
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
-public class HakemuksenKoetulosYhteenveto {
+class HakemuksenKoetulosYhteenveto {
     @JsonProperty
-    public final ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
+    public  ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
     @JsonProperty
-    private final Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
+    private  Map<String, HakukohteenOsallistumistiedotDTO> hakukohteidenOsallistumistiedot;
 
-    private final String hakemusOid;
+    private  String hakemusOid;
 
     @JsonCreator
     public HakemuksenKoetulosYhteenveto(
@@ -96,12 +97,13 @@ public class HakemuksenKoetulosYhteenveto {
         }
     }
 
-    public HakemuksenKoetulosYhteenveto(ApplicationAdditionalDataDTO additionalData,
+    public HakemuksenKoetulosYhteenveto(Valintapisteet valintapisteet,
                                         Pair<String, List<ValintaperusteDTO>> valintaperusteet,
                                         ValintakoeOsallistuminenDTO kokeet,
                                         Oppija oppija,
                                         ParametritDTO ohjausparametrit) {
-        this.hakemusOid = additionalData.getOid();
+        /*
+        this.hakemusOid = valintapisteet.getHakemusOID();
         Map<String, Pair<Suoritus, Arvosana>> naytettavatKielikoetulokset = createKielikoetulokset(oppija, ohjausparametrit, hakemusOid);
         this.hakukohteidenOsallistumistiedot = (kokeet == null ? Stream.<HakutoiveDTO>empty() : kokeet.getHakutoiveet().stream())
                 .collect(Collectors.toMap(
@@ -153,6 +155,7 @@ public class HakemuksenKoetulosYhteenveto {
                             Osallistuminen.EI_VAADITA.toString()
             );
         });
+        */
     }
 
     private Map<String, Pair<Suoritus, Arvosana>> createKielikoetulokset(Oppija oppija, ParametritDTO ohjausparametrit, String hakemusOid) {

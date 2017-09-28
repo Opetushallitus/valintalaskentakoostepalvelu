@@ -21,6 +21,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviKuuntelija;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
@@ -65,8 +66,10 @@ public abstract class AbstractPistesyottoKoosteService {
     protected final OrganisaatioAsyncResource organisaatioAsyncResource;
     protected final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     protected final ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource;
+    protected final ValintapisteAsyncResource valintapisteAsyncResource;
 
     protected AbstractPistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
+                                               ValintapisteAsyncResource valintapisteAsyncResource,
                                                SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                                TarjontaAsyncResource tarjontaAsyncResource,
                                                OhjausparametritAsyncResource ohjausparametritAsyncResource,
@@ -74,6 +77,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                                ValintaperusteetAsyncResource valintaperusteetAsyncResource,
                                                ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         this.applicationAsyncResource = applicationAsyncResource;
+        this.valintapisteAsyncResource = valintapisteAsyncResource;
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
