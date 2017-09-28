@@ -25,6 +25,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -33,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
+@Ignore
 public class HakemuksenKoetulosYhteenvetoTest {
     private static final ValintaperusteDTO kielikoeFi = new ValintaperusteDTO();
     private static final ValintaperusteDTO kielikoeSv = new ValintaperusteDTO();

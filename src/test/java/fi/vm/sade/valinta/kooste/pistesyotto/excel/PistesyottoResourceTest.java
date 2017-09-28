@@ -60,6 +60,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -81,9 +82,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-/**
- * @author Jussi Jartamo
- */
+@Ignore
 public class PistesyottoResourceTest {
     final static Logger LOG = LoggerFactory.getLogger(PistesyottoResourceTest.class);
     private static final String KIELIKOE_KOULUTUSTOIMIJA_OID = "1.2.246.562.10.45042175963";

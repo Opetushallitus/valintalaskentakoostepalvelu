@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -27,6 +28,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
 
     @Autowired
     public PistesyottoVientiService(
+            ValintapisteAsyncResource valintapisteAsyncResource,
             ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
@@ -36,6 +38,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             DokumenttiAsyncResource dokumenttiAsyncResource,
             SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
         super(applicationAsyncResource,
+                valintapisteAsyncResource,
                 suoritusrekisteriAsyncResource,
                 tarjontaAsyncResource,
                 ohjausparametritAsyncResource,

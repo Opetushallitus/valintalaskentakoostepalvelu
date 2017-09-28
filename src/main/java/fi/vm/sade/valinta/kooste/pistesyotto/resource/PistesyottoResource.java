@@ -113,6 +113,8 @@ public class PistesyottoResource {
                 )),
                 pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid),
                 (authorityCheck, pistetiedotHakukohteittain) -> {
+                    throw new UnsupportedOperationException("Not supported yet!");
+                    /*
                     Set<String> hakutoiveOids = pistetiedotHakukohteittain.keySet();
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return Response.ok()
@@ -127,6 +129,7 @@ public class PistesyottoResource {
                         LOG.error(msg);
                         return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
                     }
+                    */
                 }
         ).subscribe(
                 response::resume,

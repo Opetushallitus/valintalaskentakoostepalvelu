@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationService.Result;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -33,6 +34,7 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
 
     @Autowired
     public AmmatillisenKielikoeMigrationPistesyottoService(ApplicationAsyncResource applicationAsyncResource,
+                                                           ValintapisteAsyncResource valintapisteAsyncResource,
                                                            SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                                            TarjontaAsyncResource tarjontaAsyncResource,
                                                            OhjausparametritAsyncResource ohjausparametritAsyncResource,
@@ -40,6 +42,7 @@ public class AmmatillisenKielikoeMigrationPistesyottoService extends AbstractPis
                                                            ValintaperusteetAsyncResource valintaperusteetAsyncResource,
                                                            ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         super(applicationAsyncResource,
+                valintapisteAsyncResource,
                 suoritusrekisteriAsyncResource,
                 tarjontaAsyncResource,
                 ohjausparametritAsyncResource,

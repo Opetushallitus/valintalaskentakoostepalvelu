@@ -40,11 +40,8 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteSe
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
+import org.junit.*;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.core.MediaType;
@@ -61,9 +58,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author Jussi Jartamo
- */
+@Ignore
 public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     @Before

@@ -22,7 +22,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
+//import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviKuuntelija;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AmmatillisenKielikoetulosOperations.CompositeCommand;
@@ -174,6 +174,8 @@ public abstract class AbstractPistesyottoKoosteService {
                             .collect(Collectors.toMap(o -> o.getHakemusOid(), o -> o));
                     Map<String, Oppija> kielikoetuloksetByPersonOid = kielikoetulokset.stream()
                             .collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o));
+                    throw new UnsupportedOperationException("Excel not supported yet!");
+                    /*
                     return lisatiedot.stream().map(l ->
                             new HakemuksenKoetulosYhteenveto(
                                     l,
@@ -183,6 +185,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                     ohjausparametrit
                             ).applicationAdditionalDataDTO
                     ).collect(Collectors.toList());
+                    */
                 }
         );
         Observable<List<Hakemus>> hakemuksetO = Observable.merge(Observable.zip(

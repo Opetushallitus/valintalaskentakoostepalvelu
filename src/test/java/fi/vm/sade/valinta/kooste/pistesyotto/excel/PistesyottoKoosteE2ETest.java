@@ -57,6 +57,7 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -74,6 +75,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Ignore
 public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     private static final ValintaperusteDTO kielikoeFi = new ValintaperusteDTO();

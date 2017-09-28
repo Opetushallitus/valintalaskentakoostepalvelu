@@ -84,6 +84,7 @@
     <mockito:mock id="hyvaksymiskirjeetService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService" />
     <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />
     <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource" />
+    <mockito:mock id="valintapisteResource" class="fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource" />
     <mockito:mock id="hakuV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource" />
     <mockito:mock id="hakokohdeResource" class="fi.vm.sade.tarjonta.service.resources.HakukohdeResource" />
     <mockito:mock id="komotoResource" class="fi.vm.sade.tarjonta.service.resources.KomotoResource" />

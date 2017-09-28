@@ -31,7 +31,7 @@ import static fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoK
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
-class HakemuksenKoetulosYhteenveto {
+public class HakemuksenKoetulosYhteenveto {
     @JsonProperty
     public  ApplicationAdditionalDataDTO applicationAdditionalDataDTO;
     @JsonProperty
@@ -97,7 +97,7 @@ class HakemuksenKoetulosYhteenveto {
         }
     }
 
-    public HakemuksenKoetulosYhteenveto(Valintapisteet valintapisteet,
+    public HakemuksenKoetulosYhteenveto(ApplicationAdditionalDataDTO additionalData,
                                         Pair<String, List<ValintaperusteDTO>> valintaperusteet,
                                         ValintakoeOsallistuminenDTO kokeet,
                                         Oppija oppija,
