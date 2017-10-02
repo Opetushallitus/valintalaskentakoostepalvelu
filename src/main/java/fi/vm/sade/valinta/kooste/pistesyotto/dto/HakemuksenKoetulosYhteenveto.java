@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -97,12 +98,32 @@ public class HakemuksenKoetulosYhteenveto {
         }
     }
 
-    public HakemuksenKoetulosYhteenveto(ApplicationAdditionalDataDTO additionalData,
+    private static final Function<Valintapisteet, ApplicationAdditionalDataDTO> toAdditionalData = v -> {
+        Map<String, String> immutableAdditionalData = v.getPisteet().stream().flatMap(p ->
+                Stream.of(
+                        Pair.of(p.getTunniste(), p.getArvo()),
+                        Pair.of(withOsallistuminenSuffix(p.getTunniste()), p.getOsallistuminen().toString())
+                )
+        ).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+
+
+        return new ApplicationAdditionalDataDTO(
+                v.getHakemusOID(),
+                v.getOppijaOID(),
+                v.getEtunimet(),
+                v.getSukunimi(),
+                new HashMap<>(immutableAdditionalData)
+        );
+    };
+    private static String withOsallistuminenSuffix(String tunniste) {
+        return new StringBuilder(tunniste).append("-OSALLISTUMINEN").toString();
+    }
+
+    public HakemuksenKoetulosYhteenveto(Valintapisteet valintapisteet,
                                         Pair<String, List<ValintaperusteDTO>> valintaperusteet,
                                         ValintakoeOsallistuminenDTO kokeet,
                                         Oppija oppija,
                                         ParametritDTO ohjausparametrit) {
-        /*
         this.hakemusOid = valintapisteet.getHakemusOID();
         Map<String, Pair<Suoritus, Arvosana>> naytettavatKielikoetulokset = createKielikoetulokset(oppija, ohjausparametrit, hakemusOid);
         this.hakukohteidenOsallistumistiedot = (kokeet == null ? Stream.<HakutoiveDTO>empty() : kokeet.getHakutoiveet().stream())
@@ -110,26 +131,26 @@ public class HakemuksenKoetulosYhteenveto {
                         HakutoiveDTO::getHakukohdeOid,
                         h -> new HakukohteenOsallistumistiedotDTO(h, naytettavatKielikoetulokset, hakemusOid, kokeet.getHakutoiveet())
                 ));
-        this.applicationAdditionalDataDTO = additionalData;
+        this.applicationAdditionalDataDTO = toAdditionalData.apply(valintapisteet);
         naytettavatKielikoetulokset.forEach((koetunniste, tulos) -> {
             SureHyvaksyttyArvosana arvosana = SureHyvaksyttyArvosana.valueOf(tulos.getRight().getArvio().getArvosana());
             switch (arvosana) {
                 case hyvaksytty:
-                    additionalData.getAdditionalData().put(koetunniste, "true");
-                    additionalData.getAdditionalData().put(
-                            koetunniste + "-OSALLISTUMINEN",
+                    this.applicationAdditionalDataDTO.getAdditionalData().put(koetunniste, "true");
+                    this.applicationAdditionalDataDTO.getAdditionalData().put(
+                            withOsallistuminenSuffix(koetunniste),
                             hakemusOid.equals(tulos.getLeft().getMyontaja()) ?
                                     Osallistuminen.OSALLISTUI.toString() :
                                     Osallistuminen.MERKITSEMATTA.toString()
                     );
                     break;
                 case hylatty:
-                    additionalData.getAdditionalData().put(koetunniste, "false");
-                    additionalData.getAdditionalData().put(koetunniste + "-OSALLISTUMINEN", Osallistuminen.OSALLISTUI.toString());
+                    this.applicationAdditionalDataDTO.getAdditionalData().put(koetunniste, "false");
+                    this.applicationAdditionalDataDTO.getAdditionalData().put(withOsallistuminenSuffix(koetunniste), Osallistuminen.OSALLISTUI.toString());
                     break;
                 case ei_osallistunut:
-                    additionalData.getAdditionalData().put(koetunniste, "");
-                    additionalData.getAdditionalData().put(koetunniste + "-OSALLISTUMINEN", Osallistuminen.EI_OSALLISTUNUT.toString());
+                    this.applicationAdditionalDataDTO.getAdditionalData().put(koetunniste, "");
+                    this.applicationAdditionalDataDTO.getAdditionalData().put(withOsallistuminenSuffix(koetunniste), Osallistuminen.EI_OSALLISTUNUT.toString());
                     break;
                 default:
                     throw new RuntimeException(String.format(
@@ -147,15 +168,14 @@ public class HakemuksenKoetulosYhteenveto {
                     }
                 });
             }
-            additionalData.getAdditionalData().putIfAbsent(v.getTunniste(), "");
-            additionalData.getAdditionalData().putIfAbsent(
+            this.applicationAdditionalDataDTO.getAdditionalData().putIfAbsent(v.getTunniste(), "");
+            this.applicationAdditionalDataDTO.getAdditionalData().putIfAbsent(
                     v.getOsallistuminenTunniste(),
                     v.getVaatiiOsallistumisen() ?
                             Osallistuminen.MERKITSEMATTA.toString() :
                             Osallistuminen.EI_VAADITA.toString()
             );
         });
-        */
     }
 
     private Map<String, Pair<Suoritus, Arvosana>> createKielikoetulokset(Oppija oppija, ParametritDTO ohjausparametrit, String hakemusOid) {
