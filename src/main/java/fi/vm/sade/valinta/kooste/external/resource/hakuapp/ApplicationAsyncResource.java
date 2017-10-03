@@ -40,9 +40,11 @@ public interface ApplicationAsyncResource {
 
     Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback);
 
+    /*
     Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(String hakuOid, String hakukohdeOid);
 
     Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids);
+    */
 
     Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData);
 

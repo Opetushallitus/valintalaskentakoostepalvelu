@@ -145,20 +145,6 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     @Override
-    public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids) {
-        return postAsObservable(
-                getUrl("haku-app.applications.additionaldata"),
-                new TypeToken<List<ApplicationAdditionalDataDTO>>(){
-                }.getType(),
-                Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
-    }
-
-    @Override
     public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
         String url = getUrl("haku-app.applications.list");
         return new PeruutettavaImpl(getWebClient()

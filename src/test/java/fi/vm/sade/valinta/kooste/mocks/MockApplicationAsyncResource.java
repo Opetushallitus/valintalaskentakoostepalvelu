@@ -169,11 +169,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(Collection<String> hakemusOids) {
-        return Observable.just(additionalDataResultByOidReference.get());
-    }
-
-    @Override
     public Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData) {
         additionalDataPutReference.set(additionalData);
         return Observable.just(Response.ok().build());
@@ -195,10 +190,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         return Futures.immediateFuture(resultByOidReference.get());
     }
 
-    @Override
-    public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(final String hakuOid, final String hakukohdeOid) {
-        return Observable.just(additionalDataResultReference.get());
-    }
 
     private Hakemus getHakemus() {
         Hakemus hakemus = new Hakemus();

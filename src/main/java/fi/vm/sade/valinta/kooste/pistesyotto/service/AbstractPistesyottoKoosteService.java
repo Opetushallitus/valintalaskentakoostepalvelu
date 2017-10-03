@@ -127,11 +127,13 @@ public abstract class AbstractPistesyottoKoosteService {
                 return Observable.just(lisatiedot);
             }
             prosessi.inkrementoiKokonaistyota();
+            throw new UnsupportedOperationException("Not supported muodostaPistesyottoExcel");
+            /*
             return applicationAsyncResource.getApplicationAdditionalData(puuttuvatLisatiedot)
                     .map(ls -> Stream.concat(lisatiedot.stream(), ls.stream()).collect(Collectors.toList()))
                     .doOnCompleted(() -> {
                         prosessi.inkrementoiTehtyjaToita();
-                    });
+                    });*/
         };
         Func2<List<ValintakoeOsallistuminenDTO>, List<Hakemus>, Observable<List<Hakemus>>> haePuuttuvatHakemukset = (osallistumiset, hakemukset) -> {
             Set<String> puuttuvatHakemukset = osallistumiset.stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet());
@@ -159,6 +161,8 @@ public abstract class AbstractPistesyottoKoosteService {
         };
         Observable<List<ValintaperusteDTO>> kokeetO = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
         Observable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid);
+        throw new UnsupportedOperationException("Excel not supported yet!");
+        /*
         Observable<List<ApplicationAdditionalDataDTO>> lisatiedotO = Observable.zip(
                 Observable.merge(Observable.zip(
                         osallistumistiedotO,
@@ -174,8 +178,6 @@ public abstract class AbstractPistesyottoKoosteService {
                             .collect(Collectors.toMap(o -> o.getHakemusOid(), o -> o));
                     Map<String, Oppija> kielikoetuloksetByPersonOid = kielikoetulokset.stream()
                             .collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o));
-                    throw new UnsupportedOperationException("Excel not supported yet!");
-                    /*
                     return lisatiedot.stream().map(l ->
                             new HakemuksenKoetulosYhteenveto(
                                     l,
@@ -185,7 +187,6 @@ public abstract class AbstractPistesyottoKoosteService {
                                     ohjausparametrit
                             ).applicationAdditionalDataDTO
                     ).collect(Collectors.toList());
-                    */
                 }
         );
         Observable<List<Hakemus>> hakemuksetO = Observable.merge(Observable.zip(
@@ -213,6 +214,7 @@ public abstract class AbstractPistesyottoKoosteService {
         ).doOnCompleted(() -> {
             prosessi.inkrementoiTehtyjaToita();
         });
+        */
     }
 
     protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
