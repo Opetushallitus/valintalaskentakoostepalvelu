@@ -40,7 +40,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public Observable<Void> putValintapisteet(String hakuOID, String hakukohdeOID, List<Valintapisteet> pisteet, AuditSession auditSession) {
-        return postAsObservable(
+        return putAsObservable(
                 getUrl("valintapiste-service.put.pisteet", hakuOID, hakukohdeOID),
                 Void.class,
                 Entity.entity(pisteet, MediaType.APPLICATION_JSON_TYPE)
