@@ -143,7 +143,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 return new Valintapisteet(v.getHakemusOID(), o.getHakijaOid(), o.getEtunimi(), o.getSukunimi(), v.getPisteet());
             };
 
-            return valintapisteAsyncResource.getValintapisteet(puuttuvatLisatiedot, auditSession).map(v ->
+            return valintapisteAsyncResource.getValintapisteet(hakuOid, puuttuvatLisatiedot, auditSession).map(v ->
                     v.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).doOnCompleted(() -> {
                 prosessi.inkrementoiTehtyjaToita();
             });

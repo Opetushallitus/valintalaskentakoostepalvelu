@@ -40,9 +40,9 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Observable<List<Valintapisteet>> getValintapisteet(Collection<String> hakemusOIDs, AuditSession auditSession) {
+    public Observable<List<Valintapisteet>> getValintapisteet(String hakuOID, Collection<String> hakemusOIDs, AuditSession auditSession) {
         return  postAsObservable(
-                getUrl("valintapiste-service.get.pisteet.with.hakemusoids"),
+                getUrl("valintapiste-service.get.pisteet.with.hakemusoids", hakuOID),
                 new TypeToken<List<Valintapisteet>>(){}.getType(),
                 Entity.entity(hakemusOIDs, MediaType.APPLICATION_JSON_TYPE),client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);

@@ -11,7 +11,7 @@ public interface ValintapisteAsyncResource {
 
     Observable<List<Valintapisteet>> getValintapisteet(String hakuOID, String hakukohdeOID, AuditSession auditSession);
 
-    Observable<List<Valintapisteet>> getValintapisteet(Collection<String> hakemusOIDs, AuditSession auditSession);
+    Observable<List<Valintapisteet>> getValintapisteet(String hakuOID, Collection<String> hakemusOIDs, AuditSession auditSession);
 
     Observable<Void> putValintapisteet(String hakuOID, String hakukohdeOID, List<Valintapisteet> pisteet, AuditSession auditSession);
 
