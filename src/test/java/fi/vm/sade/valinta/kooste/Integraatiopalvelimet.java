@@ -8,6 +8,8 @@ import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Parameter;
 import org.mockserver.model.RegexBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -28,6 +30,7 @@ import static org.mockserver.model.HttpResponse.response;
  * http://www.mock-server.com/
  */
 public class Integraatiopalvelimet {
+    private static final Logger LOG = LoggerFactory.getLogger(Integraatiopalvelimet.class);
 
     public static ClientAndServerWithHost mockServer = new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
     static {
@@ -160,21 +163,21 @@ public class Integraatiopalvelimet {
     public static void mockToReturnJsonWithParams(String method, String p, Object r, Map<String, String> parameters) {
         String s;
         mockToReturnValueWithParams(method, p, s = gson().toJson(r), parameters.keySet().stream().map(name -> new Parameter(name, parameters.get(name))).collect(Collectors.toList()));
-        System.err.println(s);
+        LOG.debug(s);
     }
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;
         mockToReturnValue(method, p, s = gson().toJson(r));
-        System.err.println(s);
+        LOG.debug(s);
     }
     public static void mockToReturnJsonAndCheckBody(String method, String p, Object r, String regex) {
         String s;
         mockToReturnValueAndCheckBody(method, p, s = gson().toJson(r), regex);
-        System.err.println(s);
+        LOG.debug(s);
     }
     public static void mockToReturnString(String method, String p, String r) {
         mockToReturnValue(method, p, r);
-        System.err.println(r);
+        LOG.debug(r);
     }
 
     public static class ClientAndServerWithHost extends ClientAndServer {
