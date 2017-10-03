@@ -98,7 +98,7 @@ public class HakemuksenKoetulosYhteenveto {
         }
     }
 
-    private static final Function<Valintapisteet, ApplicationAdditionalDataDTO> toAdditionalData = v -> {
+    public static ApplicationAdditionalDataDTO toAdditionalData(Valintapisteet v) {
         Map<String, String> immutableAdditionalData = v.getPisteet().stream().flatMap(p ->
                 Stream.of(
                         Pair.of(p.getTunniste(), p.getArvo()),
@@ -131,7 +131,7 @@ public class HakemuksenKoetulosYhteenveto {
                         HakutoiveDTO::getHakukohdeOid,
                         h -> new HakukohteenOsallistumistiedotDTO(h, naytettavatKielikoetulokset, hakemusOid, kokeet.getHakutoiveet())
                 ));
-        this.applicationAdditionalDataDTO = toAdditionalData.apply(valintapisteet);
+        this.applicationAdditionalDataDTO = toAdditionalData(valintapisteet);
         naytettavatKielikoetulokset.forEach((koetunniste, tulos) -> {
             SureHyvaksyttyArvosana arvosana = SureHyvaksyttyArvosana.valueOf(tulos.getRight().getArvio().getArvosana());
             switch (arvosana) {

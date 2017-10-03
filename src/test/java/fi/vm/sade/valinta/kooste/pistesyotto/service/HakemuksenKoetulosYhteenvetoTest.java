@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.Osallistumistieto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
@@ -63,7 +64,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         eiVaadiOsallistumista.setOsallistuminenTunniste("ei_vaadi_osallistumista-OSALLISTUMINEN");
         eiVaadiOsallistumista.setVaatiiOsallistumisen(false);
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", additionalData),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", additionalData),
                 Pair.of("hakukohdeOid", Arrays.asList(vaatiiOsallistumisen, eiVaadiOsallistumista)),
                 new ValintakoeOsallistuminenDTO(),
                 new Oppija(),
@@ -92,7 +94,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         kielikoesuoritus.setArvosanat(Collections.singletonList(a));
         oppija.setSuoritukset(Collections.singletonList(kielikoesuoritus));
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,
@@ -132,7 +135,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
 
         oppija.setSuoritukset(Arrays.asList(samanHakemuksenSuoritus, eriHakemuksenSuoritus));
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeSv)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,
@@ -174,7 +178,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
 
         oppija.setSuoritukset(Arrays.asList(samanHakemuksenSuoritus, eriHakemuksenSuoritus));
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeSv)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,
@@ -234,7 +239,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         osallistuminen.setHakutoiveet(Collections.singletonList(h));
 
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 osallistuminen,
                 oppija,
@@ -252,7 +258,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         syotettavissaKaikille.setTunniste("syotettavissa_kaikille");
         syotettavissaKaikille.setSyotettavissaKaikille(true);
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(syotettavissaKaikille)),
                 null,
                 null,
@@ -299,7 +306,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         ohjausparametrit.setPH_VLS(ph_vls);
 
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 osallistuminen,
                 oppija,
@@ -327,7 +335,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         oppija.setSuoritukset(Collections.singletonList(kielikoesuoritus));
 
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,
@@ -370,7 +379,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         
         
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 valintakoeOsallistuminenDTO,
                 oppija,
@@ -433,7 +443,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         hylatynOsallistuminen.setHakutoiveet(Collections.singletonList(h));
 
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hylattyHakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hylattyHakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 hylatynOsallistuminen,
                 oppija,
@@ -461,7 +472,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         osallistuminen.setHakutoiveet(Collections.singletonList(h));
 
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 osallistuminen,
                 null,
@@ -494,7 +506,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         vp.setSyotettavissaKaikille(true);
 
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(vp)),
                 osallistuminen,
                 null,
@@ -538,7 +551,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         oppija.setSuoritukset(Arrays.asList(todistusToinen, todistusTama));
 
         HakemuksenKoetulosYhteenveto toinenEnsin = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,
@@ -550,7 +564,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         oppija.setSuoritukset(Arrays.asList(todistusTama, todistusToinen));
 
         HakemuksenKoetulosYhteenveto tamaEnsin = new HakemuksenKoetulosYhteenveto(
-                new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
+                new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+                //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", new HashMap<>()),
                 Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
                 new ValintakoeOsallistuminenDTO(),
                 oppija,

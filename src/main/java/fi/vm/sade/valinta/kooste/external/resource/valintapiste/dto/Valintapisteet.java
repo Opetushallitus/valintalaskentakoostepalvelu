@@ -10,6 +10,16 @@ public class Valintapisteet {
     private String sukunimi;
     private List<Piste> pisteet;
 
+    public Valintapisteet() {
+    }
+    public Valintapisteet(String hakemusOID, String oppijaOID, String etunimet, String sukunimi, List<Piste> pisteet) {
+        this.hakemusOID = hakemusOID;
+        this.oppijaOID = oppijaOID;
+        this.etunimet = etunimet;
+        this.sukunimi = sukunimi;
+        this.pisteet = pisteet;
+    }
+
     public List<Piste> getPisteet() {
         return pisteet;
     }
