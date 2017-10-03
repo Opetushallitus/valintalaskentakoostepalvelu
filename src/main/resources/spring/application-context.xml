@@ -328,10 +328,6 @@
 
 		<bean id="ValinnanvaiheenValintakoekutsutService"
 			  class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
-		<bean id="AmmatillisenKielikoeMigrationService"
-					class="fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationService"/>
-		<bean id="AmmatillisenKielikoeMigrationPistesyottoService"
-					class="fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationPistesyottoService"/>
 		<!-- Valintalaskenta -->
 		<bean id="ValintalaskentaKerrallaResource"
 			  class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
