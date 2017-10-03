@@ -39,7 +39,7 @@ public class HakuParametritService {
             ParametritDTO paramDto = parametritDTOObservable.toBlocking().single();
             return new ParametritParser(paramDto, rootOrganisaatioOid);
         } catch (Exception e) {
-            LOG.error(String.format("Error querying ParametritDTO for haku {}", hakuOid), e);
+            LOG.error(String.format("Error querying ParametritDTO for haku %s", hakuOid), e);
             throw new RuntimeException(e);
         }
     }
