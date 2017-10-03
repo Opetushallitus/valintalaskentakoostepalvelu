@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
@@ -100,7 +101,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                 ).collect(Collectors.toList());
     }
 
-    public void tuo(String username, String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
+    public void tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
         muodostaPistesyottoExcel(hakuOid, hakukohdeOid, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
                 .flatMap(p -> {
@@ -141,7 +142,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     } else {
                         LOG.info("Pistesyötössä hakukohteeseen {} muuttunutta {} tietoa tallennettavaksi", hakukohdeOid, uudetPistetiedot.size());
                         return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, uudetPistetiedot,
-                                uudetKielikoetulokset, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL);
+                                uudetKielikoetulokset, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, auditSession);
                     }
                 })
                 .subscribe(x -> {

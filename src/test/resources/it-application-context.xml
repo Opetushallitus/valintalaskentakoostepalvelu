@@ -63,12 +63,6 @@
         class="fi.vm.sade.valinta.kooste.hakemukset.resource.HakemuksetResource"/>
   <bean id="ValinnanvaiheenValintakoekutsutService"
         class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
-  <bean id="AmmatillisenKielikoeMigrationResource"
-        class="fi.vm.sade.valinta.kooste.hakemukset.resource.AmmatillisenKielikoeMigrationResource"/>
-  <bean id="AmmatillisenKielikoeMigrationService"
-        class="fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationService"/>
-  <bean id="AmmatillisenKielikoeMigrationPistesyottoService"
-					class="fi.vm.sade.valinta.kooste.hakemukset.service.AmmatillisenKielikoeMigrationPistesyottoService"/>
 
   <bean class="fi.vm.sade.security.OidProvider" />
 

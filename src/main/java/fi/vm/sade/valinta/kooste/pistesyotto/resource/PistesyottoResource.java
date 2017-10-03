@@ -150,6 +150,7 @@ public class PistesyottoResource {
                                                          ApplicationAdditionalDataDTO pistetiedot,
                                                          @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -184,7 +185,7 @@ public class PistesyottoResource {
                             .collect(Collectors.toList());
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(
-                                pistetiedot, username
+                                pistetiedot, username, auditSession
                         );
                     } else {
                         String msg = String.format(
@@ -263,6 +264,7 @@ public class PistesyottoResource {
                                              List<ApplicationAdditionalDataDTO> pistetiedot,
                                              @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -301,7 +303,7 @@ public class PistesyottoResource {
                     )));
                 })
         ).flatMap(x -> pistesyottoKoosteService.tallennaKoostetutPistetiedot(
-                hakuOid, hakukohdeOid, pistetiedot, username)
+                hakuOid, hakukohdeOid, pistetiedot, username, auditSession)
         ).subscribe(
                 x -> response.resume(Response.noContent().build()),
                 error -> {
@@ -379,7 +381,7 @@ public class PistesyottoResource {
 
         try {
             final String username = KoosteAudit.username();
-
+            final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
             authorityCheckService.getAuthorityCheckForRoles(asList(
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
                     "ROLE_APP_HAKEMUS_CRUD",
@@ -414,7 +416,7 @@ public class PistesyottoResource {
                                         username, hakuOid, hakukohdeOid),
                                 poikkeus)
                 );
-                tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
+                tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
                 return prosessi.toProsessiId();
             }).subscribe(
                     id -> asyncResponse.resume(Response.ok(id).build()),

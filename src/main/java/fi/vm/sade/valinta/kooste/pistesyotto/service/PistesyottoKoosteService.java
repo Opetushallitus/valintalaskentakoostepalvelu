@@ -173,7 +173,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     }
 
     public Observable<Void> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
-                                                                     String username) {
+                                                                     String username, AuditSession auditSession) {
         return valintalaskentaValintakoeAsyncResource.haeHakemukselle(pistetietoDTO.getOid()).flatMap(vo -> {
             String hakuOid = vo.getHakuOid();
             Map<String, HakutoiveDTO> kh = kielikokeidenHakukohteet(vo);
@@ -189,7 +189,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     a.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
                     return tallennaKoostetutPistetiedot(
                             hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(),
-                            Collections.singletonList(a), username
+                            Collections.singletonList(a), username, auditSession
                     );
                 }).collect(Collectors.toList()));
             }
@@ -199,12 +199,12 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     public Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
                                                          String hakukohdeOid,
                                                          List<ApplicationAdditionalDataDTO> pistetietoDTOs,
-                                                         String username) {
+                                                         String username, AuditSession auditSession) {
         Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoetuloksetSureen = new HashMap<>();
         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle;
         try {
             pistetiedotHakemukselle = createAdditionalDataAndPopulateKielikoetulokset(pistetietoDTOs, kielikoetuloksetSureen);
-            return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA);
+            return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, auditSession);
         } catch (Exception e) {
             LOG.error(String.format("Ongelma käsiteltäessä pistetietoja haun %s kohteelle %s , käyttäjä %s ", hakuOid, hakukohdeOid, username), e);
             return Observable.error(e);
