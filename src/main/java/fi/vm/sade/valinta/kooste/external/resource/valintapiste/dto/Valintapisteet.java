@@ -1,6 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto;
 
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Valintapisteet {
 
@@ -38,5 +45,26 @@ public class Valintapisteet {
 
     public String getSukunimi() {
         return sukunimi;
+    }
+
+    public static ApplicationAdditionalDataDTO toAdditionalData(Valintapisteet v) {
+        Map<String, String> immutableAdditionalData = v.getPisteet().stream().flatMap(p ->
+                Stream.of(
+                        Pair.of(p.getTunniste(), p.getArvo()),
+                        Pair.of(withOsallistuminenSuffix(p.getTunniste()), p.getOsallistuminen().toString())
+                )
+        ).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+
+
+        return new ApplicationAdditionalDataDTO(
+                v.getHakemusOID(),
+                v.getOppijaOID(),
+                v.getEtunimet(),
+                v.getSukunimi(),
+                new HashMap<>(immutableAdditionalData)
+        );
+    };
+    public static String withOsallistuminenSuffix(String tunniste) {
+        return new StringBuilder(tunniste).append("-OSALLISTUMINEN").toString();
     }
 }

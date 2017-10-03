@@ -103,7 +103,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
 
     public void tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
-        muodostaPistesyottoExcel(hakuOid, hakukohdeOid, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
+        muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
                 .flatMap(p -> {
                     PistesyottoExcel pistesyottoExcel = p.getLeft();
                     Map<String, ApplicationAdditionalDataDTO> pistetiedot = p.getRight();

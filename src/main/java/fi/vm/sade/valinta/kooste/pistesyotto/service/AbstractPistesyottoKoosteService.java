@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
@@ -26,6 +27,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Piste;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviKuuntelija;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
@@ -124,22 +126,27 @@ public abstract class AbstractPistesyottoKoosteService {
     protected Observable<Pair<PistesyottoExcel, Map<String, ApplicationAdditionalDataDTO>>> muodostaPistesyottoExcel(
             String hakuOid,
             String hakukohdeOid,
+            AuditSession auditSession,
             DokumenttiProsessi prosessi,
             Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
-        Func2<List<ValintakoeOsallistuminenDTO>, List<ApplicationAdditionalDataDTO>, Observable<List<ApplicationAdditionalDataDTO>>> heaPuuttuvatLisatiedot = (osallistumiset, lisatiedot) -> {
-            Set<String> puuttuvatLisatiedot = osallistumiset.stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet());
-            puuttuvatLisatiedot.removeAll(lisatiedot.stream().map(l -> l.getOid()).collect(Collectors.toSet()));
+        Func2<List<ValintakoeOsallistuminenDTO>, List<Valintapisteet>, Observable<List<Valintapisteet>>> haePuuttuvatLisatiedot = (osallistumiset, lisatiedot) -> {
+            final Map<String, ValintakoeOsallistuminenDTO> osallistuminenByHakemusOID = osallistumiset.stream().collect(Collectors.toMap(o -> o.getHakemusOid(), o -> o));
+            Sets.SetView<String> puuttuvatLisatiedot = Sets.difference(osallistuminenByHakemusOID.keySet(), lisatiedot.stream().map(l -> l.getHakemusOID()).collect(Collectors.toSet()));
+            //Set<String> puuttuvatLisatiedot = osallistuminenByHakemusOID.keySet();
+            //puuttuvatLisatiedot.removeAll(lisatiedot.stream().map(l -> l.getOid()).collect(Collectors.toSet()));
             if (puuttuvatLisatiedot.isEmpty()) {
                 return Observable.just(lisatiedot);
             }
             prosessi.inkrementoiKokonaistyota();
-            throw new UnsupportedOperationException("Not supported muodostaPistesyottoExcel");
-            /*
-            return applicationAsyncResource.getApplicationAdditionalData(puuttuvatLisatiedot)
-                    .map(ls -> Stream.concat(lisatiedot.stream(), ls.stream()).collect(Collectors.toList()))
-                    .doOnCompleted(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    });*/
+            Function<Valintapisteet, Valintapisteet> populateNameAndOppijaOID = v -> {
+                ValintakoeOsallistuminenDTO o = osallistuminenByHakemusOID.get(v.getHakemusOID());
+                return new Valintapisteet(v.getHakemusOID(), o.getHakijaOid(), o.getEtunimi(), o.getSukunimi(), v.getPisteet());
+            };
+
+            return valintapisteAsyncResource.getValintapisteet(puuttuvatLisatiedot, auditSession).map(v ->
+                    v.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).doOnCompleted(() -> {
+                prosessi.inkrementoiTehtyjaToita();
+            });
         };
         Func2<List<ValintakoeOsallistuminenDTO>, List<Hakemus>, Observable<List<Hakemus>>> haePuuttuvatHakemukset = (osallistumiset, hakemukset) -> {
             Set<String> puuttuvatHakemukset = osallistumiset.stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet());
@@ -167,14 +174,13 @@ public abstract class AbstractPistesyottoKoosteService {
         };
         Observable<List<ValintaperusteDTO>> kokeetO = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
         Observable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid);
-        throw new UnsupportedOperationException("Excel not supported yet!");
-        /*
+        Observable<List<Valintapisteet>> merge = Observable.merge(Observable.zip(
+                osallistumistiedotO,
+                valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession),
+                haePuuttuvatLisatiedot
+        ));
         Observable<List<ApplicationAdditionalDataDTO>> lisatiedotO = Observable.zip(
-                Observable.merge(Observable.zip(
-                        osallistumistiedotO,
-                        applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid),
-                        heaPuuttuvatLisatiedot
-                )),
+                merge,
                 kokeetO,
                 osallistumistiedotO,
                 kokeetO.flatMap(haeKielikoetulokset),
@@ -188,8 +194,8 @@ public abstract class AbstractPistesyottoKoosteService {
                             new HakemuksenKoetulosYhteenveto(
                                     l,
                                     Pair.of(hakukohdeOid, kokeet),
-                                    osallistumistiedotByHakemusOid.get(l.getOid()),
-                                    kielikoetuloksetByPersonOid.get(l.getPersonOid()),
+                                    osallistumistiedotByHakemusOid.get(l.getHakemusOID()),
+                                    kielikoetuloksetByPersonOid.get(l.getOppijaOID()),
                                     ohjausparametrit
                             ).applicationAdditionalDataDTO
                     ).collect(Collectors.toList());
@@ -220,7 +226,6 @@ public abstract class AbstractPistesyottoKoosteService {
         ).doOnCompleted(() -> {
             prosessi.inkrementoiTehtyjaToita();
         });
-        */
     }
 
     protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
@@ -416,15 +421,6 @@ public abstract class AbstractPistesyottoKoosteService {
             return oppilaitosRef;
         }
         return etsiOppilaitosHierarkiasta(tarjoajaOid, seuraavaTaso, oppilaitosRef, tarjoajaLevelReached);
-    }
-
-    public static Map<String, List<Arvosana>> ammatillisenKielikoeArvosanat(List<Oppija> oppijat) {
-        return oppijat.stream().collect(
-                Collectors.toMap(Oppija::getOppijanumero,
-                        o -> o.getSuoritukset().stream()
-                                .filter(SuoritusJaArvosanatWrapper::isAmmatillisenKielikoe).map(SuoritusJaArvosanat::getArvosanat).flatMap(List::stream)
-                                .filter(a -> KIELIKOE_ARVOSANA_AINE.equalsIgnoreCase(a.getAine())).collect(Collectors.toList()))
-        );
     }
 
     protected void siirraKielikoepistetiedotKielikoetulosMapiin(Date valmistuminen, Map<String, List<SingleKielikoeTulos>> uudetKielikoetulokset, String hakemusOid, Map<String, String> newPistetiedot) {

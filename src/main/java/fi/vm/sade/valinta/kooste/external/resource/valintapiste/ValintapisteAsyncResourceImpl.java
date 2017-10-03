@@ -13,6 +13,7 @@ import rx.Observable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -29,6 +30,21 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
         return  getAsObservable(
                 getUrl("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID),
                 new GenericType<List<Valintapisteet>>(){}.getType(),client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    client.query("sessionId", auditSession.getSessionId());
+                    client.query("uid", auditSession.getUid());
+                    client.query("inetAddress", auditSession.getInetAddress());
+                    client.query("userAgent", auditSession.getUserAgent());
+                    return client;
+                });
+    }
+
+    @Override
+    public Observable<List<Valintapisteet>> getValintapisteet(Collection<String> hakemusOIDs, AuditSession auditSession) {
+        return  postAsObservable(
+                getUrl("valintapiste-service.get.pisteet"),
+                new TypeToken<List<Valintapisteet>>(){}.getType(),
+                Entity.entity(hakemusOIDs, MediaType.APPLICATION_JSON_TYPE),client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("sessionId", auditSession.getSessionId());
                     client.query("uid", auditSession.getUid());

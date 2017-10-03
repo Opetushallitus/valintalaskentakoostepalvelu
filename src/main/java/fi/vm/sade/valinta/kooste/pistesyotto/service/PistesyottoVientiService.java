@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -48,13 +49,13 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     }
 
-    public void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi) {
+    public void vie(String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
         PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
         });
         prosessi.inkrementoiKokonaistyota();
-        muodostaPistesyottoExcel(hakuOid, hakukohdeOid, prosessi, Collections.emptyList()).subscribe(p -> {
+        muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList()).subscribe(p -> {
             PistesyottoExcel pistesyottoExcel = p.getLeft();
             String id = UUID.randomUUID().toString();
             dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", defaultExpirationDate().getTime(), prosessi.getTags(),

@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet.*;
 import static fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService.KIELIKOE_KEY_PREFIX;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 
@@ -96,27 +97,6 @@ public class HakemuksenKoetulosYhteenveto {
         private boolean hyvaksytty(SuoritusJaArvosanat s) {
             return s.getArvosanat().stream().anyMatch(a -> isHyvaksytty(a) && tamaKieli.test(a));
         }
-    }
-
-    public static ApplicationAdditionalDataDTO toAdditionalData(Valintapisteet v) {
-        Map<String, String> immutableAdditionalData = v.getPisteet().stream().flatMap(p ->
-                Stream.of(
-                        Pair.of(p.getTunniste(), p.getArvo()),
-                        Pair.of(withOsallistuminenSuffix(p.getTunniste()), p.getOsallistuminen().toString())
-                )
-        ).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-
-
-        return new ApplicationAdditionalDataDTO(
-                v.getHakemusOID(),
-                v.getOppijaOID(),
-                v.getEtunimet(),
-                v.getSukunimi(),
-                new HashMap<>(immutableAdditionalData)
-        );
-    };
-    private static String withOsallistuminenSuffix(String tunniste) {
-        return new StringBuilder(tunniste).append("-OSALLISTUMINEN").toString();
     }
 
     public HakemuksenKoetulosYhteenveto(Valintapisteet valintapisteet,

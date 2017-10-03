@@ -323,6 +323,7 @@ public class PistesyottoResource {
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @Suspended AsyncResponse asyncResponse) {
         final String username = KoosteAudit.username();
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("vienti-palvelukutsu on aikakatkaistu: POST /vienti");
@@ -341,7 +342,7 @@ public class PistesyottoResource {
             if (authorityCheck.test(hakukohdeOid)) {
                 DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-                vientiService.vie(hakuOid, hakukohdeOid, prosessi);
+                vientiService.vie(hakuOid, hakukohdeOid, auditSession, prosessi);
                 return Observable.just(prosessi.toProsessiId());
             } else {
                 String msg = String.format(
