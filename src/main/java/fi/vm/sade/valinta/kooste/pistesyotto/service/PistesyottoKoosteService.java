@@ -7,6 +7,7 @@ import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -30,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
+import rx.functions.Functions;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -103,36 +105,40 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         }
     }
 
-    public Observable<Valintapisteet> koostaOsallistujanPistetiedot(String hakemusOid) {
-        /*
-        return applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus -> {
+    public Observable<Map<String, HakemuksenKoetulosYhteenveto>> koostaOsallistujanPistetiedot(String hakemusOid, AuditSession auditSession) {
+        Observable<Pair<Hakemus, Map<String, List<String>>>> hakemusAndTarjonta = applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus -> tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakemus.getApplicationSystemId()).map(tarjonta -> Pair.of(hakemus, tarjonta)));
+        return hakemusAndTarjonta.map(ht -> {
+            Hakemus hakemus = ht.getKey();
             String hakuOid = hakemus.getApplicationSystemId();
-            Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid).toBlocking().first();
+            Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ht.getValue();
             HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus, hakukohdeRyhmasForHakukohdes);
-            Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
-            Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
-            Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
-            return Observable.merge(hakemusDTO.getHakukohteet().stream()
-                .map(hakukohdeDTO -> {
-                    String hakukohdeOid = hakukohdeDTO.getOid();
-                    return Observable.zip(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
-                        koeO,
-                        oppijaO,
-                        parametritO,
-                        (valintaperusteet, valintakoeOsallistuminen, oppija, ohjausparametrit) ->
-                            Pair.of(
-                                hakukohdeOid,
-                                new HakemuksenKoetulosYhteenveto(
-                                    new ApplicationAdditionalDataDTO(hakemusOid, hakemus.getPersonOid(), hakemusDTO.getEtunimi(), hakemusDTO.getSukunimi(), hakemus.getAdditionalInfo()),
-                                    Pair.of(hakukohdeOid, valintaperusteet),
-                                    valintakoeOsallistuminen,
-                                    oppija,
-                                    ohjausparametrit)));
-                }).collect(Collectors.toList())
-            ).toMap(Pair::getLeft, Pair::getRight);
-        });
-        */
-        return Observable.empty();
+                    Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
+                    Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
+                    Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+                    Observable<List<Valintapisteet>> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, Arrays.asList(hakemusOid), auditSession);
+                    Stream<Observable<Pair<String, HakemuksenKoetulosYhteenveto>>> tulokset = hakemusDTO.getHakukohteet().stream().map(hakukohde -> {
+                        String hakukohdeOid = hakukohde.getOid();
+
+                        return Observable.zip(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
+                                koeO,
+                                oppijaO,
+                                parametritO,
+                                valintapisteet,
+                                (valintaperusteet, valintakoeOsallistuminen, oppija, ohjausparametrit, pisteet) ->
+                                        Pair.of(
+                                                hakukohdeOid,
+                                                new HakemuksenKoetulosYhteenveto(
+                                                        pisteet.iterator().next(),
+                                                        Pair.of(hakukohdeOid, valintaperusteet),
+                                                        valintakoeOsallistuminen,
+                                                        oppija,
+                                                        ohjausparametrit)));
+
+                    });
+
+                    return Observable.merge(tulokset.collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight);
+                }
+        ).flatMap(r -> r);
     }
 
     private static Map<String, HakutoiveDTO> kielikokeidenHakukohteet(ValintakoeOsallistuminenDTO voDTO) {

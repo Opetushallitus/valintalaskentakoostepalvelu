@@ -96,6 +96,7 @@ public class PistesyottoResource {
     public void koostaPistetiedotYhdelleHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                      @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -111,10 +112,9 @@ public class PistesyottoResource {
                         "ROLE_APP_HAKEMUS_LISATIETORU",
                         "ROLE_APP_HAKEMUS_LISATIETOCRUD"
                 )),
-                pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid),
+                pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid, auditSession),
                 (authorityCheck, pistetiedotHakukohteittain) -> {
-                    throw new UnsupportedOperationException("Not supported yet!");
-                    /*
+
                     Set<String> hakutoiveOids = pistetiedotHakukohteittain.keySet();
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return Response.ok()
@@ -129,7 +129,6 @@ public class PistesyottoResource {
                         LOG.error(msg);
                         return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
                     }
-                    */
                 }
         ).subscribe(
                 response::resume,
