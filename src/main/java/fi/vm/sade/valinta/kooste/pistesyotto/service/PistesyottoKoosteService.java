@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
@@ -61,10 +62,10 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 valintalaskentaValintakoeAsyncResource);
     }
 
-    public Observable<List<HakemuksenKoetulosYhteenveto>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, AuditSession auditSession) {
+    public Observable<Pair<Optional<String>, List<HakemuksenKoetulosYhteenveto>>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, AuditSession auditSession) {
 
         try {
-            Observable<List<Valintapisteet>> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
+            Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
             Observable<Map<String, ValintakoeOsallistuminenDTO>> osallistuminenByHakemus = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
                     .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v)));
             Observable<Map<String, Oppija>> oppijaByPersonOID = suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
@@ -76,7 +77,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     oppijaByPersonOID,
                 ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
                 (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) ->
-                    additionalDatat.stream().map(vps ->
+                    Pair.of(additionalDatat.lastModified, additionalDatat.valintapisteet.stream().map(vps ->
                         new HakemuksenKoetulosYhteenveto(
                                 vps,
                             Pair.of(hakukohdeOid, valintaperusteet),
@@ -84,7 +85,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                             oppijat.get(vps.getOppijaOID()),
                             ohjausparametrit
                         )
-                    ).collect(Collectors.toList())
+                    ).collect(Collectors.toList()))
             );/*
             //Observable<List<ValintaperusteDTO>> avaimet = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
             Observable<List<ValintaperusteDTO>> avaimet = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
@@ -115,7 +116,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
                     Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
                     Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
-                    Observable<List<Valintapisteet>> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, Arrays.asList(hakemusOid), auditSession);
+                    Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, Arrays.asList(hakemusOid), auditSession);
                     Stream<Observable<Pair<String, HakemuksenKoetulosYhteenveto>>> tulokset = hakemusDTO.getHakukohteet().stream().map(hakukohde -> {
                         String hakukohdeOid = hakukohde.getOid();
 
@@ -128,7 +129,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                                         Pair.of(
                                                 hakukohdeOid,
                                                 new HakemuksenKoetulosYhteenveto(
-                                                        pisteet.iterator().next(),
+                                                        pisteet.valintapisteet.iterator().next(),
                                                         Pair.of(hakukohdeOid, valintaperusteet),
                                                         valintakoeOsallistuminen,
                                                         oppija,
@@ -179,6 +180,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     }
 
     public Observable<Void> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
+                                                                     Optional<String> ifUnmodifiedSince,
                                                                      String username, AuditSession auditSession) {
         return valintalaskentaValintakoeAsyncResource.haeHakemukselle(pistetietoDTO.getOid()).flatMap(vo -> {
             String hakuOid = vo.getHakuOid();
@@ -194,7 +196,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     ApplicationAdditionalDataDTO a = poistaKielikoepistetiedot(pistetietoDTO);
                     a.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
                     return tallennaKoostetutPistetiedot(
-                            hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(),
+                            hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(), ifUnmodifiedSince,
                             Collections.singletonList(a), username, auditSession
                     );
                 }).collect(Collectors.toList()));
@@ -204,13 +206,14 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
     public Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
                                                          String hakukohdeOid,
+                                                         Optional<String> ifUnmodifiedSince,
                                                          List<ApplicationAdditionalDataDTO> pistetietoDTOs,
                                                          String username, AuditSession auditSession) {
         Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoetuloksetSureen = new HashMap<>();
         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle;
         try {
             pistetiedotHakemukselle = createAdditionalDataAndPopulateKielikoetulokset(pistetietoDTOs, kielikoetuloksetSureen);
-            return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, auditSession);
+            return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, auditSession);
         } catch (Exception e) {
             LOG.error(String.format("Ongelma käsiteltäessä pistetietoja haun %s kohteelle %s , käyttäjä %s ", hakuOid, hakukohdeOid, username), e);
             return Observable.error(e);

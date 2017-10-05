@@ -25,6 +25,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 //import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Piste;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
@@ -129,13 +130,13 @@ public abstract class AbstractPistesyottoKoosteService {
             AuditSession auditSession,
             DokumenttiProsessi prosessi,
             Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
-        Func2<List<ValintakoeOsallistuminenDTO>, List<Valintapisteet>, Observable<List<Valintapisteet>>> haePuuttuvatLisatiedot = (osallistumiset, lisatiedot) -> {
+        Func2<List<ValintakoeOsallistuminenDTO>, PisteetWithLastModified, Observable<List<Valintapisteet>>> haePuuttuvatLisatiedot = (osallistumiset, lisatiedot) -> {
             final Map<String, ValintakoeOsallistuminenDTO> osallistuminenByHakemusOID = osallistumiset.stream().collect(Collectors.toMap(o -> o.getHakemusOid(), o -> o));
-            Sets.SetView<String> puuttuvatLisatiedot = Sets.difference(osallistuminenByHakemusOID.keySet(), lisatiedot.stream().map(l -> l.getHakemusOID()).collect(Collectors.toSet()));
+            Sets.SetView<String> puuttuvatLisatiedot = Sets.difference(osallistuminenByHakemusOID.keySet(), lisatiedot.valintapisteet.stream().map(l -> l.getHakemusOID()).collect(Collectors.toSet()));
             //Set<String> puuttuvatLisatiedot = osallistuminenByHakemusOID.keySet();
             //puuttuvatLisatiedot.removeAll(lisatiedot.stream().map(l -> l.getOid()).collect(Collectors.toSet()));
             if (puuttuvatLisatiedot.isEmpty()) {
-                return Observable.just(lisatiedot);
+                return Observable.just(lisatiedot.valintapisteet);
             }
             prosessi.inkrementoiKokonaistyota();
             Function<Valintapisteet, Valintapisteet> populateNameAndOppijaOID = v -> {
@@ -144,7 +145,7 @@ public abstract class AbstractPistesyottoKoosteService {
             };
 
             return valintapisteAsyncResource.getValintapisteet(hakuOid, puuttuvatLisatiedot, auditSession).map(v ->
-                    v.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).doOnCompleted(() -> {
+                    v.valintapisteet.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).doOnCompleted(() -> {
                 prosessi.inkrementoiTehtyjaToita();
             });
         };
@@ -230,16 +231,18 @@ public abstract class AbstractPistesyottoKoosteService {
 
     protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
                                                             String hakukohdeOid,
+                                                            Optional<String> ifUnmodifiedSince,
                                                             List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
                                                             Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
                                                             String username,
                                                             ValintaperusteetOperation auditLogOperation, AuditSession auditSession) {
-        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, pistetiedotHakemukselle, kielikoetuloksetSureen, username, auditLogOperation, auditSession,true);
+        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, auditLogOperation, auditSession,true);
     }
 
 
     protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
                                                             String hakukohdeOid,
+                                                            Optional<String> ifUnmodifiedSince,
                                                             List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
                                                             Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
                                                             String username,
@@ -259,7 +262,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
         return kielikoeTallennus.flatMap(a -> {
             if (saveApplicationAdditionalInfo) {
-                return tallennaAdditionalInfoHakemuksille(hakuOid, hakukohdeOid, pistetiedotHakemukselle, username, auditLogOperation, auditSession);
+                return tallennaAdditionalInfoHakemuksille(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, username, auditLogOperation, auditSession);
             } else {
                 return Observable.just(null);
             }
@@ -335,11 +338,12 @@ public abstract class AbstractPistesyottoKoosteService {
 
     private Observable<Void> tallennaAdditionalInfoHakemuksille(String hakuOid,
                                                                 String hakukohdeOid,
+                                                                Optional<String> ifUnmodifiedSince,
                                                                 List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
                                                                 String username,
                                                                 ValintaperusteetOperation auditLogOperation,
                                                                 AuditSession auditSession) {
-        return valintapisteAsyncResource.putValintapisteet(hakuOid, hakukohdeOid, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
+        return valintapisteAsyncResource.putValintapisteet(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
                 .<Void>map(a -> null)
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
                         "Lisätietojen tallennus hakemukselle epäonnistui", t)))

@@ -101,7 +101,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                 ).collect(Collectors.toList());
     }
 
-    public void tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
+    public void tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid,  Optional<String> ifUnmodifiedSince, DokumenttiProsessi prosessi, InputStream stream) {
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
         muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
                 .flatMap(p -> {
@@ -141,7 +141,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                         return Observable.just(null);
                     } else {
                         LOG.info("Pistesyötössä hakukohteeseen {} muuttunutta {} tietoa tallennettavaksi", hakukohdeOid, uudetPistetiedot.size());
-                        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, uudetPistetiedot,
+                        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, uudetPistetiedot,
                                 uudetKielikoetulokset, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, auditSession);
                     }
                 })
