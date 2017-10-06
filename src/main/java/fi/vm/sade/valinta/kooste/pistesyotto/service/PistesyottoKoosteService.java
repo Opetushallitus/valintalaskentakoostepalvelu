@@ -21,6 +21,8 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithL
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HenkiloValilehtiDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistesyottoValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -62,7 +64,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 valintalaskentaValintakoeAsyncResource);
     }
 
-    public Observable<Pair<Optional<String>, List<HakemuksenKoetulosYhteenveto>>> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, AuditSession auditSession) {
+    public Observable<PistesyottoValilehtiDTO> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, AuditSession auditSession) {
 
         try {
             Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
@@ -72,96 +74,85 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     .map(os -> os.stream().collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o)));
             return Observable.zip(
                     valintapisteet,
-                valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
+                    valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
                     osallistuminenByHakemus,
                     oppijaByPersonOID,
-                ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
-                (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) ->
-                    Pair.of(additionalDatat.lastModified, additionalDatat.valintapisteet.stream().map(vps ->
-                        new HakemuksenKoetulosYhteenveto(
-                                vps,
-                            Pair.of(hakukohdeOid, valintaperusteet),
-                            valintakokeet.get(vps.getHakemusOID()),
-                            oppijat.get(vps.getOppijaOID()),
-                            ohjausparametrit
-                        )
-                    ).collect(Collectors.toList()))
-            );/*
-            //Observable<List<ValintaperusteDTO>> avaimet = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
-            Observable<List<ValintaperusteDTO>> avaimet = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
-
-            Observable<Map<String, ValintakoeOsallistuminenDTO>> osallistumiset = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
-                    .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v)));
-            Observable<Map<String, Valintapisteet>> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession)
-                    .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOID(), v -> v)));
-
-            Observable.zip(avaimet, osallistumiset, valintapisteet, (a, o, v) -> v.entrySet().stream().map(
-                    v0 -> mergeOsallistuminenWithPisteet.apply(Optional.ofNullable(o.get(v0.getKey())), v0.getValue())).collect(Collectors.toList()));
-
-            return valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
-            */
+                    ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
+                    (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) ->
+                            new PistesyottoValilehtiDTO(additionalDatat.lastModified.orElse(null), additionalDatat.valintapisteet.stream().map(vps ->
+                                    new HakemuksenKoetulosYhteenveto(
+                                            vps,
+                                            Pair.of(hakukohdeOid, valintaperusteet),
+                                            valintakokeet.get(vps.getHakemusOID()),
+                                            oppijat.get(vps.getOppijaOID()),
+                                            ohjausparametrit
+                                    )
+                            ).collect(Collectors.toList()))
+            );
         } catch (Exception e) {
             LOG.error(String.format("Ongelma koostettaessa haun %s kohteen %s pistetietoja", hakuOid, hakukohdeOid), e);
             return Observable.error(e);
         }
     }
 
-    public Observable<Map<String, HakemuksenKoetulosYhteenveto>> koostaOsallistujanPistetiedot(String hakemusOid, AuditSession auditSession) {
+    public Observable<HenkiloValilehtiDTO> koostaOsallistujanPistetiedot(String hakemusOid, AuditSession auditSession) {
         Observable<Pair<Hakemus, Map<String, List<String>>>> hakemusAndTarjonta = applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus -> tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakemus.getApplicationSystemId()).map(tarjonta -> Pair.of(hakemus, tarjonta)));
-        return hakemusAndTarjonta.map(ht -> {
-            Hakemus hakemus = ht.getKey();
-            String hakuOid = hakemus.getApplicationSystemId();
-            Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ht.getValue();
-            HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus, hakukohdeRyhmasForHakukohdes);
+        return hakemusAndTarjonta.switchMap(ht -> {
+                    Hakemus hakemus = ht.getKey();
+                    String hakuOid = hakemus.getApplicationSystemId();
+                    Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ht.getValue();
+                    HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus, hakukohdeRyhmasForHakukohdes);
                     Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
                     Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
                     Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
                     Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, Arrays.asList(hakemusOid), auditSession);
-                    Stream<Observable<Pair<String, HakemuksenKoetulosYhteenveto>>> tulokset = hakemusDTO.getHakukohteet().stream().map(hakukohde -> {
-                        String hakukohdeOid = hakukohde.getOid();
 
-                        return Observable.zip(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
-                                koeO,
-                                oppijaO,
-                                parametritO,
-                                valintapisteet,
-                                (valintaperusteet, valintakoeOsallistuminen, oppija, ohjausparametrit, pisteet) ->
-                                        Pair.of(
-                                                hakukohdeOid,
-                                                new HakemuksenKoetulosYhteenveto(
-                                                        pisteet.valintapisteet.iterator().next(),
-                                                        Pair.of(hakukohdeOid, valintaperusteet),
-                                                        valintakoeOsallistuminen,
-                                                        oppija,
-                                                        ohjausparametrit)));
+                    return valintapisteet.switchMap(pisteet -> {
+                        Observable<Map<String, HakemuksenKoetulosYhteenveto>> yhteenvedot = Observable.merge(hakemusDTO.getHakukohteet().stream().map(hakukohde -> {
+                            String hakukohdeOid = hakukohde.getOid();
 
+
+                            return Observable.zip(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
+                                    koeO,
+                                    oppijaO,
+                                    parametritO,
+                                    (valintaperusteet, valintakoeOsallistuminen, oppija, ohjausparametrit) ->
+                                            Pair.of(
+                                                    hakukohdeOid,
+                                                    new HakemuksenKoetulosYhteenveto(
+                                                            pisteet.valintapisteet.iterator().next(),
+                                                            Pair.of(hakukohdeOid, valintaperusteet),
+                                                            valintakoeOsallistuminen,
+                                                            oppija,
+                                                            ohjausparametrit)));
+                        }).collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight);
+                        //.toMap(Pair::getLeft, Pair::getRight);
+                        return yhteenvedot.map(y -> new HenkiloValilehtiDTO(pisteet.lastModified.orElse(null), y));
                     });
-
-                    return Observable.merge(tulokset.collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight);
                 }
-        ).flatMap(r -> r);
+        );
     }
 
     private static Map<String, HakutoiveDTO> kielikokeidenHakukohteet(ValintakoeOsallistuminenDTO voDTO) {
         Map<String, HakutoiveDTO> kielikokeidenHakukohteet = new HashMap<>();
         voDTO.getHakutoiveet().forEach(h ->
-            h.getValinnanVaiheet().stream()
-                .flatMap(vaihe -> vaihe.getValintakokeet().stream())
-                .filter(koe -> koe.getOsallistuminenTulos().getOsallistuminen() == Osallistuminen.OSALLISTUU)
-                .filter(koe -> koe.getValintakoeTunniste().matches(PistesyottoExcel.KIELIKOE_REGEX))
-                .forEach(koe -> {
-                    String koetunniste = koe.getValintakoeTunniste();
-                    if (kielikokeidenHakukohteet.containsKey(koetunniste)) {
-                        throw new IllegalStateException(String.format(
-                                "Hakemuksen %s hakija osallistunut kielikokeeseen %s useammassa kuin yhdessä hakukohteessa: %s, %s",
-                                voDTO.getHakemusOid(),
-                                koetunniste,
-                                kielikokeidenHakukohteet.get(koetunniste),
-                                h.getHakukohdeOid()
-                        ));
-                    }
-                    kielikokeidenHakukohteet.put(koetunniste, h);
-                }));
+                h.getValinnanVaiheet().stream()
+                        .flatMap(vaihe -> vaihe.getValintakokeet().stream())
+                        .filter(koe -> koe.getOsallistuminenTulos().getOsallistuminen() == Osallistuminen.OSALLISTUU)
+                        .filter(koe -> koe.getValintakoeTunniste().matches(PistesyottoExcel.KIELIKOE_REGEX))
+                        .forEach(koe -> {
+                            String koetunniste = koe.getValintakoeTunniste();
+                            if (kielikokeidenHakukohteet.containsKey(koetunniste)) {
+                                throw new IllegalStateException(String.format(
+                                        "Hakemuksen %s hakija osallistunut kielikokeeseen %s useammassa kuin yhdessä hakukohteessa: %s, %s",
+                                        voDTO.getHakemusOid(),
+                                        koetunniste,
+                                        kielikokeidenHakukohteet.get(koetunniste),
+                                        h.getHakukohdeOid()
+                                ));
+                            }
+                            kielikokeidenHakukohteet.put(koetunniste, h);
+                        }));
         return kielikokeidenHakukohteet;
     }
 

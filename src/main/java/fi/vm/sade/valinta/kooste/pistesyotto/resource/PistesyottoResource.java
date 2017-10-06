@@ -4,9 +4,7 @@ import static fi.vm.sade.valinta.kooste.AuthorizationUtil.*;
 import static java.util.Arrays.asList;
 import com.google.common.collect.Lists;
 
-import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
-import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -59,7 +57,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Controller("PistesyottoResource")
@@ -117,7 +114,7 @@ public class PistesyottoResource {
                 pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid, auditSession),
                 (authorityCheck, pistetiedotHakukohteittain) -> {
 
-                    Set<String> hakutoiveOids = pistetiedotHakukohteittain.keySet();
+                    Set<String> hakutoiveOids = pistetiedotHakukohteittain.getHakukohteittain().keySet();
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return Response.ok()
                                 .header("Content-Type", "application/json")
@@ -152,7 +149,7 @@ public class PistesyottoResource {
                                                          @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        final Optional<String> ifUnmodifiedSince = ifUnmodifiedSince();
+        final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -233,15 +230,10 @@ public class PistesyottoResource {
                 "ROLE_APP_HAKEMUS_LISATIETOCRUD"
         )).flatMap(authorityCheck -> {
             if (authorityCheck.test(hakukohdeOid)) {
-                BiFunction<Response.ResponseBuilder, Optional<String>, Response.ResponseBuilder> addLastModified = (r, lm) -> {
-                    lm.ifPresent(lastModified -> r.header(ValintapisteAsyncResource.LAST_MODIFIED, lastModified));
-                    return r;
-                };
-
                 return pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid, auditSession)
-                        .map(pistetiedot -> addLastModified.apply(Response.ok(), pistetiedot.getKey())
+                        .map(pistetiedot -> Response.ok()
                                 .header("Content-Type", "application/json")
-                                .entity(pistetiedot.getValue())
+                                .entity(pistetiedot)
                                 .build());
             } else {
                 String msg = String.format(
@@ -259,7 +251,7 @@ public class PistesyottoResource {
                 }
         );
     }
-    private Optional<String> ifUnmodifiedSince() {
+    private Optional<String> ifUnmodifiedSinceFromHeader() {
         return Optional.ofNullable(httpServletRequestJaxRS.getHeader(ValintapisteAsyncResource.IF_UNMODIFIED_SINCE));
     }
 
@@ -275,7 +267,7 @@ public class PistesyottoResource {
                                              @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        Optional<String> ifUnmodifiedSince = ifUnmodifiedSince();
+        Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -394,7 +386,7 @@ public class PistesyottoResource {
         try {
             final String username = KoosteAudit.username();
             final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-            final Optional<String> ifUnmodifiedSince = ifUnmodifiedSince();
+            final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
             authorityCheckService.getAuthorityCheckForRoles(asList(
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
                     "ROLE_APP_HAKEMUS_CRUD",
