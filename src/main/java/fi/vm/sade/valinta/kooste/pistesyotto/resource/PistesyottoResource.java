@@ -8,6 +8,7 @@ import static java.util.Collections.*;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -152,7 +153,7 @@ public class PistesyottoResource {
                                                          @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader(httpServletRequestJaxRS);
+        final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -254,7 +255,8 @@ public class PistesyottoResource {
                 }
         );
     }
-    private Optional<String> ifUnmodifiedSinceFromHeader(HttpServletRequest h) {
+    private Optional<String> ifUnmodifiedSinceFromHeader() {
+        HttpServletRequest h = AuthorizationUtil.request(httpServletRequestJaxRS);
         return list(h.getHeaderNames()).stream().filter(IF_UNMODIFIED_SINCE::equals).map(e ->
                 h.getHeader(IF_UNMODIFIED_SINCE)
         ).findAny();
@@ -272,7 +274,7 @@ public class PistesyottoResource {
                                              @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader(httpServletRequestJaxRS);
+        Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -391,7 +393,7 @@ public class PistesyottoResource {
         try {
             final String username = KoosteAudit.username();
             final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-            final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader(httpServletRequestJaxRS);
+            final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
             authorityCheckService.getAuthorityCheckForRoles(asList(
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
                     "ROLE_APP_HAKEMUS_CRUD",

@@ -25,7 +25,7 @@ public class AuthorizationUtil {
         return createAuditSession(false, httpServletRequestJaxRS);
     }
 
-    private static HttpServletRequest request(HttpServletRequest httpServletRequestJaxRS) {
+    public static HttpServletRequest request(HttpServletRequest httpServletRequestJaxRS) {
         if(null != httpServletRequestJaxRS) {
             //Käytetään unit-testeissä
             return httpServletRequestJaxRS;
