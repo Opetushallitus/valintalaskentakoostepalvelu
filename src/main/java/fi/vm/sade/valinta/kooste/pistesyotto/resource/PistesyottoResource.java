@@ -152,7 +152,7 @@ public class PistesyottoResource {
                                                          @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
+        final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}", hakemusOid);
@@ -254,9 +254,9 @@ public class PistesyottoResource {
                 }
         );
     }
-    private Optional<String> ifUnmodifiedSinceFromHeader() {
-        return list(httpServletRequestJaxRS.getHeaderNames()).stream().filter(IF_UNMODIFIED_SINCE::equals).map(e ->
-                httpServletRequestJaxRS.getHeader(IF_UNMODIFIED_SINCE)
+    private Optional<String> ifUnmodifiedSinceFromHeader(HttpServletRequest h) {
+        return list(h.getHeaderNames()).stream().filter(IF_UNMODIFIED_SINCE::equals).map(e ->
+                h.getHeader(IF_UNMODIFIED_SINCE)
         ).findAny();
     }
 
@@ -272,7 +272,7 @@ public class PistesyottoResource {
                                              @Suspended final AsyncResponse response) {
         final String username = KoosteAudit.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
+        Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
             LOG.error("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
@@ -391,7 +391,7 @@ public class PistesyottoResource {
         try {
             final String username = KoosteAudit.username();
             final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-            final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
+            final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader(httpServletRequestJaxRS);
             authorityCheckService.getAuthorityCheckForRoles(asList(
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
                     "ROLE_APP_HAKEMUS_CRUD",
