@@ -1,7 +1,10 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
 import static fi.vm.sade.valinta.kooste.AuthorizationUtil.*;
+import static fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource.IF_UNMODIFIED_SINCE;
 import static java.util.Arrays.asList;
+import static java.util.Collections.*;
+
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
@@ -252,7 +255,9 @@ public class PistesyottoResource {
         );
     }
     private Optional<String> ifUnmodifiedSinceFromHeader() {
-        return Optional.ofNullable(httpServletRequestJaxRS.getHeader(ValintapisteAsyncResource.IF_UNMODIFIED_SINCE));
+        return list(httpServletRequestJaxRS.getHeaderNames()).stream().filter(IF_UNMODIFIED_SINCE::equals).map(e ->
+                httpServletRequestJaxRS.getHeader(IF_UNMODIFIED_SINCE)
+        ).findAny();
     }
 
     @PUT
@@ -404,7 +409,7 @@ public class PistesyottoResource {
                         msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
                 ));
             }).map(x -> {
-                DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Collections.singletonList(hakukohdeOid));
+                DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, singletonList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 ByteArrayOutputStream xlsx = readFileToBytearray(file);
                 final String uuid = UUID.randomUUID().toString();
