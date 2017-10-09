@@ -8,6 +8,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -72,92 +73,76 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
         }
     }
 
-    //!!FIXME tämä toteutus toisteinen (mutta toimii). Aiheuttajana on valintaryhmälaskennan muista laskennoista poikkeava rakenne.
+    //FIXME tämä toteutus toisteinen (mutta toimii). Aiheuttajana on valintaryhmälaskennan muista laskennoista poikkeava rakenne.
     @Override
     public Peruutettava laskeJaSijoittele(List<LaskeDTO> lista, Consumer<String> callback, Consumer<Throwable> failureCallback) {
 
         String uuid;
-        if(!lista.isEmpty()) {
+        if (!lista.isEmpty()) {
             uuid = lista.get(0).getUuid();
         } else {
             uuid = "Tyhjä lista, ei laillista prosessi-uuid:ta";
         }
-
+        String result = "";
+        final AtomicReference<Integer> secondsUntilNextPoll = new AtomicReference<>(3);
         final AtomicReference<Boolean> done = new AtomicReference<>(false);
         final AtomicReference<Boolean> virhe = new AtomicReference<>(false);
-        String result = "";
-        final AtomicReference<Integer> secondsUntilNextPoll = new AtomicReference<>(5);
-        String api = "valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele";
         String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele");
         Observable<String> apiReturns = Observable.empty();
-        try {
-            while (!done.get()) {
-                //LOG.info("(UUID: {}) API-kutsu: {} Backoff: {}", laskeDTO.getUuid(), api, secondsUntilNextPoll.get());
-                  apiReturns = postAsObservable(
-                        getUrl(api),
-                        String.class,
-                        Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE),
-                        client -> {
-                            client.accept(MediaType.TEXT_PLAIN_TYPE);
-                            return client;
-                        });
 
-                final ConnectableObservable<String> replayingObservable = apiReturns.replay(1);
-                replayingObservable.connect();
-                replayingObservable.first().subscribe(
-                        s -> {
-                            LOG.info("(UUID: {}) LaskeJaSijoittele: saatiin osoitteesta {} palautusarvo: {} ", uuid, api, s);
-                            if (s.equals("Valmis!")) {
-                                LOG.info("(UUID: {}) Laskenta hakukohteelle valmis, lopetetaan pollaus ", uuid);
-                                done.set(true);
-                            }
-                            if (s.equals("Virhe!")) {
-                                LOG.error("Virhe laskennan suorituksessa, lopetetaan");
-                                done.set(true);
-                                virhe.set(true);
-                            }
+        while(!done.get()) {
+            apiReturns = postAsObservable(
+                    url,
+                    String.class,
+                    Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE),
+                    client -> {
+                        client.accept(MediaType.TEXT_PLAIN_TYPE);
+                        return client;
+                    });
+            result = apiReturns.toBlocking().first();
+            LOG.info("(UUID: {}) VALINTARYHMÄLASKENTA Saatiin osoitteesta {} palautusarvo: {} ", uuid, url, result);
+            if (HakukohteenLaskennanTila.VALMIS.equals(result)) {
+                LOG.info("Laskenta valintaryhmälaskennalle valmis");
+                done.set(true);
+            }
+            if (HakukohteenLaskennanTila.VIRHE.equals(result)) {
+                LOG.error("Valintaryhmälaskennassa tapahtui virhe");
+                done.set(true);
+                failureCallback.accept(new Exception());
+                return TyhjaPeruutettava.tyhjaPeruutettava();
+            }
 
-                        }
-                );
-
-                if (done.get()) {
-                    result = "Valmis!";
-                } else {
-                    try {
-                        TimeUnit.SECONDS.sleep(secondsUntilNextPoll.get());
-                    } catch (Exception e) {
-                        throw new RuntimeException();
-                    }
-                    if (secondsUntilNextPoll.get() < 30) {
-                        secondsUntilNextPoll.set(secondsUntilNextPoll.get() + 3);
-                    }
+            if (!done.get()) {
+                try {
+                    TimeUnit.SECONDS.sleep(secondsUntilNextPoll.get());
+                } catch (Exception e) {
+                    throw new RuntimeException();
+                }
+                if (secondsUntilNextPoll.get() < 30) {
+                    secondsUntilNextPoll.set(secondsUntilNextPoll.get() + 3);
                 }
             }
-        } catch (Exception e) {
-            LOG.error("(Uuid: {}) Virhe rajapinnan pollauksessa, ", uuid, e);
-            throw e;
         }
 
-        if ("Valmis!".equals(result)) {
-            LOG.info("Laskenta onnistui (Uuid: {}", lista.get(0).getUuid());
+        if (HakukohteenLaskennanTila.VALMIS.equals(result)) {
+            LOG.info("Valintaryhmälaskenta onnistui (Uuid: {})", uuid);
             try {
                 return new PeruutettavaImpl(
-                        getWebClient()
-                                .path(url)
-                                .async()
-                                .post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<String>(gson(), url, callback, failureCallback, new TypeToken<String>() {
-                                }.getType())));
+                    getWebClient()
+                        .path(url)
+                        .async()
+                        .post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<String>(gson(), url, callback, failureCallback, new TypeToken<String>() {
+                        }.getType())));
             } catch (Exception e) {
-                LOG.error("Virhe laske ja sijoittele kutsussa", e);
+                LOG.error("Virhe laske ja sijoittele kutsussa (valintaryhmälaskenta) ", e);
                 failureCallback.accept(e);
                 return TyhjaPeruutettava.tyhjaPeruutettava();
             }
         } else {
-            LOG.error("Jokin meni laskennassa vikaan, palautetaan tyhjä Peruutettava");
+            LOG.error("Virhe laske ja sijoittele kutsussa (valintaryhmälaskenta");
             failureCallback.accept(new Throwable());
             return TyhjaPeruutettava.tyhjaPeruutettava();
         }
-
     }
 
     @Override
@@ -172,7 +157,8 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
         Observable<String> apiReturns = Observable.empty();
         final AtomicReference<Boolean> done = new AtomicReference<>(false);
         final AtomicReference<Boolean> virhe = new AtomicReference<>(false);
-        final AtomicReference<Integer> secondsUntilNextPoll = new AtomicReference<>(5);
+        final AtomicReference<Integer> secondsUntilNextPoll = new AtomicReference<>(3);
+        String result = "";
 
         try {
             while (!done.get()) {
@@ -184,29 +170,24 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
                             client.accept(MediaType.TEXT_PLAIN_TYPE);
                             return client;
                         });
+                result = apiReturns.toBlocking().first();
+                LOG.info("(UUID: {}) Saatiin osoitteesta {} palautusarvo: {} hakukohteelle {} ", laskeDTO.getUuid(), api, result, laskeDTO.getHakukohdeOid());
+                if (HakukohteenLaskennanTila.VALMIS.equals(result)) {
+                    //LOG.info("Merkitään valmiiksi");
+                    done.set(true);
+                }
+                if (HakukohteenLaskennanTila.VIRHE.equals(result)) {
+                    LOG.error("Virhe laskennan suorituksessa, lopetetaan");
+                    done.set(true);
+                    virhe.set(true);
+                }
 
-                final ConnectableObservable<String> replayingObservable = apiReturns.replay(1);
-                replayingObservable.connect();
-                replayingObservable.first().subscribe(
-                        s -> {
-                            LOG.info("(UUID: {}) Saatiin osoitteesta {} palautusarvo: {} ", laskeDTO.getUuid(), api, s);
-                            if (s.equals("Valmis!")) {
-                                done.set(true);
-                            }
-                            if (s.equals("Virhe!")) {
-                                LOG.error("Virhe laskennan suorituksessa, lopetetaan");
-                                done.set(true);
-                                virhe.set(true);
-                            }
-
-                        }
-                );
-                if(virhe.get()) {
+                if (virhe.get()) {
                     LOG.info("(UUID {}) Palautetaan virhe-observable", laskeDTO.getUuid());
                     return Observable.error(new Exception());
                 }
                 if (done.get()) {
-                    LOG.info("(UUID: {}) Laskenta hakukohteelle valmis, lopetetaan pollaus ", laskeDTO.getUuid());
+                    LOG.info("(UUID: {}) Laskenta hakukohteelle {} valmis, lopetetaan pollaus ", laskeDTO.getUuid(), laskeDTO.getHakukohdeOid());
                     return apiReturns;
                 } else {
                     try {
