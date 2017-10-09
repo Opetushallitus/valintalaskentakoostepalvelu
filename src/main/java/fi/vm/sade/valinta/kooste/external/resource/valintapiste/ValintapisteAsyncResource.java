@@ -5,6 +5,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapiste
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import rx.Observable;
 
+import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,6 @@ public interface ValintapisteAsyncResource {
 
     Observable<PisteetWithLastModified> getValintapisteet(String hakuOID, Collection<String> hakemusOIDs, AuditSession auditSession);
 
-    Observable<Object> putValintapisteet(String hakuOID, String hakukohdeOID, Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession);
+    Observable<Response> putValintapisteet(String hakuOID, String hakukohdeOID, Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession);
 
 }

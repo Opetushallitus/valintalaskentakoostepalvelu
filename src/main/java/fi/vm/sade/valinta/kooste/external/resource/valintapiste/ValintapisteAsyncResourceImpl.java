@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintapiste;
 
 import com.google.common.reflect.TypeToken;
+import fi.vm.sade.valinta.http.FailedHttpException;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
@@ -88,7 +89,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Observable<Object> putValintapisteet(String hakuOID, String hakukohdeOID, Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
+    public Observable<Response> putValintapisteet(String hakuOID, String hakukohdeOID, Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
         Observable<Response> response = putAsObservable(
                 getUrl("valintapiste-service.put.pisteet", hakuOID, hakukohdeOID),
                 Entity.entity(pisteet, MediaType.APPLICATION_JSON_TYPE)
@@ -102,18 +103,16 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                     return client;
                 }
         );
-        return response.switchMap(r -> {
-            if(r.getStatus() == 200) {
-                return Observable.just(OK);
-            } else {
-                String body = body(r);
-                if(r.getStatus() == 409) {
 
+        return response.onErrorResumeNext(t -> {
+            if(t instanceof FailedHttpException) {
+                FailedHttpException f = (FailedHttpException)t;
+                if(f.response.getStatus() == 409) {
+                    String body = body(f.response);
                     return Observable.error(new RuntimeException("Ei voida tallentaa, koska kannassa oli välissä muuttuneita pistetietoja hakemuksilla: " + body));
-                } else {
-                    return Observable.error(new RuntimeException("Tuntematon virhe tallennuksessa! " + body));
                 }
             }
+            return Observable.error(t);
         });
     }
 }
