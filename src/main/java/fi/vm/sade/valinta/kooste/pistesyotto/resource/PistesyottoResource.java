@@ -257,9 +257,10 @@ public class PistesyottoResource {
     }
     private Optional<String> ifUnmodifiedSinceFromHeader() {
         HttpServletRequest h = AuthorizationUtil.request(httpServletRequestJaxRS);
-        return list(h.getHeaderNames()).stream().filter(IF_UNMODIFIED_SINCE::equals).map(e ->
-                h.getHeader(IF_UNMODIFIED_SINCE)
-        ).findAny();
+        return list(h.getHeaderNames()).stream()
+                .map(String::toLowerCase)
+                .filter(IF_UNMODIFIED_SINCE.toLowerCase()::equals)
+                .map(h::getHeader).findAny();
     }
 
     @PUT
