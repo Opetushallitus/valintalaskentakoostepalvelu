@@ -37,6 +37,7 @@ import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaCo
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -55,6 +56,7 @@ import java.util.stream.Stream;
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.*;
+import static org.apache.commons.collections.ListUtils.*;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Osallistuminen;
@@ -97,6 +99,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
     private PistesyottoExcel muodostoPistesyottoExcel(String hakuOid,
                                                       String hakukohdeOid,
+                                                      Optional<String> aikaleima,
                                                       List<ValintakoeOsallistuminenDTO> osallistumistiedot,
                                                       List<Hakemus> hakemukset,
                                                       List<ValintaperusteDTO> valintaperusteet,
@@ -119,7 +122,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 .map(v -> v.getTunniste())
                 .collect(Collectors.toSet());
 
-        return new PistesyottoExcel(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi, Optional.empty(),
+        return new PistesyottoExcel(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi, aikaleima,
                 hakemukset, kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
                 pistetiedot, kuuntelijat);
     }
@@ -130,13 +133,11 @@ public abstract class AbstractPistesyottoKoosteService {
             AuditSession auditSession,
             DokumenttiProsessi prosessi,
             Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
-        Func2<List<ValintakoeOsallistuminenDTO>, PisteetWithLastModified, Observable<List<Valintapisteet>>> haePuuttuvatLisatiedot = (osallistumiset, lisatiedot) -> {
+        Func2<List<ValintakoeOsallistuminenDTO>, PisteetWithLastModified, Observable<PisteetWithLastModified>> haePuuttuvatLisatiedot = (osallistumiset, lisatiedot) -> {
             final Map<String, ValintakoeOsallistuminenDTO> osallistuminenByHakemusOID = osallistumiset.stream().collect(Collectors.toMap(o -> o.getHakemusOid(), o -> o));
             Sets.SetView<String> puuttuvatLisatiedot = Sets.difference(osallistuminenByHakemusOID.keySet(), lisatiedot.valintapisteet.stream().map(l -> l.getHakemusOID()).collect(Collectors.toSet()));
-            //Set<String> puuttuvatLisatiedot = osallistuminenByHakemusOID.keySet();
-            //puuttuvatLisatiedot.removeAll(lisatiedot.stream().map(l -> l.getOid()).collect(Collectors.toSet()));
             if (puuttuvatLisatiedot.isEmpty()) {
-                return Observable.just(lisatiedot.valintapisteet);
+                return Observable.just(lisatiedot);
             }
             prosessi.inkrementoiKokonaistyota();
             Function<Valintapisteet, Valintapisteet> populateNameAndOppijaOID = v -> {
@@ -145,7 +146,8 @@ public abstract class AbstractPistesyottoKoosteService {
             };
 
             return valintapisteAsyncResource.getValintapisteet(hakuOid, puuttuvatLisatiedot, auditSession).map(v ->
-                    v.valintapisteet.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).doOnCompleted(() -> {
+                    v.valintapisteet.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).map(p ->
+                    new PisteetWithLastModified(lisatiedot.lastModified, union(lisatiedot.valintapisteet, p))).doOnCompleted(() -> {
                 prosessi.inkrementoiTehtyjaToita();
             });
         };
@@ -175,12 +177,12 @@ public abstract class AbstractPistesyottoKoosteService {
         };
         Observable<List<ValintaperusteDTO>> kokeetO = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
         Observable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid);
-        Observable<List<Valintapisteet>> merge = Observable.merge(Observable.zip(
+        Observable<PisteetWithLastModified> merge = Observable.merge(Observable.zip(
                 osallistumistiedotO,
                 valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession),
                 haePuuttuvatLisatiedot
         ));
-        Observable<List<ApplicationAdditionalDataDTO>> lisatiedotO = Observable.zip(
+        Observable<Pair<Optional<String>, List<ApplicationAdditionalDataDTO>>> lisatiedotO = Observable.zip(
                 merge,
                 kokeetO,
                 osallistumistiedotO,
@@ -191,7 +193,7 @@ public abstract class AbstractPistesyottoKoosteService {
                             .collect(Collectors.toMap(o -> o.getHakemusOid(), o -> o));
                     Map<String, Oppija> kielikoetuloksetByPersonOid = kielikoetulokset.stream()
                             .collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o));
-                    return lisatiedot.stream().map(l ->
+                    return Pair.of(lisatiedot.lastModified, lisatiedot.valintapisteet.stream().map(l ->
                             new HakemuksenKoetulosYhteenveto(
                                     l,
                                     Pair.of(hakukohdeOid, kokeet),
@@ -199,7 +201,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                     kielikoetuloksetByPersonOid.get(l.getOppijaOID()),
                                     ohjausparametrit
                             ).applicationAdditionalDataDTO
-                    ).collect(Collectors.toList());
+                    ).collect(Collectors.toList()));
                 }
         );
         Observable<List<Hakemus>> hakemuksetO = Observable.merge(Observable.zip(
@@ -217,16 +219,12 @@ public abstract class AbstractPistesyottoKoosteService {
                 valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)),
                 tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                 tarjontaAsyncResource.haeHaku(hakuOid),
-                (osallistumistiedot, lisatiedot, hakemukset, kokeet, valintakoeosallistumiset, hakukohde, haku) -> {
-                    return Pair.of(
-                            muodostoPistesyottoExcel(hakuOid, hakukohdeOid, osallistumistiedot, hakemukset, kokeet,
-                                    lisatiedot, valintakoeosallistumiset, haku, hakukohde, kuuntelijat),
-                            lisatiedot.stream().collect(Collectors.toMap(l -> l.getOid(), l -> l))
-                    );
-                }
-        ).doOnCompleted(() -> {
-            prosessi.inkrementoiTehtyjaToita();
-        });
+                (osallistumistiedot, lisatiedot, hakemukset, kokeet, valintakoeosallistumiset, hakukohde, haku) -> Pair.of(
+                        muodostoPistesyottoExcel(hakuOid, hakukohdeOid, lisatiedot.getKey(), osallistumistiedot, hakemukset, kokeet,
+                                lisatiedot.getRight(), valintakoeosallistumiset, haku, hakukohde, kuuntelijat),
+                        lisatiedot.getRight().stream().collect(Collectors.toMap(l -> l.getOid(), l -> l))
+                )
+        ).doOnCompleted(() -> prosessi.inkrementoiTehtyjaToita());
     }
 
     protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
