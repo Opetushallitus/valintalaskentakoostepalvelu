@@ -101,7 +101,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                 ).collect(Collectors.toList());
     }
 
-    public void tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid,  Optional<String> ifUnmodifiedSince, DokumenttiProsessi prosessi, InputStream stream) {
+    public void tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid,  DokumenttiProsessi prosessi, InputStream stream) {
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
         muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
                 .flatMap(p -> {
@@ -112,6 +112,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     } catch (IOException e) {
                         return Observable.error(e);
                     }
+                    Optional<String> ifUnmodifiedSince = Optional.empty();
                     List<String> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, pistetiedot);
                     if (!virheet.isEmpty()) {
                         String v = virheet.stream().collect(Collectors.joining(", "));

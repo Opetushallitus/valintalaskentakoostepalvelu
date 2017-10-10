@@ -119,7 +119,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 .map(v -> v.getTunniste())
                 .collect(Collectors.toSet());
 
-        return new PistesyottoExcel(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi,
+        return new PistesyottoExcel(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi, Optional.empty(),
                 hakemukset, kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
                 pistetiedot, kuuntelijat);
     }

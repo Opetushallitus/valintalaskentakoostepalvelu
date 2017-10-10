@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +34,7 @@ public class PistesyotonTuonti2Test extends PistesyotonTuontiTestBase {
 		Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
 		PistesyottoExcel pistesyottoExcel = new PistesyottoExcel("testioidi1",
 				"1.2.246.562.20.61064567623", "jep", "", "", "",
+				Optional.empty(),
 				hakemukset,Collections.<String>emptySet(), valintakoeTunnisteet,
 				osallistumistiedot, valintaperusteet, pistetiedot,
 				Collections.singletonList(new PistesyottoDataRiviListAdapter()));

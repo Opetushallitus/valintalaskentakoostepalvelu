@@ -394,7 +394,6 @@ public class PistesyottoResource {
         try {
             final String username = KoosteAudit.username();
             final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-            final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
             authorityCheckService.getAuthorityCheckForRoles(asList(
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
                     "ROLE_APP_HAKEMUS_CRUD",
@@ -429,7 +428,7 @@ public class PistesyottoResource {
                                         username, hakuOid, hakukohdeOid),
                                 poikkeus)
                 );
-                tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, ifUnmodifiedSince, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
+                tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
                 return prosessi.toProsessiId();
             }).subscribe(
                     id -> asyncResponse.resume(Response.ok(id).build()),

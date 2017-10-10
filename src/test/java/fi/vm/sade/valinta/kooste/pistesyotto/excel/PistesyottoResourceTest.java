@@ -227,6 +227,7 @@ public class PistesyottoResourceTest {
     ));
     private PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
             KIELIKOE_TOIMIPISTE_OID, "", "", "",
+            Optional.empty(),
             Arrays.asList(
                     hakemus().setOid(HAKEMUS1).build(),
                     hakemus().setOid(HAKEMUS2).build(),
@@ -721,6 +722,7 @@ public class PistesyottoResourceTest {
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                 KIELIKOE_TOIMIPISTE_OID, "", "", "",
+                Optional.empty(),
                 Arrays.asList(
                         hakemus()
                                 .setOid(HAKEMUS1)
@@ -873,6 +875,7 @@ public class PistesyottoResourceTest {
             );
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                     KIELIKOE_TOIMIPISTE_OID, "", "", "",
+                    Optional.empty(),
                     Arrays.asList(
                             hakemus().setOid(HAKEMUS1).build(),
                             hakemus().setOid(HAKEMUS2).build(),
@@ -1146,6 +1149,7 @@ public class PistesyottoResourceTest {
             mockValintakokeetHakukohteille();
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                     KIELIKOE_TOIMIPISTE_OID, "", "", "",
+                    Optional.empty(),
                     Arrays.asList(
                             hakemus().setOid(HAKEMUS1).build(),
                             hakemus().setOid(HAKEMUS2).build(),
@@ -1233,7 +1237,8 @@ public class PistesyottoResourceTest {
             MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(kielikokeitaJarjestavanOppilaitoksenHierarkia);
             mockValintakokeetHakukohteille();
 
-            PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1, KIELIKOE_TOIMIPISTE_OID, "", "", "", Collections.singletonList(hakemus().setOid(HAKEMUS1).build()),
+            PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1, KIELIKOE_TOIMIPISTE_OID, "", "", "",
+                    Optional.empty(), Collections.singletonList(hakemus().setOid(HAKEMUS1).build()),
                 Sets.newHashSet(Collections.singletonList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
                 Collections.singletonList(VALINTAKOE1), // TUNNISTEET
                 osallistumistiedot,

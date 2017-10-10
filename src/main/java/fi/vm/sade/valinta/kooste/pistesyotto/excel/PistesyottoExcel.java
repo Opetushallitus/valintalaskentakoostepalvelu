@@ -33,6 +33,8 @@ import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 
+import static java.util.Comparator.*;
+
 public class PistesyottoExcel {
     private static final Logger LOG = LoggerFactory.getLogger(PistesyottoExcel.class);
 
@@ -129,6 +131,7 @@ public class PistesyottoExcel {
                             String hakuNimi,
                             String hakukohdeNimi,
                             String tarjoajaNimi,
+                            Optional<String> aikaleima,
                             Collection<Hakemus> hakemukset,
                             Set<String> kaikkiKutsutaanTunnisteet,
                             Collection<String> valintakoeTunnisteet,
@@ -141,7 +144,7 @@ public class PistesyottoExcel {
             pistetiedot = Collections.emptyList();
         }
 
-        Collections.sort(valintaperusteet, (o1, o2) -> o1.getKuvaus().compareTo(o2.getKuvaus()));
+        Collections.sort(valintaperusteet, comparing(ValintaperusteDTO::getKuvaus));
 
         Map<String, Map<String, ValintakoeDTO>> tunnisteValintakoe = valintakoeOidit(hakukohdeOid, osallistumistiedot);
 
@@ -153,6 +156,7 @@ public class PistesyottoExcel {
         final List<String> tunnisteet = valintaperusteet.stream().map(ValintaperusteDTO::getTunniste).collect(Collectors.toList());
 
         List<Rivi> rivit = Lists.newArrayList();
+        rivit.add(aikaleima.map(l -> new RiviBuilder().addTeksti(l).addTeksti("Aikaleima", 4).build()).orElse(Rivi.tyhjaRivi()));
         rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4).build());
         rivit.add(new RiviBuilder().addOid(hakukohdeOid).addTeksti(hakukohdeNimi, 4).build());
         if (StringUtils.isBlank(tarjoajaOid)) {
