@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.*;
+import fi.vm.sade.valinta.kooste.excel.*;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
 import org.apache.commons.lang.StringUtils;
@@ -14,11 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
-import fi.vm.sade.valinta.kooste.excel.Excel;
-import fi.vm.sade.valinta.kooste.excel.OidRivi;
-import fi.vm.sade.valinta.kooste.excel.Rivi;
-import fi.vm.sade.valinta.kooste.excel.RiviBuilder;
-import fi.vm.sade.valinta.kooste.excel.Teksti;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.BooleanArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
@@ -47,7 +43,7 @@ public class PistesyottoExcel {
     public final static String VAKIO_OSALLISTUI = "OSALLISTUI";
     public final static String VAKIO_EI_OSALLISTUNUT = "EI_OSALLISTUNUT";
     public final static String VAKIO_EI_VAADITA = "EI_VAADITA";
-
+    private AikaleimaRivi aikaleimaRivi = new AikaleimaRivi();
     private final static Collection<String> VAIHTOEHDOT = Arrays.asList(MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT, EI_VAADITA);
     private final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
             .addKonversio(StringUtils.EMPTY, MERKITSEMATTA)
@@ -125,6 +121,10 @@ public class PistesyottoExcel {
         return data.getLastName() + ", " + data.getFirstNames();
     }
 
+    public Optional<String> getAikaleima() {
+        return aikaleimaRivi.getCurrentAikaleima();
+    }
+
     public PistesyottoExcel(String hakuOid,
                             String hakukohdeOid,
                             String tarjoajaOid,
@@ -140,6 +140,7 @@ public class PistesyottoExcel {
                             List<ApplicationAdditionalDataDTO> pistetiedot,
                             Collection<PistesyottoDataRiviKuuntelija> kuuntelijat
     ) {
+        this.aikaleimaRivi = new AikaleimaRivi(aikaleima);
         if (pistetiedot == null) {
             pistetiedot = Collections.emptyList();
         }
@@ -156,7 +157,7 @@ public class PistesyottoExcel {
         final List<String> tunnisteet = valintaperusteet.stream().map(ValintaperusteDTO::getTunniste).collect(Collectors.toList());
 
         List<Rivi> rivit = Lists.newArrayList();
-        rivit.add(aikaleima.map(l -> new RiviBuilder().addTeksti(l).addTeksti("Aikaleima", 4).build()).orElse(Rivi.tyhjaRivi()));
+        rivit.add(aikaleimaRivi);
         rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4).build());
         rivit.add(new RiviBuilder().addOid(hakukohdeOid).addTeksti(hakukohdeNimi, 4).build());
         if (StringUtils.isBlank(tarjoajaOid)) {

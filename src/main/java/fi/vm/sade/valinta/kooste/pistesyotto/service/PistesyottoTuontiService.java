@@ -112,7 +112,6 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     } catch (IOException e) {
                         return Observable.error(e);
                     }
-                    Optional<String> ifUnmodifiedSince = Optional.empty();
                     List<String> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, pistetiedot);
                     if (!virheet.isEmpty()) {
                         String v = virheet.stream().collect(Collectors.joining(", "));
@@ -120,6 +119,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     }
                     Date valmistuminen = new Date();
                     Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> uudetKielikoetulokset = new HashMap<>();
+                    Optional<String> ifUnmodifiedSince = pistesyottoExcel.getAikaleima();
                     List<ApplicationAdditionalDataDTO> uudetPistetiedot =
                             pistesyottoTuontiAdapteri
                                     .getRivit().stream()
