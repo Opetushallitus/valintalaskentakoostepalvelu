@@ -465,6 +465,7 @@ public class PistesyottoResource {
                                List<HakemusDTO> hakemukset,
                                @Suspended AsyncResponse asyncResponse) {
         try {
+            final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
             if (hakemukset == null || hakemukset.isEmpty()) {
                 asyncResponse.resume(Response.serverError().entity("Ulkoinen pistesyotto API requires at least one hakemus").build());
             } else {
@@ -480,7 +481,7 @@ public class PistesyottoResource {
                 ).subscribe(
                         authorityCheck -> {
                             LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
-                            externalTuontiService.tuo(authorityCheck, hakemukset, username, hakuOid, valinnanvaiheOid,
+                            externalTuontiService.tuo(authorityCheck, hakemukset, username, auditSession, hakuOid, valinnanvaiheOid,
                                     (onnistuneet, validointivirheet) -> {
                                         UlkoinenResponseDTO response = new UlkoinenResponseDTO();
                                         response.setKasiteltyOk(onnistuneet);

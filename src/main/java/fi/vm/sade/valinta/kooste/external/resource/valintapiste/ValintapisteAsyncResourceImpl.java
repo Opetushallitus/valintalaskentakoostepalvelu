@@ -74,9 +74,9 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Observable<PisteetWithLastModified> getValintapisteet(String hakuOID, Collection<String> hakemusOIDs, AuditSession auditSession) {
+    public Observable<PisteetWithLastModified> getValintapisteet(Collection<String> hakemusOIDs, AuditSession auditSession) {
         Observable<Response> response = postAsObservable(
-                getUrl("valintapiste-service.get.pisteet.with.hakemusoids", hakuOID),
+                getUrl("valintapiste-service.get.pisteet.with.hakemusoids"),
                 Entity.entity(hakemusOIDs, MediaType.APPLICATION_JSON_TYPE), client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("sessionId", auditSession.getSessionId());
@@ -89,9 +89,9 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Observable<Response> putValintapisteet(String hakuOID, String hakukohdeOID, Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
+    public Observable<Response> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
         Observable<Response> response = putAsObservable(
-                getUrl("valintapiste-service.put.pisteet", hakuOID, hakukohdeOID),
+                getUrl("valintapiste-service.put.pisteet"),
                 Entity.entity(pisteet, MediaType.APPLICATION_JSON_TYPE)
                 , client -> {
                     ifUnmodifiedSince.ifPresent(since -> client.header(IF_UNMODIFIED_SINCE, since));

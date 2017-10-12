@@ -13,6 +13,9 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.VirheDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -20,6 +23,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.OsallistuminenTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +50,16 @@ public class PistesyottoExternalTuontiService {
     private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
     private final ValintaperusteetAsyncResource valintaperusteetResource;
     private final ApplicationAsyncResource applicationAsyncResource;
-
+    private final ValintapisteAsyncResource valintapisteAsyncResource;
     @Autowired
     public PistesyottoExternalTuontiService(
             ValintalaskentaValintakoeAsyncResource valintakoeResource,
-            ValintaperusteetAsyncResource valintaperusteetResource, ApplicationAsyncResource applicationAsyncResource) {
+            ValintaperusteetAsyncResource valintaperusteetResource,
+            ValintapisteAsyncResource valintapisteAsyncResource,
+            ApplicationAsyncResource applicationAsyncResource) {
         this.valintakoeResource = valintakoeResource;
         this.valintaperusteetResource = valintaperusteetResource;
+        this.valintapisteAsyncResource = valintapisteAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
     }
 
@@ -260,7 +267,7 @@ public class PistesyottoExternalTuontiService {
         )).collect(Collectors.toList());
     }
 
-    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, String username,
+    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, String username, AuditSession auditSession,
                     String hakuOid, String valinnanvaiheOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler,
                     Consumer<Throwable> exceptionHandler) {
         Observable<List<Hakemus>> applicationsByHakemusOids = applicationAsyncResource.getApplicationsByHakemusOids(
@@ -321,8 +328,8 @@ public class PistesyottoExternalTuontiService {
                         osallistumiset.stream().filter(o -> !o.isVirhe()).map(OsallistuminenHakutoiveeseen::asApplicationAdditionalDataDTO).collect(Collectors.toList());
                 List<VirheDTO> virheet = osallistumiset.stream().filter(o -> o.isVirhe()).map(o -> o.asVirheDTO()).collect(Collectors.toList());
                 if(!additionalData.isEmpty()) {
-                    applicationAsyncResource.putApplicationAdditionalData(
-                            hakuOid, additionalData).subscribe(response -> {
+                    List<Valintapisteet> vp = additionalData.stream().map(a -> Pair.of(username, a)).map(Valintapisteet::new).collect(Collectors.toList());
+                    valintapisteAsyncResource.putValintapisteet(Optional.empty(), vp, auditSession).subscribe(response -> {
                         additionalData.forEach(p ->
                                 AUDIT.log(builder()
                                         .id(username)

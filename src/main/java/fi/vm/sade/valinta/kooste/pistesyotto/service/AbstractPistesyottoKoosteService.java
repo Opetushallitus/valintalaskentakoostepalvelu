@@ -145,7 +145,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 return new Valintapisteet(v.getHakemusOID(), o.getHakijaOid(), o.getEtunimi(), o.getSukunimi(), v.getPisteet());
             };
 
-            return valintapisteAsyncResource.getValintapisteet(hakuOid, puuttuvatLisatiedot, auditSession).map(v ->
+            return valintapisteAsyncResource.getValintapisteet(puuttuvatLisatiedot, auditSession).map(v ->
                     v.valintapisteet.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).map(p ->
                     new PisteetWithLastModified(lisatiedot.lastModified, union(lisatiedot.valintapisteet, p))).doOnCompleted(() -> {
                 prosessi.inkrementoiTehtyjaToita();
@@ -311,27 +311,10 @@ public abstract class AbstractPistesyottoKoosteService {
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }
 
-    private static BiFunction<Map<String, String>, String, List<Piste>> ADDITIONAL_INFO_TO_PISTEET = (additionalInfo, oid) -> {
-        List<Piste> pisteet = additionalInfo.entrySet().stream().flatMap(entry -> {
-            String k = entry.getKey();
-            Object v = entry.getValue();
-            if (k.endsWith("-OSALLISTUMINEN")) {
-                String tunniste = k.replaceAll("-OSALLISTUMINEN", "");
-                Osallistuminen osallistuminen = Osallistuminen.valueOf(v.toString());
-                String arvo = (String)additionalInfo.get(tunniste);
-                return Stream.of(new Piste(tunniste, arvo, osallistuminen, oid));
-            } else {
-                return Stream.empty();
-            }
 
-        }).collect(Collectors.toList());
-        return pisteet;
-    };
 
     public List<Valintapisteet> pistetiedotHakemukselle(String tallettaja, List<ApplicationAdditionalDataDTO> additionalDataDTOS) {
-        return additionalDataDTOS.stream().map(a ->
-            new Valintapisteet(a.getOid(), a.getPersonOid(), a.getFirstNames(), a.getLastName(), ADDITIONAL_INFO_TO_PISTEET.apply(a.getAdditionalData(), tallettaja))
-        ).collect(Collectors.toList());
+        return additionalDataDTOS.stream().map(a -> Pair.of(tallettaja, a)).map(Valintapisteet::new).collect(Collectors.toList());
     }
 
     private Observable<Void> tallennaAdditionalInfoHakemuksille(String hakuOid,
@@ -341,7 +324,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                                                 String username,
                                                                 ValintaperusteetOperation auditLogOperation,
                                                                 AuditSession auditSession) {
-        return valintapisteAsyncResource.putValintapisteet(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
+        return valintapisteAsyncResource.putValintapisteet(ifUnmodifiedSince, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
                 .<Void>map(a -> null)
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
                         "Lisätietojen tallennus hakemukselle epäonnistui", t)))

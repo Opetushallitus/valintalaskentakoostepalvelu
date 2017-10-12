@@ -191,16 +191,6 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     @Override
-    public Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData) {
-        return putAsObservable(getUrl("haku-app.applications.additionaldata.hakuoid.hakukohdeoid", hakuOid, hakukohdeOid), Entity.json(additionalData));
-    }
-
-    @Override
-    public Observable<Response> putApplicationAdditionalData(String hakuOid, List<ApplicationAdditionalDataDTO> additionalData) {
-        return putAsObservable(getUrl("haku-app.applications.additionaldata.hakuoid", hakuOid), Entity.json(additionalData));
-    }
-
-    @Override
     public Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOids, String reason) {
         return postAsObservable(getUrl("haku-app.applications.state.passivate"), Entity.json(new ApplicationOidsAndReason(hakemusOids, reason)));
     }

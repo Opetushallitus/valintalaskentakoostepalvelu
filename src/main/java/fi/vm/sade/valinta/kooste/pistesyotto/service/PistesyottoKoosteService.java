@@ -36,11 +36,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 import rx.functions.Functions;
 
+import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.Collections.*;
 
 public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     private static final Logger LOG = LoggerFactory.getLogger(PistesyottoKoosteService.class);
@@ -105,7 +108,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
                     Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
                     Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
-                    Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, Arrays.asList(hakemusOid), auditSession);
+                    Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(Arrays.asList(hakemusOid), auditSession);
 
                     return valintapisteet.switchMap(pisteet -> {
                         Observable<Map<String, HakemuksenKoetulosYhteenveto>> yhteenvedot = Observable.merge(hakemusDTO.getHakukohteet().stream().map(hakukohde -> {
@@ -180,15 +183,17 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     .filter(e -> e.getKey().matches(PistesyottoExcel.KIELIKOE_REGEX))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             if (kielikoePistetiedot.isEmpty()) {
-                return applicationAsyncResource.putApplicationAdditionalData(hakuOid, Collections.singletonList(pistetietoDTO))
-                        .map(a -> null);
+                return valintapisteAsyncResource.putValintapisteet(
+                        ifUnmodifiedSince,
+                        singletonList(new Valintapisteet(Pair.of(username, pistetietoDTO))),
+                        auditSession).map(a -> null);
             } else {
                 return Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
                     ApplicationAdditionalDataDTO a = poistaKielikoepistetiedot(pistetietoDTO);
                     a.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
                     return tallennaKoostetutPistetiedot(
                             hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(), ifUnmodifiedSince,
-                            Collections.singletonList(a), username, auditSession
+                            singletonList(a), username, auditSession
                     );
                 }).collect(Collectors.toList()));
             }
