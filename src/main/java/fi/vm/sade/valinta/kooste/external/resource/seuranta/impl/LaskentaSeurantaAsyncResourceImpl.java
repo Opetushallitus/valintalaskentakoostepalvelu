@@ -10,7 +10,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.LaskentaParams;
 import fi.vm.sade.valinta.seuranta.dto.*;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -33,7 +32,6 @@ import rx.Observable;
 public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource implements LaskentaSeurantaAsyncResource {
     private final Logger LOG = LoggerFactory.getLogger(getClass());
     private final Gson gson = new Gson();
-    private final ResponseCallback responseCallback = new ResponseCallback();
 
     @Autowired
     public LaskentaSeurantaAsyncResourceImpl(
@@ -124,7 +122,8 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
     public void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
         String url = getUrl("seuranta-service.seuranta.kuormantasaus.laskenta.tila.hakukohde", uuid, tila, hakukohdetila);
         try {
-        if(ilmoitusDtoOptional.isPresent()) {
+            ResponseCallback responseCallback = new ResponseCallback(url);
+            if(ilmoitusDtoOptional.isPresent()) {
             getWebClient()
                     .path(url)
                     .async()
@@ -144,6 +143,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
     public void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
         String url = getUrl("seuranta-service.seuranta.kuormantasaus.laskenta.hakukohde.tila", uuid, hakukohdeOid, tila);
         try {
+            ResponseCallback responseCallback = new ResponseCallback(url);
             if(ilmoitusDtoOptional.isPresent()) {
                 getWebClient()
                         .path(url)
@@ -157,18 +157,6 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
             }
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu " + url + " laskennalle " + uuid + " ja hakukohteelle " + hakukohdeOid + " paatyi virheeseen", e);
-        }
-    }
-
-    public void lisaaIlmoitusHakukohteelle(String uuid, String hakukohdeOid, IlmoitusDto ilmoitus) {
-        String url = getUrl("seuranta-service.seuranta.kuormantasaus.laskenta.hakukohde", uuid, hakukohdeOid);
-        try {
-            getWebClient()
-                    .path(url)
-                    .async()
-                    .post(Entity.entity(gson.toJson(ilmoitus), MediaType.APPLICATION_JSON_TYPE), responseCallback);
-        } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu paatyi virheeseen " + url, e);
         }
     }
 
