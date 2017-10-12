@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.excel;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class AikaleimaRivi  extends Rivi {
 
     @Override
     public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
-        this.currentAikaleima = rivi.getSolut().stream().findFirst().map(s -> s.toTeksti().getTeksti());
+        this.currentAikaleima = rivi.getSolut().stream().findFirst().map(s -> s.toTeksti().getTeksti()).filter(StringUtils::isBlank);
         return false;
     }
 }
