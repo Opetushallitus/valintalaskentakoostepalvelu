@@ -31,12 +31,13 @@ public abstract class AbstraktiPalvelukutsuStrategia implements PalvelukutsuStra
         }
         final PalvelukutsuJaTakaisinkutsu seuraavaPalvelukutsu = palvelukutsuJono.poll();
         if (seuraavaPalvelukutsu != null) {
-            LOG.info("Aktivoidaan jonossa seuraava {}", seuraavaPalvelukutsu.palvelukutsu.getClass().getSimpleName());
-            aloitetutPalvelukutsut.add(seuraavaPalvelukutsu.palvelukutsu);
+            Palvelukutsu kutsu = seuraavaPalvelukutsu.palvelukutsu;
+            LOG.info("Aktivoidaan jonossa seuraava {}", kutsu.toString());
+            aloitetutPalvelukutsut.add(kutsu);
             try {
-                seuraavaPalvelukutsu.palvelukutsu.teePalvelukutsu(palvelukutsu -> {
+                kutsu.teePalvelukutsu(palvelukutsu -> {
                     try {
-                        aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
+                        aloitetutPalvelukutsut.remove(kutsu);
                     } catch (Exception e) {
                         LOG.error("Palvelustrategiassa aloitetun palvelukutsun poisto tyojonosta epaonnistui", e);
                         throw e;
@@ -48,11 +49,11 @@ public abstract class AbstraktiPalvelukutsuStrategia implements PalvelukutsuStra
                     }
                 });
             } catch (PalvelukutsunUudelleenAktivointiPoikkeus p) {
-                aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
+                aloitetutPalvelukutsut.remove(kutsu);
                 throw p;
             } catch (Exception e) {
                 LOG.error("Palvelukutsun kaynnistys heitti poikkeuksen", e);
-                aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
+                aloitetutPalvelukutsut.remove(kutsu);
                 throw e;
             }
         }

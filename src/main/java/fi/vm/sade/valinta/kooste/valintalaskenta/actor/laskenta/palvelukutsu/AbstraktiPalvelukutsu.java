@@ -97,4 +97,9 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
     public String getHakukohdeOid() {
         return kuvaus.getHakukohdeJaOrganisaatio().getHakukohdeOid();
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " laskennalle " + kuvaus.toString();
+    }
 }
