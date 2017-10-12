@@ -33,7 +33,7 @@ public class AikaleimaRivi  extends Rivi {
 
     @Override
     public boolean validoi(Rivi rivi) throws ExcelValidointiPoikkeus {
-        this.currentAikaleima = rivi.getSolut().stream().findFirst().map(s -> s.toTeksti().getTeksti()).filter(StringUtils::isBlank);
+        this.currentAikaleima = rivi.getSolut().stream().findFirst().map(s -> s.toTeksti().getTeksti()).filter(s -> !StringUtils.isBlank(s));
         return false;
     }
 }
