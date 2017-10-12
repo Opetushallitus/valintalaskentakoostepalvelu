@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -72,7 +73,7 @@ public class EligibilitiesKonvertointiTest {
 					//
 					.map(h -> {
 						try {
-							return Converter.hakemusToHakemusDTO(h, Maps.newHashMap());
+							return Converter.hakemusToHakemusDTO(h, new Valintapisteet(), Maps.newHashMap());
 						} catch (Exception e) {
 							epaonnistuneetKonversiot.put(h.getOid(), e);
 							return null;

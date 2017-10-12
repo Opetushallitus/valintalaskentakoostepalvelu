@@ -4,6 +4,7 @@ import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import org.mockito.Mockito;
@@ -30,6 +31,8 @@ public class Mocks {
     private KoodistoAsyncResource koodistoAsyncResource;
     @Autowired
     private OhjausparametritAsyncResource ohjausparametritAsyncResource;
+    @Autowired
+    private ValintapisteAsyncResource valintapisteAsyncResource;
 
     @PostConstruct
     public void init() {
@@ -42,6 +45,9 @@ public class Mocks {
     public static OhjausparametritAsyncResource getOhjausparametritAsyncResource() {
         return MOCKS.ohjausparametritAsyncResource;
     }
+    public static ValintapisteAsyncResource getValintapisteAsyncResource() {
+        return MOCKS.valintapisteAsyncResource;
+    }
     public static KoodistoAsyncResource getKoodistoAsyncResource() {
         return MOCKS.koodistoAsyncResource;
     }
@@ -52,6 +58,7 @@ public class Mocks {
         return MOCKS.dokumenttiAsyncResource;
     }
     public static void reset() {
-        Mockito.reset(getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource(), getDokumenttiAsyncResource());
+        Mockito.reset(getValintapisteAsyncResource(), getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource(), getDokumenttiAsyncResource());
     }
+
 }

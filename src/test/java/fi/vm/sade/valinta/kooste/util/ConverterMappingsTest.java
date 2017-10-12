@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.apache.commons.io.IOUtils;
@@ -19,6 +20,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.util.*;
 
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
@@ -34,7 +36,7 @@ public class ConverterMappingsTest {
         Hakemus hakemus = hakemukset.stream()
                 .filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid()))
                 .distinct().iterator().next();
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, Maps.newHashMap());
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()), Maps.newHashMap());
         // LOG.error("\r\n{}", new GsonBuilder().setPrettyPrinting().create()
         // .toJson(dto));
         assertTrue(dto
@@ -61,13 +63,13 @@ public class ConverterMappingsTest {
         ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
         Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.49132232288", a);
 
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, hakukohdeRyhmasForHakukohdes);
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()),hakukohdeRyhmasForHakukohdes);
         assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
     }
 
     @Test
     public void testaaEligibilitiesMappaustaNullArvoilla() {
-        assertTrue(Collections.emptyMap().equals(
+        assertTrue(emptyMap().equals(
                 Converter.mapEligibilityAndStatus(null, null)));
         assertTrue(Converter.mapEligibilityAndStatus(
                 Arrays.asList(new Eligibility("", "", "", "")), null).isEmpty());
@@ -141,7 +143,7 @@ public class ConverterMappingsTest {
         Hakemus hakemus = hakemukset.stream()
                 .filter(h -> "1.2.246.562.11.00003000803".equals(h.getOid()))
                 .distinct().iterator().next();
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, Maps.newHashMap());
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()), Maps.newHashMap());
 
         final int prefixes = dto.getAvaimet().stream()
                 .filter(a -> a.getAvain().startsWith("PK_") || a.getAvain().startsWith("LK_"))

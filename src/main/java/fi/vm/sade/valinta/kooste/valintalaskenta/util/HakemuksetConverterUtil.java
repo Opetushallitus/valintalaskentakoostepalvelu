@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
@@ -45,10 +46,10 @@ public class HakemuksetConverterUtil {
 
     public static List<HakemusDTO> muodostaHakemuksetDTO(HakuV1RDTO haku, String hakukohdeOid,
                                                          Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
-                                                         List<Hakemus> hakemukset, List<Oppija> oppijat,
+                                                         List<Hakemus> hakemukset, List<Valintapisteet> valintapisteet, List<Oppija> oppijat,
                                                          ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
         ensurePersonOids(hakemukset, hakukohdeOid);
-        List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, hakukohdeRyhmasForHakukohdes);
+        List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, valintapisteet, hakukohdeRyhmasForHakukohdes);
         Map<String, Exception> errors = Maps.newHashMap();
         try {
             if (oppijat != null) {
@@ -111,15 +112,16 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<Hakemus> hakemukset, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<Hakemus> hakemukset, List<Valintapisteet> valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         List<HakemusDTO> hakemusDtot;
+        Map<String, Valintapisteet> hakemusOIDtoValintapisteet = valintapisteet.stream().collect(Collectors.toMap(v -> v.getHakemusOID(), v -> v));
         Map<String, Exception> epaonnistuneetKonversiot = Maps.newConcurrentMap();
         try {
             hakemusDtot = hakemukset.parallelStream()
                     .filter(Objects::nonNull)
                     .map(h -> {
                         try {
-                            return Converter.hakemusToHakemusDTO(h, hakukohdeRyhmasForHakukohdes);
+                            return Converter.hakemusToHakemusDTO(h, hakemusOIDtoValintapisteet.get(h.getOid()), hakukohdeRyhmasForHakukohdes); // TODO there maybe come null pisteet here
                         } catch (Exception e) {
                             epaonnistuneetKonversiot.put(h.getOid(), e);
                             return null;

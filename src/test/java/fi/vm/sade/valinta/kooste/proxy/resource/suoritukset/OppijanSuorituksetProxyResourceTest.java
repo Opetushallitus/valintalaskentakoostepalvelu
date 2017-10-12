@@ -11,6 +11,8 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
@@ -20,16 +22,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
 public class OppijanSuorituksetProxyResourceTest {
@@ -194,6 +200,7 @@ public class OppijanSuorituksetProxyResourceTest {
 
     public void initMocks(String oppilajanSuorituksetFile, String oppijanHakemusFile, String tarjontaFile) throws Exception {
         Mocks.reset();
+
         Oppija expectedOppijanSuoritukset = GSON.
                 fromJson(classpathResourceAsString(oppilajanSuorituksetFile), new TypeToken<Oppija>() {
                 }.getType());
@@ -204,6 +211,12 @@ public class OppijanSuorituksetProxyResourceTest {
         HakuV1RDTO expectedHaku = GSON
                 .fromJson(classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {
                 }.getType());
+
+        Valintapisteet v = new Valintapisteet(expectedHakemus.getOid(), expectedHakemus.getPersonOid(),"","",Collections.emptyList());
+
+        Mockito.when(
+                Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.any(), Mockito.any())).thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(),
+                singletonList(v))));
 
 
         MockTarjontaAsyncService.setMockHaku(expectedHaku);
@@ -223,7 +236,11 @@ public class OppijanSuorituksetProxyResourceTest {
         HakuV1RDTO expectedHaku = GSON
                 .fromJson(classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {
                 }.getType());
+        List<Valintapisteet> v = expectedHakemukset.stream().map(h -> new Valintapisteet(h.getOid(), h.getPersonOid(),"","",Collections.emptyList())).collect(Collectors.toList());
 
+        Mockito.when(
+                Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.any(), Mockito.any())).thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(),
+                v)));
 
         MockTarjontaAsyncService.setMockHaku(expectedHaku);
         MockApplicationAsyncResource.setResultByOid(expectedHakemukset);

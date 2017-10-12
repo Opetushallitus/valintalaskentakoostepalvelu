@@ -1,7 +1,12 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
+import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
 import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
@@ -21,12 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import rx.Observable;
-import rx.functions.Action1;
-import rx.observables.BlockingObservable;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -40,6 +45,8 @@ import java.util.stream.Collectors;
 public class OppijanSuorituksetProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResource.class);
 
+    @Context
+    private HttpServletRequest httpServletRequestJaxRS;
     @Autowired
     private SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
 
@@ -51,6 +58,9 @@ public class OppijanSuorituksetProxyResource {
 
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
+
+    @Autowired
+    private ValintapisteAsyncResource valintapisteAsyncResource;
 
     /**
      *
@@ -76,11 +86,12 @@ public class OppijanSuorituksetProxyResource {
             @PathParam("hakemusOid") String hakemusOid,
             @Suspended final AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}", opiskelijaOid);
             respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
-        resolveHakemusDTO(hakuOid, opiskelijaOid, applicationAsyncResource.getApplication(hakemusOid), true, hakemusDTO -> {
+        resolveHakemusDTO(auditSession, hakuOid, opiskelijaOid, hakemusOid, applicationAsyncResource.getApplication(hakemusOid), true).subscribe(hakemusDTO -> {
             asyncResponse.resume(Response
                     .ok()
                     .header("Content-Type", "application/json")
@@ -103,14 +114,14 @@ public class OppijanSuorituksetProxyResource {
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             List<String> hakemusOids,
             @Suspended final AsyncResponse asyncResponse) {
-
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{hakuOid}", hakuOid);
             respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
 
-        resolveHakemusDTOs(hakuOid, hakemusOids, fetchEnsikertalaisuus,
+        resolveHakemusDTOs(auditSession, hakuOid, hakemusOids, fetchEnsikertalaisuus).subscribe(
                 (hakemusDTOs -> {
                     List<Map<String, String>> listOfMaps = hakemusDTOs.stream().map(this::getAvainArvoMap).collect(Collectors.toList());
 
@@ -157,12 +168,13 @@ public class OppijanSuorituksetProxyResource {
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             Hakemus hakemus,
             @Suspended final AsyncResponse asyncResponse) {
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskelijaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskelijaOid/{oid}", opiskelijaOid);
             respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
-        resolveHakemusDTO(hakuOid, opiskelijaOid, Observable.just(hakemus), fetchEnsikertalaisuus, hakemusDTO -> {
+        resolveHakemusDTO(auditSession, hakuOid, opiskelijaOid, hakemus.getOid(), Observable.just(hakemus), fetchEnsikertalaisuus).subscribe(hakemusDTO -> {
             asyncResponse.resume(Response
                     .ok()
                     .type(MediaType.APPLICATION_JSON_TYPE)
@@ -183,7 +195,7 @@ public class OppijanSuorituksetProxyResource {
             final List<HakemusHakija> allHakemus,
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             @Suspended final AsyncResponse asyncResponse) {
-
+        final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu");
@@ -195,37 +207,38 @@ public class OppijanSuorituksetProxyResource {
             return;
         }
 
-        final Map<String, Map<String, String>> allData = new HashMap<>();
-        final BlockingObservable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).toBlocking();
-        HakuV1RDTO haku = hakuObservable.first();
+        //final Map<String, Map<String, String>> allData = new HashMap<>();
+        Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(allHakemus.stream().map(h -> h.getHakemus().getOid()).collect(Collectors.toList()), auditSession);
+        Observable<HakuV1RDTO> hakuV1RDTOObservable = tarjontaAsyncResource.haeHaku(hakuOid);
+        Observable.combineLatest(hakuV1RDTOObservable, valintapisteet, (haku, pisteet) -> {
+            if (haku == null) {
+                throw new RuntimeException(String.format("Hakua %s ei löytynyt", hakuOid));
+            }
+            LOG.info("Hae suoritukset {} hakemukselle", allHakemus.size());
 
-        if (haku == null) {
-            respondWithError(asyncResponse, String.format("Hakua %s ei löytynyt", hakuOid));
-            return;
-        }
+            List<Hakemus> hakemukset = allHakemus.stream().map(HakemusHakija::getHakemus).collect(Collectors.toList());
+            List<String> opiskelijaOids = allHakemus.stream().map(HakemusHakija::getOpiskelijaOid).collect(Collectors.toList());
 
-         Action1<Throwable> exceptionConsumer = (Throwable poikkeus) -> {
-            LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-            respondWithError(asyncResponse, poikkeus.getMessage());
-        };
+            return resolveHakemusDTOs(hakuOid, hakemukset, pisteet.valintapisteet, opiskelijaOids, fetchEnsikertalaisuus);
+        }).flatMap(f -> f).subscribe(hakemusDTOs -> {
 
-        LOG.info("Hae suoritukset {} hakemukselle", allHakemus.size());
-
-        List<Hakemus> hakemukset = allHakemus.stream().map(HakemusHakija::getHakemus).collect(Collectors.toList());
-        List<String> opiskelijaOids = allHakemus.stream().map(HakemusHakija::getOpiskelijaOid).collect(Collectors.toList());
-
-        resolveHakemusDTOs(hakuOid, hakemukset, opiskelijaOids, fetchEnsikertalaisuus, hakemusDTOs -> {
-            hakemusDTOs.forEach(hakemusDTO -> {
-                Map<String, String> data = getAvainArvoMap(hakemusDTO);
-                allData.put(hakemusDTO.getHakijaOid(), data);
-            });
+            Map<String, Map<String, String>> allData = hakemusDTOs.stream().collect(Collectors.toMap(h -> h.getHakijaOid(), h -> getAvainArvoMap(h), (m0, m1) -> {
+                m0.putAll(m1);
+                return m0;
+            }));
             LOG.info("Haettiin {} hakemukselle {} suoritustietoa", allHakemus.size(), allData.size());
             asyncResponse.resume(Response
                     .ok()
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(allData)
                     .build());
-        }, exceptionConsumer);
+        }, poikkeus -> {
+            LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
+            respondWithError(asyncResponse, poikkeus.getMessage());
+        });
+
+
+
     }
 
     private Map<String,String> getAvainArvoMap(HakemusDTO hakemusDTO) {
@@ -236,25 +249,26 @@ public class OppijanSuorituksetProxyResource {
         ).collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
     }
 
-    private void resolveHakemusDTO(String hakuOid, String opiskelijaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
-                                   Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
-        hakemusObservable.doOnError(throwableConsumer);
-        Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).doOnError(throwableConsumer);
+    private Observable<HakemusDTO> resolveHakemusDTO(AuditSession auditSession, String hakuOid, String opiskelijaOid, String hakemusOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus) {
+        Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid);
         Observable<Oppija> suorituksetByOppija = fetchEnsikertalaisuus ?
-                suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskelijaOid, hakuOid).doOnError(throwableConsumer) :
+                suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskelijaOid, hakuOid) :
                 suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOid);
-        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(throwableConsumer);
+        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
         Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesObservable = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid);
-        Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable, hakukohdeRyhmasForHakukohdesObservable,
-                (haku, suoritukset, hakemus, ohjausparametrit, hakukohdeRyhmasForHakukohdes) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
+        Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession);
+
+        return Observable.combineLatest(valintapisteet, hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable, hakukohdeRyhmasForHakukohdesObservable,
+                (v, haku, suoritukset, hakemus, ohjausparametrit, hakukohdeRyhmasForHakukohdes) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
                         haku,
                         "",
                         hakukohdeRyhmasForHakukohdes,
                         Collections.singletonList(hakemus),
+                        v.valintapisteet,
                         Collections.singletonList(suoritukset),
                         ohjausparametrit,
                         fetchEnsikertalaisuus).get(0)
-        ).subscribe(hakemusDTOConsumer, throwableConsumer);
+        );
     }
 
     /**
@@ -263,27 +277,24 @@ public class OppijanSuorituksetProxyResource {
      * @param hakuOid Used for retrieving Haku from Tarjonta
      * @param hakemusOids Used to limit Hakemukset from Hakuapp
      * @param fetchEnsikertalaisuus Boolean flag if 'ensikertalaisuus' should be fetched
-     * @param onNext Action1 Handler for successful operation taking a List<HakemusDTO>
-     * @param onError Action1 Handler for exceptions
      */
-    private void resolveHakemusDTOs(String hakuOid,
+    private Observable<List<HakemusDTO>> resolveHakemusDTOs(AuditSession auditSession, String hakuOid,
                                     List<String> hakemusOids,
-                                    Boolean fetchEnsikertalaisuus,
-                                    Action1<List<HakemusDTO>> onNext,
-                                    Action1<Throwable> onError) {
+                                    Boolean fetchEnsikertalaisuus) {
 
-        Observable<HakuV1RDTO>    hakuObservable           = tarjontaAsyncResource.haeHaku(hakuOid).doOnError(onError);
-        Observable<List<Hakemus>> hakemuksetObservable     = applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids).doOnError(onError);
-        Observable<ParametritDTO> parametritObservable     = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(onError);
+        Observable<HakuV1RDTO>    hakuObservable           = tarjontaAsyncResource.haeHaku(hakuOid);
+        Observable<List<Hakemus>> hakemuksetObservable     = applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids);
+        Observable<List<Valintapisteet>> valintapisteetObservable     = valintapisteAsyncResource.getValintapisteet(hakemusOids, auditSession).map(f -> f.valintapisteet);
+        Observable<ParametritDTO> parametritObservable     = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
 
         // Fetch Oppija (suoritusdata) for each personOid in hakemukset
         Observable<List<String>>  opiskelijaOidsObservable = hakemuksetObservable.flatMap(Observable::from).map(Hakemus::getPersonOid).toList();
         Observable<List<Oppija>>  suorituksetObservable    = opiskelijaOidsObservable.flatMap(Observable::from)
                 .flatMap(o -> {
                             if (fetchEnsikertalaisuus) {
-                                return suoritusrekisteriAsyncResource.getSuorituksetByOppija(o, hakuOid).doOnError(onError);
+                                return suoritusrekisteriAsyncResource.getSuorituksetByOppija(o, hakuOid);
                             } else {
-                                return suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(o).doOnError(onError);
+                                return suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(o);
                             }
                         })
                 .toList();
@@ -293,42 +304,42 @@ public class OppijanSuorituksetProxyResource {
          *
          * When each have a value merge the data using a converter and return a list of HakemusDTOs
          */
-        Observable.zip(hakuObservable, suorituksetObservable, hakemuksetObservable, parametritObservable,
-                (haku, suoritukset, hakemukset, parametrit) -> createHakemusDTOs(haku, suoritukset, hakemukset, parametrit, fetchEnsikertalaisuus)
-        ).subscribe(onNext, onError);
+        return Observable.zip(valintapisteetObservable, hakuObservable, suorituksetObservable, hakemuksetObservable, parametritObservable,
+                (valintapisteet, haku, suoritukset, hakemukset, parametrit) -> createHakemusDTOs(haku, suoritukset, hakemukset, valintapisteet, parametrit, fetchEnsikertalaisuus)
+        );
     }
 
 
     /**
      * Fetch and combine data of Suoritus with passed Hakemus
      */
-    private void resolveHakemusDTOs(String hakuOid,
+    private Observable<List<HakemusDTO>> resolveHakemusDTOs(String hakuOid,
                                     List<Hakemus> hakemukset,
+                                    List<Valintapisteet> valintapisteet,
                                     List<String> opiskelijaOids,
-                                    Boolean fetchEnsikertalaisuus,
-                                    Action1<List<HakemusDTO>> onNext,
-                                    Action1<Throwable> onError) {
+                                    Boolean fetchEnsikertalaisuus) {
 
-        Observable<HakuV1RDTO>    hakuObservable           = tarjontaAsyncResource.haeHaku(hakuOid).doOnError(onError);
-        Observable<ParametritDTO> parametritObservable     = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(onError);
+        Observable<HakuV1RDTO>    hakuObservable           = tarjontaAsyncResource.haeHaku(hakuOid);
+        Observable<ParametritDTO> parametritObservable     = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
 
         Observable<List<Oppija>> suorituksetObservable = fetchEnsikertalaisuus
-                ? suoritusrekisteriAsyncResource.getSuorituksetByOppijas(opiskelijaOids, hakuOid).doOnError(onError)
-                : suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOids).doOnError(onError);
+                ? suoritusrekisteriAsyncResource.getSuorituksetByOppijas(opiskelijaOids, hakuOid)
+                : suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOids);
 
-        Observable.zip(hakuObservable, suorituksetObservable, parametritObservable,
-                (haku, suoritukset, parametrit) -> createHakemusDTOs(haku, suoritukset, hakemukset, parametrit, fetchEnsikertalaisuus)
-        ).subscribe(onNext, onError);
+        return Observable.zip(hakuObservable, suorituksetObservable, parametritObservable,
+                (haku, suoritukset, parametrit) -> createHakemusDTOs(haku, suoritukset, hakemukset, valintapisteet, parametrit, fetchEnsikertalaisuus)
+        );
     }
 
     private List<HakemusDTO> createHakemusDTOs (HakuV1RDTO haku,
                                                 List<Oppija> suoritukset,
                                                 List<Hakemus> hakemukset,
+                                                List<Valintapisteet> valintapisteet,
                                                 ParametritDTO parametrit,
                                                 Boolean fetchEnsikertalaisuus) {
 
         Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid()).toBlocking().first();
-        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, suoritukset, parametrit, fetchEnsikertalaisuus);
+        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
     }
 
 

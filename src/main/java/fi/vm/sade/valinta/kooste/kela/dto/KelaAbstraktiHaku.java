@@ -46,5 +46,4 @@ public abstract class KelaAbstraktiHaku {
             OppilaitosSource oppilaitosSource,
             TutkinnontasoSource tutkinnontasoSource,
             TilaSource tilaSource);
-
 }

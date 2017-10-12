@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.util;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Piste;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
@@ -61,7 +63,7 @@ public class Converter {
         return arvo;
     }
 
-    public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+    public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         HakemusDTO hakemusTyyppi = new HakemusDTO();
         hakemusTyyppi.setHakemusoid(hakemus.getOid());
         hakemusTyyppi.setHakijaOid(hakemus.getPersonOid());
@@ -204,6 +206,12 @@ public class Converter {
                     hakemusTyyppi.getAvaimet().add(aa);
                 }
             }
+            Valintapisteet.toAdditionalData(valintapisteet).getAdditionalData().forEach((k,v) -> {
+                AvainArvoDTO aa = new AvainArvoDTO();
+                aa.setAvain(k);
+                aa.setArvo(v);
+                hakemusTyyppi.getAvaimet().add(aa);
+            });
         } catch (Exception e) {
             LOG.error("Epaonnistuminen avainten konversioon!", e);
             throw e;

@@ -24,6 +24,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiSe
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -181,11 +182,7 @@ public class PistesyottoResource {
                 )),
                 applicationAsyncResource.getApplication(hakemusOid),
                 (authorityCheck, hakemus) -> {
-                    // HakuOid tarvitaan hakemukselta, siksi blocking.
-                    Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakemus.getApplicationSystemId()).toBlocking().single();
-                    List<String> hakutoiveOids = Converter.hakemusToHakemusDTO(hakemus, hakukohdeRyhmasForHakukohdes).getHakukohteet().stream()
-                            .map(HakukohdeDTO::getOid)
-                            .collect(Collectors.toList());
+                    Collection<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids();
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(
                                 pistetiedot, ifUnmodifiedSince, username, auditSession

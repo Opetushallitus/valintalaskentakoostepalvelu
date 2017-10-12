@@ -16,7 +16,7 @@ public interface ValintalaskentaAsyncResource {
 
     Observable<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
 
-    Peruutettava laskeJaSijoittele(List<LaskeDTO> lista, Consumer<String> callback, Consumer<Throwable> failureCallback);
+    Observable<String> laskeJaSijoittele(List<LaskeDTO> lista);
 
     Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
 

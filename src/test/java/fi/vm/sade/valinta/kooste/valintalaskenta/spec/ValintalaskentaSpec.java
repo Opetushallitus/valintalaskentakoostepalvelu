@@ -44,23 +44,16 @@ public class ValintalaskentaSpec {
 
         public ValintalaskentaAsyncResource build() {
             ValintalaskentaAsyncResource valintalaskentaAsyncResource = Mockito.mock(ValintalaskentaAsyncResource.class);
-            Mockito.when(valintalaskentaAsyncResource.laskeJaSijoittele(Mockito.anyList(), Mockito.any(), Mockito.any()))
+            Mockito.when(valintalaskentaAsyncResource.laskeJaSijoittele(Mockito.anyList()))
                     .thenAnswer(answer -> {
                         final List<LaskeDTO> laskeDto = (List<LaskeDTO> ) answer.getArguments()[0];
                         Consumer<String> cb = (Consumer<String>) answer.getArguments()[1];
                         Consumer<Throwable> cb2 = (Consumer<Throwable>) answer.getArguments()[2];
                         if(filters.entrySet().stream().anyMatch(a -> a.getKey().test(laskeDto))) {
-                            filters.entrySet().stream().filter(
-                                    a -> a.getKey().test(laskeDto)
-                            ).findFirst().ifPresent(
-                                    (a) -> {
-                                        a.getValue().accept(cb, cb2);
-                                    }
-                            );
+                            return Observable.just("OK");
                         } else {
-                            cb2.accept(new RuntimeException("Ei paluuarvoa!"));
+                            return Observable.error(new RuntimeException("No return val!"));
                         }
-                        return TyhjaPeruutettava.tyhjaPeruutettava();
                     });
             return valintalaskentaAsyncResource;
         }

@@ -60,7 +60,7 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     }
 
     @Override
-    public Peruutettava laskeJaSijoittele(List<LaskeDTO> lista, Consumer<String> callback, Consumer<Throwable> failureCallback) {
+    public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista) {
         throw new UnsupportedOperationException();
     }
 

@@ -15,13 +15,15 @@ public class LaskentaActorParams {
     private final Collection<HakukohdeJaOrganisaatio> hakukohdeOids;
 
     public LaskentaActorParams(LaskentaStartParams laskentaStartParams, ParametritDTO parametritDTO) {
+        this(laskentaStartParams, laskentaStartParams.getHakukohdeDtos().stream()
+                .map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
+                .collect(Collectors.toList()), parametritDTO);
+    }
+    public LaskentaActorParams(LaskentaStartParams laskentaStartParams, Collection<HakukohdeJaOrganisaatio> hakukohdeOids, ParametritDTO parametritDTO) {
         this.laskentaStartParams = laskentaStartParams;
         this.parametritDTO = parametritDTO;
-        this.hakukohdeOids = laskentaStartParams.getHakukohdeDtos().stream()
-                .map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
-                .collect(Collectors.toList());
+        this.hakukohdeOids = hakukohdeOids;
     }
-
     public String getUuid() {
         return laskentaStartParams.getUuid();
     }

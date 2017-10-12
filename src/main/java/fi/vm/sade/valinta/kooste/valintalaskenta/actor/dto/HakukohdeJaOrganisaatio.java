@@ -6,6 +6,10 @@ public class HakukohdeJaOrganisaatio {
     private String hakukohdeOid;
     private String organisaatioOid;
 
+    public HakukohdeJaOrganisaatio() {
+        this.hakukohdeOid = "";
+        this.organisaatioOid = "";
+    }
     public HakukohdeJaOrganisaatio(String hakukohdeOid, String organisaatioOid) {
         this.hakukohdeOid = hakukohdeOid;
         this.organisaatioOid = organisaatioOid;

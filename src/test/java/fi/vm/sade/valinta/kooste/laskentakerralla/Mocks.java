@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
@@ -27,6 +28,7 @@ public class Mocks {
     static SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
     static TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
     static ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler = mock(ValintalaskentaStatusExcelHandler.class);
+    static ValintapisteAsyncResource valintapisteAsyncResource = mock(ValintapisteAsyncResource.class);
     static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource, tarjontaAsyncResource),new LaskentaActorFactory(
             5,
             valintalaskentaAsyncResource,
@@ -34,7 +36,7 @@ public class Mocks {
             valintaperusteetAsyncResource,
             laskentaSeurantaAsyncResource,
             suoritusrekisteriAsyncResource,
-            tarjontaAsyncResource
+            tarjontaAsyncResource,valintapisteAsyncResource
     ), 8));
 
     public static void resetMocks() {
@@ -46,6 +48,7 @@ public class Mocks {
         reset(valintalaskentaAsyncResource);
         reset(suoritusrekisteriAsyncResource);
         reset(tarjontaAsyncResource);
+        reset(valintapisteAsyncResource);
         reset(valintalaskentaStatusExcelHandler);
         reset(laskentaActorSystem);
     }

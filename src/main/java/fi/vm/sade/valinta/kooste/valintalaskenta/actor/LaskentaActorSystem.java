@@ -17,6 +17,7 @@ import akka.actor.TypedActor;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
@@ -32,6 +33,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -88,7 +90,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Override
     public void suoritaValintalaskentaKerralla(final HakuV1RDTO haku, final ParametritDTO parametritDTO, final LaskentaStartParams laskentaStartParams) {
-        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, haku, new LaskentaActorParams(laskentaStartParams, parametritDTO));
+        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(koosteAuditSession(),this, haku, new LaskentaActorParams(laskentaStartParams, parametritDTO));
         startLaskentaActor(laskentaStartParams, laskentaActor);
     }
 
@@ -141,9 +143,12 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             laskentaStarter.fetchLaskentaParams(
                     laskennanKaynnistajaActor,
                     uuid,
-                    (haku, params) -> startLaskentaActor(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, haku, params))
+                    (haku, params) -> startLaskentaActor(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(koosteAuditSession(), this, haku, params))
             );
         }
+    }
+    private AuditSession koosteAuditSession() {
+        return new AuditSession("laskentakoostepalvelu", Collections.emptyList(), "laskentakoostepalvelu", "laskentakoostepalvelu");
     }
 
     protected void startLaskentaActor(LaskentaStartParams params, LaskentaActor laskentaActor) {
