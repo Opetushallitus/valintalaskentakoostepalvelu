@@ -148,7 +148,10 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         }
     }
     private AuditSession koosteAuditSession() {
-        return new AuditSession("laskentakoostepalvelu", Collections.emptyList(), "laskentakoostepalvelu", "laskentakoostepalvelu");
+        AuditSession auditSession = new AuditSession("laskentakoostepalvelu", Collections.emptyList(), "laskentakoostepalvelu", "laskentakoostepalvelu");
+        auditSession.setSessionId("laskentakoostepalvelu");
+        auditSession.setUid("laskentakoostepalvelu");
+        return auditSession;
     }
 
     protected void startLaskentaActor(LaskentaStartParams params, LaskentaActor laskentaActor) {
