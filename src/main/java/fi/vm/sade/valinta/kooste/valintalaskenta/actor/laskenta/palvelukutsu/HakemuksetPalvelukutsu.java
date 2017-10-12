@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import rx.Observable;
 import rx.Subscription;
+import rx.functions.Func1;
 
 public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Palvelukutsu {
     private final static Logger LOG = LoggerFactory.getLogger(HakemuksetPalvelukutsu.class);
@@ -36,9 +36,7 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Pal
 
     public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
         aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> toPeruutettava(applicationAsyncResource.getApplicationsByOid(hakuOid, getHakukohdeOid())
-                .retryWhen(errors -> errors.zipWith(Observable.range(1,2), (n, i) -> i)
-                        .flatMap(i -> Observable.timer(5*i, TimeUnit.SECONDS)
-                        ))
+                .retryWhen(createRetryer())
                 .subscribe(hakemukset -> {
                     if (hakemukset == null) {
                         LOG.error("Hakemuksetpalvelu palautti null datajoukon!");
@@ -49,6 +47,16 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Pal
                     }
                 }, failureCallback(takaisinkutsu))));
         return this;
+    }
+
+    private Func1<Observable<? extends Throwable>, Observable<?>> createRetryer() {
+        int maxRetries = 2;
+        int secondsToWaitMultiplier = 5;
+        return errors -> errors.zipWith(Observable.range(1, maxRetries), (n, i) -> i).flatMap(i -> {
+            int delaySeconds = secondsToWaitMultiplier * i;
+            LOG.warn(toString() + " retry number " + i + "/" + maxRetries + ", waiting for " + delaySeconds + " seconds.");
+            return Observable.timer(delaySeconds, TimeUnit.SECONDS);
+        });
     }
 
     private static Peruutettava toPeruutettava(final Subscription subscription) {
