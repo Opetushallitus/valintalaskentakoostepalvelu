@@ -77,28 +77,6 @@ public class LaskentaActorFactory {
 
 
     public LaskentaActor createValintaryhmaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams a) {
-        /*
-        return valintaryhmaPalvelukutsuYhdiste.stream()
-                .map(y -> {
-                    try {
-                        LaskeDTO l = new LaskeDTO(
-                                uuid,
-                                korkeakouluHaku,
-                                erillishaku,
-                                y.getHakukohdeOid(),
-                                muodostaHakemuksetDTO(y.getHakukohdeOid(), y.getHakemuksetPalvelukutsu().getHakemukset(), y.getSuoritusrekisteriPalvelukutsut().getOppijat()),
-                                y.getValintaperusteetPalvelukutsu().getValintaperusteet(),
-                                y.getHakijaryhmatPalvelukutsu().getHakijaryhmat()
-                        );
-                        y.vapautaResurssit();
-                        return l;
-                    } catch (Exception e) {
-                        LOG.error("LaskeDTO:n muodostaminen epaonnistui", e);
-                        throw e;
-                    }
-                })
-                .collect(Collectors.toList());
-        */
         LaskentaActorParams fakeOnlyOneHakukohdeParams = new LaskentaActorParams(a.getLaskentaStartParams(), Arrays.asList(new HakukohdeJaOrganisaatio()), a.getParametritDTO());
         return laskentaHakukohteittainActor(laskentaSupervisor, fakeOnlyOneHakukohdeParams,
                 hakukohdeJaOrganisaatio -> {
