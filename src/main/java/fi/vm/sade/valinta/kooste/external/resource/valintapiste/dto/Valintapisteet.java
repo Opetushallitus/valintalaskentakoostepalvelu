@@ -3,9 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,7 +34,7 @@ public class Valintapisteet {
     }
 
     public List<Piste> getPisteet() {
-        return pisteet;
+        return Optional.ofNullable(pisteet).orElse(Collections.emptyList());
     }
 
     public String getHakemusOID() {
