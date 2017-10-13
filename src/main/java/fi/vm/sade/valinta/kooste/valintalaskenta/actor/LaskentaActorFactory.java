@@ -84,7 +84,8 @@ public class LaskentaActorFactory {
                     Collection<String> hakukohdeOids = a.getHakukohdeOids().stream().map(hk -> hk.getHakukohdeOid()).collect(Collectors.toList());
                     String hakukohteidenNimi = String.format("Valintaryhmälaskenta %s hakukohteella", hakukohdeOids.size());
                     LOG.info("(Uuid={}) {}", uuid, hakukohteidenNimi);
-                    Observable<Observable<LaskeDTO>> everyLaskeDTO = Observable.from(hakukohdeOids).map(h -> fetchResourcesForOneLaskenta(auditSession, uuid, haku, h, a, true)).subscribeOn(Schedulers.io());
+                    Observable<Observable<LaskeDTO>> everyLaskeDTO = Observable.from(hakukohdeOids).map(h -> fetchResourcesForOneLaskenta(
+                            auditSession, uuid, haku, h, a, true, true)).subscribeOn(Schedulers.io());
 
                     Observable<String> laskenta = everyLaskeDTO.flatMap(Observable::toList).switchMap(valintalaskentaAsyncResource::laskeJaSijoittele);
                     laskenta.subscribe(laskentaOK.apply(uuid, hakukohteidenNimi), laskentaException.apply(uuid, hakukohteidenNimi));
@@ -110,7 +111,7 @@ public class LaskentaActorFactory {
         return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
                 hakukohdeJaOrganisaatio -> {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
-                    Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false).switchMap(valintalaskentaAsyncResource::valintakokeet);
+                    Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, false).switchMap(valintalaskentaAsyncResource::valintakokeet);
                     laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                     return laskenta;
                 }
@@ -133,7 +134,7 @@ public class LaskentaActorFactory {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
 
-                    Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, true).switchMap(valintalaskentaAsyncResource::laske);
+                    Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, true).switchMap(valintalaskentaAsyncResource::laske);
                     laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                     return laskenta;
                 }
@@ -152,7 +153,7 @@ public class LaskentaActorFactory {
                 hakukohdeJaOrganisaatio -> {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan + valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
-                    Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, true).switchMap(valintalaskentaAsyncResource::laskeKaikki);
+                    Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false,true).switchMap(valintalaskentaAsyncResource::laskeKaikki);
                     laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                     return laskenta;
                 }
@@ -180,17 +181,34 @@ public class LaskentaActorFactory {
         return new LaskentaActorForSingleHakukohde(actorParams, r, laskentaSupervisor, laskentaSeurantaAsyncResource, splittaus);
     }
 
+    private Func1<Observable<? extends Throwable>, Observable<?>> createRetryer() {
+        int maxRetries = 2;
+        int secondsToWaitMultiplier = 5;
+        return errors -> errors.zipWith(Observable.range(1, maxRetries), (n, i) -> i).flatMap(i -> {
+            int delaySeconds = secondsToWaitMultiplier * i;
+            LOG.warn(toString() + " retry number " + i + "/" + maxRetries + ", waiting for " + delaySeconds + " seconds.");
+            return Observable.timer(delaySeconds, TimeUnit.SECONDS);
+        });
+    }
+
     private Observable<LaskeDTO> fetchResourcesForOneLaskenta(final AuditSession auditSession, final String uuid, HakuV1RDTO haku,
                                                               final String hakukohdeOid,
                                                               LaskentaActorParams actorParams,
+                                                              boolean retry,
                                                               boolean withHakijaRyhmat) {
         LOG.info("(Uuid={}) Haetaan valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
         final String hakuOid = haku.getOid();
         Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe());
         valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("valintaperusteetAsyncResource.haeValintaperusteet", uuid, hakukohdeOid));
         Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid);
+        if(retry) {
+            hakemukset = hakemukset.retryWhen(createRetryer());
+        }
         hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("applicationAsyncResource.getApplicationsByOid", uuid, hakukohdeOid));
         Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid);
+        if(retry) {
+            oppijat = oppijat.retryWhen(createRetryer());
+        }
         oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("suoritusrekisteriAsyncResource.getOppijatByHakukohde", uuid, hakukohdeOid));
         Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid);
         hakukohdeRyhmasForHakukohdes.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes", uuid, hakukohdeOid));
