@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
+import static java.util.Collections.*;
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.*;
 
@@ -49,7 +50,7 @@ public class HakemuksetConverterUtil {
                                                          List<Hakemus> hakemukset, List<Valintapisteet> valintapisteet, List<Oppija> oppijat,
                                                          ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
         ensurePersonOids(hakemukset, hakukohdeOid);
-        List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, valintapisteet, hakukohdeRyhmasForHakukohdes);
+        List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, ofNullable(valintapisteet).orElse(emptyList()), hakukohdeRyhmasForHakukohdes);
         Map<String, Exception> errors = Maps.newHashMap();
         try {
             if (oppijat != null) {
@@ -158,7 +159,7 @@ public class HakemuksetConverterUtil {
 
     public static Map<String, AvainArvoDTO> toAvainMap(List<AvainArvoDTO> avaimet, String hakemusOid, String hakukohdeOid, Map<String, Exception> poikkeukset) {
         return ofNullable(avaimet)
-                .orElse(Collections.emptyList()).stream().filter(Objects::nonNull).filter(a -> StringUtils.isNotBlank(a.getAvain()))
+                .orElse(emptyList()).stream().filter(Objects::nonNull).filter(a -> StringUtils.isNotBlank(a.getAvain()))
                 .collect(groupingBy(a -> a.getAvain(), mapping(a -> a, toList())))
                 .entrySet().stream()
                 .map(a -> {
@@ -286,7 +287,7 @@ public class HakemuksetConverterUtil {
                 }};
         final Map<String, String> tiedot = new HashMap<>();
         final List<SuoritusJaArvosanat> suoritukset = filterUnrelevantSuoritukset(haku, hakemus, sureSuoritukset);
-        Collections.sort(suoritukset);
+        sort(suoritukset);
 
         Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemus, suoritukset);
         pohjakoulutus.ifPresent(pk -> tiedot.put(POHJAKOULUTUS, pk));
