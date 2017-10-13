@@ -206,12 +206,14 @@ public class Converter {
                     hakemusTyyppi.getAvaimet().add(aa);
                 }
             }
-            Valintapisteet.toAdditionalData(valintapisteet).getAdditionalData().forEach((k,v) -> {
-                AvainArvoDTO aa = new AvainArvoDTO();
-                aa.setAvain(k);
-                aa.setArvo(v);
-                hakemusTyyppi.getAvaimet().add(aa);
-            });
+            if(valintapisteet != null) {
+                Valintapisteet.toAdditionalData(valintapisteet).getAdditionalData().forEach((k, v) -> {
+                    AvainArvoDTO aa = new AvainArvoDTO();
+                    aa.setAvain(k);
+                    aa.setArvo(v);
+                    hakemusTyyppi.getAvaimet().add(aa);
+                });
+            }
         } catch (Exception e) {
             LOG.error("Epaonnistuminen avainten konversioon!", e);
             throw e;
