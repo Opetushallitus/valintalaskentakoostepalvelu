@@ -1,6 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.tuple.Pair.of;
+import static rx.Observable.combineLatest;
+import static rx.Observable.just;
+import static rx.Observable.range;
+import static rx.Observable.timer;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
@@ -20,6 +25,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Audit
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +37,16 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observables.ConnectableObservable;
-import rx.schedulers.Schedulers;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
@@ -74,7 +82,24 @@ public class LaskentaActorFactory {
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.valintapisteAsyncResource = valintapisteAsyncResource;
     }
+    private Pair<String, Collection<String>> headAndTail(Collection<String> c) {
+        String head = c.iterator().next();
+        Collection<String> tail = c.stream().skip(1L).collect(Collectors.toList());
+        return Pair.of(head,tail);
+    }
 
+    private Observable<Pair<Collection<String>, List<LaskeDTO>>> fetchRecursively(Function<String, Observable<LaskeDTO>> fetchLaskeDTO, Observable<Pair<Collection<String>, List<LaskeDTO>>> o) {
+        return o.switchMap(l -> {
+            Collection<String> oids = l.getKey();
+            if(oids.isEmpty()) {
+                return o;
+            } else {
+                Pair<String, Collection<String>> headWithTail = headAndTail(oids);
+                Observable<Pair<Collection<String>, List<LaskeDTO>>> map = fetchLaskeDTO.apply(headWithTail.getKey()).map(laskeDTO -> Pair.of(headWithTail.getRight(), Stream.concat(Stream.of(laskeDTO), l.getRight().stream()).collect(Collectors.toList())));
+                return map.switchMap(t -> fetchRecursively(fetchLaskeDTO, Observable.just(t)));
+            }
+        });
+    }
 
     public LaskentaActor createValintaryhmaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams a) {
         LaskentaActorParams fakeOnlyOneHakukohdeParams = new LaskentaActorParams(a.getLaskentaStartParams(), Arrays.asList(new HakukohdeJaOrganisaatio()), a.getParametritDTO());
@@ -84,10 +109,20 @@ public class LaskentaActorFactory {
                     Collection<String> hakukohdeOids = a.getHakukohdeOids().stream().map(hk -> hk.getHakukohdeOid()).collect(Collectors.toList());
                     String hakukohteidenNimi = String.format("Valintaryhmälaskenta %s hakukohteella", hakukohdeOids.size());
                     LOG.info("(Uuid={}) {}", uuid, hakukohteidenNimi);
-                    Observable<Observable<LaskeDTO>> everyLaskeDTO = Observable.from(hakukohdeOids).map(h -> fetchResourcesForOneLaskenta(
-                            auditSession, uuid, haku, h, a, true, true)).subscribeOn(Schedulers.io());
+                    Observable<Pair<Collection<String>, List<LaskeDTO>>> recursiveSequentialFetch = just(of(hakukohdeOids, emptyList()));
 
-                    Observable<String> laskenta = everyLaskeDTO.flatMap(Observable::toList).switchMap(valintalaskentaAsyncResource::laskeJaSijoittele);
+                    Function<String, Observable<LaskeDTO>> fetchLaskeDTO = h ->fetchResourcesForOneLaskenta(
+                            auditSession, uuid, haku, h, a, true, true);
+
+                    Observable<String> laskenta = fetchRecursively(fetchLaskeDTO, recursiveSequentialFetch).switchMap(hksAndDtos -> {
+                        List<LaskeDTO> allLaskeDTOs = hksAndDtos.getRight();
+                        if(!hksAndDtos.getKey().isEmpty()) { // sanity check
+                            throw new RuntimeException("Kaikkia hakukohteita ei ollut vielä haettu!");
+                        } else if(allLaskeDTOs.size() != hakukohdeOids.size()) {
+                            throw new RuntimeException("Hakukohteita oli " + hakukohdeOids.size() + " mutta haettuja laskeDTOita oli " + allLaskeDTOs.size() + "!");
+                        }
+                        return valintalaskentaAsyncResource.laskeJaSijoittele(allLaskeDTOs);
+                    });
                     laskenta.subscribe(laskentaOK.apply(uuid, hakukohteidenNimi), laskentaException.apply(uuid, hakukohteidenNimi));
                     return laskenta;
                 }
@@ -184,10 +219,10 @@ public class LaskentaActorFactory {
     private Func1<Observable<? extends Throwable>, Observable<?>> createRetryer() {
         int maxRetries = 2;
         int secondsToWaitMultiplier = 5;
-        return errors -> errors.zipWith(Observable.range(1, maxRetries), (n, i) -> i).flatMap(i -> {
+        return errors -> errors.zipWith(range(1, maxRetries), (n, i) -> i).flatMap(i -> {
             int delaySeconds = secondsToWaitMultiplier * i;
             LOG.warn(toString() + " retry number " + i + "/" + maxRetries + ", waiting for " + delaySeconds + " seconds.");
-            return Observable.timer(delaySeconds, TimeUnit.SECONDS);
+            return timer(delaySeconds, TimeUnit.SECONDS);
         });
     }
 
@@ -214,10 +249,10 @@ public class LaskentaActorFactory {
         hakukohdeRyhmasForHakukohdes.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes", uuid, hakukohdeOid));
         Observable<PisteetWithLastModified> valintapisteetForHakukohdes = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
         valintapisteetForHakukohdes.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("tarjontaAsyncResource.valintapisteAsyncResource", uuid, hakukohdeOid));
-        Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid) : Observable.just(emptyList());
+        Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid) : just(emptyList());
         hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException("valintaperusteetAsyncResource.haeHakijaryhmat", uuid, hakukohdeOid));
 
-        return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
+        return wrapAsRunOnlyOnceObservable(combineLatest(
                 valintapisteetForHakukohdes,
                 hakijaryhmat,
                 valintaperusteet,
