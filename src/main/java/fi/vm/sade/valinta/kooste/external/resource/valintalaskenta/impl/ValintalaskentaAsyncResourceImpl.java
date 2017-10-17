@@ -23,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.*;
+import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VALMIS;
+
 @Service
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
@@ -91,57 +94,31 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
                 ValinnanvaiheDTO.class, entity, (webclient) -> webclient.query("tarjoajaOid", tarjoajaOid));
     }
 
-    public <T> Observable<String> kutsuRajapintaaPollaten(String api, String uuid, String hakukohde, T laskeDTO) {
-        Observable<String> apiReturns = Observable.empty();
-        final AtomicReference<Boolean> done = new AtomicReference<>(false);
-        final AtomicReference<Boolean> virhe = new AtomicReference<>(false);
-        final AtomicReference<Integer> secondsUntilNextPoll = new AtomicReference<>(3);
-        String result = "";
-
-        try {
-            while (!done.get()) {
-                apiReturns = postAsObservable(
-                        getUrl(api),
-                        String.class,
-                        Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE),
-                        client -> {
-                            client.accept(MediaType.TEXT_PLAIN_TYPE);
-                            return client;
-                        });
-                result = apiReturns.toBlocking().first();
-                LOG.info("(UUID: {}) Saatiin osoitteesta {} palautusarvo: {} hakukohteelle {} ", uuid, api, result, hakukohde);
-                if (HakukohteenLaskennanTila.VALMIS.equals(result)) {
-                    //LOG.info("Merkitään valmiiksi");
-                    done.set(true);
-                }
-                if (HakukohteenLaskennanTila.VIRHE.equals(result)) {
-                    LOG.error("Virhe laskennan suorituksessa, lopetetaan");
-                    done.set(true);
-                    virhe.set(true);
-                }
-
-                if (virhe.get()) {
-                    LOG.info("(UUID {}) Palautetaan virhe-observable", uuid);
-                    return Observable.error(new Exception());
-                }
-                if (done.get()) {
-                    LOG.info("(UUID: {}) Laskenta hakukohteelle {} valmis, lopetetaan pollaus ", uuid, hakukohde);
-                    return apiReturns;
-                } else {
-                    try {
-                        TimeUnit.SECONDS.sleep(secondsUntilNextPoll.get());
-                    } catch (Exception e) {
-                        throw new RuntimeException();
-                    }
-                    if (secondsUntilNextPoll.get() < 30) {
-                        secondsUntilNextPoll.set(secondsUntilNextPoll.get() + 3);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOG.error("(Uuid: {}) Virhe rajapinnan pollauksessa, ", uuid, e);
-            throw e;
+    public Observable<String> pollaa(Object result, String uuid, String hakukohdeOid) {
+        if (VALMIS.equals(result)) {
+            return Observable.just(VALMIS);
+        } else if (VIRHE.equals(result)) {
+            LOG.error("Virhe laskennan suorituksessa, lopetetaan");
+            return Observable.error(new RuntimeException(String.format("Laskenta uuid=%s, hakukohde=%s epäonnistui!", uuid, result)));
+        } else {
+            return Observable.timer(3, TimeUnit.SECONDS).switchMap(d -> {
+                String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.status", uuid, hakukohdeOid);
+                return getAsObservable(url, String.class, client -> {
+                    client.accept(MediaType.TEXT_PLAIN_TYPE);
+                    return client;
+                }).switchMap(rval -> pollaa(rval, uuid, hakukohdeOid));
+            });
         }
-        return apiReturns;
+    }
+
+    public <T> Observable<String> kutsuRajapintaaPollaten(String api, String uuid, String hakukohdeOid, T laskeDTO) {
+        return postAsObservable(
+                getUrl(api),
+                String.class,
+                Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.TEXT_PLAIN_TYPE);
+                    return client;
+                }).switchMap(rval -> pollaa(rval, uuid, hakukohdeOid));
     }
 }
