@@ -122,7 +122,9 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
     public void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
         String url = getUrl("seuranta-service.seuranta.kuormantasaus.laskenta.tila.hakukohde", uuid, tila, hakukohdetila);
         try {
-            ResponseCallback responseCallback = new ResponseCallback(url);
+            ResponseCallback responseCallback = new ResponseCallback(url, ok -> {}, fail -> {
+                LOG.error("(UUID = {}) Laskennan tilan (laskenta={}, hakukohde={}) merkkaaminen epaonnistui! {}", uuid, tila, hakukohdetila, fail);
+            });
             if (ilmoitusDtoOptional.isPresent()) {
                 getWebClient()
                     .path(url)
@@ -143,7 +145,9 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
     public void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
         String url = getUrl("seuranta-service.seuranta.kuormantasaus.laskenta.hakukohde.tila", uuid, hakukohdeOid, tila);
         try {
-            ResponseCallback responseCallback = new ResponseCallback(url);
+            ResponseCallback responseCallback = new ResponseCallback(url, ok -> {}, fail -> {
+                LOG.error("(UUID = {}) Hakukohteen ({}) tilan ({}) merkkaaminen epaonnistui! {}", uuid, hakukohdeOid, tila, fail);
+            });
             if (ilmoitusDtoOptional.isPresent()) {
                 getWebClient()
                     .path(url)
