@@ -242,7 +242,6 @@ public class LaskentaActorFactory {
                                                               LaskentaActorParams actorParams,
                                                               boolean retry,
                                                               boolean withHakijaRyhmat) {
-        LOG.info("(Uuid={}) Haetaan laskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
         final String hakuOid = haku.getOid();
         BiConsumer<String, Observable<?>> monitorResource = (r, o) -> {
             long i = System.currentTimeMillis();
