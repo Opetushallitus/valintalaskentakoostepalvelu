@@ -262,7 +262,7 @@ public class LaskentaActorFactory {
         Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid);
         monitorResource.accept("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes", hakukohdeRyhmasForHakukohdes);
         Observable<PisteetWithLastModified> valintapisteetForHakukohdes = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
-        monitorResource.accept("tarjontaAsyncResource.valintapisteAsyncResource", valintapisteetForHakukohdes);
+        monitorResource.accept("valintapisteAsyncResource.getValintapisteet", valintapisteetForHakukohdes);
         Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid) : just(emptyList());
         if(withHakijaRyhmat) {
             monitorResource.accept("valintaperusteetAsyncResource.haeHakijaryhmat", hakijaryhmat);
