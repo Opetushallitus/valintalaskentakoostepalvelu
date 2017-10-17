@@ -234,7 +234,7 @@ public class LaskentaActorFactory {
                                                               LaskentaActorParams actorParams,
                                                               boolean retry,
                                                               boolean withHakijaRyhmat) {
-        LOG.info("(Uuid={}) Haetaan valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
+        LOG.info("(Uuid={}) Haetaan laskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
         final String hakuOid = haku.getOid();
         Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe());
         valintaperusteet.subscribe(resurssiOK("valintaperusteetAsyncResource.haeValintaperusteet", uuid, hakukohdeOid), resurssiException("valintaperusteetAsyncResource.haeValintaperusteet", uuid, hakukohdeOid));
