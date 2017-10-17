@@ -29,6 +29,7 @@ import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VALMIS;
 @Service
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
+    private final int MAX_POLL_INTERVAL_IN_SECONDS = 30;
 
     public ValintalaskentaAsyncResourceImpl() {
         super(TimeUnit.HOURS.toMillis(8));
@@ -94,19 +95,22 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
                 ValinnanvaiheDTO.class, entity, (webclient) -> webclient.query("tarjoajaOid", tarjoajaOid));
     }
 
-    public Observable<String> pollaa(Object result, String uuid, String hakukohdeOid) {
+    public Observable<String> pollaa(int pollInterval, Object result, String uuid, String hakukohdeOid) {
         if (VALMIS.equals(result)) {
             return Observable.just(VALMIS);
         } else if (VIRHE.equals(result)) {
             LOG.error("Virhe laskennan suorituksessa, lopetetaan");
             return Observable.error(new RuntimeException(String.format("Laskenta uuid=%s, hakukohde=%s epäonnistui!", uuid, result)));
         } else {
-            return Observable.timer(3, TimeUnit.SECONDS).switchMap(d -> {
+            if(pollInterval == MAX_POLL_INTERVAL_IN_SECONDS) {
+                LOG.warn("(Uuid={}) Laskenta hakukohteelle {} kestaa pitkaan! Jatketaan pollausta..", uuid, hakukohdeOid);
+            }
+            return Observable.timer(pollInterval, TimeUnit.SECONDS).switchMap(d -> {
                 String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.status", uuid, hakukohdeOid);
                 return getAsObservable(url, String.class, client -> {
                     client.accept(MediaType.TEXT_PLAIN_TYPE);
                     return client;
-                }).switchMap(rval -> pollaa(rval, uuid, hakukohdeOid));
+                }).switchMap(rval -> pollaa(Math.min(pollInterval *2, MAX_POLL_INTERVAL_IN_SECONDS), rval, uuid, hakukohdeOid));
             });
         }
     }
@@ -119,6 +123,6 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
                 client -> {
                     client.accept(MediaType.TEXT_PLAIN_TYPE);
                     return client;
-                }).switchMap(rval -> pollaa(rval, uuid, hakukohdeOid));
+                }).switchMap(rval -> pollaa(1, rval, uuid, hakukohdeOid));
     }
 }
