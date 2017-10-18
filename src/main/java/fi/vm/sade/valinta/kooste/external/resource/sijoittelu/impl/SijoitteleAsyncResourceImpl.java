@@ -8,6 +8,8 @@ import java.util.function.Consumer;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.sijoittelu.domain.HaunSijoittelunTila;
+import fi.vm.sade.sijoittelu.domain.SijoitteluAjo;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.slf4j.Logger;
@@ -81,13 +83,13 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
                         .get(String.class).get();
 
                 LOGGER.info("Saatiin ajontila-rajapinnalta palautusarvo {}", status);
-                if ("VALMIS".equals(status)) {
+                if (HaunSijoittelunTila.VALMIS.equals(status)) {
                     LOGGER.info("#### Sijoittelu {} haulle {} on valmistunut", sijoitteluId, hakuOid);
                     callback.accept(status);
                     done.set(true);
                     return;
                 }
-                if ("VIRHE".equals(status)) {
+                if (HaunSijoittelunTila.VIRHE.equals(status)) {
                     LOGGER.info("#### Sijoittelu {} haulle {} päättyi virheeseen", sijoitteluId, hakuOid);
                     failureCallback.accept(new Exception());
                     done.set(true);
