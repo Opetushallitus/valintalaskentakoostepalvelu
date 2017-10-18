@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import fi.vm.sade.sijoittelu.domain.HaunSijoittelunTila;
-import fi.vm.sade.sijoittelu.domain.SijoitteluAjo;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.slf4j.Logger;
@@ -19,9 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
-import rx.Observable;
 
 @Service
 public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implements SijoitteleAsyncResource {
@@ -33,13 +28,14 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
 
     @Override
     public void sijoittele(String hakuOid, Consumer<String> callback, Consumer<Throwable> failureCallback) {
-        LOGGER.info("Sijoitellaan pollaten haulle {}", hakuOid);
-        String luontiUrl = getUrl("sijoittelu-service.sijoittele", hakuOid);
+        //LOGGER.info("Sijoitellaan pollaten haulle {}", hakuOid);
         int secondsUntilNextPoll = 3;
         String status = "";
         AtomicReference<Boolean> done = new AtomicReference<>(false);
         Long sijoitteluId = -1L;
 
+        //Luodaan sijoittelu, saadaan palautusarvona sen id, jota käytetään pollattaessa toista rajapintaa.
+        String luontiUrl = getUrl("sijoittelu-service.sijoittele", hakuOid);
         try {
             sijoitteluId = getWebClient()
                     .path(luontiUrl)
@@ -49,21 +45,7 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
         } catch (Exception e) {
             LOGGER.info("(Haku {}) sijoittelun rajapintakutsu epäonnistui", hakuOid);
         }
-        /*
-        //Luodaan sijoittelu, saadaan palautusarvona sen id, jota käytetään pollattaessa toista rajapintaa.
-        Observable apiReturns = postAsObservable(
-                luontiUrl,
-                Long.class,
-                Entity.entity(Long.class, MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.TEXT_PLAIN_TYPE);
-                    return client;
-                });
-
-        Long sijoitteluId = (Long) apiReturns.toBlocking().first();
-        */
-
-        //Jos rajapinta palauttaa id:ksi -1 (tai kutsu epäonnistuu), sijoittelua ei luotu. Lopetetaan tämän kutsun osalta.
+        //Jos rajapinta palauttaa -1 tai kutsu epäonnistuu, uutta sijoittelua ei luotu. Ei aloiteta pollausta.
         if(sijoitteluId == -1) {
             LOGGER.error("Uuden sijoittelun luonti haulle {} epäonnistui", hakuOid);
             failureCallback.accept(new Exception());
@@ -71,10 +53,16 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
         }
 
         LOGGER.info("(Haku: {}) Sijoittelu on käynnistynyt id:llä {}. Pollataan kunnes se on päättynyt.", hakuOid, sijoitteluId);
-
         String pollingUrl = getUrl("sijoittelu-service.sijoittele.ajontila", sijoitteluId);
-
         while (!done.get()) {
+            try {
+                TimeUnit.SECONDS.sleep(secondsUntilNextPoll);
+            } catch (Exception e) {
+                throw new RuntimeException();
+            }
+            if (secondsUntilNextPoll < 30) {
+                secondsUntilNextPoll += 3;
+            }
             try {
                 status = getWebClient()
                         .path(pollingUrl)
@@ -99,15 +87,6 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
                 LOGGER.info("Sijoittelussa {} haulle {} tapahtui virhe", sijoitteluId, hakuOid, e);
                 failureCallback.accept(e);
                 return;
-            }
-
-            try {
-                TimeUnit.SECONDS.sleep(secondsUntilNextPoll);
-            } catch (Exception e) {
-                throw new RuntimeException();
-            }
-            if (secondsUntilNextPoll < 30) {
-                secondsUntilNextPoll += 3;
             }
         }
 
