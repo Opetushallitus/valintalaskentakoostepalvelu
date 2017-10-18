@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -13,17 +15,16 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.servlet.http.Cookie;
 
 /**
  * TODO maybe move to java-cas or some other suitable place on a sunnier day.
  */
 public class AuthorizationUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(AuthorizationUtil.class);
+
     public static AuditSession createAuditSession(HttpServletRequest httpServletRequestJaxRS) {
         return createAuditSession(false, httpServletRequestJaxRS);
     }
@@ -50,11 +51,28 @@ public class AuthorizationUtil {
         session.setSessionId(httpServletRequest.getSession().getId());
         session.setUid(KoosteAudit.uid().orElse("Unknown user"));
         session.setPersonOid(KoosteAudit.username());
-        session.setInetAddress(Optional.ofNullable(httpServletRequest.getHeader("X-Forwarded-For")).orElse(httpServletRequest.getRemoteAddr()));
+        session.setInetAddress(resolveClientIpAddress(httpServletRequest));
         session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
         session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory, httpServletRequestJaxRS));
         session.setRoles(getRoles());
         return session;
+    }
+
+    private static String resolveClientIpAddress(HttpServletRequest httpServletRequest) {
+        String xRealIp = httpServletRequest.getHeader("X-Real-IP");
+        if (StringUtils.isNotBlank(xRealIp)) {
+            return xRealIp;
+        }
+        String xForwardedFor = httpServletRequest.getHeader("X-Forwarded-For");
+        if (StringUtils.isNotBlank(xForwardedFor)) {
+            if (xForwardedFor.contains(",")) {
+                LOG.error("Ei löytynyt X-Real-IP -headeria, mutta X-Forwarded-For-headerissa on useampi arvo: " + xForwardedFor +
+                    " . Tästä voi aiheutua ongelmia.");
+            }
+            return xForwardedFor;
+        }
+        LOG.warn("X-Real-IP or X-Forwarded-For was not set. Are we not running behind a load balancer?");
+        return httpServletRequest.getRemoteAddr();
     }
 
     private static Optional<String> readIfUnmodifiedSince(boolean isUnmodifiedSinceMandatory, HttpServletRequest httpServletRequestJaxRS) {
