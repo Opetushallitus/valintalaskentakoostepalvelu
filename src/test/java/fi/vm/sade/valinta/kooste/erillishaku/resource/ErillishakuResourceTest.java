@@ -145,7 +145,7 @@ public class ErillishakuResourceTest {
                 MockData.etunimi,
                 MockData.sukunimi,
                 MockData.hetu,
-                "01.01.1901",
+                "1901-01-01",
                 henkiloOid,
                 HenkiloTyyppi.OPPIJA,
                 "SV",

@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT;
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT_JSON;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHenkiloOidilla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuSyntymaAjalla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
@@ -184,7 +185,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(erillishakuRivi.getSukunimi(), henkilo.sukunimi);
             assertEquals(erillishakuRivi.getHenkilotunnus(), henkilo.hetu);
             LocalDate erillishakuSyntymaAika = LocalDate.parse(erillishakuRivi.getSyntymaAika(), SYNTYMAAIKAFORMAT);
-            LocalDate henkiloSyntymaAika = LocalDate.parse(henkilo.syntymaaika, SYNTYMAAIKAFORMAT);
+            LocalDate henkiloSyntymaAika = LocalDate.parse(henkilo.syntymaaika, SYNTYMAAIKAFORMAT_JSON);
             assertEquals(erillishakuSyntymaAika, henkiloSyntymaAika);
             assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
 

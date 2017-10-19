@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
@@ -20,7 +19,6 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Audit
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
@@ -42,7 +40,7 @@ import static com.codepoetics.protonpack.StreamUtils.zip;
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
 import static java.util.Optional.ofNullable;
 import static rx.schedulers.Schedulers.newThread;
@@ -220,8 +218,8 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                         .get();
                 LOG.info("Luotiin henkilot=" + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
             } catch (Exception e) {
-                LOG.error(POIKKEUS_HENKILOPALVELUN_VIRHE, e);
-                prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE));
+                LOG.error(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE, e);
+                prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE));
                 throw e;
             }
             LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
