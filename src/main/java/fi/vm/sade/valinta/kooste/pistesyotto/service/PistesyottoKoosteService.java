@@ -75,7 +75,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v)));
             Observable<Map<String, Oppija>> oppijaByPersonOID = suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
                     .map(os -> os.stream().collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o)));
-            return Observable.zip(
+            return Observable.combineLatest(
                     valintapisteet,
                     valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
                     osallistuminenByHakemus,
