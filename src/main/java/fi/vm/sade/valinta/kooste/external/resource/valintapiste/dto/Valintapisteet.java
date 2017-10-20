@@ -55,9 +55,9 @@ public class Valintapisteet {
 
     public static ApplicationAdditionalDataDTO toAdditionalData(Valintapisteet v) {
         Map<String, String> immutableAdditionalData = v.getPisteet().stream().flatMap(p ->
-                Stream.of(
-                        Pair.of(p.getTunniste(), p.getArvo()),
-                        Pair.of(withOsallistuminenSuffix(p.getTunniste()), p.getOsallistuminen().toString())
+                Stream.concat(
+                        Optional.ofNullable(p.getArvo()).map(a -> Stream.of(Pair.of(p.getTunniste(), a))).orElse(Stream.empty()),
+                        Stream.of(Pair.of(withOsallistuminenSuffix(p.getTunniste()), p.getOsallistuminen().toString()))
                 )
         ).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
