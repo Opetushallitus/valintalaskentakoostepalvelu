@@ -247,23 +247,23 @@ public class LaskentaActorFactory {
             long i = System.currentTimeMillis();
             o.subscribe(resurssiOK(i, r, uuid, hakukohdeOid), resurssiException(i, r, uuid, hakukohdeOid));
         };
-        Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe());
+        Observable<List<ValintaperusteetDTO>> valintaperusteet = wrapAsRunOnlyOnceObservable(valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()));
         monitorResource.accept("valintaperusteetAsyncResource.haeValintaperusteet", valintaperusteet);
-        Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid);
+        Observable<List<Hakemus>> hakemukset = wrapAsRunOnlyOnceObservable(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid));
         if(retry) {
             hakemukset = hakemukset.retryWhen(createRetryer());
         }
         monitorResource.accept("applicationAsyncResource.getApplicationsByOid", hakemukset);
-        Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid);
+        Observable<List<Oppija>> oppijat = wrapAsRunOnlyOnceObservable(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid));
         if(retry) {
             oppijat = oppijat.retryWhen(createRetryer());
         }
         monitorResource.accept("suoritusrekisteriAsyncResource.getOppijatByHakukohde", oppijat);
-        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid);
+        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = wrapAsRunOnlyOnceObservable(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
         monitorResource.accept("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes", hakukohdeRyhmasForHakukohdes);
-        Observable<PisteetWithLastModified> valintapisteetForHakukohdes = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
+        Observable<PisteetWithLastModified> valintapisteetForHakukohdes = wrapAsRunOnlyOnceObservable(valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession));
         monitorResource.accept("valintapisteAsyncResource.getValintapisteet", valintapisteetForHakukohdes);
-        Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid) : just(emptyList());
+        Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? wrapAsRunOnlyOnceObservable(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : just(emptyList());
         if(withHakijaRyhmat) {
             monitorResource.accept("valintaperusteetAsyncResource.haeHakijaryhmat", hakijaryhmat);
         }
