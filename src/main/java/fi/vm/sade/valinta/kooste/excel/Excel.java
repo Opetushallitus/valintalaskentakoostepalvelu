@@ -6,6 +6,7 @@ import static org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import fi.vm.sade.valinta.kooste.util.excel.SafeCellStyle;
 import org.apache.poi.POIXMLException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -105,26 +106,26 @@ public class Excel {
         XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
 
         XSSFDataFormat fmt = workbook.createDataFormat();
-        CellStyle textStyle = workbook.createCellStyle();
+        CellStyle textStyle = SafeCellStyle.create(workbook);
         textStyle.setDataFormat(fmt.getFormat("@"));
         textStyle.setAlignment(LEFT);
         for (int i = 0; i < 22; ++i) {
             sheet.setDefaultColumnStyle(i, textStyle);
         }
-        XSSFCellStyle hiddenStyle = workbook.createCellStyle();
+        XSSFCellStyle hiddenStyle = SafeCellStyle.create(workbook);
         hiddenStyle.setHidden(true);
 
-        XSSFCellStyle alignRightStyle = workbook.createCellStyle();
+        XSSFCellStyle alignRightStyle = SafeCellStyle.create(workbook);
         alignRightStyle.setDataFormat(fmt.getFormat("@"));
-        XSSFCellStyle alignCenterStyle = workbook.createCellStyle();
+        XSSFCellStyle alignCenterStyle = SafeCellStyle.create(workbook);
         alignCenterStyle.setDataFormat(fmt.getFormat("@"));
         //
         alignCenterStyle.setAlignment(CENTER);
-        XSSFCellStyle lockedStyle = workbook.createCellStyle();
+        XSSFCellStyle lockedStyle = SafeCellStyle.create(workbook);
         lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
         lockedStyle.setFillPattern(SOLID_FOREGROUND);
         lockedStyle.setDataFormat(fmt.getFormat("@"));
-        XSSFCellStyle editableStyle = workbook.createCellStyle();
+        XSSFCellStyle editableStyle = SafeCellStyle.create(workbook);
         editableStyle.setDataFormat(fmt.getFormat("@"));
         editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)));
         editableStyle.setFillPattern(SOLID_FOREGROUND);

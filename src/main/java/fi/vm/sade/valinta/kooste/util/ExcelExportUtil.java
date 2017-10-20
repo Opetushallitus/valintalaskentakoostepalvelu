@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.util;
 import static org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER;
 
 import fi.vm.sade.valinta.kooste.util.excel.Highlight;
+import fi.vm.sade.valinta.kooste.util.excel.SafeCellStyle;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
@@ -35,10 +36,10 @@ public class ExcelExportUtil {
     public static byte[] exportGridSheetsAsXlsBytes(Map<String, Object[][]> grids) {
         assert (grids != null);
         HSSFWorkbook wb = new HSSFWorkbook();
-        CellStyle alignCenterStyle = wb.createCellStyle();
+        CellStyle alignCenterStyle = SafeCellStyle.create(wb);
         alignCenterStyle.setAlignment(CENTER);
-        HSSFCellStyle highlight = wb.createCellStyle();
-        HSSFCellStyle spanhighlight = wb.createCellStyle();
+        HSSFCellStyle highlight = SafeCellStyle.create(wb);
+        HSSFCellStyle spanhighlight = SafeCellStyle.create(wb);
         spanhighlight.setAlignment(CENTER);
         for (Entry<String, Object[][]> sheetAndGrid : grids.entrySet()) {
             Sheet sheet = wb.createSheet(sheetAndGrid.getKey());
@@ -109,10 +110,10 @@ public class ExcelExportUtil {
     public static byte[] exportGridAsXlsBytes(Object[][] grid) {
         assert (grid != null);
         HSSFWorkbook wb = new HSSFWorkbook();
-        CellStyle alignCenterStyle = wb.createCellStyle();
+        CellStyle alignCenterStyle = SafeCellStyle.create(wb);
         alignCenterStyle.setAlignment(CENTER);
-        HSSFCellStyle highlight = wb.createCellStyle();
-        HSSFCellStyle spanhighlight = wb.createCellStyle();
+        HSSFCellStyle highlight = SafeCellStyle.create(wb);
+        HSSFCellStyle spanhighlight = SafeCellStyle.create(wb);
         spanhighlight.setAlignment(CENTER);
         Sheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
         exportGridToSheet(grid, sheet, alignCenterStyle, spanhighlight, highlight);
