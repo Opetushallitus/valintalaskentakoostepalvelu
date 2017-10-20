@@ -1,6 +1,21 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import java.awt.Color;
+import static org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER;
+
+import fi.vm.sade.valinta.kooste.util.excel.Highlight;
+import fi.vm.sade.valinta.kooste.util.excel.Span;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,25 +23,6 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.FastDateFormat;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-
-import fi.vm.sade.valinta.kooste.util.excel.Highlight;
-import fi.vm.sade.valinta.kooste.util.excel.Span;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *         Muuntaa Object[][]:n xls-tiedostoksi!
@@ -40,10 +36,10 @@ public class ExcelExportUtil {
         assert (grids != null);
         HSSFWorkbook wb = new HSSFWorkbook();
         CellStyle alignCenterStyle = wb.createCellStyle();
-        alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        alignCenterStyle.setAlignment(CENTER);
         HSSFCellStyle highlight = wb.createCellStyle();
         HSSFCellStyle spanhighlight = wb.createCellStyle();
-        spanhighlight.setAlignment(CellStyle.ALIGN_CENTER);
+        spanhighlight.setAlignment(CENTER);
         for (Entry<String, Object[][]> sheetAndGrid : grids.entrySet()) {
             Sheet sheet = wb.createSheet(sheetAndGrid.getKey());
             exportGridToSheet(sheetAndGrid.getValue(), sheet, alignCenterStyle, spanhighlight, highlight);
@@ -114,10 +110,10 @@ public class ExcelExportUtil {
         assert (grid != null);
         HSSFWorkbook wb = new HSSFWorkbook();
         CellStyle alignCenterStyle = wb.createCellStyle();
-        alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        alignCenterStyle.setAlignment(CENTER);
         HSSFCellStyle highlight = wb.createCellStyle();
         HSSFCellStyle spanhighlight = wb.createCellStyle();
-        spanhighlight.setAlignment(CellStyle.ALIGN_CENTER);
+        spanhighlight.setAlignment(CENTER);
         Sheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
         exportGridToSheet(grid, sheet, alignCenterStyle, spanhighlight, highlight);
 

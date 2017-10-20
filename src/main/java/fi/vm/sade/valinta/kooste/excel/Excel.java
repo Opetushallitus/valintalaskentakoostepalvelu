@@ -1,13 +1,23 @@
 package fi.vm.sade.valinta.kooste.excel;
 
+import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
+import static org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER;
+import static org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import org.apache.poi.POIXMLException;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +107,7 @@ public class Excel {
         XSSFDataFormat fmt = workbook.createDataFormat();
         CellStyle textStyle = workbook.createCellStyle();
         textStyle.setDataFormat(fmt.getFormat("@"));
-        textStyle.setAlignment(CellStyle.ALIGN_LEFT);
+        textStyle.setAlignment(LEFT);
         for (int i = 0; i < 22; ++i) {
             sheet.setDefaultColumnStyle(i, textStyle);
         }
@@ -109,16 +119,16 @@ public class Excel {
         XSSFCellStyle alignCenterStyle = workbook.createCellStyle();
         alignCenterStyle.setDataFormat(fmt.getFormat("@"));
         //
-        alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        alignCenterStyle.setAlignment(CENTER);
         XSSFCellStyle lockedStyle = workbook.createCellStyle();
         lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
-        lockedStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        lockedStyle.setFillPattern(SOLID_FOREGROUND);
         lockedStyle.setDataFormat(fmt.getFormat("@"));
         XSSFCellStyle editableStyle = workbook.createCellStyle();
         editableStyle.setDataFormat(fmt.getFormat("@"));
         editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)));
-        editableStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-        editableStyle.setAlignment(CellStyle.ALIGN_LEFT);
+        editableStyle.setFillPattern(SOLID_FOREGROUND);
+        editableStyle.setAlignment(LEFT);
         editableStyle.setLocked(false);
         List<Integer> leveysPreferenssit = Lists.newArrayList();
         int rowIndex = 0;

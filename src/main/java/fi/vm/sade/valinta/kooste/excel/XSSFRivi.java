@@ -1,12 +1,12 @@
 package fi.vm.sade.valinta.kooste.excel;
 
-import java.util.List;
+import static org.apache.poi.ss.usermodel.Row.MissingCellPolicy.CREATE_NULL_AS_BLANK;
+import com.google.common.collect.Lists;
 
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 /**
  *         XSSFRow -> Rivi
@@ -20,7 +20,7 @@ public class XSSFRivi {
         List<Solu> solut = Lists.newArrayList();
         int lastCellIndex = row.getLastCellNum();
         for (int i = 0; i < lastCellIndex; ++i) {
-            XSSFCell cell = row.getCell(i, Row.CREATE_NULL_AS_BLANK);
+            XSSFCell cell = row.getCell(i, CREATE_NULL_AS_BLANK);
             solut.add(XSSFSolu.asSolu(cell));
         }
         return solut;
