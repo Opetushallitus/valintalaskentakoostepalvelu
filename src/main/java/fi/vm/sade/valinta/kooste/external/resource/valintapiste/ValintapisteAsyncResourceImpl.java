@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapiste
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
 import org.apache.commons.io.IOUtils;
+import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -41,15 +42,29 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
             throw new RuntimeException(e);
         }
     }
-
+    private String getUrl(Response response) {
+        try {
+            ResponseImpl r = (ResponseImpl) response;
+            Object url = r.getOutMessage().get("org.apache.cxf.request.uri");
+            return url.toString();
+        } catch (Exception e) {
+            return "null";
+        }
+    }
     private Observable<PisteetWithLastModified> handleResponse(Response response) {
         if(response.getStatus() != 200) {
             return Observable.error(new RuntimeException("Valintapisteitä ei saatu luettua palvelusta!"));
         } else {
             try {
-                List<Valintapisteet> vp = gson().fromJson(body(response), new GenericType<List<Valintapisteet>>() {
+                final String entity = body(response);
+                List<Valintapisteet> vp = gson().fromJson(entity, new GenericType<List<Valintapisteet>>() {
                 }.getType());
-                return Observable.just(new PisteetWithLastModified(Optional.ofNullable(response.getHeaderString(LAST_MODIFIED)), vp));
+                if(vp == null) {
+                    String url = getUrl(response);
+                    return Observable.error(new RuntimeException(String.format("Null response for url %s", url)));
+                } else {
+                    return Observable.just(new PisteetWithLastModified(Optional.ofNullable(response.getHeaderString(LAST_MODIFIED)), vp));
+                }
             } catch (Exception e) {
                 return Observable.error(e);
             }
