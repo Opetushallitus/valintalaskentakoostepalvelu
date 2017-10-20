@@ -32,7 +32,7 @@ public class HenkiloCreateDTO implements Serializable {
         this.sukunimi = sukunimi;
         this.hetu = hetu;
         this.syntymaaika = syntymaaika;
-        this.oidHenkilo = oidHenkilo;
+        this.oidHenkilo = oidHenkilo.isEmpty() ? null : oidHenkilo;
         this.henkiloTyyppi = henkiloTyyppi;
         this.asiointiKieli = createKielisyys(asiointiKieli);
         this.kansalaisuus = createKansalaisuusSet(kansalaisuus);
@@ -42,8 +42,7 @@ public class HenkiloCreateDTO implements Serializable {
         if (null == StringUtils.trimToNull(kielikoodi)) {
             return null;
         } else {
-            KielisyysDto kielisyys = new KielisyysDto(kielikoodi.toLowerCase());
-            return kielisyys;
+            return new KielisyysDto(kielikoodi.toLowerCase());
         }
     }
 
@@ -65,6 +64,19 @@ public class HenkiloCreateDTO implements Serializable {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        String overrideHetu = hetu == null ? null : "'***HETU***'";
+        return "HenkiloCreateDTO{" +
+                "etunimet='" + etunimet + '\'' +
+                ", kutsumanimi='" + kutsumanimi + '\'' +
+                ", sukunimi='" + sukunimi + '\'' +
+                ", hetu=" + overrideHetu +
+                ", syntymaaika='" + syntymaaika + '\'' +
+                ", oidHenkilo='" + oidHenkilo + '\'' +
+                ", henkiloTyyppi=" + henkiloTyyppi +
+                ", sukupuoli='" + sukupuoli + '\'' +
+                ", aidinkieli=" + aidinkieli +
+                ", asiointiKieli=" + asiointiKieli +
+                ", kansalaisuus=" + kansalaisuus +
+                '}';
     }
 }

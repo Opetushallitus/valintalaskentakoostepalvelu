@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
@@ -22,6 +23,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valin
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
 
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -210,15 +215,18 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         if(!lisattavatTaiKeskeneraiset.isEmpty()) {
             LOG.info("Haetaan/luodaan henkilöt");
             final List<HenkiloPerustietoDto> henkilot;
+            List<HenkiloCreateDTO> henkiloCreateDTOS = lisattavatTaiKeskeneraiset.stream()
+                    .map(rivi -> rivi.toHenkiloCreateDTO(convertKansalaisuusKoodi(rivi.getKansalaisuus())))
+                    .collect(Collectors.toList());
             try {
-                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(
-                        lisattavatTaiKeskeneraiset.stream()
-                                .map(rivi -> rivi.toHenkiloCreateDTO(convertKansalaisuusKoodi(rivi.getKansalaisuus())))
-                                .collect(Collectors.toList()))
-                        .get();
+                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(henkiloCreateDTOS).get();
                 LOG.info("Luotiin henkilot=" + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
             } catch (Exception e) {
-                LOG.error(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE, e);
+                if(e.getCause() != null && e.getCause() instanceof WebApplicationException){
+                    LOG.error(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE + ". lisattavatTaiKeskeneraiset: {}. Response {}", henkiloCreateDTOS, getResponseAsString(e), e);
+                } else {
+                    LOG.error(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE + ". lisattavatTaiKeskeneraiset: {}", henkiloCreateDTOS, e);
+                }
                 prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE));
                 throw e;
             }
@@ -226,6 +234,16 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             return kasitteleHakemukset(haku, henkilot, lisattavatTaiKeskeneraiset, saveApplications, prosessi);
         }
         return lisattavatTaiKeskeneraiset;
+    }
+
+    private String getResponseAsString(Exception e) {
+        Response response = ((WebApplicationException) e.getCause()).getResponse();
+        if (response.getEntity() != null && response.getEntity() instanceof InputStream) {
+            return new Scanner((InputStream) response.getEntity()).useDelimiter("\\A").next();
+        } else if(response.getEntity() != null){
+            return response.getEntity().toString();
+        }
+        return "null";
     }
 
     private Observable<List<Poikkeus>> vastaanotonJaValinnantuloksenTallennus(final AuditSession auditSession, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat) {
