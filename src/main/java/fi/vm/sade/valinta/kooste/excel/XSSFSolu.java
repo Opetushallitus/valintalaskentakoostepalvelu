@@ -1,11 +1,9 @@
 package fi.vm.sade.valinta.kooste.excel;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *         XSSFCell -> Solu
@@ -16,7 +14,7 @@ public class XSSFSolu {
     }
 
     public static Solu asSolu(XSSFCell cell) {
-        if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+        if (CellType.NUMERIC.equals(cell.getCellTypeEnum())) {
             if (DateUtil.isCellDateFormatted(cell)) {
                 return new Paivamaara(cell.getDateCellValue());
             } else {
@@ -24,7 +22,7 @@ public class XSSFSolu {
             }
         } else {
             String rawValue;
-            if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+            if (CellType.STRING.equals(cell.getCellTypeEnum())) {
                 rawValue = cell.getStringCellValue();
             } else {
                 rawValue = StringUtils.EMPTY;

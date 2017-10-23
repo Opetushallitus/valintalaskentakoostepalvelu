@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.excel;
 
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
+import static org.apache.poi.ss.usermodel.CellType.STRING;
 import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 import static org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER;
 import static org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT;
@@ -8,7 +10,6 @@ import com.google.common.collect.Maps;
 
 import fi.vm.sade.valinta.kooste.util.excel.SafeCellStyle;
 import org.apache.poi.POIXMLException;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -144,11 +145,11 @@ public class Excel {
                 for (Solu solu : rivi.getSolut()) {
                     XSSFCell cell = null;
                     if (solu.isTeksti()) {
-                        cell = row.createCell(cellNum, Cell.CELL_TYPE_STRING);
+                        cell = row.createCell(cellNum, STRING);
                         cell.setCellValue(solu.toTeksti().getTeksti());
 
                     } else if (solu.isNumero()) {
-                        cell = row.createCell(cellNum, Cell.CELL_TYPE_NUMERIC);
+                        cell = row.createCell(cellNum, NUMERIC);
                         Numero numero = solu.toNumero();
                         if (numero.hasArvovali()) {
                             ArvovaliJoukko joukko;
@@ -171,7 +172,7 @@ public class Excel {
                         }
 
                     } else if (solu.isMonivalinta()) {
-                        cell = row.createCell(cellNum, Cell.CELL_TYPE_STRING);
+                        cell = row.createCell(cellNum, STRING);
                         cell.setCellValue(solu.toTeksti().getTeksti());
 
                         Monivalinta monivalinta = solu.toMonivalinta();
