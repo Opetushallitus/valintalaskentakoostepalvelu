@@ -4,12 +4,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HSSFSolu {
-    private static final Logger LOG = LoggerFactory.getLogger(HSSFSolu.class);
-
     private HSSFSolu() {
     }
 
