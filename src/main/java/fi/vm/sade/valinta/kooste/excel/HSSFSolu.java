@@ -14,7 +14,6 @@ public class HSSFSolu {
             if (DateUtil.isCellDateFormatted(cell)) {
                 return new Paivamaara(cell.getDateCellValue());
             } else {
-                // LOG.error("{}", cell.getNumericCellValue());
                 return new Numero(cell.getNumericCellValue());
             }
         } else {
@@ -25,7 +24,6 @@ public class HSSFSolu {
                 rawValue = StringUtils.EMPTY;
             }
 
-            // String rawValue = StringUtils.trimToEmpty(cell.getRawValue());
             try {
                 String maybeNumber = rawValue.replace(",", ".");
                 double d = Double.parseDouble(maybeNumber);
