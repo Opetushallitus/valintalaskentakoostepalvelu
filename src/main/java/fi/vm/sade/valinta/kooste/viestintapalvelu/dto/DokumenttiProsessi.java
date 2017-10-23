@@ -13,11 +13,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tyo;
 
-/**
- *
- * @Deprecated ei enaa tarpeellinen kun SSE eventit otetaan kayttoon
- */
-@Deprecated
 public class DokumenttiProsessi extends Prosessi {
     public static final String DOKUMENTTI_PROSESSI = "dokumenttiProsessi";
 
