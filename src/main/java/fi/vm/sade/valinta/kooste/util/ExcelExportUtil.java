@@ -107,7 +107,7 @@ public class ExcelExportUtil {
         }
     }
 
-    public static byte[] exportGridAsXlsBytes(Object[][] grid) {
+    private static byte[] exportGridAsXlsBytes(Object[][] grid) {
         assert (grid != null);
         HSSFWorkbook wb = new HSSFWorkbook();
         CellStyle alignCenterStyle = SafeCellStyle.create(wb);
