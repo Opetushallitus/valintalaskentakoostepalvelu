@@ -198,14 +198,6 @@ public class Converter {
             }
         }
         try {
-            if (hakemus.getAdditionalInfo() != null) {
-                for (Map.Entry<String, String> e : hakemus.getAdditionalInfo().entrySet()) {
-                    AvainArvoDTO aa = new AvainArvoDTO();
-                    aa.setAvain(e.getKey());
-                    aa.setArvo(e.getValue());
-                    hakemusTyyppi.getAvaimet().add(aa);
-                }
-            }
             if(valintapisteet != null) {
                 Valintapisteet.toAdditionalData(valintapisteet).getAdditionalData().forEach((k, v) -> {
                     AvainArvoDTO aa = new AvainArvoDTO();
