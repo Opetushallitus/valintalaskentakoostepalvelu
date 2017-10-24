@@ -8,12 +8,10 @@ import static org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import fi.vm.sade.valinta.kooste.util.excel.SafeCellStyle;
+import fi.vm.sade.javautils.poi.OphCellStyles.OphXssfCellStyles;
 import org.apache.poi.POIXMLException;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
@@ -107,31 +105,38 @@ public class Excel {
         XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
 
         XSSFDataFormat fmt = workbook.createDataFormat();
-        CellStyle textStyle = SafeCellStyle.create(workbook);
-        textStyle.setDataFormat(fmt.getFormat("@"));
-        textStyle.setAlignment(LEFT);
+        OphXssfCellStyles defaultStyles = new OphXssfCellStyles(workbook);
+        defaultStyles.visit(s -> {
+            s.setDataFormat(fmt.getFormat("@"));
+            s.setAlignment(LEFT);
+        });
         for (int i = 0; i < 22; ++i) {
-            sheet.setDefaultColumnStyle(i, textStyle);
+            sheet.setDefaultColumnStyle(i, defaultStyles.getUnsafeStyle());
         }
-        XSSFCellStyle hiddenStyle = SafeCellStyle.create(workbook);
-        hiddenStyle.setHidden(true);
+        OphXssfCellStyles hiddenStyles = new OphXssfCellStyles(workbook);
+        hiddenStyles.visit(s -> s.setHidden(true));
 
-        XSSFCellStyle alignRightStyle = SafeCellStyle.create(workbook);
-        alignRightStyle.setDataFormat(fmt.getFormat("@"));
-        XSSFCellStyle alignCenterStyle = SafeCellStyle.create(workbook);
-        alignCenterStyle.setDataFormat(fmt.getFormat("@"));
-        //
-        alignCenterStyle.setAlignment(CENTER);
-        XSSFCellStyle lockedStyle = SafeCellStyle.create(workbook);
-        lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
-        lockedStyle.setFillPattern(SOLID_FOREGROUND);
-        lockedStyle.setDataFormat(fmt.getFormat("@"));
-        XSSFCellStyle editableStyle = SafeCellStyle.create(workbook);
-        editableStyle.setDataFormat(fmt.getFormat("@"));
-        editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)));
-        editableStyle.setFillPattern(SOLID_FOREGROUND);
-        editableStyle.setAlignment(LEFT);
-        editableStyle.setLocked(false);
+        OphXssfCellStyles alignRightStyles = new OphXssfCellStyles(workbook);
+        alignRightStyles.visit(alignRightStyle -> alignRightStyle.setDataFormat(fmt.getFormat("@")));
+        OphXssfCellStyles alignCenterStyles = new OphXssfCellStyles(workbook);
+        alignCenterStyles.visit(alignCenterStyle -> {
+            alignCenterStyle.setDataFormat(fmt.getFormat("@"));
+            alignCenterStyle.setAlignment(CENTER);
+        });
+        OphXssfCellStyles lockedStyles = new OphXssfCellStyles(workbook);
+        lockedStyles.visit(lockedStyle -> {
+            lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
+            lockedStyle.setFillPattern(SOLID_FOREGROUND);
+            lockedStyle.setDataFormat(fmt.getFormat("@"));
+        });
+        OphXssfCellStyles editableStyles = new OphXssfCellStyles(workbook);
+        editableStyles.visit(editableStyle -> {
+            editableStyle.setDataFormat(fmt.getFormat("@"));
+            editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)));
+            editableStyle.setFillPattern(SOLID_FOREGROUND);
+            editableStyle.setAlignment(LEFT);
+            editableStyle.setLocked(false);
+        });
         List<Integer> leveysPreferenssit = Lists.newArrayList();
         int rowIndex = 0;
         int maxCellNum = 0;
@@ -147,7 +152,7 @@ public class Excel {
                     if (solu.isTeksti()) {
                         cell = row.createCell(cellNum, STRING);
                         cell.setCellValue(solu.toTeksti().getTeksti());
-
+                        defaultStyles.apply(cell);
                     } else if (solu.isNumero()) {
                         cell = row.createCell(cellNum, NUMERIC);
                         Numero numero = solu.toNumero();
@@ -167,13 +172,14 @@ public class Excel {
                             joukko.addAddress(rowIndex, cellNum);
                         }
                         if (!numero.isTyhja()) {
-                            cell.setCellStyle(alignRightStyle);
                             cell.setCellValue(numero.getNumero().doubleValue());
+                            alignRightStyles.apply(cell);
                         }
 
                     } else if (solu.isMonivalinta()) {
                         cell = row.createCell(cellNum, STRING);
                         cell.setCellValue(solu.toTeksti().getTeksti());
+                        defaultStyles.apply(cell);
 
                         Monivalinta monivalinta = solu.toMonivalinta();
                         MonivalintaJoukko joukko;
@@ -186,15 +192,15 @@ public class Excel {
                     }
                     if (cell != null) {
                         if (solu.isKeskitettyTasaus()) {
-                            cell.setCellStyle(alignCenterStyle);
+                            alignCenterStyles.apply(cell);
                         } else if (solu.isTasausOikealle()) {
-                            cell.setCellStyle(alignRightStyle);
+                            alignRightStyles.apply(cell);
                         }
                     }
                     if (cell != null && solu.isLukittu()) {
-                        cell.setCellStyle(lockedStyle); // lockedStyle
+                        lockedStyles.apply(cell);
                     } else if (cell != null && solu.isMuokattava()) {
-                        cell.setCellStyle(editableStyle); // lockedStyle
+                        editableStyles.apply(cell);
                     }
                     asetaPreferenssi(cellNum, solu.preferoituLeveys(), leveysPreferenssit);
                     if (solu.ulottuvuus() != 1) {
@@ -228,7 +234,7 @@ public class Excel {
                 XSSFRow r = sheet.getRow(sarake);
                 if (r != null) {
                     r.setZeroHeight(true);
-                    r.setRowStyle(hiddenStyle);
+                    hiddenStyles.apply(r);
                 }
             } catch (Exception e) {
                 LOG.error("Excel throws", e);

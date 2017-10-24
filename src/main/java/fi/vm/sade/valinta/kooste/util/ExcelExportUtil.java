@@ -2,17 +2,15 @@ package fi.vm.sade.valinta.kooste.util;
 
 import static org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER;
 
+import fi.vm.sade.javautils.poi.OphCellStyles.OphHssfCellStyles;
 import fi.vm.sade.valinta.kooste.util.excel.Highlight;
-import fi.vm.sade.valinta.kooste.util.excel.SafeCellStyle;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +34,14 @@ public class ExcelExportUtil {
     public static byte[] exportGridSheetsAsXlsBytes(Map<String, Object[][]> grids) {
         assert (grids != null);
         HSSFWorkbook wb = new HSSFWorkbook();
-        CellStyle alignCenterStyle = SafeCellStyle.create(wb);
-        alignCenterStyle.setAlignment(CENTER);
-        HSSFCellStyle highlight = SafeCellStyle.create(wb);
-        HSSFCellStyle spanhighlight = SafeCellStyle.create(wb);
-        spanhighlight.setAlignment(CENTER);
+        OphHssfCellStyles alignCenterStyles = new OphHssfCellStyles(wb);
+        alignCenterStyles.visit(alignCenterStyle -> alignCenterStyle.setAlignment(CENTER));
+        OphHssfCellStyles highlights = new OphHssfCellStyles(wb);
+        OphHssfCellStyles spanhighlights = new OphHssfCellStyles(wb);
+        spanhighlights.visit(spanhighlight -> spanhighlight.setAlignment(CENTER));
         for (Entry<String, Object[][]> sheetAndGrid : grids.entrySet()) {
-            Sheet sheet = wb.createSheet(sheetAndGrid.getKey());
-            exportGridToSheet(sheetAndGrid.getValue(), sheet, alignCenterStyle, spanhighlight, highlight);
+            HSSFSheet sheet = wb.createSheet(sheetAndGrid.getKey());
+            exportGridToSheet(sheetAndGrid.getValue(), sheet, alignCenterStyles, spanhighlights, highlights);
         }
 
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
@@ -55,13 +53,13 @@ public class ExcelExportUtil {
         return bytesOut.toByteArray();
     }
 
-    private static void exportGridToSheet(Object[][] grid, Sheet sheet, CellStyle spanStyle, CellStyle highlightSpanStyle, CellStyle highlightStyle) {
+    private static void exportGridToSheet(Object[][] grid, HSSFSheet sheet, OphHssfCellStyles spanStyles, OphHssfCellStyles highlightSpanStyles, OphHssfCellStyles highlightStyles) {
         int numberOfcolumns = 0;
         // Create rows!
         short rowIndex = 0;
         for (Object[] dataRow : grid) {
             assert (dataRow != null);
-            Row excelRow = sheet.createRow(rowIndex);
+            HSSFRow excelRow = sheet.createRow(rowIndex);
             // Create columns!
             short cellIndex = 0;
             for (Object dataCell : dataRow) {
@@ -71,11 +69,12 @@ public class ExcelExportUtil {
                 if (dataCell instanceof Span) {
                     // Span over multiple columns
                     Span span = (Span) dataCell;
-                    Cell excelCell = excelRow.createCell(cellIndex);
+                    HSSFCell excelCell = excelRow.createCell(cellIndex);
+                    excelCell.setCellValue(span.getText());
                     if (span.isAlsoHighlight()) {
-                        excelCell.setCellStyle(highlightSpanStyle);
+                        highlightSpanStyles.apply(excelCell);
                     } else {
-                        excelCell.setCellStyle(spanStyle);
+                        spanStyles.apply(excelCell);
                     }
                     sheet.addMergedRegion(new CellRangeAddress(rowIndex, // first
                             // row
@@ -85,17 +84,16 @@ public class ExcelExportUtil {
                             cellIndex + span.getSpanColumns() - 1 // last column
                             // (0-based)
                     ));
-                    excelCell.setCellValue(span.getText());
                     cellIndex += span.getSpanColumns();
                 } else {
                     // Normal cell
                     numberOfcolumns = Math.max(numberOfcolumns, cellIndex);
-                    Cell excelCell = excelRow.createCell(cellIndex);
-                    if (dataCell instanceof Highlight) {
-                        excelCell.setCellStyle(highlightStyle);
-                    }
+                    HSSFCell excelCell = excelRow.createCell(cellIndex);
                     String value = dataCell.toString();
                     excelCell.setCellValue(value);
+                    if (dataCell instanceof Highlight) {
+                        highlightStyles.apply(excelCell);
+                    }
                     ++cellIndex;
                 }
             }
@@ -110,13 +108,13 @@ public class ExcelExportUtil {
     private static byte[] exportGridAsXlsBytes(Object[][] grid) {
         assert (grid != null);
         HSSFWorkbook wb = new HSSFWorkbook();
-        CellStyle alignCenterStyle = SafeCellStyle.create(wb);
-        alignCenterStyle.setAlignment(CENTER);
-        HSSFCellStyle highlight = SafeCellStyle.create(wb);
-        HSSFCellStyle spanhighlight = SafeCellStyle.create(wb);
-        spanhighlight.setAlignment(CENTER);
-        Sheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
-        exportGridToSheet(grid, sheet, alignCenterStyle, spanhighlight, highlight);
+        OphHssfCellStyles alignCenterStyles = new OphHssfCellStyles(wb);
+        alignCenterStyles.visit(alignCenterStyle -> alignCenterStyle.setAlignment(CENTER));
+        OphHssfCellStyles highlights = new OphHssfCellStyles(wb);
+        OphHssfCellStyles spanhighlights = new OphHssfCellStyles(wb);
+        spanhighlights.visit(spanhighlight -> spanhighlight.setAlignment(CENTER));
+        HSSFSheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
+        exportGridToSheet(grid, sheet, alignCenterStyles, spanhighlights, highlights);
 
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         try {
