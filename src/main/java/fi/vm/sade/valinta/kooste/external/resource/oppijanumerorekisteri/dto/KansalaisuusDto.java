@@ -7,6 +7,9 @@ public class KansalaisuusDto implements Serializable {
 
     private String kansalaisuusKoodi;
 
+    public KansalaisuusDto() {
+    }
+
     public KansalaisuusDto(String kansalaisuusKoodi) {
         this.kansalaisuusKoodi = kansalaisuusKoodi;
     }
