@@ -281,7 +281,7 @@ public class ErillishakuRivi {
     }
 
     public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
-        return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().name(), getEtunimi(), getSukunimi(),
+        return new HenkiloCreateDTO(getAidinkieli(), Sukupuoli.toHenkiloString(getSukupuoli()), getEtunimi(), getSukunimi(),
                 getHenkilotunnus(), formatSyntymaAikaAsString(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli(), kansalaisuus);
     }
 
