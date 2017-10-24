@@ -61,7 +61,7 @@ public class ErillishakuResource {
     public static final String POIKKEUS_TYHJA_DATAJOUKKO = "Syötteestä ei saatu poimittua yhtään hakijaa sijoitteluun tuotavaksi!";
     public static final String RIVIN_TUNNISTE_KAYTTOLIITTYMAAN = "Syöte"; // Datarivin tunniste käyttöliittymään
     public static final String POIKKEUS_VIALLINEN_DATAJOUKKO = "Syötteessä oli virheitä!";
-    public static final String POIKKEUS_HENKILOPALVELUN_VIRHE = "Henkilöpalvelukutsu epäonnistui!";
+    public static final String POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE = "Oppijanumerorekisterikutsu epäonnistui!";
     public static final String POIKKEUS_HAKEMUSPALVELUN_VIRHE = "Hakemuspalvelukutsu epäonnistui!";
     public static final String POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE = "Erillishakurivin hakeminen henkilön tiedoilla epäonnistui!";
     public static final String POIKKEUS_SIJOITTELUPALVELUN_VIRHE = "Sijoittelupalvelukutsu epäonnistui!";

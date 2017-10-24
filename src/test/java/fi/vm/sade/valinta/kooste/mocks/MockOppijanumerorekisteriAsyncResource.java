@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT;
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT_JSON;
 
 @Service
 public class MockOppijanumerorekisteriAsyncResource implements OppijanumerorekisteriAsyncResource {
@@ -56,7 +56,7 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
         henkiloPerustietoDto.setEtunimet(proto.etunimet);
         henkiloPerustietoDto.setHetu(proto.hetu);
         henkiloPerustietoDto.setOidHenkilo(MockData.hakijaOid);
-        henkiloPerustietoDto.setSyntymaaika(LocalDate.parse(proto.syntymaaika, SYNTYMAAIKAFORMAT));
+        henkiloPerustietoDto.setSyntymaaika(LocalDate.parse(proto.syntymaaika, SYNTYMAAIKAFORMAT_JSON));
         henkiloPerustietoDto.setSukupuoli(Sukupuoli.toSukupuoliString(proto.sukupuoli));
         return henkiloPerustietoDto;
     }

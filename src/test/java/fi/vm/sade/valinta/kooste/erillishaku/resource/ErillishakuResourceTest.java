@@ -141,11 +141,11 @@ public class ErillishakuResourceTest {
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO(
                 "SV",
-                "MIES",
+                "1",
                 MockData.etunimi,
                 MockData.sukunimi,
                 MockData.hetu,
-                "01.01.1901",
+                "1901-01-01",
                 henkiloOid,
                 HenkiloTyyppi.OPPIJA,
                 "SV",

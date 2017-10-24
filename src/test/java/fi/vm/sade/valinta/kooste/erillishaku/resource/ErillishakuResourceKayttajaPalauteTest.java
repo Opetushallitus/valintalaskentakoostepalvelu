@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.KORKEAKOULU;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO;
 import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.laillinenRivi;
@@ -124,7 +124,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
 
             assertThat(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
                     // Odotetaan hakemuspalvelun epäonnistumisesta johtuvaa palautetta!
-                    .poikkeukset, equalTo(asList(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE))));
+                    .poikkeukset, equalTo(asList(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE))));
         } finally {
             MockOppijanumerorekisteriAsyncResource.serviceIsAvailable.set(true);
         }

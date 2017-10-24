@@ -22,6 +22,7 @@ import static org.apache.commons.lang.StringUtils.*;
 public class ErillishakuRivi {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
     public final static DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    public final static DateTimeFormatter SYNTYMAAIKAFORMAT_JSON = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final String etunimi;
     private final String sukunimi;
@@ -280,7 +281,7 @@ public class ErillishakuRivi {
     }
 
     public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
-        return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().name(), getEtunimi(), getSukunimi(),
+        return new HenkiloCreateDTO(getAidinkieli(), Sukupuoli.toHenkiloString(getSukupuoli()), getEtunimi(), getSukunimi(),
                 getHenkilotunnus(), formatSyntymaAikaAsString(), getPersonOid(), HenkiloTyyppi.OPPIJA, getAsiointikieli(), kansalaisuus);
     }
 
@@ -309,7 +310,7 @@ public class ErillishakuRivi {
             }
 
             LocalDate localDate = LocalDate.parse(s, SYNTYMAAIKAFORMAT);
-            return localDate.format(SYNTYMAAIKAFORMAT);
+            return localDate.format(SYNTYMAAIKAFORMAT_JSON);
         } catch (Exception e) {
             LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", syntymaAika);
             return null;

@@ -110,7 +110,7 @@ public class ErillishaunTuontiHelper {
                 .filter(r -> r.getSukupuoli() != null && henkilo.getSukupuoli() != null)
                 .filter(r ->
                         HakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika())) &&
-                                r.getSukupuoli().toString().equals(henkilo.getSukupuoli())
+                                r.getSukupuoli().equals(Sukupuoli.toSukupuoliEnum(henkilo.getSukupuoli()))
                 ).findFirst();
         if (riviSyntymaajanJaSukupuolenMukaan.isPresent()) {
             return riviSyntymaajanJaSukupuolenMukaan.get();
