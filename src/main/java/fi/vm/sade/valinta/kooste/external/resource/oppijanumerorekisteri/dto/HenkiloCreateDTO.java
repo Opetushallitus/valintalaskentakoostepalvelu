@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto;
 
-import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 
@@ -26,7 +25,7 @@ public class HenkiloCreateDTO implements Serializable {
     public HenkiloCreateDTO(String aidinkieli, String sukupuoli, String etunimet, String sukunimi, String hetu, String syntymaaika, String oidHenkilo,
                             HenkiloTyyppi henkiloTyyppi, String asiointiKieli, String kansalaisuus) {
         this.aidinkieli = createKielisyys(aidinkieli);
-        this.sukupuoli = sukupuoli;
+        this.sukupuoli = sukupuoli.isEmpty() ? null : sukupuoli;
         this.etunimet = etunimet;
         this.kutsumanimi = etunimet;
         this.sukunimi = sukunimi;
