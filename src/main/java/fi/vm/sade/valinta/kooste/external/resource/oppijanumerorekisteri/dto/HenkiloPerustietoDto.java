@@ -1,6 +1,10 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.json.LocalDateDeserializer;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.json.LocalDateSerializer;
 
 import javax.validation.constraints.AssertTrue;
 import java.io.Serializable;
@@ -21,6 +25,8 @@ public class HenkiloPerustietoDto implements Serializable {
     private String etunimet;
     private String kutsumanimi;
     private String sukunimi;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate syntymaaika;
     private KielisyysDto aidinkieli;
     private KielisyysDto asiointiKieli;
