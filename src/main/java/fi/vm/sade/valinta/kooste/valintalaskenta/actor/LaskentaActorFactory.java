@@ -177,10 +177,6 @@ public class LaskentaActorFactory {
         };
     }
 
-    private <A, T> Observable<T> foo(A r) {//Function<A,Observable<T>> switchMap) {
-
-        return null;
-    }
     private <A, T> Func1<A, Observable<T>> timedSwitchMap(BiConsumer<Long, Optional<Throwable>> log, Function<A, Observable<T>> f) {//Function<A,Observable<T>> switchMap) {
         return (a) -> {
             long start = System.currentTimeMillis();
