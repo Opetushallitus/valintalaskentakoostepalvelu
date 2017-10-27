@@ -3,6 +3,9 @@ package fi.vm.sade.valinta.kooste.valintatapajono.service;
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
@@ -84,7 +87,8 @@ public class ValintatapajonoTuontiService {
                                             .forEach(
                                                     v -> {
                                                         v.getHakija().forEach(h -> {
-                                                            AUDIT.log(builder()
+                                                            AuditLog.log(ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.TEMPORARY, h.getOid(), h, null, null);
+                                                            /*AUDIT.log(builder()
                                                                     .id(username)
                                                                     .hakuOid(hakuOid)
                                                                     .hakemusOid(h.getHakemusOid())
@@ -93,7 +97,7 @@ public class ValintatapajonoTuontiService {
                                                                     .valintatapajonoOid(v.getOid())
                                                                     .add("jonosija", h.getJonosija())
                                                                     .setOperaatio(ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL)
-                                                                    .build());
+                                                                    .build());*/
                                                         });
                                                     }
                                             );

@@ -1,11 +1,22 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
+import static org.apache.commons.collections.ListUtils.union;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -316,7 +327,8 @@ public abstract class AbstractPistesyottoKoosteService {
                     "Virhe hakemuksen %s tulosten tallentamisessa Suoritusrekisteriin ", hakemusOid), t)));
 
             return sureOperations.doOnNext(processedArvosana ->
-                AUDIT.log(builder()
+                    AuditLog.log(auditLogOperation, ValintaResource.TEMPORARY, processedArvosana.getId(), null, null, null, ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana())
+                /*AUDIT.log(builder()
                     .id(username)
                     .hakuOid(hakuOid)
                     .hakukohdeOid(hakukohdeOid)
@@ -324,7 +336,8 @@ public abstract class AbstractPistesyottoKoosteService {
                     .hakemusOid(hakemusOid)
                     .messageJson(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
                     .setOperaatio(auditLogOperation)
-                    .build()));
+                    .build() */
+                    ));
         }).lastOrDefault(null).<Void>map(x -> null).doOnCompleted(() ->
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }
@@ -336,28 +349,17 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     private Observable<Set<String>> tallennaPisteetValintaPisteServiceen(String hakuOid,
-                                                                         String hakukohdeOid,
-                                                                         Optional<String> ifUnmodifiedSince,
-                                                                         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                                         String username,
-                                                                         ValintaperusteetOperation auditLogOperation,
-                                                                         AuditSession auditSession) {
+                                                                String hakukohdeOid,
+                                                                Optional<String> ifUnmodifiedSince,
+                                                                List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                                String username,
+                                                                ValintaperusteetOperation auditLogOperation,
+                                                                AuditSession auditSession ) {
         return valintapisteAsyncResource.putValintapisteet(ifUnmodifiedSince, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
                 //.<Void>map(a -> null)
                 .doOnNext(conflictingHakemusOids ->
-                        pistetiedotHakemukselle.forEach(p -> AUDIT.log(builder()
-                                .id(username)
-                                .hakuOid(hakuOid)
-                                .hakukohdeOid(hakukohdeOid)
-                                .hakijaOid(p.getPersonOid())
-                                .hakemusOid(p.getOid())
-                                .messageJson(conflictingHakemusOids.contains(p.getOid()) ?
-                                        ImmutableMap.of("error", "Uudemman arvon ylikirjoitus estetty!") : p.getAdditionalData())
-                                .setOperaatio(auditLogOperation)
-                                .build()))
-                )
-                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
-                        "Pistetietojen tallennus valinta-piste-serviceen epäonnistui", t)));
+                        pistetiedotHakemukselle.forEach(p -> AuditLog.log(auditLogOperation, ValintaResource.TEMPORARY, p.getOid(), p, null, null)
+                ));
     }
 
     private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid) {

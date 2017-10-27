@@ -1,5 +1,10 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
+import com.google.gson.Gson;
+import fi.vm.sade.auditlog.User;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,9 +42,21 @@ import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
 
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa.
@@ -108,13 +125,13 @@ public class SijoitteluAktivointiResource {
             throw new RuntimeException("Parametri hakuOid on pakollinen!");
         } else {
             
-            final String username = KoosteAudit.username();
-            AUDIT.log(builder()
+            AuditLog.log(ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS, ValintaResource.SIJOITTELUAKTIVOINTI, hakuOid, null, null, request);
+            /*AUDIT.log(builder()
                     .id(username)
                     .hakuOid(hakuOid)
                     .setOperaatio(ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS)
                     .build());
-
+            */
             sijoitteluAktivointiProxy
                     .aktivoiSijoittelu(new Sijoittelu(hakuOid));
         }

@@ -1,13 +1,11 @@
 package fi.vm.sade.valinta.kooste.hakemukset.resource;
 
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import static java.util.Arrays.asList;
 import com.google.common.base.Preconditions;
-
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
-import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
@@ -19,17 +17,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 
 @Controller("HakemuksetResource")
 @Path("hakemukset")
@@ -49,16 +48,22 @@ public class HakemuksetResource {
     @Path("/valinnanvaihe")
     @Produces("application/json")
     @ApiOperation(value = "Valinnanvaiheen hakemusten listaus", response = HakemusDTO.class)
-    public void hakemuksetValinnanvaiheelle(@QueryParam("hakuOid") String hakuOid, @QueryParam("valinnanvaiheOid") String valinnanvaiheOid, @Suspended AsyncResponse asyncResponse) {
+    public void hakemuksetValinnanvaiheelle(@QueryParam("hakuOid") String hakuOid, @QueryParam("valinnanvaiheOid") String valinnanvaiheOid, @Suspended AsyncResponse asyncResponse, @Context HttpServletRequest request) {
         Preconditions.checkNotNull(hakuOid);
         Preconditions.checkNotNull(valinnanvaiheOid);
         asyncResponse.setTimeout(10, TimeUnit.MINUTES);
-        AUDIT.log(builder()
+
+        Map auditParams = new HashMap<>();
+        auditParams.put("hakuOid", hakuOid);
+        auditParams.put("ValinnanvaiheOid",valinnanvaiheOid);
+        AuditLog.log(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU, ValintaResource.HAKEMUKSET, null, null, null, request, auditParams);
+        /*AUDIT.log(builder()
                 .id(KoosteAudit.username())
                 .valinnanvaiheOid(valinnanvaiheOid)
                 .hakuOid(hakuOid)
                 .setOperaatio(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU)
                 .build());
+        */
 
         LOG.warn("Aloitetaan hakemusten listaaminen valinnanvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
         Long started = System.currentTimeMillis();

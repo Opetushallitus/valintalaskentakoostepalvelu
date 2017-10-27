@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
@@ -41,6 +44,8 @@ import java.util.stream.Stream;
 import static com.codepoetics.protonpack.StreamUtils.zip;
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.*;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.*;
 import static java.util.Optional.ofNullable;
@@ -143,7 +148,15 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                             poistettavat.stream().map(rivi -> toPoistettavaErillishaunHakijaDTO(haku, rivi)));
                     lokitettavat
                             .filter(h -> !epaonnistuneet.contains(h.getHakemusOid()))
-                            .forEach(h -> AUDIT.log(builder()
+                            .forEach(h -> {
+                                ValintaperusteetOperation operation;
+                                if (h.getPoistetaankoTulokset()) {
+                                    operation = ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO;
+                                } else {
+                                    operation = ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS;
+                                }
+                                AuditLog.log(operation, ValintaResource.TEMPORARY, h.getHakijaOid(), h, null, null);
+                                /*AUDIT.log(builder()
                                     .id(username)
                                     .hakuOid(haku.getHakuOid())
                                     .hakukohdeOid(haku.getHakukohdeOid())
@@ -155,8 +168,8 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                                     .add("hakemuksentila", h.getHakemuksenTila())
                                     .add("valintatuloksentila", h.getValintatuloksenTila())
                                     .add("ilmoittautumistila", h.getIlmoittautumisTila())
-                                    .build())
-                            );
+                                    .build())*/
+                            });
                     if (poikkeukset.isEmpty()) {
                         prosessi.vaiheValmistui();
                         prosessi.valmistui("ok");
