@@ -2,9 +2,6 @@ package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
 import com.google.gson.Gson;
 
-import fi.vm.sade.auditlog.Changes;
-import fi.vm.sade.sharedutils.AuditLog;
-import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import java.util.Arrays;
@@ -14,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
