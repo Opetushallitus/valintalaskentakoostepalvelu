@@ -4,10 +4,12 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
 /**

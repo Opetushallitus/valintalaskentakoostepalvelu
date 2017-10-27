@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -21,6 +20,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
