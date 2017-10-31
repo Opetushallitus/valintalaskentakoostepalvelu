@@ -99,7 +99,7 @@ public class ValintalaskentaKerrallaResource {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
                 final String hakukohdeOids = hakukohdeOidsFromMaskiToString(stringMaski);
-                LOG.error("Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, laskentatyyppi, whitelist, valinnanvaihe, valintakoelaskenta, hakukohdeOids);
+                LOG.error("Laskennan kaynnistys timeouttasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, laskentatyyppi, whitelist, valinnanvaihe, valintakoelaskenta, hakukohdeOids);
                 asyncResponse.resume(errorResponce("Uudelleen ajo laskennalle aikakatkaistu!"));
             });
 
