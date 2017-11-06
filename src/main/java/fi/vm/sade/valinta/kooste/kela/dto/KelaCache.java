@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +23,15 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
 
-public class KelaCache implements HakemusSource, PaivamaaraSource {
+public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
     private static final Logger LOG = LoggerFactory.getLogger(KelaCache.class);
     private final ConcurrentHashMap<String, HakuDTO> haut = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, HakukohdeDTO> hakukohteet = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<>();
+//    private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, HenkiloPerustietoDto> henkilotiedot =new ConcurrentHashMap<>();
     
     private final Date now;
     private final HakukohdeResource hakukohdeResource;
@@ -92,21 +95,30 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
         return now;
     }
 
+//    @Override
+//    public Hakemus getHakemusByOid(String oid) {
+//        return hakemukset.get(oid);
+//    }
+
     @Override
-    public Hakemus getHakemusByOid(String oid) {
-        return hakemukset.get(oid);
+    public HenkiloPerustietoDto getByPersonOid(String oid) {
+        return henkilotiedot.get(oid);
     }
 
     public void put(HakuDTO haku) {
         haut.put(haku.getOid(), haku);
     }
 
-    public void put(Hakemus hakemus) {
-        hakemukset.put(hakemus.getOid(), hakemus);
-    }
+//    public void put(Hakemus hakemus) {
+//        hakemukset.put(hakemus.getOid(), hakemus);
+//    }
 
     public void put(HakukohdeDTO hakukohde) {
         hakukohteet.put(hakukohde.getOid(), hakukohde);
+    }
+
+    public void put(HenkiloPerustietoDto tieto) {
+        henkilotiedot.put(tieto.getOidHenkilo(), tieto);
     }
 
     public boolean containsHakutyyppi(String hakutyyppi) {

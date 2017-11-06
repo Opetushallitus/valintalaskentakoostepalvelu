@@ -1,19 +1,10 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.OppilaitosSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.TilaSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.TutkinnontasoSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.*;
 
 public abstract class KelaAbstraktiHaku {
 
@@ -41,14 +32,21 @@ public abstract class KelaAbstraktiHaku {
      */
     public abstract Collection<String> getHakemusOids();
 
+    public abstract List<String> getPersonOids();
+
     // public Collection<String> hakemusOids();
     public abstract Collection<KelaHakijaRivi> createHakijaRivit(
             Date alkuPvm,
             Date loppuPvm,
             String hakuOid,
             KelaProsessi prosessi,
-            HakemusSource hakemusSource, HakukohdeSource hakukohdeSource,
-            LinjakoodiSource linjakoodiSource, OppilaitosSource oppilaitosSource, TutkinnontasoSource tutkinnontasoSource, TilaSource tilaSource);
+//            HakemusSource hakemusSource,
+            HenkilotietoSource henkilotietoSource,
+            HakukohdeSource hakukohdeSource,
+            LinjakoodiSource linjakoodiSource,
+            OppilaitosSource oppilaitosSource,
+            TutkinnontasoSource tutkinnontasoSource,
+            TilaSource tilaSource);
 
     /**
      * @return case insensitive map
