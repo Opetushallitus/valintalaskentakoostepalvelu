@@ -15,6 +15,8 @@ import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Change;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
@@ -59,7 +61,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final DokumenttiResource dokumenttiResource;
     private final HaunTyyppiKomponentti haunTyyppiKomponentti;
-    private final ApplicationResource applicationResource;
+//    private final ApplicationResource applicationResource;
+    private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
     private final OppilaitosKomponentti oppilaitosKomponentti;
     private final HakuV1Resource hakuResource;
     private final LinjakoodiKomponentti linjakoodiKomponentti;
@@ -75,7 +78,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
             KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
             HakuV1Resource hakuResource,
             HaunTyyppiKomponentti haunTyyppiKomponentti,
-            ApplicationResource applicationResource,
+//            ApplicationResource applicationResource,
+            OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
             OppilaitosKomponentti oppilaitosKomponentti,
             LinjakoodiKomponentti linjakoodiKomponentti,
             HakukohdeResource hakukohdeResource,
@@ -91,7 +95,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.dokumenttiResource = dokumenttiResource;
         this.kelaHakijaKomponentti = kelaHakijaKomponentti;
         this.kelaDokumentinLuontiKomponentti = kelaDokumentinLuontiKomponentti;
-        this.applicationResource = applicationResource;
+//        this.applicationResource = applicationResource;
+        this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
         this.kelaResource = kelaResource;
     }
 
@@ -245,20 +250,25 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                             oiditSivutettuna.add(osajoukkoOideista);
                             n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA;
                         } while (n < hakemusOidit.size());
-                        List<Hakemus> hakemukset = Lists.newArrayList();
+//                        List<Hakemus> hakemukset = Lists.newArrayList();
+                        List<HenkiloPerustietoDto> henkilot = Lists.newArrayList();
                         LOG.warn("Haetaan {} hakemusta, {} erässä", hakemusOidit.size(), oiditSivutettuna.size());
                         for (List<String> oidit : oiditSivutettuna) {
                             try {
-                                List<Hakemus> h = applicationResource.getApplicationsByOids(oidit);
-                                hakemukset.addAll(h);
-                                LOG.warn("Saatiin erä hakemuksia {}. {}/{}", h.size(), hakemukset.size(), hakemusOidit.size());
+//                                List<Hakemus> h = applicationResource.getApplicationsByOids(oidit);
+                                List<HenkiloPerustietoDto> henkiloPerustietoDtos = oppijanumerorekisteriAsyncResource.haeHenkilot(oidit);
+//                                hakemukset.addAll(h);
+                                henkilot.addAll(henkiloPerustietoDtos);
+//                                LOG.warn("Saatiin erä hakemuksia {}. {}/{}", h.size(), hakemukset.size(), hakemusOidit.size());
                             } catch (Exception e) {
                                 LOG.error("Hakemuspalvelu ei jaksa tarjoilla hakemuksia. Yritetään vielä uudestaan.", e);
                                 Thread.sleep(50L);
-                                hakemukset.addAll(applicationResource.getApplicationsByOids(oidit));
+//                                hakemukset.addAll(applicationResource.getApplicationsByOids(oidit));
+                                henkilot.addAll(oppijanumerorekisteriAsyncResource.haeHenkilot(oidit));
                             }
                         }
-                        hakemukset.forEach(luonti.getLuonti().getCache()::put);
+//                        hakemukset.forEach(luonti.getLuonti().getCache()::put);
+                        henkilot.forEach(luonti.getLuonti().getCache()::put);
                     } catch (Exception e) {
                         String virhe = "Ei saatu hakemuksia hakupalvelulta!";
                         luonti.getLuonti()
@@ -383,9 +393,13 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 luontiJaRivit.getLuonti().getLoppuPvm(),
                                 kelahaku.getHaku().getOid(), //TODO_-
                                 luontiJaRivit.getLuonti().getProsessi(),
+//                                luontiJaRivit.getLuonti().getCache(),
                                 luontiJaRivit.getLuonti().getCache(),
-                                hakukohdeSource, linjakoodiSource,
-                                oppilaitosSource, tutkinnontasoSource, tilaSource));
+                                hakukohdeSource,
+                                linjakoodiSource,
+                                oppilaitosSource,
+                                tutkinnontasoSource,
+                                tilaSource));
                     }
 
                     if (rivit.isEmpty()) {
