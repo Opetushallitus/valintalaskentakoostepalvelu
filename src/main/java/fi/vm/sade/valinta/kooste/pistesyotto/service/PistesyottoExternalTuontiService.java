@@ -347,8 +347,11 @@ public class PistesyottoExternalTuontiService {
                                 if (!additionalData.isEmpty()) {
                                     List<Valintapisteet> vp = additionalData.stream().map(a -> Pair.of(username, a)).map(Valintapisteet::new).collect(Collectors.toList());
                                     valintapisteAsyncResource.putValintapisteet(Optional.empty(), vp, auditSession).subscribe(conflictingHakemusOids -> {
-                                        additionalData.forEach(p ->
-                                                        AuditLog.log(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, ValintaResource.TEMPORARY, p.getOid(), null, null, null)
+                                        additionalData.forEach(pistetieto -> {
+                                                Map<String, String> additionalAuditInfo= new HashMap<>();
+                                        additionalAuditInfo.put("Username from params", username);
+                                        additionalAuditInfo.put("hakuOid", hakuOid);
+                                            AuditLog.log(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, ValintaResource.PISTESYOTTOEXTERNALSERVICE, pistetieto.getOid(), pistetieto, null, null, additionalAuditInfo);
                                                 /*AUDIT.log(builder()
                                                         .id(username)
                                                         .hakuOid(hakuOid)
@@ -358,7 +361,7 @@ public class PistesyottoExternalTuontiService {
                                                                 ImmutableMap.of("error", "Uudemman arvon ylikirjoitus estetty!") : p.getAdditionalData())
                                                         .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
                                                         .build())*/
-                                        );
+                                    });
                                         List<VirheDTO> valintapisteVirheet = conflictingHakemusOids.stream()
                                                 .map(hakemusOid -> {
                                                     VirheDTO virhe = new VirheDTO();

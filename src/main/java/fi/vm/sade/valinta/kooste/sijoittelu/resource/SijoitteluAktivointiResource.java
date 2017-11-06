@@ -124,7 +124,6 @@ public class SijoitteluAktivointiResource {
             LOG.error("Sijoittelua yritettiin käynnistää ilman hakuOidia!");
             throw new RuntimeException("Parametri hakuOid on pakollinen!");
         } else {
-            
             AuditLog.log(ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS, ValintaResource.SIJOITTELUAKTIVOINTI, hakuOid, null, null, request);
             /*AUDIT.log(builder()
                     .id(username)

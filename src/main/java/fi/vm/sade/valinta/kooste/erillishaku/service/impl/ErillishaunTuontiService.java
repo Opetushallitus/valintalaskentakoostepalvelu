@@ -148,14 +148,17 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                             poistettavat.stream().map(rivi -> toPoistettavaErillishaunHakijaDTO(haku, rivi)));
                     lokitettavat
                             .filter(h -> !epaonnistuneet.contains(h.getHakemusOid()))
-                            .forEach(h -> {
-                                ValintaperusteetOperation operation;
-                                if (h.getPoistetaankoTulokset()) {
-                                    operation = ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO;
+                            .forEach(hakijaDTO -> {
+                                Map<String, String> additionalAuditInfo = new HashMap<>();
+                                additionalAuditInfo.put("hakuOid", haku.getHakuOid());
+                                additionalAuditInfo.put("hakukohdeOid", haku.getHakukohdeOid());
+                                additionalAuditInfo.put("valintatapajonoOid", haku.getValintatapajonoOid());
+                                if (hakijaDTO.getPoistetaankoTulokset()) {
+                                    AuditLog.log(ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), null, hakijaDTO, null, additionalAuditInfo);
                                 } else {
-                                    operation = ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS;
+                                    //###TARKISTETTAVA###
+                                    AuditLog.log(ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), hakijaDTO, null, null, additionalAuditInfo);
                                 }
-                                AuditLog.log(operation, ValintaResource.TEMPORARY, h.getHakijaOid(), h, null, null);
                                 /*AUDIT.log(builder()
                                     .id(username)
                                     .hakuOid(haku.getHakuOid())

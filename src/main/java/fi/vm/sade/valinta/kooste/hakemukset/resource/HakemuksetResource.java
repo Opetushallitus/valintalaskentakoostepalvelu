@@ -53,10 +53,10 @@ public class HakemuksetResource {
         Preconditions.checkNotNull(valinnanvaiheOid);
         asyncResponse.setTimeout(10, TimeUnit.MINUTES);
 
-        Map auditParams = new HashMap<>();
-        auditParams.put("hakuOid", hakuOid);
-        auditParams.put("ValinnanvaiheOid",valinnanvaiheOid);
-        AuditLog.log(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU, ValintaResource.HAKEMUKSET, null, null, null, request, auditParams);
+        Map additionalAuditInfo = new HashMap<>();
+        additionalAuditInfo.put("hakuOid", hakuOid);
+        additionalAuditInfo.put("ValinnanvaiheOid",valinnanvaiheOid);
+        AuditLog.log(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU, ValintaResource.HAKEMUKSET, valinnanvaiheOid, null, null, request, additionalAuditInfo);
         /*AUDIT.log(builder()
                 .id(KoosteAudit.username())
                 .valinnanvaiheOid(valinnanvaiheOid)
