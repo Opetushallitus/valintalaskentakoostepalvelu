@@ -40,7 +40,7 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
         final AtomicBoolean K = new AtomicBoolean(false);
         return new PoikkeusKasittelijaSovitin(poikkeus -> {
             if (!K.compareAndSet(false, true)) {
-                LOG.debug("Silmukka havaittu {}", self.getClass().getSimpleName());
+                LOG.warn("Silmukka havaittu {}", self.getClass().getSimpleName());
                 return;
             }
             LOG.error(self.getClass().getSimpleName() + " epaonnistui (uuid=" + getUuid() + ", hakukohde=" + getHakukohdeOid() + ")!", poikkeus);
