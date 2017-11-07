@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import static fi.vm.sade.valinta.http.ObservableUtil.wrapAsRunOnlyOnceObservable;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.tuple.Pair.of;
 import static rx.Observable.combineLatest;
@@ -36,7 +37,6 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.observables.ConnectableObservable;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -131,12 +131,6 @@ public class LaskentaActorFactory {
                     return laskenta;
                 }
         );
-    }
-
-    private <T> Observable<T> wrapAsRunOnlyOnceObservable(Observable<T> o) {
-        final ConnectableObservable<T> replayingObservable = o.replay(1);
-        replayingObservable.connect();
-        return replayingObservable;
     }
 
     @ManagedOperation
