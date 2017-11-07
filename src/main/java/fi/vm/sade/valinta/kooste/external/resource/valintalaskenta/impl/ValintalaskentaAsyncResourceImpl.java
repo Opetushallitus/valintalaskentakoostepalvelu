@@ -1,30 +1,25 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
-import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.Laskentakutsu;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import rx.Observable;
-import rx.observables.ConnectableObservable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
-import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.*;
 import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VALMIS;
+import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VIRHE;
 
 @Service
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
@@ -49,9 +44,10 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     public Observable<String> laske(LaskeDTO laskeDTO) {
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
 
         try {
-            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laske", laskeDTO.getUuid(), laskeDTO.getHakukohdeOid(), laskeDTO);
+            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laske", laskentakutsu);
         } catch (Exception e) {
             throw e;
         }
@@ -59,9 +55,10 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
 
         try {
-            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.valintakokeet", laskeDTO.getUuid(), laskeDTO.getHakukohdeOid(), laskeDTO);
+            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.valintakokeet", laskentakutsu);
         } catch (Exception e) {
             throw e;
         }
@@ -69,19 +66,21 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
 
         try {
-            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskekaikki", laskeDTO.getUuid(), laskeDTO.getHakukohdeOid(), laskeDTO);
+            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskekaikki", laskentakutsu);
         } catch (Exception e) {
             throw e;
         }
     }
 
-    //FIXME tämä toteutus toisteinen (mutta toimii). Aiheuttajana on valintaryhmälaskennan muista laskennoista poikkeava rakenne.
     @Override
     public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista) {
+        Laskentakutsu laskentakutsu = new Laskentakutsu(lista);
+
         try {
-            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele", lista.iterator().next().getUuid(), String.format("(%s hakukohdetta)", lista.size()), lista);
+            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele", laskentakutsu);
         } catch (Exception e) {
             throw e;
         }
@@ -95,7 +94,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
                 ValinnanvaiheDTO.class, entity, (webclient) -> webclient.query("tarjoajaOid", tarjoajaOid));
     }
 
-    public Observable<String> pollaa(int pollInterval, Object result, String uuid, String hakukohdeOid) {
+    public Observable<String> pollaa(int pollInterval, Object result, String uuid, String pollKey) {
         if (VALMIS.equals(result)) {
             return Observable.just(VALMIS);
         } else if (VIRHE.equals(result)) {
@@ -103,26 +102,26 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
             return Observable.error(new RuntimeException(String.format("Laskenta uuid=%s, hakukohde=%s epäonnistui!", uuid, result)));
         } else {
             if(pollInterval == MAX_POLL_INTERVAL_IN_SECONDS) {
-                LOG.warn("(Uuid={}) Laskenta hakukohteelle {} kestaa pitkaan! Jatketaan pollausta..", uuid, hakukohdeOid);
+                LOG.warn("(Uuid={}) Laskenta hakukohteelle {} kestaa pitkaan! Jatketaan pollausta..", pollKey);
             }
             return Observable.timer(pollInterval, TimeUnit.SECONDS).switchMap(d -> {
-                String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.status", uuid, hakukohdeOid);
+                String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.status", pollKey);
                 return getAsObservable(url, String.class, client -> {
                     client.accept(MediaType.TEXT_PLAIN_TYPE);
                     return client;
-                }).switchMap(rval -> pollaa(Math.min(pollInterval *2, MAX_POLL_INTERVAL_IN_SECONDS), rval, uuid, hakukohdeOid));
+                }).switchMap(rval -> pollaa(Math.min(pollInterval *2, MAX_POLL_INTERVAL_IN_SECONDS), rval, uuid, pollKey));
             });
         }
     }
 
-    public <T> Observable<String> kutsuRajapintaaPollaten(String api, String uuid, String hakukohdeOid, T laskeDTO) {
+    public <T> Observable<String> kutsuRajapintaaPollaten(String api, Laskentakutsu laskentakutsu) {
         return postAsObservable(
                 getUrl(api),
                 String.class,
-                Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE),
+                Entity.entity(laskentakutsu, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.TEXT_PLAIN_TYPE);
                     return client;
-                }).switchMap(rval -> pollaa(1, rval, uuid, hakukohdeOid));
+                }).switchMap(rval -> pollaa(1, rval, laskentakutsu.getUuid(), laskentakutsu.getPollKey()));
     }
 }
