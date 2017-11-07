@@ -78,6 +78,10 @@ public class LaskentaResurssinhakuObservable<R> {
             this.hakukohdeOid = hakukohdeOid;
         }
 
+        public PyynnonTunniste withNimi(String resurssi) {
+            return new PyynnonTunniste(resurssi, this.uuid, this.hakukohdeOid);
+        }
+
         @Override
         public String toString() {
             return "Resurssinhaku " + resurssi + " : uuid=" + uuid + ", hakukohdeOid=" + hakukohdeOid;
