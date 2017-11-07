@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -27,7 +25,6 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
     private static final Logger LOG = LoggerFactory.getLogger(MockOppijanumerorekisteriAsyncResource.class);
     public List<HenkiloCreateDTO> henkiloPrototyypit = null;
     private final Function<List<HenkiloCreateDTO>, Future<List<HenkiloPerustietoDto>>> futureSupplier;
-
     public MockOppijanumerorekisteriAsyncResource() {
         this.futureSupplier = hp -> {
             if (hp == null) {
@@ -42,7 +39,6 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
                     .collect(Collectors.toList()));
         };
     }
-
     public MockOppijanumerorekisteriAsyncResource(Function<List<HenkiloCreateDTO>, Future<List<HenkiloPerustietoDto>>> futureSupplier) {
         this.futureSupplier = futureSupplier;
     }
@@ -50,10 +46,6 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
     public Future<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(final List<HenkiloCreateDTO> hp) {
         return Optional.ofNullable(MockOppijanumerorekisteriAsyncResource.<List<HenkiloPerustietoDto>>serviceAvailableCheck()).orElseGet(
                 () -> futureSupplier.apply(hp));
-    }
-    @Override
-    public List<HenkiloPerustietoDto> haeHenkilot(List<String> personOids) {
-        return Lists.newArrayList();
     }
 
     public static HenkiloPerustietoDto toHenkiloPerustietoDto(HenkiloCreateDTO proto) {

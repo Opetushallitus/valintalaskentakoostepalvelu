@@ -8,5 +8,4 @@ import java.util.concurrent.Future;
 
 public interface OppijanumerorekisteriAsyncResource {
     Future<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit);
-    List<HenkiloPerustietoDto> haeHenkilot(List<String> personOids);
 }

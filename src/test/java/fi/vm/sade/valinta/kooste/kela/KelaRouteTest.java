@@ -14,7 +14,6 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
@@ -63,8 +62,6 @@ public class KelaRouteTest extends CamelTestSupport {
 			.mock(HaunTyyppiKomponentti.class);
 	private final ApplicationResource applicationResource = Mockito
 			.mock(ApplicationResource.class);
-	private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource= Mockito
-			.mock(OppijanumerorekisteriAsyncResource.class);
 	private final OppilaitosKomponentti oppilaitosKomponentti = Mockito
 			.mock(OppilaitosKomponentti.class);
 	private final LinjakoodiKomponentti linjakoodiKomponentti = Mockito
@@ -195,12 +192,9 @@ public class KelaRouteTest extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new KelaRouteImpl(DIRECT_KELA, dokumenttiResource, hkRivi,
 				dkRivi, hakuResource,
-				haunTyyppiKomponentti,
-				oppijanumerorekisteriAsyncResource,
-				oppilaitosKomponentti,
-				linjakoodiKomponentti,
-				hakukohdeResource,
-				valintaTulosServiceAsyncResource,
+				haunTyyppiKomponentti, applicationResource,
+				oppilaitosKomponentti, linjakoodiKomponentti,
+				hakukohdeResource, valintaTulosServiceAsyncResource,
 				null);
 	}
 

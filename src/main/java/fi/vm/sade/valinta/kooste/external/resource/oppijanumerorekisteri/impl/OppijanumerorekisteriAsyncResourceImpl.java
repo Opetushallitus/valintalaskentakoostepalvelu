@@ -36,12 +36,4 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
                 .post(Entity.entity(henkiloPrototyypit, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HenkiloPerustietoDto>>() {
                 });
     }
-
-    public List<HenkiloPerustietoDto> haeHenkilot(List<String> personOids) {
-        return getWebClient()
-                .path(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findByPersonOidList"))
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(personOids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HenkiloPerustietoDto>>() {
-                });
-    }
 }
