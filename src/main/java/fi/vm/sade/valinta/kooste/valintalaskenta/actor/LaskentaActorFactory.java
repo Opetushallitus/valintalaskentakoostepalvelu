@@ -5,7 +5,6 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.tuple.Pair.of;
 import static rx.Observable.combineLatest;
 import static rx.Observable.just;
-import static rx.Observable.range;
 import static rx.Observable.timer;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
@@ -23,6 +22,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuObservable.PyynnonTunniste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
@@ -153,24 +153,6 @@ public class LaskentaActorFactory {
                 }
         );
     }
-    private static final Action1<? super Object> resurssiOK(long startTime, String resurssi, String uuid, String hakukohde) {
-        return r -> {
-            long l = System.currentTimeMillis();
-            long duration = l - startTime;
-            LOG.info("(Uuid={}) (Kesto {}s) Saatiin resurssi {} hakukohteelle {}", uuid, millisToString(duration),resurssi, hakukohde);
-        };
-    }
-
-    private static final Action1<Throwable> resurssiException(long startTime, String resurssi, String uuid, String hakukohde) {
-        return error -> {
-            long l = System.currentTimeMillis();
-            long duration = l - startTime;
-            long min = TimeUnit.MILLISECONDS.toMinutes(duration);
-            String message = HttpExceptionWithResponse.appendWrappedResponse(String.format("(Uuid=%s) (kesto %s minuuttia) Resurssin %s lataus epäonnistui hakukohteelle %s", uuid, min, resurssi, hakukohde)
-                    , error);
-            LOG.warn(message, error);
-        };
-    }
 
     private <A, T> Func1<A, Observable<T>> timedSwitchMap(BiConsumer<Long, Optional<Throwable>> log, Function<A, Observable<T>> f) {//Function<A,Observable<T>> switchMap) {
         return (a) -> {
@@ -248,46 +230,34 @@ public class LaskentaActorFactory {
         return new LaskentaActorForSingleHakukohde(actorParams, r, laskentaSupervisor, laskentaSeurantaAsyncResource, splittaus);
     }
 
-    private Func1<Observable<? extends Throwable>, Observable<?>> createRetryer() {
-        int maxRetries = 2;
-        int secondsToWaitMultiplier = 5;
-        return errors -> errors.zipWith(range(1, maxRetries), (n, i) -> i).flatMap(i -> {
-            int delaySeconds = secondsToWaitMultiplier * i;
-            LOG.warn(toString() + " retry number " + i + "/" + maxRetries + ", waiting for " + delaySeconds + " seconds.");
-            return timer(delaySeconds, TimeUnit.SECONDS);
-        });
-    }
-
     private Observable<LaskeDTO> fetchResourcesForOneLaskenta(final AuditSession auditSession, final String uuid, HakuV1RDTO haku,
                                                               final String hakukohdeOid,
                                                               LaskentaActorParams actorParams,
-                                                              boolean retry,
+                                                              boolean retryHakemuksetAndOppijat,
                                                               boolean withHakijaRyhmat) {
         final String hakuOid = haku.getOid();
-        BiConsumer<String, Observable<?>> monitorResource = (r, o) -> {
-            long i = System.currentTimeMillis();
-            o.subscribe(resurssiOK(i, r, uuid, hakukohdeOid), resurssiException(i, r, uuid, hakukohdeOid));
-        };
-        Observable<List<ValintaperusteetDTO>> valintaperusteet = wrapAsRunOnlyOnceObservable(valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()));
-        monitorResource.accept("valintaperusteetAsyncResource.haeValintaperusteet", valintaperusteet);
-        Observable<List<Hakemus>> hakemukset = wrapAsRunOnlyOnceObservable(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid));
-        if(retry) {
-            hakemukset = hakemukset.retryWhen(createRetryer());
-        }
-        monitorResource.accept("applicationAsyncResource.getApplicationsByOid", hakemukset);
-        Observable<List<Oppija>> oppijat = wrapAsRunOnlyOnceObservable(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid));
-        if(retry) {
-            oppijat = oppijat.retryWhen(createRetryer());
-        }
-        monitorResource.accept("suoritusrekisteriAsyncResource.getOppijatByHakukohde", oppijat);
-        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = wrapAsRunOnlyOnceObservable(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
-        monitorResource.accept("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes", hakukohdeRyhmasForHakukohdes);
-        Observable<PisteetWithLastModified> valintapisteetForHakukohdes = wrapAsRunOnlyOnceObservable(valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession));
-        monitorResource.accept("valintapisteAsyncResource.getValintapisteet", valintapisteetForHakukohdes);
-        Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? wrapAsRunOnlyOnceObservable(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : just(emptyList());
-        if(withHakijaRyhmat) {
-            monitorResource.accept("valintaperusteetAsyncResource.haeHakijaryhmat", hakijaryhmat);
-        }
+
+        Observable<List<ValintaperusteetDTO>> valintaperusteet = new LaskentaResurssinhakuObservable<>(
+            valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()),
+            new PyynnonTunniste("valintaperusteetAsyncResource.haeValintaperusteet", uuid, hakukohdeOid)).getObservable();
+        Observable<List<Hakemus>> hakemukset = new LaskentaResurssinhakuObservable<>(
+            applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
+            new PyynnonTunniste("applicationAsyncResource.getApplicationsByOid", uuid, hakukohdeOid),
+            retryHakemuksetAndOppijat).getObservable();
+        Observable<List<Oppija>> oppijat = new LaskentaResurssinhakuObservable<>(
+            suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid),
+            new PyynnonTunniste("suoritusrekisteriAsyncResource.getOppijatByHakukohde", uuid, hakukohdeOid),
+            retryHakemuksetAndOppijat).getObservable();
+        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = new LaskentaResurssinhakuObservable<>(
+            tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid),
+            new PyynnonTunniste("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes", uuid, hakukohdeOid)).getObservable();
+        Observable<PisteetWithLastModified> valintapisteetForHakukohdes = new LaskentaResurssinhakuObservable<>(
+            valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession),
+            new PyynnonTunniste("valintapisteAsyncResource.getValintapisteet", uuid, hakukohdeOid)).getObservable();
+        Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? new LaskentaResurssinhakuObservable<>(
+            valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid),
+            new PyynnonTunniste("valintaperusteetAsyncResource.haeHakijaryhmat", uuid, hakukohdeOid)
+        ).getObservable() : just(emptyList());
 
         return wrapAsRunOnlyOnceObservable(combineLatest(
                 valintapisteetForHakukohdes,
