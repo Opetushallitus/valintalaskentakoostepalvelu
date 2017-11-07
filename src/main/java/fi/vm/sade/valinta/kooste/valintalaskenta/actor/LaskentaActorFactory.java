@@ -41,6 +41,7 @@ import rx.functions.Func1;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -104,13 +105,13 @@ public class LaskentaActorFactory {
         });
     }
 
-    public LaskentaActor createValintaryhmaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams a) {
-        LaskentaActorParams fakeOnlyOneHakukohdeParams = new LaskentaActorParams(a.getLaskentaStartParams(), Arrays.asList(new HakukohdeJaOrganisaatio()), a.getParametritDTO());
+    private LaskentaActor createValintaryhmaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams a) {
+        LaskentaActorParams fakeOnlyOneHakukohdeParams = new LaskentaActorParams(a.getLaskentaStartParams(), Collections.singletonList(new HakukohdeJaOrganisaatio()), a.getParametritDTO());
         fakeOnlyOneHakukohdeParams.setValintaryhmalaskenta(true);
         return laskentaHakukohteittainActor(laskentaSupervisor, fakeOnlyOneHakukohdeParams,
                 hakukohdeJaOrganisaatio -> {
                     String uuid = a.getUuid();
-                    Collection<String> hakukohdeOids = a.getHakukohdeOids().stream().map(hk -> hk.getHakukohdeOid()).collect(Collectors.toList());
+                    Collection<String> hakukohdeOids = a.getHakukohdeOids().stream().map(HakukohdeJaOrganisaatio::getHakukohdeOid).collect(Collectors.toList());
                     String hakukohteidenNimi = String.format("Valintaryhmälaskenta %s hakukohteella", hakukohdeOids.size());
                     LOG.info("(Uuid={}) {}", uuid, hakukohteidenNimi);
                     Observable<Pair<Collection<String>, List<LaskeDTO>>> recursiveSequentialFetch = just(of(hakukohdeOids, emptyList()));
@@ -139,15 +140,14 @@ public class LaskentaActorFactory {
         LOG.info("Laskenta split count asetettu arvoon {}", splitCount);
     }
 
-    public LaskentaActor createValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
+    private LaskentaActor createValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
         return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
                 hakukohdeJaOrganisaatio -> {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, false)
-                            .switchMap(timedSwitchMap((took, exception) -> {
-                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid);
-                            }, valintalaskentaAsyncResource::valintakokeet));
+                            .switchMap(timedSwitchMap((took, exception) ->
+                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid), valintalaskentaAsyncResource::valintakokeet));
                     laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                     return laskenta;
                 }
@@ -158,18 +158,18 @@ public class LaskentaActorFactory {
         return (a) -> {
             long start = System.currentTimeMillis();
             Observable<T> t = wrapAsRunOnlyOnceObservable(f.apply(a));
-            t.subscribe((n) -> {
-                log.accept(System.currentTimeMillis() - start, Optional.empty());
-            },(n) -> {
-                log.accept(System.currentTimeMillis() - start, Optional.ofNullable(n));
-            });
+            t.subscribe((n) ->
+                log.accept(System.currentTimeMillis() - start, Optional.empty()), (n) ->
+                log.accept(System.currentTimeMillis() - start, Optional.ofNullable(n)));
             return t;
         };
     }
+
     private static String millisToString(long millis) {
         return new BigDecimal(millis).divide(new BigDecimal(1000), 2, BigDecimal.ROUND_HALF_UP).toPlainString();
     }
-    public LaskentaActor createValintalaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
+
+    private LaskentaActor createValintalaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
         return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
                 hakukohdeJaOrganisaatio -> {
@@ -178,9 +178,8 @@ public class LaskentaActorFactory {
 
 
                     Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, true)
-                            .switchMap(timedSwitchMap((took, exception) -> {
-                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid);
-                            }, valintalaskentaAsyncResource::laske));
+                            .switchMap(timedSwitchMap((took, exception) ->
+                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid), valintalaskentaAsyncResource::laske));
                     laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                     return laskenta;
                 }
@@ -193,16 +192,15 @@ public class LaskentaActorFactory {
         LOG.warn(message, error);
     };
 
-    public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
+    private LaskentaActor createValintalaskentaJaValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
         return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
                 hakukohdeJaOrganisaatio -> {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan + valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                     Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false,true)
-                            .switchMap(timedSwitchMap((took, exception) -> {
-                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid);
-                            }, valintalaskentaAsyncResource::laskeKaikki));
+                            .switchMap(timedSwitchMap((took, exception) ->
+                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid), valintalaskentaAsyncResource::laskeKaikki));
                     laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
                     return laskenta;
                 }
