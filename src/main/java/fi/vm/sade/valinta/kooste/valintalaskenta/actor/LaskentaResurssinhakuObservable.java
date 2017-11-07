@@ -55,7 +55,7 @@ public class LaskentaResurssinhakuObservable<R> {
             long min = MILLISECONDS.toMinutes(duration);
             String message = String.format("(Uuid=%s) (kesto %s minuuttia) Resurssin %s lataus epäonnistui hakukohteelle %s", tunniste.uuid, min, tunniste.resurssi, tunniste.hakukohdeOid);
             String messageWithResponse = HttpExceptionWithResponse.appendWrappedResponse(message, error);
-            LOG.warn(messageWithResponse, error);
+            LOG.error(messageWithResponse, error);
         };
     }
 
