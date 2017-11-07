@@ -237,27 +237,27 @@ public class LaskentaActorFactory {
                                                               boolean withHakijaRyhmat) {
         final String hakuOid = haku.getOid();
 
-        PyynnonTunniste tunniste = new PyynnonTunniste("valintaperusteetAsyncResource.haeValintaperusteet", uuid, hakukohdeOid);
-        Observable<List<ValintaperusteetDTO>> valintaperusteet = new LaskentaResurssinhakuObservable<>(
-            valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()),
-            tunniste).getObservable();
-        Observable<List<Hakemus>> hakemukset = new LaskentaResurssinhakuObservable<>(
+        PyynnonTunniste tunniste = new PyynnonTunniste("Please put individual resource source identifier here!", uuid, hakukohdeOid);
+        Observable<List<ValintaperusteetDTO>> valintaperusteet = createResurssiObservable(tunniste,
+            "valintaperusteetAsyncResource.haeValintaperusteet",
+            valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()));
+        Observable<List<Hakemus>> hakemukset = createResurssiObservable(tunniste,
+            "applicationAsyncResource.getApplicationsByOid",
             applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
-            tunniste.withNimi("applicationAsyncResource.getApplicationsByOid"),
-            retryHakemuksetAndOppijat).getObservable();
-        Observable<List<Oppija>> oppijat = new LaskentaResurssinhakuObservable<>(
+            retryHakemuksetAndOppijat);
+        Observable<List<Oppija>> oppijat = createResurssiObservable(tunniste,
+            "suoritusrekisteriAsyncResource.getOppijatByHakukohde",
             suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid),
-            tunniste.withNimi("suoritusrekisteriAsyncResource.getOppijatByHakukohde"),
-            retryHakemuksetAndOppijat).getObservable();
-        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = new LaskentaResurssinhakuObservable<>(
-            tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid),
-            tunniste.withNimi("tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes")).getObservable();
-        Observable<PisteetWithLastModified> valintapisteetForHakukohdes = new LaskentaResurssinhakuObservable<>(
-            valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession),
-            tunniste.withNimi("valintapisteAsyncResource.getValintapisteet")).getObservable();
-        Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? new LaskentaResurssinhakuObservable<>(
-            valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid),
-            tunniste.withNimi("valintaperusteetAsyncResource.haeHakijaryhmat")).getObservable() : just(emptyList());
+            retryHakemuksetAndOppijat);
+        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = createResurssiObservable(tunniste,
+            "tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",
+            tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
+        Observable<PisteetWithLastModified> valintapisteetForHakukohdes = createResurssiObservable(tunniste,
+            "valintapisteAsyncResource.getValintapisteet",
+            valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession));
+        Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? createResurssiObservable(tunniste,
+            "valintaperusteetAsyncResource.haeHakijaryhmat",
+            valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : just(emptyList());
 
         return wrapAsRunOnlyOnceObservable(combineLatest(
                 valintapisteetForHakukohdes,
@@ -282,5 +282,13 @@ public class LaskentaActorFactory {
                             hakukohdeOid,
                             HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
                 }}));
+    }
+
+    private <T> Observable<T> createResurssiObservable(PyynnonTunniste tunniste, String resurssi, Observable<T> sourceObservable, boolean retry) {
+        return new LaskentaResurssinhakuObservable<>(sourceObservable, tunniste.withNimi(resurssi), retry).getObservable();
+    }
+
+    private <T> Observable<T> createResurssiObservable(PyynnonTunniste tunniste, String resurssi, Observable<T> sourceObservable) {
+        return createResurssiObservable(tunniste, resurssi, sourceObservable, false);
     }
 }

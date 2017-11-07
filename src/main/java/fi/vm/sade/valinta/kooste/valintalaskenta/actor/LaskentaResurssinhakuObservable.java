@@ -30,10 +30,6 @@ public class LaskentaResurssinhakuObservable<R> {
         this.tunniste = tunniste;
     }
 
-    public LaskentaResurssinhakuObservable(Observable<R> source, PyynnonTunniste tunniste) {
-        this(source, tunniste, false);
-    }
-
     private static Func1<Observable<? extends Throwable>, Observable<?>> createRetryer(PyynnonTunniste tunniste) {
         int maxRetries = 2;
         int secondsToWaitMultiplier = 5;
