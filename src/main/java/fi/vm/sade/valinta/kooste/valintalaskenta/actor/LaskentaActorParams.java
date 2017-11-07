@@ -13,6 +13,7 @@ public class LaskentaActorParams {
     private final LaskentaStartParams laskentaStartParams;
     private final ParametritDTO parametritDTO;
     private final Collection<HakukohdeJaOrganisaatio> hakukohdeOids;
+    private boolean isValintaryhmalaskenta;
 
     public LaskentaActorParams(LaskentaStartParams laskentaStartParams, ParametritDTO parametritDTO) {
         this(laskentaStartParams, laskentaStartParams.getHakukohdeDtos().stream()
@@ -23,6 +24,7 @@ public class LaskentaActorParams {
         this.laskentaStartParams = laskentaStartParams;
         this.parametritDTO = parametritDTO;
         this.hakukohdeOids = hakukohdeOids;
+        this.isValintaryhmalaskenta = false;
     }
     public String getUuid() {
         return laskentaStartParams.getUuid();
@@ -61,6 +63,14 @@ public class LaskentaActorParams {
 
     public Collection<HakukohdeJaOrganisaatio> getHakukohdeOids() {
         return hakukohdeOids;
+    }
+
+    public void setValintaryhmalaskenta(boolean value) {
+        this.isValintaryhmalaskenta = value;
+    }
+
+    public boolean isValintaryhmalaskenta() {
+        return this.isValintaryhmalaskenta;
     }
 
     /**

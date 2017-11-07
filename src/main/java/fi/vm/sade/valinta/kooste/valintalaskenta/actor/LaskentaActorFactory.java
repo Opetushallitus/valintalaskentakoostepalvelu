@@ -106,6 +106,7 @@ public class LaskentaActorFactory {
 
     public LaskentaActor createValintaryhmaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams a) {
         LaskentaActorParams fakeOnlyOneHakukohdeParams = new LaskentaActorParams(a.getLaskentaStartParams(), Arrays.asList(new HakukohdeJaOrganisaatio()), a.getParametritDTO());
+        fakeOnlyOneHakukohdeParams.setValintaryhmalaskenta(true);
         return laskentaHakukohteittainActor(laskentaSupervisor, fakeOnlyOneHakukohdeParams,
                 hakukohdeJaOrganisaatio -> {
                     String uuid = a.getUuid();
