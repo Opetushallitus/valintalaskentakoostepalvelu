@@ -83,15 +83,28 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
 
     private void handleSuccessfulLaskentaResult(boolean fromRetryQueue, String hakukohdeOid) {
         if (fromRetryQueue) {
-            LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}", uuid(), hakukohdeOid, successTotal.incrementAndGet(), totalKohteet());
+            LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}",
+                uuid(),
+                hakukohdeOid,
+                successTotal.incrementAndGet(),
+                totalKohteet());
         } else {
-            LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui. Valmiita kohteita laskennassa yhteensä {}/{}", uuid(), hakukohdeOid, successTotal.incrementAndGet(), totalKohteet());
+            LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui. Valmiita kohteita laskennassa yhteensä {}/{}",
+                uuid(),
+                hakukohdeOid,
+                successTotal.incrementAndGet(),
+                totalKohteet());
         }
         try {
             laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.VALMIS, Optional.empty());
-            LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.", uuid(), hakukohdeOid);
+            LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.",
+                uuid(),
+                hakukohdeOid);
         } catch (Throwable t) {
-            LOG.error("(Uuid={}) Hakukohteen {} laskenta on valmis mutta ei saatu merkattua.", uuid(), hakukohdeOid, t);
+            LOG.error("(Uuid={}) Hakukohteen {} laskenta on valmis mutta ei saatu merkattua.",
+                uuid(),
+                hakukohdeOid,
+                t);
         }
         hakukohdeKerralla();
     }
@@ -101,10 +114,20 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                                             Throwable failure) {
         String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
         if (!fromRetryQueue) {
-            LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid(), hakukohdeOid, retryTotal.incrementAndGet(), totalKohteet(), failure);
+            LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}",
+                uuid(),
+                hakukohdeOid,
+                retryTotal.incrementAndGet(),
+                totalKohteet(),
+                failure);
             retryQueue.add(hakukohdeJaOrganisaatio);
         } else {
-            LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid(), hakukohdeOid, failedTotal.incrementAndGet(), totalKohteet(), failure);
+            LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}",
+                uuid(),
+                hakukohdeOid,
+                failedTotal.incrementAndGet(),
+                totalKohteet(),
+                failure);
             try {
                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.KESKEYTETTY,
                     Optional.of(virheilmoitus(failure.getMessage(), Arrays.toString(failure.getStackTrace()))));
@@ -119,7 +142,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private void handleEmptyWorkQueueResult() {
         if (retryActive.compareAndSet(false, true)) {
             if (retryQueue.peek() != null) {
-                LOG.info("Laskenta (uuid={}) olisi päättynyt, mutta sisältää keskeytettyjä hakukohteita. Yritetään epäonnistuneita kohteita ({} kpl) uudelleen.", uuid(), retryTotal.get());
+                LOG.info("Laskenta (uuid={}) olisi päättynyt, mutta sisältää keskeytettyjä hakukohteita. Yritetään epäonnistuneita kohteita ({} kpl) uudelleen.",
+                    uuid(),
+                    retryTotal.get());
                 final boolean splitRetry = retryQueue.size() > 20;
                 IntStream.range(0, splitRetry ? splittaus : 1).forEach(i -> hakukohdeKerralla());
                 return;
@@ -141,7 +166,12 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
             LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid());
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
         } else {
-            LOG.info("#### (Uuid={}) Laskenta valmis koska ei enää hakukohteita käsiteltävänä. Onnistuneita {}, Uudelleenyrityksiä {}, Lopullisesti epäonnistuneita {}", uuid(), successTotal.get(), retryTotal.get(), failedTotal.get());
+            LOG.info("#### (Uuid={}) Laskenta valmis koska ei enää hakukohteita käsiteltävänä. " +
+                "Onnistuneita {}, Uudelleenyrityksiä {}, Lopullisesti epäonnistuneita {}",
+                uuid(),
+                successTotal.get(),
+                retryTotal.get(),
+                failedTotal.get());
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.VALMIS, Optional.empty());
         }
         laskentaSupervisor.ready(uuid());
