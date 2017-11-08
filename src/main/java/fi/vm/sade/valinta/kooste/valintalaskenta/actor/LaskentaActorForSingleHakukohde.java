@@ -78,7 +78,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
             hkJaOrg = Optional.ofNullable(retryQueue.poll());
             fromRetryQueue = true;
         }
-        hkJaOrg.ifPresent(hakukohdeJaOrganisaatio -> {
+
+        if (hkJaOrg.isPresent()) {
+            HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio = hkJaOrg.get();
             String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
             Observable.amb(
                 hakukohteenLaskenta.call(hakukohdeJaOrganisaatio),
@@ -86,8 +88,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 .subscribe(
                     s -> handleSuccessfulLaskentaResult(fromRetryQueue, hakukohdeOid),
                     e -> handleFailedLaskentaResult(fromRetryQueue, hakukohdeJaOrganisaatio, e));
-        });
-        if (!hkJaOrg.isPresent()) {
+        } else {
             handleEmptyWorkQueueResult();
         }
     }
