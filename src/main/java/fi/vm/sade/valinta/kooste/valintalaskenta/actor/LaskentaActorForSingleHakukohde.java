@@ -33,8 +33,8 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private final LaskentaActorParams actorParams;
     private final Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta;
     private final LaskentaSupervisor laskentaSupervisor;
-    private LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
-    private int splittaus;
+    private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
+    private final int splittaus;
     private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue;
     private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue = new ConcurrentLinkedQueue<>();
 
