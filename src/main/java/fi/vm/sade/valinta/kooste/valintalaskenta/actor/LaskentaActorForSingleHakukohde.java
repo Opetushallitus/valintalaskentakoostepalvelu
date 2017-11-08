@@ -24,14 +24,14 @@ import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
 class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorForSingleHakukohde.class);
 
-    private final AtomicBoolean active;
+    private final AtomicBoolean active = new AtomicBoolean(true);
     private final AtomicBoolean done;
     private final String uuid;
     private final int totalKohteet;
-    private final AtomicBoolean retryActive;
-    private final AtomicInteger successTotal;
-    private final AtomicInteger retryTotal;
-    private final AtomicInteger failedTotal;
+    private final AtomicBoolean retryActive = new AtomicBoolean(false);
+    private final AtomicInteger successTotal = new AtomicInteger(0);
+    private final AtomicInteger retryTotal = new AtomicInteger(0);
+    private final AtomicInteger failedTotal = new AtomicInteger(0);
     private final LaskentaActorParams actorParams;
     private final Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> r;
     private final LaskentaSupervisor laskentaSupervisor;
@@ -44,14 +44,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         this.laskentaSupervisor = laskentaSupervisor;
         this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
         this.splittaus = splittaus;
-        active = new AtomicBoolean(true);
         done = new AtomicBoolean(false);
         uuid = actorParams.getUuid();
         totalKohteet = actorParams.getHakukohdeOids().size();
-        retryActive = new AtomicBoolean(false);
-        successTotal = new AtomicInteger(0);
-        retryTotal = new AtomicInteger(0);
-        failedTotal = new AtomicInteger(0);
     }
 
     public String getHakuOid() {
