@@ -68,55 +68,47 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private void hakukohdeKerralla(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue) {
         Optional<HakukohdeJaOrganisaatio> hkJaOrg;
         boolean fromRetryQueue;
-        if(!retryActive.get()) {
+        if (!retryActive.get()) {
             hkJaOrg = Optional.ofNullable(hakukohdeQueue.poll());
             fromRetryQueue = false;
         } else {
             hkJaOrg = Optional.ofNullable(retryQueue.poll());
             fromRetryQueue = true;
         }
-        hkJaOrg.ifPresent(
-                h ->
-                        Observable.amb(
-                                hakukohteenLaskenta.call(h),
-                                Observable.timer(90L, TimeUnit.MINUTES).switchMap(t -> Observable.error(
-                                        new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin")
-                                ))
-                        ).subscribe(
-                                s -> {
-                                    if (fromRetryQueue) {
-                                        LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), successTotal.incrementAndGet(), totalKohteet);
-                                    } else {
-                                        LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), successTotal.incrementAndGet(), totalKohteet);
-                                    }
-                                    try {
-                                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.VALMIS, Optional.empty());
-                                        LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.", uuid, h.getHakukohdeOid());
-                                    } catch (Throwable t) {
-                                        LOG.error("(Uuid={}) Hakukohteen {} laskenta on valmis mutta ei saatu merkattua.", uuid, h.getHakukohdeOid(), t);
-                                    }
-                                    hakukohdeKerralla(hakukohdeQueue, retryQueue);
-                                },
-                                e -> {
-                                    if (!fromRetryQueue) {
-                                        LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), retryTotal.incrementAndGet(), totalKohteet, e);
-                                        retryQueue.add(h);
-                                    } else {
-                                        LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), failedTotal.incrementAndGet(), totalKohteet, e);
-                                        try {
-                                            laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY,
-                                                    Optional.of(virheilmoitus(e.getMessage(), Arrays.toString(e.getStackTrace()))));
-                                            LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tulos merkattu onnistuneesti seurantaan ", uuid, h.getHakukohdeOid());
-                                        } catch (Throwable e1) {
-                                            LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui mutta ei saatu merkattua ", uuid, h.getHakukohdeOid(), e1);
-                                        }
-                                    }
-                                    hakukohdeKerralla(hakukohdeQueue, retryQueue);
-                                },
-                                () -> {
-                                }
-                        )
-        );
+        hkJaOrg.ifPresent(h ->
+            Observable.amb(
+                hakukohteenLaskenta.call(h),
+                Observable.timer(90L, TimeUnit.MINUTES).switchMap(t ->
+                    Observable.error(new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin")))
+            ).subscribe(s -> {
+                if (fromRetryQueue) {
+                    LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), successTotal.incrementAndGet(), totalKohteet);
+                } else {
+                    LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), successTotal.incrementAndGet(), totalKohteet);
+                }
+                try {
+                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.VALMIS, Optional.empty());
+                    LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.", uuid, h.getHakukohdeOid());
+                } catch (Throwable t) {
+                    LOG.error("(Uuid={}) Hakukohteen {} laskenta on valmis mutta ei saatu merkattua.", uuid, h.getHakukohdeOid(), t);
+                }
+                hakukohdeKerralla(hakukohdeQueue, retryQueue);
+            }, e -> {
+                if (!fromRetryQueue) {
+                    LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), retryTotal.incrementAndGet(), totalKohteet, e);
+                    retryQueue.add(h);
+                } else {
+                    LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), failedTotal.incrementAndGet(), totalKohteet, e);
+                    try {
+                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY,
+                            Optional.of(virheilmoitus(e.getMessage(), Arrays.toString(e.getStackTrace()))));
+                        LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tulos merkattu onnistuneesti seurantaan ", uuid, h.getHakukohdeOid());
+                    } catch (Throwable e1) {
+                        LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui mutta ei saatu merkattua ", uuid, h.getHakukohdeOid(), e1);
+                    }
+                }
+                hakukohdeKerralla(hakukohdeQueue, retryQueue);
+            }));
         if (!hkJaOrg.isPresent()) {
             if (retryActive.compareAndSet(false, true)) {
                 if (retryQueue.peek() != null) {
