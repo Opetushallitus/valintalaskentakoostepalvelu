@@ -35,6 +35,8 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private final LaskentaSupervisor laskentaSupervisor;
     private LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private int splittaus;
+    private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue;
+    private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue = new ConcurrentLinkedQueue<>();
 
     public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams,
                                            Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta,
@@ -48,6 +50,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         this.splittaus = splittaus;
         done = new AtomicBoolean(false);
         uuid = actorParams.getUuid();
+        hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
     }
 
     private int totalKohteet() {
@@ -64,14 +67,11 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
 
     public void start() {
         LOG.info("(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {} ", uuid, getHakuOid(), totalKohteet());
-        final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
-        final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue = new ConcurrentLinkedQueue<>();
         final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
-        IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> hakukohdeKerralla(hakukohdeQueue, retryQueue));
+        IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> hakukohdeKerralla());
     }
 
-    private void hakukohdeKerralla(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue,
-                                   ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue) {
+    private void hakukohdeKerralla() {
         Optional<HakukohdeJaOrganisaatio> hkJaOrg;
         boolean fromRetryQueue;
         if (!retryActive.get()) {
@@ -87,18 +87,15 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 hakukohteenLaskenta.call(hakukohdeJaOrganisaatio),
                 Observable.timer(90L, TimeUnit.MINUTES).switchMap(t -> Observable.error(new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin"))))
                 .subscribe(
-                    s -> handleSuccessfulLaskentaResult(hakukohdeQueue, retryQueue, fromRetryQueue, hakukohdeOid),
-                    e -> handleFailedLaskentaResult(hakukohdeQueue, retryQueue, fromRetryQueue, hakukohdeJaOrganisaatio, e));
+                    s -> handleSuccessfulLaskentaResult(fromRetryQueue, hakukohdeOid),
+                    e -> handleFailedLaskentaResult(fromRetryQueue, hakukohdeJaOrganisaatio, e));
         });
         if (!hkJaOrg.isPresent()) {
-            handleEmptyWorkQueueResult(hakukohdeQueue, retryQueue);
+            handleEmptyWorkQueueResult();
         }
     }
 
-    private void handleSuccessfulLaskentaResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue,
-                                                ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue,
-                                                boolean fromRetryQueue,
-                                                String hakukohdeOid) {
+    private void handleSuccessfulLaskentaResult(boolean fromRetryQueue, String hakukohdeOid) {
         if (fromRetryQueue) {
             LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, successTotal.incrementAndGet(), totalKohteet());
         } else {
@@ -110,12 +107,10 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         } catch (Throwable t) {
             LOG.error("(Uuid={}) Hakukohteen {} laskenta on valmis mutta ei saatu merkattua.", uuid, hakukohdeOid, t);
         }
-        hakukohdeKerralla(hakukohdeQueue, retryQueue);
+        hakukohdeKerralla();
     }
 
-    private void handleFailedLaskentaResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue,
-                                            ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue,
-                                            boolean fromRetryQueue,
+    private void handleFailedLaskentaResult(boolean fromRetryQueue,
                                             HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio,
                                             Throwable e) {
         String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
@@ -132,16 +127,15 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui mutta ei saatu merkattua ", uuid, hakukohdeOid, e1);
             }
         }
-        hakukohdeKerralla(hakukohdeQueue, retryQueue);
+        hakukohdeKerralla();
     }
 
-    private void handleEmptyWorkQueueResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue,
-                                            ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue) {
+    private void handleEmptyWorkQueueResult() {
         if (retryActive.compareAndSet(false, true)) {
             if (retryQueue.peek() != null) {
                 LOG.info("Laskenta (uuid={}) olisi päättynyt, mutta sisältää keskeytettyjä hakukohteita. Yritetään epäonnistuneita kohteita ({} kpl) uudelleen.", uuid, retryTotal.get());
                 final boolean splitRetry = retryQueue.size() > 20;
-                IntStream.range(0, splitRetry ? splittaus : 1).forEach(i -> hakukohdeKerralla(hakukohdeQueue, retryQueue));
+                IntStream.range(0, splitRetry ? splittaus : 1).forEach(i -> hakukohdeKerralla());
                 return;
             } else {
                 LOG.info("Laskennassa (uuid={}) ei ole epäonnistuneita hakukohteita uudelleenyritettäviksi.", uuid);
