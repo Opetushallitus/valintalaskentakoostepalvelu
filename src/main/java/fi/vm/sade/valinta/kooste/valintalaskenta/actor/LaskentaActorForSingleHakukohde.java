@@ -82,7 +82,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 Observable.timer(90L, TimeUnit.MINUTES).switchMap(t -> Observable.error(new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin"))))
                 .subscribe(
                     s -> handleSuccessfulLaskentaResult(hakukohdeQueue, retryQueue, fromRetryQueue, hakukohdeOid),
-                    e -> handleFailedLaskentaResult(hakukohdeQueue, retryQueue, fromRetryQueue, hakukohdeJaOrganisaatio, hakukohdeOid, e));
+                    e -> handleFailedLaskentaResult(hakukohdeQueue, retryQueue, fromRetryQueue, hakukohdeJaOrganisaatio, e));
         });
         if (!hkJaOrg.isPresent()) {
             handleEmptyWorkQueueResult(hakukohdeQueue, retryQueue);
@@ -104,7 +104,8 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         hakukohdeKerralla(hakukohdeQueue, retryQueue);
     }
 
-    private void handleFailedLaskentaResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue, boolean fromRetryQueue, HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio, String hakukohdeOid, Throwable e) {
+    private void handleFailedLaskentaResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue, boolean fromRetryQueue, HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio, Throwable e) {
+        String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
         if (!fromRetryQueue) {
             LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, retryTotal.incrementAndGet(), totalKohteet, e);
             retryQueue.add(hakukohdeJaOrganisaatio);
