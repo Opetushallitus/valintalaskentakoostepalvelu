@@ -50,18 +50,6 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
     }
 
-    private int totalKohteet() {
-        return actorParams.getHakukohdeOids().size();
-    }
-
-    public String getHakuOid() {
-        return actorParams.getHakuOid();
-    }
-
-    public boolean isValmis() {
-        return false;
-    }
-
     public void start() {
         LOG.info("(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {} ", uuid(), getHakuOid(), totalKohteet());
         final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
@@ -166,5 +154,17 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
 
     private String uuid() {
         return actorParams.getUuid();
+    }
+
+    private int totalKohteet() {
+        return actorParams.getHakukohdeOids().size();
+    }
+
+    public String getHakuOid() {
+        return actorParams.getHakuOid();
+    }
+
+    public boolean isValmis() {
+        return false;
     }
 }
