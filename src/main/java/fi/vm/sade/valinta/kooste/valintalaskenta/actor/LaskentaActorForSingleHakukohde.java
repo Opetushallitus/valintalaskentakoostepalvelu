@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorForSingleHakukohde.class);
 
-    private final AtomicBoolean done;
+    private final AtomicBoolean done = new AtomicBoolean(false);
     private final String uuid;
     private final AtomicBoolean retryActive = new AtomicBoolean(false);
     private final AtomicInteger successTotal = new AtomicInteger(0);
@@ -48,7 +48,6 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         this.laskentaSupervisor = laskentaSupervisor;
         this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
         this.splittaus = splittaus;
-        done = new AtomicBoolean(false);
         uuid = actorParams.getUuid();
         hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
     }
