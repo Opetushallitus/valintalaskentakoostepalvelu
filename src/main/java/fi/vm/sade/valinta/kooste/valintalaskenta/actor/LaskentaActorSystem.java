@@ -1,11 +1,19 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.TypedActor;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.MaxWorkerCount;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.NoWorkAvailable;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.ResetWorkerCount;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.StartAllWorkers;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.WorkAvailable;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.WorkerAvailable;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.props;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
+
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.TypedActor;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -27,8 +35,6 @@ import scala.concurrent.duration.FiniteDuration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.*;
 
 @Service
 @ManagedResource(objectName = "OPH:name=LaskentaActorSystem", description = "LaskentaActorSystem mbean")
@@ -100,10 +106,6 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     public void ready(String uuid) {
         LOG.trace("Ilmoitettu actor valmiiksi laskennalle (" + uuid + ")");
         LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
-        int callStackinSyvyys = new Exception().getStackTrace().length;
-        if (callStackinSyvyys > 50) {
-            LOG.info("Call-stackin syvyys: " + callStackinSyvyys);
-        }
         stopActor(uuid, actorWrapper.laskentaActor());
     }
 
