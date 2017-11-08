@@ -40,8 +40,6 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import rx.Observable;
-import rx.Subscriber;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observables.ConnectableObservable;
@@ -433,48 +431,4 @@ public class LaskentaActorFactory {
             }
         };
     }
-
-    private static <T> Subscriber<T> subscribeWithFinally(Action1<T> doNext, Action1<Throwable> doError, Action0 doFinally) {
-        return subscribeWithFinally(doNext, doError, () -> {
-        }, doFinally);
-    }
-
-    private static <T> Subscriber<T> subscribeWithFinally(Action0 doFinally) {
-        return subscribeWithFinally(f -> {
-        }, f -> {
-        }, () -> {
-        }, doFinally);
-    }
-
-    private static <T> Subscriber<T> subscribeWithFinally(Action1<T> doNext, Action1<Throwable> doError, Action0 doComplete, Action0 doFinally) {
-        return new Subscriber<T>() {
-            @Override
-            public void onCompleted() {
-                try {
-                    doComplete.call();
-                } finally {
-                    doFinally.call();
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                try {
-                    doError.call(e);
-                } finally {
-                    doFinally.call();
-                }
-            }
-
-            @Override
-            public void onNext(T t) {
-                try {
-                    doNext.call(t);
-                } finally {
-                    doFinally.call();
-                }
-            }
-        };
-    }
-
 }
