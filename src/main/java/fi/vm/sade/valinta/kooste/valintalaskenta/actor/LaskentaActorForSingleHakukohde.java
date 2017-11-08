@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
+
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
@@ -18,13 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
-import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
-
 class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorForSingleHakukohde.class);
 
-    private final AtomicBoolean active = new AtomicBoolean(true);
     private final AtomicBoolean done;
     private final String uuid;
     private final AtomicBoolean retryActive = new AtomicBoolean(false);
@@ -158,7 +157,6 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     }
 
     public void lopeta() {
-        active.set(false);
         if (!done.get()) {
             LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid);
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
