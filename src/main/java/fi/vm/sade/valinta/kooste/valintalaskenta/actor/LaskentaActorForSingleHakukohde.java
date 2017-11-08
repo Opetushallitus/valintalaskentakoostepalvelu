@@ -33,14 +33,14 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private final AtomicInteger retryTotal = new AtomicInteger(0);
     private final AtomicInteger failedTotal = new AtomicInteger(0);
     private final LaskentaActorParams actorParams;
-    private final Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> r;
+    private final Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta;
     private final LaskentaSupervisor laskentaSupervisor;
     private LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private int splittaus;
 
-    public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams, Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> r, LaskentaSupervisor laskentaSupervisor, LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource, int splittaus) {
+    public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams, Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta, LaskentaSupervisor laskentaSupervisor, LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource, int splittaus) {
         this.actorParams = actorParams;
-        this.r = r;
+        this.hakukohteenLaskenta = hakukohteenLaskenta;
         this.laskentaSupervisor = laskentaSupervisor;
         this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
         this.splittaus = splittaus;
@@ -78,7 +78,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         hkJaOrg.ifPresent(
                 h ->
                         Observable.amb(
-                                r.call(h),
+                                hakukohteenLaskenta.call(h),
                                 Observable.timer(90L, TimeUnit.MINUTES).switchMap(t -> Observable.error(
                                         new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin")
                                 ))
