@@ -27,7 +27,6 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private final AtomicBoolean active = new AtomicBoolean(true);
     private final AtomicBoolean done;
     private final String uuid;
-    private final int totalKohteet;
     private final AtomicBoolean retryActive = new AtomicBoolean(false);
     private final AtomicInteger successTotal = new AtomicInteger(0);
     private final AtomicInteger retryTotal = new AtomicInteger(0);
@@ -50,7 +49,10 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         this.splittaus = splittaus;
         done = new AtomicBoolean(false);
         uuid = actorParams.getUuid();
-        totalKohteet = actorParams.getHakukohdeOids().size();
+    }
+
+    private int totalKohteet() {
+        return actorParams.getHakukohdeOids().size();
     }
 
     public String getHakuOid() {
@@ -62,7 +64,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     }
 
     public void start() {
-        LOG.info("(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {} ", uuid, getHakuOid(), totalKohteet);
+        LOG.info("(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {} ", uuid, getHakuOid(), totalKohteet());
         final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
         final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue = new ConcurrentLinkedQueue<>();
         final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
@@ -99,9 +101,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                                                 boolean fromRetryQueue,
                                                 String hakukohdeOid) {
         if (fromRetryQueue) {
-            LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, successTotal.incrementAndGet(), totalKohteet);
+            LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, successTotal.incrementAndGet(), totalKohteet());
         } else {
-            LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, successTotal.incrementAndGet(), totalKohteet);
+            LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, successTotal.incrementAndGet(), totalKohteet());
         }
         try {
             laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS, Optional.empty());
@@ -119,10 +121,10 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                                             Throwable e) {
         String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
         if (!fromRetryQueue) {
-            LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, retryTotal.incrementAndGet(), totalKohteet, e);
+            LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, retryTotal.incrementAndGet(), totalKohteet(), e);
             retryQueue.add(hakukohdeJaOrganisaatio);
         } else {
-            LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, failedTotal.incrementAndGet(), totalKohteet, e);
+            LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, failedTotal.incrementAndGet(), totalKohteet(), e);
             try {
                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY,
                     Optional.of(virheilmoitus(e.getMessage(), Arrays.toString(e.getStackTrace()))));
@@ -146,7 +148,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 LOG.info("Laskennassa (uuid={}) ei ole epäonnistuneita hakukohteita uudelleenyritettäviksi.", uuid);
             }
         }
-        if (totalKohteet == (successTotal.get() + failedTotal.get())) {
+        if (totalKohteet() == (successTotal.get() + failedTotal.get())) {
             if (done.get()) {
                 LOG.error("done == " + done + " but it is being set again! Looks like a bug!", new Exception());
             }
