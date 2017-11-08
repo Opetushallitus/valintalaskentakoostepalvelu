@@ -256,7 +256,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         for (List<String> oidit : oiditSivutettuna) {
                             try {
 //                                List<Hakemus> h = applicationResource.getApplicationsByOids(oidit);
-                                List<HenkiloPerustietoDto> henkiloPerustietoDtos = oppijanumerorekisteriAsyncResource.haeHenkilot(oidit);
+                                List<String> henkiloOidit = luonti.getHaut().stream().flatMap(h -> h.getPersonOids().stream()).collect(Collectors.toList());
+                                List<HenkiloPerustietoDto> henkiloPerustietoDtos = oppijanumerorekisteriAsyncResource.haeHenkilot(henkiloOidit);
 //                                hakemukset.addAll(h);
                                 henkilot.addAll(henkiloPerustietoDtos);
 //                                LOG.warn("Saatiin erä hakemuksia {}. {}/{}", h.size(), hakemukset.size(), hakemusOidit.size());
