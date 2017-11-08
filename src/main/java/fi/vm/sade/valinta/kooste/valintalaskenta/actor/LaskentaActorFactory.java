@@ -381,14 +381,14 @@ public class LaskentaActorFactory {
                                         },
                                         e -> {
                                             if (!fromRetryQueue) {
-                                                LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), retryTotal.incrementAndGet(), totalKohteet);
+                                                LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), retryTotal.incrementAndGet(), totalKohteet, e);
                                                 retryQueue.add(h);
                                             } else {
-                                                LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), failedTotal.incrementAndGet(), totalKohteet);
+                                                LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid, h.getHakukohdeOid(), failedTotal.incrementAndGet(), totalKohteet, e);
                                                 try {
                                                     laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY,
                                                             Optional.of(virheilmoitus(e.getMessage(), Arrays.toString(e.getStackTrace()))));
-                                                    LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tulos merkattu onnistuneesti seurantaan ", uuid, h.getHakukohdeOid(), e);
+                                                    LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tulos merkattu onnistuneesti seurantaan ", uuid, h.getHakukohdeOid());
                                                 } catch (Throwable e1) {
                                                     LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui mutta ei saatu merkattua ", uuid, h.getHakukohdeOid(), e1);
                                                 }
