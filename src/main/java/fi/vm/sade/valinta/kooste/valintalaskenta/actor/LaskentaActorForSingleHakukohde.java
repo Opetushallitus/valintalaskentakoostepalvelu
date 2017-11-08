@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorForSingleHakukohde.State.COMPLETE;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorForSingleHakukohde.State.FIRST_ATTEMPTS;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorForSingleHakukohde.State.RERUNS;
 import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
 import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
 
@@ -17,15 +20,14 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorForSingleHakukohde.class);
 
-    private final AtomicBoolean done = new AtomicBoolean(false);
-    private final AtomicBoolean retryActive = new AtomicBoolean(false);
+    private final AtomicReference<State> state = new AtomicReference<>(FIRST_ATTEMPTS);
     private final AtomicInteger successTotal = new AtomicInteger(0);
     private final AtomicInteger retryTotal = new AtomicInteger(0);
     private final AtomicInteger failedTotal = new AtomicInteger(0);
@@ -59,12 +61,14 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private void laskeSeuraavaHakukohde() {
         final Optional<HakukohdeJaOrganisaatio> hkJaOrg;
         final boolean fromRetryQueue;
-        if (!retryActive.get()) {
+        if (FIRST_ATTEMPTS.equals(state.get())) {
             hkJaOrg = Optional.ofNullable(hakukohdeQueue.poll());
             fromRetryQueue = false;
-        } else {
+        } else if (RERUNS.equals(state.get())) {
             hkJaOrg = Optional.ofNullable(retryQueue.poll());
             fromRetryQueue = true;
+        } else {
+            throw new IllegalStateException(getClass().getSimpleName() + " on ajamassa laskentaa, vaikka tila on " + state.get());
         }
 
         if (hkJaOrg.isPresent()) {
@@ -140,7 +144,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     }
 
     private void handleEmptyWorkQueueResult() {
-        if (retryActive.compareAndSet(false, true)) {
+        if (state.compareAndSet(FIRST_ATTEMPTS, RERUNS)) {
             if (retryQueue.peek() != null) {
                 LOG.info("Laskenta (uuid={}) olisi päättynyt, mutta sisältää keskeytettyjä hakukohteita. Yritetään epäonnistuneita kohteita ({} kpl) uudelleen.",
                     uuid(),
@@ -153,16 +157,15 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
             }
         }
         if (totalKohteet() == (successTotal.get() + failedTotal.get())) {
-            if (done.get()) {
-                LOG.error("done == " + done + " but it is being set again! Looks like a bug!", new Exception());
+            if (COMPLETE.equals(state.getAndSet(COMPLETE))) {
+                LOG.error("state == " + state + " but it is being set to that again! Looks like a bug!", new Exception());
             }
-            done.set(true);
             lopeta();
         }
     }
 
     public void lopeta() {
-        if (!done.get()) {
+        if (!COMPLETE.equals(state.get())) {
             LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid());
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
         } else {
@@ -196,5 +199,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
 
     public boolean isValmis() {
         return false;
+    }
+
+    public enum State {
+        FIRST_ATTEMPTS, RERUNS, COMPLETE
     }
 }
