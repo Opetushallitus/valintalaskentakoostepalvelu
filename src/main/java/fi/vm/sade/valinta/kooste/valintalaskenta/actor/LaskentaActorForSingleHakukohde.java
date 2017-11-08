@@ -134,6 +134,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
             }
         }
         if (totalKohteet == (successTotal.get() + failedTotal.get())) {
+            if (done.get()) {
+                LOG.error("done == " + done + " but it is being set again! Looks like a bug!", new Exception());
+            }
             done.set(true);
             lopeta();
         }
