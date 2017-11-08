@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.kela.route.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fi.vm.sade.organisaatio.resource.api.KelaResource;
@@ -49,14 +48,13 @@ import static java.util.Arrays.asList;
 public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(KelaRouteImpl.class);
 
-    private final int MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA = 10000;
+    private final int MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_OPPIJANUMEROREKISTERISTA = 10000;
 
     private final KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti;
     private final KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final DokumenttiResource dokumenttiResource;
     private final HaunTyyppiKomponentti haunTyyppiKomponentti;
-//    private final ApplicationResource applicationResource;
     private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
     private final OppilaitosKomponentti oppilaitosKomponentti;
     private final HakuV1Resource hakuResource;
@@ -73,7 +71,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
             KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
             HakuV1Resource hakuResource,
             HaunTyyppiKomponentti haunTyyppiKomponentti,
-//            ApplicationResource applicationResource,
             OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
             OppilaitosKomponentti oppilaitosKomponentti,
             LinjakoodiKomponentti linjakoodiKomponentti,
@@ -90,7 +87,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.dokumenttiResource = dokumenttiResource;
         this.kelaHakijaKomponentti = kelaHakijaKomponentti;
         this.kelaDokumentinLuontiKomponentti = kelaDokumentinLuontiKomponentti;
-//        this.applicationResource = applicationResource;
         this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
         this.kelaResource = kelaResource;
     }
@@ -236,13 +232,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         Collection<List<String>> oiditSivutettuna = Lists
                                 .newArrayList();
                         do {
-                            List<String> osajoukkoOideista = FluentIterable
-                                    .from(henkiloOidit)
-                                    .skip(n)
-                                    .limit(MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA)
-                                    .toList();
+                            List<String> osajoukkoOideista = henkiloOidit.stream().skip(n).limit(MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_OPPIJANUMEROREKISTERISTA).collect(Collectors.toList());
                             oiditSivutettuna.add(osajoukkoOideista);
-                            n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA;
+                            n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_OPPIJANUMEROREKISTERISTA;
                         } while (n < henkiloOidit.size());
                         List<HenkiloPerustietoDto> henkilot = Lists.newArrayList();
                         LOG.warn("Haetaan {} henkiloa, {} erässä", henkiloOidit.size(), oiditSivutettuna.size());
@@ -381,7 +373,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 luontiJaRivit.getLuonti().getLoppuPvm(),
                                 kelahaku.getHaku().getOid(), //TODO_-
                                 luontiJaRivit.getLuonti().getProsessi(),
-//                                luontiJaRivit.getLuonti().getCache(),
                                 luontiJaRivit.getLuonti().getCache(),
                                 hakukohdeSource,
                                 linjakoodiSource,
