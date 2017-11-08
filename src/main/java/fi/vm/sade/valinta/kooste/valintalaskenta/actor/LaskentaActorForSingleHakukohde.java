@@ -38,7 +38,11 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private int splittaus;
 
-    public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams, Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta, LaskentaSupervisor laskentaSupervisor, LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource, int splittaus) {
+    public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams,
+                                           Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta,
+                                           LaskentaSupervisor laskentaSupervisor,
+                                           LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
+                                           int splittaus) {
         this.actorParams = actorParams;
         this.hakukohteenLaskenta = hakukohteenLaskenta;
         this.laskentaSupervisor = laskentaSupervisor;
@@ -65,7 +69,8 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> hakukohdeKerralla(hakukohdeQueue, retryQueue));
     }
 
-    private void hakukohdeKerralla(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue) {
+    private void hakukohdeKerralla(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue,
+                                   ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue) {
         Optional<HakukohdeJaOrganisaatio> hkJaOrg;
         boolean fromRetryQueue;
         if (!retryActive.get()) {
@@ -89,7 +94,10 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         }
     }
 
-    private void handleSuccessfulLaskentaResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue, boolean fromRetryQueue, String hakukohdeOid) {
+    private void handleSuccessfulLaskentaResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue,
+                                                ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue,
+                                                boolean fromRetryQueue,
+                                                String hakukohdeOid) {
         if (fromRetryQueue) {
             LOG.info("(Uuid={}) Hakukohteen {} laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, successTotal.incrementAndGet(), totalKohteet);
         } else {
@@ -104,7 +112,11 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         hakukohdeKerralla(hakukohdeQueue, retryQueue);
     }
 
-    private void handleFailedLaskentaResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue, boolean fromRetryQueue, HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio, Throwable e) {
+    private void handleFailedLaskentaResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue,
+                                            ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue,
+                                            boolean fromRetryQueue,
+                                            HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio,
+                                            Throwable e) {
         String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
         if (!fromRetryQueue) {
             LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid, hakukohdeOid, retryTotal.incrementAndGet(), totalKohteet, e);
@@ -122,7 +134,8 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         hakukohdeKerralla(hakukohdeQueue, retryQueue);
     }
 
-    private void handleEmptyWorkQueueResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue) {
+    private void handleEmptyWorkQueueResult(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue,
+                                            ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue) {
         if (retryActive.compareAndSet(false, true)) {
             if (retryQueue.peek() != null) {
                 LOG.info("Laskenta (uuid={}) olisi päättynyt, mutta sisältää keskeytettyjä hakukohteita. Yritetään epäonnistuneita kohteita ({} kpl) uudelleen.", uuid, retryTotal.get());
