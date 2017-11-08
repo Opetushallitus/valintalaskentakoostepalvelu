@@ -1,17 +1,5 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
-import static fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil.toSearchCriteria;
-
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.KomotoResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
@@ -19,15 +7,21 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.KomotoDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.OidRDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
     private static final Logger LOG = LoggerFactory.getLogger(KelaCache.class);
     private final ConcurrentHashMap<String, HakuDTO> haut = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, HakukohdeDTO> hakukohteet = new ConcurrentHashMap<>();
-//    private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<>();
@@ -95,11 +89,6 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
         return now;
     }
 
-//    @Override
-//    public Hakemus getHakemusByOid(String oid) {
-//        return hakemukset.get(oid);
-//    }
-
     @Override
     public HenkiloPerustietoDto getByPersonOid(String oid) {
         return henkilotiedot.get(oid);
@@ -108,10 +97,6 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
     public void put(HakuDTO haku) {
         haut.put(haku.getOid(), haku);
     }
-
-//    public void put(Hakemus hakemus) {
-//        hakemukset.put(hakemus.getOid(), hakemus);
-//    }
 
     public void put(HakukohdeDTO hakukohde) {
         hakukohteet.put(hakukohde.getOid(), hakukohde);

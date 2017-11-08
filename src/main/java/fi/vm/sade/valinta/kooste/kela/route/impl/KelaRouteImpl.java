@@ -2,7 +2,9 @@ package fi.vm.sade.valinta.kooste.kela.route.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.*;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import fi.vm.sade.organisaatio.resource.api.KelaResource;
 import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
@@ -12,9 +14,7 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.Reititys;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -25,8 +25,6 @@ import fi.vm.sade.valinta.kooste.kela.dto.*;
 import fi.vm.sade.valinta.kooste.kela.komponentti.*;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.*;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.LogEntry;
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 import org.apache.camel.Endpoint;
@@ -36,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import rx.Observable;
 import rx.observables.BlockingObservable;
 
 import java.io.ByteArrayInputStream;
@@ -45,9 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.Arrays.*;
 import static java.util.Arrays.asList;
 
 @Component
@@ -232,46 +227,38 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                 .routeId("KELALUONTI")
                 .to(haeHakuJaValmistaHaku)
                 .process(Reititys.<KelaLuontiJaAbstraktitHaut>kuluttaja(luonti -> {
-                    Collection<String> hakemusOidit = Sets.newHashSet();
-                    for (KelaAbstraktiHaku kelahaku : luonti.getHaut()) {
-                        hakemusOidit.addAll(kelahaku.getHakemusOids());
-                    }
-                    hakemusOidit = Lists.newArrayList(hakemusOidit);
+                    List<String> henkiloOidit = luonti.getHaut().stream()
+                            .flatMap(h -> h.getPersonOids().stream())
+                            .distinct()
+                            .collect(Collectors.toList());
                     try {
                         int n = 0;
                         Collection<List<String>> oiditSivutettuna = Lists
                                 .newArrayList();
                         do {
                             List<String> osajoukkoOideista = FluentIterable
-                                    .from(hakemusOidit)
+                                    .from(henkiloOidit)
                                     .skip(n)
                                     .limit(MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA)
                                     .toList();
                             oiditSivutettuna.add(osajoukkoOideista);
                             n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA;
-                        } while (n < hakemusOidit.size());
-//                        List<Hakemus> hakemukset = Lists.newArrayList();
+                        } while (n < henkiloOidit.size());
                         List<HenkiloPerustietoDto> henkilot = Lists.newArrayList();
-                        LOG.warn("Haetaan {} hakemusta, {} erässä", hakemusOidit.size(), oiditSivutettuna.size());
+                        LOG.warn("Haetaan {} henkiloa, {} erässä", henkiloOidit.size(), oiditSivutettuna.size());
                         for (List<String> oidit : oiditSivutettuna) {
                             try {
-//                                List<Hakemus> h = applicationResource.getApplicationsByOids(oidit);
-                                List<String> henkiloOidit = luonti.getHaut().stream().flatMap(h -> h.getPersonOids().stream()).collect(Collectors.toList());
                                 List<HenkiloPerustietoDto> henkiloPerustietoDtos = oppijanumerorekisteriAsyncResource.haeHenkilot(henkiloOidit);
-//                                hakemukset.addAll(h);
                                 henkilot.addAll(henkiloPerustietoDtos);
-//                                LOG.warn("Saatiin erä hakemuksia {}. {}/{}", h.size(), hakemukset.size(), hakemusOidit.size());
                             } catch (Exception e) {
-                                LOG.error("Hakemuspalvelu ei jaksa tarjoilla hakemuksia. Yritetään vielä uudestaan.", e);
+                                LOG.error("Oppijanumerorekisteri ei jaksa tarjoilla hakemuksia. Yritetään vielä uudestaan.", e);
                                 Thread.sleep(50L);
-//                                hakemukset.addAll(applicationResource.getApplicationsByOids(oidit));
-                                henkilot.addAll(oppijanumerorekisteriAsyncResource.haeHenkilot(oidit));
+                                henkilot.addAll(oppijanumerorekisteriAsyncResource.haeHenkilot(henkiloOidit));
                             }
                         }
-//                        hakemukset.forEach(luonti.getLuonti().getCache()::put);
                         henkilot.forEach(luonti.getLuonti().getCache()::put);
                     } catch (Exception e) {
-                        String virhe = "Ei saatu hakemuksia hakupalvelulta!";
+                        String virhe = "Ei saatu henkiloita oppijanumerorekisteristä!";
                         luonti.getLuonti()
                                 .getProsessi()
                                 .getPoikkeuksetUudelleenYrityksessa()

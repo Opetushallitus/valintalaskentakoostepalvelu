@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.impl;
 
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,6 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
         return getWebClient()
                 .path(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findByPersonOidList"))
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(personOids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HenkiloPerustietoDto>>() {
-                });
+                .post(Entity.entity(personOids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HenkiloPerustietoDto>>() {});
     }
 }

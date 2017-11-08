@@ -1,10 +1,11 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
-import java.util.*;
-
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.*;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 public abstract class KelaAbstraktiHaku {
 
@@ -34,33 +35,16 @@ public abstract class KelaAbstraktiHaku {
 
     public abstract List<String> getPersonOids();
 
-    // public Collection<String> hakemusOids();
     public abstract Collection<KelaHakijaRivi> createHakijaRivit(
             Date alkuPvm,
             Date loppuPvm,
             String hakuOid,
             KelaProsessi prosessi,
-//            HakemusSource hakemusSource,
             HenkilotietoSource henkilotietoSource,
             HakukohdeSource hakukohdeSource,
             LinjakoodiSource linjakoodiSource,
             OppilaitosSource oppilaitosSource,
             TutkinnontasoSource tutkinnontasoSource,
             TilaSource tilaSource);
-
-    /**
-     * @return case insensitive map
-     */
-    protected Map<String, String> additionalInfo(Hakemus hakemus) {
-        Map<String, String> additionalInfo = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-        additionalInfo.putAll(hakemus.getAdditionalInfo());
-        return additionalInfo;
-    }
-
-    protected Map<String, String> henkilotiedot(Hakemus hakemus) {
-        Map<String, String> henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-        henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
-        return henkilotiedot;
-    }
 
 }

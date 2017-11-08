@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri;
 
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 
 import java.util.List;
 import java.util.concurrent.Future;

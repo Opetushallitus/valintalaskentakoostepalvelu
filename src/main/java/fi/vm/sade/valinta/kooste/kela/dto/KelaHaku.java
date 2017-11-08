@@ -4,22 +4,16 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.kela.komponentti.*;
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource.HENKILOTUNNUS;
-import static fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource.SYNTYMAAIKA;
 
 public class KelaHaku extends KelaAbstraktiHaku {
     private final static Logger LOG = LoggerFactory.getLogger(KelaHaku.class);
@@ -35,7 +29,6 @@ public class KelaHaku extends KelaAbstraktiHaku {
                                                         Date loppuPvm,
                                                         String hakuOid,
                                                         KelaProsessi prosessi,
-//                                                        HakemusSource hakemusSource,
                                                         HenkilotietoSource henkilotietoSource,
                                                         HakukohdeSource hakukohdeSource,
                                                         LinjakoodiSource linjakoodiSource,
@@ -49,16 +42,12 @@ public class KelaHaku extends KelaAbstraktiHaku {
             prosessi.inkrementoiTehtyjaToita();
             hakija.getHakutoiveet()
                     .stream()
-                            //
                     .filter(h -> h != null && h.getValintatila() != null
                             && h.getVastaanottotila() != null)
-                            //
                     .filter(hakutoive ->
-                            //
                             hakutoive.getValintatila().isHyvaksytty()
                                     && hakutoive.getVastaanottotila()
                                     .isVastaanottanut())
-                            //
                     .findFirst()
                     .ifPresent(
                             hakutoive -> {
