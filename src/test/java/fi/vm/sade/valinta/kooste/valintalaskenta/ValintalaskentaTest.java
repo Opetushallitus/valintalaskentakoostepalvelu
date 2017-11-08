@@ -146,4 +146,19 @@ public class ValintalaskentaTest {
         verify(seurantaAsyncResource, times(2)).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty()); // TODO one extra call
         //Mockito.verifyNoMoreInteractions(seurantaAsyncResource); // TODO FIXME
     }
+
+    @Test
+    public void poikkeukseenEpaonnistuneitaLaskentojaEiKirjataSeurantapalveluun() throws InterruptedException {
+        List<HakukohdeJaOrganisaatio> hakukohdeOids = Collections.singletonList(new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"));
+
+        when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
+            Observable.just(Collections.singletonList(new ValintaperusteetDTO())));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenThrow(new RuntimeException(getClass().getSimpleName() +
+            " : Ei saatu taaskaan haettua hakemuksia kohteelle " + hakukohde1Oid));
+
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE));
+        Thread.sleep(500);
+
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
 }
