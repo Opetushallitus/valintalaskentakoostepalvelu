@@ -128,6 +128,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 LOG.info("Laskenta (uuid={}) olisi päättynyt, mutta sisältää keskeytettyjä hakukohteita. Yritetään epäonnistuneita kohteita ({} kpl) uudelleen.", uuid, retryTotal.get());
                 final boolean splitRetry = retryQueue.size() > 20;
                 IntStream.range(0, splitRetry ? splittaus : 1).forEach(i -> hakukohdeKerralla(hakukohdeQueue, retryQueue));
+                return;
             } else {
                 LOG.info("Laskennassa (uuid={}) ei ole epäonnistuneita hakukohteita uudelleenyritettäviksi.", uuid);
             }

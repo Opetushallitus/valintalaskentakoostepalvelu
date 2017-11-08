@@ -1,8 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,10 +24,14 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusTyyppi;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
+import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import rx.Observable;
 
@@ -120,12 +125,9 @@ public class ValintalaskentaTest {
 
         when(valintalaskentaAsyncResource.laskeKaikki(any())).thenReturn(Observable.just("OK"));
 
-//        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(
             Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-//        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(
-//            Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde2Oid)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
 
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde1Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
@@ -139,12 +141,29 @@ public class ValintalaskentaTest {
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
 
-//        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
-//        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
-        verify(seurantaAsyncResource, times(2)).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty()); // TODO one extra call
-        verify(seurantaAsyncResource, times(2)).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty()); // TODO one extra call
-        //Mockito.verifyNoMoreInteractions(seurantaAsyncResource); // TODO FIXME
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), argThat(new ArgumentMatcher<Optional<IlmoitusDto>>() {
+            private final IlmoitusTyyppi odotettuIlmoitustyyppi = IlmoitusTyyppi.VIRHE;
+            private final String odotettuOtsikonSisalto = "Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid;
+
+            @Override
+            public boolean matches(Object argument) {
+                if (!(argument instanceof Optional)) {
+                    return false;
+                }
+                IlmoitusDto ilmoitusDto = ((Optional<IlmoitusDto>) argument).get();
+                return odotettuIlmoitustyyppi.equals(ilmoitusDto.getTyyppi()) && ilmoitusDto.getOtsikko().contains(odotettuOtsikonSisalto);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText(IlmoitusDto.class.getSimpleName() + ", jossa " + odotettuIlmoitustyyppi + " ja otsikossa \"" + odotettuOtsikonSisalto + "\"");
+            }
+        }));
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }
 
     @Test
