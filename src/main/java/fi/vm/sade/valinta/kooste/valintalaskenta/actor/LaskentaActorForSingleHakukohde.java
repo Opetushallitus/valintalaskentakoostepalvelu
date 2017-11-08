@@ -148,6 +148,6 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
 
     public void postStop() {
         LOG.info("PostStop ajettu");
-        //lopeta();
+        lopeta();
     }
 }
