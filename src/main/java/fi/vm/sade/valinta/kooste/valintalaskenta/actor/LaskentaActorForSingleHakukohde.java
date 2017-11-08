@@ -109,16 +109,16 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
 
     private void handleFailedLaskentaResult(boolean fromRetryQueue,
                                             HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio,
-                                            Throwable e) {
+                                            Throwable failure) {
         String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
         if (!fromRetryQueue) {
-            LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid(), hakukohdeOid, retryTotal.incrementAndGet(), totalKohteet(), e);
+            LOG.warn("(Uuid={}) Lisätään hakukohde {} epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}", uuid(), hakukohdeOid, retryTotal.incrementAndGet(), totalKohteet(), failure);
             retryQueue.add(hakukohdeJaOrganisaatio);
         } else {
-            LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid(), hakukohdeOid, failedTotal.incrementAndGet(), totalKohteet(), e);
+            LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}", uuid(), hakukohdeOid, failedTotal.incrementAndGet(), totalKohteet(), failure);
             try {
                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.KESKEYTETTY,
-                    Optional.of(virheilmoitus(e.getMessage(), Arrays.toString(e.getStackTrace()))));
+                    Optional.of(virheilmoitus(failure.getMessage(), Arrays.toString(failure.getStackTrace()))));
                 LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tulos merkattu onnistuneesti seurantaan ", uuid(), hakukohdeOid);
             } catch (Throwable e1) {
                 LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui mutta ei saatu merkattua ", uuid(), hakukohdeOid, e1);
