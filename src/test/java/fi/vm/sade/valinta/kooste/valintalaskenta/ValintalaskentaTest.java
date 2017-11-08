@@ -64,19 +64,15 @@ public class ValintalaskentaTest {
     private final String uuid = "uuid";
     private final String hakuOid = "hakuOid";
     private final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+    private final List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(
+        new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
+        new HakukohdeJaOrganisaatio(hakukohde2Oid, "o2"),
+        new HakukohdeJaOrganisaatio(hakukohde3Oid, "o3"));
 
     @Before
     public void setUpTestData() {
         hakemus.setPersonOid("personOid");
         hakuDTO.setOid(hakuOid);
-    }
-
-    @Test
-    public void onnistuneestaValintalaskennastaPidetaanKirjaaSeurantapalveluun() throws InterruptedException {
-        List<HakukohdeJaOrganisaatio> hakukohdeOids = Arrays.asList(
-            new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
-            new HakukohdeJaOrganisaatio(hakukohde2Oid, "o2"),
-            new HakukohdeJaOrganisaatio(hakukohde3Oid, "o3"));
 
         when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
             Observable.just(Collections.singletonList(new ValintaperusteetDTO())));
@@ -86,17 +82,20 @@ public class ValintalaskentaTest {
 
         when(valintalaskentaAsyncResource.laskeKaikki(any())).thenReturn(Observable.just("OK"));
 
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde1Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde2Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde3Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
 
         when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid)).thenReturn(Observable.just(Collections.emptyMap()));
+    }
 
-        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
+    @Test
+    public void onnistuneestaValintalaskennastaPidetaanKirjaaSeurantapalveluun() throws InterruptedException {
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
@@ -109,34 +108,14 @@ public class ValintalaskentaTest {
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }
 
-
     @Test
     public void epaonnistuneetLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
-        List<HakukohdeJaOrganisaatio> hakukohdeOids = Arrays.asList(
-            new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
-            new HakukohdeJaOrganisaatio(hakukohde2Oid, "o2"),
-            new HakukohdeJaOrganisaatio(hakukohde3Oid, "o3"));
-
-        when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
-            Observable.just(Collections.singletonList(new ValintaperusteetDTO())));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde1Oid)).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde2Oid)).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde3Oid)).thenReturn(Observable.just(Collections.emptyList()));
-
-        when(valintalaskentaAsyncResource.laskeKaikki(any())).thenReturn(Observable.just("OK"));
-
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(
             Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
 
-        when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde1Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
-        when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde2Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
-        when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde3Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
-
-        when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid)).thenReturn(Observable.just(Collections.emptyMap()));
-
-        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
@@ -168,14 +147,10 @@ public class ValintalaskentaTest {
 
     @Test
     public void poikkeukseenEpaonnistuneitaLaskentojaEiKirjataSeurantapalveluun() throws InterruptedException {
-        List<HakukohdeJaOrganisaatio> hakukohdeOids = Collections.singletonList(new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"));
-
-        when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
-            Observable.just(Collections.singletonList(new ValintaperusteetDTO())));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenThrow(new RuntimeException(getClass().getSimpleName() +
             " : Ei saatu taaskaan haettua hakemuksia kohteelle " + hakukohde1Oid));
 
-        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE));
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE));
         Thread.sleep(500);
 
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
