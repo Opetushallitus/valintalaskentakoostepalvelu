@@ -100,6 +100,10 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     public void ready(String uuid) {
         LOG.trace("Ilmoitettu actor valmiiksi laskennalle (" + uuid + ")");
         LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
+        int callStackinSyvyys = new Exception().getStackTrace().length;
+        if (callStackinSyvyys > 50) {
+            LOG.info("Call-stackin syvyys: " + callStackinSyvyys);
+        }
         stopActor(uuid, actorWrapper.laskentaActor());
     }
 
