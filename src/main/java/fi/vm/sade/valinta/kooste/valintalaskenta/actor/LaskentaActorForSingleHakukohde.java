@@ -69,8 +69,8 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     }
 
     private void hakukohdeKerralla() {
-        Optional<HakukohdeJaOrganisaatio> hkJaOrg;
-        boolean fromRetryQueue;
+        final Optional<HakukohdeJaOrganisaatio> hkJaOrg;
+        final boolean fromRetryQueue;
         if (!retryActive.get()) {
             hkJaOrg = Optional.ofNullable(hakukohdeQueue.poll());
             fromRetryQueue = false;
