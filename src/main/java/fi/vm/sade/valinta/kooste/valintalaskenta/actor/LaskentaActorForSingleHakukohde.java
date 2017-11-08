@@ -24,14 +24,14 @@ import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
 class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorForSingleHakukohde.class);
 
-    final AtomicBoolean active;
-    final AtomicBoolean done;
-    final String uuid;
-    final int totalKohteet;
-    final AtomicBoolean retryActive;
-    final AtomicInteger successTotal;
-    final AtomicInteger retryTotal;
-    final AtomicInteger failedTotal;
+    private final AtomicBoolean active;
+    private final AtomicBoolean done;
+    private final String uuid;
+    private final int totalKohteet;
+    private final AtomicBoolean retryActive;
+    private final AtomicInteger successTotal;
+    private final AtomicInteger retryTotal;
+    private final AtomicInteger failedTotal;
     private final LaskentaActorParams actorParams;
     private final Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> r;
     private final LaskentaSupervisor laskentaSupervisor;
