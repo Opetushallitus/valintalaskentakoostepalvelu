@@ -114,7 +114,8 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
         }
     }
 
-    public <T> Observable<String> kutsuRajapintaaPollaten(String api, Laskentakutsu laskentakutsu) {
+    public Observable<String> kutsuRajapintaaPollaten(String api, Laskentakutsu laskentakutsu) {
+        LOG.info("(Uuid: {}) Lähetetään laskenta-servicelle laskentakutsu ja pollataan sen tilaa kunnes se on päättynyt. (Pollkey: {})", laskentakutsu.getUuid(), laskentakutsu.getPollKey());
         return postAsObservable(
                 getUrl(api),
                 String.class,
