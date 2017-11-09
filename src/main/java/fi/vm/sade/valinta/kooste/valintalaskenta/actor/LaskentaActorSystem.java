@@ -106,6 +106,9 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     public void ready(String uuid) {
         LOG.trace("Ilmoitettu actor valmiiksi laskennalle (" + uuid + ")");
         LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
+        if (actorWrapper == null) {
+            throw new IllegalStateException("Ei löytynyt valmiiksi merkattavaa actoria laskennalle " + uuid);
+        }
         stopActor(uuid, actorWrapper.laskentaActor());
     }
 
