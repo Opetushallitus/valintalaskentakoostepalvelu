@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import static org.apache.commons.lang3.concurrent.ConcurrentUtils.constantFuture;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
@@ -8,7 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -35,10 +38,12 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import rx.Observable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class ValintalaskentaTest {
     private static final Hakemus hakemus = new Hakemus();
@@ -106,6 +111,56 @@ public class ValintalaskentaTest {
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
+
+    @Test // TODO: Tsekkaa, miten tämä testi käyttäytyy OK-115:n muutosten kanssa.
+    public void onnistuneestaValintaryhmalaskennastaPidetaanKirjaaSeurantapalveluun() throws InterruptedException {
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+
+        Integer vaiheenNumero = 1;
+
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde1Oid), eq(vaiheenNumero), anyConsumer(), anyConsumer()))
+            .thenReturn(new PeruutettavaImpl(constantFuture(new ArrayList<ValintaperusteetDTO>())));
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde2Oid), eq(vaiheenNumero), anyConsumer(), anyConsumer()))
+            .thenReturn(new PeruutettavaImpl(constantFuture(new ArrayList<ValintaperusteetDTO>())));
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde3Oid), eq(vaiheenNumero), anyConsumer(), anyConsumer()))
+            .thenReturn(new PeruutettavaImpl(constantFuture(new ArrayList<ValintaperusteetDTO>())));
+
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde1Oid), anyConsumer(), anyConsumer()))
+            .thenReturn(new PeruutettavaImpl(constantFuture(new ArrayList<ValintaperusteetHakijaryhmaDTO>())));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde2Oid), anyConsumer(), anyConsumer()))
+            .thenReturn(new PeruutettavaImpl(constantFuture(new ArrayList<ValintaperusteetHakijaryhmaDTO>())));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde3Oid), anyConsumer(), anyConsumer()))
+            .thenReturn(new PeruutettavaImpl(constantFuture(new ArrayList<ValintaperusteetHakijaryhmaDTO>())));
+
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid, false, vaiheenNumero, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.VALINTARYHMA);
+
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
+        Thread.sleep(500);
+
+        //verify(valintalaskentaAsyncResource).laskeJaSijoittele(anyListOf(LaskeDTO.class), anyConsumer(), anyConsumer());
+
+
+        verify(valintaperusteetAsyncResource).haeValintaperusteet(eq(hakukohde1Oid), eq(vaiheenNumero), anyConsumer(), anyConsumer());
+//        verify(valintaperusteetAsyncResource).haeValintaperusteet(eq(hakukohde2Oid), eq(valinnanvaihe), any(Consumer.class), any(Consumer.class));
+//        verify(valintaperusteetAsyncResource).haeValintaperusteet(eq(hakukohde3Oid), eq(valinnanvaihe), any(Consumer.class), any(Consumer.class));
+        verify(valintaperusteetAsyncResource).haeHakijaryhmat(eq(hakukohde1Oid), anyConsumer(), anyConsumer());
+//        verify(valintaperusteetAsyncResource).haeHakijaryhmat(eq(hakukohde2Oid), any(Consumer.class), any(Consumer.class));
+//        verify(valintaperusteetAsyncResource).haeHakijaryhmat(eq(hakukohde3Oid), any(Consumer.class), any(Consumer.class));
+        Mockito.verifyNoMoreInteractions(valintaperusteetAsyncResource);
+
+//        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
+//        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty());
+//        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
+//        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
+//        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
+
+    private <T> Consumer<T> anyConsumer() {
+        return any(Consumer.class);
     }
 
     @Test
