@@ -45,12 +45,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static fi.vm.sade.valinta.http.ObservableUtil.wrapAsRunOnlyOnceObservable;
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
+import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
+import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.tuple.Pair.of;
+import static rx.Observable.*;
 
 @Service
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
@@ -146,21 +155,25 @@ public class LaskentaActorFactory {
                 hakukohdeJaOrganisaatio -> {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, false)
-                            .switchMap(timedSwitchMap((took, exception) ->
-                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid), valintalaskentaAsyncResource::valintakokeet));
-                    laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
+                            .switchMap(timedSwitchMap((took, exception) -> {
+                                if (exception.isPresent()) {
+                                    LOG.error("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt virheeseen: {}", uuid, millisToString(took), hakukohdeOid, exception.get());
+                                } else {
+                                    LOG.info("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt onnistuneesti.", uuid, millisToString(took), hakukohdeOid);
+                                }
+                            }, valintalaskentaAsyncResource::valintakokeet));
                     return laskenta;
                 }
         );
     }
 
     private <A, T> Func1<A, Observable<T>> timedSwitchMap(BiConsumer<Long, Optional<Throwable>> log, Function<A, Observable<T>> f) {//Function<A,Observable<T>> switchMap) {
-        return (a) -> {
+        return (A a) -> {
             long start = System.currentTimeMillis();
             Observable<T> t = wrapAsRunOnlyOnceObservable(f.apply(a));
-            t.subscribe((n) ->
-                log.accept(System.currentTimeMillis() - start, Optional.empty()), (n) ->
-                log.accept(System.currentTimeMillis() - start, Optional.ofNullable(n)));
+            t.subscribe(
+                    (n) -> log.accept(System.currentTimeMillis() - start, Optional.empty()),
+                    (n) -> log.accept(System.currentTimeMillis() - start, Optional.ofNullable(n)));
             return t;
         };
     }
@@ -178,9 +191,13 @@ public class LaskentaActorFactory {
 
 
                     Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, true)
-                            .switchMap(timedSwitchMap((took, exception) ->
-                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid), valintalaskentaAsyncResource::laske));
-                    laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
+                            .switchMap(timedSwitchMap((took, exception) -> {
+                                if (exception.isPresent()) {
+                                    LOG.error("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt virheeseen: {}", uuid, millisToString(took), hakukohdeOid, exception.get());
+                                } else {
+                                    LOG.info("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt onnistuneesti.", uuid, millisToString(took), hakukohdeOid);
+                                }
+                            }, valintalaskentaAsyncResource::laske));
                     return laskenta;
                 }
         );
@@ -199,9 +216,13 @@ public class LaskentaActorFactory {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan + valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                     Observable<String> laskenta = fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false,true)
-                            .switchMap(timedSwitchMap((took, exception) ->
-                                LOG.info("(Uuid={}) (Kesto {}s) Laskenta valmis hakukohteelle {}", uuid,millisToString(took), hakukohdeOid), valintalaskentaAsyncResource::laskeKaikki));
-                    laskenta.subscribe(laskentaOK.apply(uuid, hakukohdeOid), laskentaException.apply(uuid, hakukohdeOid));
+                            .switchMap(timedSwitchMap((took, exception) -> {
+                                if (exception.isPresent()) {
+                                    LOG.error("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt virheeseen: {}", uuid, millisToString(took), hakukohdeOid, exception.get());
+                                } else {
+                                    LOG.info("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt onnistuneesti.", uuid, millisToString(took), hakukohdeOid);
+                                }
+                            }, valintalaskentaAsyncResource::laskeKaikki));
                     return laskenta;
                 }
         );
