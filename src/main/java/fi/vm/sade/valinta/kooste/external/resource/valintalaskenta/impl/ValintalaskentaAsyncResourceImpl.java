@@ -18,8 +18,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VALMIS;
-import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VIRHE;
+import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.*;
 
 @Service
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
@@ -115,7 +114,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     public Observable<String> kutsuRajapintaaPollaten(String api, Laskentakutsu laskentakutsu) {
-        LOG.info("(Uuid: {}) Lähetetään laskenta-servicelle laskentakutsu ja pollataan sen tilaa kunnes se on päättynyt. (Pollkey: {})", laskentakutsu.getUuid(), laskentakutsu.getPollKey());
+        LOG.info("(Uuid: {}) Lähetetään laskenta-servicelle laskentakutsu. (Pollkey: {})", laskentakutsu.getUuid(), laskentakutsu.getPollKey());
         return postAsObservable(
                 getUrl(api),
                 String.class,
@@ -123,6 +122,14 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
                 client -> {
                     client.accept(MediaType.TEXT_PLAIN_TYPE);
                     return client;
-                }).switchMap(rval -> pollaa(1, rval, laskentakutsu.getUuid(), laskentakutsu.getPollKey()));
+                }).switchMap(rval -> {
+                    if (UUSI.equals(rval)) {
+                        LOG.info("Saatiin tieto, että uusi laskenta on luotu (Pollkey: {}). Pollataan sen tilaa kunnes se on päättynyt (VALMIS tai VIRHE).", laskentakutsu.getPollKey());
+                        return pollaa(1, rval, laskentakutsu.getUuid(), laskentakutsu.getPollKey());
+                    } else {
+                        LOG.error("Yritettiin käynnistää laskenta, mutta saatiin palautusarvona {} eikä UUSI. Pollauksen pitäisi olla käynnissä muualla. Ei pollata.", rval);
+                        return Observable.error(new RuntimeException(String.format("Laskenta (pollKey=%s) epäonnistui!", laskentakutsu.getPollKey())));
+                    }
+                });
     }
 }
