@@ -101,15 +101,16 @@ public class LaskentaActorFactory {
         return Pair.of(head,tail);
     }
 
-    private Observable<Pair<Collection<String>, List<LaskeDTO>>> fetchRecursively(Function<String, Observable<LaskeDTO>> fetchLaskeDTO, Observable<Pair<Collection<String>, List<LaskeDTO>>> o) {
-        return o.switchMap(l -> {
-            Collection<String> oids = l.getKey();
+    private Observable<Pair<Collection<String>, List<LaskeDTO>>> fetchRecursively(Function<String, Observable<LaskeDTO>> haeLaskeDTOHakukohteelle, Observable<Pair<Collection<String>, List<LaskeDTO>>> tulosObservable) {
+        return tulosObservable.switchMap(haetutResurssit -> {
+            Collection<String> oids = haetutResurssit.getKey();
             if(oids.isEmpty()) {
-                return o;
+                return tulosObservable;
             } else {
                 Pair<String, Collection<String>> headWithTail = headAndTail(oids);
-                Observable<Pair<Collection<String>, List<LaskeDTO>>> map = fetchLaskeDTO.apply(headWithTail.getKey()).map(laskeDTO -> Pair.of(headWithTail.getRight(), Stream.concat(Stream.of(laskeDTO), l.getRight().stream()).collect(Collectors.toList())));
-                return map.switchMap(t -> fetchRecursively(fetchLaskeDTO, Observable.just(t)));
+                Observable<Pair<Collection<String>, List<LaskeDTO>>> aiemmatJaUusiResurssi = haeLaskeDTOHakukohteelle.apply(headWithTail.getKey())
+                        .map(laskeDTO -> Pair.of(headWithTail.getRight(), Stream.concat(Stream.of(laskeDTO), haetutResurssit.getRight().stream()).collect(Collectors.toList())));
+                return aiemmatJaUusiResurssi.switchMap(haetut -> fetchRecursively(haeLaskeDTOHakukohteelle, Observable.just(haetut)));
             }
         });
     }
@@ -125,7 +126,7 @@ public class LaskentaActorFactory {
                     LOG.info("(Uuid={}) {}", uuid, hakukohteidenNimi);
                     Observable<Pair<Collection<String>, List<LaskeDTO>>> recursiveSequentialFetch = just(of(hakukohdeOids, emptyList()));
 
-                    Function<String, Observable<LaskeDTO>> fetchLaskeDTO = h ->fetchResourcesForOneLaskenta(
+                    Function<String, Observable<LaskeDTO>> fetchLaskeDTO = h -> fetchResourcesForOneLaskenta(
                             auditSession, uuid, haku, h, a, true, true);
 
                     Observable<String> laskenta = fetchRecursively(fetchLaskeDTO, recursiveSequentialFetch).switchMap(hksAndDtos -> {
