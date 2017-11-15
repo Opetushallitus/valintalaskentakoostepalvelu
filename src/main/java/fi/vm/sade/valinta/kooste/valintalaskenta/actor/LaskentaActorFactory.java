@@ -278,6 +278,7 @@ public class LaskentaActorFactory {
             "valintaperusteetAsyncResource.haeHakijaryhmat",
             valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : just(emptyList());
 
+        LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
         return wrapAsRunOnlyOnceObservable(combineLatest(
                 valintapisteetForHakukohdes,
                 hakijaryhmat,
@@ -285,16 +286,18 @@ public class LaskentaActorFactory {
                 hakemukset,
                 oppijat,
                 hakukohdeRyhmasForHakukohdes,
-                (vp, hr, v, h, o, r) -> {if(!withHakijaRyhmat) {
-                    return new LaskeDTO(
+                (vp, hr, v, h, o, r) -> {
+                    LOG.info("(Uuid: {}) Kaikki resurssit hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
+                    if(!withHakijaRyhmat) {
+                        return new LaskeDTO(
                             uuid,
                             haku.isKorkeakouluHaku(),
                             actorParams.isErillishaku(),
                             hakukohdeOid,
                             HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v);
 
-                } else {
-                    return new LaskeDTO(
+                    } else {
+                        return new LaskeDTO(
                             uuid,
                             haku.isKorkeakouluHaku(),
                             actorParams.isErillishaku(),
