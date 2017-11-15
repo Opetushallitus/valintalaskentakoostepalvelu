@@ -137,7 +137,6 @@ public class LaskentaActorFactory {
                         }
                         return valintalaskentaAsyncResource.laskeJaSijoittele(allLaskeDTOs);
                     });
-                    laskenta.subscribe(laskentaOK.apply(uuid, hakukohteidenNimi), laskentaException.apply(uuid, hakukohteidenNimi));
                     return laskenta;
                 }
         );
