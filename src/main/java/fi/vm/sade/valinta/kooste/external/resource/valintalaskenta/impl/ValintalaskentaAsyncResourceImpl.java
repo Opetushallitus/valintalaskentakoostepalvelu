@@ -44,7 +44,6 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     public Observable<String> laske(LaskeDTO laskeDTO) {
         Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
-
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laske", laskentakutsu);
         } catch (Exception e) {
@@ -55,7 +54,6 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     @Override
     public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
         Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
-
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.valintakokeet", laskentakutsu);
         } catch (Exception e) {
@@ -66,7 +64,6 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     @Override
     public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
         Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
-
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskekaikki", laskentakutsu);
         } catch (Exception e) {
@@ -77,7 +74,6 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     @Override
     public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista) {
         Laskentakutsu laskentakutsu = new Laskentakutsu(lista);
-
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele", laskentakutsu);
         } catch (Exception e) {
@@ -98,10 +94,10 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
             return Observable.just(VALMIS);
         } else if (VIRHE.equals(result)) {
             LOG.error("Virhe laskennan suorituksessa, lopetetaan");
-            return Observable.error(new RuntimeException(String.format("Laskenta uuid=%s, hakukohde=%s epäonnistui!", uuid, result)));
+            return Observable.error(new RuntimeException(String.format("(Pollkey: %s) Laskenta epäonnistui!", pollKey)));
         } else {
             if(pollInterval == MAX_POLL_INTERVAL_IN_SECONDS) {
-                LOG.warn("(Uuid={}) Laskenta hakukohteelle {} kestaa pitkaan! Jatketaan pollausta..", pollKey);
+                LOG.warn(String.format("(Pollkey=%s) Laskenta kestää pitkään! Jatketaan pollausta.", pollKey));
             }
             return Observable.timer(pollInterval, TimeUnit.SECONDS).switchMap(d -> {
                 String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.status", pollKey);

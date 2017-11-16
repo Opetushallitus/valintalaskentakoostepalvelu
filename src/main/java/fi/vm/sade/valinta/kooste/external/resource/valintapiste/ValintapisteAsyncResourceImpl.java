@@ -1,17 +1,14 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintapiste;
 
-import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.FailedHttpException;
-import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ListFullSearchDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -24,11 +21,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource implements ValintapisteAsyncResource {
     public static final String OK = "";
+    Logger LOG = LoggerFactory.getLogger(ValintapisteAsyncResource.class);
 
     public ValintapisteAsyncResourceImpl() {
         super(TimeUnit.MINUTES.toMillis(30));
@@ -48,6 +45,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
             Object url = r.getOutMessage().get("org.apache.cxf.request.uri");
             return url.toString();
         } catch (Exception e) {
+            LOG.error(String.format("Urlin selvittämisessä tapahtui virhe: " + e));
             return "null";
         }
     }
@@ -57,13 +55,14 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
         } else {
             try {
                 final String entity = body(response);
-                List<Valintapisteet> vp = gson().fromJson(entity, new GenericType<List<Valintapisteet>>() {
+                List<Valintapisteet> pisteet = gson().fromJson(entity, new GenericType<List<Valintapisteet>>() {
                 }.getType());
-                if(vp == null) {
+                if(pisteet == null) {
+                    LOG.error("Valintapisteet null!");
                     String url = getUrl(response);
                     return Observable.error(new RuntimeException(String.format("Null response for url %s", url)));
                 } else {
-                    return Observable.just(new PisteetWithLastModified(Optional.ofNullable(response.getHeaderString(LAST_MODIFIED)), vp));
+                    return Observable.just(new PisteetWithLastModified(Optional.ofNullable(response.getHeaderString(LAST_MODIFIED)), pisteet));
                 }
             } catch (Exception e) {
                 return Observable.error(e);
