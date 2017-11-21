@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor;
@@ -109,10 +110,22 @@ public class LaskentaStarter {
                 (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: ", Optional.of(t), laskenta.getUuid())
         );
     }
-
+    private static AuditSession koosteAuditSession(LaskentaDto laskenta) {
+        final String userAgent = "-";
+        final String inetAddress = "127.0.0.1";
+        AuditSession auditSession = new AuditSession(
+                laskenta.getUserOID(),
+                Collections.emptyList(),
+                userAgent,
+                inetAddress);
+        auditSession.setSessionId(laskenta.getUuid());
+        auditSession.setUid(laskenta.getUserOID());
+        return auditSession;
+    }
     private static LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {
         return new LaskentaActorParams(
                 new LaskentaStartParams(
+                        koosteAuditSession(laskenta),
                         laskenta.getUuid(),
                         hakuOid,
                         laskenta.isErillishaku(),

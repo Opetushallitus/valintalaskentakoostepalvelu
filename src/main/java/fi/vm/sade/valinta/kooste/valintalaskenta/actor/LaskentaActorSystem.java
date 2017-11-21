@@ -90,7 +90,8 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Override
     public void suoritaValintalaskentaKerralla(final HakuV1RDTO haku, final ParametritDTO parametritDTO, final LaskentaStartParams laskentaStartParams) {
-        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(koosteAuditSession(),this, haku, new LaskentaActorParams(laskentaStartParams, parametritDTO));
+        AuditSession auditSession = laskentaStartParams.getAuditSession();
+        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(auditSession,this, haku, new LaskentaActorParams(laskentaStartParams, parametritDTO));
         startLaskentaActor(laskentaStartParams, laskentaActor);
     }
 
@@ -143,15 +144,10 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             laskentaStarter.fetchLaskentaParams(
                     laskennanKaynnistajaActor,
                     uuid,
-                    (haku, params) -> startLaskentaActor(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(koosteAuditSession(), this, haku, params))
+                    (haku, params) -> startLaskentaActor(params.getLaskentaStartParams(),
+                            laskentaActorFactory.createLaskentaActor(params.getLaskentaStartParams().getAuditSession(), this, haku, params))
             );
         }
-    }
-    private AuditSession koosteAuditSession() {
-        AuditSession auditSession = new AuditSession("laskentakoostepalvelu", Collections.emptyList(), "laskentakoostepalvelu", "laskentakoostepalvelu");
-        auditSession.setSessionId("laskentakoostepalvelu");
-        auditSession.setUid("laskentakoostepalvelu");
-        return auditSession;
     }
 
     protected void startLaskentaActor(LaskentaStartParams params, LaskentaActor laskentaActor) {

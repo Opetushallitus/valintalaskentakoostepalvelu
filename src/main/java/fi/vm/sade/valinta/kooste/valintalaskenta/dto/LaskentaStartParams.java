@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +24,10 @@ public class LaskentaStartParams implements LaskentaInfo {
     private final boolean valintaryhmalaskenta;
     private final Collection<HakukohdeJaOrganisaatio> hakukohdeDtos;
     private final LaskentaTyyppi tyyppi;
+    private final AuditSession auditSession;
 
     public LaskentaStartParams(
+            AuditSession auditSession,
             String uuid,
             String hakuOid,
             boolean erillishaku,
@@ -33,6 +36,7 @@ public class LaskentaStartParams implements LaskentaInfo {
             Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
             LaskentaTyyppi tyyppi
     ) {
+        this.auditSession = auditSession;
         this.uuid = uuid;
         this.hakuOid = hakuOid;
         this.osittainenLaskenta = false;
@@ -45,6 +49,7 @@ public class LaskentaStartParams implements LaskentaInfo {
     }
 
     public LaskentaStartParams(
+            AuditSession auditSession,
             String uuid,
             String hakuOid,
             boolean erillishaku,
@@ -55,6 +60,7 @@ public class LaskentaStartParams implements LaskentaInfo {
             Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
             LaskentaTyyppi tyyppi
     ) {
+        this.auditSession = auditSession;
         this.uuid = uuid;
         this.hakuOid = hakuOid;
         this.osittainenLaskenta = osittainenLaskenta;
@@ -64,6 +70,10 @@ public class LaskentaStartParams implements LaskentaInfo {
         this.hakukohdeDtos = hakukohdeDtos;
         this.tyyppi = tyyppi;
         this.erillishaku = erillishaku;
+    }
+
+    public AuditSession getAuditSession() {
+        return auditSession;
     }
 
     public LaskentaTyyppi getTyyppi() {

@@ -81,6 +81,7 @@ public class ValintalaskentaTest {
         new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
         new HakukohdeJaOrganisaatio(hakukohde2Oid, "o2"),
         new HakukohdeJaOrganisaatio(hakukohde3Oid, "o3"));
+    private final AuditSession auditSession = new AuditSession("virkailijaOid", Collections.singletonList("APP_VALINTA_EVERYTHING_CRUD"), "Firefox", "127.0.0.1");
     private PisteetWithLastModified pisteet;
 
     @Before
@@ -115,7 +116,7 @@ public class ValintalaskentaTest {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
 
-        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
@@ -144,7 +145,7 @@ public class ValintalaskentaTest {
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde2Oid))).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde3Oid))).thenReturn(Observable.just(Collections.emptyList()));
 
-        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid, false, vaiheenNumero, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.VALINTARYHMA);
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, vaiheenNumero, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.VALINTARYHMA);
 
         when(valintalaskentaAsyncResource.laskeJaSijoittele(anyListOf(LaskeDTO.class))).thenReturn(Observable.just("Valintaryhmälaskenta onnistui"));
 
@@ -178,7 +179,7 @@ public class ValintalaskentaTest {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
 
-        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
@@ -216,7 +217,7 @@ public class ValintalaskentaTest {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenThrow(new RuntimeException(getClass().getSimpleName() +
             " : Ei saatu taaskaan haettua hakemuksia kohteelle " + hakukohde1Oid));
 
-        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, new LaskentaStartParams(uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE));
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, new LaskentaStartParams(auditSession, uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE));
         Thread.sleep(500);
 
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
