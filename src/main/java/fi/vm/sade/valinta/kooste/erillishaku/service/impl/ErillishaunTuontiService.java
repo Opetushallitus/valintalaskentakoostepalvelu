@@ -32,6 +32,7 @@ import rx.Observable;
 import rx.Scheduler;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.RedirectionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
@@ -314,7 +315,14 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             if(saveApplications) {
                 List<HakemusPrototyyppi> hakemusPrototyypit = rivitWithHenkiloData.stream().map(rivi -> createHakemusprototyyppi(rivi, convertKuntaNimiToKuntaKoodi(rivi.getKotikunta()))).collect(Collectors.toList());
                 LOG.info("Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
-                final List<Hakemus> hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+                final List<Hakemus> hakemukset;
+                try {
+                    hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+                } catch (RedirectionException e) {
+                    LOG.error("Error updating application prototypes {}", Arrays.toString(hakemusPrototyypit.toArray()), e);
+                    LOG.error("Rivi with henkilodata={}", Arrays.toString(rivitWithHenkiloData.toArray()));
+                    throw e;
+                }
                 if (hakemukset.size() != lisattavatTaiKeskeneraiset.size()) { // 1-1 relationship assumed
                     LOG.warn("Hakemuspalveluun tallennettujen hakemusten lukumäärä {}kpl on väärä!! Odotettiin {}kpl.",
                             hakemukset.size(), lisattavatTaiKeskeneraiset.size());

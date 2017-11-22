@@ -200,4 +200,37 @@ public class HakemusPrototyyppi {
 
         return syntymaAika.format(ErillishakuRivi.SYNTYMAAIKAFORMAT);
     }
+
+    private String getHetuToString() {
+        if(this.henkilotunnus != null && this.henkilotunnus.length() > 0) {
+            return "***HETU***";
+        } else {
+            return "";
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "HakemusPrototyyppi{" +
+                "hakijaOid='" + hakijaOid + '\'' +
+                ", etunimi='" + etunimi + '\'' +
+                ", sukunimi='" + sukunimi + '\'' +
+                ", henkilotunnus='" + getHetuToString() + '\'' +
+                ", sahkoposti='" + sahkoposti + '\'' +
+                ", syntymaAika='" + syntymaAika + '\'' +
+                ", sukupuoli='" + sukupuoli + '\'' +
+                ", aidinkieli='" + aidinkieli + '\'' +
+                ", asiointikieli='" + asiointikieli + '\'' +
+                ", puhelinnumero='" + puhelinnumero + '\'' +
+                ", osoite='" + osoite + '\'' +
+                ", postinumero='" + postinumero + '\'' +
+                ", postitoimipaikka='" + postitoimipaikka + '\'' +
+                ", asuinmaa='" + asuinmaa + '\'' +
+                ", kansalaisuus='" + kansalaisuus + '\'' +
+                ", kotikunta='" + kotikunta + '\'' +
+                ", toisenAsteenSuoritus=" + toisenAsteenSuoritus +
+                ", toisenAsteenSuoritusmaa='" + toisenAsteenSuoritusmaa + '\'' +
+                ", maksuvelvollisuus='" + maksuvelvollisuus + '\'' +
+                '}';
+    }
 }
