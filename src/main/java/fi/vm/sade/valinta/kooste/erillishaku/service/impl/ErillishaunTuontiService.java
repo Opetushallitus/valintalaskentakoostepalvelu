@@ -109,7 +109,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 LOG.warn("excel ei validi", validointiPoikkeus);
                 prosessi.keskeyta(validointiPoikkeus.getMessage());
             } catch(Exception e) {
-                LOG.error("unexpexted tuoData exception!", e);
+                LOG.error("unexpected tuoData exception!", e);
                 prosessi.keskeyta();
             }
         }, poikkeus -> {
