@@ -27,7 +27,14 @@ public class HenkiloCreateDTO implements Serializable {
         this.aidinkieli = createKielisyys(aidinkieli);
         this.sukupuoli = sukupuoli.isEmpty() ? null : sukupuoli;
         this.etunimet = etunimet;
-        this.kutsumanimi = etunimet;
+
+        final String trimmedEtunimet = this.etunimet.trim();
+        if(trimmedEtunimet.lastIndexOf(" ") > 0) {
+            this.kutsumanimi = trimmedEtunimet.split(" ")[0];
+        } else {
+            this.kutsumanimi = trimmedEtunimet;
+        }
+
         this.sukunimi = sukunimi;
         this.hetu = hetu;
         this.syntymaaika = syntymaaika;
