@@ -318,7 +318,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 final List<Hakemus> hakemukset;
                 try {
                     hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
-                } catch (RedirectionException e) {
+                } catch (Exception e) {
                     LOG.error("Error updating application prototypes {}", Arrays.toString(hakemusPrototyypit.toArray()), e);
                     LOG.error("Rivi with henkilodata={}", Arrays.toString(rivitWithHenkiloData.toArray()));
                     throw e;
