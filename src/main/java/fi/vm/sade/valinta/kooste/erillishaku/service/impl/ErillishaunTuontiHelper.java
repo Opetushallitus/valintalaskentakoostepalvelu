@@ -123,13 +123,16 @@ public class ErillishaunTuontiHelper {
         return riviWithHenkiloData(henkilo, rivi);
     }
 
+    /**
+     * @implNote Uses {@link HenkiloPerustietoDto#kutsumanimi} to populate {@link ErillishakuRivi#etunimi}
+     */
     public static  ErillishakuRivi riviWithHenkiloData(HenkiloPerustietoDto henkilo, ErillishakuRivi rivi) {
         String aidinkieli = kielisyysToString(henkilo.getAidinkieli());
         String asiointikieli = kielisyysToString(henkilo.getAsiointiKieli());
         String sukupuoli = henkilo.getSukupuoli();
         return ErillishakuRiviBuilder.fromRivi(rivi)
                 .sukunimi(henkilo.getSukunimi())
-                .etunimi(henkilo.getEtunimet())
+                .etunimi(henkilo.getKutsumanimi())
                 .henkilotunnus(henkilo.getHetu())
                 .sahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()))
                 .syntymaAika(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
