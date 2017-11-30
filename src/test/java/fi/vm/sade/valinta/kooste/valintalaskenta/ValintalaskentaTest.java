@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import static org.apache.commons.lang3.concurrent.ConcurrentUtils.constantFuture;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.argThat;
@@ -11,9 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -45,12 +42,10 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import rx.Observable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public class ValintalaskentaTest {
     private static final Hakemus hakemus = new Hakemus();
@@ -129,7 +124,7 @@ public class ValintalaskentaTest {
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }
 
-    @Test // TODO: Tsekkaa, miten tämä testi käyttäytyy OK-115:n muutosten kanssa, kun rebase on valmis :)
+    @Test
     public void onnistuneestaValintaryhmalaskennastaPidetaanKirjaaSeurantapalveluun() throws InterruptedException {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
@@ -164,11 +159,9 @@ public class ValintalaskentaTest {
         verify(valintalaskentaAsyncResource).laskeJaSijoittele(anyListOf(LaskeDTO.class));
         Mockito.verifyNoMoreInteractions(valintalaskentaAsyncResource);
 
-//        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
-//        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty());
-//        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
-//        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
-//        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, "", HakukohdeTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }
 
