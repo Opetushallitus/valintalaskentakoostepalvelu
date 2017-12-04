@@ -29,7 +29,7 @@ public class HenkiloCreateDTO implements Serializable {
         this.etunimet = etunimet;
 
         final String trimmedEtunimet = this.etunimet.trim();
-        if(trimmedEtunimet.lastIndexOf(" ") > 0) {
+        if (trimmedEtunimet.lastIndexOf(" ") > 0) {
             this.kutsumanimi = trimmedEtunimet.split(" ")[0];
         } else {
             this.kutsumanimi = trimmedEtunimet;
