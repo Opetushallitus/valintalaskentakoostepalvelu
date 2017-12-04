@@ -119,7 +119,7 @@ public class LaskentaStarter {
                 userAgent,
                 inetAddress);
         auditSession.setSessionId(laskenta.getUuid());
-        auditSession.setUid(laskenta.getUserOID());
+        auditSession.setPersonOid(laskenta.getUserOID());
         return auditSession;
     }
     private static LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {

@@ -78,7 +78,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("sessionId", auditSession.getSessionId());
-                    client.query("uid", auditSession.getUid());
+                    client.query("uid", auditSession.getPersonOid());
                     client.query("inetAddress", auditSession.getInetAddress());
                     client.query("userAgent", auditSession.getUserAgent());
                     return client;
@@ -94,7 +94,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                 Entity.entity(hakemusOIDs, MediaType.APPLICATION_JSON_TYPE), client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("sessionId", auditSession.getSessionId());
-                    client.query("uid", auditSession.getUid());
+                    client.query("uid", auditSession.getPersonOid());
                     client.query("inetAddress", auditSession.getInetAddress());
                     client.query("userAgent", auditSession.getUserAgent());
                     return client;
@@ -111,7 +111,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                     ifUnmodifiedSince.ifPresent(since -> client.header(IF_UNMODIFIED_SINCE, since));
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("sessionId", auditSession.getSessionId());
-                    client.query("uid", auditSession.getUid());
+                    client.query("uid", auditSession.getPersonOid());
                     client.query("inetAddress", auditSession.getInetAddress());
                     client.query("userAgent", auditSession.getUserAgent());
                     return client;
