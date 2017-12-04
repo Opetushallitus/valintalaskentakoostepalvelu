@@ -201,7 +201,10 @@ public class HakemusPrototyyppi {
         return syntymaAika.format(ErillishakuRivi.SYNTYMAAIKAFORMAT);
     }
 
-    private String getHetuToString() {
+    /**
+     * @return ***HETU*** if {@link #henkilotunnus} is not empty, otherwise empty string
+     */
+    private String getCensoredHETUIfExists() {
         if(this.henkilotunnus != null && this.henkilotunnus.length() > 0) {
             return "***HETU***";
         } else {
@@ -215,7 +218,7 @@ public class HakemusPrototyyppi {
                 "hakijaOid='" + hakijaOid + '\'' +
                 ", etunimi='" + etunimi + '\'' +
                 ", sukunimi='" + sukunimi + '\'' +
-                ", henkilotunnus='" + getHetuToString() + '\'' +
+                ", henkilotunnus='" + getCensoredHETUIfExists() + '\'' +
                 ", sahkoposti='" + sahkoposti + '\'' +
                 ", syntymaAika='" + syntymaAika + '\'' +
                 ", sukupuoli='" + sukupuoli + '\'' +
