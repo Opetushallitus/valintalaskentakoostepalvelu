@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste;
 
+import fi.vm.sade.javautils.http.HttpServletRequestUtils;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -23,8 +21,6 @@ import java.util.stream.Collectors;
  * TODO maybe move to java-cas or some other suitable place on a sunnier day.
  */
 public class AuthorizationUtil {
-    private static final Logger LOG = LoggerFactory.getLogger(AuthorizationUtil.class);
-
     public static AuditSession createAuditSession(HttpServletRequest httpServletRequestJaxRS) {
         return createAuditSession(false, httpServletRequestJaxRS);
     }
@@ -51,28 +47,11 @@ public class AuthorizationUtil {
         session.setSessionId(httpServletRequest.getSession().getId());
         session.setUid(KoosteAudit.uid().orElse("Unknown user"));
         session.setPersonOid(KoosteAudit.username());
-        session.setInetAddress(resolveClientIpAddress(httpServletRequest));
+        session.setInetAddress(HttpServletRequestUtils.getRemoteAddress(httpServletRequest));
         session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
         session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory, httpServletRequestJaxRS));
         session.setRoles(getRoles());
         return session;
-    }
-
-    private static String resolveClientIpAddress(HttpServletRequest httpServletRequest) {
-        String xRealIp = httpServletRequest.getHeader("X-Real-IP");
-        if (StringUtils.isNotBlank(xRealIp)) {
-            return xRealIp;
-        }
-        String xForwardedFor = httpServletRequest.getHeader("X-Forwarded-For");
-        if (StringUtils.isNotBlank(xForwardedFor)) {
-            if (xForwardedFor.contains(",")) {
-                LOG.error("Ei löytynyt X-Real-IP -headeria, mutta X-Forwarded-For-headerissa on useampi arvo: " + xForwardedFor +
-                    " . Tästä voi aiheutua ongelmia.");
-            }
-            return xForwardedFor;
-        }
-        LOG.warn("X-Real-IP or X-Forwarded-For was not set. Are we not running behind a load balancer?");
-        return httpServletRequest.getRemoteAddr();
     }
 
     private static Optional<String> readIfUnmodifiedSince(boolean isUnmodifiedSinceMandatory, HttpServletRequest httpServletRequestJaxRS) {
@@ -94,7 +73,7 @@ public class AuthorizationUtil {
         if(null == authentication) {
             return new ArrayList<>();
         }
-        return authentication.getAuthorities().stream().map(a -> ((GrantedAuthority)a).getAuthority()).map(r -> r.replace("ROLE_", "")).collect(Collectors.toList());
+        return authentication.getAuthorities().stream().map(a -> a.getAuthority()).map(r -> r.replace("ROLE_", "")).collect(Collectors.toList());
     }
 
     public static String getCurrentUser() {
