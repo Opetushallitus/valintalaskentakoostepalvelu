@@ -48,25 +48,6 @@
 			<artifactId>jetty-webapp</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency>
-			<groupId>fi.vm.sade</groupId>
-			<artifactId>scala-utils_2.11</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.dataformat</groupId>
-					<artifactId>jackson-dataformat-yaml</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.json4s</groupId>
-					<artifactId>json4s-core_2.11</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-compress</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency> -->
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
@@ -398,33 +379,6 @@
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>
 	  </dependency>
-		<!--<dependency> -->
-		<!--<groupId>org.apache.camel</groupId> -->
-		<!--<artifactId>camel-cxf</artifactId> -->
-		<!--<version>${camel.version}</version> -->
-		<!--<exclusions> -->
-		<!--<exclusion> -->
-		<!--<artifactId>spring-context</artifactId> -->
-		<!--<groupId>org.springframework</groupId> -->
-		<!--</exclusion> -->
-		<!--<exclusion> -->
-		<!--<artifactId>spring-beans</artifactId> -->
-		<!--<groupId>org.springframework</groupId> -->
-		<!--</exclusion> -->
-		<!--<exclusion> -->
-		<!--<artifactId>spring-core</artifactId> -->
-		<!--<groupId>org.springframework</groupId> -->
-		<!--</exclusion> -->
-		<!--<exclusion> -->
-		<!--<artifactId>cxf-rt-core</artifactId> -->
-		<!--<groupId>org.apache.cxf</groupId> -->
-		<!--</exclusion> -->
-		<!--<exclusion> -->
-		<!--<artifactId>cxf-api</artifactId> -->
-		<!--<groupId>org.apache.cxf</groupId> -->
-		<!--</exclusion> -->
-		<!--</exclusions> -->
-		<!--</dependency> -->
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-http</artifactId>
