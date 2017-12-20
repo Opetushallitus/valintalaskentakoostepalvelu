@@ -160,7 +160,6 @@ public class ValintalaskentaTest {
         Mockito.verifyNoMoreInteractions(valintalaskentaAsyncResource);
 
         verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
-        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, "", HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }

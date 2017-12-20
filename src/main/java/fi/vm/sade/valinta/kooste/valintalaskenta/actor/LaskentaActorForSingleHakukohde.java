@@ -38,6 +38,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private final int splittaus;
     private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue;
     private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue = new ConcurrentLinkedQueue<>();
+    private final boolean isValintaryhmalaskenta;
 
     public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams,
                                            Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta,
@@ -50,6 +51,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
         this.splittaus = splittaus;
         hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
+        this.isValintaryhmalaskenta = actorParams.isValintaryhmalaskenta();
     }
 
     public void start() {
@@ -99,16 +101,20 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 successTotal.incrementAndGet(),
                 totalKohteet());
         }
-        try {
-            laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.VALMIS, Optional.empty());
-            LOG.info("(Uuid={}) Hakukohteen ({}) laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.",
-                uuid(),
-                hakukohdeOid);
-        } catch (Throwable t) {
-            LOG.error("(Uuid={}) Hakukohteen ({}) laskenta on valmis mutta ei saatu merkattua.",
-                uuid(),
-                hakukohdeOid,
-                t);
+        if (!isValintaryhmalaskenta) {
+            try {
+                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.VALMIS, Optional.empty());
+                LOG.info("(Uuid={}) Hakukohteen ({}) laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.",
+                        uuid(),
+                        hakukohdeOid);
+            } catch (Throwable t) {
+                LOG.error("(Uuid={}) Hakukohteen ({}) laskenta on valmis mutta ei saatu merkattua.",
+                        uuid(),
+                        hakukohdeOid,
+                        t);
+            }
+        } else {
+            LOG.info("Ei merkitä valintaryhmälaskennan hakukohteiden tilaa seurantaan. (Onnistunut laskenta)");
         }
         laskeSeuraavaHakukohde();
     }
@@ -132,12 +138,16 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 failedTotal.incrementAndGet(),
                 totalKohteet(),
                 failure);
-            try {
-                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.KESKEYTETTY,
-                    Optional.of(virheilmoitus(failure.getMessage(), Arrays.toString(failure.getStackTrace()))));
-                LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tulos merkattu onnistuneesti seurantaan ", uuid(), hakukohdeOid);
-            } catch (Throwable e1) {
-                LOG.error("(Uuid={}) Hakukohteen ({}) laskenta epäonnistui mutta ei saatu merkattua ", uuid(), hakukohdeOid, e1);
+            if (!isValintaryhmalaskenta) {
+                try {
+                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.KESKEYTETTY,
+                            Optional.of(virheilmoitus(failure.getMessage(), Arrays.toString(failure.getStackTrace()))));
+                    LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tulos merkattu onnistuneesti seurantaan ", uuid(), hakukohdeOid);
+                } catch (Throwable e1) {
+                    LOG.error("(Uuid={}) Hakukohteen ({}) laskenta epäonnistui mutta ei saatu merkattua ", uuid(), hakukohdeOid, e1);
+                }
+            } else {
+                LOG.info("Ei merkitä valintaryhmälaskennan hakukohteiden tilaa seurantaan. (Epäonnistunut laskenta)");
             }
         }
         laskeSeuraavaHakukohde();
