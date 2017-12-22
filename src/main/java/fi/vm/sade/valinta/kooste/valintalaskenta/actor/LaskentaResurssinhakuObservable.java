@@ -21,7 +21,7 @@ public class LaskentaResurssinhakuObservable<R> {
     public LaskentaResurssinhakuObservable(Observable<R> source, PyynnonTunniste tunniste, boolean retry) {
         Observable<R> runOnlyOnceObservable = ObservableUtil.wrapAsRunOnlyOnceObservable(source);
         if (retry) {
-            this.observable = runOnlyOnceObservable.retryWhen(createRetryer(tunniste));
+            this.observable = source.retryWhen(createRetryer(tunniste));
         } else {
             this.observable = runOnlyOnceObservable;
         }
@@ -31,8 +31,8 @@ public class LaskentaResurssinhakuObservable<R> {
     }
 
     private static Func1<Observable<? extends Throwable>, Observable<?>> createRetryer(PyynnonTunniste tunniste) {
-        int maxRetries = 2;
-        int secondsToWaitMultiplier = 5;
+        int maxRetries = 15;
+        int secondsToWaitMultiplier = 15;
         return errors -> errors.zipWith(range(1, maxRetries+1), (n, i) -> {
             if (i <= maxRetries) {
                 LOG.info(String.format("%s : Uudelleenyritys # %s", tunniste, i));
@@ -41,10 +41,7 @@ public class LaskentaResurssinhakuObservable<R> {
                 LOG.info(String.format("%s : Kaikki uudelleenyritykset (%s kpl) on käytetty, ei yritetä enää.", tunniste, maxRetries));
                 return Observable.error(n);
             }})
-            .flatMap(i -> {
-                LOG.warn(tunniste.toString() + " retry number or error " + i);
-                return i;
-            });
+            .flatMap(i -> i);
     }
 
     private Action1<? super Object> resurssiOK(long startTime, PyynnonTunniste tunniste) {
