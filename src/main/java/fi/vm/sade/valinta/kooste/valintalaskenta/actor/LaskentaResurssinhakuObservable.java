@@ -33,11 +33,18 @@ public class LaskentaResurssinhakuObservable<R> {
     private static Func1<Observable<? extends Throwable>, Observable<?>> createRetryer(PyynnonTunniste tunniste) {
         int maxRetries = 2;
         int secondsToWaitMultiplier = 5;
-        return errors -> errors.zipWith(range(1, maxRetries), (n, i) -> i).flatMap(i -> {
-            int delaySeconds = secondsToWaitMultiplier * i;
-            LOG.warn(tunniste.toString() + " retry number " + i + "/" + maxRetries + ", waiting for " + delaySeconds + " seconds.");
-            return timer(delaySeconds, SECONDS);
-        });
+        return errors -> errors.zipWith(range(1, maxRetries+1), (n, i) -> {
+            if (i <= maxRetries) {
+                LOG.info(String.format("%s : Uudelleenyritys # %s", tunniste, i));
+                return Observable.timer(i * secondsToWaitMultiplier, SECONDS);
+            } else {
+                LOG.info(String.format("%s : Kaikki uudelleenyritykset (%s kpl) on käytetty, ei yritetä enää.", tunniste, maxRetries));
+                return Observable.error(n);
+            }})
+            .flatMap(i -> {
+                LOG.warn(tunniste.toString() + " retry number or error " + i);
+                return i;
+            });
     }
 
     private Action1<? super Object> resurssiOK(long startTime, PyynnonTunniste tunniste) {
