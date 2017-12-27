@@ -31,14 +31,14 @@ public class LaskentaResurssinhakuObservable<R> {
     }
 
     private static Func1<Observable<? extends Throwable>, Observable<?>> createRetryer(PyynnonTunniste tunniste) {
-        int maxRetries = 15;
-        int secondsToWaitMultiplier = 15;
+        int maxRetries = 5;
+        int secondsToWaitMultiplier = 10;
         return errors -> errors.zipWith(range(1, maxRetries+1), (n, i) -> {
             if (i <= maxRetries) {
-                LOG.info(String.format("%s : Uudelleenyritys # %s", tunniste, i));
+                LOG.info(String.format("%s : Resurssin haussa tapahtui virhe %s, uudelleenyritys # %s", tunniste, n.getMessage(), i));
                 return Observable.timer(i * secondsToWaitMultiplier, SECONDS);
             } else {
-                LOG.info(String.format("%s : Kaikki uudelleenyritykset (%s kpl) on käytetty, ei yritetä enää.", tunniste, maxRetries));
+                LOG.info(String.format("%s : Kaikki uudelleenyritykset (%s kpl) on käytetty, ei yritetä enää. Virhe: %s", tunniste, maxRetries, n.getMessage()));
                 return Observable.error(n);
             }})
             .flatMap(i -> i);
