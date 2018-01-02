@@ -48,7 +48,7 @@ import static java.util.Arrays.asList;
 public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(KelaRouteImpl.class);
 
-    private final int MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_OPPIJANUMEROREKISTERISTA = 10000;
+    private final int MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_OPPIJANUMEROREKISTERISTA = 5000;
 
     private final KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti;
     private final KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
