@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
@@ -265,7 +266,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                                             Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
                                                             String username,
                                                             ValintaperusteetOperation auditLogOperation, AuditSession auditSession) {
-        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, auditLogOperation, auditSession,true);
+        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, auditLogOperation, auditSession, true);
     }
 
 
@@ -327,13 +328,13 @@ public abstract class AbstractPistesyottoKoosteService {
                     "Virhe hakemuksen %s tulosten tallentamisessa Suoritusrekisteriin ", hakemusOid), t)));
 
             sureOperations.doOnNext(processedArvosana -> {
-                Map additionalAuditInfo = new HashMap<>();
+                Map<String, String> additionalAuditInfo = new HashMap<>();
                 additionalAuditInfo.put("usernameForAudit", username);
                 additionalAuditInfo.put("hakuOid", hakuOid);
                 additionalAuditInfo.put("hakukohdeOid", hakukohdeOid);
                 additionalAuditInfo.put("hakijaOid", personOid);
                 additionalAuditInfo.put("hakemusOid", hakemusOid);
-                additionalAuditInfo.put(KIELIKOE_KEY_PREFIX+processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana());
+                additionalAuditInfo.put(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana());
                 AuditLog.log(auditLogOperation,
                         ValintaResource.PISTESYOTTOSERVICE,
                         processedArvosana.getId(),
@@ -381,15 +382,6 @@ public abstract class AbstractPistesyottoKoosteService {
                                     additionalInfo.put("hakukohdeOid", hakukohdeOid);
                                     AuditLog.log(auditLogOperation, ValintaResource.PISTESYOTTOSERVICE, pistetieto.getOid(), pistetieto, null, null, additionalInfo);
                                 }
-                                /*AUDIT.log(builder()
-                                .id(username)
-                                .hakuOid(hakuOid)
-                                .hakukohdeOid(hakukohdeOid)
-                                .hakijaOid(p.getPersonOid())
-                                .hakemusOid(p.getOid())
-                                .messageJson(p.getAdditionalData())
-                                .setOperaatio(auditLogOperation)
-                                .build())*/
                         ))
                             .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
                                     "Lisätietojen tallennus hakemukselle epäonnistui", t)));

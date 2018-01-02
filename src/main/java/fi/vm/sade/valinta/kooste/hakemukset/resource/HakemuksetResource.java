@@ -53,17 +53,10 @@ public class HakemuksetResource {
         Preconditions.checkNotNull(valinnanvaiheOid);
         asyncResponse.setTimeout(10, TimeUnit.MINUTES);
 
-        Map additionalAuditInfo = new HashMap<>();
+        Map<String, String> additionalAuditInfo = new HashMap<>();
         additionalAuditInfo.put("hakuOid", hakuOid);
         additionalAuditInfo.put("ValinnanvaiheOid",valinnanvaiheOid);
         AuditLog.log(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU, ValintaResource.HAKEMUKSET, valinnanvaiheOid, null, null, request, additionalAuditInfo);
-        /*AUDIT.log(builder()
-                .id(KoosteAudit.username())
-                .valinnanvaiheOid(valinnanvaiheOid)
-                .hakuOid(hakuOid)
-                .setOperaatio(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU)
-                .build());
-        */
 
         LOG.warn("Aloitetaan hakemusten listaaminen valinnanvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
         Long started = System.currentTimeMillis();

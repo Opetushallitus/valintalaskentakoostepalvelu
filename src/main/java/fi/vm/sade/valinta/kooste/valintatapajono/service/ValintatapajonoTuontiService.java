@@ -88,16 +88,6 @@ public class ValintatapajonoTuontiService {
                                                     v -> {
                                                         v.getHakija().forEach(hakija -> {
                                                             AuditLog.log(ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), hakija, null, null);
-                                                            /*AUDIT.log(builder()
-                                                                    .id(username)
-                                                                    .hakuOid(hakuOid)
-                                                                    .hakemusOid(hakija.getHakemusOid())
-                                                                    .valinnanvaiheOid(valinnanvaihe.getValinnanvaiheoid())
-                                                                    .hakukohdeOid(hakukohdeOid)
-                                                                    .valintatapajonoOid(v.getOid())
-                                                                    .add("jonosija", hakija.getJonosija())
-                                                                    .setOperaatio(ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL)
-                                                                    .build());*/
                                                         });
                                                     }
                                             );

@@ -156,23 +156,9 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                                 if (hakijaDTO.getPoistetaankoTulokset()) {
                                     AuditLog.log(ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), null, hakijaDTO, null, additionalAuditInfo);
                                 } else {
-                                    //###TARKISTETTAVA###
                                     AuditLog.log(ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), hakijaDTO, null, null, additionalAuditInfo);
                                 }
-                                /*AUDIT.log(builder()
-                                    .id(username)
-                                    .hakuOid(haku.getHakuOid())
-                                    .hakukohdeOid(haku.getHakukohdeOid())
-                                    .hakemusOid(h.getHakemusOid())
-                                    //.henkiloOid(h.getHakijaOid())
-                                    .valintatapajonoOid(haku.getValintatapajonoOid())
-                                    .setOperaatio(h.getPoistetaankoTulokset() ? ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO :
-                                            ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS)
-                                    .add("hakemuksentila", h.getHakemuksenTila())
-                                    .add("valintatuloksentila", h.getValintatuloksenTila())
-                                    .add("ilmoittautumistila", h.getIlmoittautumisTila())
-                                    .build())*/
-                            });
+                        });
                     if (poikkeukset.isEmpty()) {
                         prosessi.vaiheValmistui();
                         prosessi.valmistui("ok");
