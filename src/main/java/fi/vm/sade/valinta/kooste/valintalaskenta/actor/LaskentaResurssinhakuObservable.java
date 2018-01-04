@@ -21,7 +21,7 @@ public class LaskentaResurssinhakuObservable<R> {
     public LaskentaResurssinhakuObservable(Observable<R> source, PyynnonTunniste tunniste, boolean retry) {
         Observable<R> runOnlyOnceObservable = ObservableUtil.wrapAsRunOnlyOnceObservable(source);
         if (retry) {
-            this.observable = ObservableUtil.wrapAsRunOnlyOnceObservable(source.retryWhen(createRetryer(tunniste)));
+            this.observable = source.retryWhen(createRetryer(tunniste));
         } else {
             this.observable = runOnlyOnceObservable;
         }
