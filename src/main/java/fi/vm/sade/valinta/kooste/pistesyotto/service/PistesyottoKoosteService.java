@@ -171,7 +171,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         return a;
     }
 
-    public Observable<Void> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
+    public Observable<Set<String>> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
                                                                      Optional<String> ifUnmodifiedSince,
                                                                      String username, AuditSession auditSession) {
         return valintalaskentaValintakoeAsyncResource.haeHakemukselle(pistetietoDTO.getOid()).flatMap(vo -> {
@@ -184,7 +184,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 return valintapisteAsyncResource.putValintapisteet(
                         ifUnmodifiedSince,
                         singletonList(new Valintapisteet(Pair.of(username, pistetietoDTO))),
-                        auditSession).map(a -> null);
+                        auditSession);
             } else {
                 return Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
                     ApplicationAdditionalDataDTO a = poistaKielikoepistetiedot(pistetietoDTO);
@@ -198,7 +198,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         }).lastOrDefault(null);
     }
 
-    public Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
+    public Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
                                                          String hakukohdeOid,
                                                          Optional<String> ifUnmodifiedSince,
                                                          List<ApplicationAdditionalDataDTO> pistetietoDTOs,

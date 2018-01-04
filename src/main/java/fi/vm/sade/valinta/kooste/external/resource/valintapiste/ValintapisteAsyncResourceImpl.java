@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -103,7 +104,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Observable<Response> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
+    public Observable<Set<String>> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
         Observable<Response> response = putAsObservable(
                 getUrl("valintapiste-service.put.pisteet"),
                 Entity.entity(DEFAULT_GSON.toJson(pisteet), MediaType.APPLICATION_JSON_TYPE)
@@ -114,19 +115,19 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                     client.query("uid", auditSession.getPersonOid());
                     client.query("inetAddress", auditSession.getInetAddress());
                     client.query("userAgent", auditSession.getUserAgent());
+                    client.query("save-partially", "true");
                     return client;
                 }
         );
-
-        return response.onErrorResumeNext(t -> {
-            if(t instanceof FailedHttpException) {
-                FailedHttpException f = (FailedHttpException)t;
-                if(f.response.getStatus() == 409) {
-                    String body = body(f.response);
-                    return Observable.error(new RuntimeException("Ei voida tallentaa, koska kannassa oli välissä muuttuneita pistetietoja hakemuksilla: " + body));
-                }
-            }
-            return Observable.error(t);
+        return response.switchMap(r -> {
+        try {
+            final String entity = body(r);
+            Set<String> conflictingHakemusOids = gson().fromJson(entity, new GenericType<Set<String>>() {
+            }.getType());
+            return Observable.just(conflictingHakemusOids);
+        } catch (Exception e) {
+            return Observable.error(e);
+        }
         });
     }
 }

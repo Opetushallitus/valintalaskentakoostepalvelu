@@ -329,14 +329,15 @@ public class PistesyottoExternalTuontiService {
                 List<VirheDTO> virheet = osallistumiset.stream().filter(o -> o.isVirhe()).map(o -> o.asVirheDTO()).collect(Collectors.toList());
                 if(!additionalData.isEmpty()) {
                     List<Valintapisteet> vp = additionalData.stream().map(a -> Pair.of(username, a)).map(Valintapisteet::new).collect(Collectors.toList());
-                    valintapisteAsyncResource.putValintapisteet(Optional.empty(), vp, auditSession).subscribe(response -> {
+                    valintapisteAsyncResource.putValintapisteet(Optional.empty(), vp, auditSession).subscribe(conflictingHakemusOids -> {
                         additionalData.forEach(p ->
                                 AUDIT.log(builder()
                                         .id(username)
                                         .hakuOid(hakuOid)
                                         .hakijaOid(p.getPersonOid())
                                         .hakemusOid(p.getOid())
-                                        .messageJson(p.getAdditionalData())
+                                        .messageJson(conflictingHakemusOids.contains(p.getOid()) ?
+                                                ImmutableMap.of("error", "Uudemman arvon ylikirjoitus estetty!") : p.getAdditionalData())
                                         .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
                                         .build())
                         );

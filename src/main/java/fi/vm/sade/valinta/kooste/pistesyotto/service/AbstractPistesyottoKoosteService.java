@@ -227,7 +227,7 @@ public abstract class AbstractPistesyottoKoosteService {
         ).doOnCompleted(() -> prosessi.inkrementoiTehtyjaToita());
     }
 
-    protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
+    protected Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
                                                             String hakukohdeOid,
                                                             Optional<String> ifUnmodifiedSince,
                                                             List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
@@ -238,7 +238,7 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
 
-    protected Observable<Void> tallennaKoostetutPistetiedot(String hakuOid,
+    protected Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
                                                             String hakukohdeOid,
                                                             Optional<String> ifUnmodifiedSince,
                                                             List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
@@ -317,7 +317,7 @@ public abstract class AbstractPistesyottoKoosteService {
         return additionalDataDTOS.stream().map(a -> Pair.of(tallettaja, a)).map(Valintapisteet::new).collect(Collectors.toList());
     }
 
-    private Observable<Void> tallennaAdditionalInfoHakemuksille(String hakuOid,
+    private Observable<Set<String>> tallennaAdditionalInfoHakemuksille(String hakuOid,
                                                                 String hakukohdeOid,
                                                                 Optional<String> ifUnmodifiedSince,
                                                                 List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
@@ -325,19 +325,21 @@ public abstract class AbstractPistesyottoKoosteService {
                                                                 ValintaperusteetOperation auditLogOperation,
                                                                 AuditSession auditSession) {
         return valintapisteAsyncResource.putValintapisteet(ifUnmodifiedSince, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
-                .<Void>map(a -> null)
-                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
-                        "Lisätietojen tallennus hakemukselle epäonnistui", t)))
-                .doOnCompleted(() ->
+                //.<Void>map(a -> null)
+                .doOnNext(conflictingHakemusOids ->
                         pistetiedotHakemukselle.forEach(p -> AUDIT.log(builder()
                                 .id(username)
                                 .hakuOid(hakuOid)
                                 .hakukohdeOid(hakukohdeOid)
                                 .hakijaOid(p.getPersonOid())
                                 .hakemusOid(p.getOid())
-                                .messageJson(p.getAdditionalData())
+                                .messageJson(conflictingHakemusOids.contains(p.getOid()) ?
+                                        ImmutableMap.of("error", "Uudemman arvon ylikirjoitus estetty!") : p.getAdditionalData())
                                 .setOperaatio(auditLogOperation)
-                                .build())));
+                                .build()))
+                )
+                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
+                        "Lisätietojen tallennus hakemukselle epäonnistui", t)));
     }
 
     private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid) {
