@@ -93,55 +93,62 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     @Override
     public void handleMessage(Message message) throws Fault {
         try {
-            boolean inbound = (Boolean) message.get(Message.INBOUND_MESSAGE);
-            if (inbound) {
-                boolean isUnauthorized = HTTP_401_UNAUTHORIZED.equals(message.get(Message.RESPONSE_CODE));
-                if (isUnauthorized || isRedirectToCas(message)) {
-                    Message request = message.getExchange().getOutMessage();
-                    String session = getRequestCookie(request, JSESSIONID);
-                    if (session == null) {
-                        String serviceTicket = ((HttpURLConnection) request.get("http.connection")).getRequestProperty("CasSecurityTicket");
-                        LOGGER.warn(String.format("Authentication to %s failed using service ticket %s", this.targetService, serviceTicket));
-                    } else {
-                        LOGGER.info(String.format("Authentication to %s failed using session %s", this.targetService, session));
-                        this.sessionCookiePromise.updateAndGet(currentSessionPromise -> {
-                            if (session.equals(currentSessionPromise.getNow(null))) {
-                                return CompletableFuture.completedFuture(null);
-                            } else {
-                                return currentSessionPromise;
-                            }
-                        });
-                    }
-                } else {
-                    String session = getResponseCookie(message, JSESSIONID);
-                    if (session != null && this.sessionCookiePromise.get().complete(session)) {
-                        LOGGER.info(String.format("New session %s for %s", session, this.targetService));
-                    }
-                }
+            if ((Boolean) message.get(Message.INBOUND_MESSAGE)) {
+                handleInboundMessage(message);
             } else {
-                CompletableFuture<String> p = this.sessionCookiePromise.get();
-                String session;
-                try {
-                    session = p.get(10, TimeUnit.SECONDS);
-                } catch (TimeoutException e) {
-                    LOGGER.warn("Fetching a session has taken over 10 seconds");
-                    session = null;
-                }
-                if (session == null) {
-                    if (this.sessionCookiePromise.compareAndSet(p, new CompletableFuture<>())) {
-                        LOGGER.info(String.format("Fetching a new CAS service ticket for %s", this.targetService));
-                        String serviceTicket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService);
-                        LOGGER.info(String.format("Got a service ticket %s for %s", serviceTicket, this.targetService));
-                        ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
-                    } else {
-                        // TODO retry
-                    }
-                } else {
-                    addCookie(message, JSESSIONID, session);
-                }
+                handleOutboundMessage(message);
             }
         } catch (Exception e) {
             LOGGER.error("handleMessage throws", e);
+        }
+    }
+
+    private void handleInboundMessage(Message message) {
+        boolean isUnauthorized = HTTP_401_UNAUTHORIZED.equals(message.get(Message.RESPONSE_CODE));
+        if (isUnauthorized || isRedirectToCas(message)) {
+            Message request = message.getExchange().getOutMessage();
+            String session = getRequestCookie(request, JSESSIONID);
+            if (session == null) {
+                String serviceTicket = ((HttpURLConnection) request.get("http.connection")).getRequestProperty("CasSecurityTicket");
+                LOGGER.warn(String.format("Authentication to %s failed using service ticket %s", this.targetService, serviceTicket));
+            } else {
+                LOGGER.info(String.format("Authentication to %s failed using session %s", this.targetService, session));
+                this.sessionCookiePromise.updateAndGet(currentSessionPromise -> {
+                    if (session.equals(currentSessionPromise.getNow(null))) {
+                        return CompletableFuture.completedFuture(null);
+                    } else {
+                        return currentSessionPromise;
+                    }
+                });
+            }
+        } else {
+            String session = getResponseCookie(message, JSESSIONID);
+            if (session != null && this.sessionCookiePromise.get().complete(session)) {
+                LOGGER.info(String.format("New session %s for %s", session, this.targetService));
+            }
+        }
+    }
+
+    private void handleOutboundMessage(Message message) throws InterruptedException, java.util.concurrent.ExecutionException {
+        CompletableFuture<String> p = this.sessionCookiePromise.get();
+        String session;
+        try {
+            session = p.get(10, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            LOGGER.warn("Fetching a session has taken over 10 seconds");
+            session = null;
+        }
+        if (session == null) {
+            if (this.sessionCookiePromise.compareAndSet(p, new CompletableFuture<>())) {
+                LOGGER.info(String.format("Fetching a new CAS service ticket for %s", this.targetService));
+                String serviceTicket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService);
+                LOGGER.info(String.format("Got a service ticket %s for %s", serviceTicket, this.targetService));
+                ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
+            } else {
+                // TODO retry
+            }
+        } else {
+            addCookie(message, JSESSIONID, session);
         }
     }
 }
