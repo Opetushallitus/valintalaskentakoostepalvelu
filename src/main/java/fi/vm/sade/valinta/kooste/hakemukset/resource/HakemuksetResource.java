@@ -1,13 +1,18 @@
 package fi.vm.sade.valinta.kooste.hakemukset.resource;
 
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static java.util.Arrays.asList;
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +27,6 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 import java.util.concurrent.TimeUnit;
-
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static java.util.Arrays.asList;
 
 
 @Controller("HakemuksetResource")
@@ -79,7 +80,7 @@ public class HakemuksetResource {
                             }
                     );
                 }, exception -> {
-                    LOG.error("hakemusten listaaminen epäonnistui, authCheck failed", exception);
+                    LOG.error(HttpExceptionWithResponse.appendWrappedResponse("hakemusten listaaminen epäonnistui, authCheck failed", exception), exception);
                     asyncResponse.resume(Response.serverError().entity(exception).build());
                 }
         );
