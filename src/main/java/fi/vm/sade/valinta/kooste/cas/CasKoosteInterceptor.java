@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.cas;
 
+import static fi.vm.sade.valinta.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
+
 import fi.vm.sade.authentication.cas.CasClient;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
@@ -12,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -120,6 +123,8 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
                         return currentSessionPromise;
                     }
                 });
+                Map<String, List<String>> httpHeaders = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
+                httpHeaders.put(CAS_302_REDIRECT_MARKER.getKey(), Collections.singletonList(CAS_302_REDIRECT_MARKER.getValue()));
             }
         } else {
             String session = getResponseCookie(message, JSESSIONID);
@@ -145,7 +150,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
                 LOGGER.info(String.format("Got a service ticket %s for %s", serviceTicket, this.targetService));
                 ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
             } else {
-                // TODO retry
+                // TODO retry – or not? The current retry functionality is in fi.vm.sade.valinta.http.HttpResourceImpl lazy methods
             }
         } else {
             addCookie(message, JSESSIONID, session);
