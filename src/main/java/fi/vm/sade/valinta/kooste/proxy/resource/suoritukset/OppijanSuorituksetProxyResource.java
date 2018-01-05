@@ -241,13 +241,13 @@ public class OppijanSuorituksetProxyResource {
         ).subscribe(hakemusDTOConsumer, throwableConsumer);
     }
 
-    private void resolveHakemusDTO(String hakuOid, String opiskeljaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
+    private void resolveHakemusDTO(String hakuOid, String opiskelijaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
                                    Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
         hakemusObservable.doOnError(throwableConsumer);
         Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid).doOnError(throwableConsumer);
         Observable<Oppija> suorituksetByOppija = fetchEnsikertalaisuus ?
-                suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, hakuOid).doOnError(throwableConsumer) :
-                suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskeljaOid);
+                suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskelijaOid, hakuOid).doOnError(throwableConsumer) :
+                suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOid);
         Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).doOnError(throwableConsumer);
         Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesObservable = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid);
         Observable.combineLatest(hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable, hakukohdeRyhmasForHakukohdesObservable,
