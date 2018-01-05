@@ -236,26 +236,6 @@ public class OppijanSuorituksetProxyResource {
         ).collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
     }
 
-    private void resolveHakemusDTO(HakuV1RDTO haku, Observable<ParametritDTO> parametritDTOObservable, String opiskelijaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
-                                   Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
-        hakemusObservable.doOnError(throwableConsumer);
-
-        Observable<Oppija> suorituksetByOppija = fetchEnsikertalaisuus ?
-                suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskelijaOid, haku.getOid()).doOnError(throwableConsumer) :
-                suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOid).doOnError(throwableConsumer);
-        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesObservable = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid());
-        Observable.combineLatest(suorituksetByOppija, hakemusObservable, parametritDTOObservable, hakukohdeRyhmasForHakukohdesObservable,
-                (oppija, hakemus, ohjausparametrit, hakukohdeRyhmasForHakukohdes) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
-                        haku,
-                        "",
-                        hakukohdeRyhmasForHakukohdes,
-                        Collections.singletonList(hakemus),
-                        Collections.singletonList(oppija),
-                        ohjausparametrit,
-                        fetchEnsikertalaisuus).get(0)
-        ).subscribe(hakemusDTOConsumer, throwableConsumer);
-    }
-
     private void resolveHakemusDTO(String hakuOid, String opiskelijaOid, Observable<Hakemus> hakemusObservable, Boolean fetchEnsikertalaisuus,
                                    Action1<HakemusDTO> hakemusDTOConsumer, Action1<Throwable> throwableConsumer) {
         hakemusObservable.doOnError(throwableConsumer);
