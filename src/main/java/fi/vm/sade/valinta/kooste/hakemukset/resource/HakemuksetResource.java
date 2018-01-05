@@ -68,7 +68,7 @@ public class HakemuksetResource {
                     valinnanvaiheenValintakoekutsutService.hae(valinnanvaiheOid, hakuOid, authCheck,
                             hakemusDTOs -> {
                                 long duration = (System.currentTimeMillis() - started) / 1000;
-                                LOG.warn("hakemusten listaaminen valinnanvaiheelle {} haussa {} kesti {} sekuntia", valinnanvaiheOid, hakuOid, duration);
+                                LOG.info("hakemusten listaaminen valinnanvaiheelle {} haussa {} kesti {} sekuntia", valinnanvaiheOid, hakuOid, duration);
                                 asyncResponse.resume(Response.ok(hakemusDTOs).build());
                             },
                             exception -> {
