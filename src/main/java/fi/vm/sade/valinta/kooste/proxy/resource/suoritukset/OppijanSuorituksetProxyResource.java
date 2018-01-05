@@ -52,20 +52,35 @@ public class OppijanSuorituksetProxyResource {
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
 
+    /**
+     *
+     @deprecated Use the one with the fixed path (opiskelijaOid instead of opiskeljaOid) {@link #getSuoritukset(String, String, String, AsyncResponse)} ()}
+     */
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @GET
     @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskeljaOid/{opiskeljaOid}/hakemusOid/{hakemusOid}")
-    public void getSuoritukset(
+    public void getSuorituksetOld(
             @PathParam("hakuOid") String hakuOid,
             @PathParam("opiskeljaOid") String opiskeljaOid,
             @PathParam("hakemusOid") String hakemusOid,
             @Suspended final AsyncResponse asyncResponse) {
+        getSuoritukset(hakuOid, opiskeljaOid, hakemusOid, asyncResponse);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+    @GET
+    @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskelijaOid/{opiskelijaOid}/hakemusOid/{hakemusOid}")
+    public void getSuoritukset(
+            @PathParam("hakuOid") String hakuOid,
+            @PathParam("opiskelijaOid") String opiskelijaOid,
+            @PathParam("hakemusOid") String hakemusOid,
+            @Suspended final AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
-            LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}", opiskeljaOid);
+            LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}", opiskelijaOid);
             respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
-        resolveHakemusDTO(hakuOid, opiskeljaOid, applicationAsyncResource.getApplication(hakemusOid), true, hakemusDTO -> {
+        resolveHakemusDTO(hakuOid, opiskelijaOid, applicationAsyncResource.getApplication(hakemusOid), true, hakemusDTO -> {
             asyncResponse.resume(Response
                     .ok()
                     .header("Content-Type", "application/json")
