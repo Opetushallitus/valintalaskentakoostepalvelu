@@ -198,7 +198,13 @@ public class PistesyottoResource {
                     }
                 }
         )).subscribe(
-                x -> response.resume(Response.noContent().build()),
+                x -> {
+                    if(x.isEmpty()) {
+                        response.resume(Response.noContent().build());
+                    } else {
+                        response.resume(Response.ok(x).build());
+                    }
+                },
                 error -> {
                     logError("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
                     resumeWithException(response, error);
@@ -316,7 +322,13 @@ public class PistesyottoResource {
         ).flatMap(x -> pistesyottoKoosteService.tallennaKoostetutPistetiedot(
                 hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedot, username, auditSession)
         ).subscribe(
-                x -> response.resume(Response.noContent().build()),
+                x -> {
+                    if(x.isEmpty()) {
+                        response.resume(Response.noContent().build());
+                    } else {
+                        response.resume(Response.ok(x).build());
+                    }
+                },
                 error -> {
                     logError("tallennaKoostetutPistetiedot epäonnistui", error);
                     resumeWithException(response, error);
