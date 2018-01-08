@@ -57,7 +57,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
                                 final String etunimi = henkilotiedot.getEtunimet();
                                 final String sukunimi = henkilotiedot.getSukunimi();
                                 final String henkilotunnus = henkilotiedot.getHetu();
-                                final String syntymaaika = henkilotiedot.getSyntymaaika().toString();
+                                final String syntymaaika = henkilotiedot.getSyntymaaika() == null ? "": henkilotiedot.getSyntymaaika().toString();
                                 final Date lukuvuosi = getPaivamaaraSource().lukuvuosi(getHaku(), hakukohdeOid);
                                 final Date poimintapaivamaara = getPaivamaaraSource().poimintapaivamaara(getHaku());
 
