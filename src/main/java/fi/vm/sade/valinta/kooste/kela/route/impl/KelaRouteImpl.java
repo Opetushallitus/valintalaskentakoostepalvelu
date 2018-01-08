@@ -240,7 +240,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         LOG.warn("Haetaan {} henkiloa, {} erässä", henkiloOidit.size(), oiditSivutettuna.size());
                         for (List<String> oidit : oiditSivutettuna) {
                             try {
-                                List<HenkiloPerustietoDto> henkiloPerustietoDtos = oppijanumerorekisteriAsyncResource.haeHenkilot(henkiloOidit);
+                                List<HenkiloPerustietoDto> henkiloPerustietoDtos = oppijanumerorekisteriAsyncResource.haeHenkilot(oidit);
                                 henkilot.addAll(henkiloPerustietoDtos);
                             } catch (Exception e) {
                                 LOG.error("Oppijanumerorekisteri ei jaksa tarjoilla hakemuksia. Yritetään vielä uudestaan.", e);
