@@ -36,7 +36,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     @Override
     public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
                                                           String hakuOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("suoritusrekisteri.oppijat"),
                 new TypeToken<List<Oppija>>() { }.getType(),
                 client -> {
@@ -49,7 +49,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("suoritusrekisteri.oppijat"),
                 new TypeToken<List<Oppija>>() { }.getType(),
                 client -> {
@@ -98,7 +98,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         LOG.info("Batched POST: {} oids partitioned into {} batches", opiskelijaOids.size(), oidBatches.size());
 
         Observable<Observable<List<Oppija>>> obses = Observable.from(oidBatches).map(oidBatch ->
-                postAsObservable(url,
+                postAsObservableLazily(url,
                         new TypeToken<List<Oppija>>() { }.getType(),
                         Entity.entity(oidBatch, MediaType.APPLICATION_JSON_TYPE),
                         client -> {
@@ -120,7 +120,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("suoritusrekisteri.suoritukset"),
                 new TypeToken<Suoritus>(){
                 }.getType(),
@@ -134,7 +134,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<Arvosana> postArvosana(Arvosana arvosana) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("suoritusrekisteri.arvosanat"),
                 new TypeToken<Arvosana>(){
                 }.getType(),
@@ -148,7 +148,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("suoritusrekisteri.arvosanat.id",  arvosanaId),
                 new TypeToken<Arvosana>(){}.getType(),
                 Entity.entity(gson().toJson(arvosanaWithUpdatedValues), MediaType.APPLICATION_JSON_TYPE),
@@ -161,7 +161,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<Void> deleteSuoritus(String suoritusId) {
-        return deleteAsObservable(
+        return deleteAsObservableLazily(
                 getUrl("suoritusrekisteri.suoritukset.id", suoritusId),
                 new TypeToken<Suoritus>(){
                 }.getType(),
@@ -174,7 +174,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<Void> deleteArvosana(String arvosanaId) {
-        return deleteAsObservable(
+        return deleteAsObservableLazily(
                 getUrl("suoritusrekisteri.arvosanat.id", arvosanaId), new TypeToken<Arvosana>(){}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
