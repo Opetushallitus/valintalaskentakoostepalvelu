@@ -64,12 +64,12 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid) {
-        return getAsObservable(getUrl("valinta-tulos-service.haku.hakuoid", hakuOid),
+        return getAsObservableLazily(getUrl("valinta-tulos-service.haku.hakuoid", hakuOid),
                 new GenericType<List<ValintaTulosServiceDto>>() {}.getType());
     }
     @Override
     public Observable<List<Muutoshistoria>> getMuutoshistoria(String hakemusOid, String valintatapajonoOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valinta-tulos-service.muutoshistoria", hakemusOid, valintatapajonoOid),
                 new GenericType<List<Muutoshistoria>>(){}.getType());
     }
@@ -89,7 +89,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid) {
-        return getStringAsObservable(
+        return getStringAsObservableLazily(
                 getUrl("valinta-tulos-service.haku.hakuoid.hakemus", hakuOid, hakemusOid));
     }
 

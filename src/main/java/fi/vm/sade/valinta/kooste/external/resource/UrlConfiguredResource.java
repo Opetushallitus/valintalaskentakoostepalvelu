@@ -75,11 +75,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     }
 
     @Override
-    public Observable<String> getStringAsObservable(String path) {
-        return wrappedHttpResource.getStringAsObservable(path);
-    }
-
-    @Override
     public <T> Observable<T> getAsObservable(String path, Type type) {
         return wrappedHttpResource.getAsObservable(path, type);
     }
