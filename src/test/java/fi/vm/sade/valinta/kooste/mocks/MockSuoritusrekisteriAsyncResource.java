@@ -1,26 +1,19 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.Futures;
 
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 @Service
 public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyncResource {
@@ -63,11 +56,6 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
 
     @Override
-    public Peruutettava getOppijatByHakukohde(String hakukohdeOid, String hakuOid, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
-        return null;
-    }
-
-    @Override
     public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String hakuOid) {
         return Observable.just(ImmutableList.of(oppijaRef.get()));
     }
@@ -75,12 +63,6 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     @Override
     public Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
         return Observable.just(ImmutableList.of(oppijaRef.get()));
-    }
-
-    @Override
-    public Future<Response> getSuorituksetByOppija(String opiskelijaOid, String hakuOid, Consumer<Oppija> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(oppijaRef.get());
-        return Futures.immediateCancelledFuture();
     }
 
     @Override
@@ -168,9 +150,5 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
         Arvosana arvosana = new Arvosana();
         arvosana.setId(arvosanaId);
         return Observable.just(null);
-    }
-
-    public int getLatestId() {
-        return ids.get();
     }
 }
