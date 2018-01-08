@@ -5,12 +5,14 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import rx.Observable;
@@ -25,13 +27,7 @@ public interface ValintaTulosServiceAsyncResource {
 
     Observable<List<Muutoshistoria>> getMuutoshistoria(String hakemusOid, String valintatapajonoOid);
 
-    Observable<ValintaTulosServiceDto> getHakemuksenValintatulos(String hakuOid, String hakemusOid);
-
     Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid);
-
-    Observable<List<VastaanottoRecordDTO>> hakukohteenVastaanotot(String hakukohdeOid);
-
-    Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid);
 
     Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid);
 

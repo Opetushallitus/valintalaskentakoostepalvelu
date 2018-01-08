@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
-import com.google.common.collect.ImmutableMap;
+import static com.google.common.collect.ImmutableMap.of;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
@@ -16,20 +16,20 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValinnantulosRequest;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -43,8 +43,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import static com.google.common.collect.ImmutableMap.of;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource implements ValintaTulosServiceAsyncResource {
@@ -72,19 +70,6 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
         return getAsObservableLazily(
                 getUrl("valinta-tulos-service.muutoshistoria", hakemusOid, valintatapajonoOid),
                 new GenericType<List<Muutoshistoria>>(){}.getType());
-    }
-
-    @Override
-    public Observable<ValintaTulosServiceDto> getHakemuksenValintatulos(String hakuOid, String hakemusOid) {
-        return getAsObservable(
-                getUrl("valinta-tulos-service.haku.hakuoid.hakemus", hakuOid, hakemusOid),
-                ValintaTulosServiceDto.class);
-    }
-
-    @Override
-    public Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid) {
-        return getAsObservable(getUrl("valinta-tulos-service.virkailija.haku.hakukohde", hakuOid, hakukohdeOid),
-                new GenericType<List<HakemuksenVastaanottotila>>(){}.getType());
     }
 
     @Override
@@ -197,13 +182,6 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 getUrl("valinta-tulos-service.virkailija.tilahakijalle.haku.hakukohde.valintatapajono", hakuOid, hakukohdeOid, valintatapajonoOid),
                 new GenericType<List<TilaHakijalleDto>>() {}.getType(),
                 Entity.json(hakemusOids));
-    }
-
-    @Override
-    public Observable<List<VastaanottoRecordDTO>> hakukohteenVastaanotot(String hakukohdeOid) {
-        return getAsObservable(
-                getUrl("valinta-tulos-service.virkailija.vastaanotto.hakukohde", hakukohdeOid),
-                new GenericType<List<VastaanottoRecordDTO>>() {}.getType());
     }
 
     @Override

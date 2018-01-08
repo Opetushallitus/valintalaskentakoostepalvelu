@@ -1,26 +1,29 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import static java.util.Collections.emptyList;
 import com.google.common.collect.Lists;
+
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.Collections.*;
-import static javax.ws.rs.core.Response.Status.OK;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class MockValintaTulosServiceAsyncResource implements ValintaTulosServiceAsyncResource {
@@ -35,23 +38,8 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     }
 
     @Override
-    public Observable<ValintaTulosServiceDto> getHakemuksenValintatulos(String hakuOid, String hakemusOid) {
-        return Observable.just(new ValintaTulosServiceDto());
-    }
-
-    @Override
     public Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid) {
         return Observable.just("{}");
-    }
-
-    @Override
-    public Observable<List<VastaanottoRecordDTO>> hakukohteenVastaanotot(String hakukohdeOid) {
-        return Observable.just(Lists.newArrayList());
-    }
-
-    @Override
-    public Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid) {
-        return Observable.just(Lists.newArrayList());
     }
 
     @Override
