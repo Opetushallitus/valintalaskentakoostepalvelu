@@ -27,7 +27,7 @@ public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource imp
     @Override
     public Observable<TokensResponse> sendSecureLinks(TokensRequest tokensRequest) {
         LOG.info("Sending securelinks to {} recipients.", tokensRequest.getApplicationOidToEmailAddress().size());
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("oppijan-tunnistus.tokens"),
                 new TypeToken<TokensResponse>(){
                 }.getType(),
@@ -41,7 +41,7 @@ public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<Response> previewSecureLink(TokensRequest tokensRequest) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("oppijan-tunnistus.preview.haku.template.lang", tokensRequest.getHakuOid(), tokensRequest.getTemplatename(), tokensRequest.getLang()),
                 client -> {
                     client.accept(EML_TYPE);
