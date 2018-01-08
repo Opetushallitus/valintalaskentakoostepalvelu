@@ -75,11 +75,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     }
 
     @Override
-    public Observable<Response> getAsObservable(String path, Function<WebClient, WebClient> paramsHeadersAndStuff) {
-        return wrappedHttpResource.getAsObservable(path, paramsHeadersAndStuff);
-    }
-
-    @Override
     public Observable<String> getStringAsObservable(String path) {
         return wrappedHttpResource.getStringAsObservable(path);
     }
@@ -87,11 +82,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     @Override
     public <T> Observable<T> getAsObservable(String path, Type type) {
         return wrappedHttpResource.getAsObservable(path, type);
-    }
-
-    @Override
-    public <T, A> Observable<T> getAsObservable(String path, Type type, Entity<A> getBody) {
-        return wrappedHttpResource.getAsObservable(path, type, getBody);
     }
 
     @Override
@@ -123,12 +113,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     }
 
     @Override
-    public <A> Observable<Response> postAsObservable(String path, Entity<A> entity,
-                                                     Function<WebClient, WebClient> paramsHeadersAndStuff) {
-        return wrappedHttpResource.postAsObservable(path, entity, paramsHeadersAndStuff);
-    }
-
-    @Override
     public <A, B> Observable<B> putAsObservable(String path, Type type, Entity<A> entity) {
         return wrappedHttpResource.putAsObservable(path, type, entity);
     }
@@ -146,11 +130,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     @Override
     public <A> Observable<Response> putAsObservable(String path, Entity<A> entity, Function<WebClient, WebClient> paramsHeadersAndStuff) {
         return wrappedHttpResource.putAsObservable(path, entity, paramsHeadersAndStuff);
-    }
-
-    @Override
-    public <A> Observable<A> deleteAsObservable(String path, final Type type, Function<WebClient, WebClient> paramsHeadersAndStuff) {
-        return wrappedHttpResource.deleteAsObservable(path, type, paramsHeadersAndStuff);
     }
 
     @Override
