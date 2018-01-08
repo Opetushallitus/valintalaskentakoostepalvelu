@@ -3,11 +3,8 @@ package fi.vm.sade.valinta.kooste.external.resource;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.http.ExtractSuccessfullResponseCallback;
-import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
-import fi.vm.sade.valinta.http.ResponseCallback;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -17,18 +14,11 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
-import rx.Subscriber;
-import rx.subscriptions.Subscriptions;
 
-import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class UrlConfiguredResource implements HttpResource{
@@ -82,11 +72,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     @Override
     public WebClient getWebClient() {
         return wrappedHttpResource.getWebClient();
-    }
-
-    @Override
-    public Observable<Response> getAsObservable(String path) {
-        return wrappedHttpResource.getAsObservable(path);
     }
 
     @Override
