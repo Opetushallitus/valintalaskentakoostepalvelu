@@ -253,11 +253,9 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                         } catch (Exception e) {
                                             LOG.error("Statuksen haku epaonnistui", e);
                                         }
-                                    }, throwable -> {
-                                        prosessi.keskeyta();
-                                    }, () -> {
-                                        prosessi.keskeyta();
-                                    });
+                                    },
+                                    throwable -> prosessi.keskeyta(),
+                                    prosessi::keskeyta);
                 } else {
                     prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
                 }

@@ -59,7 +59,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
-        return getApplicationsByOids(hakuOid, Arrays.asList(hakukohdeOid));
+        return getApplicationsByOids(hakuOid, Collections.singletonList(hakukohdeOid));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
         Map<String, List<String>> requestBody = new HashMap<>();
         requestBody.put("states", DEFAULT_STATES);
-        requestBody.put("asIds", Arrays.asList(hakuOid));
+        requestBody.put("asIds", Collections.singletonList(hakuOid));
         requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
         requestBody.put("keys", ApplicationAsyncResource.DEFAULT_KEYS);
         return postAsObservable(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(),
@@ -163,11 +163,12 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                 .async()
                 .post(Entity.entity(Lists.newArrayList(hakemusOids),
                         MediaType.APPLICATION_JSON_TYPE),
-                        new GsonResponseCallback<List<Hakemus>>(gson(),
+                        new GsonResponseCallback<>(gson(),
                         url + "?rows=" + DEFAULT_ROW_LIMIT,
                         callback,
                         failureCallback,
-                        new TypeToken<List<Hakemus>>() {}.getType())));
+                        new TypeToken<List<Hakemus>>() {
+                        }.getType())));
     }
 
     public Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
@@ -181,11 +182,12 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                             .query("asId", hakuOid)
                             .query("aoOid", hakukohdeOid)
                             .async()
-                            .get(new GsonResponseCallback<List<Hakemus>>(gson(),
-                                    url + "?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=" + hakukohdeOid + "&asId=" + hakuOid,
-                                    callback,
-                                    failureCallback,
-                                    new TypeToken<List<Hakemus>>() {}.getType())));
+                            .get(new GsonResponseCallback<>(gson(),
+                                url + "?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=" + hakukohdeOid + "&asId=" + hakuOid,
+                                callback,
+                                failureCallback,
+                                new TypeToken<List<Hakemus>>() {
+                                }.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
