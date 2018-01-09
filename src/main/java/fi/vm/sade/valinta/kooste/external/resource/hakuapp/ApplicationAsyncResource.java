@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public interface ApplicationAsyncResource {
@@ -35,7 +34,7 @@ public interface ApplicationAsyncResource {
 
     Observable<Hakemus> getApplication(String hakemusOid);
 
-    Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids);
+    Observable<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids);
 
     Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback);
 

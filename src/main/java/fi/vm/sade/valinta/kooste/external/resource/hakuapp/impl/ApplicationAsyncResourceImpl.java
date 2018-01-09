@@ -30,14 +30,12 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -112,7 +110,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     private Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
-        return postAsObservable(getUrl("haku-app.applications.list"), new TypeToken<List<Hakemus>>() {}.getType(),
+        return postAsObservableLazily(getUrl("haku-app.applications.list"), new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -143,13 +141,11 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     @Override
-    public Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids) {
-        return getWebClient()
-                .path(getUrl("haku-app.applications.list"))
-                .query("rows", DEFAULT_ROW_LIMIT)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Hakemus>>() {});
+    public Observable<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids) {
+        return postAsObservableLazily(getUrl("haku-app.applications.list"),
+            new GenericType<List<Hakemus>>() {}.getType(),
+            Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
+            webClient -> webClient.query("rows", DEFAULT_ROW_LIMIT).accept(MediaType.APPLICATION_JSON_TYPE));
     }
 
     @Override

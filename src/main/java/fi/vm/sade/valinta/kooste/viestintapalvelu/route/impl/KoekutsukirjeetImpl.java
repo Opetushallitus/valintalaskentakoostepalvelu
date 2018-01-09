@@ -2,6 +2,35 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import static rx.Observable.from;
 import static rx.Observable.zip;
+import com.google.common.collect.Sets;
+
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import rx.Observable;
+import rx.functions.Action1;
+import rx.observables.BlockingObservable;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,38 +43,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import rx.Observable;
-import rx.functions.Action1;
-import rx.observables.BlockingObservable;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
-
-import com.google.common.collect.Sets;
-
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 
 @Service
 public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
@@ -73,7 +70,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 
     @Override
     public void koekutsukirjeetHakemuksille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, Collection<String> hakemusOids) {
-        from(applicationAsyncResource.getApplicationsByOids(hakemusOids))
+        applicationAsyncResource.getApplicationsByOids(hakemusOids)
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(koekutsukirjeiksi(prosessi, koekutsu),
                         t1 -> {
@@ -134,14 +131,14 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                 );
     }
 
-    Stream<Hakemus> getHakukohteenUlkopuolisetHakemukset(List<Hakemus> hakemukset, Set<String> osallistujienHakemusOidit) throws InterruptedException, java.util.concurrent.ExecutionException {
+    Stream<Hakemus> getHakukohteenUlkopuolisetHakemukset(List<Hakemus> hakemukset, Set<String> osallistujienHakemusOidit) {
         Stream<Hakemus> hakukohteenUlkopuolisetHakemukset;
         {
             Set<String> hakemusOids = hakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet());
             Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
             hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
             if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
-                hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat).get().stream();
+                hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat).toBlocking().first().stream();
             } else {
                 hakukohteenUlkopuolisetHakemukset = Stream.empty();
             }

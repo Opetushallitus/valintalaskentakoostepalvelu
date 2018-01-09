@@ -170,8 +170,8 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Future<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {
-        return Futures.immediateFuture(resultByOidReference.get());
+    public Observable<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {
+        return Observable.just(resultByOidReference.get());
     }
 
 
