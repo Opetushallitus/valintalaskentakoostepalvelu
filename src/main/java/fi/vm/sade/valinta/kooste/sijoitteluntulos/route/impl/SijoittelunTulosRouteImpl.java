@@ -204,6 +204,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         HakuV1RDTO hakuDTO = null;
                         List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
                         try {
+                            // TODO here it would make more sense to parallelise the asynchronous calls and bundle the results together after they all complete.
                             hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
                             hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).toBlocking().toFuture().get();
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).toBlocking().toFuture().get();
