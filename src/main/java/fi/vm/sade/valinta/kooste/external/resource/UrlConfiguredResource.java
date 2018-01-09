@@ -74,49 +74,76 @@ public abstract class UrlConfiguredResource implements HttpResource{
         return wrappedHttpResource.getWebClient();
     }
 
+    /**
+     * @deprecated use {@link #getAsObservableLazily(String, Type)}
+     */
     @Override
     public <T> Observable<T> getAsObservable(String path, Type type) {
         return wrappedHttpResource.getAsObservable(path, type);
     }
 
+    /**
+     * @deprecated use {@link #getAsObservableLazily(String, Type, Function)}
+     */
     @Override
     public <T> Observable<T> getAsObservable(String path, Type type,
                                              Function<WebClient, WebClient> paramsHeadersAndStuff) {
         return wrappedHttpResource.getAsObservable(path, type, paramsHeadersAndStuff);
     }
 
+    /**
+     * @deprecated use {@link #getAsObservableLazily(String, Function, Function)}
+     */
     @Override
     public <T> Observable<T> getAsObservable(String path, Function<String, T> extractor,
                                              Function<WebClient, WebClient> paramsHeadersAndStuff) {
         return wrappedHttpResource.getAsObservable(path, extractor, paramsHeadersAndStuff);
     }
 
+    /**
+     * @deprecated use {@link #postAsObservableLazily(String, Type, Entity)}
+     */
     @Override
     public <A, B> Observable<B> postAsObservable(String path, Type type, Entity<A> entity) {
         return wrappedHttpResource.postAsObservable(path, type, entity);
     }
 
+    /**
+     * @deprecated use {@link #postAsObservableLazily(String, Type, Entity, Function)}
+     */
     @Override
     public <A, B> Observable<B> postAsObservable(String path, Type type, Entity<A> entity,
                                                  Function<WebClient, WebClient> paramsHeadersAndStuff) {
         return wrappedHttpResource.postAsObservable(path, type, entity, paramsHeadersAndStuff);
     }
 
+    /**
+     * @deprecated  use {@link #postAsObservableLazily(String, Type, Entity)}
+     */
     @Override
     public <A> Observable<Response> postAsObservable(String path, Entity<A> entity) {
         return wrappedHttpResource.postAsObservable(path, entity);
     }
 
+    /**
+     * @deprecated use {@link #putAsObservableLazily(String, Type, Entity)}
+     */
     @Override
     public <A, B> Observable<B> putAsObservable(String path, Type type, Entity<A> entity) {
         return wrappedHttpResource.putAsObservable(path, type, entity);
     }
 
+    /**
+     * @deprecated use {@link #putAsObservableLazily(String, Entity)}
+     */
     @Override
     public <A> Observable<Response> putAsObservable(String path, Entity<A> entity) {
         return wrappedHttpResource.putAsObservable(path, entity);
     }
 
+    /**
+     * @deprecated use {@link #putAsObservableLazily(String, Entity, Function)}
+     */
     @Override
     public <A, B> Observable<B> putAsObservable(String path, Type type, Entity<A> entity, Function<WebClient, WebClient> paramsHeadersAndStuff) {
         return wrappedHttpResource.putAsObservable(path,type,entity,paramsHeadersAndStuff);
