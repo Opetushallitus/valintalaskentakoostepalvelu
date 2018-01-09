@@ -22,14 +22,6 @@ public interface ViestintapalveluAsyncResource {
 
     Duration VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA = Duration.of(60, ChronoUnit.MINUTES);
 
-    @Deprecated
-        // ks viePdfJaOdotaReferenssiObservable
-    Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch);
-
-    @Deprecated
-        // ks haeStatusObservable
-    Future<LetterBatchStatusDto> haeStatus(String batchId);
-
     Observable<LetterResponse> viePdfJaOdotaReferenssiObservable(LetterBatch letterBatch);
 
     Observable<LetterBatchStatusDto> haeStatusObservable(String batchId);

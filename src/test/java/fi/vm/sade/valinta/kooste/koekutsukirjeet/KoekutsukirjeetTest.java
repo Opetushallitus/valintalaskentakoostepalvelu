@@ -1,7 +1,12 @@
 package fi.vm.sade.valinta.kooste.koekutsukirjeet;
 
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
 import com.google.common.util.concurrent.Futures;
 import com.google.gson.GsonBuilder;
+
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
@@ -20,17 +25,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
 
 /**
  * @author Jussi Jartamo
@@ -49,7 +50,7 @@ public class KoekutsukirjeetTest {
     }
 
     @Test
-    public void kaikkiKutsutaanHakijanValinta() throws Throwable {
+    public void kaikkiKutsutaanHakijanValinta() {
         try {
             final String HAKUKOHDE1 = "HAKUKOHDE1";
             final String HAKUKOHDE2 = "HAKUKOHDE2";
@@ -63,7 +64,7 @@ public class KoekutsukirjeetTest {
             ViestintapalveluAsyncResource viestintapalveluAsyncResource =
                     Mocks.getViestintapalveluAsyncResource();
             ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);
-            Mockito.when(viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(Mockito.any(LetterBatch.class))).thenReturn(Futures.immediateCancelledFuture());
+            Mockito.when(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(Mockito.any(LetterBatch.class))).thenReturn(Observable.empty());
             Mockito.when(Mocks.getHakukohdeResource().getByOID(Mockito.anyString())).thenReturn(HAKUKOHDEDTO1);
             MockValintaperusteetAsyncResource.setHakukohdeResult(
                     Arrays.asList(
@@ -127,11 +128,11 @@ public class KoekutsukirjeetTest {
                             .query("tarjoajaOid", "T0")
                             .query("templateName", "tmpl")
                             .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
-                            .post(Entity.json(new DokumentinLisatiedot(Collections.<String>emptyList(), "tag", "Letterbodytext", "FI", Collections.<String>emptyList())));
+                            .post(Entity.json(new DokumentinLisatiedot(Collections.emptyList(), "tag", "Letterbodytext", "FI", Collections.emptyList())));
             Assert.assertEquals(200, r.getStatus());
 
 
-            Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1)).viePdfJaOdotaReferenssi(letterBatchArgumentCaptor.capture());
+            Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1)).viePdfJaOdotaReferenssiObservable(letterBatchArgumentCaptor.capture());
             LetterBatch batch = letterBatchArgumentCaptor.getValue();
             Assert.assertEquals("Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.", 2, batch.getLetters().size());
             LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));

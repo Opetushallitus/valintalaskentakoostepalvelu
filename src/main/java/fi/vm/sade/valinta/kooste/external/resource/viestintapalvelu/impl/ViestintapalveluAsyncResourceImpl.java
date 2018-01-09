@@ -2,11 +2,14 @@ package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+
 import fi.vm.sade.valinta.http.ResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
@@ -27,7 +30,6 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -69,22 +71,6 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
                     return client;
                 }
         );
-    }
-
-    @Override
-    public Future<LetterBatchStatusDto> haeStatus(String letterBatchId) {
-        return getWebClient()
-                .path(getUrl("viestintapalvelu.letter.async.letter.status", letterBatchId))
-                .accept(MediaType.APPLICATION_JSON_TYPE).async()
-                .get(LetterBatchStatusDto.class);
-    }
-
-    public Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch) {
-        return getWebClient()
-                .path(getUrl("viestintapalvelu.letter.async.letter"))
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .post(Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE), LetterResponse.class);
     }
 
     public Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli) {

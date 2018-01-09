@@ -224,7 +224,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                         koekutsu.getHakukohdeOid(), hakemusOidJaHakijanMuutHakutoiveOids, koekutsu.getLetterBodyText(),
                         koekutsu.getTarjoajaOid(), koekutsu.getTag(), koekutsu.getTemplateName());
                 LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
-                LetterResponse batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(letterBatch).get(35L, TimeUnit.SECONDS);
+                LetterResponse batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).toBlocking().toFuture().get(35L, TimeUnit.SECONDS);
                 LOG.error("### BATCHID: {} {} {} ###", batchId.getBatchId(), batchId.getStatus(), batchId.getErrors());
                 LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
                 prosessi.vaiheValmistui();
@@ -238,7 +238,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                     pulse -> {
                                         try {
                                             LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
-                                            LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatus(batchId.getBatchId()).get(900L, TimeUnit.MILLISECONDS);
+                                            LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())
+                                                .toBlocking().toFuture().get(900L, TimeUnit.MILLISECONDS);
                                             if ("error".equals(status.getStatus())) {
                                                 LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
                                                 prosessi.keskeyta();
