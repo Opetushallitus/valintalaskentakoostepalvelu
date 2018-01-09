@@ -186,7 +186,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid),
                 new TypeToken<List<ValintatulosUpdateStatus>>() {}.getType(),
                 Entity.entity(gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset)), MediaType.APPLICATION_JSON),
@@ -201,7 +201,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(AuditSession auditSession, String valintatapajonoOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
           getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid) ,
           new GenericType<List<Valinnantulos>>() {}.getType(),
             client -> {
@@ -217,7 +217,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, "latest", hakukohdeOid),
                 new TypeToken<HakukohdeDTO>() {}.getType(),
                 client -> {
