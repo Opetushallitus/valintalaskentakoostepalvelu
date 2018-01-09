@@ -25,7 +25,7 @@ public class RyhmasahkopostiAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<Optional<Long>> haeRyhmasahkopostiIdByLetterObservable(Long letterId) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("viestintapalvelu.reportMessages", letterId),
                 (idAsString) -> Optional.of(Long.parseLong(idAsString)),
                 client -> {
