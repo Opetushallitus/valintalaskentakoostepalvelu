@@ -46,7 +46,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<LetterResponse> viePdfJaOdotaReferenssiObservable(LetterBatch letterBatch) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("viestintapalvelu.letter.async.letter"),
                 new TypeToken<LetterResponse>() {
                 }.getType(),
@@ -60,7 +60,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<LetterBatchStatusDto> haeStatusObservable(String letterBatchId) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("viestintapalvelu.letter.async.letter.status", letterBatchId),
                 new TypeToken<LetterBatchStatusDto>() {
                 }.getType(),
@@ -88,7 +88,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     public Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("viestintapalvelu.luotettu.letter.count.type.language", hakuOid, tyyppi, kieli),
                 LetterBatchCountDto.class, client -> { client.accept(MediaType.APPLICATION_JSON_TYPE);return client; });
     }
@@ -97,7 +97,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
     public Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid) {
         String url = getUrl("viestintapalvelu.template.gethistory");
         LOG.info("######## TemplateHistory {}?applicationPeriod={}&oid={}&templateName={}&languageCode={}&tag={}", url, hakuOid, tarjoajaOid, templateName, languageCode, hakukohdeOid);
-        return getAsObservable(
+        return getAsObservableLazily(
                 url,
                 new TypeToken<List<TemplateHistory>>() {}.getType(),
                 client -> {
@@ -143,7 +143,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     private Observable<Optional<Long>> haeKirjelahetys(String url, String hakuOid, String kirjeenTyyppi, String asiointikieli) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 url,
                 (batchIdAsString) ->
                         StringUtils.isNumeric(batchIdAsString) ? Optional.of(Long.parseLong(batchIdAsString)) : Optional.empty(),
@@ -159,7 +159,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<Optional<Long>> julkaiseKirjelahetys(Long batchId) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("viestintapalvelu.luotettu.letter.publishletterbatch", batchId),
                 (batchIdAsString) ->
                         StringUtils.isNumeric(batchIdAsString) ? Optional.of(Long.parseLong(batchIdAsString)) : Optional.empty(),
@@ -172,7 +172,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<Map<String, String>> haeEPostiOsoitteet(Long batchId) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("viestintapalvelu.luotettu.letter.getepostiadressesforletterbatch", batchId),
                 new TypeToken<Map<String, String>>() {
                 }.getType(),
