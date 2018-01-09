@@ -10,7 +10,6 @@ import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
@@ -150,7 +149,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
 
     @Override
     public Observable<Hakemus> getApplication(String hakemusOid) {
-        return getAsObservable(getUrl("haku-app.applications", hakemusOid), Hakemus.class);
+        return getAsObservableLazily(getUrl("haku-app.applications", hakemusOid), Hakemus.class);
     }
 
     @Override
