@@ -138,39 +138,39 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
-        return getAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.haku.hakukohde", hakuOid, hakukohdeOid), new GenericType<List<Valintatulos>>() {}.getType());
+        return getAsObservableLazily(getUrl("valinta-tulos-service.virkailija.valintatulos.haku.hakukohde", hakuOid, hakukohdeOid), new GenericType<List<Valintatulos>>() {}.getType());
     }
 
     @Override
     public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, AuditSession session) {
-        return postAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "read", hakukohdeOid), new GenericType<List<Lukuvuosimaksu>>() {}.getType(),
+        return postAsObservableLazily(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "read", hakukohdeOid), new GenericType<List<Lukuvuosimaksu>>() {}.getType(),
                 Entity.json(of("auditSession", session)));
     }
 
     @Override
     public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
-        return postAsObservable(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "write", hakukohdeOid),
+        return postAsObservableLazily(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "write", hakukohdeOid),
                 Void.class,
                 Entity.json(of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session)));
     }
 
     @Override
     public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde", hakuOid, hakukohdeOid),
                 new GenericType<List<Valintatulos>>() {}.getType());
     }
 
     @Override
     public Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valinta-tulos-service.virkailija.valintatulos.haku.hakemus", hakuOid, hakemusOid),
                 new GenericType<List<Valintatulos>>() {}.getType());
     }
 
     @Override
     public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("valinta-tulos-service.virkailija.myohastyneet.haku.hakukohde", hakuOid, hakukohdeOid),
                 new GenericType<List<VastaanottoAikarajaMennytDTO>>() {}.getType(),
                 Entity.json(hakemusOids));
@@ -178,7 +178,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<List<TilaHakijalleDto>> findTilahakijalle(String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("valinta-tulos-service.virkailija.tilahakijalle.haku.hakukohde.valintatapajono", hakuOid, hakukohdeOid, valintatapajonoOid),
                 new GenericType<List<TilaHakijalleDto>>() {}.getType(),
                 Entity.json(hakemusOids));
