@@ -82,7 +82,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
-        return getAsObservable(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(), client -> {
+        return getAsObservableLazily(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(), client -> {
             client.query("appState", DEFAULT_STATES.toArray());
             client.query("rows", DEFAULT_ROW_LIMIT).query("asId", hakuOid).query("aoOid", hakukohdeOids);
             LOG.info("Calling url {}", client.getCurrentURI());
