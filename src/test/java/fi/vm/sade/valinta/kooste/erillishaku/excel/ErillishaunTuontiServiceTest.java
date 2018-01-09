@@ -7,35 +7,37 @@ import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisH
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.kkHakuToisenAsteenValintatuloksella;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.puutteellisiaTietojaAutotayttoaVarten;
-import static java.util.Collections.*;
-import static javax.ws.rs.core.Response.Status.OK;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static rx.Observable.*;
-
+import static rx.Observable.just;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -44,9 +46,6 @@ import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO.Result;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import org.junit.Before;
@@ -58,11 +57,14 @@ import org.mockito.Mockito;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RunWith(Enclosed.class)
@@ -75,7 +77,7 @@ public class ErillishaunTuontiServiceTest {
 
             assertEquals(1, erillishaunValinnantulokset.size());
             assertEquals(5, erillishaunValinnantulokset.get("jono1").size()); //KESKEN-tilainen puuttuu
-            erillishaunValinnantulokset.get("jono1").stream().forEach(v -> {
+            erillishaunValinnantulokset.get("jono1").forEach(v -> {
                 assertEquals(IlmoittautumisTila.EI_TEHTY, v.getIlmoittautumistila());
                 assertEquals(ValintatuloksenTila.KESKEN, v.getVastaanottotila());
             });
@@ -90,7 +92,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(1, applicationAsyncResource.results.size());
             assertEquals(1, erillishaunValinnantulokset.size());
             assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
-            erillishaunValinnantulokset.get("jono1").stream().forEach(v -> {
+            erillishaunValinnantulokset.get("jono1").forEach(v -> {
                 assertEquals(IlmoittautumisTila.EI_TEHTY, v.getIlmoittautumistila());
                 assertEquals(ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI, v.getVastaanottotila());
             });
@@ -129,7 +131,7 @@ public class ErillishaunTuontiServiceTest {
 
             assertEquals(1, erillishaunValinnantulokset.size());
             assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
-            erillishaunValinnantulokset.get("jono1").stream().forEach(v -> {
+            erillishaunValinnantulokset.get("jono1").forEach(v -> {
                 assertEquals(IlmoittautumisTila.EI_TEHTY, v.getIlmoittautumistila());
                 assertEquals(ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI, v.getVastaanottotila());
                 assertEquals(MockData.valintatapajonoOid, v.getValintatapajonoOid());
@@ -191,7 +193,7 @@ public class ErillishaunTuontiServiceTest {
 
             assertEquals(1, erillishaunValinnantulokset.size());
             assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
-            erillishaunValinnantulokset.get("jono1").stream().forEach(v -> {
+            erillishaunValinnantulokset.get("jono1").forEach(v -> {
                 assertEquals(IlmoittautumisTila.EI_TEHTY, v.getIlmoittautumistila());
                 assertEquals(ValintatuloksenTila.KESKEN, v.getVastaanottotila());
                 assertEquals(MockData.valintatapajonoOid, v.getValintatapajonoOid());
@@ -371,7 +373,7 @@ class ErillisHakuTuontiTestCase {
                 koodistoCachedAsyncResource,
                 Schedulers.immediate()
         );
-        tuontiService.tuoExcelistä(new AuditSession("frank", new ArrayList<String>(), "", ""), prosessi, erillisHaku, data);
+        tuontiService.tuoExcelistä(new AuditSession("frank", new ArrayList<>(), "", ""), prosessi, erillisHaku, data);
         Mockito.verify(prosessi).valmistui("ok");
     }
 
@@ -383,7 +385,7 @@ class ErillisHakuTuontiTestCase {
                 koodistoCachedAsyncResource,
                 Schedulers.immediate()
         );
-        tuontiService.tuoJson(new AuditSession("frank", new ArrayList<String>(), "", ""), prosessi, erillisHaku, rivit, false);
+        tuontiService.tuoJson(new AuditSession("frank", new ArrayList<>(), "", ""), prosessi, erillisHaku, rivit, false);
         Mockito.verify(prosessi).valmistui("ok");
     }
 }
