@@ -92,7 +92,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
-        Map<String, List<String>> requestBody = new HashMap();
+        Map<String, List<String>> requestBody = new HashMap<>();
         requestBody.put("states", DEFAULT_STATES);
         requestBody.put("asIds", Arrays.asList(hakuOid));
         requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
