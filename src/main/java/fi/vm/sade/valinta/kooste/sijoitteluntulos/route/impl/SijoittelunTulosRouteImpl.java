@@ -143,7 +143,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.valintalaskentaResource = valintalaskentaResource;
     }
 
-    public void configure() throws Exception {
+    public void configure() {
         configureMuodostaDokumentit();
         configureDeadLetterChannel();
         configureHakukohteidenHaku();
@@ -175,7 +175,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 .process(SECURITY)
                 .process(new Processor() {
                     @Override
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         SijoittelunTulosProsessi prosessi = prosessi(exchange);
                         HakukohdeTyyppi hakukohde = exchange.getIn().getBody(HakukohdeTyyppi.class);
                         String hakukohdeOid = hakukohde.getOid();
@@ -211,7 +211,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             hakuDTO = haeHakuTarjonnaltaKomponentti.getHaku(hakuOid);
 
                         } catch (Exception e) {
-                            //todo: fix this
+                            log.error("Problem when getting resources for creating the excel", e);
                         }
 
                         try {
@@ -270,7 +270,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 .process(SECURITY)
                 .process(new Processor() {
                     @Override
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         SijoittelunTulosProsessi prosessi = prosessi(exchange);
                         HakukohdeTyyppi hakukohde = exchange.getIn().getBody(HakukohdeTyyppi.class);
                         String hakukohdeOid = hakukohde.getOid();
@@ -363,7 +363,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 .log(ERROR, "Sijoitteluntulosten taulukkolaskentaluonti epaonnistui: ${property.CamelExceptionCaught}")
                 .process(new Processor() {
                     @Override
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         if (dokumenttiprosessi(exchange).getPoikkeukset().isEmpty()) {
                             dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Sijoitteluntulosten vienti epäonnistui!"));
                         }
@@ -376,7 +376,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         from(muodostaDokumentit)
                 .process(new Processor() {
                     @Override
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         SijoittelunTulosProsessi prosessi = prosessi(exchange);
                         if (prosessi.inkrementoi() == 0) {
                             try {
