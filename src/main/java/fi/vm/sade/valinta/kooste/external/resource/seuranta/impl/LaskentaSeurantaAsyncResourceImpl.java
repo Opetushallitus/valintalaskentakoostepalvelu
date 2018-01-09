@@ -109,9 +109,9 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
         String url = getUrl("seuranta-service.seuranta.kuormantasaus.laskenta.tila", uuid, tila);
         try {
             if (ilmoitusDtoOptional.isPresent()) {
-                return postAsObservable(url, Entity.entity(gson.toJson(ilmoitusDtoOptional.get()), MediaType.APPLICATION_JSON_TYPE));
+                return postAsObservableLazily(url, Entity.entity(gson.toJson(ilmoitusDtoOptional.get()), MediaType.APPLICATION_JSON_TYPE));
             } else {
-                return putAsObservable(url, Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE));
+                return putAsObservableLazily(url, Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE));
             }
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu paatyi virheeseen!" + url, e);

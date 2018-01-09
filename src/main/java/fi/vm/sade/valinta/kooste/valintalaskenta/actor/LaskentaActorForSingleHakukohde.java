@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import rx.Observable;
 import rx.functions.Func1;
 
+import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -175,9 +176,10 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     }
 
     public void lopeta() {
+        final Observable<Response> tilanmerkkausObservable;
         if (!COMPLETE.equals(state.get())) {
             LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid());
-            laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
+            tilanmerkkausObservable = laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
         } else {
             LOG.info("#### (Uuid={}) Laskenta valmis koska ei enää hakukohteita käsiteltävänä. " +
                 "Onnistuneita {}, Uudelleenyrityksiä {}, Lopullisesti epäonnistuneita {}",
@@ -185,9 +187,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 successTotal.get(),
                 retryTotal.get(),
                 failedTotal.get());
-            laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.VALMIS, Optional.empty());
+            tilanmerkkausObservable = laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.VALMIS, Optional.empty());
         }
-        laskentaSupervisor.ready(uuid());
+        tilanmerkkausObservable.subscribe(response -> laskentaSupervisor.ready(uuid()));
     }
 
     public void postStop() {
