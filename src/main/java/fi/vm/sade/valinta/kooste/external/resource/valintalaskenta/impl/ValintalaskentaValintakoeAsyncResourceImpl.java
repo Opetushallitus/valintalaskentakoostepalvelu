@@ -1,28 +1,23 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
+
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-
-import com.google.common.collect.Lists;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.google.common.reflect.TypeToken;
-
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import rx.Observable;
-
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaValintakoeAsyncResource {
@@ -33,14 +28,14 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
 
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintakoe.hakutoive.hakukohdeoid", hakukohdeOid),
                 new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
     }
 
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintakoe.hakutoive"),
                 new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
@@ -52,7 +47,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
 
     @Override
     public Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeTunnisteet) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintatieto.hakukohde", hakukohdeOid),
                 new TypeToken<List<HakemusOsallistuminenDTO>>() {}.getType(),
                 Entity.entity(valintakoeTunnisteet, MediaType.APPLICATION_JSON_TYPE));
@@ -60,7 +55,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
 
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeAmmatillisenKielikokeenOsallistumiset(Date since) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintakoe.ammatillisenkielikoeosallistumiset",
                         new SimpleDateFormat("yyyy-MM-dd").format(since)),
             new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
@@ -68,7 +63,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
 
     @Override
     public Observable<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid) {
-        return getAsObservable(getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintakoe.hakemus", hakemusOid),
+        return getAsObservableLazily(getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintakoe.hakemus", hakemusOid),
                 ValintakoeOsallistuminenDTO.class);
     }
 }
