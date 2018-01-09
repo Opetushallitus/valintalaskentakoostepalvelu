@@ -69,7 +69,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                 Collections.emptyList(),
                 Collections.singletonList("oid")
         );
-        return this.<ListFullSearchDTO, List<HakemusOid>>postAsObservable(
+        return this.<ListFullSearchDTO, List<HakemusOid>>postAsObservableLazily(
                 getUrl("haku-app.applications.listfull"),
                 new TypeToken<List<HakemusOid>>() {}.getType(),
                 Entity.entity(s, MediaType.APPLICATION_JSON_TYPE)
