@@ -394,7 +394,7 @@ public class PistesyottoResource {
     public void tuonti(@QueryParam("hakuOid") String hakuOid,
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        InputStream file,
-                       @Suspended AsyncResponse asyncResponse) throws IOException {
+                       @Suspended AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("tuonti-palvelukutsu on aikakatkaistu: POST /tuonti");
@@ -493,7 +493,7 @@ public class PistesyottoResource {
                 ).subscribe(
                         authorityCheck -> {
                             LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
-                            externalTuontiService.tuo(authorityCheck, hakemukset, username, auditSession, hakuOid, valinnanvaiheOid,
+                            externalTuontiService.tuo(authorityCheck, hakemukset, username, auditSession, hakuOid,
                                     (onnistuneet, validointivirheet) -> {
                                         UlkoinenResponseDTO response = new UlkoinenResponseDTO();
                                         response.setKasiteltyOk(onnistuneet);

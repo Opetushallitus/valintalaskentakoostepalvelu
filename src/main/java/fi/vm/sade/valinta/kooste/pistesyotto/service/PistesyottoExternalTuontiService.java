@@ -268,7 +268,7 @@ public class PistesyottoExternalTuontiService {
     }
 
     public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, String username, AuditSession auditSession,
-                    String hakuOid, String valinnanvaiheOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler,
+                    String hakuOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler,
                     Consumer<Throwable> exceptionHandler) {
         Observable<List<Hakemus>> applicationsByHakemusOids = applicationAsyncResource.getApplicationsByHakemusOids(
                 hakemukset.stream().map(HakemusDTO::getHakemusOid).collect(Collectors.toList()));
