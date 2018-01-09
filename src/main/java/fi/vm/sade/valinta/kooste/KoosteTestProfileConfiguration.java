@@ -111,7 +111,7 @@ public class KoosteTestProfileConfiguration {
     public static Filter getFilter() {
         return new Filter() {
             @Override
-            public void init(FilterConfig filterConfig) throws ServletException {
+            public void init(FilterConfig filterConfig) {
 
             }
 
@@ -134,11 +134,6 @@ public class KoosteTestProfileConfiguration {
 
     @Bean(name = "ryhmasahkopostiClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getRyhmasahkopostiClientCasInterceptor() {
-        return INTERCEPTOR;
-    }
-
-    @Bean(name = "ValintakoeRestClientCasInterceptor")
-    public AbstractPhaseInterceptor<Message> getValintakoeRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
 

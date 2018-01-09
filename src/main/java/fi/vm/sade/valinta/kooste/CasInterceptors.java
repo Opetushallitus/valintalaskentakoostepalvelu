@@ -28,14 +28,7 @@ public class CasInterceptors {
             @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
         return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
     }
-    @Bean(name="ValintakoeRestClientCasInterceptor")
-    public AbstractPhaseInterceptor<Message> getValintakoeRestClientCasInterceptor(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.valintalaskenta-service}/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
-        return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
-    }
+
     @Bean(name="HakemusServiceRestClientAsAdminCasInterceptor")
     public AbstractPhaseInterceptor<Message> getHakemusServiceRestClientAsAdminCasInterceptor(
             @Value("${web.url.cas}") String webCasUrl,

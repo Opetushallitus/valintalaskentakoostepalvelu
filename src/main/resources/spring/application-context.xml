@@ -90,20 +90,6 @@
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
-		<jaxrs-client:client id="ValintakoeRestClient"
-							 serviceClass="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource"
-							 address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}">
-			<jaxrs-client:outInterceptors>
-				<ref bean="ValintakoeRestClientCasInterceptor"/>
-			</jaxrs-client:outInterceptors>
-			<jaxrs-client:inInterceptors>
-				<ref bean="ValintakoeRestClientCasInterceptor"/>
-			</jaxrs-client:inInterceptors>
-			<jaxrs-client:providers>
-				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-			</jaxrs-client:providers>
-		</jaxrs-client:client>
 		<jaxrs-client:client id="HakemusServiceRestClientAsAdmin"
 							 address="${valintalaskentakoostepalvelu.hakemus.rest.url}"
 							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource"
