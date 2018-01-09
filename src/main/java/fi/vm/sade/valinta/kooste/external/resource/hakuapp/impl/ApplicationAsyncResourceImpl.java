@@ -1,11 +1,21 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
+import static rx.observables.BlockingObservable.from;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
+
 import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.*;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppiBatch;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ListFullSearchDTO;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
@@ -19,13 +29,18 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import static rx.observables.BlockingObservable.from;
 
 @Service
 public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implements ApplicationAsyncResource {
@@ -38,11 +53,10 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     @Override
-    public Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-        return getWebClient().path(getUrl("haku-app.applications.syntheticapplication"))
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON), new GenericType<List<Hakemus>>() {});
+    public Observable<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
+        String url = getUrl("haku-app.applications.syntheticapplication");
+        Entity<HakemusPrototyyppiBatch> entity = Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON);
+        return this.putAsObservableLazily(url, new GenericType<List<Hakemus>>() {}.getType(), entity);
     }
 
     @Override

@@ -309,7 +309,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 ), t)));
     }
 
-    private List<ErillishakuRivi> kasitteleHakemukset(ErillishakuDTO haku, List<HenkiloPerustietoDto> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, boolean saveApplications, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
+    private List<ErillishakuRivi> kasitteleHakemukset(ErillishakuDTO haku, List<HenkiloPerustietoDto> henkilot, List<ErillishakuRivi> lisattavatTaiKeskeneraiset, boolean saveApplications, KirjeProsessi prosessi) {
         try {
             final List<ErillishakuRivi> rivitWithHenkiloData = henkilot.stream().map(h -> riviWithHenkiloData(h, lisattavatTaiKeskeneraiset)).collect(Collectors.toList());
             if(saveApplications) {
@@ -317,7 +317,8 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 LOG.info("Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
                 final List<Hakemus> hakemukset;
                 try {
-                    hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+                    hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit)
+                        .toBlocking().first();
                 } catch (Exception e) {
                     LOG.error("Error updating application prototypes {}", Arrays.toString(hakemusPrototyypit.toArray()), e);
                     LOG.error("Rivi with henkilodata={}", Arrays.toString(rivitWithHenkiloData.toArray()));

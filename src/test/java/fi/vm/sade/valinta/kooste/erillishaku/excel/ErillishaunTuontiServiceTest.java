@@ -100,7 +100,7 @@ public class ErillishaunTuontiServiceTest {
 
     public final static class HetullaJaSyntymaAjalla extends ErillisHakuTuontiTestCase {
         @Test
-        public void tuontiSuoritetaan() throws IOException, InterruptedException {
+        public void tuontiSuoritetaan() {
             importData(kkHakuToisenAsteenValintatuloksella());
 
             assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
@@ -165,7 +165,7 @@ public class ErillishaunTuontiServiceTest {
 
     public final static class HetullaJaSyntymaAjallaJaOidillaJokaOnEriKuinHenkilopalvelustaPalaava extends ErillisHakuTuontiTestCase {
         @Test
-        public void tuontiSuoritetaan() throws IOException, InterruptedException, ParseException {
+        public void tuontiSuoritetaan() {
             String hakemusOidOnHakemusAndSijoittelu = "hakija1";
             String personOidHenkiloPalvelusta = "eri.henkiloOid.henkiloPalvelusta";
             ErillishakuRivi erillishakuRivi = createRow("101275-937P", hakemusOidOnHakemusAndSijoittelu, "hakemus1");
@@ -294,7 +294,7 @@ public class ErillishaunTuontiServiceTest {
         @Test
         public void hakemustenLuontiEpaonnistuu() {
             final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
-            when(failingResource.putApplicationPrototypes(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
+            when(failingResource.putApplicationPrototypes(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Observable.error(new RuntimeException("simulated HTTP fail")));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
                     failingResource,
                     henkiloAsyncResource,
