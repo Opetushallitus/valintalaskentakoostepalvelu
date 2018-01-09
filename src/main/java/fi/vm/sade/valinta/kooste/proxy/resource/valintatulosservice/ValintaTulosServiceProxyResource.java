@@ -1,14 +1,11 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
-import static fi.vm.sade.valinta.kooste.KoosteAudit.username;
 import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -17,27 +14,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import rx.Observable;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Controller("ValintaTulosServiceProxyResource")
 @Path("/proxy/valintatulosservice")
@@ -126,10 +117,6 @@ public class ValintaTulosServiceProxyResource {
                     respondWithError(asyncResponse, "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage());
                 }
             );
-    }
-
-    private List<VastaanottoRecordDTO> createVastaanottoRecordsFrom(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
-        return valintatulokset.stream().map(v -> VastaanottoRecordDTO.of(v, muokkaaja, selite)).collect(Collectors.toList());
     }
 
     private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {

@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintapiste;
 
-import fi.vm.sade.valinta.http.FailedHttpException;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
@@ -73,7 +72,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public Observable<PisteetWithLastModified> getValintapisteet(String hakuOID, String hakukohdeOID, AuditSession auditSession) {
-        Observable<Response> response = getAsObservable(
+        Observable<Response> response = getAsObservableLazily(
                 getUrl("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID),
                 //new GenericType<List<Valintapisteet>>(){}.getType(),
                 client -> {
@@ -90,7 +89,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public Observable<PisteetWithLastModified> getValintapisteet(Collection<String> hakemusOIDs, AuditSession auditSession) {
-        Observable<Response> response = postAsObservable(
+        Observable<Response> response = postAsObservableLazily(
                 getUrl("valintapiste-service.get.pisteet.with.hakemusoids"),
                 Entity.entity(hakemusOIDs, MediaType.APPLICATION_JSON_TYPE), client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
