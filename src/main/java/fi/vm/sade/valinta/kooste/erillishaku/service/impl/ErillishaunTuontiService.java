@@ -23,7 +23,6 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valin
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +30,10 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.RedirectionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,7 +56,6 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     private final ApplicationAsyncResource applicationAsyncResource;
     private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
-    private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final Scheduler scheduler;
 
     public ErillishaunTuontiService(ApplicationAsyncResource applicationAsyncResource,
@@ -72,7 +67,6 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         this.applicationAsyncResource = applicationAsyncResource;
         this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
-        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.scheduler = scheduler;
     }
 
