@@ -1,12 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl;
 
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.http.ResponseCallback;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
-import fi.vm.sade.valinta.kooste.external.resource.*;
-import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import fi.vm.sade.valinta.http.ResponseCallback;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import rx.Observable;
 
 import javax.ws.rs.client.Entity;
@@ -25,7 +26,7 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
 
     @Override
     public Observable<String> uudelleenNimea(String dokumenttiId, String filename) {
-        return putAsObservable(getUrl("dokumenttipalvelu-service.dokumentit.uudelleennimea", dokumenttiId), new TypeToken<String>() {}.getType(), Entity.text(filename));
+        return putAsObservableLazily(getUrl("dokumenttipalvelu-service.dokumentit.uudelleennimea", dokumenttiId), new TypeToken<String>() {}.getType(), Entity.text(filename));
     }
     @Override
     public Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata) {

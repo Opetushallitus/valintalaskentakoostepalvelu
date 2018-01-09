@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource;
 
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
@@ -126,27 +127,11 @@ public abstract class UrlConfiguredResource implements HttpResource{
     }
 
     /**
-     * @deprecated use {@link #putAsObservableLazily(String, Type, Entity)}
-     */
-    @Override
-    public <A, B> Observable<B> putAsObservable(String path, Type type, Entity<A> entity) {
-        return wrappedHttpResource.putAsObservable(path, type, entity);
-    }
-
-    /**
      * @deprecated use {@link #putAsObservableLazily(String, Entity)}
      */
     @Override
     public <A> Observable<Response> putAsObservable(String path, Entity<A> entity) {
         return wrappedHttpResource.putAsObservable(path, entity);
-    }
-
-    /**
-     * @deprecated use {@link #putAsObservableLazily(String, Entity, Function)}
-     */
-    @Override
-    public <A, B> Observable<B> putAsObservable(String path, Type type, Entity<A> entity, Function<WebClient, WebClient> paramsHeadersAndStuff) {
-        return wrappedHttpResource.putAsObservable(path,type,entity,paramsHeadersAndStuff);
     }
 
     @Override
