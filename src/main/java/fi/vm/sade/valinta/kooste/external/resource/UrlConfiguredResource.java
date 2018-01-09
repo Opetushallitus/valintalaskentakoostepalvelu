@@ -135,11 +135,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     }
 
     @Override
-    public <A> Observable<Response> putAsObservable(String path, Entity<A> entity, Function<WebClient, WebClient> paramsHeadersAndStuff) {
-        return wrappedHttpResource.putAsObservable(path, entity, paramsHeadersAndStuff);
-    }
-
-    @Override
     public Observable<Response> getAsObservableLazily(String path) {
         return wrappedHttpResource.getAsObservableLazily(path);
     }

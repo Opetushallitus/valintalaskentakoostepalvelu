@@ -104,7 +104,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public Observable<Set<String>> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
-        Observable<Response> response = putAsObservable(
+        Observable<Response> response = putAsObservableLazily(
                 getUrl("valintapiste-service.put.pisteet"),
                 Entity.entity(DEFAULT_GSON.toJson(pisteet), MediaType.APPLICATION_JSON_TYPE)
                 , client -> {
