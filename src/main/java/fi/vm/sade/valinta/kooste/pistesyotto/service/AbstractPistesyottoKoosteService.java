@@ -1,9 +1,20 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
+import static org.apache.commons.collections.ListUtils.union;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
@@ -16,20 +27,15 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
-//import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
-import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Piste;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviKuuntelija;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AmmatillisenKielikoetulosOperations.CompositeCommand;
@@ -37,7 +43,6 @@ import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaCo
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -46,20 +51,21 @@ import rx.Observable;
 import rx.functions.Func1;
 import rx.functions.Func2;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.*;
-import static org.apache.commons.collections.ListUtils.*;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
-import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Osallistuminen;
+//import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 
 public abstract class AbstractPistesyottoKoosteService {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
@@ -113,13 +119,13 @@ public abstract class AbstractPistesyottoKoosteService {
         String hakukohdeNimi = new Teksti(hakukohdeDTO.getHakukohteenNimet()).getTeksti();
         String tarjoajaNimi = new Teksti(hakukohdeDTO.getTarjoajaNimet()).getTeksti();
         Collection<String> valintakoeTunnisteet = valintaperusteet.stream()
-                .map(v -> v.getTunniste())
+                .map(ValintaperusteDTO::getTunniste)
                 .collect(Collectors.toList());
 
         Set<String> kaikkiKutsutaanTunnisteet = hakukohdeJaValintakoe.stream()
                 .flatMap(h -> h.getValintakoeDTO().stream())
                 .filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki()))
-                .map(v -> v.getTunniste())
+                .map(ValintakoeCreateDTO::getTunniste)
                 .collect(Collectors.toSet());
 
         return new PistesyottoExcel(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi, aikaleima,
@@ -152,25 +158,21 @@ public abstract class AbstractPistesyottoKoosteService {
             });
         };
         Func2<List<ValintakoeOsallistuminenDTO>, List<Hakemus>, Observable<List<Hakemus>>> haePuuttuvatHakemukset = (osallistumiset, hakemukset) -> {
-            Set<String> puuttuvatHakemukset = osallistumiset.stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet());
-            puuttuvatHakemukset.removeAll(hakemukset.stream().map(h -> h.getOid()).collect(Collectors.toSet()));
+            Set<String> puuttuvatHakemukset = osallistumiset.stream().map(ValintakoeOsallistuminenDTO::getHakemusOid).collect(Collectors.toSet());
+            puuttuvatHakemukset.removeAll(hakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet()));
             if (puuttuvatHakemukset.isEmpty()) {
                 return Observable.just(hakemukset);
             }
             prosessi.inkrementoiKokonaistyota();
             return applicationAsyncResource.getApplicationsByHakemusOids(new ArrayList<>(puuttuvatHakemukset))
                     .map(hs -> Stream.concat(hakemukset.stream(), hs.stream()).collect(Collectors.toList()))
-                    .doOnCompleted(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    });
+                    .doOnCompleted(prosessi::inkrementoiTehtyjaToita);
         };
         Func1<List<ValintaperusteDTO>, Observable<List<Oppija>>> haeKielikoetulokset = kokeet -> {
-            if (kokeet.stream().map(k -> k.getTunniste()).anyMatch(t -> t.matches(PistesyottoExcel.KIELIKOE_REGEX))) {
+            if (kokeet.stream().map(ValintaperusteDTO::getTunniste).anyMatch(t -> t.matches(PistesyottoExcel.KIELIKOE_REGEX))) {
                 prosessi.inkrementoiKokonaistyota();
                 return suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
-                        .doOnCompleted(() -> {
-                            prosessi.inkrementoiTehtyjaToita();
-                        });
+                        .doOnCompleted(prosessi::inkrementoiTehtyjaToita);
             } else {
                 return Observable.just(new ArrayList<>());
             }
@@ -190,9 +192,9 @@ public abstract class AbstractPistesyottoKoosteService {
                 ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
                 (lisatiedot, kokeet, osallistumistiedot, kielikoetulokset, ohjausparametrit) -> {
                     Map<String, ValintakoeOsallistuminenDTO> osallistumistiedotByHakemusOid = osallistumistiedot.stream()
-                            .collect(Collectors.toMap(o -> o.getHakemusOid(), o -> o));
+                            .collect(Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, o -> o));
                     Map<String, Oppija> kielikoetuloksetByPersonOid = kielikoetulokset.stream()
-                            .collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o));
+                            .collect(Collectors.toMap(Oppija::getOppijanumero, o -> o));
                     return Pair.of(lisatiedot.lastModified, lisatiedot.valintapisteet.stream().map(l ->
                             new HakemuksenKoetulosYhteenveto(
                                     l,
@@ -224,7 +226,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                 lisatiedot.getRight(), valintakoeosallistumiset, haku, hakukohde, kuuntelijat),
                         lisatiedot.getRight().stream().collect(Collectors.toMap(l -> l.getOid(), l -> l))
                 )
-        ).doOnCompleted(() -> prosessi.inkrementoiTehtyjaToita());
+        ).doOnCompleted(prosessi::inkrementoiTehtyjaToita);
     }
 
     protected Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
@@ -386,9 +388,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
     private AtomicReference<String> etsiOppilaitosHierarkiasta(String tarjoajaOid, List<OrganisaatioTyyppi> taso, AtomicReference<String> oppilaitosRef, boolean tarjoajaLevelReached) {
         Optional<OrganisaatioTyyppi> oppilaitos = taso.stream().filter(ot -> ot.getOrganisaatiotyypit().contains(OPPILAITOS)).findFirst();
-        if (oppilaitos.isPresent()) {
-            oppilaitosRef.set(oppilaitos.get().getOid());
-        }
+        oppilaitos.ifPresent(organisaatioTyyppi -> oppilaitosRef.set(organisaatioTyyppi.getOid()));
 
         Optional<OrganisaatioTyyppi> tarjoaja = taso.stream().filter(ot -> ot.getOid().equals(tarjoajaOid)).findFirst();
         tarjoajaLevelReached = tarjoajaLevelReached || tarjoaja.isPresent();
