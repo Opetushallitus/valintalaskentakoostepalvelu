@@ -121,12 +121,11 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                 defaultValue,
                 prosessi.getAsiointikieli(),
                 resurssit.hakijat,
-                resurssit.hakemukset, prosessi)
+                resurssit.hakemukset)
                 .timeout(ViestintapalveluObservables.getDelay(Optional.of(resurssit.hakukohdeOid)), TimeUnit.MINUTES, Observable.just("timeout"));
     }
 
-    private Observable<String> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<String> defaultValue, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset,
-                                                                       SijoittelunTulosProsessi prosessi) {
+    private Observable<String> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<String> defaultValue, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset) {
         return
                 tarjontaAsyncResource.haeHakukohde(hakukohdeOid).switchMap(
                         h -> {
