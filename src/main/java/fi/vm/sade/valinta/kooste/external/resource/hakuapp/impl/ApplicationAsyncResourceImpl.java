@@ -52,7 +52,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     public Observable<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
         String url = getUrl("haku-app.applications.syntheticapplication");
         Entity<HakemusPrototyyppiBatch> entity = Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON);
-        return this.putAsObservableLazily(url, new GenericType<List<Hakemus>>() {}.getType(), entity);
+        return this.putAsObservableLazily(url, new GenericType<List<Hakemus>>() {}.getType(), entity, ACCEPT_JSON);
     }
 
     @Override
