@@ -20,8 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResource implements OppijanumerorekisteriAsyncResource {
-    private static final Logger LOG = LoggerFactory.getLogger(OppijanumerorekisteriAsyncResourceImpl.class);
-
     @Autowired
     public OppijanumerorekisteriAsyncResourceImpl(
             @Qualifier("OppijanumerorekisteriServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
