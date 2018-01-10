@@ -205,7 +205,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         });
     }
 
-    private List<ErillishakuRivi> luoHenkilotJaKasitteleHakemukset(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final boolean saveApplications) {
+    private List<ErillishakuRivi> luoHenkilotJaKasitteleHakemukset(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final boolean saveApplications) throws Exception {
         LOG.info("lisattavatTaiKeskeneraiset="+lisattavatTaiKeskeneraiset.size());
         if(!lisattavatTaiKeskeneraiset.isEmpty()) {
             LOG.info("Haetaan/luodaan henkilöt");
