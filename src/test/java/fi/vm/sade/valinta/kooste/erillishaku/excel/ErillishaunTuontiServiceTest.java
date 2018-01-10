@@ -259,7 +259,7 @@ public class ErillishaunTuontiServiceTest {
         @Test
         public void henkilonLuontiEpaonnistuu() {
             final OppijanumerorekisteriAsyncResource failingOppijanumerorekisteriResource = mock(OppijanumerorekisteriAsyncResource.class);
-            when(failingOppijanumerorekisteriResource.haeTaiLuoHenkilot(Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
+            when(failingOppijanumerorekisteriResource.haeTaiLuoHenkilot(Mockito.any())).thenReturn(Observable.error(new RuntimeException("simulated HTTP fail")));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(
                     applicationAsyncResource,
                     failingOppijanumerorekisteriResource,

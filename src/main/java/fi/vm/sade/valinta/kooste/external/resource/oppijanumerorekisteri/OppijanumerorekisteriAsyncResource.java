@@ -2,11 +2,11 @@ package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri;
 
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import rx.Observable;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
 public interface OppijanumerorekisteriAsyncResource {
-    Future<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit);
-    List<HenkiloPerustietoDto> haeHenkilot(List<String> personOids);
+    Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit);
+    Observable<List<HenkiloPerustietoDto>> haeHenkilot(List<String> personOids);
 }

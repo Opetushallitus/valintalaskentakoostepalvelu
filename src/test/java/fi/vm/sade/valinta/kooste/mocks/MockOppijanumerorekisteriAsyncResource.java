@@ -9,9 +9,9 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -47,13 +47,13 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
         this.futureSupplier = futureSupplier;
     }
     @Override
-    public Future<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(final List<HenkiloCreateDTO> hp) {
-        return Optional.ofNullable(MockOppijanumerorekisteriAsyncResource.<List<HenkiloPerustietoDto>>serviceAvailableCheck()).orElseGet(
-                () -> futureSupplier.apply(hp));
+    public Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(final List<HenkiloCreateDTO> hp) {
+        return Observable.from(Optional.ofNullable(MockOppijanumerorekisteriAsyncResource.<List<HenkiloPerustietoDto>>serviceAvailableCheck()).orElseGet(
+                () -> futureSupplier.apply(hp)));
     }
     @Override
-    public List<HenkiloPerustietoDto> haeHenkilot(List<String> personOids) {
-        return Lists.newArrayList();
+    public Observable<List<HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
+        return Observable.just(Lists.newArrayList());
     }
 
     public static HenkiloPerustietoDto toHenkiloPerustietoDto(HenkiloCreateDTO proto) {

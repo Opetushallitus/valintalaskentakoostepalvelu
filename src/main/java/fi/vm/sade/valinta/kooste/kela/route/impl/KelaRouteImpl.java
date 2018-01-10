@@ -240,12 +240,12 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         LOG.warn("Haetaan {} henkiloa, {} erässä", henkiloOidit.size(), oiditSivutettuna.size());
                         for (List<String> oidit : oiditSivutettuna) {
                             try {
-                                List<HenkiloPerustietoDto> henkiloPerustietoDtos = oppijanumerorekisteriAsyncResource.haeHenkilot(oidit);
+                                List<HenkiloPerustietoDto> henkiloPerustietoDtos = retrieveHenkiloPerustietoDtos(oidit);
                                 henkilot.addAll(henkiloPerustietoDtos);
                             } catch (Exception e) {
                                 LOG.error("Oppijanumerorekisteri haku epäonnistui. Yritetään vielä uudestaan.", e);
                                 Thread.sleep(50L);
-                                henkilot.addAll(oppijanumerorekisteriAsyncResource.haeHenkilot(oidit));
+                                henkilot.addAll(retrieveHenkiloPerustietoDtos(oidit));
                             }
                         }
                         henkilot.forEach(luonti.getLuonti().getCache()::put);
@@ -471,6 +471,12 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         log.error("Virhetilanne", e);
                     }
                 }));
+    }
+
+    private List<HenkiloPerustietoDto> retrieveHenkiloPerustietoDtos(List<String> oidit) {
+        return oppijanumerorekisteriAsyncResource.haeHenkilot(oidit)
+            .doOnError(throwable -> log.error("Exception when retrieving henkilö data for " + oidit.size() + " oids", throwable))
+            .toBlocking().first();
     }
 
     private void updateHaunKohdejoukkoCache(Haku haku, KelaCache cache, Collection<Poikkeus> poikkeuksetUudelleenYrityksessa) {

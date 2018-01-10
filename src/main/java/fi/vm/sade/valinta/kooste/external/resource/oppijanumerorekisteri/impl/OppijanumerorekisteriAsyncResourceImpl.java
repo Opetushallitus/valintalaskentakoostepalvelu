@@ -5,17 +5,15 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.Oppijan
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -26,19 +24,17 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
         super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     }
 
-    public Future<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
-        return getWebClient()
-                .path(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findOrCreateMultiple"))
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .post(Entity.entity(henkiloPrototyypit, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HenkiloPerustietoDto>>() {
-                });
+    public Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
+        return postAsObservableLazily(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findOrCreateMultiple"),
+            new GenericType<List<HenkiloPerustietoDto>>() {}.getType(),
+            Entity.entity(henkiloPrototyypit, MediaType.APPLICATION_JSON_TYPE),
+            ACCEPT_JSON);
     }
 
-    public List<HenkiloPerustietoDto> haeHenkilot(List<String> personOids) {
-        return getWebClient()
-                .path(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findByPersonOidList"))
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(personOids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HenkiloPerustietoDto>>() {});
+    public Observable<List<HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
+        return postAsObservableLazily(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findByPersonOidList"),
+            new GenericType<List<HenkiloPerustietoDto>>() {}.getType(),
+            Entity.entity(personOids, MediaType.APPLICATION_JSON_TYPE),
+            ACCEPT_JSON);
     }
 }

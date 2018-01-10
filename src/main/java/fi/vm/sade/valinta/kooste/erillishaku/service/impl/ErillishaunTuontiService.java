@@ -205,7 +205,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         });
     }
 
-    private List<ErillishakuRivi> luoHenkilotJaKasitteleHakemukset(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final boolean saveApplications) throws Exception {
+    private List<ErillishakuRivi> luoHenkilotJaKasitteleHakemukset(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final boolean saveApplications) {
         LOG.info("lisattavatTaiKeskeneraiset="+lisattavatTaiKeskeneraiset.size());
         if(!lisattavatTaiKeskeneraiset.isEmpty()) {
             LOG.info("Haetaan/luodaan henkilöt");
@@ -214,7 +214,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                     .map(rivi -> rivi.toHenkiloCreateDTO(convertKansalaisuusKoodi(rivi.getKansalaisuus())))
                     .collect(Collectors.toList());
             try {
-                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(henkiloCreateDTOS).get();
+                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(henkiloCreateDTOS).toBlocking().first();
                 LOG.info("Luotiin henkilot=" + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
             } catch (Exception e) {
                 if(e.getCause() != null && e.getCause() instanceof WebApplicationException){
