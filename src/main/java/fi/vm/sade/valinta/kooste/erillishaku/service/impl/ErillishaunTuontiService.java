@@ -120,7 +120,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
         validoiRivit(prosessi,haku,rivit,saveApplications);
 
-        List<ErillishakuRivi> lisattavatTaiKeskeneraiset = luoHenkilotJaKasitteleHakemukset(auditSession, prosessi, haku, rivit.stream().filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList()), saveApplications);
+        List<ErillishakuRivi> lisattavatTaiKeskeneraiset = luoHenkilotJaKasitteleHakemukset(prosessi, haku, rivit.stream().filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList()), saveApplications);
 
         LOG.info("Viedaan hakijoita ({}kpl) jonoon {}", lisattavatTaiKeskeneraiset.size(), haku.getValintatapajonoOid());
 
@@ -205,7 +205,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         });
     }
 
-    private List<ErillishakuRivi> luoHenkilotJaKasitteleHakemukset(final AuditSession auditSession, final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final boolean saveApplications) throws Exception {
+    private List<ErillishakuRivi> luoHenkilotJaKasitteleHakemukset(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final boolean saveApplications) {
         LOG.info("lisattavatTaiKeskeneraiset="+lisattavatTaiKeskeneraiset.size());
         if(!lisattavatTaiKeskeneraiset.isEmpty()) {
             LOG.info("Haetaan/luodaan henkilöt");
