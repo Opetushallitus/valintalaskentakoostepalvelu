@@ -76,7 +76,7 @@ public class HakemuksetResource {
                             exception -> {
                                 long duration = (System.currentTimeMillis() - started) / 1000;
                                 if (exception instanceof ValinnanvaiheenValintakoekutsutService.ValinnanvaiheelleEiLoydyValintaryhmiaException) {
-                                    LOG.error(String.format("%skesto %d sekuntia", exception.getMessage(), duration));
+                                    LOG.error(String.format("%s : kesto %d sekuntia", exception.getMessage(), duration));
                                     Map<String,String> responseContent = new HashMap<>();
                                     responseContent.put("message", exception.getMessage());
                                     asyncResponse.resume(Response
