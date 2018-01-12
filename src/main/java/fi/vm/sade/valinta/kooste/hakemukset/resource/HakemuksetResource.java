@@ -26,6 +26,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -73,10 +75,20 @@ public class HakemuksetResource {
                             },
                             exception -> {
                                 long duration = (System.currentTimeMillis() - started) / 1000;
-                                LOG.error(
-                                    String.format("hakemusten listaaminen epäonnistui (valinnanvaihe %s, haku %s, kesto %d sekuntia", valinnanvaiheOid, hakuOid, duration),
-                                    exception);
-                                asyncResponse.cancel();
+                                if (exception instanceof ValinnanvaiheenValintakoekutsutService.ValinnanvaiheelleEiLoydyValintaryhmiaException) {
+                                    LOG.error(String.format("%skesto %d sekuntia", exception.getMessage(), duration));
+                                    Map<String,String> responseContent = new HashMap<>();
+                                    responseContent.put("message", exception.getMessage());
+                                    asyncResponse.resume(Response
+                                        .status(Response.Status.BAD_REQUEST)
+                                        .entity(responseContent)
+                                        .build());
+                                } else {
+                                    LOG.error(
+                                        String.format("hakemusten listaaminen epäonnistui (valinnanvaihe %s, haku %s, kesto %d sekuntia", valinnanvaiheOid, hakuOid, duration),
+                                        exception);
+                                    asyncResponse.cancel();
+                                }
                             }
                     );
                 }, exception -> {

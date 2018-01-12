@@ -4,10 +4,11 @@ package fi.vm.sade.valinta.kooste.hakemukset.service;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
@@ -24,9 +25,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
-import rx.functions.Action1;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -54,9 +61,14 @@ public class ValinnanvaiheenValintakoekutsutService {
         valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid)
                 .subscribe(hakukohdeOidit -> {
                     LOG.info("Löydettiin {} hakukohdetta", hakukohdeOidit.size());
-                    applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit).subscribe(
-                        hakemukset -> handleApplicationsResponse(hakemukset, authorityCheck, successHandler, exceptionHandler, hakukohdeOidit),
-                        exceptionHandler::accept);
+                    if (hakukohdeOidit.isEmpty()) {
+                        exceptionHandler.accept(new ValinnanvaiheelleEiLoydyValintaryhmiaException(
+                            String.format("Ei löytynyt yhtään hakukohdeoidia valintaryhmien perusteella haun %s valinnanvaiheelle %s", hakuOid, valinnanvaiheOid)));
+                    } else {
+                        applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit).subscribe(
+                            hakemukset -> handleApplicationsResponse(hakemukset, authorityCheck, successHandler, exceptionHandler, hakukohdeOidit),
+                            exceptionHandler::accept);
+                    }
                 });
     }
 
@@ -116,10 +128,8 @@ public class ValinnanvaiheenValintakoekutsutService {
                                     final List<ValintaperusteDTO> filteredValintaperusteet = valintaperusteet.stream().filter(valintaperuste -> {
                                         if (valintaperuste.getSyotettavissaKaikille()) {
                                             return true;
-                                        } else if (kutsututValintakokeet.contains(Pair.of(hakukohdeJaValintaperuste.getHakukohdeOid(), valintaperuste.getTunniste()))) {
-                                            return true;
-                                        }
-                                        return false;
+                                        } else
+                                            return kutsututValintakokeet.contains(Pair.of(hakukohdeJaValintaperuste.getHakukohdeOid(), valintaperuste.getTunniste()));
                                     }).collect(Collectors.toList());
                                     return new HakukohdeJaValintaperusteDTO(hakukohdeJaValintaperuste.getHakukohdeOid(), filteredValintaperusteet);
                                 })
@@ -163,5 +173,11 @@ public class ValinnanvaiheenValintakoekutsutService {
                 postinumero));
         hakemusDTO.setHakukohteet(valintaperusteDTOs.stream().map(vp -> new HakukohdeDTO(vp.getHakukohdeOid(), vp.getValintaperusteDTO().stream().map(vv -> new fi.vm.sade.valinta.kooste.hakemukset.dto.ValintakoeDTO(vv.getTunniste())).collect(Collectors.toList()))).collect(Collectors.toList()));
         return hakemusDTO;
+    }
+
+    public class ValinnanvaiheelleEiLoydyValintaryhmiaException extends RuntimeException {
+        public ValinnanvaiheelleEiLoydyValintaryhmiaException(String message) {
+            super(message);
+        }
     }
 }

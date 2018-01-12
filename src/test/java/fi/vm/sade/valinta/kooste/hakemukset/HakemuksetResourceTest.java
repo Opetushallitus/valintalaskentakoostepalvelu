@@ -1,9 +1,16 @@
 package fi.vm.sade.valinta.kooste.hakemukset;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
@@ -18,16 +25,18 @@ import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class HakemuksetResourceTest {
 
@@ -96,4 +105,22 @@ public class HakemuksetResourceTest {
                          .get("tunniste").getAsString());
     }
 
+    @Test
+    public void josHakijaryhmiaEiLoydyPalautetaanBadRequestSelityksenKanssa() throws IOException {
+        Mocks.reset();
+        MockValintaperusteetAsyncResource.setHakukohteetValinnanvaiheelleResult(Collections.emptySet());
+        String hakuOid = "1.2.3";
+        String valinnanvaiheOid = "4.5.6";
+        Response r = hakemuksetValinnanvaiheResource.getWebClient()
+                .query("hakuOid", hakuOid)
+                .query("valinnanvaiheOid", valinnanvaiheOid)
+                .get();
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, r.getStatus());
+        assertThat(IOUtils.toString((InputStream) r.getEntity(), "UTF-8"),
+            containsString(String.format(
+                "Ei löytynyt yhtään hakukohdeoidia valintaryhmien perusteella haun %s valinnanvaiheelle %s",
+                hakuOid,
+                valinnanvaiheOid)));
+    }
 }
