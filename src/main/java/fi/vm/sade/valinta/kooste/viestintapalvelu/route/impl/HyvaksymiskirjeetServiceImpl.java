@@ -2,6 +2,9 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static rx.Observable.from;
 import static rx.Observable.just;
 import static rx.Observable.zip;
@@ -270,7 +273,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 LOG.info("Aloitetaan hyvaksymiskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
                 final LetterResponse batchId;
                 try {
-                    batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).toBlocking().toFuture().get(165L, TimeUnit.SECONDS);
+                    batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)
+                        .timeout(164, SECONDS)
+                        .toBlocking()
+                        .toFuture()
+                        .get(165L, SECONDS);
                 } catch (Exception e) {
                     LOG.error("Viestintapalvelukutsu epaonnistui virheeseen", e);
                     throw new RuntimeException(e);
@@ -293,7 +300,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                         try {
                                             LOG.info("Tehdaan status kutsu seurantaId:lle {}", batchId);
                                             LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())
-                                                .toBlocking().toFuture().get(900L, TimeUnit.MILLISECONDS);
+                                                .timeout(899, MILLISECONDS)
+                                                .toBlocking()
+                                                .toFuture()
+                                                .get(900L, TimeUnit.MILLISECONDS);
                                             if (prosessi.isKeskeytetty()) {
                                                 LOG.warn("Hyvaksymiskirjeiden muodostuksen seuranta on keskeytetty kayttajantoimesta!");
                                                 stop.onNext(null);

@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static rx.Observable.from;
 import static rx.Observable.zip;
 import com.google.common.collect.Sets;
@@ -138,7 +141,11 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
             Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
             hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
             if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
-                hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat).toBlocking().first().stream();
+                hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat)
+                    .timeout(30, SECONDS)
+                    .toBlocking()
+                    .first()
+                    .stream();
             } else {
                 hakukohteenUlkopuolisetHakemukset = Stream.empty();
             }
@@ -224,14 +231,19 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                         koekutsu.getHakukohdeOid(), hakemusOidJaHakijanMuutHakutoiveOids, koekutsu.getLetterBodyText(),
                         koekutsu.getTarjoajaOid(), koekutsu.getTag(), koekutsu.getTemplateName());
                 LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
-                LetterResponse batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).toBlocking().toFuture().get(35L, TimeUnit.SECONDS);
+                LetterResponse batchId = viestintapalveluAsyncResource
+                    .viePdfJaOdotaReferenssiObservable(letterBatch)
+                    .timeout(1, MINUTES)
+                    .toBlocking()
+                    .toFuture()
+                    .get(35L, SECONDS);
                 LOG.error("### BATCHID: {} {} {} ###", batchId.getBatchId(), batchId.getStatus(), batchId.getErrors());
                 LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
                 prosessi.vaiheValmistui();
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
-                            .interval(1, TimeUnit.SECONDS)
+                            .interval(1, SECONDS)
                             .take((int) (ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / 1000))
                             .takeUntil(stop)
                             .subscribe(
@@ -239,6 +251,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                         try {
                                             LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
                                             LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())
+                                                .timeout(899, MILLISECONDS)
                                                 .toBlocking().toFuture().get(900L, TimeUnit.MILLISECONDS);
                                             if ("error".equals(status.getStatus())) {
                                                 LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");

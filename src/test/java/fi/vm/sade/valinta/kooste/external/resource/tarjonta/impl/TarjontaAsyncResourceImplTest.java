@@ -1,15 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import org.junit.Test;
 import rx.Observable;
 
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.Assert.*;
 
 public class TarjontaAsyncResourceImplTest {
 
@@ -19,7 +20,7 @@ public class TarjontaAsyncResourceImplTest {
 
         Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImplHelper.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
         Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap(a);
-        Map<String, List<String>> res = observable.toBlocking().single();
+        Map<String, List<String>> res = observable.timeout(10, SECONDS).toBlocking().single();
         assertEquals(2, res.size());
         assertEquals(3, res.get("oid1").size());
         assertTrue(res.get("oid1").contains("ryhmaoid1"));
@@ -31,7 +32,7 @@ public class TarjontaAsyncResourceImplTest {
 
         Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImplHelper.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
         Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap(a);
-        Map<String, List<String>> res = observable.toBlocking().single();
+        Map<String, List<String>> res = observable.timeout(10, SECONDS).toBlocking().single();
         assertEquals(2, res.size());
         assertEquals(0, res.get("oid1").size());
         assertEquals(0, res.get("oid2").size());
@@ -43,7 +44,7 @@ public class TarjontaAsyncResourceImplTest {
 
         Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImplHelper.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
         Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap(a);
-        Map<String, List<String>> res = observable.toBlocking().single();
+        Map<String, List<String>> res = observable.timeout(10, SECONDS).toBlocking().single();
         assertEquals(0, res.size());
     }
 

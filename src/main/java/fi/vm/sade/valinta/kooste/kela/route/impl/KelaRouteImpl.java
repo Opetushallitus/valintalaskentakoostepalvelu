@@ -39,10 +39,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Component
 public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
@@ -476,7 +478,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     private List<HenkiloPerustietoDto> retrieveHenkiloPerustietoDtos(List<String> oidit) {
         return oppijanumerorekisteriAsyncResource.haeHenkilot(oidit)
             .doOnError(throwable -> log.error("Exception when retrieving henkilö data for " + oidit.size() + " oids", throwable))
-            .toBlocking().first();
+            .timeout(30, SECONDS).toBlocking().first();
     }
 
     private void updateHaunKohdejoukkoCache(Haku haku, KelaCache cache, Collection<Poikkeus> poikkeuksetUudelleenYrityksessa) {

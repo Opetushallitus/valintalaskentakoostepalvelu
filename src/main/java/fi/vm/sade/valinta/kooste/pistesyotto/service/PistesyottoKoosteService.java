@@ -1,10 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
+import static java.util.Collections.singletonList;
+
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -34,16 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
-import rx.functions.Functions;
 
-import javax.ws.rs.core.Response;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.Collections.*;
 
 public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     private static final Logger LOG = LoggerFactory.getLogger(PistesyottoKoosteService.class);

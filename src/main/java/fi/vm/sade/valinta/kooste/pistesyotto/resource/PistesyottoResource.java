@@ -1,10 +1,11 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
-import static fi.vm.sade.valinta.kooste.AuthorizationUtil.*;
+import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
 import static fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource.IF_UNMODIFIED_SINCE;
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
-
+import static java.util.Collections.list;
+import static java.util.Collections.singletonList;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
@@ -14,21 +15,18 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
-import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
-import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.util.IOUtils;
@@ -60,7 +58,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -481,7 +483,7 @@ public class PistesyottoResource {
             if (hakemukset == null || hakemukset.isEmpty()) {
                 asyncResponse.resume(Response.serverError().entity("Ulkoinen pistesyotto API requires at least one hakemus").build());
             } else {
-                asyncResponse.setTimeout(120L, TimeUnit.MINUTES);
+                asyncResponse.setTimeout(120L, MINUTES);
                 asyncResponse.setTimeoutHandler(asyncResponse1 -> {
                     LOG.error("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu: /haku/{}", hakuOid);
                     asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());

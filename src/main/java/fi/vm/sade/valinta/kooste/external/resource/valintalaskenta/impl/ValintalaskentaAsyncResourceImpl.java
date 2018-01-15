@@ -1,5 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
+import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.UUSI;
+import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VALMIS;
+import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VIRHE;
+
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
@@ -17,8 +21,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.*;
 
 @Service
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
@@ -84,7 +86,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     @Override
     public Observable<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe) {
         final Entity<ValinnanvaiheDTO> entity = Entity.entity(vaihe, MediaType.APPLICATION_JSON_TYPE);
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe", hakukohdeOid),
                 ValinnanvaiheDTO.class, entity, (webclient) -> webclient.query("tarjoajaOid", tarjoajaOid));
     }
@@ -111,7 +113,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     public Observable<String> kutsuRajapintaaPollaten(String api, Laskentakutsu laskentakutsu) {
         LOG.info("(Uuid: {}) Lähetetään laskenta-servicelle laskentakutsu. (Pollkey: {})", laskentakutsu.getUuid(), laskentakutsu.getPollKey());
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl(api),
                 String.class,
                 Entity.entity(laskentakutsu, MediaType.APPLICATION_JSON_TYPE),

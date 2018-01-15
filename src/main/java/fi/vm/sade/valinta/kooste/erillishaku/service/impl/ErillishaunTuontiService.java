@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
@@ -113,7 +115,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         }, () -> LOG.info("Tuonti lopetettiin"));
     }
 
-    private void tuoHakijatJaLuoHakemukset(final AuditSession auditSession, final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final boolean saveApplications, final ErillishakuDTO haku) throws Exception {
+    private void tuoHakijatJaLuoHakemukset(final AuditSession auditSession, final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final boolean saveApplications, final ErillishakuDTO haku) {
         final String username = auditSession.getPersonOid();
 
         LOG.info("Aloitetaan tuonti. Rivit=" + erillishakuExcel.rivit.size());
@@ -182,7 +184,11 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     private void passivoiHakemukset(List<ErillishakuRivi> poistettavat) {
         if (!poistettavat.isEmpty()) {
             List<String> hakemusOidit = poistettavat.stream().map(ErillishakuRivi::getHakemusOid).collect(Collectors.toList());
-            applicationAsyncResource.changeStateOfApplicationsToPassive(hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä").toBlocking().first();
+            applicationAsyncResource
+                .changeStateOfApplicationsToPassive(hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä")
+                .timeout(1, MINUTES)
+                .toBlocking()
+                .first();
         }
     }
 
@@ -214,7 +220,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                     .map(rivi -> rivi.toHenkiloCreateDTO(convertKansalaisuusKoodi(rivi.getKansalaisuus())))
                     .collect(Collectors.toList());
             try {
-                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(henkiloCreateDTOS).toBlocking().first();
+                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(henkiloCreateDTOS).timeout(1, MINUTES).toBlocking().first();
                 LOG.info("Luotiin henkilot=" + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
             } catch (Exception e) {
                 if(e.getCause() != null && e.getCause() instanceof WebApplicationException){
@@ -248,7 +254,11 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         final Map<String, Valinnantulos> vanhatValinnantulokset = new HashMap<>();
         if(kesken.size() > 0) {
             vanhatValinnantulokset.putAll(valintaTulosServiceAsyncResource.getErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid())
-                    .toBlocking().first().stream().collect(Collectors.toMap(Valinnantulos::getHakemusOid, v -> v)));
+                .timeout(5, MINUTES)
+                .toBlocking()
+                .first()
+                .stream()
+                .collect(Collectors.toMap(Valinnantulos::getHakemusOid, v -> v)));
         }
 
         return doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, createValinnantuloksetForValintaTulosService(haku, lisattavat, kesken, poistettavat, vanhatValinnantulokset));
@@ -312,6 +322,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 final List<Hakemus> hakemukset;
                 try {
                     hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit)
+                        .timeout(1, MINUTES)
                         .toBlocking().first();
                 } catch (Exception e) {
                     LOG.error("Error updating application prototypes {}", Arrays.toString(hakemusPrototyypit.toArray()), e);

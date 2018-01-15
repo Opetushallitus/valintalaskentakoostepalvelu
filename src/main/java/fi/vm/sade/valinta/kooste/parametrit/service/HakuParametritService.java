@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.parametrit.service;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
@@ -36,7 +38,10 @@ public class HakuParametritService {
         try {
             Observable<ParametritDTO> parametritDTOObservable = haunOhjausParametritCache.get(hakuOid,
                     () -> ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).single());
-            ParametritDTO paramDto = parametritDTOObservable.toBlocking().single();
+            ParametritDTO paramDto = parametritDTOObservable
+                .timeout(30, SECONDS)
+                .toBlocking()
+                .single();
             return new ParametritParser(paramDto, rootOrganisaatioOid);
         } catch (Exception e) {
             LOG.error(String.format("Error querying ParametritDTO for haku %s", hakuOid), e);

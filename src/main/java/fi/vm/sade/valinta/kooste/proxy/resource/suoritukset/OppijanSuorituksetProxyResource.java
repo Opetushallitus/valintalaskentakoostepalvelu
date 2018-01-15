@@ -2,24 +2,26 @@ package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
 import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
 import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
-import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
-import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import static java.util.concurrent.TimeUnit.MINUTES;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +30,21 @@ import org.springframework.stereotype.Controller;
 import rx.Observable;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller("SuorituksenArvosanatProxyResource")
@@ -85,7 +94,7 @@ public class OppijanSuorituksetProxyResource {
             @PathParam("opiskelijaOid") String opiskelijaOid,
             @PathParam("hakemusOid") String hakemusOid,
             @Suspended final AsyncResponse asyncResponse) {
-        asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(2L, MINUTES);
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}", opiskelijaOid);
@@ -114,8 +123,9 @@ public class OppijanSuorituksetProxyResource {
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             List<String> hakemusOids,
             @Suspended final AsyncResponse asyncResponse) {
+
+        asyncResponse.setTimeout(2L, MINUTES);
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{hakuOid}", hakuOid);
             respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
@@ -169,7 +179,7 @@ public class OppijanSuorituksetProxyResource {
             Hakemus hakemus,
             @Suspended final AsyncResponse asyncResponse) {
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(2L, MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskelijaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskelijaOid/{oid}", opiskelijaOid);
             respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
@@ -196,7 +206,7 @@ public class OppijanSuorituksetProxyResource {
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             @Suspended final AsyncResponse asyncResponse) {
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-        asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(2L, MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
             LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu");
             respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
@@ -338,7 +348,11 @@ public class OppijanSuorituksetProxyResource {
                                                 ParametritDTO parametrit,
                                                 Boolean fetchEnsikertalaisuus) {
 
-        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid()).toBlocking().first();
+        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource
+            .hakukohdeRyhmasForHakukohdes(haku.getOid())
+            .timeout(1, MINUTES)
+            .toBlocking()
+            .first();
         return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
     }
 
