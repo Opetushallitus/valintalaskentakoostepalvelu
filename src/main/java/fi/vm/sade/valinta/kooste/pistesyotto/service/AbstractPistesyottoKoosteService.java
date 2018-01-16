@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import rx.Observable;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.observables.ConnectableObservable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -175,8 +176,8 @@ public abstract class AbstractPistesyottoKoosteService {
                 return Observable.just(new ArrayList<>());
             }
         };
-        Observable<List<ValintaperusteDTO>> kokeetO = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
-        Observable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid);
+        ConnectableObservable<List<ValintaperusteDTO>> kokeetO = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid).replay(1);
+        ConnectableObservable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid).replay(1);
         Observable<PisteetWithLastModified> merge = Observable.merge(Observable.zip(
                 osallistumistiedotO,
                 valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession),
@@ -211,6 +212,8 @@ public abstract class AbstractPistesyottoKoosteService {
         ));
 
         prosessi.inkrementoiKokonaistyota();
+        kokeetO.connect();
+        osallistumistiedotO.connect();
         return Observable.zip(
                 osallistumistiedotO,
                 lisatiedotO,
