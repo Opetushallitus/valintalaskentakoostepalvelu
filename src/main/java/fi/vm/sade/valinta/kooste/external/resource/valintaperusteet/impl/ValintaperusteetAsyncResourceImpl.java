@@ -125,7 +125,7 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids) {
-        return postAsObservable(
+        return postAsObservableLazily(
                 getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet"),
                 new TypeToken<List<HakukohdeJaValintaperusteDTO>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
