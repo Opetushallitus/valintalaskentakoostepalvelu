@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
-import static rx.observables.BlockingObservable.from;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
