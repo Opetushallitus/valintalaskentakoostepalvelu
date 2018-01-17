@@ -26,7 +26,7 @@ public class OhjausparametritAsyncResourceImpl extends UrlConfiguredResource imp
         super(TimeUnit.SECONDS.toMillis(requestTimeoutSeconds));
     }
     public Observable<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
-        return getAsObservable(getUrl("ohjausparametrit-service.parametri", hakuOid), ParametritDTO.class);
+        return getAsObservableLazily(getUrl("ohjausparametrit-service.parametri", hakuOid), ParametritDTO.class);
     }
 
     public Peruutettava haeHaunOhjausparametrit(String hakuOid, Consumer<ParametritDTO> callback, Consumer<Throwable> failureCallback) {

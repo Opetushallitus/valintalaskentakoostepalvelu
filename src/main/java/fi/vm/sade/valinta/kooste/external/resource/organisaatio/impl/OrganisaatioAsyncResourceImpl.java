@@ -73,7 +73,7 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
-        return this.<HakutoimistoDTO>getAsObservable(
+        return this.<HakutoimistoDTO>getAsObservableLazily(
                 getUrl("organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
                 HakutoimistoDTO.class)
                 .onErrorReturn(
