@@ -189,7 +189,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 failedTotal.get());
             tilanmerkkausObservable = laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.VALMIS, Optional.empty());
         }
-        tilanmerkkausObservable.subscribe(response -> laskentaSupervisor.ready(uuid()));
+        tilanmerkkausObservable.subscribe(
+            response -> laskentaSupervisor.ready(uuid()),
+            e -> LOG.error("Ongelma laskennan merkkaamisessa loppuneeksi", e));
     }
 
     public void postStop() {

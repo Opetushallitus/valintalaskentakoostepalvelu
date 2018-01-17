@@ -59,7 +59,8 @@ public class ValinnanvaiheenValintakoekutsutService {
 
     public void hae(String valinnanvaiheOid, String hakuOid, final HakukohdeOIDAuthorityCheck authorityCheck, Consumer<Collection<HakemusDTO>> successHandler, Consumer<Throwable> exceptionHandler) {
         valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid)
-                .subscribe(hakukohdeOidit -> {
+            .subscribe(
+                hakukohdeOidit -> {
                     LOG.info("Löydettiin {} hakukohdetta", hakukohdeOidit.size());
                     if (hakukohdeOidit.isEmpty()) {
                         exceptionHandler.accept(new ValinnanvaiheelleEiLoydyValintaryhmiaException(
@@ -69,7 +70,8 @@ public class ValinnanvaiheenValintakoekutsutService {
                             hakemukset -> handleApplicationsResponse(hakemukset, authorityCheck, successHandler, exceptionHandler, hakukohdeOidit),
                             exceptionHandler::accept);
                     }
-                });
+                },
+                e -> LOG.error("Ongelma haettaessa valintaryhmien perusteella hakukohteita valinnanvaiheelle " + valinnanvaiheOid, e));
     }
 
     private void handleApplicationsResponse(List<Hakemus> hakemukset, HakukohdeOIDAuthorityCheck authorityCheck, Consumer<Collection<HakemusDTO>> successHandler, Consumer<Throwable> exceptionHandler, Set<String> hakukohdeOidit) {
@@ -139,10 +141,12 @@ public class ValinnanvaiheenValintakoekutsutService {
                     })
                     .filter(x -> !x.getHakukohteet().isEmpty())
                     .collect(Collectors.toList());
-        }).subscribe(hakemusDTOs -> {
-            LOG.info("Palautetaan {} hakemusta", hakemusDTOs.size());
-            successHandler.accept(hakemusDTOs);
-        });
+        }).subscribe(
+            hakemusDTOs -> {
+                LOG.info("Palautetaan {} hakemusta", hakemusDTOs.size());
+                successHandler.accept(hakemusDTOs);
+            },
+            exceptionHandler::accept);
     }
 
     private Set<String> collect(List<Hakemus> hakemukset) {
