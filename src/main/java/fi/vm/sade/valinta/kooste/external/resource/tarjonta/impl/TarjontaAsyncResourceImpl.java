@@ -49,7 +49,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(Collection<String> organizationGroupOids) {
-        return this.<ResultSearch>getAsObservable(getUrl("tarjonta-service.hakukohde.search"), new TypeToken<ResultSearch>() {
+        return this.<ResultSearch>getAsObservableLazily(getUrl("tarjonta-service.hakukohde.search"), new TypeToken<ResultSearch>() {
         }.getType(), client -> {
             client.query("organisaatioRyhmaOid", organizationGroupOids.toArray());
             return client;
@@ -57,7 +57,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
     }
     @Override
     public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(Collection<String> organizationOids) {
-        return this.<ResultSearch>getAsObservable(
+        return this.<ResultSearch>getAsObservableLazily(
                 getUrl("tarjonta-service.hakukohde.search"),
                 new TypeToken<ResultSearch>() {
         }.getType(), client -> {

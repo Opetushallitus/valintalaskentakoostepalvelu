@@ -76,15 +76,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     }
 
     /**
-     * @deprecated use {@link #getAsObservableLazily(String, Type, Function)}
-     */
-    @Override
-    public <T> Observable<T> getAsObservable(String path, Type type,
-                                             Function<WebClient, WebClient> paramsHeadersAndStuff) {
-        return wrappedHttpResource.getAsObservable(path, type, paramsHeadersAndStuff);
-    }
-
-    /**
      * @deprecated use {@link #getAsObservableLazily(String, Function, Function)}
      */
     @Override
