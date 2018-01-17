@@ -1,18 +1,18 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiAsiointikielella;
+import static rx.observables.BlockingObservable.from;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
@@ -35,16 +35,17 @@ import rx.functions.Action3;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
-import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiAsiointikielella;
-import static rx.observables.BlockingObservable.from;
 
 @Service
 public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
@@ -54,7 +55,6 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
-    private final TarjontaAsyncResource hakuV1AsyncResource;
     private final int pollingIntervalMillis;
 
     @Autowired
@@ -64,14 +64,12 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
         ApplicationAsyncResource applicationAsyncResource,
         KirjeetHakukohdeCache kirjeetHakukohdeCache,
-        TarjontaAsyncResource hakuV1AsyncResource,
         @Value("${valintalaskentakoostepalvelu.jalkiohjauskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
-        this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.pollingIntervalMillis = pollingIntervalMillis;
     }
 
@@ -143,12 +141,6 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     private String lueAsiointikieliKirjeesta(JalkiohjauskirjeDTO kirje) {
         return KieliUtil.normalisoiKielikoodi(Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
-    }
-
-    private boolean isKorkeakouluhaku(String hakuOid) {
-        //TODO: tee aidosti asynkroniseksi
-        String haunKohdejoukkoUri = from(hakuV1AsyncResource.haeHaku(hakuOid)).first().getKohdejoukkoUri();
-        return haunKohdejoukkoUri.startsWith("haunkohdejoukko_12"); //"kohdejoukkoUri": "haunkohdejoukko_12#1"
     }
 
     private Action3<KirjeProsessi, JalkiohjauskirjeDTO, Supplier<HaunResurssit>> muodostaKirjeet(boolean tallennaTuloksetDokumenttiPalveluun) {
