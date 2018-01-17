@@ -18,6 +18,8 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static rx.observables.BlockingObservable.from;
 
 @Component
@@ -33,7 +35,7 @@ public class KirjeetHakukohdeCache {
         return metaHakukohdeCache.get(hakukohdeOid,
                 () -> {
                     //TODO Tee tästä aidosti asynkroninen!
-                    HakukohdeV1RDTO hakukohde = from(hakuV1AsyncResource.haeHakukohde(hakukohdeOid)).first();
+                    HakukohdeV1RDTO hakukohde = from(hakuV1AsyncResource.haeHakukohde(hakukohdeOid).timeout(30, SECONDS)).first();
                     Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
                     String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
                     LOG.debug("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
