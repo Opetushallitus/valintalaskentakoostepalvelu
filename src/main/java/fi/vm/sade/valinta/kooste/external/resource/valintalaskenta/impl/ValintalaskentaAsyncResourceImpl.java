@@ -103,7 +103,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
             }
             return Observable.timer(pollInterval, TimeUnit.SECONDS).switchMap(d -> {
                 String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.status", pollKey);
-                return getAsObservable(url, String.class, client -> {
+                return getAsObservableLazily(url, String.class, client -> {
                     client.accept(MediaType.TEXT_PLAIN_TYPE);
                     return client;
                 }).switchMap(rval -> pollaa(Math.min(pollInterval *2, MAX_POLL_INTERVAL_IN_SECONDS), rval, uuid, pollKey));
