@@ -5,10 +5,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -16,11 +12,9 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.external.resource.*;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.reflect.TypeToken;
@@ -46,22 +40,6 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
                             .accept(MediaType.APPLICATION_JSON_TYPE)
                             .async()
                             .get(new GsonResponseCallback<>(gson(), url, callback, failureCallback, new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType())));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
-    }
-
-    public Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback) {
-        LOG.info("Valinnanvaiheiden haku...");
-        try {
-            String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe", hakukohdeOid);
-            return new PeruutettavaImpl(
-                    getWebClient()
-                    .path(url)
-                    .accept(MediaType.APPLICATION_JSON_TYPE)
-                    .async()
-                    .get(new GsonResponseCallback<>(gson(), url, callback, failureCallback, new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -165,16 +143,6 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public Observable<List<ValintakoeDTO>> readByTunnisteet(Collection<String> tunnisteet) {
-        return postAsObservable(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.tunniste"), new TypeToken<List<ValintakoeDTO>>() {}.getType(),
-                Entity.entity(Lists.newArrayList(tunnisteet), MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                });
-    }
-
-    @Override
     public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
         return getWebClient()
                 .path(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"))
@@ -193,16 +161,6 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
                 });
     }
 
-    @Override
-    public Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
-        String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe");
-        return new PeruutettavaImpl(getWebClient()
-                .path(url)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE),
-                        new GsonResponseCallback<>(gson(), url, callback, failureCallback, new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType())));
-    }
     @Override
     public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids) {
         return postAsObservable(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintatapajono"),

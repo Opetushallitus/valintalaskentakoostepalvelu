@@ -87,18 +87,6 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(hakukohdeResultReference.get());
-        return new PeruutettavaImpl(Futures.immediateFuture(hakukohdeResultReference.get()));
-    }
-
-    @Override
-    public Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(resultReference.get());
-        return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-    }
-
-    @Override
     public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
         return Observable.just(hakukohteetValinnanvaiheelleResultReference.get());
     }
@@ -128,10 +116,6 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Observable<List<ValintakoeDTO>> readByTunnisteet(Collection<String> tunnisteet) {
-        throw new UnsupportedOperationException();
-    }
     @Override
     public Peruutettava haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku, Consumer<List<ValintaperusteetDTO>> callback, Consumer<Throwable> failureCallback) {
         throw new UnsupportedOperationException();

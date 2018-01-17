@@ -43,7 +43,6 @@ public interface ValintaperusteetAsyncResource {
     Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids);
 
     Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid);
-    Observable<List<ValintakoeDTO>> readByTunnisteet(Collection<String> tunnisteet);
 
     Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
 
@@ -53,10 +52,6 @@ public interface ValintaperusteetAsyncResource {
     Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids);
 
     Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids);
-
-    Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
-
-    Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback);
 
     // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
     Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
