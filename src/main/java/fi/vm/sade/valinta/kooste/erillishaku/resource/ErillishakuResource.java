@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 import static fi.vm.sade.valinta.kooste.AuthorizationUtil.*;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.oidHaustaJaHakukohteesta;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static rx.observables.BlockingObservable.from;
 
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
@@ -48,6 +49,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Controller("ErillishakuResource")
@@ -93,8 +95,8 @@ public class ErillishakuResource {
             @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("valintatapajonoOid") String valintatapajonoOid) throws Exception {
-        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+            @QueryParam("valintatapajonoOid") String valintatapajonoOid) {
+        String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
@@ -115,7 +117,7 @@ public class ErillishakuResource {
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             InputStream file) throws Exception {
         LOG.info("Käyttäjä " + KoosteAudit.username() + " tuo excelillä hakuun " + hakuOid + " hakemuksia");
-        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ByteArrayOutputStream b;
         IOUtils.copy(file, b = new ByteArrayOutputStream());
@@ -154,9 +156,9 @@ public class ErillishakuResource {
                     "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>" +
                     "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>" +
                     "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
-            ErillishakuJson json) throws Exception {
+            ErillishakuJson json) {
         LOG.info("Käyttäjä " + KoosteAudit.username() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
-        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
@@ -189,9 +191,9 @@ public class ErillishakuResource {
                     "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>" +
                     "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>" +
                     "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
-                    ErillishakuJson json) throws Exception {
+                    ErillishakuJson json) {
         LOG.info("Käyttäjä " + KoosteAudit.username() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
-        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
@@ -201,5 +203,7 @@ public class ErillishakuResource {
         return prosessi.toProsessiId();
     }
 
-
+    private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+        return HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid).timeout(30, SECONDS)).first());
+    }
 }
