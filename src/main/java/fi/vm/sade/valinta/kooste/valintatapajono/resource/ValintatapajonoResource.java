@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static rx.observables.BlockingObservable.from;
 
 import java.io.ByteArrayInputStream;
@@ -74,7 +75,7 @@ public class ValintatapajonoResource {
     public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
                              @QueryParam("hakukohdeOid") String hakukohdeOid,
                              @QueryParam("valintatapajonoOid") String valintatapajonoOid) {
-        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
         DokumenttiProsessi prosessi = new DokumenttiProsessi("Valintatapajono", "vienti", hakuOid, Arrays.asList(hakukohdeOid));
         valintatapajonoVienti.vie(prosessi, hakuOid, hakukohdeOid, valintatapajonoOid);
@@ -94,9 +95,9 @@ public class ValintatapajonoResource {
                        InputStream file,
                        @Suspended AsyncResponse asyncResponse) {
         final String username = KoosteAudit.username();
-        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
-        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
         final ByteArrayOutputStream bytes;
         try {
@@ -135,9 +136,9 @@ public class ValintatapajonoResource {
                        ValintatapajonoRivit rivit,
                        @Suspended AsyncResponse asyncResponse) {
         final String username = KoosteAudit.username();
-        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
-        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
         valintatapajonoTuontiService.tuo(
                 username,
@@ -151,5 +152,9 @@ public class ValintatapajonoResource {
             LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
             asyncResponse1.resume(Response.serverError().entity("Valintatapajonon tuonti on aikakatkaistu").build());
         };
+    }
+
+    private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+        return HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid).timeout(1, MINUTES)).first());
     }
 }
