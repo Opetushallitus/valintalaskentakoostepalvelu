@@ -44,6 +44,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Component
@@ -196,7 +197,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         log.info("haetaan haku:" + haku.getOid());
                         try {
                             Collection<ValintaTulosServiceDto> hakijat =
-                                    BlockingObservable.from(valintaTulosServiceAsyncResource.getHaunValintatulokset(haku.getOid()))
+                                    BlockingObservable.from(valintaTulosServiceAsyncResource.getHaunValintatulokset(haku.getOid()).timeout(30, MINUTES))
                                             .first()
                                             .stream()
                                             .filter(vts -> vts.getHakutoiveet().stream()
@@ -347,7 +348,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         for(int tries = 0; tries < maxTries; ++tries) {
                             try {
                                 List<Muutoshistoria> muutoshistoriat =
-                                        BlockingObservable.from(valintaTulosServiceAsyncResource.getMuutoshistoria(hakemusOid, valintatapajonoOid)).first();
+                                        BlockingObservable.from(valintaTulosServiceAsyncResource.getMuutoshistoria(hakemusOid, valintatapajonoOid)
+                                            .timeout(30, MINUTES))
+                                            .first();
 
                                 final Predicate<Change> isVastaanottoChange = (change) -> "vastaanottotila".equals(change.getField());
                                 final Predicate<Map.Entry<String, Date>> isVastaanotto = entry -> asList("VASTAANOTTANUT_SITOVASTI", "VASTAANOTTANUT", "EHDOLLISESTI_VASTAANOTTANUT").contains(entry.getKey());
