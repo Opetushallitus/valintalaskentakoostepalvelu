@@ -163,7 +163,7 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids) {
-        return postAsObservable(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintatapajono"),
+        return postAsObservableLazily(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintatapajono"),
                 new TypeToken<Map<String, List<ValintatapajonoDTO>>>() {}.getType(),
                 Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE));
     }
