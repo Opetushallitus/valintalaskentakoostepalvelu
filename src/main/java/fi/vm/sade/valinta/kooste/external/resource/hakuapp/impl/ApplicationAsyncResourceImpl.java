@@ -127,10 +127,10 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
         LOG.info("Haetaan " + hakemusOids.size() + " hakemusta haku-app:sta");
         List<Hakemus> allApplications = new ArrayList<>();
         List<List<String>> partialIdLists = Lists.partition(hakemusOids, DEFAULT_PART_ROW_LIMIT);
-        for (int patchNo = 1; patchNo <= partialIdLists.size(); patchNo++) {
-            List<Hakemus> applicationBatch = from(getApplicationsByHakemusOids(hakuOid, partialIdLists.get(patchNo - 1), keys)).first();
+        for (int batchNo = 1; batchNo <= partialIdLists.size(); batchNo++) {
+            List<Hakemus> applicationBatch = from(getApplicationsByHakemusOids(hakuOid, partialIdLists.get(batchNo - 1), keys)).first();
             allApplications.addAll(applicationBatch);
-            if(patchNo < partialIdLists.size()) {
+            if(batchNo < partialIdLists.size()) {
                 LOG.info("Haettu " + allApplications.size() + " hakemusta. Haetaan lisää.");
             }
         }
