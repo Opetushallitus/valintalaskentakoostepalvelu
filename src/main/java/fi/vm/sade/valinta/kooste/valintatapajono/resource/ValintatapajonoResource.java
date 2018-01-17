@@ -141,10 +141,13 @@ public class ValintatapajonoResource {
         String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
         valintatapajonoTuontiService.tuo(
-                username,
-                (valinnanvaiheet, hakemukset) -> {
-                    return rivit.getRivit();
-                }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse);
+            username,
+            (valinnanvaiheet, hakemukset) -> rivit.getRivit(),
+            hakuOid,
+            hakukohdeOid,
+            tarjoajaOid,
+            valintatapajonoOid,
+            asyncResponse);
     }
 
     private TimeoutHandler getTimeoutHandler(String hakuOid, String hakukohdeOid) {
