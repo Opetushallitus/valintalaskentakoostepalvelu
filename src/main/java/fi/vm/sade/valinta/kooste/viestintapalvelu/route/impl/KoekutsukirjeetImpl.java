@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.functions.Action1;
-import rx.observables.BlockingObservable;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
@@ -99,33 +98,35 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                 .anyMatch(vk -> Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                         if (haetaankoKaikkiHakutoiveenHakijatValintakokeeseen) {
                             LOG.info("Kaikki hakutoiveen {} hakijat osallistuu!", koekutsu.getHakukohdeOid());
-                            return hakemukset;
+                            return Observable.just(hakemukset);
                         }
                     } catch (Exception e) {
                         LOG.error("Kutsutaanko kaikki kokeeseen tarkistus epaonnistui!", e);
                         throw e;
                     }
                     try {
-                        Set<String> osallistujienHakemusOidit = BlockingObservable.from(osallistumiset)
-                                .first()
+                        return osallistumiset.map(osallistuminenDTOS -> {
+                            Set<String> osallistujienHakemusOidit = osallistuminenDTOS
                                 .stream()
                                 .filter(Objects::nonNull)
                                 .filter(OsallistujatPredicate.osallistujat(valintakoeTunnisteet, koekutsu.getHakukohdeOid()))
                                 .map(ValintakoeOsallistuminenDTO::getHakemusOid)
                                 .collect(Collectors.toSet());
-                        Stream<Hakemus> hakukohteenUlkopuolisetHakemukset = getHakukohteenUlkopuolisetHakemukset(hakemukset, osallistujienHakemusOidit);
-                        // vain hakukohteen osallistujat
-                        List<Hakemus> lopullinenHakemusJoukko = Stream.concat(hakukohteenUlkopuolisetHakemukset,
+                            Stream<Hakemus> hakukohteenUlkopuolisetHakemukset = getHakukohteenUlkopuolisetHakemukset(hakemukset, osallistujienHakemusOidit);
+                            // vain hakukohteen osallistujat
+                            List<Hakemus> lopullinenHakemusJoukko = Stream.concat(hakukohteenUlkopuolisetHakemukset,
                                 hakemukset.stream().filter(h -> osallistujienHakemusOidit.contains(h.getOid())))
                                 .collect(Collectors.toList());
-                        LOG.info("{}", lopullinenHakemusJoukko.size());
-                        return lopullinenHakemusJoukko;
+                            LOG.info("{}", lopullinenHakemusJoukko.size());
+                            return lopullinenHakemusJoukko;
+                        });
                     } catch (Exception e) {
                         LOG.error("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli " + valintakoeTunnisteet.size(), e);
                         throw new RuntimeException("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli " + valintakoeTunnisteet.size(), e);
                     }
                 })
                 .subscribeOn(Schedulers.newThread())
+                .flatMap(x -> x)
                 .subscribe(koekutsukirjeiksi(prosessi, koekutsu),
                         t1 -> {
                             LOG.error("Osallistumistietojen haussa hakutoiveelle " + koekutsu.getHakukohdeOid(), t1);
