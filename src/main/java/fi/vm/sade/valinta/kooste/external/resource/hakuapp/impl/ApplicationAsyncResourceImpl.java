@@ -130,7 +130,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
         for (int batchNo = 1; batchNo <= partialIdLists.size(); batchNo++) {
             List<Hakemus> applicationBatch = from(getApplicationsByHakemusOids(hakuOid, partialIdLists.get(batchNo - 1), keys)).first();
             allApplications.addAll(applicationBatch);
-            if(batchNo < partialIdLists.size()) {
+            if (batchNo < partialIdLists.size()) {
                 LOG.info("Haettu " + allApplications.size() + " hakemusta. Haetaan lisää.");
             }
         }
