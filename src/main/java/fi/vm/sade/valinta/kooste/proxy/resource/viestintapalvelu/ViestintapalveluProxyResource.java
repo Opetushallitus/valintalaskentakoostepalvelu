@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static rx.Observable.combineLatest;
 import com.google.common.collect.ImmutableMap;
+
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
@@ -12,15 +15,18 @@ import org.springframework.stereotype.Controller;
 import rx.Observable;
 import rx.observables.BlockingObservable;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import static rx.Observable.*;
 
 @Controller("ViestintapalveluProxyResource")
 @Path("/proxy/viestintapalvelu")
@@ -59,7 +65,8 @@ public class ViestintapalveluProxyResource {
         if (countDto.letterBatchId == null) {
             return countDto;
         }
-        Optional<Long> groupEmailId = BlockingObservable.from(ryhmasahkopostiAsyncResource.haeRyhmasahkopostiIdByLetterObservable(countDto.letterBatchId)).first();
+        Optional<Long> groupEmailId = BlockingObservable.from(
+            ryhmasahkopostiAsyncResource.haeRyhmasahkopostiIdByLetterObservable(countDto.letterBatchId).timeout(5, MINUTES)).first();
         return groupEmailId.map(aLong ->
             new LetterBatchCountDto(
                 countDto.letterBatchId,
@@ -106,7 +113,7 @@ public class ViestintapalveluProxyResource {
     }
 
     private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
-        response.setTimeout(5L, TimeUnit.MINUTES);
+        response.setTimeout(5L, MINUTES);
         response.setTimeoutHandler(asyncResponse -> {
             errorResponse(timeoutMessage, asyncResponse);
         });
