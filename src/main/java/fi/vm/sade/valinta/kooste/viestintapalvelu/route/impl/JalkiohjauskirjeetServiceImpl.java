@@ -132,7 +132,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
         List<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
         try {
-            return applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS);
+            Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS);
+            return hakemuksetObservable.timeout(5, TimeUnit.MINUTES).toBlocking().first();
         } catch (Throwable e) {
             LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
             throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");

@@ -106,7 +106,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
-            Observable<List<Hakemus>> hakemuksetFuture = just(applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS));
+            Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS);
             Observable<List<HakijaDTO>> hakijatFuture = Observable.from(hakemusOids).concatMap(hakemus -> valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemus)).toList();
             Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
 

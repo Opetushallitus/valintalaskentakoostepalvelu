@@ -123,19 +123,19 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     @Override
-    public List<Hakemus> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
+    public Observable<List<Hakemus>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
         LOG.info("Haetaan " + hakemusOids.size() + " hakemusta haku-app:sta");
-        List<Hakemus> allApplications = new ArrayList<>();
+        List<Observable<List<Hakemus>>> allApplications = new ArrayList<>();
         List<List<String>> partialIdLists = Lists.partition(hakemusOids, DEFAULT_PART_ROW_LIMIT);
         for (int batchNo = 1; batchNo <= partialIdLists.size(); batchNo++) {
-            List<Hakemus> applicationBatch = from(getApplicationsByHakemusOids(hakuOid, partialIdLists.get(batchNo - 1), keys)).first();
-            allApplications.addAll(applicationBatch);
+            Observable<List<Hakemus>> applicationBatch = getApplicationsByHakemusOids(hakuOid, partialIdLists.get(batchNo - 1), keys);
+            allApplications.add(applicationBatch);
             if (batchNo < partialIdLists.size()) {
-                LOG.info("Haettu " + allApplications.size() + " hakemusta. Haetaan lisää.");
+                LOG.info("Aloitettu " + allApplications.size() + " hakemuksen haku. Haetaan lisää.");
             }
         }
-        LOG.info("Haettiin " + allApplications.size() + " hakemusta haku-app:sta onnistuneesti.");
-        return allApplications;
+        LOG.info("Aloitettu " + allApplications.size() + " hakemuksen haku haku-app:sta onnistuneesti.");
+        return Observable.merge(allApplications, 1);
     }
 
     @Override
