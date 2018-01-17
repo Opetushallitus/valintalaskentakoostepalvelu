@@ -32,13 +32,13 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
     @Override
     public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
-        return getAsObservable("/valintalaskentakoostepalvelu/jonotsijoittelussa/" + hakuOid, new GenericType<List<JonoDto>>() {
+        return getAsObservableLazily("/valintalaskentakoostepalvelu/jonotsijoittelussa/" + hakuOid, new GenericType<List<JonoDto>>() {
         }.getType());
     }
 
     @Override
     public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe", hakukohdeOid),
                 new GenericType<List<ValintatietoValinnanvaiheDTO>>() {
         }.getType());
