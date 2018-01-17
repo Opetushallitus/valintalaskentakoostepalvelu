@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import org.springframework.stereotype.Service;
 import rx.Observable;
@@ -29,11 +28,6 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
     @Override
     public Future<Response> haeOrganisaatio(String organisaatioOid) {
         throw new NotImplementedException();
-    }
-
-    @Override
-    public Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(String organisaatioOid) {
-        return Observable.just(hierarkiaRef.get());
     }
 
     @Override

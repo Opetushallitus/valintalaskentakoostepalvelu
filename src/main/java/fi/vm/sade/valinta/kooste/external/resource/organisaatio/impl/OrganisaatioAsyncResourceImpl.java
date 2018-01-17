@@ -41,18 +41,6 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(String organisaatioOid) {
-        return getOrganisaatioTyyppiHierarkiaObservable(client -> {
-            client.accept(MediaType.APPLICATION_JSON_TYPE);
-            client.query("oid", organisaatioOid);
-            client.query("aktiiviset", true);
-            client.query("suunnitellut", false);
-            client.query("lakkautetut", false);
-            return client;
-        });
-    }
-
-    @Override
     public Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid) {
         return getOrganisaatioTyyppiHierarkiaObservable(client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
