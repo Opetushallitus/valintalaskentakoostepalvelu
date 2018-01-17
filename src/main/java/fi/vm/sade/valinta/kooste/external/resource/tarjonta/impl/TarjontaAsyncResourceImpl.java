@@ -82,7 +82,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     public Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
-        Observable<ResultSearch> s = this.<ResultSearch>getAsObservable(
+        Observable<ResultSearch> s = this.getAsObservable(
                 getUrl("tarjonta-service.hakukohde.search"),
                 new TypeToken<ResultSearch>() {
                 }.getType(), client -> {
