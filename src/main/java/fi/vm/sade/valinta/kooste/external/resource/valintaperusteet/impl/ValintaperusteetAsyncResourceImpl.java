@@ -70,13 +70,13 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
 
     public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
         LOG.info("Valinnanvaiheiden haku...");
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.ilmanlaskentaa", hakukohdeOid),
                 new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType());
     }
 
     public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.hakijaryhma", hakukohdeOid),
                 new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType(),
                 client -> {
@@ -86,7 +86,7 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     public Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet", hakukohdeOid),
                 new TypeToken<List<ValintaperusteetDTO>>() {}.getType(),
                 client -> {
@@ -140,7 +140,7 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet.oid", hakukohdeOid),
                 new TypeToken<List<ValintaperusteDTO>>() {}.getType());
     }
@@ -159,7 +159,7 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid) {
-        return getAsObservable(
+        return getAsObservableLazily(
                 getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valinnanvaihe.valintaperusteet", valinnanvaiheOid),
                 new TypeToken<List<ValintaperusteetDTO>>() {}.getType());
     }
@@ -232,6 +232,6 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
         String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valinnanvaihe.hakukohteet", oid);
         LOG.info("Calling url {}", url);
-        return getAsObservable(url, new TypeToken<Set<String>>() {}.getType());
+        return getAsObservableLazily(url, new TypeToken<Set<String>>() {}.getType());
     }
 }
