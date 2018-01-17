@@ -1,15 +1,26 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
+import static fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImplHelper.getGson;
+import static fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.*;
+
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ErrorV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.GenericSearchParamsV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultRyhmaliitos;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
@@ -23,9 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImplHelper.getGson;
-import static fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap;
 
 @Service
 public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements TarjontaAsyncResource {
@@ -60,7 +68,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
-        return this.<ResultV1RDTO<HakuV1RDTO>>getAsObservable(
+        return this.<ResultV1RDTO<HakuV1RDTO>>getAsObservableLazily(
                 getUrl("tarjonta-service.haku.hakuoid", hakuOid),
                 new TypeToken<ResultV1RDTO<HakuV1RDTO>>() {
         }.getType()).map(result -> result.getResult());
@@ -68,7 +76,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
-        return this.<ResultV1RDTO<HakukohdeV1RDTO>>getAsObservable(
+        return this.<ResultV1RDTO<HakukohdeV1RDTO>>getAsObservableLazily(
                 getUrl("tarjonta-service.hakukohde.hakukohdeoid", hakukohdeOid),
                 new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {
         }.getType()).map(result -> result.getResult());
@@ -76,13 +84,13 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
-        return this.<ResultV1RDTO<Set<String>>>getAsObservable(getUrl("tarjonta-service.haku.findoidstosynctarjontafor"), new TypeToken<ResultV1RDTO<Set<String>>>() {
+        return this.<ResultV1RDTO<Set<String>>>getAsObservableLazily(getUrl("tarjonta-service.haku.findoidstosynctarjontafor"), new TypeToken<ResultV1RDTO<Set<String>>>() {
         }.getType()).map(result -> result.getResult());
     }
 
     @Override
     public Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
-        Observable<ResultSearch> s = this.getAsObservable(
+        Observable<ResultSearch> s = this.getAsObservableLazily(
                 getUrl("tarjonta-service.hakukohde.search"),
                 new TypeToken<ResultSearch>() {
                 }.getType(), client -> {
