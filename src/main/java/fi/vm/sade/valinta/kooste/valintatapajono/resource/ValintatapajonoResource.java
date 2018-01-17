@@ -73,7 +73,7 @@ public class ValintatapajonoResource {
     @ApiOperation(consumes = "application/json", value = "Valintatapajonon vienti taulukkolaskentaan", response = ProsessiId.class)
     public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
                              @QueryParam("hakukohdeOid") String hakukohdeOid,
-                             @QueryParam("valintatapajonoOid") String valintatapajonoOid) throws Exception {
+                             @QueryParam("valintatapajonoOid") String valintatapajonoOid) {
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
         DokumenttiProsessi prosessi = new DokumenttiProsessi("Valintatapajono", "vienti", hakuOid, Arrays.asList(hakukohdeOid));
@@ -92,7 +92,7 @@ public class ValintatapajonoResource {
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @QueryParam("valintatapajonoOid") String valintatapajonoOid,
                        InputStream file,
-                       @Suspended AsyncResponse asyncResponse) throws Exception {
+                       @Suspended AsyncResponse asyncResponse) {
         final String username = KoosteAudit.username();
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
@@ -133,7 +133,7 @@ public class ValintatapajonoResource {
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @QueryParam("valintatapajonoOid") String valintatapajonoOid,
                        ValintatapajonoRivit rivit,
-                       @Suspended AsyncResponse asyncResponse) throws Exception {
+                       @Suspended AsyncResponse asyncResponse) {
         final String username = KoosteAudit.username();
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
