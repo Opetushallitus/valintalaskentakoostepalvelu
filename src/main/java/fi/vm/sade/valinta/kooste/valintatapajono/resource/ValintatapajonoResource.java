@@ -57,8 +57,6 @@ public class ValintatapajonoResource {
     private Authorizer authorizer;
     @Autowired
     private ValintatapajonoTuontiService valintatapajonoTuontiService;
-    @Autowired
-    private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
     @Autowired(required = false)
     private ValintatapajonoVientiRoute valintatapajonoVienti;
