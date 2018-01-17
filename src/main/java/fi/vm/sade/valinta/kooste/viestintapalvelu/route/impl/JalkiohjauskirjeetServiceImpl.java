@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiAsiointikielella;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static rx.observables.BlockingObservable.from;
 import com.google.common.collect.Sets;
 
@@ -131,7 +132,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         List<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
         try {
             Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS);
-            return hakemuksetObservable.timeout(5, TimeUnit.MINUTES).toBlocking().first();
+            return hakemuksetObservable.timeout(5, MINUTES).toBlocking().first();
         } catch (Throwable e) {
             LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
             throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
@@ -157,7 +158,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 }
                 LOG.info("Aloitetaan jalkiohjauskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
                 //TODO: Muuta aidosti asynkroniseksi
-                LetterResponse batchId = from(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)).first();
+                LetterResponse batchId = from(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).timeout(5, MINUTES)).first();
 
                 int timesToPoll = (int) (VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / pollingIntervalMillis);
                 LOG.info(String.format("Saatiin jalkiohjauskirjeen seurantaId %s ja aloitetaan valmistumisen pollaus! " +
