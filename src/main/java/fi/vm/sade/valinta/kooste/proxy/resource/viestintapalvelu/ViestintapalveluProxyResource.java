@@ -91,20 +91,19 @@ public class ViestintapalveluProxyResource {
                 String.format("ViestintapalveluProxyResource -palvelukutsu on aikakatkaistu: /viestintapalvelu/haku/%s/tyyppi/--/kieli/--",
                         hakuOid));
 
-        Observable<LetterBatchCountDto> hyvaksymiskirjeFi = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "fi").map(count -> haeRyhmasahkopostiId(count));
-        Observable<LetterBatchCountDto> hyvaksymiskirjeSv = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "sv").map(count -> haeRyhmasahkopostiId(count));
-        Observable<LetterBatchCountDto> hyvaksymiskirjeEn = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "en").map(count -> haeRyhmasahkopostiId(count));
+        Observable<LetterBatchCountDto> hyvaksymiskirjeFi = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "fi").map(this::haeRyhmasahkopostiId);
+        Observable<LetterBatchCountDto> hyvaksymiskirjeSv = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "sv").map(this::haeRyhmasahkopostiId);
+        Observable<LetterBatchCountDto> hyvaksymiskirjeEn = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "en").map(this::haeRyhmasahkopostiId);
 
-        Observable<LetterBatchCountDto> jalkiohjauskirjeFi = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "fi").map(count -> haeRyhmasahkopostiId(count));
-        Observable<LetterBatchCountDto> jalkiohjauskirjeSv = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "sv").map(count -> haeRyhmasahkopostiId(count));
-        Observable<LetterBatchCountDto> jalkiohjauskirjeEn = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "en").map(count -> haeRyhmasahkopostiId(count));
+        Observable<LetterBatchCountDto> jalkiohjauskirjeFi = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "fi").map(this::haeRyhmasahkopostiId);
+        Observable<LetterBatchCountDto> jalkiohjauskirjeSv = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "sv").map(this::haeRyhmasahkopostiId);
+        Observable<LetterBatchCountDto> jalkiohjauskirjeEn = viestintapalveluAsyncResource.haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "en").map(this::haeRyhmasahkopostiId);
 
         combineLatest(hyvaksymiskirjeFi, hyvaksymiskirjeSv, hyvaksymiskirjeEn, jalkiohjauskirjeFi, jalkiohjauskirjeSv, jalkiohjauskirjeEn, (hFi,hSv,hEn,jFi,jSv,jEn) -> ImmutableMap.of(
                 "hyvaksymiskirje", ImmutableMap.of("fi",hFi, "sv",hSv, "en",hEn),
                 "jalkiohjauskirje", ImmutableMap.of("fi",jFi, "sv",jSv, "en",jEn))).subscribe(
-                letterCount -> {
-                    asyncResponse.resume(Response.ok(letterCount,MediaType.APPLICATION_JSON_TYPE).build());
-                },
+                letterCount ->
+                    asyncResponse.resume(Response.ok(letterCount,MediaType.APPLICATION_JSON_TYPE).build()),
                 error -> {
                     LOG.error("Viestintäpalvelukutsu epäonnistui!", error);
                     errorResponse(String.format("Viestintäpalvelukutsu epäonnistui! %s",error.getMessage()), asyncResponse);
@@ -114,9 +113,7 @@ public class ViestintapalveluProxyResource {
 
     private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
         response.setTimeout(5L, MINUTES);
-        response.setTimeoutHandler(asyncResponse -> {
-            errorResponse(timeoutMessage, asyncResponse);
-        });
+        response.setTimeoutHandler(asyncResponse -> errorResponse(timeoutMessage, asyncResponse));
     }
 
     private void errorResponse(String timeoutMessage, AsyncResponse asyncResponse) {
@@ -125,5 +122,4 @@ public class ViestintapalveluProxyResource {
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
     }
-
 }
