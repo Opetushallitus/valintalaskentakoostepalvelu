@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +34,7 @@ public class RyhmasahkopostiAsyncResourceImpl extends UrlConfiguredResource impl
                     return client;
                 }
         ).onErrorReturn(error -> {
-            if(error instanceof HttpExceptionWithResponse && ((HttpExceptionWithResponse) error).status == 404) {
+            if (HttpExceptionWithResponse.isResponseWithStatus(Response.Status.NOT_FOUND, error)) {
                 return Optional.empty();
             }
             if(error instanceof RuntimeException) {
