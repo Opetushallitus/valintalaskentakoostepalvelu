@@ -33,11 +33,15 @@ import java.util.Optional;
 public class ViestintapalveluProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(ViestintapalveluProxyResource.class);
 
-    @Autowired
-    private ViestintapalveluAsyncResource viestintapalveluAsyncResource;
+    private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
+    private final RyhmasahkopostiAsyncResource ryhmasahkopostiAsyncResource;
 
     @Autowired
-    private RyhmasahkopostiAsyncResource ryhmasahkopostiAsyncResource;
+    public ViestintapalveluProxyResource(ViestintapalveluAsyncResource viestintapalveluAsyncResource,
+                                         RyhmasahkopostiAsyncResource ryhmasahkopostiAsyncResource) {
+        this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
+        this.ryhmasahkopostiAsyncResource = ryhmasahkopostiAsyncResource;
+    }
 
     @POST
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
