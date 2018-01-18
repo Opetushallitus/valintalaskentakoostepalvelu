@@ -88,7 +88,7 @@ public class ViestintapalveluProxyResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @Path("/count/haku/{hakuOid}")
     @Consumes("application/json")
-    public void valintatuloksetIlmanTilaaHakijalle(
+    public void countLettersForHaku(
             @PathParam("hakuOid") String hakuOid,
             @Suspended AsyncResponse asyncResponse) {
         setAsyncTimeout(asyncResponse,
