@@ -1,13 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit;
 
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import rx.Observable;
 
-import java.util.function.Consumer;
-
 public interface OhjausparametritAsyncResource {
-    Peruutettava haeHaunOhjausparametrit(String hakuOid, Consumer<ParametritDTO> callback, Consumer<Throwable> failureCallback);
-
     Observable<ParametritDTO> haeHaunOhjausparametrit(String hakuOid);
 }

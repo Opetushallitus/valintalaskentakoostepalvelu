@@ -129,13 +129,7 @@ public class LaskentaKerrallaTest {
                                 .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)))
                                 ));
 
-        when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any(), argument.capture(), any()))
-                .thenAnswer(
-                        invocation -> {
-                            argument.getValue().accept(LaskentaKerrallaTestData.ohjausparametrit());
-                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-                        }
-                );
+        when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any())).thenReturn(Observable.just(LaskentaKerrallaTestData.ohjausparametrit()));
 
         when(Mocks.applicationAsyncResource.getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID)))
                 .thenAnswer(

@@ -101,13 +101,12 @@ public class LaskentaStarter {
                 (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Tarjontatietojen haku epäonnistui: ", Optional.of(t), laskenta.getUuid())
         );
 
-        ohjausparametritAsyncResource.haeHaunOhjausparametrit(
-                hakuOid,
-                parametrit -> {
-                    parametritRef.set(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
-                    counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                },
-                (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: ", Optional.of(t), laskenta.getUuid())
+        ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).subscribe(
+            parametrit -> {
+                parametritRef.set(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
+                counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+            },
+            (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: ", Optional.of(t), laskenta.getUuid())
         );
     }
     private static AuditSession koosteAuditSession(LaskentaDto laskenta) {
