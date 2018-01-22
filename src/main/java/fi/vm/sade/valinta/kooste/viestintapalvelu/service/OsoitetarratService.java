@@ -1,9 +1,10 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.service;
 
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
@@ -30,7 +31,13 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -258,15 +265,16 @@ public class OsoitetarratService {
                 try {
                     InputStream inputStream = pipeInputStreams((InputStream) response.getEntity());
                     dokumenttiAsyncResource.tallenna(id, "osoitetarrat.pdf",
-                            defaultExpirationDate().getTime(), prosessi.getTags(), "application/pdf",
-                            inputStream
-                            , ok -> {
-                                prosessi.inkrementoiTehtyjaToita();
-                                prosessi.setDokumenttiId(id);
-                            }, poikkeus -> {
-                                LOG.error("Osoitetarrojen luonti epäonnistui dokumentin tallennukseen:", poikkeus);
-                                prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen tallennus epäonnistui:", poikkeus.getMessage()));
-                            });
+                        defaultExpirationDate().getTime(), prosessi.getTags(), "application/pdf",
+                        inputStream).subscribe(
+                        ok -> {
+                            prosessi.inkrementoiTehtyjaToita();
+                            prosessi.setDokumenttiId(id);
+                        },
+                        poikkeus -> {
+                            LOG.error("Osoitetarrojen luonti epäonnistui dokumentin tallennukseen:", poikkeus);
+                            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen tallennus epäonnistui:", poikkeus.getMessage()));
+                        });
                 } catch (Throwable t) {
                     poikkeuskasittelija.accept(t);
                 }

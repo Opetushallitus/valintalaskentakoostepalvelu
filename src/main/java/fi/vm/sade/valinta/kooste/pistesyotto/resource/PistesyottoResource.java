@@ -432,15 +432,13 @@ public class PistesyottoResource {
                 Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
                 List<String> tags = asList();
                 dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
-                        "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()),
-                        response -> LOG.info(
-                                "Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
-                                username, hakuOid, hakukohdeOid, uuid),
-                        poikkeus -> logError(
-                                String.format(
-                                        "Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                                        username, hakuOid, hakukohdeOid),
-                                poikkeus)
+                    "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray())).subscribe(
+                    response -> LOG.info(
+                        "Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
+                        username, hakuOid, hakukohdeOid, uuid),
+                    poikkeus -> logError(String.format(
+                        "Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
+                        username, hakuOid, hakukohdeOid), poikkeus)
                 );
                 tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
                 return prosessi.toProsessiId();

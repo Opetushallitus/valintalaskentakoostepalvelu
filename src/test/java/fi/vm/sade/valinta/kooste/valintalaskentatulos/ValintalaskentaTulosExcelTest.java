@@ -23,6 +23,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -106,10 +107,8 @@ public class ValintalaskentaTulosExcelTest {
                     Mockito.anyLong(),
                     Mockito.anyList(),
                     Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture(),
-                    Mockito.any(Consumer.class),
-                    Mockito.any(Consumer.class)
-            )).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+                    inputStreamArgumentCaptor.capture()
+            )).thenReturn(Observable.just(null));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
@@ -225,10 +224,8 @@ public class ValintalaskentaTulosExcelTest {
                     Mockito.anyLong(),
                     Mockito.anyList(),
                     Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture(),
-                    Mockito.any(Consumer.class),
-                    Mockito.any(Consumer.class)
-            )).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+                    inputStreamArgumentCaptor.capture()
+            )).thenReturn(Observable.just(null));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
@@ -362,10 +359,8 @@ public class ValintalaskentaTulosExcelTest {
                     Mockito.anyLong(),
                     Mockito.anyList(),
                     Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture(),
-                    Mockito.any(Consumer.class),
-                    Mockito.any(Consumer.class)
-            )).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+                    inputStreamArgumentCaptor.capture()
+            )).thenReturn(Observable.just(null));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();

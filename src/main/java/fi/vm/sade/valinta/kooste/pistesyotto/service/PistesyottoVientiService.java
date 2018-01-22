@@ -14,11 +14,14 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import rx.Observable;
 
+import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
@@ -55,15 +58,19 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
         });
         prosessi.inkrementoiKokonaistyota();
-        muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList()).subscribe(p -> {
+        muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList()).flatMap(p -> {
             PistesyottoExcel pistesyottoExcel = p.getLeft();
             String id = UUID.randomUUID().toString();
-            dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", defaultExpirationDate().getTime(), prosessi.getTags(),
-                    "application/octet-stream", pistesyottoExcel.getExcel().vieXlsx(), response -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                        prosessi.setDokumenttiId(id);
-                    }, poikkeuskasittelija);
-        }, poikkeuskasittelija);
+            Observable<Response> tallennus = dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", defaultExpirationDate().getTime(), prosessi.getTags(),
+                "application/octet-stream", pistesyottoExcel.getExcel().vieXlsx());
+            return Observable.just(id).zipWith(tallennus, Pair::of);
+        }).subscribe(
+            idWithResponse -> {
+                prosessi.inkrementoiTehtyjaToita();
+                prosessi.setDokumenttiId(idWithResponse.getLeft());
+            },
+            poikkeuskasittelija
+        );
     }
 
     protected Date defaultExpirationDate() {

@@ -105,11 +105,17 @@ public class ValintakoekutsutExcelService {
                             String id = UUID.randomUUID().toString();
                             long expirationDate = DateTime.now().plusHours(168).toDate().getTime();
 
-                            dokumenttiAsyncResource.tallenna(id, "valintakoekutsut.xls", expirationDate, prosessi.getTags(), "application/vnd.ms-excel", filedata,
-                                    ok -> {
-                                        prosessi.inkrementoiTehtyjaToita();
-                                        prosessi.setDokumenttiId(id);
-                                    }, poikkeuskasittelija);
+                            dokumenttiAsyncResource.tallenna(
+                                id,
+                                "valintakoekutsut.xls",
+                                expirationDate,
+                                prosessi.getTags(),
+                                "application/vnd.ms-excel",
+                                filedata).subscribe(
+                                ok -> {
+                                    prosessi.inkrementoiTehtyjaToita();
+                                    prosessi.setDokumenttiId(id);
+                                }, poikkeuskasittelija);
                         } catch (Throwable t) {
                             poikkeuskasittelija.accept(t);
                         }

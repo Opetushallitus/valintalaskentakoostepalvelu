@@ -2,10 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl;
 
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.http.ResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import rx.Observable;
@@ -16,7 +12,6 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implements DokumenttiAsyncResource {
 
@@ -43,25 +38,5 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
                     return client;
                 }
         );
-    }
-    @Override
-    public Peruutettava tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata, Consumer<Response> responseCallback, Consumer<Throwable> failureCallback) {
-        String url = getUrl("dokumenttipalvelu-service.dokumentit.tallenna");
-
-        try {
-            return new PeruutettavaImpl(
-                    getWebClient()
-                            .path(url)
-                            .query("id", id)
-                            .query("filename", filename)
-                            .query("expirationDate", expirationDate)
-                            .query("tags", tags.toArray())
-                            .query("mimeType", mimeType)
-                           .async()
-                            .put(Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM), new ResponseCallback(url, responseCallback, failureCallback)));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
     }
 }
