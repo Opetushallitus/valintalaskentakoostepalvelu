@@ -86,15 +86,7 @@ public class ValintalaskentaTulosExcelTest {
         Mocks.reset();
         try {
             List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList();
-            Mockito.when(
-                    Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).then(
-                    answer -> {
-                        Consumer<List<Koodi>> callback = (Consumer<List<Koodi>>) answer.getArguments()[1];
-                        if (callback != null) {
-                            callback.accept(Collections.emptyList());
-                        }
-                        return new PeruutettavaImpl(Futures.immediateFuture(null));
-                    });
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
             MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(osallistuminenDTOs);
             MockValintaperusteetAsyncResource.setValintakokeetResult(valintakoeDTOs);
             MockApplicationAsyncResource.setResult(hakemuses);
@@ -131,15 +123,7 @@ public class ValintalaskentaTulosExcelTest {
         Mocks.reset();
         try {
             List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList();
-            Mockito.when(
-                    Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).then(
-                    answer -> {
-                        Consumer<List<Koodi>> callback = (Consumer<List<Koodi>>) answer.getArguments()[1];
-                        if (callback != null) {
-                            callback.accept(Collections.emptyList());
-                        }
-                        return new PeruutettavaImpl(Futures.immediateFuture(null));
-                    });
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
             MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(
                     Arrays.asList(
                             hakemusOsallistuminen()
@@ -281,15 +265,7 @@ public class ValintalaskentaTulosExcelTest {
                             .build()
                             .build()
                             .build());
-            Mockito.when(
-                    Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).then(
-                    answer -> {
-                        Consumer<List<Koodi>> callback = (Consumer<List<Koodi>>) answer.getArguments()[1];
-                        if (callback != null) {
-                            callback.accept(Collections.emptyList());
-                        }
-                        return new PeruutettavaImpl(Futures.immediateFuture(null));
-                    });
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
             MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(
                     Arrays.asList(
                             hakemusOsallistuminen()

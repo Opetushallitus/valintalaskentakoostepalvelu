@@ -1,23 +1,27 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
+
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.junit.Assert;
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -25,11 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
 
 /**
  * @author Jussi Jartamo
@@ -59,7 +58,7 @@ public class OsoitetarratServiceTest {
     }
 
     @Test
-    public void testaaOsoitetarratSijoittelussaHyvaksytyille() throws Throwable {
+    public void testaaOsoitetarratSijoittelussaHyvaksytyille() {
         Mocks.reset();
         try {
             String HAKU2 = "1.2.246.562.5.2013080813081926341927";
@@ -80,16 +79,7 @@ public class OsoitetarratServiceTest {
     public void testaaOsoitetarratValintakokeeseenOsallistujilleKunKaikkiKutsutaan() {
         Mocks.reset();
         try {
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).thenAnswer(
-                    answer -> {
-                        Consumer<List<Koodi>> c = (Consumer<List<Koodi>>)answer.getArguments()[1];
-                        if(c != null) {
-                            c.accept(Collections.emptyList());
-                        }
-                        return null;
-                    }
-            );
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Futures.immediateFuture(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
             MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(
                             valintakoe()
                                     .setTunniste(VALINTAKOE1)
@@ -145,14 +135,7 @@ public class OsoitetarratServiceTest {
     public void testaaOsoitetarratValintakokeeseenOsallistujilleKunYksittainenHakijaKutsutaan() {
         Mocks.reset();
         try {
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).thenAnswer(
-                    answer -> {
-                        Consumer<List<Koodi>> c = (Consumer<List<Koodi>>) answer.getArguments()[1];
-                        c.accept(Collections.emptyList());
-                        return null;
-                    }
-            );
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Futures.immediateFuture(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
             MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(
                             valintakoe()
                                     .setTunniste(VALINTAKOE1)

@@ -4,7 +4,6 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
-import com.google.common.util.concurrent.Futures;
 import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -60,7 +59,7 @@ public class KoekutsukirjeetTest {
             final String HAKEMUS2 = "HAKEMUS2";
             HakukohdeDTO HAKUKOHDEDTO1 = new HakukohdeDTO();
             HAKUKOHDEDTO1.setOpetuskielet(Arrays.asList("FI", "SV"));
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Futures.immediateFuture(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
             ViestintapalveluAsyncResource viestintapalveluAsyncResource =
                     Mocks.getViestintapalveluAsyncResource();
             ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);

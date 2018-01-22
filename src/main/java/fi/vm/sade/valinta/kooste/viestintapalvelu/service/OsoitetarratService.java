@@ -300,17 +300,21 @@ public class OsoitetarratService {
     }
 
     private void maatJaValtiot1(final SynkronoituLaskuri laskuri, AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref, Consumer<Throwable> poikkeuskasittelija) {
-        koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1, maatJaValtiot1 -> {
-            maatJaValtiot1Ref.set(maatJaValtiot1);
-            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-        }, poikkeuskasittelija);
+        koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1).subscribe(
+            maatJaValtiot1 -> {
+                maatJaValtiot1Ref.set(maatJaValtiot1);
+                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+            },
+            poikkeuskasittelija::accept);
     }
 
     private void posti(final SynkronoituLaskuri laskuri, AtomicReference<Map<String, Koodi>> postiRef, Consumer<Throwable> poikkeuskasittelija) {
-        koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI, posti -> {
-            postiRef.set(posti);
-            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-        }, poikkeuskasittelija);
+        koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI).subscribe(
+            posti -> {
+                postiRef.set(posti);
+                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+            },
+            poikkeuskasittelija::accept);
     }
 
     private InputStream pipeInputStreams(InputStream incoming) throws IOException {
