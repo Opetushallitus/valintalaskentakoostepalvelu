@@ -1,8 +1,7 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,6 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,12 +91,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     @Override
     public Observable<List<Hakemus>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
         return Observable.just(resultReference.get());
-    }
-
-    @Override
-    public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(resultByOidReference.get());
-        return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get()));
     }
 
     @Override

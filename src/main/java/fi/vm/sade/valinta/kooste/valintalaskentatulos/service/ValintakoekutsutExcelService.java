@@ -124,10 +124,12 @@ public class ValintakoekutsutExcelService {
             }, poikkeuskasittelija);
             if (useWhitelist) {
                 // haetaan whitelistin hakemukset
-                applicationResource.getApplicationsByOids(hakemusOids, hakemukset -> {
-                    lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
-                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                }, poikkeuskasittelija);
+                applicationResource.getApplicationsByOids(hakemusOids).subscribe(
+                    hakemukset -> {
+                        lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
+                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    },
+                    poikkeuskasittelija);
             }
             valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(
                     hakukohdeOid,
@@ -149,10 +151,12 @@ public class ValintakoekutsutExcelService {
                                         );
                                         osallistujienHakemusOids.removeAll(joHaetutHakemukset); // ei haeta jo haettuja hakemuksia
                                         // haetaan osallistujille hakemukset
-                                        applicationResource.getApplicationsByOids(osallistujienHakemusOids, hakemukset -> {
-                                            lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
-                                            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                                        }, poikkeuskasittelija);
+                                        applicationResource.getApplicationsByOids(osallistujienHakemusOids).subscribe(
+                                            hakemukset -> {
+                                                lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
+                                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                            },
+                                            poikkeuskasittelija);
                                     }
                                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                                 }).build();

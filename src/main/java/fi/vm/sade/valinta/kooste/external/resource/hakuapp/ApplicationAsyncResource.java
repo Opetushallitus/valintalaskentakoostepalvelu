@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp;
 
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import rx.Observable;
@@ -10,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public interface ApplicationAsyncResource {
 
@@ -35,8 +33,6 @@ public interface ApplicationAsyncResource {
     Observable<Hakemus> getApplication(String hakemusOid);
 
     Observable<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids);
-
-    Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback);
 
     Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOid, String reason);
 }

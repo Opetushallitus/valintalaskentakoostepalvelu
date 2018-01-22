@@ -99,10 +99,12 @@ public class OsoitetarratService {
                             .collect(Collectors.toList());
                     boolean onkoHyvaksyttyjaHakijoita = !hyvaksytytHakijat.isEmpty();
                     if (onkoHyvaksyttyjaHakijoita) {
-                        applicationAsyncResource.getApplicationsByOids(hyvaksytytHakijat, hakemukset -> {
-                            haetutHakemuksetRef.set(hakemukset);
-                            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                        }, poikkeuskasittelija);
+                        applicationAsyncResource.getApplicationsByOids(hyvaksytytHakijat).subscribe(
+                            hakemukset -> {
+                                haetutHakemuksetRef.set(hakemukset);
+                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                            },
+                            poikkeuskasittelija::accept);
                     } else {
                         LOG.error("Sijoittelussa ei ole hyväksyttyjä hakijoita");
                         prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen luonti epäonnistui:", "Sijoittelussa ei ole hyväksyttyjä hakijoita"));
@@ -167,10 +169,12 @@ public class OsoitetarratService {
                         } else {
                             Set<String> puuttuvatHakemusOidit = Sets.newHashSet(valintakokeisiinOsallistujienHakemusOidit);
                             puuttuvatHakemusOidit.removeAll(mahdollisestiHakukohteenHakemusOidit);
-                            applicationAsyncResource.getApplicationsByOids(puuttuvatHakemusOidit, puuttuvatHakemukset -> {
-                                haetutHakemuksetRef.set(Stream.concat(haetutHakemuksetRef.get().stream(), puuttuvatHakemukset.stream()).collect(Collectors.toList()));
-                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                            }, poikkeuskasittelija);
+                            applicationAsyncResource.getApplicationsByOids(puuttuvatHakemusOidit).subscribe(
+                                puuttuvatHakemukset -> {
+                                    haetutHakemuksetRef.set(Stream.concat(haetutHakemuksetRef.get().stream(), puuttuvatHakemukset.stream()).collect(Collectors.toList()));
+                                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                },
+                                poikkeuskasittelija);
                         }
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
@@ -220,10 +224,12 @@ public class OsoitetarratService {
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
-            applicationAsyncResource.getApplicationsByOids(hakemusOids, hakemukset -> {
-                haetutHakemuksetRef.set(hakemukset);
-                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-            }, poikkeuskasittelija);
+            applicationAsyncResource.getApplicationsByOids(hakemusOids).subscribe(
+                hakemukset -> {
+                    haetutHakemuksetRef.set(hakemukset);
+                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                },
+                poikkeuskasittelija::accept);
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }

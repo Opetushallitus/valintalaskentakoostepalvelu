@@ -6,6 +6,7 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -93,7 +94,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
         requestBody.put("asIds", Collections.singletonList(hakuOid));
         requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
         requestBody.put("keys", ApplicationAsyncResource.DEFAULT_KEYS);
-        return postAsObservable(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(),
+        return postAsObservableLazily(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(requestBody, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -151,23 +152,6 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
         return getAsObservableLazily(getUrl("haku-app.applications", hakemusOid), Hakemus.class);
     }
 
-    @Override
-    public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
-        String url = getUrl("haku-app.applications.list");
-        return new PeruutettavaImpl(getWebClient()
-                .path(url)
-                .query("rows", DEFAULT_ROW_LIMIT)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .post(Entity.entity(Lists.newArrayList(hakemusOids),
-                        MediaType.APPLICATION_JSON_TYPE),
-                        new GsonResponseCallback<>(gson(),
-                        url + "?rows=" + DEFAULT_ROW_LIMIT,
-                        callback,
-                        failureCallback,
-                        new TypeToken<List<Hakemus>>() {
-                        }.getType())));
-    }
 
     public Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
         String url = getUrl("haku-app.applications.listfull");
