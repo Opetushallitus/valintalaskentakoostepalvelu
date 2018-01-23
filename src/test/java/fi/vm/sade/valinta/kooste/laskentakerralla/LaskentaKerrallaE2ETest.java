@@ -1,7 +1,16 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.HAKUKOHDE1;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.HAKUKOHDE2;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeviite;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintaperusteet;
+import static javax.ws.rs.HttpMethod.GET;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
@@ -18,28 +27,21 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.*;
-import static javax.ws.rs.HttpMethod.GET;
-
 @Ignore
 public class LaskentaKerrallaE2ETest {
     private final SeurantaServerMock seurantaServerMock = new SeurantaServerMock();
 
     @Before
-    public void startServer() throws Throwable{
+    public void startServer() {
         startShared();
     }
 
     @Test
     public void testaaLaskentaa() {
         mockForward(seurantaServerMock);
-        HttpResource http = new HttpResourceBuilder()
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder()
                 .address(resourcesAddress + "/valintalaskentakerralla/haku/HAKUOID1/tyyppi/HAKU/whitelist/true")
-                .build();
+                .buildExposingWebClientDangerously();
         mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/.*",
                 Arrays.asList(
                         hakukohdeviite()

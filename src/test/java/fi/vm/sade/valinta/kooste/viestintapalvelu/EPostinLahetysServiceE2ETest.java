@@ -1,51 +1,46 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToInternalServerError;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNotFound;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import fi.vm.sade.valinta.http.HttpResource;
+
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
-import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.Recipient;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiResponse;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNotFound;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToInternalServerError;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class EPostinLahetysServiceE2ETest {
 
     private static final long EXPIRATION_TIME = System.currentTimeMillis() + 9999999;
 
     @Before
-    public void init() throws Throwable {
+    public void init() {
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
     }
@@ -113,9 +108,9 @@ public class EPostinLahetysServiceE2ETest {
     }
 
     private Response sendEPosti(String kirjeenTyyppi, String asiointikieli) {
-        HttpResource http = new HttpResourceBuilder()
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder()
                 .address(resourcesAddress + "/viestintapalvelu/securelinkit/aktivoi")
-                .build();
+                .buildExposingWebClientDangerously();
         EPostiRequest request = new EPostiRequest();
         request.setAsiointikieli(asiointikieli);
         request.setHakuOid(HAKU1);

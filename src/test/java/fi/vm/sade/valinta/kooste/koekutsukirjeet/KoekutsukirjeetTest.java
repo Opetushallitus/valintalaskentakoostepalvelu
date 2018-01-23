@@ -7,7 +7,6 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
@@ -39,9 +38,9 @@ public class KoekutsukirjeetTest {
     final static Logger LOG = LoggerFactory.getLogger(KoekutsukirjeetTest.class);
     public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource koekutsukirjeResource = new HttpResourceBuilder()
+    final HttpResourceBuilder.WebClientExposingHttpResource koekutsukirjeResource = new HttpResourceBuilder()
             .address(root + "/viestintapalvelu/koekutsukirjeet/aktivoi")
-            .build();
+            .buildExposingWebClientDangerously();
 
     @Before
     public void startServer() {

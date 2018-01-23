@@ -71,11 +71,6 @@ public abstract class UrlConfiguredResource implements HttpResource{
     }
 
     @Override
-    public WebClient getWebClient() {
-        return wrappedHttpResource.getWebClient();
-    }
-
-    @Override
     public Observable<Response> getAsObservableLazily(String path) {
         return wrappedHttpResource.getAsObservableLazily(path);
     }

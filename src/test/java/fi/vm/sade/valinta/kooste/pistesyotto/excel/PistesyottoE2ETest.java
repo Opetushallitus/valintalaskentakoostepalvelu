@@ -18,9 +18,7 @@ import com.google.gson.Gson;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
-import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -38,10 +36,12 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.commons.io.IOUtils;
-import org.junit.*;
 import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.core.MediaType;
@@ -120,7 +120,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         final Semaphore arvosanaCounter = new Semaphore(0);
         mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
 
-        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").build();
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").buildExposingWebClientDangerously();
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);
         mockForward(PUT,
@@ -171,7 +171,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
         mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest);
 
-        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").build();
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").buildExposingWebClientDangerously();
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);
         mockForward(PUT,
@@ -204,7 +204,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
         mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest + ".666");
 
-        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").build();
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").buildExposingWebClientDangerously();
         Response r = http.getWebClient()
                 .query("hakuOid", "testioidi1")
                 .query("hakukohdeOid", hakukohdeOidFromUiRequest)

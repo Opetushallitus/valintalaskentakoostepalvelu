@@ -1,6 +1,19 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS1;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS2;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE1;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
@@ -8,7 +21,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
@@ -32,22 +44,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS1;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS2;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE1;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.POST;
-
 public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     @BeforeClass
-    public static void init() throws Throwable{
+    public static void init() {
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
     }
@@ -308,9 +307,9 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     }
 
     private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
-        HttpResource http = new HttpResourceBuilder()
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder()
                 .address(resourcesAddress + "/viestintapalvelu/jalkiohjauskirjeet/aktivoi")
-                .build();
+                .buildExposingWebClientDangerously();
         WebClient client = http.getWebClient()
                 .query("hakuOid", HAKU1)
                 .query("templateName","jalkiohjauskirje")
@@ -321,7 +320,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         return response.readEntity(ProsessiId.class);
     }
 
-    private void pollAndAssertDokumenttiProsessi(ProsessiId dokumenttiId) throws InterruptedException {
+    private void pollAndAssertDokumenttiProsessi(ProsessiId dokumenttiId) {
         Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(resourcesAddress, dokumenttiId, Prosessi::valmis);
         Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
         Assert.assertEquals(false, valmisProsessi.keskeytetty);

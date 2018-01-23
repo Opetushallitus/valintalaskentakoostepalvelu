@@ -1,19 +1,22 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
@@ -136,7 +139,7 @@ public class ErillishakuResourceTest {
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
 
-    private void verifyCreatedExcelDocument(Hakutyyppi hakutyyppi, final InputStream storedDocument) throws IOException {
+    private void verifyCreatedExcelDocument(Hakutyyppi hakutyyppi, final InputStream storedDocument) {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(hakutyyppi, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO(
@@ -196,7 +199,7 @@ public class ErillishakuResourceTest {
     }
 
     private WebClient createClient(String url) {
-        return new HttpResourceBuilder().address(url).build().getWebClient();
+        return new HttpResourceBuilder().address(url).buildExposingWebClientDangerously().getWebClient();
     }
 
 }

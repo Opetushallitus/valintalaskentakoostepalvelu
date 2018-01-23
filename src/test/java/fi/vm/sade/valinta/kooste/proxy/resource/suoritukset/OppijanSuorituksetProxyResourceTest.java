@@ -1,10 +1,14 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -32,11 +36,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static java.util.Collections.*;
-import static org.junit.Assert.*;
 
 public class OppijanSuorituksetProxyResourceTest {
     private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResourceTest.class);
@@ -44,9 +51,9 @@ public class OppijanSuorituksetProxyResourceTest {
     private static final String opiskelijaOid = "1.2.246.562.24.71943835646";
     private static final String hakemusOid = "1.2.246.562.11.00000000615";
     private static final String hakuOid = "1.2.246.562.29.90697286251";
-    final HttpResource proxyResource = new HttpResourceBuilder()
+    final HttpResourceBuilder.WebClientExposingHttpResource proxyResource = new HttpResourceBuilder()
             .address(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid + "/opiskeljaOid/" + opiskelijaOid + "/hakemusOid/" + hakemusOid)
-            .build();
+            .buildExposingWebClientDangerously();
 
 
 
@@ -165,10 +172,10 @@ public class OppijanSuorituksetProxyResourceTest {
         }
 
 
-        final HttpResource proxyBatchResource = new HttpResourceBuilder()
+        final HttpResourceBuilder.WebClientExposingHttpResource proxyBatchResource = new HttpResourceBuilder()
                 .address(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid)
                 .timeoutMillis(1000*100)
-                .build();
+                .buildExposingWebClientDangerously();
 
         Response response = proxyBatchResource.getWebClient().type(MediaType.APPLICATION_JSON_TYPE).post(allHakemus);
         assertEquals(200, response.getStatus());

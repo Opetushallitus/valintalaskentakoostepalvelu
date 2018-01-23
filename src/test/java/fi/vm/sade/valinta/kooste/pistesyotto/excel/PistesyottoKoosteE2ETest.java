@@ -1,28 +1,31 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static javax.ws.rs.HttpMethod.*;
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpHandler;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.*;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
-import fi.vm.sade.valinta.http.HttpResourceImpl;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -41,9 +44,9 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakukohteenOsallistumistiedotDTO.KokeenOsallistumistietoDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.Osallistumistieto;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -67,7 +70,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -87,7 +95,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     }
 
     @Before
-    public void startServer() throws Throwable{
+    public void startServer() {
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_1.2.246.562.10.00000000001");
     }
@@ -95,9 +103,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     @Test
     public void testKoostaaPistetiedotHakemuksille() throws Exception {
 
-        HttpResource http = new HttpResourceBuilder()
-                .address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde")
-                .build();
+        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
 
         List<ApplicationAdditionalDataDTO> pistetiedot = readAdditionalData();
         List<String> hakemusOids = pistetiedot.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toList());
@@ -146,7 +152,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     @Test
     public void testTallentaaKoostetutPistetiedotHakukohteelle() throws Exception {
-        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde").build();
+        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
         List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
         mockToReturnJson(POST, "/haku-app/applications/listfull",
@@ -185,7 +191,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
         String hakijaOid = pistetieto.getPersonOid();
 
-        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid()).build();
+        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid());
         pistetieto.getAdditionalData().remove("kielikoe_fi");
 
         mockOrganisaatioKutsu();
@@ -259,7 +265,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
         String hakijaOid = pistetieto.getPersonOid();
 
-        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid()).build();
+        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid());
         pistetieto.getAdditionalData().remove("kielikoe_fi");
 
         String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
@@ -302,7 +308,8 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
         String hakijaOid = pistetieto.getPersonOid();
 
-        HttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid()).build();
+        String url = resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid();
+        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(url);
         pistetieto.getAdditionalData().remove("kielikoe_fi");
 
         String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
@@ -337,6 +344,12 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
         Response singleHakemusResponse = http.getWebClient().accept(MediaType.APPLICATION_JSON).get();
         assertEquals(403, singleHakemusResponse.getStatus());
+    }
+
+    private HttpResourceBuilder.WebClientExposingHttpResource createClient(String url) {
+        return new HttpResourceBuilder()
+                .address(url)
+                .buildExposingWebClientDangerously();
     }
 
     private void mockValintakoe() {

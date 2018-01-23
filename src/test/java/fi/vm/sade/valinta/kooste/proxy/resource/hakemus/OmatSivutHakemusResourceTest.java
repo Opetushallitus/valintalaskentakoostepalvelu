@@ -1,9 +1,13 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
-import fi.vm.sade.valinta.http.HttpResource;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static javax.ws.rs.HttpMethod.GET;
+import static org.junit.Assert.assertEquals;
+
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import org.apache.commons.io.IOUtils;
@@ -14,12 +18,6 @@ import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static javax.ws.rs.HttpMethod.GET;
-import static org.junit.Assert.assertEquals;
 
 public class OmatSivutHakemusResourceTest {
     private static final String hakemusOid = "1.2.246.562.11.00003935855";
@@ -41,9 +39,9 @@ public class OmatSivutHakemusResourceTest {
     public void hakemusResourceTest() throws Exception {
         final String valintatulos = classpathResourceAsString(PROXY_VALINTA_TULOS_SERVICE_JSON);
         mockToReturnString(GET, "/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid, valintatulos);
-        final HttpResource proxyResource = new HttpResourceBuilder()
+        final HttpResourceBuilder.WebClientExposingHttpResource proxyResource = new HttpResourceBuilder()
                 .address(resourcesAddress + "/proxy/valintatulos/haku/" + hakuOid + "/hakemusOid/" + hakemusOid)
-                .build();
+                .buildExposingWebClientDangerously();
         Response response = proxyResource.getWebClient().get();
         assertEquals(200, response.getStatus());
         assertEquals(valintatulos, IOUtils.toString((InputStream) response.getEntity()));

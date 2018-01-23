@@ -13,7 +13,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import com.google.gson.GsonBuilder;
-import fi.vm.sade.valinta.http.HttpResource;
+
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
@@ -47,8 +47,8 @@ public class ErillishakuResourceKayttajaPalauteTest {
     String hakukohdeOid = "1.2.246.562.5.72607738902";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
-    final HttpResource jsonResource = new HttpResourceBuilder().address(root + "/erillishaku/tuonti/ui").build();
-    final HttpResource excelResource = new HttpResourceBuilder().address(root + "/erillishaku/tuonti").build();
+    final HttpResourceBuilder.WebClientExposingHttpResource jsonResource = new HttpResourceBuilder().address(root + "/erillishaku/tuonti/ui").buildExposingWebClientDangerously();
+    final HttpResourceBuilder.WebClientExposingHttpResource excelResource = new HttpResourceBuilder().address(root + "/erillishaku/tuonti").buildExposingWebClientDangerously();
     @Before
     public void startServer() {
         ValintaKoosteJetty.startShared();
@@ -56,7 +56,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
     }
 
     @Test
-    public void tuontiVirheTyhjaTietoJoukkoPalaute() throws IOException {
+    public void tuontiVirheTyhjaTietoJoukkoPalaute() {
         final ProsessiId prosessiId =
                 jsonClient()
                         .post(Entity.json(new ErillishakuJson(emptyList()))

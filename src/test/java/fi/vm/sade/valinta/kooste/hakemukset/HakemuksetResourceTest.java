@@ -15,7 +15,6 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -41,9 +40,9 @@ import java.util.List;
 public class HakemuksetResourceTest {
 
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource hakemuksetValinnanvaiheResource = new HttpResourceBuilder()
+    final HttpResourceBuilder.WebClientExposingHttpResource hakemuksetValinnanvaiheResource = new HttpResourceBuilder()
             .address(root + "/hakemukset/valinnanvaihe")
-            .build();
+            .buildExposingWebClientDangerously();
 
     @Before
     public void startServer() {

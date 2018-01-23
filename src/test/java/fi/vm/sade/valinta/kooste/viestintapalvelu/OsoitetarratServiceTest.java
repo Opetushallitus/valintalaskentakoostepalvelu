@@ -4,7 +4,6 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
 
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
@@ -38,12 +37,12 @@ public class OsoitetarratServiceTest {
     final static Logger LOG = LoggerFactory.getLogger(OsoitetarratServiceTest.class);
     public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource osoitetarratResource = new HttpResourceBuilder()
+    final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource = new HttpResourceBuilder()
             .address(root + "/viestintapalvelu/osoitetarrat/aktivoi")
-            .build();
-    final HttpResource osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResourceBuilder()
+            .buildExposingWebClientDangerously();
+    final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResourceBuilder()
             .address(root + "/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
-            .build();
+            .buildExposingWebClientDangerously();
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String TARJOAJA1 = "TARJOAJA1";

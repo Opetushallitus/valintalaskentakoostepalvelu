@@ -22,14 +22,10 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
-import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
@@ -38,7 +34,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDt
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,16 +41,14 @@ import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
     @Before
-    public void init() throws Throwable {
+    public void init() {
         startShared();
         mockParams();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
@@ -270,9 +263,9 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
-        HttpResource http = new HttpResourceBuilder()
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder()
                 .address(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet")
-                .build();
+                .buildExposingWebClientDangerously();
         WebClient client = http.getWebClient()
                 .query("hakuOid", HAKU1)
                 .query("asiointikieli", asiointikieli)
@@ -356,7 +349,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockToReturnJson(GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
     }
 
-    private void pollAndAssertDokumenttiProsessi(ProsessiId dokumenttiId) throws InterruptedException {
+    private void pollAndAssertDokumenttiProsessi(ProsessiId dokumenttiId) {
         Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(resourcesAddress, dokumenttiId, Prosessi::valmis);
         Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
         Assert.assertEquals(false, valmisProsessi.keskeytetty);

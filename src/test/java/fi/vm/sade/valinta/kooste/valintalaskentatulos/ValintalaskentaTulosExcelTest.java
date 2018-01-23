@@ -51,9 +51,9 @@ import java.util.stream.Collectors;
 public class ValintalaskentaTulosExcelTest {
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null);
-    final HttpResource valintakoekutsutResource = new HttpResourceBuilder()
+    final HttpResourceBuilder.WebClientExposingHttpResource valintakoekutsutResource = new HttpResourceBuilder()
             .address(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi")
-            .build();
+            .buildExposingWebClientDangerously();
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String VALINTAKOENIMI1 = "VALINTAKOENIMI1";

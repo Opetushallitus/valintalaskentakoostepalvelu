@@ -31,7 +31,6 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
@@ -76,7 +75,6 @@ import rx.Observable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,12 +91,12 @@ public class PistesyottoResourceTest {
     private static final String KIELIKOE_OPPILAITOS_OID = "1.2.246.562.10.45698499378";
     private static final String KIELIKOE_TOIMIPISTE_OID = "1.2.3.44444.5";
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource pistesyottoTuontiResource = new HttpResourceBuilder()
-            .address(root + "/pistesyotto/tuonti").build();
-    final HttpResource pistesyottoVientiResource = new HttpResourceBuilder()
-            .address(root + "/pistesyotto/vienti").build();
-    final HttpResource pistesyottoUlkoinenTuontiResource = new HttpResourceBuilder()
-            .address(root + "/pistesyotto/ulkoinen").build();
+    final HttpResourceBuilder.WebClientExposingHttpResource pistesyottoTuontiResource = new HttpResourceBuilder()
+            .address(root + "/pistesyotto/tuonti").buildExposingWebClientDangerously();
+    final HttpResourceBuilder.WebClientExposingHttpResource pistesyottoVientiResource = new HttpResourceBuilder()
+            .address(root + "/pistesyotto/vienti").buildExposingWebClientDangerously();
+    final HttpResourceBuilder.WebClientExposingHttpResource pistesyottoUlkoinenTuontiResource = new HttpResourceBuilder()
+            .address(root + "/pistesyotto/ulkoinen").buildExposingWebClientDangerously();
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String TARJOAJA1 = "TARJOAJA1";
