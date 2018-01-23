@@ -40,18 +40,8 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public void otaSeuraavaLaskentaTyonAlle(Consumer<String> uuidCallback, Consumer<Throwable> failureCallback) {
-        try {
-            String url = getUrl("seuranta-service.seuranta.laskenta.otaseuraavalaskentatyonalle");
-            LOG.info("Haetaan seuraava laskenta tyon alle");
-            getWebClient()
-                .path(url)
-                .async()
-                .get(new GsonResponseCallback<>(gson(), url, uuidCallback, failureCallback, String.class));
-        } catch (Exception e) {
-            LOG.error("Uuden tyon hakeminen epaonnistui", e);
-            failureCallback.accept(e);
-        }
+    public Observable<String> otaSeuraavaLaskentaTyonAlle() {
+        return getAsObservableLazily(getUrl("seuranta-service.seuranta.laskenta.otaseuraavalaskentatyonalle"), String.class);
     }
 
     public void laskenta(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback) {

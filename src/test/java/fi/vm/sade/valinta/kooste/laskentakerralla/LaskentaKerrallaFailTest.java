@@ -32,7 +32,6 @@ import rx.Observable;
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -56,12 +55,11 @@ public class LaskentaKerrallaFailTest {
         AtomicInteger seurantaCount = new AtomicInteger(0);
         doAnswer(invocation -> {
             if (seurantaCount.getAndIncrement() < 1)
-                ((Consumer<String>) invocation.getArguments()[0]).accept(LASKENTASEURANTA_ID);
+                return Observable.just(LASKENTASEURANTA_ID);
             else {
-                ((Consumer<String>) invocation.getArguments()[0]).accept(null);
+                return Observable.just(null);
             }
-            return null;
-        }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
+        }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
     }
 
     @Test

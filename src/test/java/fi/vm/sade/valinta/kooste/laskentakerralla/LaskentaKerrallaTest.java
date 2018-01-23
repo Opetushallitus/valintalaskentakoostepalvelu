@@ -168,14 +168,12 @@ public class LaskentaKerrallaTest {
 
         AtomicInteger seurantaCount = new AtomicInteger(0);
         doAnswer(invocation -> {
-            if (seurantaCount.getAndIncrement() < 1)
-                ((Consumer<String>) invocation.getArguments()[0]).accept(LASKENTASEURANTA_ID);
-            else {
-                ((Consumer<String>) invocation.getArguments()[0]).accept(null);
+            if (seurantaCount.getAndIncrement() < 1) {
+                return Observable.just(LASKENTASEURANTA_ID);
+            } else {
+                return Observable.just(null);
             }
-            return null;
-        }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
-
+        }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
     }
 
     private HakuV1RDTO buildHakuDto() {

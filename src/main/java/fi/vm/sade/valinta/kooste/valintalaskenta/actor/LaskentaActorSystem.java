@@ -116,23 +116,23 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     }
 
     public void fetchAndStartLaskenta() {
-        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
-                this::startLaskentaIfWorkAvailable,
-                (Throwable t) -> {
-                    LOG.warn("Uutta laskentaa ei saatu tyon alle seurannasta. Yritetään uudelleen.", t);
-                    _fetchAndStartLaskentaRetry(); //FIXME kill me OK-152
-                });
+        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle().subscribe(
+            this::startLaskentaIfWorkAvailable,
+            (Throwable t) -> {
+                LOG.warn("Uutta laskentaa ei saatu tyon alle seurannasta. Yritetään uudelleen.", t);
+                _fetchAndStartLaskentaRetry(); //FIXME kill me OK-152
+            });
     }
 
     private void _fetchAndStartLaskentaRetry() {
-        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
-                this::startLaskentaIfWorkAvailable,
-                (Throwable t) -> {
-                    String message = "Uutta laskentaa ei saatu tyon alle seurannasta.";
-                    LOG.error(message, t);
-                    actorSystem.scheduler().scheduleOnce(FiniteDuration.create(5, TimeUnit.SECONDS), laskennanKaynnistajaActor, new WorkerAvailable(), actorSystem.dispatcher(), ActorRef.noSender());
-                    throw new RuntimeException(message, t);
-                });
+        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle().subscribe(
+            this::startLaskentaIfWorkAvailable,
+            (Throwable t) -> {
+                String message = "Uutta laskentaa ei saatu tyon alle seurannasta.";
+                LOG.error(message, t);
+                actorSystem.scheduler().scheduleOnce(FiniteDuration.create(5, TimeUnit.SECONDS), laskennanKaynnistajaActor, new WorkerAvailable(), actorSystem.dispatcher(), ActorRef.noSender());
+                throw new RuntimeException(message, t);
+            });
     }
 
     private void startLaskentaIfWorkAvailable(String uuid) {

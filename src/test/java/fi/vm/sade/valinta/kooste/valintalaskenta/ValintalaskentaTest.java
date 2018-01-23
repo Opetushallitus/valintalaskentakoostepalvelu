@@ -118,7 +118,7 @@ public class ValintalaskentaTest {
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
 
-        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
+        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
@@ -162,7 +162,7 @@ public class ValintalaskentaTest {
         verify(valintalaskentaAsyncResource).laskeJaSijoittele(anyListOf(LaskeDTO.class));
         Mockito.verifyNoMoreInteractions(valintalaskentaAsyncResource);
 
-        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
+        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
         verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }

@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 
 public interface LaskentaSeurantaAsyncResource {
 
-    void otaSeuraavaLaskentaTyonAlle(Consumer<String> uuidCallback, Consumer<Throwable> failureCallback);
+    Observable<String> otaSeuraavaLaskentaTyonAlle();
 
     void laskenta(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
 
