@@ -22,13 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OsoiteHaku {
-
     private static final Logger LOG = LoggerFactory.getLogger(OsoiteHaku.class);
 
-    private static Organisaatio responseToOrganisaatio(
-            HaeOsoiteKomponentti haeOsoiteKomponentti,
-            OrganisaatioAsyncResource organisaatioAsyncResource,
-            Response organisaatioResponse) throws IOException {
+    private static Organisaatio responseToOrganisaatio(Response organisaatioResponse) throws IOException {
         InputStream stream = (InputStream) organisaatioResponse.getEntity();
         String json = StringUtils.trimToEmpty(IOUtils.toString(stream));
         IOUtils.closeQuietly(stream);
@@ -65,7 +61,7 @@ public class OsoiteHaku {
             }
             if (rdto.getParentOid() != null) {
                 LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
-                return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioAsyncResource
+                return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(organisaatioAsyncResource
                         .haeOrganisaatio(rdto.getParentOid()).timeout(1, MINUTES).toBlocking().first()), organisaationimi);
             } else {
                 LOG.error("Ei saatu hakijapalveluiden osoitetta! Kaytiin lapi organisaatiot {}!", Arrays.toString(oids.toArray()));
@@ -84,7 +80,7 @@ public class OsoiteHaku {
         Organisaatio org;
         Teksti organisaationimi;
         try {
-            org = responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioResponse);
+            org = responseToOrganisaatio(organisaatioResponse);
             organisaationimi = new Teksti(org.getNimi());
         } catch (Exception e) {
             LOG.error("Ei saatu organisaatiota!", e);
