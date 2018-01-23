@@ -34,7 +34,7 @@ public interface ValintaperusteetAsyncResource {
     Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid);
 
     // @POST /valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
-    Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
+    Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
 
     Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
     Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids);

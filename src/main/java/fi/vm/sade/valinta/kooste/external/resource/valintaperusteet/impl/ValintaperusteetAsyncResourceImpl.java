@@ -78,12 +78,11 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
-        return getWebClient()
-                .path(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.tuohakukohde"))
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .post(Entity.entity(hakukohde, MediaType.APPLICATION_JSON_TYPE));
+    public Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
+        return postAsObservableLazily(
+            getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.tuohakukohde"),
+            Entity.entity(hakukohde, MediaType.APPLICATION_JSON_TYPE),
+            ACCEPT_JSON);
     }
 
     @Override

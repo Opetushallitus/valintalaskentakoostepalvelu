@@ -61,7 +61,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
     }
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         /**
          * Tanne tullaan jos retry:t ei riita importoinnin loppuun vientiin
          */
@@ -125,10 +125,13 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                         //
                 .process(new Processor() {
                     @Override
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         HakukohdeImportDTO hki = exchange.getIn().getBody(
                                 HakukohdeImportDTO.class);
-                        valintaperusteetRestResource.tuoHakukohde(hki);
+                        valintaperusteetRestResource.tuoHakukohde(hki).subscribe(
+                            ok -> {},
+                            error -> LOG.error("valintaperusteetRestResource.tuoHakukohde palautti virheen", error)
+                        );
                     }
                 })
                         //
@@ -167,7 +170,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                         //
                 .process(new Processor() {
                     @Override
-                    public void process(Exchange exchange) throws Exception {
+                    public void process(Exchange exchange) {
                         exchange.getOut().setBody(
                                 suoritaHakuImportKomponentti
                                         .suoritaHakukohdeImport(exchange
@@ -214,7 +217,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
     private Processor logSuccessfulHakukohdeGet() {
         return new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 HakuImportProsessi prosessi = exchange.getProperty(
                         PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
                 int i = prosessi.lisaaImportoitu();
@@ -230,7 +233,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
     private Processor logSuccessfulHakuGet() {
         return new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
                 @SuppressWarnings("unchecked")
                 Collection<String> hakukohdeOids = (Collection<String>) exchange.getIn().getBody(Collection.class);
@@ -242,7 +245,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
     private Processor logSuccessfulHakuImport() {
         return new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
                 int t = prosessi.lisaaTuonti();
                 if (t % 25 == 0 || t == prosessi.getHakukohteita()) {
@@ -255,7 +258,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
     private Processor logFailedHakuConvert() {
         return new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
                 String oid = exchange.getIn().getBody(String.class);
                 if (oid != null) {
@@ -270,7 +273,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
     private Processor logFailedHakuImport() {
         return new Processor() {
-            public void process(Exchange exchange) throws Exception {
+            public void process(Exchange exchange) {
                 HakuImportProsessi prosessi = exchange.getProperty(
                         PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
                 HakukohdeImportDTO hki = exchange.getIn().getBody(

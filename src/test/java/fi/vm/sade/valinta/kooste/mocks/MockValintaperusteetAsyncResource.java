@@ -113,7 +113,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
+    public Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
         throw new UnsupportedOperationException();
     }
 
