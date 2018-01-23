@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import fi.vm.sade.sijoittelu.domain.SijoitteluajonTila;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
@@ -19,7 +22,7 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
     private final static int MAX_POLL_INTERVALL_IN_SECONDS = 30;
     private final static int ADDED_WAIT_PER_POLL_IN_SECONDS = 3;
     public SijoitteleAsyncResourceImpl() {
-        super(TimeUnit.MINUTES.toMillis(50));
+        super(MINUTES.toMillis(50));
     }
 
     @Override
@@ -33,11 +36,10 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
         //Luodaan sijoitteluajo, saadaan palautusarvona sen id, jota käytetään pollattaessa toista rajapintaa.
         String luontiUrl = getUrl("sijoittelu-service.sijoittele", hakuOid);
         try {
-            sijoitteluajoId = getWebClient()
-                    .path(luontiUrl)
-                    .accept(MediaType.WILDCARD_TYPE)
-                    .async()
-                    .get(Long.class).get();
+            sijoitteluajoId = this.<Long>getAsObservableLazily(luontiUrl, Long.class, client -> client.accept(MediaType.WILDCARD_TYPE))
+                .timeout(30, SECONDS)
+                .toBlocking()
+                .first();
         } catch (Exception e) {
             LOGGER.info(String.format("(Haku %s) sijoittelun rajapintakutsu epäonnistui", hakuOid), e);
         }
@@ -61,12 +63,10 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
                 secondsUntilNextPoll += ADDED_WAIT_PER_POLL_IN_SECONDS;
             }
             try {
-                status = getWebClient()
-                        .path(pollingUrl)
-                        .accept(MediaType.WILDCARD_TYPE)
-                        .async()
-                        .get(String.class).get();
-
+                status = this.<String>getAsObservableLazily(pollingUrl, String.class, webClient -> webClient.accept(MediaType.WILDCARD_TYPE))
+                    .timeout(15, SECONDS)
+                    .toBlocking()
+                    .first();
                 LOGGER.info("Saatiin ajontila-rajapinnalta palautusarvo {}", status);
                 if (SijoitteluajonTila.VALMIS.toString().equals(status)) {
                     LOGGER.info("#### Sijoittelu {} haulle {} on valmistunut", sijoitteluajoId, hakuOid);
