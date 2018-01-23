@@ -39,12 +39,13 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
                     .async()
                     .get(Long.class).get();
         } catch (Exception e) {
-            LOGGER.info("(Haku {}) sijoittelun rajapintakutsu epäonnistui", hakuOid);
+            LOGGER.info(String.format("(Haku %s) sijoittelun rajapintakutsu epäonnistui", hakuOid), e);
         }
         //Jos rajapinta palauttaa -1 tai kutsu epäonnistuu, uutta sijoitteluajoa ei luotu. Ei aloiteta pollausta.
-        if(sijoitteluajoId == -1) {
-            LOGGER.error("Uuden sijoittelun luonti haulle {} epäonnistui", hakuOid);
-            failureCallback.accept(new Exception());
+        if (sijoitteluajoId == -1) {
+            String msg = String.format("Uuden sijoittelun luonti haulle %s epäonnistui: luontirajapinta palautti -1", hakuOid);
+            LOGGER.error(msg);
+            failureCallback.accept(new Exception(msg));
             return;
         }
 
@@ -80,7 +81,7 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
                     return;
                 }
             } catch (Exception e) {
-                LOGGER.info("Sijoittelussa {} haulle {} tapahtui virhe", sijoitteluajoId, hakuOid, e);
+                LOGGER.info(String.format("Sijoittelussa %s haulle %s tapahtui virhe", sijoitteluajoId, hakuOid), e);
                 failureCallback.accept(e);
                 return;
             }
