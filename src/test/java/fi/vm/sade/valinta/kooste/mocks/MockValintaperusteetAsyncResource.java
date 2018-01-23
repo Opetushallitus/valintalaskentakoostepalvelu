@@ -122,11 +122,6 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Peruutettava haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku, Consumer<List<ValintaperusteetDTO>> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
         throw new UnsupportedOperationException();
     }

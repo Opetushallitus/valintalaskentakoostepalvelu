@@ -16,10 +16,8 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -73,23 +71,6 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
                     }
                     return client;
                 });
-    }
-
-    public Peruutettava haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku, Consumer<List<ValintaperusteetDTO>> callback, Consumer<Throwable> failureCallback) {
-        try {
-            String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet", hakukohdeOid);
-            WebClient wc = getWebClient().path(url);
-            if (valinnanVaiheJarjestysluku != null) {
-                wc.query("vaihe", valinnanVaiheJarjestysluku);
-            }
-            return new PeruutettavaImpl(wc
-                    .accept(MediaType.APPLICATION_JSON_TYPE)
-                    .async()
-                    .get(new GsonResponseCallback<>(gson(), url + "?vaihe=" + valinnanVaiheJarjestysluku, callback, failureCallback, new TypeToken<List<ValintaperusteetDTO>>() {}.getType())));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
     }
 
     public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
