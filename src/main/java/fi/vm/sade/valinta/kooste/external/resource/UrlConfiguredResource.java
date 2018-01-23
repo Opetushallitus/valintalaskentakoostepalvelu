@@ -12,8 +12,6 @@ import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import javax.ws.rs.client.Entity;
@@ -23,7 +21,6 @@ import java.util.List;
 import java.util.function.Function;
 
 public abstract class UrlConfiguredResource implements HttpResource{
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
     private final HttpResource wrappedHttpResource;
     private final UrlConfiguration urlConfiguration;
 
