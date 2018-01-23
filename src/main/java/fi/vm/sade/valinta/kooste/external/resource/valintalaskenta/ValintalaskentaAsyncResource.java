@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import rx.Observable;
+
+import java.util.List;
 
 public interface ValintalaskentaAsyncResource {
     Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid);
