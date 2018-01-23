@@ -261,30 +261,32 @@ public class OsoitetarratService {
                     }
             );
             //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(osoitteet));
-            viestintapalveluAsyncResource.haeOsoitetarrat(osoitteet, response -> {
-                prosessi.inkrementoiTehtyjaToita();
-                String id = UUID.randomUUID().toString();
-                try {
-                    InputStream inputStream = pipeInputStreams((InputStream) response.getEntity());
-                    dokumenttiAsyncResource.tallenna(id, "osoitetarrat.pdf",
-                        defaultExpirationDate().getTime(), prosessi.getTags(), "application/pdf",
-                        inputStream).subscribe(
-                        ok -> {
-                            prosessi.inkrementoiTehtyjaToita();
-                            prosessi.setDokumenttiId(id);
-                        },
-                        poikkeus -> {
-                            LOG.error("Osoitetarrojen luonti epäonnistui dokumentin tallennukseen:", poikkeus);
-                            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen tallennus epäonnistui:", poikkeus.getMessage()));
-                        });
-                } catch (Throwable t) {
-                    poikkeuskasittelija.accept(t);
-                }
-            }, poikkeus -> {
-                LOG.error("Osoitetarrojen luonti epäonnistui viestintäpalvelukutsuun:", poikkeus);
-                prosessi.getPoikkeukset().add(
+            viestintapalveluAsyncResource.haeOsoitetarrat(osoitteet).subscribe(
+                response -> {
+                    prosessi.inkrementoiTehtyjaToita();
+                    String id = UUID.randomUUID().toString();
+                    try {
+                        InputStream inputStream = pipeInputStreams((InputStream) response.getEntity());
+                        dokumenttiAsyncResource.tallenna(id, "osoitetarrat.pdf",
+                            defaultExpirationDate().getTime(), prosessi.getTags(), "application/pdf",
+                            inputStream).subscribe(
+                            ok -> {
+                                prosessi.inkrementoiTehtyjaToita();
+                                prosessi.setDokumenttiId(id);
+                            },
+                            poikkeus -> {
+                                LOG.error("Osoitetarrojen luonti epäonnistui dokumentin tallennukseen:", poikkeus);
+                                prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen tallennus epäonnistui:", poikkeus.getMessage()));
+                            });
+                    } catch (Throwable t) {
+                        poikkeuskasittelija.accept(t);
+                    }
+                },
+                poikkeus -> {
+                    LOG.error("Osoitetarrojen luonti epäonnistui viestintäpalvelukutsuun:", poikkeus);
+                    prosessi.getPoikkeukset().add(
                         new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen luonti viestintäpalvelussa epäonnistui:", poikkeus.getMessage()));
-            });
+                });
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }

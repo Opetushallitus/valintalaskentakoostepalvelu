@@ -25,6 +25,7 @@ import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -51,6 +52,7 @@ public class OsoitetarratServiceTest {
     final String HAKEMUS2 = "HAKEMUS2";
     final String TUNNISTE1 = "TUNNISTE1";
     final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
+    private final Observable<Response> byteArrayResponse = Observable.just(Response.ok(new ByteArrayInputStream("lol".getBytes())).build());
 
     @Before
     public void startServer() {
@@ -109,8 +111,7 @@ public class OsoitetarratServiceTest {
             ));
             ArgumentCaptor<Osoitteet> osoitteetArgumentCaptor = ArgumentCaptor.forClass(Osoitteet.class);
             Mockito.reset(Mocks.getViestintapalveluAsyncResource());
-            Mockito.when(Mocks.getViestintapalveluAsyncResource().haeOsoitetarrat(
-                    osoitteetArgumentCaptor.capture(), Mockito.any(), Mockito.any())).thenReturn(null);
+            Mockito.when(Mocks.getViestintapalveluAsyncResource().haeOsoitetarrat(osoitteetArgumentCaptor.capture())).thenReturn(byteArrayResponse);
             Response r =
                     osoitetarratResource.getWebClient()
                             .query("hakuOid", HAKU1)
@@ -121,7 +122,7 @@ public class OsoitetarratServiceTest {
             Assert.assertEquals(200, r.getStatus());
             // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta muutosten varalta
             // annetaan pieni odotus aika ellei kutsut ole jo perillä.
-            Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1)).haeOsoitetarrat(Mockito.any(), Mockito.any(), Mockito.any());
+            Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1)).haeOsoitetarrat(Mockito.any());
             List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
             Assert.assertEquals(1, osoitteet.size());
             Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
@@ -169,8 +170,7 @@ public class OsoitetarratServiceTest {
             ));
             ArgumentCaptor<Osoitteet> osoitteetArgumentCaptor = ArgumentCaptor.forClass(Osoitteet.class);
             Mockito.reset(Mocks.getViestintapalveluAsyncResource());
-            Mockito.when(Mocks.getViestintapalveluAsyncResource().haeOsoitetarrat(
-                    osoitteetArgumentCaptor.capture(), Mockito.any(), Mockito.any())).thenReturn(null);
+            Mockito.when(Mocks.getViestintapalveluAsyncResource().haeOsoitetarrat(osoitteetArgumentCaptor.capture())).thenReturn(byteArrayResponse);
 
             Response r =
                     osoitetarratResource.getWebClient()
@@ -182,9 +182,7 @@ public class OsoitetarratServiceTest {
             Assert.assertEquals(200, r.getStatus());
             // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta muutosten varalta
             // annetaan pieni odotus aika ellei kutsut ole jo perillä.
-            Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1)).haeOsoitetarrat(
-                    Mockito.any(), Mockito.any(), Mockito.any()
-            );
+            Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1)).haeOsoitetarrat(Mockito.any());
             List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
             Assert.assertEquals(1, osoitteet.size());
             Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());

@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu;
 
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
@@ -15,8 +14,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
 
 public interface ViestintapalveluAsyncResource {
 
@@ -26,7 +23,7 @@ public interface ViestintapalveluAsyncResource {
 
     Observable<LetterBatchStatusDto> haeStatusObservable(String batchId);
 
-    Peruutettava haeOsoitetarrat(Osoitteet osoitteet, Consumer<Response> callback, Consumer<Throwable> failureCallback);
+    Observable<Response> haeOsoitetarrat(Osoitteet osoitteet);
 
     Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid);
 

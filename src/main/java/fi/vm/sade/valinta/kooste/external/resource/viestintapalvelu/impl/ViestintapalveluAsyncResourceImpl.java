@@ -3,10 +3,6 @@ package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
-import fi.vm.sade.valinta.http.ResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
@@ -31,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @Service
 public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource implements ViestintapalveluAsyncResource {
@@ -99,21 +94,8 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public Peruutettava haeOsoitetarrat(Osoitteet osoitteet, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
-        String url = getUrl("viestintapalvelu.addresslabel.sync.pdf");
-        try {
-            return new PeruutettavaImpl(
-                    getWebClient()
-                            .path(url)
-                            .async()
-                            .post(Entity.json(osoitteet), new ResponseCallback(
-                                    url,
-                                    callback,
-                                    failureCallback)));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
+    public Observable<Response> haeOsoitetarrat(Osoitteet osoitteet) {
+        return postAsObservableLazily(getUrl("viestintapalvelu.addresslabel.sync.pdf"), Entity.json(osoitteet));
     }
 
     @Override
