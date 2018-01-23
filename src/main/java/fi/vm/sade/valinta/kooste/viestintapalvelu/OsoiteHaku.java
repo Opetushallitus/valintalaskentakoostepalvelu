@@ -1,12 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.TreeMultiset;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -15,13 +12,14 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponent
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LueHakijapalvelunOsoite;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Arrays;
+import java.util.List;
 
 public class OsoiteHaku {
 
@@ -68,7 +66,7 @@ public class OsoiteHaku {
             if (rdto.getParentOid() != null) {
                 LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
                 return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioAsyncResource
-                        .haeOrganisaatio(rdto.getParentOid()).get()), organisaationimi);
+                        .haeOrganisaatio(rdto.getParentOid()).timeout(1, MINUTES).toBlocking().first()), organisaationimi);
             } else {
                 LOG.error("Ei saatu hakijapalveluiden osoitetta! Kaytiin lapi organisaatiot {}!", Arrays.toString(oids.toArray()));
                 return null;

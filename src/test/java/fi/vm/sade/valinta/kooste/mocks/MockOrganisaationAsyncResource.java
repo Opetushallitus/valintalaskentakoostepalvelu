@@ -9,7 +9,6 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.ws.rs.core.Response;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -26,7 +25,7 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
     }
 
     @Override
-    public Future<Response> haeOrganisaatio(String organisaatioOid) {
+    public Observable<Response> haeOrganisaatio(String organisaatioOid) {
         throw new NotImplementedException();
     }
 

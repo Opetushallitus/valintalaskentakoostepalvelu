@@ -3,10 +3,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static rx.Observable.from;
-import static rx.Observable.just;
 import static rx.Observable.zip;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -57,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -159,11 +155,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
         Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKaikkiHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
+        Observable<Response> organisaatioObservable = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
         zip(
                 hakemuksetObservable,
                 hakijatObservable,
-                from(organisaatioFuture),
+                organisaatioObservable,
                 (hakemukset, hakijat, organisaatioResponse) -> {
                     LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
                     Collection<HakijaDTO> hylatyt = hakijat.getResults().stream()

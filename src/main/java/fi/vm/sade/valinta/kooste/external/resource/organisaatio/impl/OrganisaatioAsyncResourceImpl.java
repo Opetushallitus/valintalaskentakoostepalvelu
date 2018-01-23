@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl;
 
 import com.google.common.reflect.TypeToken;
+
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -14,7 +15,6 @@ import rx.Observable;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -32,12 +32,8 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Future<Response> haeOrganisaatio(String organisaatioOid) {
-        return getWebClient()
-                .path(getUrl("organisaatio-service.organisaatio", organisaatioOid))
-                .accept(MediaType.WILDCARD)
-                .async()
-                .get();
+    public Observable<Response> haeOrganisaatio(String organisaatioOid) {
+        return getAsObservableLazily(getUrl("organisaatio-service.organisaatio", organisaatioOid), webClient -> webClient.accept(MediaType.WILDCARD_TYPE));
     }
 
     @Override
