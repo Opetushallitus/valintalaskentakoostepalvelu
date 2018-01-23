@@ -18,8 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import rx.Observable;
 
 import javax.ws.rs.client.Entity;
@@ -28,14 +26,11 @@ import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Jussi Jartamo
  */
 public class OsoitetarratServiceTest {
-    final static Logger LOG = LoggerFactory.getLogger(OsoitetarratServiceTest.class);
-    public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource = new HttpResourceBuilder()
             .address(root + "/viestintapalvelu/osoitetarrat/aktivoi")
@@ -45,11 +40,8 @@ public class OsoitetarratServiceTest {
             .buildExposingWebClientDangerously();
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
-    final String TARJOAJA1 = "TARJOAJA1";
     final String VALINTAKOE1 = "VALINTAKOE1";
     final String HAKEMUS1 = "HAKEMUS1";
-    final String HAKEMUS2 = "HAKEMUS2";
-    final String TUNNISTE1 = "TUNNISTE1";
     final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
     private final Observable<Response> byteArrayResponse = Observable.just(Response.ok(new ByteArrayInputStream("lol".getBytes())).build());
 
