@@ -116,7 +116,6 @@ public class LaskentaKerrallaTest {
 
     @Before
     public void build() {
-        ArgumentCaptor<Consumer> argument = ArgumentCaptor.forClass(Consumer.class);
         when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any())).thenReturn(
             Observable.just(Collections.singletonList(LaskentaKerrallaTestData.julkaistuHakukohdeViite(HAKUKOHDE_OID, TARJOAJA_OID))));
         when(Mocks.valintaperusteetAsyncResource.haeValintaperusteet(any(), any()))
@@ -152,15 +151,8 @@ public class LaskentaKerrallaTest {
                 );
         when(Mocks.tarjontaAsyncResource.haeHaku(any()))
                 .thenAnswer(invocation -> rx.Observable.just(buildHakuDto()));
-
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ((Consumer)args[2]).accept(LASKENTASEURANTA_ID);
-            return "Hmm isn't this a void method?";
-        }).when(Mocks.laskentaSeurantaAsyncResource).luoLaskenta(any(), any(), argument.capture(), any());
-
-        when(Mocks.laskentaSeurantaAsyncResource.laskenta(LASKENTASEURANTA_ID)).thenReturn(Observable.just
-            (new LaskentaDto(LASKENTASEURANTA_ID, "","","", HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, null, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false, null, true)));
+        when(Mocks.laskentaSeurantaAsyncResource.laskenta(LASKENTASEURANTA_ID)).thenReturn(Observable.just(
+            (new LaskentaDto(LASKENTASEURANTA_ID, "","","", HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, null, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false, null, true))));
 
         AtomicInteger seurantaCount = new AtomicInteger(0);
         doAnswer(invocation -> {

@@ -5,6 +5,7 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,9 +33,11 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusTyyppi;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import org.apache.poi.ss.formula.functions.T;
 import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
@@ -111,7 +114,11 @@ public class ValintalaskentaTest {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
+        when(seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle()).thenReturn(Observable.just(null));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
@@ -146,6 +153,7 @@ public class ValintalaskentaTest {
 
         when(valintalaskentaAsyncResource.laskeJaSijoittele(anyListOf(LaskeDTO.class))).thenReturn(Observable.just("Valintaryhmälaskenta onnistui"));
         when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
+        when(seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle()).thenReturn(Observable.just(null));
 
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
@@ -173,6 +181,9 @@ public class ValintalaskentaTest {
             Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.KESKEYTETTY, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
@@ -182,7 +193,6 @@ public class ValintalaskentaTest {
         verify(valintapisteAsyncResource, times(2)).getValintapisteet(eq(hakuOid), eq(hakukohde1Oid), any(AuditSession.class));
         verify(valintapisteAsyncResource).getValintapisteet(eq(hakuOid), eq(hakukohde2Oid), any(AuditSession.class));
         verify(valintapisteAsyncResource).getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class));
-        // verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any()); // TODO is it OK that this does not get called?
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), argThat(new ArgumentMatcher<Optional<IlmoitusDto>>() {

@@ -145,19 +145,21 @@ public class ValintalaskentaKerrallaService {
     private void createLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<TunnisteDto> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = toHakukohdeDto(hakukohdeData);
         validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
-        seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos, (TunnisteDto uuid) -> laskennanAloitus.accept(uuid),
-                (Throwable t) -> {
-                    LOG.info("Seurannasta uuden laskennan haku paatyi virheeseen. Yritetään uudelleen.", t);
-                    createLaskentaRetry(hakukohdeDtos, laskennanAloitus, laskentaParams, callbackResponse); //FIXME kill me OK-152!
-                });
+        seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos).subscribe(
+            laskennanAloitus::accept,
+            (Throwable t) -> {
+                LOG.info("Seurannasta uuden laskennan haku paatyi virheeseen. Yritetään uudelleen.", t);
+                createLaskentaRetry(hakukohdeDtos, laskennanAloitus, laskentaParams, callbackResponse); //FIXME kill me OK-152!
+            });
     }
 
     private void createLaskentaRetry(List<HakukohdeDto> hakukohdeDtos, Consumer<TunnisteDto> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
-        seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos, (TunnisteDto uuid) -> laskennanAloitus.accept(uuid),
-                (Throwable t) -> {
-                    LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
-                    callbackResponse.accept(errorResponse(t.getMessage()));
-                });
+        seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos).subscribe(
+            laskennanAloitus::accept,
+            (Throwable t) -> {
+                LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
+                callbackResponse.accept(errorResponse(t.getMessage()));
+            });
     }
 
     private static void validateHakukohdeDtos(Collection<HakukohdeJaOrganisaatio> hakukohdeData, List<HakukohdeDto> hakukohdeDtos, Consumer<Response> callbackResponse) {

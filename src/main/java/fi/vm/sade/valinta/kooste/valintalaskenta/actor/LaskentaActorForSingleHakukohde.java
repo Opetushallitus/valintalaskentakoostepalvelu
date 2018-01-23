@@ -103,17 +103,13 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 totalKohteet());
         }
         if (!isValintaryhmalaskenta) {
-            try {
-                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.VALMIS, Optional.empty());
-                LOG.info("(Uuid={}) Hakukohteen ({}) laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.",
-                        uuid(),
-                        hakukohdeOid);
-            } catch (Throwable t) {
-                LOG.error("(Uuid={}) Hakukohteen ({}) laskenta on valmis mutta ei saatu merkattua.",
-                        uuid(),
-                        hakukohdeOid,
-                        t);
-            }
+            HakukohdeTila tila = HakukohdeTila.VALMIS;
+            laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, tila, Optional.empty()).subscribe(
+                ok -> LOG.info("(Uuid={}) Hakukohteen ({}) laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.",
+                    uuid(),
+                    hakukohdeOid),
+                t -> LOG.error(String.format("(UUID = %s) Hakukohteen (%s) tilan (%s) merkkaaminen epaonnistui!",
+                    uuid(), hakukohdeOid, tila), t));
         } else {
             LOG.info("Ei merkitä valintaryhmälaskennan hakukohteiden tilaa seurantaan. (Onnistunut laskenta)");
         }

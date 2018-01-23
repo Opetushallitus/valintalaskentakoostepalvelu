@@ -157,8 +157,13 @@ public class LaskentaStarter {
     private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, Optional<Throwable> t,  String uuid) {
         if (t.isPresent()) LOG.error(msg, t);
         else LOG.error(msg);
-        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, HakukohdeTila.KESKEYTETTY,
-                t.map(poikkeus -> IlmoitusDto.virheilmoitus(msg, Arrays.toString(poikkeus.getStackTrace()))));
+        LaskentaTila tila = LaskentaTila.VALMIS;
+        HakukohdeTila hakukohdetila = HakukohdeTila.KESKEYTETTY;
+        Optional<IlmoitusDto> ilmoitusDtoOptional = t.map(poikkeus -> IlmoitusDto.virheilmoitus(msg, Arrays.toString(poikkeus.getStackTrace())));
+        seurantaAsyncResource.merkkaaLaskennanTila(uuid, tila, hakukohdetila, ilmoitusDtoOptional).subscribe(
+                    ok -> {},
+                    fail -> LOG.error(String.format("(UUID = %s) Laskennan tilan (laskenta=%s, hakukohde=%s) merkkaaminen epaonnistui!",
+                        uuid, tila, hakukohdetila), fail));
         laskennanKaynnistajaActor.tell(new LaskentaStarterActor.WorkerAvailable(), ActorRef.noSender());
     }
 
