@@ -28,7 +28,7 @@ public interface ValintaperusteetAsyncResource {
     Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid);
 
     // @GET /valintaperusteet-service/resources/hakukohde/haku/{}
-    Peruutettava haunHakukohteet(String hakuOid, Consumer<List<HakukohdeViiteDTO>> callback, Consumer<Throwable> failureCallback);
+    Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid);
 
     // @GET valintaperusteet-service/resources/valintaperusteet/{}
     @Deprecated

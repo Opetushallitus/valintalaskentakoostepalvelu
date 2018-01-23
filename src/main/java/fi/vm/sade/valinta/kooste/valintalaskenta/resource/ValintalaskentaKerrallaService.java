@@ -52,15 +52,15 @@ public class ValintalaskentaKerrallaService {
             callback.accept(redirectResponse(new TunnisteDto(uuid, false)));
         } else {
             LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-            valintaperusteetAsyncResource.haunHakukohteet(hakuOid,
-                    (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                        Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
-                        createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
-                    },
-                    (Throwable poikkeus) -> {
-                        LOG.error("kaynnistaLaskentaHaulle throws", poikkeus);
-                        callback.accept(errorResponse(poikkeus.getMessage()));
-                    }
+            valintaperusteetAsyncResource.haunHakukohteet(hakuOid).subscribe(
+                (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
+                    Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
+                    createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
+                },
+                (Throwable poikkeus) -> {
+                    LOG.error("kaynnistaLaskentaHaulle throws", poikkeus);
+                    callback.accept(errorResponse(poikkeus.getMessage()));
+                }
             );
         }
     }
@@ -73,18 +73,18 @@ public class ValintalaskentaKerrallaService {
                 callbackResponse.accept(redirectResponse(new TunnisteDto(uuid,false)));
             }
             seurantaAsyncResource.resetoiTilat(
-                    uuid,
-                    (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid(),
-                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> notifyWorkAvailable(new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()), callbackResponse),
-                            (Throwable poikkeus) -> {
-                                LOG.error("seurantaAsyncResource throws", poikkeus);
-                                callbackResponse.accept(errorResponse(poikkeus.getMessage()));
-                            }
-                    ),
-                    (Throwable t) -> {
-                        LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
-                        callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
-                    });
+                uuid,
+                (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid()).subscribe(
+                    (List<HakukohdeViiteDTO> hakukohdeViitteet) -> notifyWorkAvailable(new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()), callbackResponse),
+                    (Throwable poikkeus) -> {
+                        LOG.error("seurantaAsyncResource throws", poikkeus);
+                        callbackResponse.accept(errorResponse(poikkeus.getMessage()));
+                    }
+                ),
+                (Throwable t) -> {
+                    LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
+                    callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
+                });
         } catch (Throwable t) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", t);
             callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + t.getMessage()));
@@ -186,7 +186,7 @@ public class ValintalaskentaKerrallaService {
     }
 
     private Optional<String> uuidForExistingNonMaskedLaskenta(Optional<Maski> maski, String hakuOid) {
-        final Optional<Laskenta> ajossaOlevaLaskentaHaulle = !maski.isPresent() || !maski.get().isMask() ? haeAjossaOlevaLaskentaHaulle(hakuOid) : Optional.<Laskenta>empty();
+        final Optional<Laskenta> ajossaOlevaLaskentaHaulle = !maski.isPresent() || !maski.get().isMask() ? haeAjossaOlevaLaskentaHaulle(hakuOid) : Optional.empty();
         return ajossaOlevaLaskentaHaulle.map(LaskentaInfo::getUuid);
     }
 }

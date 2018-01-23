@@ -1,8 +1,16 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 
-import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
@@ -19,15 +27,12 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import rx.Observable;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -47,15 +52,7 @@ public class LaskentaKerrallaFailTest {
 
     @Before
     public void yksiLaskentaTyonAlleJokaEpaonnistuu() {
-        ArgumentCaptor<Consumer> argument = ArgumentCaptor.forClass(Consumer.class);
-        when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any(), any(), argument.capture()))
-            .thenAnswer(
-                invocation -> {
-                    argument.getValue().accept(new RuntimeException());
-                    return new PeruutettavaImpl(Futures.immediateFailedFuture(new Throwable("FAIL")));
-                }
-            );
-
+        when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any())).thenReturn(Observable.error(new Throwable("FAIL")));
         AtomicInteger seurantaCount = new AtomicInteger(0);
         doAnswer(invocation -> {
             if (seurantaCount.getAndIncrement() < 1)
@@ -68,7 +65,7 @@ public class LaskentaKerrallaFailTest {
     }
 
     @Test
-    public void testValintaperusteetHaunHakukohteetFail() throws InterruptedException {
+    public void testValintaperusteetHaunHakukohteetFail() {
         MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(null);
         AsyncResponse asyncResponse = mock(AsyncResponse.class);
         try {

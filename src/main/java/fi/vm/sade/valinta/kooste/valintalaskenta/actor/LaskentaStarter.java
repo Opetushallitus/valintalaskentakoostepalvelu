@@ -14,7 +14,10 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaat
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
-import fi.vm.sade.valinta.seuranta.dto.*;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -22,7 +25,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -59,17 +68,16 @@ public class LaskentaStarter {
                         LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
                         throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
                     }
-                    valintaperusteetAsyncResource.haunHakukohteet(
-                            hakuOid,
-                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                                Collection<HakukohdeJaOrganisaatio> hakukohdeOids = maskHakukohteet(hakuOid, hakukohdeViitteet, laskenta);
-                                if (!hakukohdeOids.isEmpty()) {
-                                    fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, startActor);
-                                } else {
-                                    cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", null, uuid);
-                                }
-                            },
-                            (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, Optional.empty(), uuid)
+                    valintaperusteetAsyncResource.haunHakukohteet(hakuOid).subscribe(
+                        (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
+                            Collection<HakukohdeJaOrganisaatio> hakukohdeOids = maskHakukohteet(hakuOid, hakukohdeViitteet, laskenta);
+                            if (!hakukohdeOids.isEmpty()) {
+                                fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, startActor);
+                            } else {
+                                cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", null, uuid);
+                            }
+                        },
+                        (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, Optional.empty(), uuid)
                     );
                 },
                 (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Laskennan haku epäonnistui ", Optional.of(t), uuid)

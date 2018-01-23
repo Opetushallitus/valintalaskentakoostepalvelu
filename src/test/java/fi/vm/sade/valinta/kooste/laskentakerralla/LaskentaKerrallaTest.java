@@ -1,11 +1,25 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
-import fi.vm.sade.valinta.seuranta.dto.*;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
@@ -14,12 +28,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,6 +40,7 @@ import rx.Observable;
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -110,13 +119,8 @@ public class LaskentaKerrallaTest {
     @Before
     public void build() {
         ArgumentCaptor<Consumer> argument = ArgumentCaptor.forClass(Consumer.class);
-        when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any(), argument.capture(), any()))
-                .thenAnswer(
-                        invocation -> {
-                            argument.getValue().accept(Arrays.asList(LaskentaKerrallaTestData.julkaistuHakukohdeViite(HAKUKOHDE_OID, TARJOAJA_OID)));
-                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-                        }
-                );
+        when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any())).thenReturn(
+            Observable.just(Collections.singletonList(LaskentaKerrallaTestData.julkaistuHakukohdeViite(HAKUKOHDE_OID, TARJOAJA_OID))));
         when(Mocks.valintaperusteetAsyncResource.haeValintaperusteet(any(), any()))
                 .thenAnswer(
                         invocation -> Observable

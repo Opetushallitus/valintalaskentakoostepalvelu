@@ -92,18 +92,12 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
         }
     }
 
-    public Peruutettava haunHakukohteet(String hakuOid, Consumer<List<HakukohdeViiteDTO>> callback, Consumer<Throwable> failureCallback) {
-        try {
-            String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku", hakuOid);
-            return new PeruutettavaImpl(getWebClient()
-                    .path(url)
-                    .accept(MediaType.APPLICATION_JSON_TYPE)
-                    .async()
-                    .get(new GsonResponseCallback<>(gson(), url, callback, failureCallback, new TypeToken<List<HakukohdeViiteDTO>>() {}.getType())));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
+    public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
+        return getAsObservableLazily(
+            getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku", hakuOid),
+            new TypeToken<List<HakukohdeViiteDTO>>() {}.getType(),
+            ACCEPT_JSON
+        );
     }
 
     @Override
