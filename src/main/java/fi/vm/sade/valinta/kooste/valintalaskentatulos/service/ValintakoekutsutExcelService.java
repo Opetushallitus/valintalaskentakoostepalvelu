@@ -6,8 +6,8 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -27,7 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -141,57 +146,56 @@ public class ValintakoekutsutExcelService {
                     },
                     poikkeuskasittelija);
             }
-            valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(
-                    hakukohdeOid,
-                    valintakokeet -> {
-                        List<ValintakoeDTO> kiinnostavatValintakokeet = valintakokeet.stream().filter(v -> valintakoeTunnisteet.contains(v.getSelvitettyTunniste()))
-                                .collect(Collectors.toList());
-                        valintakokeetRef.set(kiinnostavatValintakokeet.stream().collect(Collectors.toMap(v -> v.getSelvitettyTunniste(), v -> v)));
-                        boolean onkoJossainValintakokeessaKaikkiHaetaan = kiinnostavatValintakokeet.stream().anyMatch(vk -> Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
-                        // estetään ettei haeta kahteen kertaan kaikkia hakemuksia ja siten tuplata muistin käyttöä. joissain hakukohteissa on tuhansia hakemuksia ja hakemusten koko voi olla megatavuja.
-                        final SynkronoituLaskuri voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken = SynkronoituLaskuri.builder()
-                                .setLaskurinAlkuarvo(2)
-                                .setSynkronoituToiminto(() -> {
-                                    if (!useWhitelist) {
-                                        Set<String> osallistujienHakemusOids = Sets.newHashSet(tiedotHakukohteelleRef.get().stream()
-                                                .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
-                                                .map(o -> o.getHakemusOid()).collect(Collectors.toSet()));
-                                        Set<String> joHaetutHakemukset = haetutHakemuksetRef.get().stream().map(h -> h.getOid()).collect(
-                                                Collectors.toSet()
-                                        );
-                                        osallistujienHakemusOids.removeAll(joHaetutHakemukset); // ei haeta jo haettuja hakemuksia
-                                        // haetaan osallistujille hakemukset
-                                        applicationResource.getApplicationsByOids(osallistujienHakemusOids).subscribe(
-                                            hakemukset -> {
-                                                lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
-                                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                                            },
-                                            poikkeuskasittelija);
-                                    }
-                                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                                }).build();
+            valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(hakukohdeOid).subscribe(
+                valintakokeet -> {
+                    List<ValintakoeDTO> kiinnostavatValintakokeet = valintakokeet.stream().filter(v -> valintakoeTunnisteet.contains(v.getSelvitettyTunniste()))
+                        .collect(Collectors.toList());
+                    valintakokeetRef.set(kiinnostavatValintakokeet.stream().collect(Collectors.toMap(v -> v.getSelvitettyTunniste(), v -> v)));
+                    boolean onkoJossainValintakokeessaKaikkiHaetaan = kiinnostavatValintakokeet.stream().anyMatch(vk -> Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
+                    // estetään ettei haeta kahteen kertaan kaikkia hakemuksia ja siten tuplata muistin käyttöä. joissain hakukohteissa on tuhansia hakemuksia ja hakemusten koko voi olla megatavuja.
+                    final SynkronoituLaskuri voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken = SynkronoituLaskuri.builder()
+                        .setLaskurinAlkuarvo(2)
+                        .setSynkronoituToiminto(() -> {
+                            if (!useWhitelist) {
+                                Set<String> osallistujienHakemusOids = Sets.newHashSet(tiedotHakukohteelleRef.get().stream()
+                                    .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
+                                    .map(o -> o.getHakemusOid()).collect(Collectors.toSet()));
+                                Set<String> joHaetutHakemukset = haetutHakemuksetRef.get().stream().map(h -> h.getOid()).collect(
+                                    Collectors.toSet()
+                                );
+                                osallistujienHakemusOids.removeAll(joHaetutHakemukset); // ei haeta jo haettuja hakemuksia
+                                // haetaan osallistujille hakemukset
+                                applicationResource.getApplicationsByOids(osallistujienHakemusOids).subscribe(
+                                    hakemukset -> {
+                                        lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
+                                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                    },
+                                    poikkeuskasittelija);
+                            }
+                            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                        }).build();
 
-                        if (onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
-                            applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
-                                lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
-                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                                voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                            }, poikkeuskasittelija);
-                        } else {
+                    if (onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
+                        applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
+                            lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                             laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                             voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                        }
-                        valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid,
-                                kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList())).subscribe(osallistuminen -> {
-                            List<HakemusOsallistuminenDTO> hakukohteeseenOsallistujat = osallistuminen.stream()
-                                    .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
-                                    .collect(Collectors.toList());
-                            tiedotHakukohteelleRef.set(hakukohteeseenOsallistujat);
-                            voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         }, poikkeuskasittelija);
+                    } else {
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                    },
-                    poikkeuskasittelija
+                        voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    }
+                    valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid,
+                        kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList())).subscribe(osallistuminen -> {
+                        List<HakemusOsallistuminenDTO> hakukohteeseenOsallistujat = osallistuminen.stream()
+                            .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
+                            .collect(Collectors.toList());
+                        tiedotHakukohteelleRef.set(hakukohteeseenOsallistujat);
+                        voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    }, poikkeuskasittelija);
+                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                },
+                poikkeuskasittelija
             );
             tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
                 hakukohdeRef.set(hakukohde);

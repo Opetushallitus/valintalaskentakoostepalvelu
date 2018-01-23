@@ -12,8 +12,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import org.springframework.stereotype.Service;
 import rx.Observable;
@@ -25,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /**
  * @author Jussi Jartamo
@@ -86,14 +83,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
-        return Futures.immediateFuture(valintakokeetResultReference.get());
-    }
-
-    @Override
-    public Peruutettava haeValintakokeetHakukohteelle(String hakukohdeOid, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(valintakokeetResultReference.get());
-        return new PeruutettavaImpl(Futures.immediateFuture(valintakokeetResultReference.get()));
+    public Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
+        return Observable.just(valintakokeetResultReference.get());
     }
 
     @Override

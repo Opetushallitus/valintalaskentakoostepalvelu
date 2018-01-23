@@ -13,9 +13,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import org.slf4j.Logger;
@@ -33,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @Service
 public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource implements ValintaperusteetAsyncResource {
@@ -141,23 +137,14 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
                 new TypeToken<Map<String, List<ValintatapajonoDTO>>>() {}.getType(),
                 Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE));
     }
-    @Override
-    public Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
-        return getWebClient()
-                .path(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintakoe", hakukohdeOid))
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .get(new GenericType<List<ValintakoeDTO>>() {});
-    }
 
     @Override
-    public Peruutettava haeValintakokeetHakukohteelle(String hakukohdeOid, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
-        String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintakoe", hakukohdeOid);
-        return new PeruutettavaImpl(getWebClient()
-                .path(url)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .get(new GsonResponseCallback<>(gson(), url, callback, failureCallback, new TypeToken<List<ValintakoeDTO>>() {}.getType())));
+    public Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
+        return getAsObservableLazily(
+            getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintakoe", hakukohdeOid),
+            new GenericType<List<ValintakoeDTO>>() {}.getType(),
+            ACCEPT_JSON
+        );
     }
 
     @Override

@@ -187,18 +187,20 @@ public class OsoitetarratService {
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
 
-            valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(hakukohdeOid, valintakokeet -> {
-                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> selvitetytTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
-                if (kutsutaankoJossainKokeessaKaikki) {
-                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
-                        haetutHakemuksetRef.set(hakemukset);
+            valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(hakukohdeOid).subscribe(
+                valintakokeet -> {
+                    boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> selvitetytTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
+                    if (kutsutaankoJossainKokeessaKaikki) {
+                        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
+                            haetutHakemuksetRef.set(hakemukset);
+                            laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                        }, poikkeuskasittelija);
+                    } else {
+                        haetutHakemuksetRef.set(Collections.emptyList());
                         laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                    }, poikkeuskasittelija);
-                } else {
-                    haetutHakemuksetRef.set(Collections.emptyList());
-                    laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                }
-            }, poikkeuskasittelija);
+                    }
+                },
+                poikkeuskasittelija);
             valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid).subscribe(osallistumiset -> {
                 osallistumistiedotRef.set(osallistumiset);
                 laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

@@ -10,7 +10,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
 
 import javax.ws.rs.core.Response;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.function.Consumer;
 
 public interface ValintaperusteetAsyncResource {
 
@@ -43,9 +41,7 @@ public interface ValintaperusteetAsyncResource {
 
     Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid);
 
-    Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
-
-    Peruutettava haeValintakokeetHakukohteelle(String hakukohdeOid, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
+    Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
 
     // @POST /valintaperusteet-service/resources/hakukohde/valintakoe
     Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids);

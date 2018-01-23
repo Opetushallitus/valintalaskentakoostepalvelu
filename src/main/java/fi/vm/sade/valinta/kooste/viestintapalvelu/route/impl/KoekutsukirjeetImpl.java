@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static rx.Observable.from;
 import static rx.Observable.zip;
 import com.google.common.collect.Sets;
 
@@ -40,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -85,10 +83,10 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
     @Override
     public void koekutsukirjeetOsallistujille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, List<String> valintakoeTunnisteet) {
         final Observable<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource.haeHakutoiveelle(koekutsu.getHakukohdeOid());
-        final Future<List<ValintakoeDTO>> valintakokeetFuture = valintakoeResource.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
+        final Observable<List<ValintakoeDTO>> valintakokeetObservable = valintakoeResource.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
         final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(koekutsu.getHakuOid(), koekutsu.getHakukohdeOid());
 
-        zip(from(valintakokeetFuture), hakemuksetObservable,
+        zip(valintakokeetObservable, hakemuksetObservable,
                 (valintakoes, hakemukset) -> {
                     try {
                         boolean haetaankoKaikkiHakutoiveenHakijatValintakokeeseen = valintakoes
