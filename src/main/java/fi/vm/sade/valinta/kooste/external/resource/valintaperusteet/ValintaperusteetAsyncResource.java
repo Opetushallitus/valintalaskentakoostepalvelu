@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 
 public interface ValintaperusteetAsyncResource {
 
@@ -44,7 +43,7 @@ public interface ValintaperusteetAsyncResource {
     Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
 
     // @POST /valintaperusteet-service/resources/hakukohde/valintakoe
-    Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids);
+    Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids);
 
     Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids);
 

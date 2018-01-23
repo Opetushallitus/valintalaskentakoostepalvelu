@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import com.google.common.util.concurrent.Futures;
-
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
@@ -21,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -118,8 +115,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
-        return Futures.immediateFuture(hakukohdeResultReference.get());
+    public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
+        return Observable.just(hakukohdeResultReference.get());
     }
 
     @Override

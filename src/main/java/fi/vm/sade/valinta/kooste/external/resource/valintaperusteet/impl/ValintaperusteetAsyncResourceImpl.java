@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -112,12 +111,12 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
-        return getWebClient()
-                .path(getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"))
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HakukohdeJaValintakoeDTO>>() {});
+    public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
+        return postAsObservableLazily(
+            getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
+            new GenericType<List<HakukohdeJaValintakoeDTO>>() {}.getType(),
+            Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE),
+            ACCEPT_JSON);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -176,7 +177,9 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                     LOG.info("Hakutoiveet hakemuksista:\r\n{}", Arrays.toString(hakutoiveetKaikistaHakemuksista.toArray()));
                     valintakoeOidsHakutoiveille = valintakoeResource
                             .haeValintakokeetHakukohteille(hakutoiveetKaikistaHakemuksista)
-                            .get()
+                            .timeout(1, HOURS)
+                            .toBlocking()
+                            .first()
                             .stream()
                             .filter(h -> h.getValintakoeDTO() != null && !h.getValintakoeDTO().isEmpty())
                             .collect(Collectors.toMap(HakukohdeJaValintakoeDTO::getHakukohdeOid, h -> h));
