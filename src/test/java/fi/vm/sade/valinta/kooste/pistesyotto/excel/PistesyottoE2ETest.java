@@ -120,7 +120,8 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         final Semaphore arvosanaCounter = new Semaphore(0);
         mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
 
-        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").buildExposingWebClientDangerously();
+        String url = resourcesAddress + "/pistesyotto/tuonti";
+        HttpResourceBuilder.WebClientExposingHttpResource http = createHttpResource(url);
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);
         mockForward(PUT,
@@ -171,7 +172,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
         mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest);
 
-        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").buildExposingWebClientDangerously();
+        HttpResourceBuilder.WebClientExposingHttpResource http = createHttpResource(resourcesAddress + "/pistesyotto/tuonti");
         MockServer fakeHakuApp = new MockServer();
         final Semaphore counter = new Semaphore(0);
         mockForward(PUT,
@@ -204,7 +205,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
         mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest + ".666");
 
-        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder().address(resourcesAddress + "/pistesyotto/tuonti").buildExposingWebClientDangerously();
+        HttpResourceBuilder.WebClientExposingHttpResource http = createHttpResource(resourcesAddress + "/pistesyotto/tuonti");
         Response r = http.getWebClient()
                 .query("hakuOid", "testioidi1")
                 .query("hakukohdeOid", hakukohdeOidFromUiRequest)
@@ -296,6 +297,10 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         mockToReturnJson(GET,
                 "/tarjonta-service/rest/v1/hakukohde/1.2.246.562.5.85532589612",
                 new Result(hakukohdeDTO));
+    }
+
+    private HttpResourceBuilder.WebClientExposingHttpResource createHttpResource(String url) {
+        return new HttpResourceBuilder().address(url).buildExposingWebClientDangerously();
     }
 
     public static class Result<T> {
