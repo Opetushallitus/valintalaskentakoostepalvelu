@@ -13,10 +13,12 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.Collection;
@@ -70,21 +72,25 @@ public class ValintalaskentaKerrallaService {
             final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
             if (l != null && !l.isValmis()) {
                 LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
-                callbackResponse.accept(redirectResponse(new TunnisteDto(uuid,false)));
+                callbackResponse.accept(redirectResponse(new TunnisteDto(uuid, false)));
             }
-            seurantaAsyncResource.resetoiTilat(
-                uuid,
-                (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid()).subscribe(
-                    (List<HakukohdeViiteDTO> hakukohdeViitteet) -> notifyWorkAvailable(new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()), callbackResponse),
-                    (Throwable poikkeus) -> {
-                        LOG.error("seurantaAsyncResource throws", poikkeus);
-                        callbackResponse.accept(errorResponse(poikkeus.getMessage()));
+            seurantaAsyncResource.resetoiTilat(uuid)
+                .doOnError((Throwable poikkeus) -> {
+                    LOG.error("seurantaAsyncResource throws", poikkeus);
+                    callbackResponse.accept(errorResponse(poikkeus.getMessage()));
+                })
+                .flatMap((LaskentaDto laskenta) ->
+                    Observable.just(laskenta).zipWith(valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid()), Pair::of))
+                .subscribe(
+                    (Pair<LaskentaDto, List<HakukohdeViiteDTO>> laskentaJaHakukohdeViitteet) -> {
+                        LaskentaDto laskenta = laskentaJaHakukohdeViitteet.getLeft();
+                        notifyWorkAvailable(new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()), callbackResponse);
+                    },
+                    (Throwable t) -> {
+                        LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
+                        callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
                     }
-                ),
-                (Throwable t) -> {
-                    LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
-                    callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
-                });
+                );
         } catch (Throwable t) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", t);
             callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + t.getMessage()));

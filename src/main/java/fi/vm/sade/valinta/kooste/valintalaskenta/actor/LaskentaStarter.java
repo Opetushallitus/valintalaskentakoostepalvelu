@@ -60,27 +60,26 @@ public class LaskentaStarter {
     }
 
     public void fetchLaskentaParams(ActorRef laskennanKaynnistajaActor, final String uuid, final BiConsumer<HakuV1RDTO, LaskentaActorParams> startActor) {
-        seurantaAsyncResource.laskenta(
-                uuid,
-                (LaskentaDto laskenta) -> {
-                    String hakuOid = laskenta.getHakuOid();
-                    if (StringUtils.isBlank(hakuOid)) {
-                        LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
-                        throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
-                    }
-                    valintaperusteetAsyncResource.haunHakukohteet(hakuOid).subscribe(
-                        (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                            Collection<HakukohdeJaOrganisaatio> hakukohdeOids = maskHakukohteet(hakuOid, hakukohdeViitteet, laskenta);
-                            if (!hakukohdeOids.isEmpty()) {
-                                fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, startActor);
-                            } else {
-                                cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", null, uuid);
-                            }
-                        },
-                        (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, Optional.empty(), uuid)
-                    );
-                },
-                (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Laskennan haku epäonnistui ", Optional.of(t), uuid)
+        seurantaAsyncResource.laskenta(uuid).subscribe(
+            (LaskentaDto laskenta) -> {
+                String hakuOid = laskenta.getHakuOid();
+                if (StringUtils.isBlank(hakuOid)) {
+                    LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
+                    throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
+                }
+                valintaperusteetAsyncResource.haunHakukohteet(hakuOid).subscribe(
+                    (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
+                        Collection<HakukohdeJaOrganisaatio> hakukohdeOids = maskHakukohteet(hakuOid, hakukohdeViitteet, laskenta);
+                        if (!hakukohdeOids.isEmpty()) {
+                            fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, startActor);
+                        } else {
+                            cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", null, uuid);
+                        }
+                    },
+                    (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, Optional.empty(), uuid)
+                );
+            },
+            (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Laskennan haku epäonnistui ", Optional.of(t), uuid)
         );
     }
 

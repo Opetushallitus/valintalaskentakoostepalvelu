@@ -159,12 +159,8 @@ public class LaskentaKerrallaTest {
             return "Hmm isn't this a void method?";
         }).when(Mocks.laskentaSeurantaAsyncResource).luoLaskenta(any(), any(), argument.capture(), any());
 
-        doAnswer(invocation -> {
-                    Consumer<LaskentaDto> laskentaDtoConsumer = (Consumer<LaskentaDto>) invocation.getArguments()[1];
-                    laskentaDtoConsumer.accept(new LaskentaDto(LASKENTASEURANTA_ID, "","","", HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, null, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false, null, true));
-                    return null;
-                }
-        ).when(Mocks.laskentaSeurantaAsyncResource).laskenta(eq(LASKENTASEURANTA_ID), any(), any());
+        when(Mocks.laskentaSeurantaAsyncResource.laskenta(LASKENTASEURANTA_ID)).thenReturn(Observable.just
+            (new LaskentaDto(LASKENTASEURANTA_ID, "","","", HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, null, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false, null, true)));
 
         AtomicInteger seurantaCount = new AtomicInteger(0);
         doAnswer(invocation -> {

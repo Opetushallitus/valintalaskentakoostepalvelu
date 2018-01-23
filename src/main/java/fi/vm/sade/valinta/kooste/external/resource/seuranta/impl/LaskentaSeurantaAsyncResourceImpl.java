@@ -1,17 +1,18 @@
 package fi.vm.sade.valinta.kooste.external.resource.seuranta.impl;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import com.google.gson.Gson;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import fi.vm.sade.valinta.http.GsonResponseCallback;
+import fi.vm.sade.valinta.http.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.LaskentaParams;
-import fi.vm.sade.valinta.seuranta.dto.*;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
@@ -19,13 +20,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.Gson;
-
-import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.http.ResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import rx.Observable;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 
 @Service
@@ -44,28 +47,15 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
         return getAsObservableLazily(getUrl("seuranta-service.seuranta.laskenta.otaseuraavalaskentatyonalle"), String.class);
     }
 
-    public void laskenta(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback) {
-        try {
-            String url = getUrl("seuranta-service.seuranta.kuormantasaus.laskenta", uuid);
-            getWebClient()
-                .path(url)
-                .async()
-                .get(new GsonResponseCallback<>(gson(), url, callback, failureCallback, LaskentaDto.class));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-        }
+    public Observable<LaskentaDto> laskenta(String uuid) {
+        return getAsObservableLazily(getUrl("seuranta-service.seuranta.kuormantasaus.laskenta", uuid), LaskentaDto.class);
     }
 
-    public void resetoiTilat(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback) {
-        try {
-            String url = getUrl("seuranta-service.seuranta.kuormantasaus.laskenta.resetoi", uuid);
-            getWebClient()
-                .path(url)
-                .async()
-                .put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<>(gson(), url, callback, failureCallback, LaskentaDto.class));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-        }
+    public Observable<LaskentaDto> resetoiTilat(String uuid) {
+        return putAsObservableLazily(
+            getUrl("seuranta-service.seuranta.kuormantasaus.laskenta.resetoi", uuid),
+            LaskentaDto.class,
+            Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE));
     }
 
     public void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<TunnisteDto> callback, Consumer<Throwable> failureCallback) {

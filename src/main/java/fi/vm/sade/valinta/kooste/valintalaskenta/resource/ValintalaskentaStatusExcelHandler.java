@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.excel.LaskentaDtoAsExcel;
@@ -32,22 +33,21 @@ public class ValintalaskentaStatusExcelHandler {
     }
 
     public void getStatusXls(final String uuid, final Consumer<Response> excelResponce) {
-        seurantaAsyncResource.laskenta(
-                uuid,
-                laskenta -> {
-                    try {
-                        byte[] bytes = LaskentaDtoAsExcel.laskentaDtoAsExcel(laskenta);
-                        excelResponce.accept(excelResponse("yhteenveto.xls", bytes));
-                    } catch (Throwable e) {
-                        LOG.error("Excelin muodostuksessa(kohteelle /laskenta/" + uuid + ") tapahtui virhe", e);
-                        excelResponce.accept(luoVirheExcelVastaus("yhteenveto_virhe.xls", "Virhe Excelin muodostuksessa!", e));
-                        throw e;
-                    }
-                },
-                poikkeus -> {
-                    LOG.error("Excelin tietojen haussa seurantapalvelusta(/laskenta/" + uuid + ") tapahtui virhe", poikkeus);
-                    excelResponce.accept(luoVirheExcelVastaus("yhteenveto_seurantavirhe.xls", "Virhe seurantapavelun kutsumisessa!", poikkeus));
-                });
+        seurantaAsyncResource.laskenta(uuid).subscribe(
+            laskenta -> {
+                try {
+                    byte[] bytes = LaskentaDtoAsExcel.laskentaDtoAsExcel(laskenta);
+                    excelResponce.accept(excelResponse("yhteenveto.xls", bytes));
+                } catch (Throwable e) {
+                    LOG.error("Excelin muodostuksessa(kohteelle /laskenta/" + uuid + ") tapahtui virhe", e);
+                    excelResponce.accept(luoVirheExcelVastaus("yhteenveto_virhe.xls", "Virhe Excelin muodostuksessa!", e));
+                    throw e;
+                }
+            },
+            poikkeus -> {
+                LOG.error("Excelin tietojen haussa seurantapalvelusta(/laskenta/" + uuid + ") tapahtui virhe", poikkeus);
+                excelResponce.accept(luoVirheExcelVastaus("yhteenveto_seurantavirhe.xls", "Virhe seurantapavelun kutsumisessa!", poikkeus));
+            });
     }
 
     private Response luoVirheExcelVastaus(final String tiedostonNimi, final String virheViesti, final Throwable poikkeus) {
