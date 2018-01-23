@@ -10,10 +10,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Futures;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
@@ -158,7 +156,7 @@ public class LaskentaKerrallaTest {
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             ((Consumer)args[2]).accept(LASKENTASEURANTA_ID);
-            return new PeruutettavaImpl(Futures.immediateFuture(LASKENTASEURANTA_ID));
+            return "Hmm isn't this a void method?";
         }).when(Mocks.laskentaSeurantaAsyncResource).luoLaskenta(any(), any(), argument.capture(), any());
 
         doAnswer(invocation -> {

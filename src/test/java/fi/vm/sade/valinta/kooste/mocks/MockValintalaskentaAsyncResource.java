@@ -1,20 +1,15 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
-import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
-import org.springframework.stereotype.Service;
-
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import org.springframework.stereotype.Service;
 import rx.Observable;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Jussi Jartamo

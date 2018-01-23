@@ -1,25 +1,22 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import java.util.*;
-import java.util.function.Consumer;
-
+import static fi.vm.sade.valinta.kooste.mocks.MockData.hakuOid;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
-import org.springframework.stereotype.Service;
 
-import com.google.common.util.concurrent.Futures;
-
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
+import org.springframework.stereotype.Service;
 import rx.Observable;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import static fi.vm.sade.valinta.kooste.mocks.MockData.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class MockTarjontaAsyncService implements TarjontaAsyncResource {
