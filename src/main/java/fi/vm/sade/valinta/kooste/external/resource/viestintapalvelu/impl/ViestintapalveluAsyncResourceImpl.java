@@ -48,11 +48,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
                 new TypeToken<LetterResponse>() {
                 }.getType(),
                 Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+                ACCEPT_JSON);
     }
 
     @Override
@@ -61,17 +57,14 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
                 getUrl("viestintapalvelu.letter.async.letter.status", letterBatchId),
                 new TypeToken<LetterBatchStatusDto>() {
                 }.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+                ACCEPT_JSON);
     }
 
     public Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli) {
         return getAsObservableLazily(
                 getUrl("viestintapalvelu.luotettu.letter.count.type.language", hakuOid, tyyppi, kieli),
-                LetterBatchCountDto.class, client -> { client.accept(MediaType.APPLICATION_JSON_TYPE);return client; });
+                LetterBatchCountDto.class,
+                ACCEPT_JSON);
     }
 
     @Override
@@ -121,8 +114,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
                     client.query("type", kirjeenTyyppi);
                     client.query("language", asiointikieli);
                     return client;
-                }
-        );
+                });
     }
 
     @Override
@@ -131,11 +123,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
                 getUrl("viestintapalvelu.luotettu.letter.publishletterbatch", batchId),
                 (batchIdAsString) ->
                         StringUtils.isNumeric(batchIdAsString) ? Optional.of(Long.parseLong(batchIdAsString)) : Optional.empty(),
-                client -> {
-                    client.accept(MediaType.TEXT_PLAIN_TYPE);
-                    return client;
-                }
-        );
+                client -> client.accept(MediaType.TEXT_PLAIN_TYPE));
     }
 
     @Override
@@ -144,10 +132,6 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
                 getUrl("viestintapalvelu.luotettu.letter.getepostiadressesforletterbatch", batchId),
                 new TypeToken<Map<String, String>>() {
                 }.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+                ACCEPT_JSON);
     }
 }
