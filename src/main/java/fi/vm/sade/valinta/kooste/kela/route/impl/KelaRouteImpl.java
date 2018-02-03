@@ -243,9 +243,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 List<HenkiloPerustietoDto> henkiloPerustietoDtos = oppijanumerorekisteriAsyncResource.haeHenkilot(oidit);
                                 henkilot.addAll(henkiloPerustietoDtos);
                             } catch (Exception e) {
-                                LOG.error("Oppijanumerorekisteri ei jaksa tarjoilla hakemuksia. Yritetään vielä uudestaan.", e);
+                                LOG.error("Oppijanumerorekisteri haku epäonnistui. Yritetään vielä uudestaan.", e);
                                 Thread.sleep(50L);
-                                henkilot.addAll(oppijanumerorekisteriAsyncResource.haeHenkilot(henkiloOidit));
+                                henkilot.addAll(oppijanumerorekisteriAsyncResource.haeHenkilot(oidit));
                             }
                         }
                         henkilot.forEach(luonti.getLuonti().getCache()::put);
