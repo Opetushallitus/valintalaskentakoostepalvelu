@@ -2,11 +2,13 @@ package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
@@ -178,6 +180,12 @@ public class SijoitteluAktivointiResource {
     @ApiOperation(value = "Haun aktiiviset sijoittelut", response = SijoitteluDto.class)
     public void jatkuvaTila(@QueryParam("hakuOid") String hakuOid,
                               @Suspended AsyncResponse asyncResponse) {
+        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler(asyncResponse1 -> {
+            LOG.error("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu: /koostesijoittelu/jatkuva/{}", hakuOid);
+            asyncResponse1.resume(Response.serverError().entity("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu").build());
+        });
+
         tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
             String organisaatioOid = haku.getTarjoajaOids()[0];
 
