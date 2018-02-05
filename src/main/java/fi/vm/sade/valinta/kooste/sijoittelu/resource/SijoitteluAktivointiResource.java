@@ -186,22 +186,27 @@ public class SijoitteluAktivointiResource {
             asyncResponse1.resume(Response.serverError().entity("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu").build());
         });
 
-        tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
-            String organisaatioOid = haku.getTarjoajaOids()[0];
+        try {
+            tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
+                String organisaatioOid = haku.getTarjoajaOids()[0];
 
-            if (isAuthorizedForAnyParentOid(organisaatioOid)) {
-                String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
-                asyncResponse.resume(resp);
-            } else {
-                String msg = String.format(
-                        "Käyttäjällä ei oikeutta haun %s tarjoajaan %s tai sen yläorganisaatioihin.",
-                        hakuOid,
-                        organisaatioOid
-                );
-                LOG.error(msg);
-                asyncResponse.resume(new ForbiddenException(msg));
-            }
-        });
+                if (isAuthorizedForAnyParentOid(organisaatioOid)) {
+                    String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
+                    asyncResponse.resume(resp);
+                } else {
+                    String msg = String.format(
+                            "Käyttäjällä ei oikeutta haun %s tarjoajaan %s tai sen yläorganisaatioihin.",
+                            hakuOid,
+                            organisaatioOid
+                    );
+                    LOG.error(msg);
+                    asyncResponse.resume(new ForbiddenException(msg));
+                }
+            });
+        } catch (Exception e) {
+            LOG.error("Haun aktiiviset sijoittelut -palvelukutsu epäonnistui", e);
+            asyncResponse.resume(Response.serverError().entity(e.toString()).build());
+        }
     }
 
     private boolean isAuthorizedForAnyParentOid(String organisaatioOid) {
