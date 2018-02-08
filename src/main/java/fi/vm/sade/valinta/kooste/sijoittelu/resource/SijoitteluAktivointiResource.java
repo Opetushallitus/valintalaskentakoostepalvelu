@@ -186,6 +186,20 @@ public class SijoitteluAktivointiResource {
             asyncResponse1.resume(Response.serverError().entity("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu").build());
         });
 
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context == null) {
+            String msg = "No SecurityContext found";
+            asyncResponse.resume(new ForbiddenException(msg));
+        }
+
+        Authentication authentication = context.getAuthentication();
+        if (authentication == null) {
+            String msg = "No Authentication found in SecurityContext";
+            asyncResponse.resume(new ForbiddenException(msg));
+        }
+
+        Collection<? extends GrantedAuthority> userRoles = authentication.getAuthorities();
+
         tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
             String organisaatioOid = haku.getTarjoajaOids()[0];
 
@@ -194,16 +208,6 @@ public class SijoitteluAktivointiResource {
             try {
                 String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
                 String[] parentOids = parentOidsPath.split("/");
-
-                SecurityContext context = SecurityContextHolder.getContext();
-                if (context == null)
-                    throw new NullPointerException("No SecurityContext found");
-
-                Authentication authentication = context.getAuthentication();
-                if (authentication == null)
-                    throw new NullPointerException("No Authentication found in SecurityContext");
-
-                Collection<? extends GrantedAuthority> userRoles = authentication.getAuthorities();
 
                 for (String oid : parentOids) {
                     String organizationRole = "ROLE_APP_SIJOITTELU_CRUD_" + oid;
