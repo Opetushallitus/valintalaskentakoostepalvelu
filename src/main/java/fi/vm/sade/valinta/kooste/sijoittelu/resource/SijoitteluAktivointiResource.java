@@ -180,69 +180,58 @@ public class SijoitteluAktivointiResource {
     @ApiOperation(value = "Haun aktiiviset sijoittelut", response = SijoitteluDto.class)
     public void jatkuvaTila(@QueryParam("hakuOid") String hakuOid,
                               @Suspended AsyncResponse asyncResponse) {
-        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(asyncResponse1 -> {
             LOG.error("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu: /koostesijoittelu/jatkuva/{}", hakuOid);
             asyncResponse1.resume(Response.serverError().entity("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu").build());
         });
 
-        try {
-            tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
-                String organisaatioOid = haku.getTarjoajaOids()[0];
+        tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
+            String organisaatioOid = haku.getTarjoajaOids()[0];
 
-                if (isAuthorizedForAnyParentOid(organisaatioOid)) {
-                    String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
-                    asyncResponse.resume(resp);
-                } else {
-                    String msg = String.format(
-                            "Käyttäjällä ei oikeutta haun %s tarjoajaan %s tai sen yläorganisaatioihin.",
-                            hakuOid,
-                            organisaatioOid
-                    );
-                    LOG.error(msg);
-                    asyncResponse.resume(new ForbiddenException(msg));
+            boolean authorizedForAnyParentOid = false;
+
+            try {
+                String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
+                String[] parentOids = parentOidsPath.split("/");
+
+                SecurityContext context = SecurityContextHolder.getContext();
+                if (context == null)
+                    throw new NullPointerException("No SecurityContext found");
+
+                Authentication authentication = context.getAuthentication();
+                if (authentication == null)
+                    throw new NullPointerException("No Authentication found in SecurityContext");
+
+                Collection<? extends GrantedAuthority> userRoles = authentication.getAuthorities();
+
+                for (String oid : parentOids) {
+                    String organizationRole = "ROLE_APP_SIJOITTELU_CRUD_" + oid;
+
+                    for (GrantedAuthority auth : userRoles) {
+                        if (organizationRole.equals(auth.getAuthority()))
+                            authorizedForAnyParentOid = true;
+                    }
                 }
-            });
-        } catch (Exception e) {
-            LOG.error("Haun aktiiviset sijoittelut -palvelukutsu epäonnistui", e);
-            asyncResponse.resume(Response.serverError().entity(e.toString()).build());
-        }
-    }
-
-    private boolean isAuthorizedForAnyParentOid(String organisaatioOid) {
-        try {
-            String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
-            String[] parentOids = parentOidsPath.split("/");
-
-            Collection<? extends GrantedAuthority> userRoles = getRoles();
-
-            for (String oid : parentOids) {
-                String organizationRole = "ROLE_APP_SIJOITTELU_CRUD_" + oid;
-
-                for (GrantedAuthority auth : userRoles) {
-                    if (organizationRole.equals(auth.getAuthority()))
-                        return true;
-                }
+            } catch (Exception e) {
+                String msg = String.format("Organisaation %s parentOids -haku epäonnistui", organisaatioOid);
+                LOG.error(msg, e);
+                asyncResponse.resume(new ForbiddenException(msg));
             }
-        } catch (Exception e) {
-            String msg = String.format("Organisaation %s parentOids -haku epäonnistui", organisaatioOid);
-            LOG.error(msg, e);
-            throw new ForbiddenException(e);
-        }
 
-        return false;
-    }
-
-    private Collection<? extends GrantedAuthority> getRoles() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        if (context == null)
-            throw new NullPointerException("No SecurityContext found");
-
-        Authentication authentication = context.getAuthentication();
-        if (authentication == null)
-            throw new NullPointerException("No Authentication found in SecurityContext");
-
-        return authentication.getAuthorities();
+            if (authorizedForAnyParentOid) {
+                String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
+                asyncResponse.resume(resp);
+            } else {
+                String msg = String.format(
+                        "Käyttäjällä ei oikeutta haun %s tarjoajaan %s tai sen yläorganisaatioihin.",
+                        hakuOid,
+                        organisaatioOid
+                );
+                LOG.error(msg);
+                asyncResponse.resume(new ForbiddenException(msg));
+            }
+        });
     }
 
     private String jatkuvaTilaAutorisoituOrganisaatiolle(String hakuOid) {
