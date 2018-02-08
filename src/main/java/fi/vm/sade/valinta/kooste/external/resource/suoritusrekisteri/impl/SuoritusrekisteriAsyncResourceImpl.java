@@ -92,7 +92,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
-        return getAsObservableLazily(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
+        return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
             client.query("haku", hakuOid);
             LOG.info("Calling url {}", client.getCurrentURI());
@@ -108,7 +108,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
-        return getAsObservableLazily(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
+        return getAsObservable(getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid), Oppija.class, client -> {
             client.accept(MediaType.APPLICATION_JSON_TYPE);
             LOG.info("Calling url {}", client.getCurrentURI());
             return client;

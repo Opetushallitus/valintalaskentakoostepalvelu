@@ -84,7 +84,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
         requestBody.put("asIds", Arrays.asList(hakuOid));
         requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
         requestBody.put("keys", ApplicationAsyncResource.DEFAULT_KEYS);
-        return postAsObservableLazily(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(),
+        return postAsObservable(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(requestBody, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
