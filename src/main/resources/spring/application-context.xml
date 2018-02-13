@@ -52,8 +52,6 @@
 							 xmlns="http://camel.apache.org/schema/spring-security" />
 
 
-		<!--fetching valintatieto takes ages, consider removing this once valinnan
-			tulokset service has been optimized -->
 		<http:conduit name="*.http-conduit">
 			<!-- AllowChunking="false" Nginx fails without this -->
 			<http:client Connection="Keep-Alive" ConnectionTimeout="0"
