@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -194,18 +195,18 @@ public class SijoitteluAktivointiResource {
         Collection<? extends GrantedAuthority> userRoles = getRoles();
 
         tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
-            String organisaatioOid = haku.getTarjoajaOids()[0];
+            String[] organisaatioOids = haku.getTarjoajaOids();
 
-            boolean isAuthorizedForHaku = containsOphRole(userRoles) || isAuthorizedForAnyParentOid(organisaatioOid, userRoles);
+            boolean isAuthorizedForHaku = containsOphRole(userRoles) || isAuthorizedForAnyParentOid(organisaatioOids, userRoles);
 
             if (isAuthorizedForHaku) {
                 String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
                 asyncResponse.resume(resp);
             } else {
                 String msg = String.format(
-                        "Käyttäjällä ei oikeutta haun %s tarjoajaan %s tai sen yläorganisaatioihin.",
+                        "Käyttäjällä ei oikeutta haun %s haun tarjoajiin %s tai niiden yläorganisaatioihin.",
                         hakuOid,
-                        organisaatioOid
+                        Arrays.toString(organisaatioOids)
                 );
                 LOG.error(msg);
                 asyncResponse.resume(new ForbiddenException(msg));
@@ -222,8 +223,8 @@ public class SijoitteluAktivointiResource {
         }
 
         boolean isAuthorized = tarjontaResource.haeHaku(hakuOid).map(haku -> {
-            String organisaatioOid = haku.getTarjoajaOids()[0];
-            return isAuthorizedForAnyParentOid(organisaatioOid, userRoles);
+            String[] organisaatioOids = haku.getTarjoajaOids();
+            return isAuthorizedForAnyParentOid(organisaatioOids, userRoles);
         }).toBlocking().first();
 
         if (!isAuthorized) {
@@ -261,28 +262,28 @@ public class SijoitteluAktivointiResource {
         return false;
     }
 
-    private boolean isAuthorizedForAnyParentOid(String organisaatioOid, Collection<? extends GrantedAuthority> userRoles) {
-        boolean authorizedForAnyParentOid = false;
-
+    private boolean isAuthorizedForAnyParentOid(String[] organisaatioOids, Collection<? extends GrantedAuthority> userRoles) {
         try {
-            String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
-            String[] parentOids = parentOidsPath.split("/");
+            for (String organisaatioOid : organisaatioOids) {
+                String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
+                String[] parentOids = parentOidsPath.split("/");
 
-            for (String oid : parentOids) {
-                String organizationRole = "ROLE_APP_SIJOITTELU_CRUD_" + oid;
+                for (String oid : parentOids) {
+                    String organizationRole = "ROLE_APP_SIJOITTELU_CRUD_" + oid;
 
-                for (GrantedAuthority auth : userRoles) {
-                    if (organizationRole.equals(auth.getAuthority()))
-                        authorizedForAnyParentOid = true;
+                    for (GrantedAuthority auth : userRoles) {
+                        if (organizationRole.equals(auth.getAuthority()))
+                           return true;
+                    }
                 }
             }
         } catch (Exception e) {
-            String msg = String.format("Organisaation %s parentOids -haku epäonnistui", organisaatioOid);
+            String msg = String.format("Organisaatioiden %s parentOids -haku epäonnistui", Arrays.toString(organisaatioOids));
             LOG.error(msg, e);
            throw new ForbiddenException(msg);
         }
 
-        return authorizedForAnyParentOid;
+        return false;
     }
 
     private String jatkuvaTilaAutorisoituOrganisaatiolle(String hakuOid) {
