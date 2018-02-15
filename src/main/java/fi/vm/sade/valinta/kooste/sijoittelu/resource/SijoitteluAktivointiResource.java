@@ -52,6 +52,7 @@ public class SijoitteluAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(SijoitteluAktivointiResource.class);
     public static final String OPH_CRUD = "hasAnyRole('ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001')";
     public static final String ANY_CRUD = "hasAnyRole('ROLE_APP_SIJOITTELU_CRUD')";
+    public static final String OPH_CRUD_ROLE = "ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001";
 
     @Autowired(required = false)
     private SijoitteluAktivointiRoute sijoitteluAktivointiProxy;
@@ -195,9 +196,9 @@ public class SijoitteluAktivointiResource {
         tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
             String organisaatioOid = haku.getTarjoajaOids()[0];
 
-            boolean authorizedForAnyParentOid = isAuthorizedForAnyParentOid(organisaatioOid, userRoles);
+            boolean isAuthorizedForHaku = containsOphRole(userRoles) || isAuthorizedForAnyParentOid(organisaatioOid, userRoles);
 
-            if (authorizedForAnyParentOid) {
+            if (isAuthorizedForHaku) {
                 String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
                 asyncResponse.resume(resp);
             } else {
@@ -214,6 +215,11 @@ public class SijoitteluAktivointiResource {
 
     private void checkAuthorizationForHaku(String hakuOid) {
         Collection<? extends GrantedAuthority> userRoles = getRoles();
+
+        if (containsOphRole(userRoles)) {
+            // on OPH-käyttäjä, ei tarvitse käydä läpi organisaatioita
+            return;
+        }
 
         boolean isAuthorized = tarjontaResource.haeHaku(hakuOid).map(haku -> {
             String organisaatioOid = haku.getTarjoajaOids()[0];
@@ -244,6 +250,15 @@ public class SijoitteluAktivointiResource {
         }
 
         return authentication.getAuthorities();
+    }
+
+    private boolean containsOphRole(Collection<? extends GrantedAuthority> userRoles) {
+        for (GrantedAuthority auth : userRoles) {
+            if (OPH_CRUD_ROLE.equals(auth.getAuthority()))
+                return true;
+        }
+
+        return false;
     }
 
     private boolean isAuthorizedForAnyParentOid(String organisaatioOid, Collection<? extends GrantedAuthority> userRoles) {
