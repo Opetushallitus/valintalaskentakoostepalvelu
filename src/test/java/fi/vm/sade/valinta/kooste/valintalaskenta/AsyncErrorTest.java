@@ -25,7 +25,7 @@ public class AsyncErrorTest {
 		String hakuOid = "1.2.246.562.5.2013080813081926341927";
 		String hakukohdeOid = "1.2.246.562.5.25812040993";
 
-		a.getApplicationAdditionalData(hakuOid, hakukohdeOid).subscribe(r -> {
+		a.getApplicationOids(hakuOid, hakukohdeOid).subscribe(r -> {
 			// NOP
 			int i = 1 + 1;
 		}, e -> {

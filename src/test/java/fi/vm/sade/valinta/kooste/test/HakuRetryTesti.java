@@ -15,7 +15,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 
@@ -75,21 +74,6 @@ public class HakuRetryTesti {
 			public List<Hakemus> getApplicationsByOids(List<String> oids) {
 				failRandomly();
 				return new ArrayList<Hakemus>();
-			}
-
-			@Override
-			public List<ApplicationAdditionalDataDTO> getApplicationAdditionalData(
-					String hakuOid, String hakukohdeOid) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public void putApplicationAdditionalData(String hakuOid,
-					String hakukohdeOid,
-					List<ApplicationAdditionalDataDTO> additionalData) {
-				// TODO Auto-generated method stub
-
 			}
 		};
 
