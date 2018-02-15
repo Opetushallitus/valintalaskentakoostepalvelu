@@ -120,7 +120,7 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("/jatkuva/aktivoi")
     @Produces(MediaType.TEXT_PLAIN)
-    @PreAuthorize(OPH_CRUD)
+    @PreAuthorize(ANY_CRUD)
     @ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
     public String aktivoiJatkuvassaSijoittelussa(
             @QueryParam("hakuOid") String hakuOid) {
@@ -136,6 +136,8 @@ public class SijoitteluAktivointiResource {
                 LOG.warn("Haulta {} puuttuu jatkuvan sijoittelun parametreja. Ei aktivoida jatkuvaa sijoittelua.");
                 return "ei aktivoitu";
             } else {
+                checkAuthorizationForHaku(hakuOid);
+
                 LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
                 sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid, true);
                 return "aktivoitu";
@@ -147,7 +149,7 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("/jatkuva/poista")
     @Produces(MediaType.TEXT_PLAIN)
-    @PreAuthorize(OPH_CRUD)
+    @PreAuthorize(ANY_CRUD)
     @ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
     public String poistaJatkuvastaSijoittelusta(
             @QueryParam("hakuOid") String hakuOid) {
@@ -158,6 +160,8 @@ public class SijoitteluAktivointiResource {
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
+            checkAuthorizationForHaku(hakuOid);
+
             LOG.info("jatkuva sijoittelu poistettu haulta {}", hakuOid);
             sijoittelunSeurantaResource.poistaSijoittelu(hakuOid);
             return "poistettu";
@@ -186,42 +190,12 @@ public class SijoitteluAktivointiResource {
             asyncResponse1.resume(Response.serverError().entity("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu").build());
         });
 
-        SecurityContext context = SecurityContextHolder.getContext();
-        if (context == null) {
-            String msg = "No SecurityContext found";
-            asyncResponse.resume(new ForbiddenException(msg));
-        }
-
-        Authentication authentication = context.getAuthentication();
-        if (authentication == null) {
-            String msg = "No Authentication found in SecurityContext";
-            asyncResponse.resume(new ForbiddenException(msg));
-        }
-
-        Collection<? extends GrantedAuthority> userRoles = authentication.getAuthorities();
+        Collection<? extends GrantedAuthority> userRoles = getRoles();
 
         tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
             String organisaatioOid = haku.getTarjoajaOids()[0];
 
-            boolean authorizedForAnyParentOid = false;
-
-            try {
-                String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
-                String[] parentOids = parentOidsPath.split("/");
-
-                for (String oid : parentOids) {
-                    String organizationRole = "ROLE_APP_SIJOITTELU_CRUD_" + oid;
-
-                    for (GrantedAuthority auth : userRoles) {
-                        if (organizationRole.equals(auth.getAuthority()))
-                            authorizedForAnyParentOid = true;
-                    }
-                }
-            } catch (Exception e) {
-                String msg = String.format("Organisaation %s parentOids -haku epäonnistui", organisaatioOid);
-                LOG.error(msg, e);
-                asyncResponse.resume(new ForbiddenException(msg));
-            }
+            boolean authorizedForAnyParentOid = isAuthorizedForAnyParentOid(organisaatioOid, userRoles);
 
             if (authorizedForAnyParentOid) {
                 String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
@@ -238,6 +212,64 @@ public class SijoitteluAktivointiResource {
         });
     }
 
+    private void checkAuthorizationForHaku(String hakuOid) {
+        Collection<? extends GrantedAuthority> userRoles = getRoles();
+
+        boolean isAuthorized = tarjontaResource.haeHaku(hakuOid).map(haku -> {
+            String organisaatioOid = haku.getTarjoajaOids()[0];
+            return isAuthorizedForAnyParentOid(organisaatioOid, userRoles);
+        }).toBlocking().first();
+
+        if (!isAuthorized) {
+            String msg = String.format(
+                    "Käyttäjällä ei oikeutta haun %s tarjoajaan tai sen yläorganisaatioihin.",
+                    hakuOid
+            );
+            LOG.error(msg);
+            throw new ForbiddenException(msg);
+        }
+    }
+
+    private Collection<? extends GrantedAuthority> getRoles() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context == null) {
+            String msg = "No SecurityContext found";
+            throw new ForbiddenException(msg);
+        }
+
+        Authentication authentication = context.getAuthentication();
+        if (authentication == null) {
+            String msg = "No Authentication found in SecurityContext";
+            throw new ForbiddenException(msg);
+        }
+
+        return authentication.getAuthorities();
+    }
+
+    private boolean isAuthorizedForAnyParentOid(String organisaatioOid, Collection<? extends GrantedAuthority> userRoles) {
+        boolean authorizedForAnyParentOid = false;
+
+        try {
+            String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
+            String[] parentOids = parentOidsPath.split("/");
+
+            for (String oid : parentOids) {
+                String organizationRole = "ROLE_APP_SIJOITTELU_CRUD_" + oid;
+
+                for (GrantedAuthority auth : userRoles) {
+                    if (organizationRole.equals(auth.getAuthority()))
+                        authorizedForAnyParentOid = true;
+                }
+            }
+        } catch (Exception e) {
+            String msg = String.format("Organisaation %s parentOids -haku epäonnistui", organisaatioOid);
+            LOG.error(msg, e);
+           throw new ForbiddenException(msg);
+        }
+
+        return authorizedForAnyParentOid;
+    }
+
     private String jatkuvaTilaAutorisoituOrganisaatiolle(String hakuOid) {
         if (StringUtils.isBlank(hakuOid)) {
             return null;
@@ -250,7 +282,7 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("/jatkuva/paivita")
     @Produces(MediaType.TEXT_PLAIN)
-    @PreAuthorize(OPH_CRUD)
+    @PreAuthorize(ANY_CRUD)
     @ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
     public String paivitaJatkuvanSijoittelunAloitus(
             @QueryParam("hakuOid") String hakuOid,
@@ -262,6 +294,8 @@ public class SijoitteluAktivointiResource {
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
+            checkAuthorizationForHaku(hakuOid);
+
             sijoittelunSeurantaResource.paivitaSijoittelunAloitusajankohta(hakuOid, aloitusajankohta, ajotiheys);
             return "paivitetty";
         }
