@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,13 +180,6 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
         }
-    }
-
-    public Observable<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(String hakuOid, String hakukohdeOid) {
-        return getAsObservable(
-                getUrl("haku-app.applications.additionaldata.hakuoid.hakukohdeoid", hakuOid, hakukohdeOid),
-                new TypeToken<List<ApplicationAdditionalDataDTO>>() {}.getType()
-        );
     }
 
     @Override

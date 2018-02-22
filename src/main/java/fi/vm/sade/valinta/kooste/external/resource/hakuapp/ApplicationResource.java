@@ -8,14 +8,12 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 
@@ -70,19 +68,4 @@ public interface ApplicationResource {
     @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
     // @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     public List<Hakemus> getApplicationsByOidsGet(@QueryParam("oid") List<String> oids);
-
-    @GET
-    @Path("additionalData/{asId}/{aoId}")
-    @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-    //
-    public List<ApplicationAdditionalDataDTO> getApplicationAdditionalData(@PathParam("asId") String hakuOid, @PathParam("aoId") String hakukohdeOid);
-
-    @PUT
-    @Path("additionalData/{asId}/{aoId}")
-    @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-    @Consumes(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-    //
-    public void putApplicationAdditionalData(@PathParam("asId") String hakuOid,
-                                             @PathParam("aoId") String hakukohdeOid,
-                                             List<ApplicationAdditionalDataDTO> additionalData);
 }
