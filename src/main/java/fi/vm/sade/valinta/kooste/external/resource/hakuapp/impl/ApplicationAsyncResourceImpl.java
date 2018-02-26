@@ -3,10 +3,6 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -35,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -150,30 +145,6 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     @Override
     public Observable<Hakemus> getApplication(String hakemusOid) {
         return getAsObservableLazily(getUrl("haku-app.applications", hakemusOid), Hakemus.class);
-    }
-
-
-    public Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
-        String url = getUrl("haku-app.applications.listfull");
-        try {
-            return new PeruutettavaImpl(
-                    getWebClient()
-                            .path(url)
-                            .query("appState", "ACTIVE", "INCOMPLETE")
-                            .query("rows", DEFAULT_ROW_LIMIT)
-                            .query("asId", hakuOid)
-                            .query("aoOid", hakukohdeOid)
-                            .async()
-                            .get(new GsonResponseCallback<>(gson(),
-                                url + "?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=" + hakukohdeOid + "&asId=" + hakuOid,
-                                callback,
-                                failureCallback,
-                                new TypeToken<List<Hakemus>>() {
-                                }.getType())));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
     }
 
     @Override
