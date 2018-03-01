@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Piste;
@@ -61,6 +62,15 @@ public class Converter {
         }
 
         return arvo;
+    }
+
+    public static HakemusDTO hakemusToHakemusDTO(AtaruHakemus hakemus, Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+        HakemusDTO hakemusDto = new HakemusDTO();
+        hakemusDto.setHakemusoid(hakemus.getHakemusOid());
+        hakemusDto.setHakijaOid(hakemus.getPersonOid());
+        hakemus.setHakuOid(hakemus.getHakuOid());
+
+        return hakemusDto;
     }
 
     public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {

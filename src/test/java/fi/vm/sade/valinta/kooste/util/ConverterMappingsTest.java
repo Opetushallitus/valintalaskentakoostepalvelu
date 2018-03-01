@@ -7,6 +7,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
@@ -166,6 +167,21 @@ public class ConverterMappingsTest {
                 .findFirst().get();
 
         Assert.assertNotNull(yleinen_kielitutkinto_sv);
+    }
+
+    @Test
+    public void testaaAtaruhakemustenKonversio() throws JsonSyntaxException, IOException {
+        List<AtaruHakemus> hakemukset = new Gson().fromJson(IOUtils
+                .toString(new ClassPathResource("ataruhakemukset.json")
+                        .getInputStream()), new TypeToken<List<AtaruHakemus>>() {}.getType());
+
+        AtaruHakemus hakemus = hakemukset.stream()
+                .filter(h -> "1.2.246.562.11.00000000000000000063".equals(h.getHakemusOid()))
+                .distinct().iterator().next();
+
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getHakemusOid(), hakemus.getPersonOid(), "", "", emptyList()), Maps.newHashMap());
+
+        assertEquals(hakemus.getHakemusOid(), dto.getHakemusoid());
     }
 
 }
