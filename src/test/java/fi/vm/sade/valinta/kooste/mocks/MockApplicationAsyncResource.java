@@ -2,8 +2,19 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.util.concurrent.Futures;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
+import com.google.common.util.concurrent.Futures;
+import com.google.gson.Gson;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -19,6 +30,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
 
     private static AtomicReference<List<Hakemus>> resultReference = new AtomicReference<>();
+    private static AtomicReference<List<AtaruHakemus>> ataruResultReference = new AtomicReference<>();
     private static AtomicReference<List<Hakemus>> resultByOidReference = new AtomicReference<>();
     private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultReference = new AtomicReference<>();
     private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultByOidReference = new AtomicReference<>();
@@ -72,7 +84,20 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         additionalDataPutReference.set(null);
         additionalDataResultByOidReference.set(null);
         resultByOidReference.set(null);
+        ataruResultReference.set(null);
         resultReference.set(null);
+    }
+
+    @Override
+    public Observable<List<AtaruHakemus>> getAtaruApplicationsByHakukohde(String hakukohdeOid) {
+        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<AtaruHakemus>>serviceAvailableCheck()).orElseGet(() -> {
+            if (ataruResultReference.get() != null) {
+                return Futures.immediateFuture(ataruResultReference.get());
+            } else {
+                AtaruHakemus hakemus = getAtaruHakemus();
+                return Futures.immediateFuture(Arrays.asList(hakemus));
+            }
+        }));
     }
 
     @Override
@@ -166,6 +191,21 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         return Observable.just(resultByOidReference.get());
     }
 
+    private AtaruHakemus getAtaruHakemus() {
+        try {
+            List<AtaruHakemus> hakemukset = new Gson().fromJson(IOUtils
+                    .toString(new ClassPathResource("ataruhakemukset.json")
+                            .getInputStream()), new TypeToken<List<AtaruHakemus>>() {}.getType());
+
+            return hakemukset.stream()
+                    .filter(h -> "1.2.246.562.11.00000000000000000063".equals(h.getHakemusOid()))
+                    .distinct().iterator().next();
+        } catch (Exception e) {
+            System.err.println("Couldn't fetch mock ataru application");
+            return new AtaruHakemus();
+        }
+
+    }
 
     private Hakemus getHakemus() {
         Hakemus hakemus = new Hakemus();

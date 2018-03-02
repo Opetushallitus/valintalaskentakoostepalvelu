@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp;
 
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import rx.Observable;
@@ -15,6 +16,8 @@ public interface ApplicationAsyncResource {
     List<String> DEFAULT_KEYS = Arrays.asList("applicationSystemId", "oid", "personOid", "answers.henkilotiedot", "answers.lisatiedot", "answers.hakutoiveet", "hakutapa", "maxApplicationOptions");
     List<String> DEFAULT_STATES = Arrays.asList("ACTIVE", "INCOMPLETE");
     int DEFAULT_ROW_LIMIT = 100000;
+
+    Observable<List<AtaruHakemus>> getAtaruApplicationsByHakukohde(String hakukohdeOid);
 
     Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 

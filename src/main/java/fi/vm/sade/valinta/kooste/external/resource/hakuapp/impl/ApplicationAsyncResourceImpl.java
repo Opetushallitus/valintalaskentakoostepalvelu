@@ -2,14 +2,10 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppiBatch;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ListFullSearchDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -25,13 +21,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -51,6 +41,15 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
         HakemusPrototyyppiBatch hakemusPrototyyppiBatch = new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit);
         Entity<String> entity = Entity.entity(gson().toJson(hakemusPrototyyppiBatch), MediaType.APPLICATION_JSON);
         return this.putAsObservableLazily(url, new GenericType<List<Hakemus>>() {}.getType(), entity, ACCEPT_JSON);
+    }
+
+    @Override
+    public Observable<List<AtaruHakemus>> getAtaruApplicationsByHakukohde(String hakukohdeOid) {
+        return getAsObservable(getUrl("haku-app.applications.listfull"), new TypeToken<List<AtaruHakemus>>() {}.getType(), client -> {
+            client.query("hakukohdeOid", hakukohdeOid);
+            LOG.info("Calling url {}", client.getCurrentURI());
+            return client;
+        });
     }
 
     @Override
