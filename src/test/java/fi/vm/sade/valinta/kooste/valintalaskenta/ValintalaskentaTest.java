@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -25,6 +26,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
@@ -53,6 +55,7 @@ import java.util.Optional;
 
 public class ValintalaskentaTest {
     private static final Hakemus hakemus = new Hakemus();
+    private static final AtaruHakemus ataruHakemus = new AtaruHakemus();
     private final ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
     private final ValintalaskentaAsyncResource valintalaskentaAsyncResource = mock(ValintalaskentaAsyncResource.class);
@@ -73,8 +76,10 @@ public class ValintalaskentaTest {
     private final String hakukohde1Oid = "h1";
     private final String hakukohde2Oid = "h2";
     private final String hakukohde3Oid = "h3";
+    private final String ataruHakukohdeOid = "1.2.246.562.20.90242725084";
     private final String uuid = "uuid";
     private final String hakuOid = "hakuOid";
+    private final String ataruHakuOid = "1.2.246.562.29.805206009510";
     private final HakuV1RDTO hakuDTO = new HakuV1RDTO();
     private final List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(
         new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
@@ -87,6 +92,7 @@ public class ValintalaskentaTest {
     public void setUpTestData() {
         hakemus.setPersonOid("personOid");
         hakuDTO.setOid(hakuOid);
+        ataruHakemus.setPersonOid("1.2.246.562.24.86368188549");
         pisteet = new PisteetWithLastModified(Optional.empty(), Collections.singletonList
             (new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "Frank", "Tester", Collections.emptyList())));
 
@@ -95,18 +101,22 @@ public class ValintalaskentaTest {
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde1Oid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde2Oid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde3Oid)).thenReturn(Observable.just(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.emptyList()));
 
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde1Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde2Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
+        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
 
         when(valintalaskentaAsyncResource.laskeKaikki(any())).thenReturn(Observable.just("OK"));
 
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde1Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde2Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde3Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
+        when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid, ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
 
         when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid)).thenReturn(Observable.just(Collections.emptyMap()));
+        when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(ataruHakuOid)).thenReturn(Observable.just(Collections.emptyMap()));
     }
 
     @Test
@@ -129,6 +139,26 @@ public class ValintalaskentaTest {
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
+
+    @Test
+    public void onnistuneestaValintalaskennastaAtaruHaullePidetaanKirjaaSeurantapalveluun() throws InterruptedException {
+        when(applicationAsyncResource.getAtaruApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.singletonList(MockApplicationAsyncResource.getAtaruHakemus())));
+
+        List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Collections.singletonList(
+                new HakukohdeJaOrganisaatio(ataruHakukohdeOid, "Organisaatio1"));
+
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, ataruHakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
+
+        hakuDTO.setOid(ataruHakuOid);
+        hakuDTO.setAtaruLomakeAvain("ataru-lomake-avain");
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
+        Thread.sleep(500);
+
+        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, ataruHakukohdeOid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }

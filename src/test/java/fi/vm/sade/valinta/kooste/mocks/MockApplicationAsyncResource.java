@@ -95,7 +95,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
                 return Futures.immediateFuture(ataruResultReference.get());
             } else {
                 AtaruHakemus hakemus = getAtaruHakemus();
-                return Futures.immediateFuture(Arrays.asList(hakemus));
+                return Futures.immediateFuture(Collections.singletonList(hakemus));
             }
         }));
     }
@@ -106,7 +106,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         if (!nonMatching.isEmpty()) {
             throw new RuntimeException(String.format(
                     "Mock data contains OIDs %s not in query %s",
-                    nonMatching.stream().map(h -> h.getOid()).collect(Collectors.toList()),
+                    nonMatching.stream().map(Hakemus::getOid).collect(Collectors.toList()),
                     hakemusOids
             ));
         }
@@ -191,7 +191,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         return Observable.just(resultByOidReference.get());
     }
 
-    private AtaruHakemus getAtaruHakemus() {
+    public static AtaruHakemus getAtaruHakemus() {
         try {
             List<AtaruHakemus> hakemukset = new Gson().fromJson(IOUtils
                     .toString(new ClassPathResource("ataruhakemukset.json")
