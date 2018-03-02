@@ -82,6 +82,7 @@ public class ValintalaskentaTest {
     private final String hakuOid = "hakuOid";
     private final String ataruHakuOid = "1.2.246.562.29.805206009510";
     private final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+    private final HakuV1RDTO ataruHakuDTO = new HakuV1RDTO();
     private final List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(
         new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
         new HakukohdeJaOrganisaatio(hakukohde2Oid, "o2"),
@@ -91,14 +92,20 @@ public class ValintalaskentaTest {
             new HakukohdeJaOrganisaatio(ataruHakukohdeOid2, "Organisaatio2"));
     private final AuditSession auditSession = new AuditSession("virkailijaOid", Collections.singletonList("APP_VALINTA_EVERYTHING_CRUD"), "Firefox", "127.0.0.1");
     private PisteetWithLastModified pisteet;
+    private PisteetWithLastModified ataruPisteet;
 
     @Before
     public void setUpTestData() {
         hakemus.setPersonOid("personOid");
         hakuDTO.setOid(hakuOid);
+        ataruHakuDTO.setOid(ataruHakuOid);
+        ataruHakuDTO.setAtaruLomakeAvain("ataru-lomake-avain");
         ataruHakemus.setPersonOid("1.2.246.562.24.86368188549");
         pisteet = new PisteetWithLastModified(Optional.empty(), Collections.singletonList
             (new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "Frank", "Tester", Collections.emptyList())));
+
+        ataruPisteet = new PisteetWithLastModified(Optional.empty(), Collections.singletonList
+                (new Valintapisteet(ataruHakemus.getHakemusOid(), ataruHakemus.getPersonOid(), "Zl2A5", "TAUsuL4BQc", Collections.emptyList())));
 
         when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
             Observable.just(Collections.singletonList(new ValintaperusteetDTO())));
@@ -111,8 +118,8 @@ public class ValintalaskentaTest {
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde1Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde2Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
-        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
-        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid2), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
+        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid), any(AuditSession.class))).thenReturn(Observable.just(ataruPisteet));
+        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid2), any(AuditSession.class))).thenReturn(Observable.just(ataruPisteet));
 
         when(valintalaskentaAsyncResource.laskeKaikki(any())).thenReturn(Observable.just("OK"));
 
@@ -157,9 +164,7 @@ public class ValintalaskentaTest {
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, ataruHakuOid, false, null, null, ataruHakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
-        hakuDTO.setOid(ataruHakuOid);
-        hakuDTO.setAtaruLomakeAvain("ataru-lomake-avain");
-        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
+        laskentaActorSystem.suoritaValintalaskentaKerralla(ataruHakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
 
         verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
@@ -231,9 +236,35 @@ public class ValintalaskentaTest {
         verify(valintapisteAsyncResource).getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class));
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
-        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), argThat(new ArgumentMatcher<Optional<IlmoitusDto>>() {
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional(hakukohde1Oid));
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
+
+    @Test
+    public void epaonnistuneetAtaruLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
+        when(applicationAsyncResource.getAtaruApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.singletonList(MockApplicationAsyncResource.getAtaruHakemus())));
+        when(applicationAsyncResource.getAtaruApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(
+                Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + ataruHakukohdeOid2)));
+
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, ataruHakuOid, false, null, null, ataruHakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
+
+        laskentaActorSystem.suoritaValintalaskentaKerralla(ataruHakuDTO, null, laskentaJaHaku);
+        Thread.sleep(500);
+
+        verify(valintapisteAsyncResource, times(2)).getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid2), any(AuditSession.class));
+        verify(valintapisteAsyncResource).getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid), any(AuditSession.class));
+        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, ataruHakukohdeOid, HakukohdeTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(ataruHakukohdeOid2), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional(ataruHakukohdeOid2));
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
+
+    private Optional<IlmoitusDto> getIlmoitusDtoOptional(String hakukohdeOid) {
+        return argThat(new ArgumentMatcher<Optional<IlmoitusDto>>() {
             private final IlmoitusTyyppi odotettuIlmoitustyyppi = IlmoitusTyyppi.VIRHE;
-            private final String odotettuOtsikonSisalto = "Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid;
+            private final String odotettuOtsikonSisalto = "Ei saatu haettua hakemuksia kohteelle " + hakukohdeOid;
 
             @Override
             public boolean matches(Object argument) {
@@ -248,9 +279,7 @@ public class ValintalaskentaTest {
             public void describeTo(Description description) {
                 description.appendText(IlmoitusDto.class.getSimpleName() + ", jossa " + odotettuIlmoitustyyppi + " ja otsikossa \"" + odotettuOtsikonSisalto + "\"");
             }
-        }));
-        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
-        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+        });
     }
 
     @Test

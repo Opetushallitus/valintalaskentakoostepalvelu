@@ -58,6 +58,22 @@ public class Converter {
         return arvo;
     }
 
+    private static void setHakemusDTOvalintapisteet(Valintapisteet valintapisteet, HakemusDTO hakemusDto) {
+        try {
+            if(valintapisteet != null) {
+                Valintapisteet.toAdditionalData(valintapisteet).getAdditionalData().forEach((k, v) -> {
+                    AvainArvoDTO aa = new AvainArvoDTO();
+                    aa.setAvain(k);
+                    aa.setArvo(v);
+                    hakemusDto.getAvaimet().add(aa);
+                });
+            }
+        } catch (Exception e) {
+            LOG.error("Epäonnistuminen hakemuksen valintapisteiden asettamisessa", e);
+            throw e;
+        }
+    }
+
     public static HakemusDTO hakemusToHakemusDTO(AtaruHakemus hakemus, Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         HakemusDTO hakemusDto = new HakemusDTO();
         hakemusDto.setHakemusoid(hakemus.getHakemusOid());
@@ -92,6 +108,8 @@ public class Converter {
             hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(hakutoive.getHakukohdeOid()));
             hakemusDto.getHakukohteet().add(hk);
         });
+
+        setHakemusDTOvalintapisteet(valintapisteet, hakemusDto);
 
         return hakemusDto;
     }
@@ -231,19 +249,7 @@ public class Converter {
                 throw e;
             }
         }
-        try {
-            if(valintapisteet != null) {
-                Valintapisteet.toAdditionalData(valintapisteet).getAdditionalData().forEach((k, v) -> {
-                    AvainArvoDTO aa = new AvainArvoDTO();
-                    aa.setAvain(k);
-                    aa.setArvo(v);
-                    hakemusTyyppi.getAvaimet().add(aa);
-                });
-            }
-        } catch (Exception e) {
-            LOG.error("Epaonnistuminen avainten konversioon!", e);
-            throw e;
-        }
+        setHakemusDTOvalintapisteet(valintapisteet, hakemusTyyppi);
 
         return hakemusTyyppi;
     }
