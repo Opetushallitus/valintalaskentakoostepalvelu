@@ -179,9 +179,21 @@ public class ConverterMappingsTest {
                 .filter(h -> "1.2.246.562.11.00000000000000000063".equals(h.getHakemusOid()))
                 .distinct().iterator().next();
 
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getHakemusOid(), hakemus.getPersonOid(), "", "", emptyList()), Maps.newHashMap());
+        ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
+        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.90242725084", a);
+
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getHakemusOid(), hakemus.getPersonOid(), "", "", emptyList()), hakukohdeRyhmasForHakukohdes);
 
         assertEquals(hakemus.getHakemusOid(), dto.getHakemusoid());
+
+        assertEquals(38, hakemus.getKeyValues().size());
+
+        assertEquals(1, dto.getHakukohteet().stream()
+                .filter(h -> "1.2.246.562.20.90242725084".equals(h.getOid()))
+                .distinct().iterator().next()
+                .getPrioriteetti());
+
+        assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
     }
 
 }

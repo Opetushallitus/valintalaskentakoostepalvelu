@@ -3,23 +3,17 @@ package fi.vm.sade.valinta.kooste.util;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Piste;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Converter {
     private static final Logger LOG = LoggerFactory.getLogger(Converter.class);
@@ -69,6 +63,35 @@ public class Converter {
         hakemusDto.setHakemusoid(hakemus.getHakemusOid());
         hakemusDto.setHakijaOid(hakemus.getPersonOid());
         hakemus.setHakuOid(hakemus.getHakuOid());
+
+        if (hakemus.getKeyValues() != null) {
+            hakemus.getKeyValues().forEach((key, value) -> {
+                AvainArvoDTO aa = new AvainArvoDTO();
+                aa.setAvain(key);
+                aa.setArvo(value);
+                hakemusDto.getAvaimet().add(aa);
+            });
+        }
+
+        Map<Integer, Hakutoive> hakutoiveet = new HashMap<>();
+
+        if (hakemus.getHakutoiveet() != null) {
+            IntStream.range(0, hakemus.getHakutoiveet().size())
+                    .forEach(i -> {
+                        Hakutoive hakutoive = new Hakutoive();
+                        hakutoive.setHakukohdeOid(hakemus.getHakutoiveet().get(i));
+                        hakutoiveet.put(i+1, hakutoive);
+                    });
+        }
+
+        hakutoiveet.forEach((key, hakutoive) -> {
+            HakukohdeDTO hk = new HakukohdeDTO();
+            hk.setOid(hakutoive.getHakukohdeOid());
+            hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
+            hk.setPrioriteetti(key);
+            hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(hakutoive.getHakukohdeOid()));
+            hakemusDto.getHakukohteet().add(hk);
+        });
 
         return hakemusDto;
     }
@@ -131,7 +154,8 @@ public class Converter {
                                 hakutoive = hakutoiveet.get(prioriteetti);
                             }
 
-                            if (e.getKey().endsWith(KOULUTUS_ID)) {hakutoive.setHakukohdeOid(e.getValue());
+                            if (e.getKey().endsWith(KOULUTUS_ID)) {
+                                hakutoive.setHakukohdeOid(e.getValue());
                             } else if (e.getKey().endsWith(DISCRETIONARY)) {
                                 Boolean discretionary = Boolean.valueOf(e.getValue());
                                 discretionary = discretionary == null ? false : discretionary;
