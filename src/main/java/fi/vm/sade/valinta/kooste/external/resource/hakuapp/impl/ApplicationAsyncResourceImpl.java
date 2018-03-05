@@ -45,7 +45,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
 
     @Override
     public Observable<List<AtaruHakemus>> getAtaruApplicationsByHakukohde(String hakukohdeOid) {
-        return getAsObservable(getUrl("haku-app.applications.listfull"), new TypeToken<List<AtaruHakemus>>() {}.getType(), client -> {
+        return getAsObservable(getUrl("ataru.applications.by-hakukohde"), new TypeToken<List<AtaruHakemus>>() {}.getType(), client -> {
             client.query("hakukohdeOid", hakukohdeOid);
             LOG.info("Calling url {}", client.getCurrentURI());
             return client;
