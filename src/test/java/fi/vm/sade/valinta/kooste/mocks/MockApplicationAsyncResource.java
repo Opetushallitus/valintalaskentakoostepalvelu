@@ -89,18 +89,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<AtaruHakemus>> getAtaruApplicationsByHakukohde(String hakukohdeOid) {
-        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<AtaruHakemus>>serviceAvailableCheck()).orElseGet(() -> {
-            if (ataruResultReference.get() != null) {
-                return Futures.immediateFuture(ataruResultReference.get());
-            } else {
-                AtaruHakemus hakemus = getAtaruHakemus();
-                return Futures.immediateFuture(Collections.singletonList(hakemus));
-            }
-        }));
-    }
-
-    @Override
     public Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids) {
         List<Hakemus> nonMatching = resultByOidReference.get().stream().filter(oid -> !hakemusOids.contains(oid.getOid())).collect(Collectors.toList());
         if (!nonMatching.isEmpty()) {
@@ -189,22 +177,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     @Override
     public Observable<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {
         return Observable.just(resultByOidReference.get());
-    }
-
-    public static AtaruHakemus getAtaruHakemus() {
-        try {
-            List<AtaruHakemus> hakemukset = new Gson().fromJson(IOUtils
-                    .toString(new ClassPathResource("ataruhakemukset.json")
-                            .getInputStream()), new TypeToken<List<AtaruHakemus>>() {}.getType());
-
-            return hakemukset.stream()
-                    .filter(h -> "1.2.246.562.11.00000000000000000063".equals(h.getHakemusOid()))
-                    .distinct().iterator().next();
-        } catch (Exception e) {
-            System.err.println("Couldn't fetch mock ataru application");
-            return new AtaruHakemus();
-        }
-
     }
 
     private Hakemus getHakemus() {

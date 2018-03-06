@@ -366,6 +366,9 @@
 		<!-- HakuApp Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl" />
+		<!-- Ataru Async -->
+		<bean
+				class="fi.vm.sade.valinta.kooste.external.resource.ataru.impl.AtaruAsyncResourceImpl" />
 		<!-- Tarjonta Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl" />

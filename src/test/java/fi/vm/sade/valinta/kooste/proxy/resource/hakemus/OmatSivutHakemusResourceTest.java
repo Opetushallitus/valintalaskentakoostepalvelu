@@ -1,3 +1,4 @@
+
 package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;

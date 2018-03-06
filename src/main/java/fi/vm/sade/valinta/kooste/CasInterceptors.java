@@ -37,7 +37,22 @@ public class CasInterceptors {
             @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword) {
         return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
     }
-
+    @Bean(name="AtaruRestClientAsAdminCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getAtaruRestClientAsAdminCasInterceptor(
+            @Value("${web.url.cas}") String webCasUrl,
+            @Value("${cas.service.ataru}/auth/cas") String targetService,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.ataru}") String appClientUsername,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.ataru}") String appClientPassword) {
+        return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword,"ring-session");
+    }
+    @Bean(name="AuthenticationServiceRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getAuthenticationServiceRestClientCasInterceptor(
+            @Value("${web.url.cas}") String webCasUrl,
+            @Value("${cas.service.authentication-service}/j_spring_cas_security_check") String targetService,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword) {
+        return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
+    }
     @Bean(name="OppijanumerorekisteriServiceRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getOppijanumerorekisteriServiceRestClientCasInterceptor(
             @Value("${web.url.cas}") String webCasUrl,
@@ -103,9 +118,14 @@ public class CasInterceptors {
         return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
     }
 
+    private AbstractPhaseInterceptor<Message> createCasInterceptor(String webCasUrl, String targetService,
+                                                                   String appClientUsername, String appClientPassword) {
+        return createCasInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword, "JSESSIONID");
+    }
+
     private AbstractPhaseInterceptor<Message> createCasInterceptor(
-            String webCasUrl,String targetService,String appClientUsername,String appClientPassword) {
-        return new CasKoosteInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword);
+            String webCasUrl,String targetService,String appClientUsername,String appClientPassword, String cookieName) {
+        return new CasKoosteInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword, cookieName);
     }
 
 }

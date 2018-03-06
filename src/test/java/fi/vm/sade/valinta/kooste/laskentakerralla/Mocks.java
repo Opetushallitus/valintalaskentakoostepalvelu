@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.spy;
 public class Mocks {
     static ValintalaskentaKerrallaRouteValvomo valintalaskentaKerrallaRouteValvomo = mock(ValintalaskentaKerrallaRouteValvomo.class);
     static ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
+    static AtaruAsyncResource ataruAsyncResource = mock(AtaruAsyncResource.class);
     static ValintaperusteetAsyncResource valintaperusteetAsyncResource = mock(ValintaperusteetAsyncResource.class);
     static OhjausparametritAsyncResource ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
     static LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource = mock(LaskentaSeurantaAsyncResource.class);
@@ -33,6 +35,7 @@ public class Mocks {
             5,
             valintalaskentaAsyncResource,
             applicationAsyncResource,
+            ataruAsyncResource,
             valintaperusteetAsyncResource,
             laskentaSeurantaAsyncResource,
             suoritusrekisteriAsyncResource,
@@ -42,6 +45,7 @@ public class Mocks {
     public static void resetMocks() {
         reset(valintalaskentaKerrallaRouteValvomo);
         reset(applicationAsyncResource);
+        reset(ataruAsyncResource);
         reset(valintaperusteetAsyncResource);
         reset(ohjausparametritAsyncResource);
         reset(laskentaSeurantaAsyncResource);

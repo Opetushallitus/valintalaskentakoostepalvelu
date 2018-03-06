@@ -14,6 +14,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -26,7 +27,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
@@ -57,6 +58,7 @@ public class ValintalaskentaTest {
     private static final Hakemus hakemus = new Hakemus();
     private static final AtaruHakemus ataruHakemus = new AtaruHakemus();
     private final ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
+    private final AtaruAsyncResource ataruAsyncResource = mock(AtaruAsyncResource.class);
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
     private final ValintalaskentaAsyncResource valintalaskentaAsyncResource = mock(ValintalaskentaAsyncResource.class);
     private final ValintaperusteetAsyncResource valintaperusteetAsyncResource = mock(ValintaperusteetAsyncResource.class);
@@ -68,6 +70,7 @@ public class ValintalaskentaTest {
         5,
         valintalaskentaAsyncResource,
         applicationAsyncResource,
+        ataruAsyncResource,
         valintaperusteetAsyncResource,
         seurantaAsyncResource,
         suoritusrekisteriAsyncResource,
@@ -159,8 +162,8 @@ public class ValintalaskentaTest {
 
     @Test
     public void onnistuneestaValintalaskennastaAtaruHaullePidetaanKirjaaSeurantapalveluun() throws InterruptedException {
-        when(applicationAsyncResource.getAtaruApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.singletonList(MockApplicationAsyncResource.getAtaruHakemus())));
-        when(applicationAsyncResource.getAtaruApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(Observable.just(Collections.singletonList(MockApplicationAsyncResource.getAtaruHakemus())));
+        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus())));
+        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus())));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, ataruHakuOid, false, null, null, ataruHakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
@@ -243,8 +246,8 @@ public class ValintalaskentaTest {
 
     @Test
     public void epaonnistuneetAtaruLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
-        when(applicationAsyncResource.getAtaruApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.singletonList(MockApplicationAsyncResource.getAtaruHakemus())));
-        when(applicationAsyncResource.getAtaruApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(
+        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus())));
+        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(
                 Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + ataruHakukohdeOid2)));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, ataruHakuOid, false, null, null, ataruHakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);

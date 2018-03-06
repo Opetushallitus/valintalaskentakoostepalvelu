@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
@@ -41,15 +40,6 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
         HakemusPrototyyppiBatch hakemusPrototyyppiBatch = new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit);
         Entity<String> entity = Entity.entity(gson().toJson(hakemusPrototyyppiBatch), MediaType.APPLICATION_JSON);
         return this.putAsObservableLazily(url, new GenericType<List<Hakemus>>() {}.getType(), entity, ACCEPT_JSON);
-    }
-
-    @Override
-    public Observable<List<AtaruHakemus>> getAtaruApplicationsByHakukohde(String hakukohdeOid) {
-        return getAsObservable(getUrl("ataru.applications.by-hakukohde"), new TypeToken<List<AtaruHakemus>>() {}.getType(), client -> {
-            client.query("hakukohdeOid", hakukohdeOid);
-            LOG.info("Calling url {}", client.getCurrentURI());
-            return client;
-        });
     }
 
     @Override
