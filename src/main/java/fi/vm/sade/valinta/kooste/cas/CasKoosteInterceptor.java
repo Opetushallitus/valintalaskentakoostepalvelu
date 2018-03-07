@@ -31,17 +31,19 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private final String appClientUsername;
     private final String appClientPassword;
     private final String cookieName;
+    private final Boolean addSuffix;
 
     private AtomicReference<CompletableFuture<String>> sessionCookiePromise;
 
     public CasKoosteInterceptor(String webCasUrl, String targetService, String appClientUsername,
-                                String appClientPassword, String cookieName) {
+                                String appClientPassword, String cookieName, Boolean addSuffix) {
         super(Phase.PRE_PROTOCOL);
         this.webCasUrl = webCasUrl;
         this.targetService = targetService;
         this.appClientUsername = appClientUsername;
         this.appClientPassword = appClientPassword;
         this.cookieName = cookieName;
+        this.addSuffix = addSuffix;
         this.sessionCookiePromise = new AtomicReference<>(CompletableFuture.completedFuture(null));
     }
 
@@ -148,7 +150,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         if (session == null) {
             if (this.sessionCookiePromise.compareAndSet(p, new CompletableFuture<>())) {
                 LOGGER.info(String.format("Fetching a new CAS service ticket for %s", this.targetService));
-                String serviceTicket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService);
+                String serviceTicket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService, addSuffix);
                 LOGGER.info(String.format("Got a service ticket %s for %s", serviceTicket, this.targetService));
                 ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
             } else {

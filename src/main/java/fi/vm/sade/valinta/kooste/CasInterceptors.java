@@ -43,7 +43,7 @@ public class CasInterceptors {
             @Value("${cas.service.ataru}/auth/cas") String targetService,
             @Value("${valintalaskentakoostepalvelu.app.username.to.ataru}") String appClientUsername,
             @Value("${valintalaskentakoostepalvelu.app.password.to.ataru}") String appClientPassword) {
-        return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword,"ring-session");
+        return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword,"ring-session",false);
     }
     @Bean(name="AuthenticationServiceRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getAuthenticationServiceRestClientCasInterceptor(
@@ -120,12 +120,13 @@ public class CasInterceptors {
 
     private AbstractPhaseInterceptor<Message> createCasInterceptor(String webCasUrl, String targetService,
                                                                    String appClientUsername, String appClientPassword) {
-        return createCasInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword, "JSESSIONID");
+        return createCasInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword, "JSESSIONID", true);
     }
 
-    private AbstractPhaseInterceptor<Message> createCasInterceptor(
-            String webCasUrl,String targetService,String appClientUsername,String appClientPassword, String cookieName) {
-        return new CasKoosteInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword, cookieName);
+    private AbstractPhaseInterceptor<Message> createCasInterceptor(String webCasUrl,String targetService,
+                                                                   String appClientUsername,String appClientPassword,
+                                                                   String cookieName, Boolean addSuffix) {
+        return new CasKoosteInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword, cookieName, addSuffix);
     }
 
 }
