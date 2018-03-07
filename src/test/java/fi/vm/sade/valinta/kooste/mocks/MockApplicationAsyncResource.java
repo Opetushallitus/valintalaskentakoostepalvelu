@@ -1,20 +1,9 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.util.concurrent.Futures;
-
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
-import com.google.common.util.concurrent.Futures;
-import com.google.gson.Gson;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ClassPathResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 

@@ -2,8 +2,8 @@ package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
 
     @Override
     public Observable<List<AtaruHakemus>> getApplicationsByHakukohde(String hakukohdeOid) {
-        return getAsObservable(getUrl("ataru.applications.by-hakukohde"), new TypeToken<List<AtaruHakemus>>() {
+        return getAsObservableLazily(getUrl("ataru.applications.by-hakukohde"), new TypeToken<List<AtaruHakemus>>() {
         }.getType(), client -> {
             client.query("hakukohdeOid", hakukohdeOid);
             LOG.info("Calling url {}", client.getCurrentURI());
