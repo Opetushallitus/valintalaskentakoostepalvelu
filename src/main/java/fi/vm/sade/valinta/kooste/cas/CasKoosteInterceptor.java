@@ -7,6 +7,7 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.apache.http.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,19 +32,19 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private final String appClientUsername;
     private final String appClientPassword;
     private final String cookieName;
-    private final Boolean addSuffix;
+    private final boolean legacySpringFilter;
 
     private AtomicReference<CompletableFuture<String>> sessionCookiePromise;
 
     public CasKoosteInterceptor(String webCasUrl, String targetService, String appClientUsername,
-                                String appClientPassword, String cookieName, Boolean addSuffix) {
+                                String appClientPassword, String cookieName, boolean legacySpringFilter) {
         super(Phase.PRE_PROTOCOL);
         this.webCasUrl = webCasUrl;
         this.targetService = targetService;
         this.appClientUsername = appClientUsername;
         this.appClientPassword = appClientPassword;
         this.cookieName = cookieName;
-        this.addSuffix = addSuffix;
+        this.legacySpringFilter = legacySpringFilter;
         this.sessionCookiePromise = new AtomicReference<>(CompletableFuture.completedFuture(null));
     }
 
@@ -150,9 +151,14 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         if (session == null) {
             if (this.sessionCookiePromise.compareAndSet(p, new CompletableFuture<>())) {
                 LOGGER.info(String.format("Fetching a new CAS service ticket for %s", this.targetService));
-                String serviceTicket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService, addSuffix);
+                String serviceTicket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService, legacySpringFilter);
                 LOGGER.info(String.format("Got a service ticket %s for %s", serviceTicket, this.targetService));
-                ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
+                if (legacySpringFilter) {
+                    ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
+                } else {
+                    Cookie c = CasClient.initServiceSession(this.targetService, serviceTicket, cookieName);
+                    addCookie(message, cookieName, c.getValue());
+                }
             } else {
                 // TODO retry – or not? The current retry functionality is in fi.vm.sade.valinta.http.HttpResourceImpl lazy methods
             }

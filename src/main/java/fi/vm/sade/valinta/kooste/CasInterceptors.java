@@ -125,8 +125,8 @@ public class CasInterceptors {
 
     private AbstractPhaseInterceptor<Message> createCasInterceptor(String webCasUrl,String targetService,
                                                                    String appClientUsername,String appClientPassword,
-                                                                   String cookieName, Boolean addSuffix) {
-        return new CasKoosteInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword, cookieName, addSuffix);
+                                                                   String cookieName, boolean legacySpringFilter) {
+        return new CasKoosteInterceptor(webCasUrl, targetService, appClientUsername, appClientPassword, cookieName, legacySpringFilter);
     }
 
 }
