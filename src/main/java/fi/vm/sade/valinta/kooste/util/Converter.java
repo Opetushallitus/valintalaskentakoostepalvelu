@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -22,8 +23,14 @@ public class Converter {
     private final static String PREFERENCE = "preference";
     private final static String KOULUTUS_ID = "Koulutus-id";
     private final static String DISCRETIONARY = "discretionary";
-
     private final static String EI_ARVOSANAA = "Ei arvosanaa";
+    private final static String PREFERENCE_REGEX = "preference\\d-Koulutus-id-eligibility";
+
+    private final static ImmutableMap<String, String> ATARU_ELIGIBILITIES = new ImmutableMap.Builder<String, String>()
+            .put("eligible", "ELIGIBLE")
+            .put("uneligible", "INELIGIBLE")
+            .put("unreviewed", "NOT_CHECKED")
+            .build();
 
     private static class Hakutoive {
         private Boolean harkinnanvaraisuus;
@@ -84,7 +91,11 @@ public class Converter {
             hakemus.getKeyValues().forEach((key, value) -> {
                 AvainArvoDTO aa = new AvainArvoDTO();
                 aa.setAvain(key);
-                aa.setArvo(value);
+                if (key.matches(PREFERENCE_REGEX)) {
+                    setAtaruPreferenceValue(value, aa);
+                } else {
+                    aa.setArvo(value);
+                }
                 hakemusDto.getAvaimet().add(aa);
             });
         }
@@ -112,6 +123,14 @@ public class Converter {
         setHakemusDTOvalintapisteet(valintapisteet, hakemusDto);
 
         return hakemusDto;
+    }
+
+    private static void setAtaruPreferenceValue(String value, AvainArvoDTO aa) {
+        if (ATARU_ELIGIBILITIES.containsKey(value)) {
+            aa.setArvo(ATARU_ELIGIBILITIES.get(value));
+        } else {
+            throw new IllegalArgumentException(String.format("Could not parse hakemus preference value: %s", value));
+        }
     }
 
     public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {

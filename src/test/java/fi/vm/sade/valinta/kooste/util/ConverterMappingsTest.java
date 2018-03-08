@@ -194,6 +194,14 @@ public class ConverterMappingsTest {
                 .getPrioriteetti());
 
         assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
+
+        assertEquals("NOT_CHECKED", dto.getAvaimet().stream()
+                                        .filter(pari -> "preference1-Koulutus-id-eligibility".equals(pari.getAvain()))
+                                        .distinct().iterator().next().getArvo());
+
+        assertEquals("ELIGIBLE", dto.getAvaimet().stream()
+                .filter(pari -> "preference2-Koulutus-id-eligibility".equals(pari.getAvain()))
+                .distinct().iterator().next().getArvo());
     }
 
 }
