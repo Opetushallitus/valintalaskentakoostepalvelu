@@ -193,7 +193,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                 final Map<String, Collection<String>> hakemusOidJaHakijanMuutHakutoiveOids;
                 final Set<String> kohdeHakukohteenTunnisteet;
                 try {
-                    LOG.error("Haetaan tunnisteet kohde valintakokeille: Onko valintakoeOid {}", valintakoeOidsHakutoiveille.containsKey(koekutsu.getHakukohdeOid()));
+                    LOG.info("Haetaan tunnisteet kohde valintakokeille: Onko valintakoeOid {}", valintakoeOidsHakutoiveille.containsKey(koekutsu.getHakukohdeOid()));
                     kohdeHakukohteenTunnisteet = valintakoeOidsHakutoiveille
                             .get(koekutsu.getHakukohdeOid())
                             .getValintakoeDTO().stream()
@@ -201,7 +201,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                             .filter(v -> Boolean.TRUE.equals(v.getAktiivinen()))
                             .map(ValintakoeDTO::getSelvitettyTunniste)
                             .collect(Collectors.toSet());
-                    LOG.error("Mapataan muut hakukohteet");
+                    LOG.info("Mapataan muut hakukohteet");
                     hakemusOidJaHakijanMuutHakutoiveOids = hakemukset
                             .stream()
                             .filter(Objects::nonNull)
@@ -239,7 +239,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                     .toBlocking()
                     .toFuture()
                     .get(35L, SECONDS);
-                LOG.error("### BATCHID: {} {} {} ###", batchId.getBatchId(), batchId.getStatus(), batchId.getErrors());
+                LOG.info("### BATCHID: {} {} {} ###", batchId.getBatchId(), batchId.getStatus(), batchId.getErrors());
                 LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
                 prosessi.vaiheValmistui();
                 if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
@@ -262,7 +262,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                             }
                                             if ("ready".equals(status.getStatus())) {
                                                 prosessi.vaiheValmistui();
-                                                LOG.error("Koekutsukirjeet valmistui!");
+                                                LOG.info("Koekutsukirjeet valmistui!");
                                                 prosessi.valmistui(batchId.getBatchId());
                                                 stop.onNext(null);
                                             }

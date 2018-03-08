@@ -290,11 +290,11 @@ public class ViestintapalveluAktivointiResource {
             tag = hakemuksillaRajaus.getTag();
 
             if (hakemuksillaRajaus.getHakemusOids() != null) {
-                LOG.error("Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}", hakemuksillaRajaus.getHakemusOids());
+                LOG.info("Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}", hakemuksillaRajaus.getHakemusOids());
                 koekutsukirjeetService.koekutsukirjeetHakemuksille(prosessi,
                         new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(), tarjoajaOid, tag, hakukohdeOid, hakuOid, templateName), hakemuksillaRajaus.getHakemusOids());
             } else {
-                LOG.error("Koekutsukirjeiden luonti aloitettu");
+                LOG.info("Koekutsukirjeiden luonti aloitettu");
                 koekutsukirjeetService.koekutsukirjeetOsallistujille(prosessi,
                         new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(), tarjoajaOid, tag, hakukohdeOid, hakuOid, templateName), valintakoeTunnisteet);
             }
