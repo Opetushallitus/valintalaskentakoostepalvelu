@@ -5,8 +5,8 @@ import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusHakija;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
@@ -72,6 +72,9 @@ public class OppijanSuorituksetProxyResource {
 
     @Autowired
     private ValintapisteAsyncResource valintapisteAsyncResource;
+
+    @Autowired
+    private AtaruAsyncResource ataruAsyncResource;
 
     /**
      *
@@ -254,44 +257,47 @@ public class OppijanSuorituksetProxyResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/suorituksetByOpiskelijaOid/ataru/hakuOid/{hakuOid}")
+    @Path("/ataruSuorituksetByOpiskelijaOid/hakuOid/{hakuOid}")
     public void getSuorituksetForAtaruOpiskelijas(
             @PathParam("hakuOid") String hakuOid,
-            final List<AtaruHakemusHakija> allHakemus,
+            final List<String> hakemusOids,
             @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
             @Suspended final AsyncResponse asyncResponse) {
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeout(2L, MINUTES);
         asyncResponse.setTimeoutHandler(handler -> {
-            LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu");
-            respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
+            LOG.error("ataruSuorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu");
+            respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
 
-        if (allHakemus == null || allHakemus.isEmpty()) {
+        if (hakemusOids == null || hakemusOids.isEmpty()) {
             asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
             return;
         }
 
         //final Map<String, Map<String, String>> allData = new HashMap<>();
-        Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(allHakemus.stream().map(h -> h.getHakemus().getHakemusOid()).collect(Collectors.toList()), auditSession);
+        Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakemusOids, auditSession);
+        Observable<List<AtaruHakemus>> ataruHakemukset = ataruAsyncResource.getApplicationsByOids(hakemusOids);
         Observable<HakuV1RDTO> hakuV1RDTOObservable = tarjontaAsyncResource.haeHaku(hakuOid);
-        Observable.combineLatest(hakuV1RDTOObservable, valintapisteet, (haku, pisteet) -> {
+        Observable.combineLatest(hakuV1RDTOObservable, valintapisteet, ataruHakemukset, (haku, pisteet, hakemukset) -> {
+            if (hakemukset == null || hakemukset.isEmpty()) {
+                asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
+            }
             if (haku == null) {
                 throw new RuntimeException(String.format("Hakua %s ei löytynyt", hakuOid));
             }
-            LOG.info("Hae suoritukset {} hakemukselle", allHakemus.size());
+            LOG.info("Hae suoritukset {} hakemukselle", hakemukset.size());
 
-            List<AtaruHakemus> hakemukset = allHakemus.stream().map(AtaruHakemusHakija::getHakemus).collect(Collectors.toList());
-            List<String> opiskelijaOids = allHakemus.stream().map(AtaruHakemusHakija::getOpiskelijaOid).collect(Collectors.toList());
+            List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).collect(Collectors.toList());
 
-            return resolveAtaruHakemusDTOs(hakuOid, hakemukset, pisteet.valintapisteet, opiskelijaOids, fetchEnsikertalaisuus);
+            return resolveAtaruHakemusDTOs(hakuOid, hakemukset, pisteet.valintapisteet, personOids, fetchEnsikertalaisuus);
         }).flatMap(f -> f).subscribe(hakemusDTOs -> {
 
-            Map<String, Map<String, String>> allData = hakemusDTOs.stream().collect(Collectors.toMap(h -> h.getHakijaOid(), h -> getAvainArvoMap(h), (m0, m1) -> {
+            Map<String, Map<String, String>> allData = hakemusDTOs.stream().collect(Collectors.toMap(HakemusDTO::getHakijaOid, this::getAvainArvoMap, (m0, m1) -> {
                 m0.putAll(m1);
                 return m0;
             }));
-            LOG.info("Haettiin {} hakemukselle {} suoritustietoa", allHakemus.size(), allData.size());
+            LOG.info("Haettiin {} hakemukselle {} suoritustietoa", hakemusOids.size(), allData.size());
             asyncResponse.resume(Response
                     .ok()
                     .type(MediaType.APPLICATION_JSON_TYPE)
@@ -409,13 +415,13 @@ public class OppijanSuorituksetProxyResource {
     }
 
     private Observable<List<HakemusDTO>> resolveAtaruHakemusDTOs(String hakuOid,
-                                                            List<AtaruHakemus> hakemukset,
-                                                            List<Valintapisteet> valintapisteet,
-                                                            List<String> opiskelijaOids,
-                                                            Boolean fetchEnsikertalaisuus) {
+                                                                 List<AtaruHakemus> hakemukset,
+                                                                 List<Valintapisteet> valintapisteet,
+                                                                 List<String> opiskelijaOids,
+                                                                 Boolean fetchEnsikertalaisuus) {
 
-        Observable<HakuV1RDTO>    hakuObservable           = tarjontaAsyncResource.haeHaku(hakuOid);
-        Observable<ParametritDTO> parametritObservable     = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+        Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid);
+        Observable<ParametritDTO> parametritObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
 
         Observable<List<Oppija>> suorituksetObservable = fetchEnsikertalaisuus
                 ? suoritusrekisteriAsyncResource.getSuorituksetByOppijas(opiskelijaOids, hakuOid)
@@ -426,12 +432,12 @@ public class OppijanSuorituksetProxyResource {
         );
     }
 
-    private List<HakemusDTO> createAtaruHakemusDTOs (HakuV1RDTO haku,
-                                                List<Oppija> suoritukset,
-                                                List<AtaruHakemus> hakemukset,
-                                                List<Valintapisteet> valintapisteet,
-                                                ParametritDTO parametrit,
-                                                Boolean fetchEnsikertalaisuus) {
+    private List<HakemusDTO> createAtaruHakemusDTOs(HakuV1RDTO haku,
+                                                    List<Oppija> suoritukset,
+                                                    List<AtaruHakemus> hakemukset,
+                                                    List<Valintapisteet> valintapisteet,
+                                                    ParametritDTO parametrit,
+                                                    Boolean fetchEnsikertalaisuus) {
 
         Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource
                 .hakukohdeRyhmasForHakukohdes(haku.getOid())
@@ -440,5 +446,4 @@ public class OppijanSuorituksetProxyResource {
                 .first();
         return HakemuksetConverterUtil.muodostaHakemuksetDTOfromAtaruHakemukset(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
     }
-
 }

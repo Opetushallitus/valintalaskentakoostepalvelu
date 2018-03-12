@@ -30,7 +30,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
 
     @Autowired
     public ApplicationAsyncResourceImpl(
-            @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+            @Qualifier("AtaruRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
         super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     }
 

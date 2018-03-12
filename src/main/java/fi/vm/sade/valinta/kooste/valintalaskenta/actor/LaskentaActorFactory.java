@@ -344,7 +344,7 @@ public class LaskentaActorFactory {
 
         if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
             Observable<List<AtaruHakemus>> hakemukset = createResurssiObservable(tunniste,
-                    "applicationAsyncResource.getApplicationsByHakukohde",
+                    "applicationAsyncResource.getApplications",
                     ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
                     retryHakemuksetAndOppijat);
             LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);

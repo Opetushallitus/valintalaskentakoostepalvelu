@@ -14,9 +14,13 @@ import java.util.List;
 
 public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
-
     @Override
     public Observable<List<AtaruHakemus>> getApplicationsByHakukohde(String hakukohdeOid) {
+        return Observable.from(Futures.immediateFuture(Collections.singletonList(getAtaruHakemus())));
+    }
+
+    @Override
+    public Observable<List<AtaruHakemus>> getApplicationsByOids(List<String> oids) {
         return Observable.from(Futures.immediateFuture(Collections.singletonList(getAtaruHakemus())));
     }
 
@@ -33,6 +37,5 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
             System.err.println("Couldn't fetch mock ataru application");
             return new AtaruHakemus();
         }
-
     }
 }

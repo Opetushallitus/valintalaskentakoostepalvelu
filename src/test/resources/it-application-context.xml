@@ -94,6 +94,7 @@
     <mockito:mock id="kirjeetHakukohdeCache" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache" />
     <mockito:mock id="koodistoAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource" />
     <mockito:mock id="organisationHierarchyAuthorizer" class="fi.vm.sade.security.OrganisationHierarchyAuthorizer" />
+    <mockito:mock id="ataruAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource" />
 
     <bean id="jaxrsconfig" class="fi.vm.sade.valinta.kooste.JaxrsConfiguration"/>
 
