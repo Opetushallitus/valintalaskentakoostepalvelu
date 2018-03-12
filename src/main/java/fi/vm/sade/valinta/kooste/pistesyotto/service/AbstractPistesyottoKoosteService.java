@@ -327,7 +327,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
                     "Virhe hakemuksen %s tulosten tallentamisessa Suoritusrekisteriin ", hakemusOid), t)));
 
-            sureOperations.doOnNext(processedArvosana -> {
+            return sureOperations.doOnNext(processedArvosana -> {
                 Map<String, String> additionalAuditInfo = new HashMap<>();
                 additionalAuditInfo.put("usernameForAudit", username);
                 additionalAuditInfo.put("hakuOid", hakuOid);
@@ -344,17 +344,6 @@ public abstract class AbstractPistesyottoKoosteService {
                         additionalAuditInfo
                 );
             });
-                    /*AUDIT.log(builder()
-                    .id(username)
-                    .hakuOid(hakuOid)
-                    .hakukohdeOid(hakukohdeOid)
-                    .hakijaOid(personOid)
-                    .hakemusOid(hakemusOid)
-                    .messageJson(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
-                    .setOperaatio(auditLogOperation)
-                    .build()*/
-
-            return sureOperations;
         }).lastOrDefault(null).<Void>map(x -> null).doOnCompleted(() ->
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }
