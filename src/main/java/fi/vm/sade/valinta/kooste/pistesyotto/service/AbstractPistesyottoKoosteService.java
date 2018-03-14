@@ -266,19 +266,6 @@ public abstract class AbstractPistesyottoKoosteService {
                                                             Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
                                                             String username,
                                                             ValintaperusteetOperation auditLogOperation, AuditSession auditSession) {
-        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, auditLogOperation, auditSession, true);
-    }
-
-
-    protected Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
-                                                            String hakukohdeOid,
-                                                            Optional<String> ifUnmodifiedSince,
-                                                            List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                            Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                            String username,
-                                                            ValintaperusteetOperation auditLogOperation,
-                                                            AuditSession auditSession,
-                                                            boolean saveApplicationAdditionalInfo) {
         Observable<Void> kielikoeTallennus = Observable.zip(
                 findSourceOid(hakukohdeOid),
                 haeOppijatSuresta(hakuOid, hakukohdeOid),
@@ -287,11 +274,11 @@ public abstract class AbstractPistesyottoKoosteService {
                     String sourceOid = sourceAndOppijat.getLeft();
                     List<Oppija> oppijatSuresta = sourceAndOppijat.getRight();
                     return tallennaKielikoetulokset(hakuOid, hakukohdeOid, sourceOid, pistetiedotHakemukselle,
-                            kielikoetuloksetSureen, username, auditLogOperation, auditSession.asAuditUser(), oppijatSuresta);
+                        kielikoetuloksetSureen, username, auditLogOperation, auditSession.asAuditUser(), oppijatSuresta);
                 });
 
         return kielikoeTallennus.flatMap(a -> {
-            if (saveApplicationAdditionalInfo) {
+            if (true) {
                 return tallennaPisteetValintaPisteServiceen(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, username, auditLogOperation, auditSession);
             } else {
                 return Observable.just(null);
