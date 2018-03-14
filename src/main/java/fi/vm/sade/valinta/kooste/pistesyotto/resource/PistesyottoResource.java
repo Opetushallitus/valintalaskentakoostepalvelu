@@ -1,5 +1,11 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
+import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
+import static fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource.IF_UNMODIFIED_SINCE;
+import static java.util.Arrays.asList;
+import static java.util.Collections.list;
+import static java.util.Collections.singletonList;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
