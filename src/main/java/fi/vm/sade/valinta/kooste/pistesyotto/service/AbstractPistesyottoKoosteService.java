@@ -178,9 +178,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
             return valintapisteAsyncResource.getValintapisteet(puuttuvatLisatiedot, auditSession).map(v ->
                     v.valintapisteet.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).map(p ->
-                    new PisteetWithLastModified(lisatiedot.lastModified, union(lisatiedot.valintapisteet, p))).doOnCompleted(() -> {
-                prosessi.inkrementoiTehtyjaToita();
-            });
+                    new PisteetWithLastModified(lisatiedot.lastModified, union(lisatiedot.valintapisteet, p))).doOnCompleted(prosessi::inkrementoiTehtyjaToita);
         };
         Func2<List<ValintakoeOsallistuminenDTO>, List<HakemusWrapper>, Observable<List<HakemusWrapper>>> haePuuttuvatHakemukset = (osallistumiset, hakemukset) -> {
             Set<String> puuttuvatHakemukset = osallistumiset.stream().map(ValintakoeOsallistuminenDTO::getHakemusOid).collect(Collectors.toSet());
