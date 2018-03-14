@@ -277,14 +277,10 @@ public abstract class AbstractPistesyottoKoosteService {
                         kielikoetuloksetSureen, username, auditLogOperation, auditSession.asAuditUser(), oppijatSuresta);
                 });
 
-        return kielikoeTallennus.flatMap(a -> {
-            if (true) {
-                return tallennaPisteetValintaPisteServiceen(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, username, auditLogOperation, auditSession);
-            } else {
-                return Observable.just(null);
-            }
-        }).onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
-                "Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), t)));
+        return kielikoeTallennus.flatMap(a ->
+            tallennaPisteetValintaPisteServiceen(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, username, auditLogOperation, auditSession))
+            .onErrorResumeNext(t -> Observable.error(
+                new IllegalStateException(String.format("Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), t)));
     }
 
     private Observable<Void> tallennaKielikoetulokset(String hakuOid, String hakukohdeOid, String sourceOid,
