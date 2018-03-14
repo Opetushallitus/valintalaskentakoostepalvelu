@@ -26,7 +26,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -35,7 +34,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
-@Ignore
 public class HakemuksenKoetulosYhteenvetoTest {
     private static final ValintaperusteDTO kielikoeFi = new ValintaperusteDTO();
     private static final ValintaperusteDTO kielikoeSv = new ValintaperusteDTO();
@@ -51,8 +49,8 @@ public class HakemuksenKoetulosYhteenvetoTest {
         kielikoeSv.setSyotettavissaKaikille(false);
     }
 
-    @Test
-    public void testKaikkiValintakoeavaimetAsetetaanAdditionalDataan() {
+    @Test // TODO: I wonder if this test tests anything meaningful anymore.
+    public void valintakokeitaEiAsetetaAdditionalDataan() {
         HashMap<String, String> additionalData = new HashMap<>();
         additionalData.put("hakemuksella", "arvo_hakemuksella");
         ValintaperusteDTO vaatiiOsallistumisen = new ValintaperusteDTO();
@@ -65,17 +63,15 @@ public class HakemuksenKoetulosYhteenvetoTest {
         eiVaadiOsallistumista.setVaatiiOsallistumisen(false);
         HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
                 new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-        //new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi", additionalData),
                 Pair.of("hakukohdeOid", Arrays.asList(vaatiiOsallistumisen, eiVaadiOsallistumista)),
                 new ValintakoeOsallistuminenDTO(),
                 new Oppija(),
                 new ParametritDTO()
         );
+        p.applicationAdditionalDataDTO.setAdditionalData(additionalData);
         assertEquals("arvo_hakemuksella", p.applicationAdditionalDataDTO.getAdditionalData().get("hakemuksella"));
-        assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("vaatii_osallistumisen"));
-        assertEquals(Osallistuminen.MERKITSEMATTA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("vaatii_osallistumisen-OSALLISTUMINEN"));
-        assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("ei_vaadi_osallistumista"));
-        assertEquals(Osallistuminen.EI_VAADITA.toString(), p.applicationAdditionalDataDTO.getAdditionalData().get("ei_vaadi_osallistumista-OSALLISTUMINEN"));
+        assertEquals(Osallistuminen.OSALLISTUI.toString(), p.osallistumistieto("hakukohdeOid", "vaatii_osallistumisen").osallistumistieto.toString());
+        assertEquals(Osallistuminen.OSALLISTUI.toString(), p.osallistumistieto("hakukohdeOid", "ei_vaadi_osallistumista").osallistumistieto.toString());
     }
 
     @Test
