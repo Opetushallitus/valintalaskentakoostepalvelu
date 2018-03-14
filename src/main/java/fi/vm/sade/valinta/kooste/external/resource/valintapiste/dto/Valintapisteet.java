@@ -69,19 +69,20 @@ public class Valintapisteet {
                 v.getSukunimi(),
                 new HashMap<>(immutableAdditionalData)
         );
-    };
+    }
+
     public static String withOsallistuminenSuffix(String tunniste) {
         return new StringBuilder(tunniste).append("-OSALLISTUMINEN").toString();
     }
-    private static BiFunction<Map<String, String>, String, List<Piste>> ADDITIONAL_INFO_TO_PISTEET = (additionalInfo, oid) -> {
+    private static BiFunction<Map<String, String>, String, List<Piste>> ADDITIONAL_INFO_TO_PISTEET = (additionalInfo, tallettajaOid) -> {
         List<Piste> pisteet = additionalInfo.entrySet().stream().flatMap(entry -> {
             String k = entry.getKey();
             Object v = entry.getValue();
             if (k.endsWith("-OSALLISTUMINEN")) {
                 String tunniste = k.replaceAll("-OSALLISTUMINEN", "");
                 Osallistuminen osallistuminen = Osallistuminen.valueOf(v.toString());
-                String arvo = (String)additionalInfo.get(tunniste);
-                return Stream.of(new Piste(tunniste, arvo, osallistuminen, oid));
+                String arvo = additionalInfo.get(tunniste);
+                return Stream.of(new Piste(tunniste, arvo, osallistuminen, tallettajaOid));
             } else {
                 return Stream.empty();
             }
