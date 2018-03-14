@@ -28,7 +28,9 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -88,7 +90,12 @@ public class ValintatapajonoTuontiService {
                                             .forEach(
                                                     v -> {
                                                         v.getHakija().forEach(hakija -> {
-                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), hakija, null);
+                                                            Map<String,String> additionalAuditFields = new HashMap<>();
+                                                            additionalAuditFields.put("hakuOid", hakuOid);
+                                                            additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
+                                                            additionalAuditFields.put("valinnanvaiheOid", valinnanvaihe.getValinnanvaiheoid());
+                                                            additionalAuditFields.put("valintatapajonoOid", v.getValintatapajonooid());
+                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), hakija, null, additionalAuditFields);
                                                         });
                                                     }
                                             );

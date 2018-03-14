@@ -370,6 +370,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                     additionalInfo.put("Username from call params", username);
                                     additionalInfo.put("hakuOid", hakuOid);
                                     additionalInfo.put("hakukohdeOid", hakukohdeOid);
+                                    additionalInfo.put("hakijaOid", pistetieto.getPersonOid());
                                     AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), auditLogOperation, ValintaResource.PISTESYOTTOSERVICE, pistetieto.getOid(), pistetieto, null, additionalInfo);
                                 }
                         ))
