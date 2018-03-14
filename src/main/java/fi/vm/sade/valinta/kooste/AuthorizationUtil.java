@@ -46,7 +46,7 @@ public class AuthorizationUtil {
         AuditSession session = new AuditSession();
         session.setSessionId(httpServletRequest.getSession().getId());
         session.setUid(KoosteAudit.uid().orElse("Unknown user"));
-        session.setPersonOid(AuditLog.username());
+        session.setPersonOid(AuditLog.loggedInUserOid());
         session.setInetAddress(HttpServletRequestUtils.getRemoteAddress(httpServletRequest));
         session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
         session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory, httpServletRequestJaxRS));

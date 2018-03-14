@@ -95,7 +95,7 @@ public class ValintatapajonoResource {
                        InputStream file,
                        @Suspended AsyncResponse asyncResponse,
                        @Context HttpServletRequest request) {
-        final String username = AuditLog.username();
+        final String loggedInUserOid = AuditLog.loggedInUserOid();
         final User user = AuditLog.getUser(request);
         asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
@@ -105,7 +105,7 @@ public class ValintatapajonoResource {
         try {
             IOUtils.copy(file, bytes = new ByteArrayOutputStream());
             IOUtils.closeQuietly(file);
-            valintatapajonoTuontiService.tuo(username, (valinnanvaiheet, hakemukset) -> {
+            valintatapajonoTuontiService.tuo(loggedInUserOid, (valinnanvaiheet, hakemukset) -> {
                 ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
                 try {
                     ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
@@ -138,7 +138,7 @@ public class ValintatapajonoResource {
                        ValintatapajonoRivit rivit,
                        @Suspended AsyncResponse asyncResponse,
                        @Context HttpServletRequest request) {
-        final String username = AuditLog.username();
+        final String username = AuditLog.loggedInUserOid();
         final User user = AuditLog.getUser(request);
         asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));

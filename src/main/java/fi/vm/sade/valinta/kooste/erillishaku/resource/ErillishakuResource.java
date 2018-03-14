@@ -103,7 +103,7 @@ public class ErillishakuResource {
             @QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             InputStream file) throws Exception {
-        LOG.info("Käyttäjä " + AuditLog.username() + " tuo excelillä hakuun " + hakuOid + " hakemuksia");
+        LOG.info("Käyttäjä " + AuditLog.loggedInUserOid() + " tuo excelillä hakuun " + hakuOid + " hakemuksia");
         String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ByteArrayOutputStream b;
@@ -144,7 +144,7 @@ public class ErillishakuResource {
                     "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>" +
                     "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
             ErillishakuJson json) {
-        LOG.info("Käyttäjä " + AuditLog.username() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
+        LOG.info("Käyttäjä " + AuditLog.loggedInUserOid() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
         String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
@@ -179,7 +179,7 @@ public class ErillishakuResource {
                     "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>" +
                     "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
                     ErillishakuJson json) {
-        LOG.info("Käyttäjä " + AuditLog.username() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
+        LOG.info("Käyttäjä " + AuditLog.loggedInUserOid() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
         String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
