@@ -9,7 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.util.StringUtils;
 
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -18,12 +17,6 @@ import java.util.Optional;
  */
 public class KoosteAudit {
     public static final Audit AUDIT = new Audit(new AuditLogger(), "valintalaskentakoostepalvelu", ApplicationType.VIRKAILIJA);
-
-    public static String username() {
-        return Optional.ofNullable((Principal) SecurityContextHolder.getContext().getAuthentication()).orElse(
-                () -> "Kirjautumaton käyttäjä"
-        ).getName();
-    }
 
     public static Optional<String> uid() {
         Optional<String> uid = uidFromCasAuthenticationToken();

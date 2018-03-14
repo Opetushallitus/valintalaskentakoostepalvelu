@@ -6,7 +6,6 @@ import static rx.observables.BlockingObservable.from;
 import fi.vm.sade.auditlog.User;
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.sharedutils.AuditLog;
-import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
@@ -96,7 +95,7 @@ public class ValintatapajonoResource {
                        InputStream file,
                        @Suspended AsyncResponse asyncResponse,
                        @Context HttpServletRequest request) {
-        final String username = KoosteAudit.username();
+        final String username = AuditLog.username();
         final User user = AuditLog.getUser(request);
         asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
@@ -139,7 +138,7 @@ public class ValintatapajonoResource {
                        ValintatapajonoRivit rivit,
                        @Suspended AsyncResponse asyncResponse,
                        @Context HttpServletRequest request) {
-        final String username = KoosteAudit.username();
+        final String username = AuditLog.username();
         final User user = AuditLog.getUser(request);
         asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));

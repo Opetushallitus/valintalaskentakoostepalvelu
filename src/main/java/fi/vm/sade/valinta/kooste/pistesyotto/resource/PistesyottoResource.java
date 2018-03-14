@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
 import com.google.common.collect.Lists;
+
+import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
@@ -90,7 +92,7 @@ public class PistesyottoResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     public void koostaPistetiedotYhdelleHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                      @Suspended final AsyncResponse response) {
-        final String username = KoosteAudit.username();
+        final String username = AuditLog.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
@@ -143,7 +145,7 @@ public class PistesyottoResource {
     public void tallennaKoostetutPistetiedotHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                          ApplicationAdditionalDataDTO pistetiedot,
                                                          @Suspended final AsyncResponse response) {
-        final String username = KoosteAudit.username();
+        final String username = AuditLog.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
         response.setTimeout(120L, TimeUnit.SECONDS);
@@ -221,7 +223,7 @@ public class PistesyottoResource {
     public void koostaPistetiedotHakemuksille(@PathParam("hakuOid") String hakuOid,
                                               @PathParam("hakukohdeOid") String hakukohdeOid,
                                               @Suspended final AsyncResponse response) {
-        final String username = KoosteAudit.username();
+        final String username = AuditLog.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
@@ -281,7 +283,7 @@ public class PistesyottoResource {
                                              @PathParam("hakukohdeOid") String hakukohdeOid,
                                              List<ApplicationAdditionalDataDTO> pistetiedot,
                                              @Suspended final AsyncResponse response) {
-        final String username = KoosteAudit.username();
+        final String username = AuditLog.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
         response.setTimeout(120L, TimeUnit.SECONDS);
@@ -354,7 +356,7 @@ public class PistesyottoResource {
     public void vienti(@QueryParam("hakuOid") String hakuOid,
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @Suspended AsyncResponse asyncResponse) {
-        final String username = KoosteAudit.username();
+        final String username = AuditLog.username();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
         asyncResponse.setTimeoutHandler(handler -> {
@@ -413,7 +415,7 @@ public class PistesyottoResource {
         });
 
         try {
-            final String username = KoosteAudit.username();
+            final String username = AuditLog.username();
             final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
             Observable<Object> authCheck = authorityCheckService.getAuthorityCheckForRoles(asList(
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
@@ -512,7 +514,7 @@ public class PistesyottoResource {
                     asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
                 });
 
-                final String username = KoosteAudit.username();
+                final String username = AuditLog.username();
                 authorityCheckService.getAuthorityCheckForRoles(
                         asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD")
                 ).subscribe(
