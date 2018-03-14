@@ -3,7 +3,11 @@ package fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,7 +63,7 @@ public class Valintapisteet {
                         Optional.ofNullable(p.getArvo()).map(a -> Stream.of(Pair.of(p.getTunniste(), a))).orElse(Stream.empty()),
                         Stream.of(Pair.of(withOsallistuminenSuffix(p.getTunniste()), p.getOsallistuminen().toString()))
                 )
-        ).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+        ).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
 
         return new ApplicationAdditionalDataDTO(
@@ -72,10 +76,10 @@ public class Valintapisteet {
     }
 
     public static String withOsallistuminenSuffix(String tunniste) {
-        return new StringBuilder(tunniste).append("-OSALLISTUMINEN").toString();
+        return tunniste + "-OSALLISTUMINEN";
     }
-    private static BiFunction<Map<String, String>, String, List<Piste>> ADDITIONAL_INFO_TO_PISTEET = (additionalInfo, tallettajaOid) -> {
-        List<Piste> pisteet = additionalInfo.entrySet().stream().flatMap(entry -> {
+    private static BiFunction<Map<String, String>, String, List<Piste>> ADDITIONAL_INFO_TO_PISTEET = (additionalInfo, tallettajaOid) ->
+        additionalInfo.entrySet().stream().flatMap(entry -> {
             String k = entry.getKey();
             Object v = entry.getValue();
             if (k.endsWith("-OSALLISTUMINEN")) {
@@ -86,8 +90,5 @@ public class Valintapisteet {
             } else {
                 return Stream.empty();
             }
-
         }).collect(Collectors.toList());
-        return pisteet;
-    };
 }
