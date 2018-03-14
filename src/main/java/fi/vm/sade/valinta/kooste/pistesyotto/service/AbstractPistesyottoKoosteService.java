@@ -258,12 +258,13 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     protected Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
-                                                            String hakukohdeOid,
-                                                            Optional<String> ifUnmodifiedSince,
-                                                            List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                            Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                            String username,
-                                                            ValintaperusteetOperation auditLogOperation, AuditSession auditSession) {
+                                                                   String hakukohdeOid,
+                                                                   Optional<String> ifUnmodifiedSince,
+                                                                   List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                                   Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
+                                                                   String username,
+                                                                   ValintaperusteetOperation auditLogOperation,
+                                                                   AuditSession auditSession) {
         Observable<Void> kielikoeTallennus = Observable.zip(
                 findSourceOid(hakukohdeOid),
                 haeOppijatSuresta(hakuOid, hakukohdeOid),
