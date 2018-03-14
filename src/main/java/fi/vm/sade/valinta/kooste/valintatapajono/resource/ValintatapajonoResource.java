@@ -3,28 +3,22 @@ package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static rx.observables.BlockingObservable.from;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.*;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.container.TimeoutHandler;
-import javax.ws.rs.core.Response;
-
-import io.swagger.annotations.Api;
+import fi.vm.sade.auditlog.User;
 import fi.vm.sade.authentication.business.service.Authorizer;
+import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
-import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
+import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
 import fi.vm.sade.valinta.kooste.valintatapajono.service.ValintatapajonoTuontiService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +26,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import io.swagger.annotations.ApiOperation;
-
-import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.container.TimeoutHandler;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * @Autowired(required = false) Camelin pois refaktorointi
@@ -91,8 +94,10 @@ public class ValintatapajonoResource {
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @QueryParam("valintatapajonoOid") String valintatapajonoOid,
                        InputStream file,
-                       @Suspended AsyncResponse asyncResponse) {
+                       @Suspended AsyncResponse asyncResponse,
+                       @Context HttpServletRequest request) {
         final String username = KoosteAudit.username();
+        final User user = AuditLog.getUser(request);
         asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
         String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
@@ -114,7 +119,7 @@ public class ValintatapajonoResource {
                     throw new RuntimeException(t);
                 }
                 return listaus.getRivit();
-            }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse);
+            }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse, user);
         } catch (Throwable t) {
             asyncResponse.resume(Response.serverError()
                     .entity("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen")
@@ -132,8 +137,10 @@ public class ValintatapajonoResource {
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @QueryParam("valintatapajonoOid") String valintatapajonoOid,
                        ValintatapajonoRivit rivit,
-                       @Suspended AsyncResponse asyncResponse) {
+                       @Suspended AsyncResponse asyncResponse,
+                       @Context HttpServletRequest request) {
         final String username = KoosteAudit.username();
+        final User user = AuditLog.getUser(request);
         asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
         String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
@@ -145,7 +152,8 @@ public class ValintatapajonoResource {
             hakukohdeOid,
             tarjoajaOid,
             valintatapajonoOid,
-            asyncResponse);
+            asyncResponse,
+            user);
     }
 
     private TimeoutHandler getTimeoutHandler(String hakuOid, String hakukohdeOid) {

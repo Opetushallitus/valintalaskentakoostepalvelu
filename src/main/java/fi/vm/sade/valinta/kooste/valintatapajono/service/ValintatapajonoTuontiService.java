@@ -1,11 +1,14 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
 import com.google.gson.GsonBuilder;
+
+import fi.vm.sade.auditlog.User;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
@@ -31,9 +34,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-
 @Service
 public class ValintatapajonoTuontiService {
     private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoTuontiService.class);
@@ -48,13 +48,14 @@ public class ValintatapajonoTuontiService {
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
     public void tuo(
-            String username,
-            BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
-            final String hakuOid,
-            final String hakukohdeOid,
-            final String tarjoajaOid,
-            final String valintatapajonoOid,
-            AsyncResponse asyncResponse) {
+        String username,
+        BiFunction<List<ValintatietoValinnanvaiheDTO>, List<Hakemus>, Collection<ValintatapajonoRivi>> riviFunction,
+        final String hakuOid,
+        final String hakukohdeOid,
+        final String tarjoajaOid,
+        final String valintatapajonoOid,
+        AsyncResponse asyncResponse,
+        User user) {
         AtomicReference<String> dokumenttiIdRef = new AtomicReference<>(null);
         AtomicInteger counter = new AtomicInteger(
                 1 // valinnanvaiheet
@@ -87,7 +88,7 @@ public class ValintatapajonoTuontiService {
                                             .forEach(
                                                     v -> {
                                                         v.getHakija().forEach(hakija -> {
-                                                            AuditLog.log(ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), hakija, null, null);
+                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), hakija, null);
                                                         });
                                                     }
                                             );

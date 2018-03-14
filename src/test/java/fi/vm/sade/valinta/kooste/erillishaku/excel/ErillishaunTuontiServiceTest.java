@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT_JSON;
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishaunTuontiServiceTest.PERSON_1_OID;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHenkiloOidilla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuSyntymaAjalla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
@@ -66,6 +67,8 @@ import java.util.stream.Collectors;
 
 @RunWith(Enclosed.class)
 public class ErillishaunTuontiServiceTest {
+    protected static final String PERSON_1_OID = "1.2.246.562.24.64735725450";
+    protected static final String PERSON_2_OID = "1.2.246.562.24.64735725451";
 
     public final static class Autotaytto extends ErillisHakuTuontiTestCase {
         @Test
@@ -265,7 +268,7 @@ public class ErillishaunTuontiServiceTest {
                     Schedulers.immediate()
             );
             assertEquals(0, applicationAsyncResource.results.size());
-            tuontiService.tuoExcelistä(new AuditSession("bob", emptyList(), "", ""), prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
+            tuontiService.tuoExcelistä(new AuditSession(PERSON_2_OID, emptyList(), "", ""), prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             Mockito.verify(prosessi).keskeyta();
         }
 
@@ -286,7 +289,7 @@ public class ErillishaunTuontiServiceTest {
                     koodistoCachedAsyncResource,
                     Schedulers.immediate()
             );
-            tuontiService.tuoExcelistä(new AuditSession("bob", emptyList(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
+            tuontiService.tuoExcelistä(new AuditSession(PERSON_2_OID, emptyList(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             Mockito.verify(prosessi).keskeyta(Matchers.<Collection<Poikkeus>>any());
         }
 
@@ -304,7 +307,7 @@ public class ErillishaunTuontiServiceTest {
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             KirjeProsessi prosessi = new ErillishakuProsessiDTO(1);
 
-            tuontiService.tuoExcelistä(new AuditSession("bob", emptyList(), "", ""), prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
+            tuontiService.tuoExcelistä(new AuditSession(PERSON_2_OID, emptyList(), "", ""), prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             assertEquals(0, erillishaunValinnantulokset.size());
             assertTrue(prosessi.isKeskeytetty());
         }
@@ -405,7 +408,7 @@ class ErillisHakuTuontiTestCase {
                 koodistoCachedAsyncResource,
                 Schedulers.immediate()
         );
-        tuontiService.tuoExcelistä(new AuditSession("frank", new ArrayList<>(), "", ""), prosessi, erillisHaku, data);
+        tuontiService.tuoExcelistä(new AuditSession(PERSON_1_OID, new ArrayList<>(), "", ""), prosessi, erillisHaku, data);
         Mockito.verify(prosessi).valmistui("ok");
     }
 
@@ -417,7 +420,7 @@ class ErillisHakuTuontiTestCase {
                 koodistoCachedAsyncResource,
                 Schedulers.immediate()
         );
-        tuontiService.tuoJson(new AuditSession("frank", new ArrayList<>(), "", ""), prosessi, erillisHaku, rivit, false);
+        tuontiService.tuoJson(new AuditSession(PERSON_1_OID, new ArrayList<>(), "", ""), prosessi, erillisHaku, rivit, false);
         Mockito.verify(prosessi).valmistui("ok");
     }
 }

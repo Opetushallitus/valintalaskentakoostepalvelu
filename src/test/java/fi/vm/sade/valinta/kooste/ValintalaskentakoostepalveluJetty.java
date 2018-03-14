@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste;
 
 import com.google.common.io.Files;
+
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
@@ -45,7 +46,7 @@ public class ValintalaskentakoostepalveluJetty {
         }
     }
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) {
         startShared();
         //MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_VALINTAPERUSTEET_READ_1.2.246.562.10.00000000001");
     }
@@ -67,6 +68,7 @@ public class ValintalaskentakoostepalveluJetty {
         }
     }
     public static void startShared() {
+        ValintaKoosteJetty.fakeAuthentication();
         Integraatiopalvelimet.mockServer.reset();
         SpringProfile.setProfile("test");
         mockUserHomeWithCommonProperties();

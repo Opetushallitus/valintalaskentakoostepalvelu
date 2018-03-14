@@ -1,10 +1,27 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import static com.codepoetics.protonpack.StreamUtils.zip;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.HenkilonRivinPaattelyEpaonnistuiException;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.ainoastaanHakemuksenTilaPaivitys;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.autoTaytto;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.createHakemusprototyyppi;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.isKesken;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.riviWithHenkiloData;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toErillishaunHakijaDTO;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toPoistettavaErillishaunHakijaDTO;
+import static java.util.Optional.ofNullable;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static rx.schedulers.Schedulers.newThread;
+
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
@@ -33,6 +50,8 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
@@ -43,7 +62,6 @@ import java.util.stream.Stream;
 
 import static com.codepoetics.protonpack.StreamUtils.zip;
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.*;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
@@ -154,9 +172,9 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                                 additionalAuditInfo.put("hakukohdeOid", haku.getHakukohdeOid());
                                 additionalAuditInfo.put("valintatapajonoOid", haku.getValintatapajonoOid());
                                 if (hakijaDTO.getPoistetaankoTulokset()) {
-                                    AuditLog.log(ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), null, hakijaDTO, null, additionalAuditInfo);
+                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), null, hakijaDTO, additionalAuditInfo);
                                 } else {
-                                    AuditLog.log(ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), hakijaDTO, null, null, additionalAuditInfo);
+                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), hakijaDTO, null, additionalAuditInfo);
                                 }
                         });
                     if (poikkeukset.isEmpty()) {

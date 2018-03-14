@@ -1,5 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto;
 
+import fi.vm.sade.auditlog.User;
+import org.ietf.jgss.Oid;
+
+import java.net.InetAddress;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,6 +80,14 @@ public class AuditSession {
 
     public String getSessionId() {
         return sessionId;
+    }
+
+    public User asAuditUser() {
+        try {
+            return new User(new Oid(personOid), InetAddress.getByName(inetAddress), sessionId, userAgent);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -140,7 +141,7 @@ public class SijoitteluAktivointiResource {
             LOG.error("Sijoittelua yritettiin käynnistää ilman hakuOidia!");
             throw new RuntimeException("Parametri hakuOid on pakollinen!");
         } else {
-            AuditLog.log(ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS, ValintaResource.SIJOITTELUAKTIVOINTI, hakuOid, null, null, request);
+            AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS, ValintaResource.SIJOITTELUAKTIVOINTI, hakuOid, null, null);
             sijoitteluAktivointiProxy
                     .aktivoiSijoittelu(new Sijoittelu(hakuOid));
         }

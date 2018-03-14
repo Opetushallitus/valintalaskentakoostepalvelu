@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
@@ -8,9 +7,9 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static org.apache.commons.collections.ListUtils.union;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
+import fi.vm.sade.auditlog.User;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
@@ -20,6 +19,7 @@ import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -287,7 +287,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     String sourceOid = sourceAndOppijat.getLeft();
                     List<Oppija> oppijatSuresta = sourceAndOppijat.getRight();
                     return tallennaKielikoetulokset(hakuOid, hakukohdeOid, sourceOid, pistetiedotHakemukselle,
-                            kielikoetuloksetSureen, username, auditLogOperation, oppijatSuresta);
+                            kielikoetuloksetSureen, username, auditLogOperation, auditSession.asAuditUser(), oppijatSuresta);
                 });
 
         return kielikoeTallennus.flatMap(a -> {
@@ -301,10 +301,11 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     private Observable<Void> tallennaKielikoetulokset(String hakuOid, String hakukohdeOid, String sourceOid,
-                                                         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                         Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                         String username, ValintaperusteetOperation auditLogOperation,
-                                                         List<Oppija> oppijatSuresta) {
+                                                      List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                      Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
+                                                      String username, ValintaperusteetOperation auditLogOperation,
+                                                      User user,
+                                                      List<Oppija> oppijatSuresta) {
         Function<String,String> findPersonOidByHakemusOid = hakemusOid -> pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
         AmmatillisenKielikoetulosOperations operations = new AmmatillisenKielikoetulosOperations(sourceOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
 
@@ -335,14 +336,14 @@ public abstract class AbstractPistesyottoKoosteService {
                 additionalAuditInfo.put("hakijaOid", personOid);
                 additionalAuditInfo.put("hakemusOid", hakemusOid);
                 additionalAuditInfo.put(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana());
-                AuditLog.log(auditLogOperation,
-                        ValintaResource.PISTESYOTTOSERVICE,
-                        processedArvosana.getId(),
-                        processedArvosana,
-                        null,
-                        null,
-                        additionalAuditInfo
-                );
+                AuditLog.log(KoosteAudit.AUDIT,
+                    user,
+                    auditLogOperation,
+                    ValintaResource.PISTESYOTTOSERVICE,
+                    processedArvosana.getId(),
+                    processedArvosana,
+                    null,
+                    additionalAuditInfo);
             });
         }).lastOrDefault(null).<Void>map(x -> null).doOnCompleted(() ->
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
@@ -369,7 +370,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                     additionalInfo.put("Username from call params", username);
                                     additionalInfo.put("hakuOid", hakuOid);
                                     additionalInfo.put("hakukohdeOid", hakukohdeOid);
-                                    AuditLog.log(auditLogOperation, ValintaResource.PISTESYOTTOSERVICE, pistetieto.getOid(), pistetieto, null, null, additionalInfo);
+                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), auditLogOperation, ValintaResource.PISTESYOTTOSERVICE, pistetieto.getOid(), pistetieto, null, additionalInfo);
                                 }
                         ))
                             .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
