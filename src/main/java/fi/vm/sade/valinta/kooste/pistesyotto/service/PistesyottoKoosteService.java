@@ -211,8 +211,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     a.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
                     return tallennaKoostetutPistetiedot(
                             hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(), ifUnmodifiedSince,
-                            singletonList(a), username, auditSession
-                    );
+                            singletonList(a), username, auditSession);
                 }).collect(Collectors.toList()));
                 return errors;
             }
@@ -223,7 +222,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                                                          String hakukohdeOid,
                                                          Optional<String> ifUnmodifiedSince,
                                                          List<ApplicationAdditionalDataDTO> pistetietoDTOs,
-                                                         String username, AuditSession auditSession) {
+                                                                        String username, AuditSession auditSession) {
         Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoetuloksetSureen = new HashMap<>();
         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle;
         try {
@@ -239,7 +238,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                             .collect(Collectors.toSet())
                     );
         } catch (Exception e) {
-            LOG.error(String.format("Ongelma käsiteltäessä pistetietoja haun %s kohteelle %s , käyttäjä %s ", hakuOid, hakukohdeOid, username), e);
+            LOG.error(String.format("Ongelma käsiteltäessä pistetietoja haun %s kohteelle %s , käyttäjä %s ", hakuOid, hakukohdeOid, auditSession.getPersonOid()), e);
             return Observable.error(e);
         }
     }

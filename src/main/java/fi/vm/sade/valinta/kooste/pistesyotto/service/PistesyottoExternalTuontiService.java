@@ -348,7 +348,7 @@ public class PistesyottoExternalTuontiService {
                                     valintapisteAsyncResource.putValintapisteet(Optional.empty(), vp, auditSession).subscribe(conflictingHakemusOids -> {
                                         additionalData.forEach(pistetieto -> {
                                             Map<String, String> additionalAuditInfo = new HashMap<>();
-                                            additionalAuditInfo.put("Username from params", username);
+                                            additionalAuditInfo.put("Username from params", auditSession.getPersonOid());
                                             additionalAuditInfo.put("hakuOid", hakuOid);
                                             additionalAuditInfo.put("hakijaOid", pistetieto.getPersonOid());
                                             AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, ValintaResource.PISTESYOTTOEXTERNALSERVICE, pistetieto.getOid(), pistetieto, null, additionalAuditInfo);

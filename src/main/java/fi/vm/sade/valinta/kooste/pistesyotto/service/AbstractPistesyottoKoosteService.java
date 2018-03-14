@@ -262,7 +262,6 @@ public abstract class AbstractPistesyottoKoosteService {
                                                                    Optional<String> ifUnmodifiedSince,
                                                                    List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
                                                                    Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                                   String username,
                                                                    ValintaperusteetOperation auditLogOperation,
                                                                    AuditSession auditSession) {
         Observable<Void> kielikoeTallennus = Observable.zip(
@@ -273,11 +272,11 @@ public abstract class AbstractPistesyottoKoosteService {
                     String sourceOid = sourceAndOppijat.getLeft();
                     List<Oppija> oppijatSuresta = sourceAndOppijat.getRight();
                     return tallennaKielikoetulokset(hakuOid, hakukohdeOid, sourceOid, pistetiedotHakemukselle,
-                        kielikoetuloksetSureen, username, auditLogOperation, auditSession.asAuditUser(), oppijatSuresta);
+                        kielikoetuloksetSureen, auditSession.getPersonOid(), auditLogOperation, auditSession.asAuditUser(), oppijatSuresta);
                 });
 
         return kielikoeTallennus.flatMap(a ->
-            tallennaPisteetValintaPisteServiceen(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, username, auditLogOperation, auditSession))
+            tallennaPisteetValintaPisteServiceen(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, auditLogOperation, auditSession))
             .onErrorResumeNext(t -> Observable.error(
                 new IllegalStateException(String.format("Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), t)));
     }
@@ -338,18 +337,17 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     private Observable<Set<String>> tallennaPisteetValintaPisteServiceen(String hakuOid,
-                                                                String hakukohdeOid,
-                                                                Optional<String> ifUnmodifiedSince,
-                                                                List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                                String username,
-                                                                ValintaperusteetOperation auditLogOperation,
-                                                                AuditSession auditSession) {
-        return valintapisteAsyncResource.putValintapisteet(ifUnmodifiedSince, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
+                                                                         String hakukohdeOid,
+                                                                         Optional<String> ifUnmodifiedSince,
+                                                                         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                                         ValintaperusteetOperation auditLogOperation,
+                                                                         AuditSession auditSession) {
+        return valintapisteAsyncResource.putValintapisteet(ifUnmodifiedSince, pistetiedotHakemukselle(auditSession.getPersonOid(), pistetiedotHakemukselle), auditSession)
                 //.<Void>map(a -> null)
                 .doOnNext(conflictingHakemusOids ->
                         pistetiedotHakemukselle.forEach(pistetieto -> {
                                     Map <String, String> additionalInfo = new HashMap<>();
-                                    additionalInfo.put("Username from call params", username);
+                                    additionalInfo.put("Username from call params", auditSession.getPersonOid());
                                     additionalInfo.put("hakuOid", hakuOid);
                                     additionalInfo.put("hakukohdeOid", hakukohdeOid);
                                     additionalInfo.put("hakijaOid", pistetieto.getPersonOid());

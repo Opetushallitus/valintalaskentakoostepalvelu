@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
 import com.google.common.collect.Lists;
 
-import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
@@ -92,7 +91,6 @@ public class PistesyottoResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     public void koostaPistetiedotYhdelleHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                      @Suspended final AsyncResponse response) {
-        final String loggedInUserOid = AuditLog.loggedInUserOid();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
@@ -121,7 +119,7 @@ public class PistesyottoResource {
                     } else {
                         String msg = String.format(
                                 "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
-                                loggedInUserOid, hakutoiveOids, hakemusOid
+                                auditSession.getPersonOid(), hakutoiveOids, hakemusOid
                         );
                         LOG.error(msg);
                         return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
@@ -145,7 +143,6 @@ public class PistesyottoResource {
     public void tallennaKoostetutPistetiedotHakemukselle(@PathParam("hakemusOid") String hakemusOid,
                                                          ApplicationAdditionalDataDTO pistetiedot,
                                                          @Suspended final AsyncResponse response) {
-        final String username = AuditLog.loggedInUserOid();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
         response.setTimeout(120L, TimeUnit.SECONDS);
@@ -188,12 +185,12 @@ public class PistesyottoResource {
                     Collection<String> hakutoiveOids = hakemus.getHakutoiveOids();
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(
-                                pistetiedot, ifUnmodifiedSince, username, auditSession
+                                pistetiedot, ifUnmodifiedSince, auditSession
                         );
                     } else {
                         String msg = String.format(
                                 "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
-                                username, hakutoiveOids, hakemusOid
+                                auditSession.getPersonOid(), hakutoiveOids, hakemusOid
                         );
                         return Observable.error(new ForbiddenException(
                                 msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
@@ -223,7 +220,6 @@ public class PistesyottoResource {
     public void koostaPistetiedotHakemuksille(@PathParam("hakuOid") String hakuOid,
                                               @PathParam("hakukohdeOid") String hakukohdeOid,
                                               @Suspended final AsyncResponse response) {
-        final String loggedInUserOid = AuditLog.loggedInUserOid();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         response.setTimeout(120L, TimeUnit.SECONDS);
         response.setTimeoutHandler(handler -> {
@@ -251,7 +247,7 @@ public class PistesyottoResource {
             } else {
                 String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                        loggedInUserOid, hakukohdeOid
+                        auditSession.getPersonOid(), hakukohdeOid
                 );
                 LOG.error(msg);
                 return Observable.just(Response.status(Response.Status.FORBIDDEN).entity(msg).build());
@@ -283,7 +279,6 @@ public class PistesyottoResource {
                                              @PathParam("hakukohdeOid") String hakukohdeOid,
                                              List<ApplicationAdditionalDataDTO> pistetiedot,
                                              @Suspended final AsyncResponse response) {
-        final String loggedInUserOid = AuditLog.loggedInUserOid();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
         response.setTimeout(120L, TimeUnit.SECONDS);
@@ -304,7 +299,7 @@ public class PistesyottoResource {
             }
             String msg = String.format(
                     "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                    loggedInUserOid, hakukohdeOid
+                    auditSession.getPersonOid(), hakukohdeOid
             );
             return Observable.error(new ForbiddenException(
                     msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
@@ -327,11 +322,11 @@ public class PistesyottoResource {
                     }
                     return Observable.error(new ForbiddenException(String.format(
                             "Käyttäjällä %s ei ole oikeuksia käsitellä hakemuksien %s pistetietoja, koska niillä ei ole haettu hakukohteeseen %s",
-                            loggedInUserOid, eiHakukohteeseenHakeneet, hakukohdeOid
+                            auditSession.getPersonOid(), eiHakukohteeseenHakeneet, hakukohdeOid
                     )));
                 })
         ).flatMap(x -> pistesyottoKoosteService.tallennaKoostetutPistetiedot(
-                hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedot, loggedInUserOid, auditSession)
+                hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedot, auditSession)
         ).subscribe(
                 x -> {
                     if(x.isEmpty()) {
@@ -356,7 +351,6 @@ public class PistesyottoResource {
     public void vienti(@QueryParam("hakuOid") String hakuOid,
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @Suspended AsyncResponse asyncResponse) {
-        final String loggedInUserOid = AuditLog.loggedInUserOid();
         final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
         asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
         asyncResponse.setTimeoutHandler(handler -> {
@@ -381,7 +375,7 @@ public class PistesyottoResource {
             } else {
                 String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                        loggedInUserOid, hakukohdeOid
+                        auditSession.getPersonOid(), hakukohdeOid
                 );
                 return Observable.error(new ForbiddenException(
                         msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
@@ -415,7 +409,6 @@ public class PistesyottoResource {
         });
 
         try {
-            final String loggedInUserOid = AuditLog.loggedInUserOid();
             final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
             Observable<Object> authCheck = authorityCheckService.getAuthorityCheckForRoles(asList(
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
@@ -428,7 +421,7 @@ public class PistesyottoResource {
                 }
                 String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
-                        loggedInUserOid, hakukohdeOid
+                        auditSession.getPersonOid(), hakukohdeOid
                 );
                 return Observable.error(new ForbiddenException(
                         msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
@@ -446,12 +439,12 @@ public class PistesyottoResource {
                     "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray())).subscribe(
                     response -> LOG.info(
                         "Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
-                        loggedInUserOid, hakuOid, hakukohdeOid, uuid),
+                        auditSession.getPersonOid(), hakuOid, hakukohdeOid, uuid),
                     poikkeus -> logError(String.format(
                         "Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                        loggedInUserOid, hakuOid, hakukohdeOid), poikkeus)
+                        auditSession.getPersonOid(), hakuOid, hakukohdeOid), poikkeus)
                 );
-                return tuontiService.tuo(loggedInUserOid, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
+                return tuontiService.tuo(auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
             });
 
             map.subscribe(
@@ -515,13 +508,12 @@ public class PistesyottoResource {
                     asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
                 });
 
-                final String loggedInUserOid = AuditLog.loggedInUserOid();
                 authorityCheckService.getAuthorityCheckForRoles(
                         asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD")
                 ).subscribe(
                         authorityCheck -> {
                             LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
-                            externalTuontiService.tuo(authorityCheck, hakemukset, loggedInUserOid, auditSession, hakuOid,
+                            externalTuontiService.tuo(authorityCheck, hakemukset, auditSession, hakuOid,
                                     (onnistuneet, validointivirheet) -> {
                                         UlkoinenResponseDTO response = new UlkoinenResponseDTO();
                                         response.setKasiteltyOk(onnistuneet);

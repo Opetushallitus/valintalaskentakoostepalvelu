@@ -50,7 +50,6 @@ public class ValintatapajonoTuontiService {
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
     public void tuo(
-        String username,
         BiFunction<List<ValintatietoValinnanvaiheDTO>, List<Hakemus>, Collection<ValintatapajonoRivi>> riviFunction,
         final String hakuOid,
         final String hakukohdeOid,
