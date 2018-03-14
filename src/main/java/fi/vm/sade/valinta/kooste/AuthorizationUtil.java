@@ -75,16 +75,4 @@ public class AuthorizationUtil {
         }
         return authentication.getAuthorities().stream().map(a -> a.getAuthority()).map(r -> r.replace("ROLE_", "")).collect(Collectors.toList());
     }
-
-    public static String getCurrentUser() {
-        SecurityContext ctx = SecurityContextHolder.getContext();
-        if (ctx == null) {
-            return null;
-        }
-        Authentication authentication = ctx.getAuthentication();
-        if (authentication == null) {
-            return null;
-        }
-        return authentication.getName();
-    }
 }
