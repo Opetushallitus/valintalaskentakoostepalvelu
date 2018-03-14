@@ -332,7 +332,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
 
 
-    public List<Valintapisteet> pistetiedotHakemukselle(String tallettaja, List<ApplicationAdditionalDataDTO> additionalDataDTOS) {
+    private List<Valintapisteet> pistetiedotHakemukselle(String tallettaja, List<ApplicationAdditionalDataDTO> additionalDataDTOS) {
         return additionalDataDTOS.stream().map(a -> Pair.of(tallettaja, a)).map(Valintapisteet::new).collect(Collectors.toList());
     }
 
