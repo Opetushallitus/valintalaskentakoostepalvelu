@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.gson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
@@ -16,6 +17,7 @@ import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.HttpMethod.PUT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -44,9 +46,12 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakukohteenOsallistumistiedotDTO.KokeenOsallistumistietoDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HenkiloValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.Osallistumistieto;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistesyottoValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -60,7 +65,6 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -75,7 +79,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -83,16 +86,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Ignore
 public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
-
     private static final ValintaperusteDTO kielikoeFi = new ValintaperusteDTO();
+    private static final Function<ApplicationAdditionalDataDTO, Valintapisteet> APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET = p -> new Valintapisteet(p.getOid(), p.getPersonOid(), p.getFirstNames(), p.getLastName(), Collections.emptyList());
 
     static {
         kielikoeFi.setTunniste("kielikoe_fi");
         kielikoeFi.setOsallistuminenTunniste("kielikoe_fi-OSALLISTUMINEN");
         kielikoeFi.setVaatiiOsallistumisen(true);
     }
+
+    private final MockServer fakeValintaPisteService = new MockServer();
 
     @Before
     public void startServer() {
@@ -105,12 +109,14 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
         HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
 
-        List<ApplicationAdditionalDataDTO> pistetiedot = readAdditionalData();
-        List<String> hakemusOids = pistetiedot.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toList());
+        List<ApplicationAdditionalDataDTO> applicationAdditionalDatas = readAdditionalData();
+        List<String> hakemusOids = applicationAdditionalDatas.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toList());
 
-        assertFalse(pistetiedot.stream().anyMatch(p -> p.getAdditionalData().containsKey("kielikoe_fi")));
+        assertFalse(applicationAdditionalDatas.stream().anyMatch(p -> p.getAdditionalData().containsKey("kielikoe_fi")));
 
-        mockHakuAppKutsu(pistetiedot);
+        mockHakuAppKutsu(applicationAdditionalDatas);
+        mockValintaPisteServiceKutsu(applicationAdditionalDatas);
+
         mockSureKutsu(createOppijat());
         mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
                 Collections.singletonList(kielikoeFi));
@@ -124,15 +130,11 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 .get();
         assertEquals(200, r.getStatus());
 
-        List<HakemuksenKoetulosYhteenveto> uudetPistetiedot = new Gson().fromJson(
-                new InputStreamReader((InputStream)r.getEntity()),
-                new TypeToken<List<HakemuksenKoetulosYhteenveto>>(){}.getType());
-
+        PistesyottoValilehtiDTO tulokset = gson().fromJson(new InputStreamReader((InputStream) r.getEntity()), PistesyottoValilehtiDTO.class);
         BiFunction<String, String, String> readPistetieto = (personOid, key) ->
-            uudetPistetiedot.stream()
-                    .map(p -> p.applicationAdditionalDataDTO)
-                    .filter(p -> personOid.equals(p.getPersonOid()))
-                    .findFirst().get().getAdditionalData().get(key);
+            tulokset.getValintapisteet().stream()
+                .filter(p -> personOid.equals(p.applicationAdditionalDataDTO.getPersonOid()))
+                .findFirst().get().applicationAdditionalDataDTO.getAdditionalData().get(key);
 
         assertEquals("true", readPistetieto.apply("1.2.246.562.24.77642460905", "kielikoe_fi"));
         assertEquals("", readPistetieto.apply("1.2.246.562.24.52321744679", "kielikoe_fi"));
@@ -145,18 +147,21 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         int keysAddedByKielikoeFi = hakemusOids.size() * 2;
         int keysAddedByKielikoeSvSuoritus = 2;
         assertEquals(
-                (countAdditionalData.apply(pistetiedot) + keysAddedByKielikoeFi + keysAddedByKielikoeSvSuoritus),
-                countAdditionalData.apply(uudetPistetiedot.stream().map(p -> p.applicationAdditionalDataDTO).collect(Collectors.toList())).intValue()
+                (keysAddedByKielikoeFi + keysAddedByKielikoeSvSuoritus),
+                countAdditionalData.apply(tulokset.getValintapisteet().stream().map(p -> p.applicationAdditionalDataDTO).collect(Collectors.toList())).intValue()
         );
     }
 
     @Test
     public void testTallentaaKoostetutPistetiedotHakukohteelle() throws Exception {
         HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
-        List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
+        List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
+        mockToReturnJson(GET, "/valintapiste-service/api/haku/testihaku/hakukohde/testihakukohde",
+            applicationAdditionalDataDtos.stream().map(APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET).collect(Collectors.toList())
+        );
         mockToReturnJson(POST, "/haku-app/applications/listfull",
-                pistetiedot.stream().map(p -> new HakemusOid(p.getOid())).collect(Collectors.toList())
+            applicationAdditionalDataDtos.stream().map(p -> new HakemusOid(p.getOid())).collect(Collectors.toList())
         );
         mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();
@@ -168,19 +173,19 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
         mockSuoritusrekisteriDelete(deleteCounter);
 
-        final Semaphore lisatietoCounter = new Semaphore(0);
-        mockHakuAppTallennus(lisatietoCounter, 209);
+        final Semaphore pisteCounter = new Semaphore(0);
+        mockPistetietoTallennus(pisteCounter, 209);
 
         Response r = http.getWebClient()
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .put(new Gson().toJson(pistetiedot));
+                .put(new Gson().toJson(applicationAdditionalDataDtos));
         assertEquals(204, r.getStatus());
 
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(2, 10, TimeUnit.SECONDS));
             Assert.assertTrue(arvosanaCounter.tryAcquire(2, 10, TimeUnit.SECONDS));
-            Assert.assertTrue(lisatietoCounter.tryAcquire(1, 10, TimeUnit.SECONDS));
+            Assert.assertTrue(pisteCounter.tryAcquire(1, 10, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             Assert.fail();
         }
@@ -188,11 +193,11 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     @Test
     public void testTallentaaKoostetutPistetiedotJosEiKielikokeita() throws Exception {
-        ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
-        String hakijaOid = pistetieto.getPersonOid();
+        ApplicationAdditionalDataDTO applicationAdditionaData = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
+        String hakijaOid = applicationAdditionaData.getPersonOid();
 
-        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid());
-        pistetieto.getAdditionalData().remove("kielikoe_fi");
+        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + applicationAdditionaData.getOid());
+        applicationAdditionaData.getAdditionalData().remove("kielikoe_fi");
 
         mockOrganisaatioKutsu();
         mockTarjontaHakukohdeCall();
@@ -200,9 +205,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockTarjontaHakukohdeRyhmaCall();
 
         Hakemus hakemusHakuAppista = new Hakemus();
-        hakemusHakuAppista.setAdditionalInfo(pistetieto.getAdditionalData());
+        hakemusHakuAppista.setAdditionalInfo(applicationAdditionaData.getAdditionalData());
         hakemusHakuAppista.setPersonOid(hakijaOid);
-        hakemusHakuAppista.setOid(pistetieto.getOid());
+        hakemusHakuAppista.setOid(applicationAdditionaData.getOid());
         hakemusHakuAppista.setApplicationSystemId("testihaku");
         Answers answers = new Answers();
         answers.setHenkilotiedot(new HashMap<>());
@@ -212,29 +217,31 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         answers.getHakutoiveet().put("preference1-Koulutus-id", "testihakukohde");
         hakemusHakuAppista.setAnswers(answers);
         mockToReturnJson(GET,
-                "/haku-app/applications/" + pistetieto.getOid(),
+                "/haku-app/applications/" + applicationAdditionaData.getOid(),
                 hakemusHakuAppista
         );
-
+        mockToReturnJson(POST,
+            "/valintapiste-service/api/pisteet-with-hakemusoids",
+            Collections.singletonList(APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET.apply(applicationAdditionaData)));
         final Semaphore suoritusCounter = new Semaphore(0);
         final Semaphore arvosanaCounter = new Semaphore(0);
         final Semaphore deleteCounter = new Semaphore(0);
         mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
         mockSuoritusrekisteriDelete(deleteCounter);
 
-        final Semaphore lisatietoCounter = new Semaphore(0);
-        mockHakuAppNormiTallennus(lisatietoCounter);
+        final Semaphore pisteCounter = new Semaphore(0);
+        mockPistetietoNormiTallennus(pisteCounter);
 
         Response r = http.getWebClient()
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .put(new Gson().toJson(pistetieto));
+                .put(new Gson().toJson(applicationAdditionaData));
         assertEquals(204, r.getStatus());
 
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(0, 10, TimeUnit.SECONDS));
             Assert.assertTrue(arvosanaCounter.tryAcquire(0, 10, TimeUnit.SECONDS));
-            Assert.assertTrue(lisatietoCounter.tryAcquire(1, 10, TimeUnit.SECONDS));
+            Assert.assertTrue(pisteCounter.tryAcquire(1, 10, TimeUnit.SECONDS));
 
             mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat/" + hakijaOid, createOppijat().get(1));
             mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
@@ -243,18 +250,15 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
             Response singleHakemusResponse = http.getWebClient().accept(MediaType.APPLICATION_JSON).get();
             assertEquals(200, singleHakemusResponse.getStatus());
-            Map<String, HakemuksenKoetulosYhteenveto> tulokset = new Gson().fromJson(
-                new InputStreamReader((InputStream) singleHakemusResponse.getEntity()),
-                new TypeToken<Map<String, HakemuksenKoetulosYhteenveto>>() {
-                }.getType()
-            );
-            assertThat(tulokset, Matchers.hasKey("testihakukohde"));
-            assertThat(tulokset.keySet(), Matchers.hasSize(1));
-            HakemuksenKoetulosYhteenveto readPistetieto = tulokset.get("testihakukohde");
+            HenkiloValilehtiDTO tulokset = gson().fromJson(new InputStreamReader((InputStream) singleHakemusResponse.getEntity()), HenkiloValilehtiDTO.class);
+            assertNull(tulokset.getLastmodified());
+            assertThat(tulokset.getHakukohteittain(), Matchers.hasKey("testihakukohde"));
+            assertThat(tulokset.getHakukohteittain().keySet(), Matchers.hasSize(1));
+            HakemuksenKoetulosYhteenveto readPistetieto = tulokset.getHakukohteittain().get("testihakukohde");
             KokeenOsallistumistietoDTO osallistumistietoDTO = readPistetieto.osallistumistieto("testihakukohde", "kielikoe_fi");
             assertEquals(Osallistumistieto.OSALLISTUI, osallistumistietoDTO.osallistumistieto);
 
-            assertEquals(pistetieto.getOid(), readPistetieto.applicationAdditionalDataDTO.getOid());
+            assertEquals(applicationAdditionaData.getOid(), readPistetieto.applicationAdditionalDataDTO.getOid());
         } catch (InterruptedException e) {
             Assert.fail();
         }
@@ -262,11 +266,11 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     @Test
     public void testHakemuksenPistetietojenLukuOnnistuuJosOikeudetHakukohteeseen() throws IOException {
-        ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
-        String hakijaOid = pistetieto.getPersonOid();
+        ApplicationAdditionalDataDTO applicationAdditionalDataDto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
+        String hakijaOid = applicationAdditionalDataDto.getPersonOid();
 
-        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid());
-        pistetieto.getAdditionalData().remove("kielikoe_fi");
+        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + applicationAdditionalDataDto.getOid());
+        applicationAdditionalDataDto.getAdditionalData().remove("kielikoe_fi");
 
         String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_" + kayttajanOrganisaatioOid);
@@ -278,9 +282,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockTarjontaHakukohdeRyhmaCall();
 
         Hakemus hakemusHakuAppista = new Hakemus();
-        hakemusHakuAppista.setAdditionalInfo(pistetieto.getAdditionalData());
+        hakemusHakuAppista.setAdditionalInfo(applicationAdditionalDataDto.getAdditionalData());
         hakemusHakuAppista.setPersonOid(hakijaOid);
-        hakemusHakuAppista.setOid(pistetieto.getOid());
+        hakemusHakuAppista.setOid(applicationAdditionalDataDto.getOid());
         hakemusHakuAppista.setApplicationSystemId("testihaku");
         Answers answers = new Answers();
         answers.setHenkilotiedot(new HashMap<>());
@@ -290,9 +294,10 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         answers.getHakutoiveet().put("preference1-Koulutus-id", "testihakukohde");
         hakemusHakuAppista.setAnswers(answers);
         mockToReturnJson(GET,
-                "/haku-app/applications/" + pistetieto.getOid(),
+                "/haku-app/applications/" + applicationAdditionalDataDto.getOid(),
                 hakemusHakuAppista
         );
+        mockToReturnJson(POST, "/valintapiste-service/api/pisteet-with-hakemusoids", Collections.singletonList(APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET.apply(applicationAdditionalDataDto)));
         mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat/" + hakijaOid, createOppijat().get(1));
         mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
                 Collections.singletonList(kielikoeFi));
@@ -305,12 +310,12 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     @Test
     public void testHakemuksenPistetietojenLukuEpaonnistuuJosEiOikeuksia() throws IOException {
-        ApplicationAdditionalDataDTO pistetieto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
-        String hakijaOid = pistetieto.getPersonOid();
+        ApplicationAdditionalDataDTO applicationAdditionalDataDto = luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
+        String hakijaOid = applicationAdditionalDataDto.getPersonOid();
 
-        String url = resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + pistetieto.getOid();
+        String url = resourcesAddress + "/pistesyotto/koostetutPistetiedot/hakemus/" + applicationAdditionalDataDto.getOid();
         HttpResourceBuilder.WebClientExposingHttpResource http = createClient(url);
-        pistetieto.getAdditionalData().remove("kielikoe_fi");
+        applicationAdditionalDataDto.getAdditionalData().remove("kielikoe_fi");
 
         String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_" + kayttajanOrganisaatioOid);
@@ -322,9 +327,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockTarjontaHakukohdeRyhmaCall();
 
         Hakemus hakemusHakuAppista = new Hakemus();
-        hakemusHakuAppista.setAdditionalInfo(pistetieto.getAdditionalData());
+        hakemusHakuAppista.setAdditionalInfo(applicationAdditionalDataDto.getAdditionalData());
         hakemusHakuAppista.setPersonOid(hakijaOid);
-        hakemusHakuAppista.setOid(pistetieto.getOid());
+        hakemusHakuAppista.setOid(applicationAdditionalDataDto.getOid());
         hakemusHakuAppista.setApplicationSystemId("testihaku");
         Answers answers = new Answers();
         answers.setHenkilotiedot(new HashMap<>());
@@ -334,9 +339,10 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         answers.getHakutoiveet().put("preference1-Koulutus-id", "testihakukohde");
         hakemusHakuAppista.setAnswers(answers);
         mockToReturnJson(GET,
-                "/haku-app/applications/" + pistetieto.getOid(),
+                "/haku-app/applications/" + applicationAdditionalDataDto.getOid(),
                 hakemusHakuAppista
         );
+        mockToReturnJson(POST, "/valintapiste-service/api/pisteet-with-hakemusoids", Collections.singletonList(APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET.apply(applicationAdditionalDataDto)));
         mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat/" + hakijaOid, createOppijat().get(1));
         mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
                 Collections.singletonList(kielikoeFi));
@@ -371,46 +377,32 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 result);
     }
 
-    private void mockHakuAppNormiTallennus(Semaphore counter) {
-        MockServer fakeHakuApp = new MockServer();
+    private void mockPistetietoNormiTallennus(Semaphore counter) {
         mockForward(PUT,
-                fakeHakuApp.addHandler("/haku-app/applications/additionalData/testihaku", exchange -> {
-                    try {
-                        new Gson().fromJson(
-                            IOUtils.toString(exchange.getRequestBody()), new TypeToken<List<ApplicationAdditionalDataDTO>>() {
-                            }.getType()
-                        );
-                        exchange.sendResponseHeaders(200, 0);
-                        exchange.getResponseBody().close();
-                        counter.release();
-                    } catch (Throwable t) {
-                        t.printStackTrace();
-                    }
-                }));
+            fakeValintaPisteService.addHandler("/valintapiste-service/api/pisteet-with-hakemusoids", exchange -> {
+                exchange.sendResponseHeaders(200, 0);
+                exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
+                exchange.getResponseBody().close();
+                exchange.close();
+                counter.release();
+            }));
     }
 
-    private void mockHakuAppTallennus(Semaphore counter, int n) {
-        MockServer fakeHakuApp = new MockServer();
+    private void mockPistetietoTallennus(Semaphore counter, int n) {
         mockForward(PUT,
-                fakeHakuApp.addHandler("/haku-app/applications/additionalData/testihaku/testihakukohde", exchange -> {
-                    try {
-                        List<ApplicationAdditionalDataDTO> additionalData = new Gson().fromJson(
-                                IOUtils.toString(exchange.getRequestBody()), new TypeToken<List<ApplicationAdditionalDataDTO>>() {
-                                }.getType()
-                        );
-                        assertEquals(n + " hakijalle löytyy lisätiedot", n, additionalData.size());
-                        long count = additionalData.stream()
-                                .flatMap(a -> a.getAdditionalData().entrySet().stream())
-                                .count();
+            fakeValintaPisteService.addHandler("/valintapiste-service/api/pisteet-with-hakemusoids", exchange -> {
+                List<Valintapisteet> valintapisteetList = new Gson().fromJson(
+                    IOUtils.toString(exchange.getRequestBody(), "UTF-8"), new TypeToken<List<Valintapisteet>>() {}.getType());
+                assertEquals(n + " hakijalle löytyy pistetiedot", n, valintapisteetList.size());
+                long count = valintapisteetList.stream().mapToLong(a -> a.getPisteet().size()).sum();
 
-                        assertEquals("Editoimattomat lisätietokentät ja kielikoetulokset ohitetaan, eli viedään 1696-" + n + "=1487", 1696 - n, count);
-                        exchange.sendResponseHeaders(200, 0);
-                        exchange.getResponseBody().close();
-                        counter.release();
-                    } catch (Throwable t) {
-                        t.printStackTrace();
-                    }
-                }));
+                assertEquals("Paljon pisteitä viedään", 1057 - n, count);
+                exchange.sendResponseHeaders(200, 0);
+                exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
+                exchange.getResponseBody().close();
+                exchange.close();
+                counter.release();
+            }));
     }
 
     private void mockTarjontaHakukohdeCall() {
@@ -463,10 +455,17 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 ImmutableMap.of("oid", "1.2.3.44444.5", "aktiiviset", "true", "suunnitellut", "false", "lakkautetut", "true"));
     }
 
-    private void mockHakuAppKutsu(List<ApplicationAdditionalDataDTO> pistetiedot) {
+    private void mockHakuAppKutsu(List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos) {
         mockToReturnJson(GET,
                 "/haku-app/applications/additionalData/testihaku/testihakukohde",
-                pistetiedot
+                applicationAdditionalDataDtos
+        );
+    }
+
+    private void mockValintaPisteServiceKutsu(List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos) {
+        mockToReturnJson(GET,
+                "/valintapiste-service/api/haku/testihaku/hakukohde/testihakukohde",
+                applicationAdditionalDataDtos.stream().map(APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET).collect(Collectors.toList())
         );
     }
 
