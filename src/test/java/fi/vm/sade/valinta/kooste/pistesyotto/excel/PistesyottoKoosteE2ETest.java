@@ -88,7 +88,6 @@ import java.util.stream.Stream;
 
 public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     private static final ValintaperusteDTO kielikoeFi = new ValintaperusteDTO();
-    private static final Function<ApplicationAdditionalDataDTO, Valintapisteet> APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET = p -> new Valintapisteet(p.getOid(), p.getPersonOid(), p.getFirstNames(), p.getLastName(), Collections.emptyList());
 
     static {
         kielikoeFi.setTunniste("kielikoe_fi");
