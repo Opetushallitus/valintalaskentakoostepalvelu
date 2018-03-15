@@ -447,8 +447,10 @@ public class PistesyottoResource {
                         final ProsessiId id = tuonti.prosessiId;
                         tuonti.failedImports.subscribe(ids -> {
                             if(ids.isEmpty()) {
+                                LOG.info("Kaikki pistetiedot tallennettu onnistuneesti");
                                 asyncResponse.resume(Response.noContent().build());
                             } else {
+                                LOG.info("Joitakin pistetietoja ei voitu tallentaa");
                                 asyncResponse.resume(Response.ok(ids).build());
                             }
                         });
