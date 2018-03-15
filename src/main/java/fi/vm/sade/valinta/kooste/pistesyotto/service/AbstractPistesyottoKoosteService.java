@@ -263,7 +263,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
         return kielikoeTallennus.flatMap(a -> {
             if (saveApplicationAdditionalInfo) {
-                return tallennaAdditionalInfoHakemuksille(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, username, auditLogOperation, auditSession);
+                return tallennaPisteetValintaPisteServiceen(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, username, auditLogOperation, auditSession);
             } else {
                 return Observable.just(null);
             }
@@ -318,13 +318,13 @@ public abstract class AbstractPistesyottoKoosteService {
         return additionalDataDTOS.stream().map(a -> Pair.of(tallettaja, a)).map(Valintapisteet::new).collect(Collectors.toList());
     }
 
-    private Observable<Set<String>> tallennaAdditionalInfoHakemuksille(String hakuOid,
-                                                                String hakukohdeOid,
-                                                                Optional<String> ifUnmodifiedSince,
-                                                                List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                                String username,
-                                                                ValintaperusteetOperation auditLogOperation,
-                                                                AuditSession auditSession) {
+    private Observable<Set<String>> tallennaPisteetValintaPisteServiceen(String hakuOid,
+                                                                         String hakukohdeOid,
+                                                                         Optional<String> ifUnmodifiedSince,
+                                                                         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                                         String username,
+                                                                         ValintaperusteetOperation auditLogOperation,
+                                                                         AuditSession auditSession) {
         return valintapisteAsyncResource.putValintapisteet(ifUnmodifiedSince, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
                 //.<Void>map(a -> null)
                 .doOnNext(conflictingHakemusOids ->
