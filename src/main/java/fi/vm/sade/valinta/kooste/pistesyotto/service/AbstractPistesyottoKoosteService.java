@@ -340,7 +340,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                 .build()))
                 )
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
-                        "Lisätietojen tallennus hakemukselle epäonnistui", t)));
+                        "Pistetietojen tallennus valinta-piste-serviceen epäonnistui", t)));
     }
 
     private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid) {
