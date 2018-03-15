@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,9 +102,9 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                 ).collect(Collectors.toList());
     }
 
-    public void tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid,  DokumenttiProsessi prosessi, InputStream stream) {
+    public Observable<Set<String>> tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid,  DokumenttiProsessi prosessi, InputStream stream) {
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
-        muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
+        Observable<Set<String>> setObservable = muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
                 .flatMap(p -> {
                     PistesyottoExcel pistesyottoExcel = p.getLeft();
                     Map<String, ApplicationAdditionalDataDTO> pistetiedot = p.getRight();
@@ -118,7 +119,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                         return Observable.error(new RuntimeException(String.format("Virheitä pistesyöttöriveissä %s", v)));
                     }
                     Date valmistuminen = new Date();
-                    Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> uudetKielikoetulokset = new HashMap<>();
+                    Map<String, List<SingleKielikoeTulos>> uudetKielikoetulokset = new HashMap<>();
                     Optional<String> ifUnmodifiedSince = pistesyottoExcel.getAikaleima();
                     List<ApplicationAdditionalDataDTO> uudetPistetiedot =
                             pistesyottoTuontiAdapteri
@@ -145,13 +146,18 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                         return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, uudetPistetiedot,
                                 uudetKielikoetulokset, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, auditSession);
                     }
-                })
-                .subscribe(x -> {
+                });
+
+        setObservable.subscribe(failedIds -> {
                     prosessi.inkrementoiTehtyjaToita();
                     prosessi.setDokumenttiId("valmis");
+                    LOG.info("Pistesyöttö epäonnistui hakemuksille: {}", StringUtils.join(failedIds, ","));
+
                 }, t -> {
                     logPistesyotonTuontiEpaonnistui(t);
                     prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
+
                 });
+        return setObservable;
     }
 }

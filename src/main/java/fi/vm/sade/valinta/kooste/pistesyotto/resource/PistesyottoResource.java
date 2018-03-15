@@ -440,10 +440,20 @@ public class PistesyottoResource {
                         "Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
                         username, hakuOid, hakukohdeOid), poikkeus)
                 );
-                tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
-                return prosessi.toProsessiId();
+                Observable<Set<String>> tuo = tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
+                return new Tuonti(prosessi.toProsessiId(), tuo);
             }).subscribe(
-                    id -> asyncResponse.resume(Response.ok(id).build()),
+                    tuonti -> {
+                        final ProsessiId id = tuonti.prosessiId;
+                        tuonti.failedImports.subscribe(ids -> {
+                            if(ids.isEmpty()) {
+                                asyncResponse.resume(Response.noContent().build());
+                            } else {
+                                asyncResponse.resume(Response.ok(ids).build());
+                            }
+                        });
+
+                    },
                     error -> {
                         logError("Tuntematon virhetilanne", error);
                         resumeWithException(asyncResponse, error);
@@ -453,6 +463,16 @@ public class PistesyottoResource {
             LOG.error("Odottamaton virhe", e);
             asyncResponse.resume(e);
         }
+    }
+
+    class Tuonti {
+        public Tuonti(ProsessiId prosessiId, Observable<Set<String>> failedImports) {
+            this.prosessiId = prosessiId;
+            this.failedImports = failedImports;
+        }
+
+        public Observable<Set<String>> failedImports;
+        public ProsessiId prosessiId;
     }
 
     private ByteArrayOutputStream readFileToBytearray(InputStream file) {
