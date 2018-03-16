@@ -29,6 +29,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -424,7 +425,7 @@ public class PistesyottoResource {
                 return Observable.error(new ForbiddenException(
                         msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
                 ));
-            }).map(x -> {
+            }).flatMap(x -> {
                 DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, singletonList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 ByteArrayOutputStream xlsx = readFileToBytearray(file);
@@ -440,21 +441,16 @@ public class PistesyottoResource {
                         "Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
                         username, hakuOid, hakukohdeOid), poikkeus)
                 );
-                Observable<Set<String>> tuo = tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
-                return new Tuonti(prosessi.toProsessiId(), tuo);
+                return tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
             }).subscribe(
-                    tuonti -> {
-                        final ProsessiId id = tuonti.prosessiId;
-                        tuonti.failedImports.subscribe(ids -> {
-                            if(ids.isEmpty()) {
-                                LOG.info("Kaikki pistetiedot tallennettu onnistuneesti");
-                                asyncResponse.resume(Response.noContent().build());
-                            } else {
-                                LOG.info("Joitakin pistetietoja ei voitu tallentaa");
-                                asyncResponse.resume(Response.ok(ids).build());
-                            }
-                        });
-
+                    failedIds -> {
+                        if(failedIds.isEmpty()) {
+                            LOG.info("Kaikki pistetiedot tallennettu onnistuneesti");
+                            asyncResponse.resume(Response.noContent().build());
+                        } else {
+                            LOG.info("Joitakin pistetietoja ei voitu tallentaa: {}", StringUtils.join(failedIds.toArray(), ","));
+                            asyncResponse.resume(Response.ok(failedIds).build());
+                        }
                     },
                     error -> {
                         logError("Tuntematon virhetilanne", error);
