@@ -1,5 +1,14 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
+import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
+import static java.util.Arrays.asList;
+import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.EMPTY_MAP;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
@@ -14,15 +23,15 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
-
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.StreamUtils;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -33,12 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-
-import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
-import static java.util.Arrays.asList;
-import static java.util.Collections.EMPTY_LIST;
-import static java.util.Collections.EMPTY_MAP;
-import static org.junit.Assert.assertEquals;
 
 public class ValintalaskennanTulosExcelTest {
     HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
@@ -62,7 +65,7 @@ public class ValintalaskennanTulosExcelTest {
         )), hakemukset());
 
     @Test
-    public void sheetNames() throws Throwable {
+    public void sheetNames() {
         assertEquals(3, workbook.getNumberOfSheets());
         assertEquals("Jono 1", workbook.getSheetName(0));
         assertEquals("Jono 2", workbook.getSheetName(1));
@@ -103,9 +106,14 @@ public class ValintalaskennanTulosExcelTest {
     }
 
     @Test
-    @Ignore
     public void generoiTiedosto() throws IOException {
-        StreamUtils.copy(Excel.export(workbook), new FileOutputStream("valintatulokset.xlsx"));
+        File outputFile = new File("valintatulokset.xlsx");
+        try {
+            StreamUtils.copy(Excel.export(workbook), new FileOutputStream(outputFile.getName()));
+            assertThat(outputFile.length(), is(greaterThan(0L)));
+        } finally {
+            FileUtils.forceDelete(outputFile);
+        }
     }
 
 
