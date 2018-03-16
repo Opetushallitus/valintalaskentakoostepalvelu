@@ -668,7 +668,7 @@
       <version>4.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>fi.vm.sade.sharedutils</groupId>
+      <groupId>fi.vm.sade.valintaperusteet</groupId>
       <artifactId>sharedutils</artifactId>
       <version>4.1-SNAPSHOT</version>
     </dependency>
