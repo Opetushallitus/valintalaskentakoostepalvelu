@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.test;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,9 +16,7 @@ import java.util.List;
  * 
  * 
  */
-@Ignore
 public class ExcelPalveluTest {
-
     @Test
     public void testaaXlsTiedostonLuontia() throws IOException {
         final String RANDOM_DATAA = "RANDOM DATAA!";
@@ -31,5 +28,4 @@ public class ExcelPalveluTest {
         InputStream xlsData = ExcelExportUtil.exportGridAsXls(rivit.toArray(new Object[][] {}));
         Assert.assertTrue(IOUtils.toByteArray(xlsData).length >= 0);
     }
-
 }
