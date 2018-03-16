@@ -409,7 +409,7 @@ public class PistesyottoResource {
         try {
             final String username = KoosteAudit.username();
             final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-            authorityCheckService.getAuthorityCheckForRoles(asList(
+            Observable<Object> authCheck = authorityCheckService.getAuthorityCheckForRoles(asList(
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
                     "ROLE_APP_HAKEMUS_CRUD",
                     "ROLE_APP_HAKEMUS_LISATIETORU",
@@ -418,14 +418,15 @@ public class PistesyottoResource {
                 if (authorityCheck.test(hakukohdeOid)) {
                     return Observable.just(null);
                 }
-                String msg = String.format(
-                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
+                String msg = String.format("Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
                         username, hakukohdeOid
                 );
                 return Observable.error(new ForbiddenException(
                         msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
                 ));
-            }).flatMap(x -> {
+            });
+
+            Observable<Set<String>> map = authCheck.flatMap(x -> {
                 DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, singletonList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 ByteArrayOutputStream xlsx = readFileToBytearray(file);
@@ -433,17 +434,23 @@ public class PistesyottoResource {
                 Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
                 List<String> tags = asList();
                 dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
-                    "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray())).subscribe(
-                    response -> LOG.info(
-                        "Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
-                        username, hakuOid, hakukohdeOid, uuid),
-                    poikkeus -> logError(String.format(
-                        "Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                        username, hakuOid, hakukohdeOid), poikkeus)
+                        "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray())).subscribe(
+                        response -> LOG.info(
+                                "Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
+                                username, hakuOid, hakukohdeOid, uuid),
+                        poikkeus -> logError(String.format(
+                                "Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
+                                username, hakuOid, hakukohdeOid), poikkeus)
                 );
                 return tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
-            }).subscribe(
+            }).doOnError(throwable -> {
+                LOG.error("Virhe tuodessa tietoja excelistä", throwable);
+                asyncResponse.resume(Response.serverError());
+            });
+
+            map.subscribe(
                     failedIds -> {
+
                         if(failedIds.isEmpty()) {
                             LOG.info("Kaikki pistetiedot tallennettu onnistuneesti");
                             asyncResponse.resume(Response.noContent().build());
