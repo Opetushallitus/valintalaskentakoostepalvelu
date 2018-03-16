@@ -151,7 +151,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         setObservable.subscribe(failedIds -> {
                     prosessi.inkrementoiTehtyjaToita();
                     prosessi.setDokumenttiId("valmis");
-                    if(failedIds != null) {
+                    if(failedIds != null && !failedIds.isEmpty()) {
                         LOG.info("Pistesyöttö epäonnistui hakemuksille: {}", StringUtils.join(failedIds, ","));
                     }
 
