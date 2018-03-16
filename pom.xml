@@ -84,11 +84,6 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>fi.vm.sade.sharedutils</groupId>
-      <artifactId>Sharedutils</artifactId>
-      <version>4.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>fi.vm.sade.valintaperusteet</groupId>
       <artifactId>http</artifactId>
       <version>${project.version}</version>
@@ -681,6 +676,11 @@
       <artifactId>sharedutils</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>fi.vm.sade.sharedutils</groupId>
+      <artifactId>sharedutils</artifactId>
+      <version>4.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
