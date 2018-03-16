@@ -58,7 +58,8 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                 List<Valintapisteet> pisteet = gson().fromJson(entity, new GenericType<List<Valintapisteet>>() {
                 }.getType());
                 if(pisteet == null) {
-                    LOG.error("Valintapisteet null! Response {}", response.toString());
+                    String s = response.readEntity(String.class);
+                    LOG.error("Valintapisteet null! Response {}", s);
                     String url = getUrl(response);
                     return Observable.error(new RuntimeException(String.format("Null response for url %s", url)));
                 } else {
