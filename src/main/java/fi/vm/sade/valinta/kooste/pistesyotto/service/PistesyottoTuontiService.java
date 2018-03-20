@@ -148,18 +148,18 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     }
                 });
 
-        setObservable.subscribe(failedIds -> {
+        setObservable = setObservable.doOnNext(failedIds -> {
                     prosessi.inkrementoiTehtyjaToita();
                     prosessi.setDokumenttiId("valmis");
                     if(failedIds != null && !failedIds.isEmpty()) {
                         LOG.info("Pistesyöttö epäonnistui hakemuksille: {}", StringUtils.join(failedIds, ","));
                     }
+        });
 
-                }, t -> {
+        setObservable = setObservable.doOnError(t -> {
                     logPistesyotonTuontiEpaonnistui(t);
                     prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
-
-                });
+        });
         return setObservable;
     }
 }
