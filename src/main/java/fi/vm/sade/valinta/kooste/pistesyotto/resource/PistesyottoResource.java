@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditi
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
@@ -426,7 +427,7 @@ public class PistesyottoResource {
                 ));
             });
 
-            Observable<Set<String>> map = authCheck.flatMap(x -> {
+            Observable<Set<TuontiErrorDTO>> map = authCheck.flatMap(x -> {
                 DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, singletonList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 ByteArrayOutputStream xlsx = readFileToBytearray(file);
@@ -450,7 +451,6 @@ public class PistesyottoResource {
 
             map.subscribe(
                     failedIds -> {
-
                         if(failedIds.isEmpty()) {
                             LOG.info("Kaikki pistetiedot tallennettu onnistuneesti");
                             asyncResponse.resume(Response.noContent().build());

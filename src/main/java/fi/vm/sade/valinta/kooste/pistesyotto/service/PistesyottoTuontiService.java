@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
@@ -102,9 +103,9 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                 ).collect(Collectors.toList());
     }
 
-    public Observable<Set<String>> tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid,  DokumenttiProsessi prosessi, InputStream stream) {
+    public Observable<Set<TuontiErrorDTO>> tuo(String username, AuditSession auditSession, String hakuOid, String hakukohdeOid,  DokumenttiProsessi prosessi, InputStream stream) {
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
-        Observable<Set<String>> setObservable = muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
+        Observable<Set<TuontiErrorDTO>> errors = muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
                 .flatMap(p -> {
                     PistesyottoExcel pistesyottoExcel = p.getLeft();
                     Map<String, ApplicationAdditionalDataDTO> pistetiedot = p.getRight();
@@ -143,12 +144,16 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                         return Observable.just(null);
                     } else {
                         LOG.info("Pistesyötössä hakukohteeseen {} muuttunutta {} tietoa tallennettavaksi", hakukohdeOid, uudetPistetiedot.size());
-                        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, uudetPistetiedot,
+                        Observable<Set<String>> failedPisteet = tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, uudetPistetiedot,
                                 uudetKielikoetulokset, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, auditSession);
+                        return failedPisteet.map(ids -> uudetPistetiedot.stream()
+                                .filter(u -> ids.contains(u.getOid()))
+                                .map(dto -> new TuontiErrorDTO(dto.getOid(), dto.getFirstNames() + " " + dto.getLastName()))
+                                .collect(Collectors.toSet()));
                     }
                 });
 
-        setObservable = setObservable.doOnNext(failedIds -> {
+        errors = errors.doOnNext(failedIds -> {
                     prosessi.inkrementoiTehtyjaToita();
                     prosessi.setDokumenttiId("valmis");
                     if(failedIds != null && !failedIds.isEmpty()) {
@@ -156,10 +161,12 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     }
         });
 
-        setObservable = setObservable.doOnError(t -> {
+        errors = errors.doOnError(t -> {
                     logPistesyotonTuontiEpaonnistui(t);
                     prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
         });
-        return setObservable;
+        return errors;
     }
+
+
 }
