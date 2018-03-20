@@ -470,16 +470,6 @@ public class PistesyottoResource {
         }
     }
 
-    class Tuonti {
-        public Tuonti(ProsessiId prosessiId, Observable<Set<String>> failedImports) {
-            this.prosessiId = prosessiId;
-            this.failedImports = failedImports;
-        }
-
-        public Observable<Set<String>> failedImports;
-        public ProsessiId prosessiId;
-    }
-
     private ByteArrayOutputStream readFileToBytearray(InputStream file) {
         try {
             ByteArrayOutputStream xlsx = new ByteArrayOutputStream();
