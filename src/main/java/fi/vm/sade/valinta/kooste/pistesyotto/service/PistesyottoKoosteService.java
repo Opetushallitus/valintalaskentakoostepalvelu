@@ -21,6 +21,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Audit
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HenkiloValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistesyottoValilehtiDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -169,7 +170,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         return a;
     }
 
-    public Observable<Set<String>> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
+    public Observable<Set<TuontiErrorDTO>> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
                                                                      Optional<String> ifUnmodifiedSince,
                                                                      String username, AuditSession auditSession) {
         return valintalaskentaValintakoeAsyncResource.haeHakemukselle(pistetietoDTO.getOid()).flatMap(vo -> {
@@ -179,12 +180,14 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     .filter(e -> e.getKey().matches(PistesyottoExcel.KIELIKOE_REGEX))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             if (kielikoePistetiedot.isEmpty()) {
-                return valintapisteAsyncResource.putValintapisteet(
+                Observable<Set<String>> failedPisteet = valintapisteAsyncResource.putValintapisteet(
                         ifUnmodifiedSince,
                         singletonList(new Valintapisteet(Pair.of(username, pistetietoDTO))),
                         auditSession);
+                return failedPisteet.map(strings ->
+                        Collections.singleton(new TuontiErrorDTO(pistetietoDTO.getOid(), pistetietoDTO.getFirstNames() + " " + pistetietoDTO.getLastName())));
             } else {
-                return Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
+                Observable<Set<TuontiErrorDTO>> errors = Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
                     ApplicationAdditionalDataDTO a = poistaKielikoepistetiedot(pistetietoDTO);
                     a.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
                     return tallennaKoostetutPistetiedot(
@@ -192,11 +195,12 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                             singletonList(a), username, auditSession
                     );
                 }).collect(Collectors.toList()));
+                return errors;
             }
         }).lastOrDefault(null);
     }
 
-    public Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
+    public Observable<Set<TuontiErrorDTO>> tallennaKoostetutPistetiedot(String hakuOid,
                                                          String hakukohdeOid,
                                                          Optional<String> ifUnmodifiedSince,
                                                          List<ApplicationAdditionalDataDTO> pistetietoDTOs,
@@ -205,7 +209,12 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle;
         try {
             pistetiedotHakemukselle = createAdditionalDataAndPopulateKielikoetulokset(pistetietoDTOs, kielikoetuloksetSureen);
-            return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, auditSession);
+            Observable<Set<String>> failedPisteet = tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, auditSession);
+            return failedPisteet.map(ids -> pistetiedotHakemukselle.stream()
+                    .filter(u -> ids.contains(u.getOid()))
+                    .map(dto -> new TuontiErrorDTO(dto.getOid(), dto.getFirstNames() + " " + dto.getLastName()))
+                    .collect(Collectors.toSet()));
+
         } catch (Exception e) {
             LOG.error(String.format("Ongelma käsiteltäessä pistetietoja haun %s kohteelle %s , käyttäjä %s ", hakuOid, hakukohdeOid, username), e);
             return Observable.error(e);
