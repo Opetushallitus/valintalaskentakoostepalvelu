@@ -327,7 +327,7 @@ public class OppijanSuorituksetProxyResource {
         Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession);
 
         return Observable.combineLatest(valintapisteet, hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable, hakukohdeRyhmasForHakukohdesObservable,
-                (v, haku, suoritukset, hakemus, ohjausparametrit, hakukohdeRyhmasForHakukohdes) -> HakemuksetConverterUtil.muodostaHakemuksetDTO(
+                (v, haku, suoritukset, hakemus, ohjausparametrit, hakukohdeRyhmasForHakukohdes) -> HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
                         haku,
                         "",
                         hakukohdeRyhmasForHakukohdes,
@@ -387,8 +387,8 @@ public class OppijanSuorituksetProxyResource {
                                     List<String> opiskelijaOids,
                                     Boolean fetchEnsikertalaisuus) {
 
-        Observable<HakuV1RDTO>    hakuObservable           = tarjontaAsyncResource.haeHaku(hakuOid);
-        Observable<ParametritDTO> parametritObservable     = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+        Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid);
+        Observable<ParametritDTO> parametritObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
 
         Observable<List<Oppija>> suorituksetObservable = fetchEnsikertalaisuus
                 ? suoritusrekisteriAsyncResource.getSuorituksetByOppijas(opiskelijaOids, hakuOid)
@@ -411,7 +411,7 @@ public class OppijanSuorituksetProxyResource {
             .timeout(1, MINUTES)
             .toBlocking()
             .first();
-        return HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
+        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
     }
 
     private Observable<List<HakemusDTO>> resolveAtaruHakemusDTOs(String hakuOid,

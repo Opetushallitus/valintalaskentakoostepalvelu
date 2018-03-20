@@ -265,7 +265,7 @@ public class LaskentaActorFactory {
                                 haku.isKorkeakouluHaku(),
                                 actorParams.isErillishaku(),
                                 hakukohdeOid,
-                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v);
+                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v);
 
                     } else {
                         return new LaskeDTO(
@@ -273,7 +273,7 @@ public class LaskentaActorFactory {
                                 haku.isKorkeakouluHaku(),
                                 actorParams.isErillishaku(),
                                 hakukohdeOid,
-                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
+                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
                     }}));
     }
 
