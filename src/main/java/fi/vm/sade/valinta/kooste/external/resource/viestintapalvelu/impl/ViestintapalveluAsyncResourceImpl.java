@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
@@ -88,7 +89,10 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<Response> haeOsoitetarrat(Osoitteet osoitteet) {
-        return postAsObservableLazily(getUrl("viestintapalvelu.addresslabel.sync.pdf"), Entity.json(osoitteet));
+        return postAsObservableLazily(
+            getUrl("viestintapalvelu.addresslabel.sync.pdf"),
+            Entity.json(osoitteet),
+            webClient -> webClient.accept(APPLICATION_OCTET_STREAM_TYPE));
     }
 
     @Override
