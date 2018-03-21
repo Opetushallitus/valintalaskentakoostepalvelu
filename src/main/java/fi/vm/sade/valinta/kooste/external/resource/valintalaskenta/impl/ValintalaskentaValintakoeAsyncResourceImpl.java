@@ -13,9 +13,7 @@ import rx.Observable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -51,14 +49,6 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintatieto.hakukohde", hakukohdeOid),
                 new TypeToken<List<HakemusOsallistuminenDTO>>() {}.getType(),
                 Entity.entity(valintakoeTunnisteet, MediaType.APPLICATION_JSON_TYPE));
-    }
-
-    @Override
-    public Observable<List<ValintakoeOsallistuminenDTO>> haeAmmatillisenKielikokeenOsallistumiset(Date since) {
-        return getAsObservableLazily(
-                getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.valintakoe.ammatillisenkielikoeosallistumiset",
-                        new SimpleDateFormat("yyyy-MM-dd").format(since)),
-            new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
     }
 
     @Override
