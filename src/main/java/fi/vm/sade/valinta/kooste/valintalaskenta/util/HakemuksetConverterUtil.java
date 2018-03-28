@@ -54,7 +54,7 @@ public class HakemuksetConverterUtil {
         Map<String, Exception> errors = Maps.newHashMap();
         try {
             if (oppijat != null) {
-                Map<String, Oppija> personOidToOppija = oppijat.stream().collect(toMap(Oppija::getOppijanumero, Function.<Oppija>identity()));
+                Map<String, Oppija> personOidToOppija = oppijat.stream().collect(toMap(Oppija::getOppijanumero, Function.identity()));
                 Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(Hakemus::getOid, h -> new HakemusWrapper(h).hasHenkilotunnus()));
                 hakemusDtot.stream().forEach(h -> {
                     try {
@@ -207,14 +207,16 @@ public class HakemuksetConverterUtil {
                         (s.isYoTutkinto() && s.isVahvistettu() && s.isValmis()))) {
             return of(PohjakoulutusToinenAste.YLIOPPILAS);
         }
-        if (suorituksetRekisterista.stream().anyMatch(s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt())) {
+        Predicate<SuoritusJaArvosanatWrapper> vahvistettuKeskeytynytPerusopetus = s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt();
+        if (suorituksetRekisterista.stream().anyMatch(vahvistettuKeskeytynytPerusopetus) &&
+            suorituksetRekisterista.stream().filter(SuoritusJaArvosanatWrapper::isPerusopetus).allMatch(vahvistettuKeskeytynytPerusopetus)) {
             return of(PohjakoulutusToinenAste.KESKEYTYNYT);
         }
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
             return of(PohjakoulutusToinenAste.YLIOPPILAS);
         }
         Optional<SuoritusJaArvosanatWrapper> perusopetus = suorituksetRekisterista.stream()
-                .filter(s -> s.isPerusopetus() && s.isVahvistettu())
+                .filter(s -> s.isPerusopetus() && s.isVahvistettu() && !s.isKeskeytynyt())
                 .findFirst();
         if (perusopetus.isPresent()) {
             return of(paattelePerusopetuksenPohjakoulutus(perusopetus.get()));
@@ -357,10 +359,10 @@ public class HakemuksetConverterUtil {
                 PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutus) ||
                 PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO.equals(pohjakoulutus)) {
             return Arrays.stream(Lisapistekoulutus.values())
-                    .collect(toMap(Function.<Lisapistekoulutus>identity(), lpk -> false));
+                    .collect(toMap(Function.identity(), lpk -> false));
         }
         return Arrays.stream(Lisapistekoulutus.values())
-                .collect(toMap(Function.<Lisapistekoulutus>identity(),
+                .collect(toMap(Function.identity(),
                         lpk -> suoritukset.stream()
                                 .filter(s -> lpk.komoOid.equals(s.getSuoritus().getKomo()))
                                 .filter(s -> !(wrap(s).isKeskeytynyt() && !hakukaudella(haku, wrap(s))))

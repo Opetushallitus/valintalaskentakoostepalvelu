@@ -114,7 +114,7 @@ public class HakemuksetConverterUtilTest {
                     .done();
     private static final SuoritusJaArvosanat vahvistettuPerusopetusKeskenHakukaudella =
             new SuoritusrekisteriSpec.SuoritusBuilder()
-                    .setPerusopetus().setVahvistettu(true)
+                    .setPerusopetus().setVahvistettu(true).setYksilollistaminen("Ei")
                     .setValmistuminen(HAKUKAUDELLA).setKesken()
                     .done();
     private static final SuoritusJaArvosanat vahvistettuPerusopetusKeskenEiHakukaudella =
@@ -399,6 +399,19 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusKeskeytynytHakukaudella);
         }};
         Assert.assertEquals(PohjakoulutusToinenAste.KESKEYTYNYT, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+    }
+
+    @Test
+    public void pohjakoulutusPeruskouluJosSekaVahvistettuPeruskoulunSuoritusKeskeytynytEttaKeskenHakukaudella() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
+            add(vahvistettuPerusopetusKeskeytynytHakukaudella);
+            add(vahvistettuPerusopetusKeskenHakukaudella);
+        }};
+        Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
 
     @Test
