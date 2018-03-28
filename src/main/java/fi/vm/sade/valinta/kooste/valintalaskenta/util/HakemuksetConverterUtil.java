@@ -207,6 +207,9 @@ public class HakemuksetConverterUtil {
                         (s.isYoTutkinto() && s.isVahvistettu() && s.isValmis()))) {
             return of(PohjakoulutusToinenAste.YLIOPPILAS);
         }
+        if (suorituksetRekisterista.stream().anyMatch(s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt())) {
+            return of(PohjakoulutusToinenAste.KESKEYTYNYT);
+        }
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
             return of(PohjakoulutusToinenAste.YLIOPPILAS);
         }
@@ -215,9 +218,6 @@ public class HakemuksetConverterUtil {
                 .findFirst();
         if (perusopetus.isPresent()) {
             return of(paattelePerusopetuksenPohjakoulutus(perusopetus.get()));
-        }
-        if (suorituksetRekisterista.stream().anyMatch(s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt())) {
-            return of(PohjakoulutusToinenAste.KESKEYTYNYT);
         }
         Optional<SuoritusJaArvosanatWrapper> perusopetusVahvistamaton = suorituksetRekisterista.stream()
                 .filter(s -> s.isPerusopetus() && !s.isVahvistettu())
