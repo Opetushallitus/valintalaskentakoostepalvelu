@@ -811,7 +811,7 @@ public class PistesyottoResourceTest {
                         .query("hakukohdeOid",HAKUKOHDE1)
                         .post(Entity.entity(excel.getExcel().vieXlsx(),
                                 MediaType.APPLICATION_OCTET_STREAM));
-        assertEquals(200, r.getStatus());
+        assertEquals(204, r.getStatus());
         assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!", 3, tuodutPisteet.size());
         } finally {
             cleanMocks();
@@ -972,7 +972,7 @@ public class PistesyottoResourceTest {
                             .query("hakukohdeOid",HAKUKOHDE1)
                             .post(Entity.entity(excel.getExcel().vieXlsx(),
                                     MediaType.APPLICATION_OCTET_STREAM));
-            assertEquals(200, r.getStatus());
+            assertEquals(204, r.getStatus());
             assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!", 3, tuodutPisteet.size());
             assertTrue("Kielikokeita ei löytyä valinta-piste-servicestä", tuodutPisteet.stream().anyMatch(v -> v.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))));
             assertThat("Arvosanoilla on oikea lähde", MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().stream().filter(a -> "1.2.246.562.10.45698499378".equals(a.getSource())).collect(Collectors.toList()), hasSize(2));
@@ -1072,7 +1072,7 @@ public class PistesyottoResourceTest {
                         .post(Entity.entity(
                                 PistesyottoResourceTest.class.getResourceAsStream("/virheellisesti_sortattu_excel.xlsx"),
                                 MediaType.APPLICATION_OCTET_STREAM));
-        assertEquals(200, r.getStatus());
+        assertEquals(500, r.getStatus());
         List<ApplicationAdditionalDataDTO> tuodutLisatiedot = MockApplicationAsyncResource.getAdditionalDataInput();
         assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!",null, tuodutLisatiedot);
         } finally {
@@ -1143,17 +1143,7 @@ public class PistesyottoResourceTest {
                             .query("hakukohdeOid",HAKUKOHDE1)
                             .post(Entity.entity(pistesyottoExcel.getExcel().vieXlsx(),
                                     MediaType.APPLICATION_OCTET_STREAM));
-            assertEquals(200, r.getStatus());
-            ProsessiId prosessiId = r.readEntity(ProsessiId.class);
-
-            DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessiStatusResponse -> {
-                if (prosessiStatusResponse.valmis() || prosessiStatusResponse.poikkeuksia()) {
-                    String exceptionMessage = prosessiStatusResponse.poikkeukset.iterator().next().getViesti();
-                    assertEquals("Virhe tallennettaessa koostettuja pistetietoja haun HAKU1 hakukohteelle HAKUKOHDE1", exceptionMessage);
-                    return true;
-                }
-                return false;
-            });
+            assertEquals(500, r.getStatus());
         } finally {
             MockSuoritusrekisteriAsyncResource.clear();
             cleanMocks();
@@ -1268,7 +1258,7 @@ public class PistesyottoResourceTest {
                             .query("hakukohdeOid",HAKUKOHDE1)
                             .post(Entity.entity(excel.getExcel().vieXlsx(),
                                     MediaType.APPLICATION_OCTET_STREAM));
-            assertEquals(200, r.getStatus());
+            assertEquals(204, r.getStatus());
             assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!", 3, tuodutPisteet.size());
             assertTrue("Kielikokeita löytyy pisteistä", tuodutPisteet.stream().anyMatch(a -> a.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))));
             assertThat("Kielikokeen suoritus löytyy suresta", MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), hasSize(1));
@@ -1349,7 +1339,7 @@ public class PistesyottoResourceTest {
             Response r = pistesyottoTuontiResource.getWebClient().query("hakuOid", HAKU1).query("hakukohdeOid", HAKUKOHDE1)
                 .post(Entity.entity(excel.getExcel().vieXlsx(), MediaType.APPLICATION_OCTET_STREAM));
 
-            assertEquals(200, r.getStatus());
+            assertEquals(204, r.getStatus());
 
             assertThat("Hakukohteen hakemukselle pisteet", tuodutPisteet, hasSize(1));
             assertTrue("Myös kielikokeet löytyvät valinta-piste-serviceen tuoduista pisteistä", tuodutPisteet.stream().anyMatch(a -> a.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))));

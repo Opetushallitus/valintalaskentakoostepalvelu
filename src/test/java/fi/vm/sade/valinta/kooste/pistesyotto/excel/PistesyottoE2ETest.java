@@ -48,6 +48,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -168,7 +169,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 .header("Content-Type", "application/octet-stream")
                 .accept(MediaType.APPLICATION_JSON)
                 .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
-        Assert.assertEquals(200, r.getStatus());
+        Assert.assertEquals(204, r.getStatus());
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
             Assert.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
@@ -205,7 +206,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 .header("Content-Type", "application/octet-stream")
                 .accept(MediaType.APPLICATION_JSON)
                 .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
-        Assert.assertEquals(200, r.getStatus());
+        Assert.assertEquals(204, r.getStatus());
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
             Assert.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));

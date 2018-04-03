@@ -235,7 +235,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .put(new Gson().toJson(applicationAdditionaData));
-        assertEquals(204, r.getStatus());
+        assertEquals(200, r.getStatus());
 
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(0, 10, TimeUnit.SECONDS));
