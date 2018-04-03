@@ -444,9 +444,6 @@ public class PistesyottoResource {
                                 username, hakuOid, hakukohdeOid), poikkeus)
                 );
                 return tuontiService.tuo(username, auditSession, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
-            }).doOnError(throwable -> {
-                LOG.error("Virhe tuodessa tietoja excelistä", throwable);
-                asyncResponse.resume(Response.serverError());
             });
 
             map.subscribe(
