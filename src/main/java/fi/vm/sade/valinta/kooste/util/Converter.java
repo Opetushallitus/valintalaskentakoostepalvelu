@@ -107,7 +107,7 @@ public class Converter {
                     .forEach(i -> {
                         Hakutoive hakutoive = new Hakutoive();
                         hakutoive.setHakukohdeOid(hakemus.getHakutoiveet().get(i));
-                        hakutoiveet.put(i+1, hakutoive);
+                        hakutoiveet.put(i + 1, hakutoive);
                     });
         }
 

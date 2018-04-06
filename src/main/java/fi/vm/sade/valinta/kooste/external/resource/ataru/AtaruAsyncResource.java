@@ -6,9 +6,7 @@ import rx.Observable;
 import java.util.List;
 
 public interface AtaruAsyncResource {
-
     Observable<List<AtaruHakemus>> getApplicationsByHakukohde(String hakukohdeOid);
 
     Observable<List<AtaruHakemus>> getApplicationsByOids(List<String> oids);
-
 }
