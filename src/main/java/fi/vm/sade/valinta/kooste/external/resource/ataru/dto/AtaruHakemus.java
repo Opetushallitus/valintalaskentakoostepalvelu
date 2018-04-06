@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.ataru.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -63,5 +64,9 @@ public class AtaruHakemus {
 
     public void setKeyValues(Map<String, String> keyValues) {
         this.keyValues = keyValues;
+    }
+
+    public boolean hasHetu() {
+        return StringUtils.isNotEmpty(keyValues.get("ssn"));
     }
 }

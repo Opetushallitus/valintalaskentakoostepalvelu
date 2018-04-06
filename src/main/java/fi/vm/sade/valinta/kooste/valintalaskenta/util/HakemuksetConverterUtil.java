@@ -47,10 +47,6 @@ public class HakemuksetConverterUtil {
 
     public static final String KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO = "haunkohdejoukko_11";
 
-    private static boolean ataruHakemusHasHetu(AtaruHakemus hakemus) {
-        return StringUtils.isNotEmpty(hakemus.getKeyValues().get("ssn"));
-    }
-
     private static void tryToMergeKeysOfOppijaAndHakemus(HakuV1RDTO haku, String hakukohdeOid, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, Map<String, Exception> errors, Map<String, Oppija> personOidToOppija, Map<String, Boolean> hasHetu, HakemusDTO h) {
         try {
             String personOid = h.getHakijaOid();
@@ -73,7 +69,7 @@ public class HakemuksetConverterUtil {
                                                                             Boolean fetchEnsikertalaisuus) {
         // No need to check for personOids since Ataru api doesn't return such applications.
         List<HakemusDTO> hakemusDtot = ataruHakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, ofNullable(valintapisteet).orElse(emptyList()), hakukohdeRyhmasForHakukohdes);
-        Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(AtaruHakemus::getHakemusOid, HakemuksetConverterUtil::ataruHakemusHasHetu));
+        Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(AtaruHakemus::getHakemusOid, AtaruHakemus::hasHetu));
         Map<String, Exception> errors = Maps.newHashMap();
         return getHakemusDTOS(haku, hakukohdeOid, oppijat, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
     }
@@ -160,8 +156,8 @@ public class HakemuksetConverterUtil {
         }
         if (!epaonnistuneetKonversiot.isEmpty()) {
             RuntimeException e = new RuntimeException(
-                    String.format("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle %s ja hakemuksille %s. Esimerkiksi %s!",
-                            hakukohdeOid, Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()), epaonnistuneetKonversiot.values().iterator().next().getMessage()));
+                    String.format("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle %s ja hakemuksille (%d/%d) %s. Esimerkiksi %s!",
+                            hakukohdeOid, epaonnistuneetKonversiot.size(), hakemukset.size(), Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()), epaonnistuneetKonversiot.values().iterator().next().getMessage()));
             LOG.error("hakemuksetToHakemusDTOs", e);
             throw e;
         }

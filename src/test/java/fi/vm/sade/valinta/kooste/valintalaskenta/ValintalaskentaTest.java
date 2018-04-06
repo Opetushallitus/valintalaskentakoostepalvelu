@@ -159,8 +159,8 @@ public class ValintalaskentaTest {
 
     @Test
     public void onnistuneestaValintalaskennastaAtaruHaullePidetaanKirjaaSeurantapalveluun() throws InterruptedException {
-        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus())));
-        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus())));
+        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus("1.2.246.562.11.00000000000000000063"))));
+        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus("1.2.246.562.11.00000000000000000063"))));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid2, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
@@ -251,7 +251,7 @@ public class ValintalaskentaTest {
     public void epaonnistuneetAtaruLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
         when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(
                 Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + ataruHakukohdeOid)));
-        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus())));
+        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(Observable.just(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus("1.2.246.562.11.00000000000000000063"))));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid2, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid, HakukohdeTila.KESKEYTETTY, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
 

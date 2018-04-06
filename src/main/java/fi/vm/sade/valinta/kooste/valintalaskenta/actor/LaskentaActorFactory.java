@@ -296,7 +296,7 @@ public class LaskentaActorFactory {
                 oppijat,
                 hakukohdeRyhmasForHakukohdes,
                 (vp, hr, v, h, o, r) -> {
-                    LOG.info("(Uuid: {}) Kaikki resurssit hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
+                    LOG.info("(Uuid: {}) Kaikki resurssit ataru hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
                     if(!withHakijaRyhmat) {
                         return new LaskeDTO(
                                 uuid,
