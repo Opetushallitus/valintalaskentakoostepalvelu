@@ -137,9 +137,13 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                 failure);
             if (!isValintaryhmalaskenta) {
                 try {
-                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, HakukohdeTila.KESKEYTETTY,
-                            Optional.of(virheilmoitus(failure.getMessage(), Arrays.toString(failure.getStackTrace()))));
-                    LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tulos merkattu onnistuneesti seurantaan ", uuid(), hakukohdeOid);
+                    HakukohdeTila tila = HakukohdeTila.KESKEYTETTY;
+                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, tila,
+                        Optional.of(virheilmoitus(failure.getMessage(), Arrays.toString(failure.getStackTrace())))
+                    ).subscribe(
+                        ok -> LOG.error("(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tila merkattu onnistuneesti seurantaan ", uuid(), hakukohdeOid),
+                        t -> LOG.error(String.format("(UUID = %s) Hakukohteen (%s) tilan (%s) merkkaaminen epaonnistui!", uuid(), hakukohdeOid, tila), t)
+                    );
                 } catch (Throwable e1) {
                     LOG.error("(Uuid={}) Hakukohteen ({}) laskenta epäonnistui mutta ei saatu merkattua ", uuid(), hakukohdeOid, e1);
                 }
