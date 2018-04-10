@@ -52,12 +52,17 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
                     List<OidRDTO> komotoOids = hakukohdeResource.getKomotosByHakukohdeOID(hakukohdeOid);
 
                     for (OidRDTO komotoOid : komotoOids) {
-                        KomotoDTO komoto = komotoResource.getByOID(komotoOid.getOid());
-                        alkamiskausiUri = komoto.getKoulutuksenAlkamiskausi();
-                        vuosi = komoto.getKoulutuksenAlkamisvuosi();
+                        try {
+                            KomotoDTO komoto = komotoResource.getByOID(komotoOid.getOid());
+                            alkamiskausiUri = komoto.getKoulutuksenAlkamiskausi();
+                            vuosi = komoto.getKoulutuksenAlkamisvuosi();
+                        } catch(Exception e) {
+                            LOG.error("Komoton haku tai käsittely epäonnistui. komotoOid:" + komotoOid.getOid(), e);
+                            throw new RuntimeException(e);
+                        }
                     }
                 } catch (Exception e) {
-                    LOG.error("Ei voitu hakea lukuvuotta tarjonnalta", e);
+                    LOG.error("Ei voitu hakea lukuvuotta tarjonnalta. HakukohdeOid:" + hakukohdeOid, e);
                     throw new RuntimeException(e);
                 }
             }
