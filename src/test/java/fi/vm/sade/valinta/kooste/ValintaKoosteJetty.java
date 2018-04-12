@@ -2,12 +2,9 @@ package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
+import fi.vm.sade.sharedutils.FakeAuthenticationInitialiser;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.jasig.cas.client.authentication.SimplePrincipal;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
 
 /**
  *  Starts valintalaskentakoostepalvelu locally.
@@ -70,7 +67,7 @@ public class ValintaKoosteJetty {
     public static void startShared(boolean useMocks) {
         try {
             if (useMocks) {
-                fakeAuthentication();
+                FakeAuthenticationInitialiser.fakeAuthentication();
             }
             if (server.isStopped()) {
                 String root =  ProjectRootFinder.findProjectRoot() + "/valintalaskentakoostepalvelu";
@@ -91,12 +88,5 @@ public class ValintaKoosteJetty {
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
-    }
-
-    public static void fakeAuthentication() {
-        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_GLOBAL);
-        SecurityContextImpl context = new SecurityContextImpl();
-        context.setAuthentication(new TestingAuthenticationToken(new SimplePrincipal("1.2.246.562.24.64735725450"), new Object()));
-        SecurityContextHolder.setContext(context);
     }
 }

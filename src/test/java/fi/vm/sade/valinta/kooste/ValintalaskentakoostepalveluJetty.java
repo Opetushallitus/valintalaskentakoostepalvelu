@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
+import fi.vm.sade.sharedutils.FakeAuthenticationInitialiser;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
@@ -68,7 +69,7 @@ public class ValintalaskentakoostepalveluJetty {
         }
     }
     public static void startShared() {
-        ValintaKoosteJetty.fakeAuthentication();
+        FakeAuthenticationInitialiser.fakeAuthentication();
         Integraatiopalvelimet.mockServer.reset();
         SpringProfile.setProfile("test");
         mockUserHomeWithCommonProperties();
