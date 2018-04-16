@@ -181,6 +181,11 @@ public class SuoritaHakukohdeImportKomponentti {
             avainArvo.setArvo(data.getUrheilijaLisapisteTunniste() != null ? data.getUrheilijaLisapisteTunniste() : hakukohdeKoodiTunniste + "_urheilija_lisapiste");
             importTyyppi.getValintaperuste().add(avainArvo);
 
+            avainArvo = new AvainArvoDTO();
+            avainArvo.setAvain("riittava_kielitaito_tunniste");
+            avainArvo.setArvo(hakukohdeKoodiTunniste + "_riittava_kielitaito");
+            importTyyppi.getValintaperuste().add(avainArvo);
+
             String opetuskieli = null;
             if (data.getOpetuskielet().size() > 0) {
                 avainArvo = new AvainArvoDTO();
