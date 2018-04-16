@@ -109,9 +109,11 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("rows", DEFAULT_ROW_LIMIT);
-                    if(!keys.isEmpty()) {
+                    client.query("state", DEFAULT_STATES.toArray());
+                    if (hakuOid != null) {
                         client.query("asIds", hakuOid);
-                        client.query("state", DEFAULT_STATES.toArray());
+                    }
+                    if (!keys.isEmpty()) {
                         client.query("keys", keys.toArray());
                     }
                     return client;
