@@ -191,7 +191,7 @@ public class ValintalaskennanTulosExcelTest {
     private List<Hakemus> hakemukset() {
         final Answers answersWithHetu = new Answers();
         answersWithHetu.getHenkilotiedot().put("Henkilotunnus", "010101-123N");
-        answersWithHetu.getHenkilotiedot().put("Sähköpostiosoite", "sukuetu1@testi.fi");
+        answersWithHetu.getHenkilotiedot().put("Sähköposti", "sukuetu1@testi.fi");
         return Arrays.asList(
             new Hakemus("", "", answersWithHetu, EMPTY_MAP, EMPTY_LIST, "Hakemus 1", "", "Hakija 1")
         );
