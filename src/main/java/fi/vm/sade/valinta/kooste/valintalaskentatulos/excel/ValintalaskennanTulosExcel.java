@@ -151,7 +151,7 @@ public class ValintalaskennanTulosExcel {
             new Column("Sukunimi", 20, rivi -> rivi.hakija.getSukunimi()),
             new Column("Etunimi", 20, rivi -> rivi.hakija.getEtunimi()),
             new Column("Henkilötunnus", 20, rivi -> rivi.getHetu()),
-            new Column("Sähköpostiosoite", 60, rivi -> rivi.getSahkoposti()),
+            new Column("Sähköpostiosoite", 20, rivi -> rivi.getSahkoposti()),
             new Column("Hakemus OID", 20, rivi -> rivi.hakija.getHakemusOid()),
             new Column("Hakutoive", 14, rivi -> String.valueOf(rivi.hakija.getPrioriteetti())),
             new Column("Laskennan tulos", 20, rivi -> rivi.hakija.getTuloksenTila().toString()),
