@@ -83,9 +83,9 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
                 asList("Jono", "Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi",  "Etunimi", "Henkilötunnus",  "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet",  "pääsykoetulos",  "keskiarvo"),
-                asList("1",        "Suku 2",    "Etu 2",   "",               "Hakemus 2",    "2",            "VIRHE",            "Puuttuu",  "",                 "",               "8"),
-                asList("2",        "Suku 1",    "Etu 1",   "010101-123N",    "Hakemus 1",    "1",            "HYVAKSYTTAVISSA",  "",         "666",              "10",             "9")
+                asList("Jonosija", "Sukunimi",  "Etunimi", "Henkilötunnus",  "Sähköpostiosoite",    "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet",  "pääsykoetulos",  "keskiarvo"),
+                asList("1",        "Suku 2",    "Etu 2",   "",               "sukuetu2@testi.fi",   "Hakemus 2",    "2",            "VIRHE",            "Puuttuu",  "",                 "",               "8"),
+                asList("2",        "Suku 1",    "Etu 1",   "010101-123N",    "sukuetu1@testi.fi",   "Hakemus 1",    "1",            "HYVAKSYTTAVISSA",  "",         "666",              "10",             "9")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
