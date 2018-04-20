@@ -159,7 +159,12 @@ public class ErillishakuExcel {
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
             if (tyyppi == Hakutyyppi.KORKEAKOULU) {
                 a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
-                a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), true, true));
+
+                //TODO: ErillishakuDataRivi.getEhdollisenHyvaksymisenEhtoKoodi
+                //a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), true, true));
+                a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi()));
+
+                //TODO: Tsekataan edellisen perusteella mitä tähän laitetaan
                 a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
                 a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
                 a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoEN(), true, true));

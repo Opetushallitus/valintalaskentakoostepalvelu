@@ -9,6 +9,8 @@ import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,15 +28,21 @@ import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.KORKEAKOULU;
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS;
 
 public class ErillishakuDataRivi extends DataRivi {
+
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
     final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
     private final ErillishakuRiviKuuntelija kuuntelija;
     private final Hakutyyppi tyyppi;
 
-    ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {
+    //TODO: Tsekkaappa että meneekö Koodistoresource tonne konstruktoriin?!?
+    private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
+    //Map<String, Koodi> ehdot = koodistoCachedAsyncResource.haeKoodisto("hyvaksynnanehdot");
+
+    ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         super(s);
         this.tyyppi = tyyppi;
         this.kuuntelija = kuuntelija;
+        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
     @Override
@@ -233,5 +242,11 @@ public class ErillishakuDataRivi extends DataRivi {
     }
     static MonivalintaArvo maksuntila(String arvo) {
         return new MonivalintaArvo(arvo, MAKSUNTILA_ARVOT);
+    }
+
+
+    public static MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
+        //Map<String, Koodi> ehdot =
+        return null;
     }
 }

@@ -246,6 +246,7 @@ public class SijoittelunTulosExcelKomponentti {
                             if (valintatulos.getTila() != null) {
                                 valintaTieto = HakemusUtil.tilaConverter(valintatulos.getTila(), preferoitukielikoodi);
                                 ehdollinenValinta = HakemusUtil.ehdollinenValinta(valintatulos.getEhdollisestiHyvaksyttavissa());
+                                //TODO: nämä haetaan koodistosta:
                                 ehdollisenHyvaksymisenEhto = valintatulos.getEhdollisenHyvaksymisenEhtoKoodi();
                                 ehdollisenHyvaksymisenEhtoFI = valintatulos.getEhdollisenHyvaksymisenEhtoFI();
                                 ehdollisenHyvaksymisenEhtoSV = valintatulos.getEhdollisenHyvaksymisenEhtoSV();
