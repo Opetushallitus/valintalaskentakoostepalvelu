@@ -59,10 +59,10 @@ public class ErillishakuExcelTest {
                 .aidinkieli("FI")
                 .hakemuksenTila("HYLATTY")
                 .ehdollisestiHyvaksyttavissa(true)
-                .ehdollisenHyvaksymisenEhtoKoodi("hyväksymisen ehto")
-                .ehdollisenHyvaksymisenEhtoFI("suomi")
-                .ehdollisenHyvaksymisenEhtoSV("ruotsi")
-                .ehdollisenHyvaksymisenEhtoEN("englanti")
+                .ehdollisenHyvaksymisenEhtoKoodi("muu")
+                .ehdollisenHyvaksymisenEhtoFI("Muu")
+                .ehdollisenHyvaksymisenEhtoSV("Annan")
+                .ehdollisenHyvaksymisenEhtoEN("Other")
                 .hyvaksymiskirjeLahetetty(null)
                 .vastaanottoTila("")
                 .ilmoittautumisTila("")
@@ -126,7 +126,7 @@ public class ErillishakuExcelTest {
         assertEquals(2, tarkistusTapahtui.get());
 
         // Tulosta tiedostoksi testausta varten
-        // IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
+         IOUtils.copy(excel.vieXlsx(), new FileOutputStream("erillishaku.xlsx"));
     }
 
     @Test
