@@ -31,13 +31,13 @@ public class ErillishakuDataRivi extends DataRivi {
     final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
     private final ErillishakuRiviKuuntelija kuuntelija;
     private final Hakutyyppi tyyppi;
-    private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
+    private static KoodistoCachedAsyncResource koodistoCachedAsyncResource;
+    static Map<String, Koodi> hyvaksynnanEhdot = koodistoCachedAsyncResource.haeKoodisto("hyvaksynnanehdot");
 
-    ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+    ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s){
         super(s);
         this.tyyppi = tyyppi;
         this.kuuntelija = kuuntelija;
-        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
     @Override
@@ -239,13 +239,19 @@ public class ErillishakuDataRivi extends DataRivi {
         return new MonivalintaArvo(arvo, MAKSUNTILA_ARVOT);
     }
 
+    /*private static Collection<String> EHDOLLISEN_HYVAKSYNNAN_EHDOT = Arrays.asList(
+            for (Koodi koodi : hyvaksynnanEhdot.values())
+        hyvaksynnanEhdot.values()
 
-    public MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
-        Map<String, Koodi> hyvaksynnanEhdot = koodistoCachedAsyncResource.haeKoodisto("hyvaksynnanehdot");
-        Collection<String> vaihtoehdot = new ArrayList<>();
-        for (Koodi ehto : hyvaksynnanEhdot.values()) {
-            vaihtoehdot.add(ehto.getKoodiArvo());
+    );*/
+
+
+    public static MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
+        Collection<String> ehdollisenHyvaksynnanEhdot = new ArrayList<>();
+        for (Koodi koodi : hyvaksynnanEhdot.values()) {
+            ehdollisenHyvaksynnanEhdot.add(koodi.getKoodiArvo());
+
         }
-        return new MonivalintaArvo(ehdollisenHyvaksymisenEhtoKoodi, vaihtoehdot);
+        return new MonivalintaArvo(ehdollisenHyvaksymisenEhtoKoodi, ehdollisenHyvaksynnanEhdot);
     }
 }
