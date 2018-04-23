@@ -6,19 +6,18 @@ import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.DataRivi;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
-import fi.vm.sade.valinta.kooste.excel.Monivalinta;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.impl.KoodistoAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,9 +31,9 @@ public class ErillishakuDataRivi extends DataRivi {
     final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
     private final ErillishakuRiviKuuntelija kuuntelija;
     private final Hakutyyppi tyyppi;
-    private static KoodistoAsyncResourceImpl koodistoAsyncResource = new KoodistoAsyncResourceImpl();
-    private static KoodistoCachedAsyncResource koodistoCachedAsyncResource  = new KoodistoCachedAsyncResource(koodistoAsyncResource);
-    //private static Map<String, Koodi> hyvaksynnanEhdot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT);
+    @Autowired
+    private static KoodistoCachedAsyncResource koodistoCachedAsyncResource;
+
 
     ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s){
         super(s);
@@ -242,16 +241,9 @@ public class ErillishakuDataRivi extends DataRivi {
         return new MonivalintaArvo(arvo, MAKSUNTILA_ARVOT);
     }
 
-    /*private static Collection<String> EHDOLLISEN_HYVAKSYNNAN_EHDOT = Arrays.asList(
-            for (Koodi koodi : hyvaksynnanEhdot.values())
-        hyvaksynnanEhdot.values()
-
-    );*/
-
-
     public static MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
-        Map<String, Koodi> hyvaksynnanEhdot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT);
         Collection<String> ehdollisenHyvaksynnanEhdot = new ArrayList<>();
+          Map<String, Koodi> hyvaksynnanEhdot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT);
         for (Koodi koodi : hyvaksynnanEhdot.values()) {
             ehdollisenHyvaksynnanEhdot.add(koodi.getKoodiArvo());
 
