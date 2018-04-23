@@ -59,7 +59,7 @@ public class ApplicationAsyncResourceImplTest {
     }
 
     @Test
-    public void stateParameterIsNotAddedWhenFetchingApplicationsByHakemusOidsWithoutOidsList() {
+    public void stateParameterIsNotAddedWhenFetchingApplicationsByHakemusOidsWithoutKeysList() {
         when(wrappedHttpResource.postAsObservableLazily(eq(urlToApplicationsList),
             eq(new TypeToken<List<Hakemus>>() {}.getType()),
             eq(Entity.entity(Lists.newArrayList("hakemus1Oid", "hakemus2Oid"), APPLICATION_JSON_TYPE)),
