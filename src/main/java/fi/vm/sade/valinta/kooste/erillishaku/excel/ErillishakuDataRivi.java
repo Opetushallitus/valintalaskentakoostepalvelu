@@ -6,6 +6,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.DataRivi;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
+import fi.vm.sade.valinta.kooste.excel.Monivalinta;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
@@ -17,10 +18,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,10 +31,7 @@ public class ErillishakuDataRivi extends DataRivi {
     final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
     private final ErillishakuRiviKuuntelija kuuntelija;
     private final Hakutyyppi tyyppi;
-
-    //TODO: Tsekkaappa että meneekö Koodistoresource tonne konstruktoriin?!?
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-    //Map<String, Koodi> ehdot = koodistoCachedAsyncResource.haeKoodisto("hyvaksynnanehdot");
 
     ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         super(s);
@@ -245,8 +240,12 @@ public class ErillishakuDataRivi extends DataRivi {
     }
 
 
-    public static MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
-        //Map<String, Koodi> ehdot =
-        return null;
+    public MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
+        Map<String, Koodi> hyvaksynnanEhdot = koodistoCachedAsyncResource.haeKoodisto("hyvaksynnanehdot");
+        Collection<String> vaihtoehdot = new ArrayList<>();
+        for (Koodi ehto : hyvaksynnanEhdot.values()) {
+            vaihtoehdot.add(ehto.getKoodiArvo());
+        }
+        return new MonivalintaArvo(ehdollisenHyvaksymisenEhtoKoodi, vaihtoehdot);
     }
 }
