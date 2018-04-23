@@ -10,11 +10,9 @@ import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.BooleanArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -103,8 +101,7 @@ public class ErillishakuExcel {
                 kuuntelija,
                 Stream.concat(
                         esittelyt.stream(),
-                        arvoRivit(erillishakurivit).map(luoArvot(tyyppi))).collect(Collectors.toList())
-        );
+                        arvoRivit(erillishakurivit).map(luoArvot(tyyppi))).collect(Collectors.toList()));
 
         rivit.add(dataRivit);
         this.excel = new Excel("Erillishaku", rivit);

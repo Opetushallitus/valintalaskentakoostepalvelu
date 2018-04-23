@@ -26,6 +26,7 @@ public class KoodistoCachedAsyncResource {
     public static final String POSTI = "posti";
     public static final String KIELI = "kieli";
     public static final String KUNTA = "kunta";
+    public static final String HYVAKSYNNAN_EHDOT = "hyvaksynnanehdot";
 
     private final Logger LOG = LoggerFactory.getLogger(KoodistoCachedAsyncResource.class);
     private final KoodistoAsyncResource koodistoAsyncResource;

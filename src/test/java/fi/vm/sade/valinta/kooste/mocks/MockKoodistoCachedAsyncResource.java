@@ -59,6 +59,15 @@ public class MockKoodistoCachedAsyncResource extends KoodistoCachedAsyncResource
                 return ImmutableMap.of(
                         "00100", postinumeroKoodi);
             }
+            case KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT: {
+                Koodi ehdollisenHyvaksynnanKoodi = new Koodi();
+                ehdollisenHyvaksynnanKoodi.setMetadata(Arrays.asList(
+                        createMetadata("Ehdollinen: lopullinen tutkintotodistus toimitettava määräaikaan mennessä", "FI"),
+                        createMetadata("Villkor: lämna in ditt slutliga examensbetyg inom utsatt tid", "SV"),
+                        createMetadata("Finland", "Condition: Submit your final qualification certificate by the deadline")));
+                ehdollisenHyvaksynnanKoodi.setKoodiArvo("ltt");
+                return ImmutableMap.of( "ltt", ehdollisenHyvaksynnanKoodi);
+            }
             default: assert false; return new HashMap<>();
         }
     }
