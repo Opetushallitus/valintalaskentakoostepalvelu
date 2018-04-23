@@ -109,11 +109,9 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     client.query("rows", DEFAULT_ROW_LIMIT);
-                    client.query("state", DEFAULT_STATES.toArray());
-                    if (hakuOid != null) {
-                        client.query("asIds", hakuOid);
-                    }
-                    if (!keys.isEmpty()) {
+                    if (!keys.isEmpty()) { // While this behaviour might seem strange, this is how the haku-app
+                        client.query("asIds", hakuOid);  // implementation works too. The filter parameters are only
+                        client.query("state", DEFAULT_STATES.toArray());  // applied when the keys parameter is given.
                         client.query("keys", keys.toArray());
                     }
                     return client;
