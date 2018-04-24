@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.BooleanArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,13 +161,22 @@ public class ErillishakuExcel {
                 a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
 
                 //TODO: ErillishakuDataRivi.getEhdollisenHyvaksymisenEhtoKoodi
-                //a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), true, true));
-                a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi()));
+               // a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), true, true));
 
-                //TODO: Tsekataan edellisen perusteella mitä tähän laitetaan
-                a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
-                a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
-                a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoEN(), true, true));
+
+                if (rivi.getEhdollisestiHyvaksyttavissa() == true) {
+                    a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi()));
+                    a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
+                    a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
+                    a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoEN(), true, true));
+                } else {
+                    a.add(new TekstiArvo("", true, true));
+                    a.add(new TekstiArvo("", true, true));
+                    a.add(new TekstiArvo("", true, true));
+                    a.add(new TekstiArvo("", true, true));
+                }
+
+
             }
             a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null ? "" : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
