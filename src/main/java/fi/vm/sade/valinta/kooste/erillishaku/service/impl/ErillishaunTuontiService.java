@@ -59,6 +59,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final Scheduler scheduler;
+    private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
     public ErillishaunTuontiService(ApplicationAsyncResource applicationAsyncResource,
                                     OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
@@ -85,7 +86,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     }
 
     public void tuoExcelistä(AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
-        tuoData(auditSession, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data), true);
+        tuoData(auditSession, prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data, koodistoCachedAsyncResource), true);
     }
 
     public void tuoJson(AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit, final boolean saveApplications) {

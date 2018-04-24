@@ -160,7 +160,7 @@ public class ErillishaunVientiService {
                     )
             );
         }).collect(Collectors.toList());
-        return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakuRivit);
+        return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakuRivit, koodistoCachedAsyncResource);
     }
 
     private ErillishakuExcel generoiIlmanHakukohdettaJaTuloksia(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
@@ -170,7 +170,7 @@ public class ErillishaunVientiService {
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus ->
             createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), ofNullable(personOidToMaksuntila.get(hakemus.getPersonOid())), "KESKEN", null, tarjontaHakukohde.getOid())
         ).collect(Collectors.toList());
-        return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), rivit);
+        return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), rivit, koodistoCachedAsyncResource);
     }
 
     private ErillishakuRivi createErillishakuRivi(String oid, HakemusWrapper wrapper, Optional<Maksuntila> lukuvuosimaksu, String hakemuksenTila,

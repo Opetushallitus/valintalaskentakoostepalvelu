@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockKoodistoCachedAsyncResource;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -13,8 +15,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 public class ErillishakuExcelTest {
+    final MockKoodistoCachedAsyncResource mockKoodistoCachedAsyncResource = new MockKoodistoCachedAsyncResource(mock(KoodistoAsyncResource.class));
 
     private static List<ErillishakuRivi> createErillishakuRivisWithTwoValidRows() {
         List<ErillishakuRivi> rivit = Lists.newArrayList();
@@ -87,7 +91,7 @@ public class ErillishakuExcelTest {
     @Test
     public void testaaTuontiKustomistaTiedostosta() throws Exception {
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
-        ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", Collections.emptyList(), rivi -> tarkistusTapahtui.incrementAndGet());
+        ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", Collections.emptyList(), rivi -> tarkistusTapahtui.incrementAndGet(), mockKoodistoCachedAsyncResource);
         eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku.xlsx").getInputStream());
         assertEquals(1, tarkistusTapahtui.get());
     }
@@ -95,7 +99,7 @@ public class ErillishakuExcelTest {
     @Test
     public void testaaTuontiKustomistaTiedostostaOtsikoilla() throws Exception {
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
-        ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi",Collections.emptyList(), rivi -> tarkistusTapahtui.incrementAndGet());
+        ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi",Collections.emptyList(), rivi -> tarkistusTapahtui.incrementAndGet(), mockKoodistoCachedAsyncResource);
         eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku_otsikoilla.xlsx").getInputStream());
         assertEquals(1, tarkistusTapahtui.get());
     }
@@ -106,7 +110,7 @@ public class ErillishakuExcelTest {
         ErillishakuRivi rivi3 = new ErillishakuRiviBuilder().build();
         rivit.add(rivi3);
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
-        ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
+        ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet(), mockKoodistoCachedAsyncResource);
         Excel excel = eExcel.getExcel();
         excel.tuoXlsx(excel.vieXlsx());
 
@@ -119,7 +123,7 @@ public class ErillishakuExcelTest {
     public void testaaVientiKKWithValidRows() throws Exception {
         List<ErillishakuRivi> rivit = createErillishakuRivisWithTwoValidRows();
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
-        ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
+        ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet(), mockKoodistoCachedAsyncResource);
         Excel excel = eExcel.getExcel();
         excel.tuoXlsx(excel.vieXlsx());
 
@@ -135,7 +139,7 @@ public class ErillishakuExcelTest {
         ErillishakuRivi rivi3 = new ErillishakuRiviBuilder().sukunimi("X-sukunimi").etunimi("X-etunimi").build();
         rivit.add(rivi3);
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
-        ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
+        ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.KORKEAKOULU, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet(), mockKoodistoCachedAsyncResource);
         Excel excel = eExcel.getExcel();
         excel.tuoXlsx(excel.vieXlsx());
 
@@ -154,7 +158,7 @@ public class ErillishakuExcelTest {
         ErillishakuRivi rivi3 = new ErillishakuRiviBuilder().build();
         rivit.add(rivi3);
         final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
-        ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet());
+        ErillishakuExcel eExcel = new ErillishakuExcel(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit, rv -> tarkistusTapahtui.incrementAndGet(), mockKoodistoCachedAsyncResource);
         Excel excel = eExcel.getExcel();
         excel.tuoXlsx(excel.vieXlsx());
 

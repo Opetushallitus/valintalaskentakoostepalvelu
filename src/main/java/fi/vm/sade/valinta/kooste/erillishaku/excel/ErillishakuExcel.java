@@ -10,7 +10,7 @@ import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.BooleanArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
-import org.apache.commons.lang.BooleanUtils;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +24,18 @@ public class ErillishakuExcel {
     public static final String HEADER_HYVAKSYMISKIRJE_LAHETETTY = "Hyväksymiskirje lähetetty";
     private final Excel excel;
 
-    public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija) {
-        this(tyyppi, "", "", "", Collections.emptyList(), kuuntelija);
+    public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+        this(tyyppi, "", "", "", Collections.emptyList(), kuuntelija, koodistoCachedAsyncResource);
     }
 
     public ErillishakuExcel(Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
-                            String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit) {
-        this(tyyppi, hakuNimi, hakukohdeNimi, tarjoajaNimi, erillishakurivit, rivi -> {});
+                            String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+        this(tyyppi, hakuNimi, hakukohdeNimi, tarjoajaNimi, erillishakurivit, rivi -> {}, koodistoCachedAsyncResource);
     }
 
     ErillishakuExcel(final Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
                      String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit,
-                     ErillishakuRiviKuuntelija kuuntelija) {
+                     ErillishakuRiviKuuntelija kuuntelija, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         erillishakurivit = Lists.newArrayList(erillishakurivit);
         List<Rivi> rivit = Lists.newArrayList();
         Collection<Collection<Arvo>> esittelyt = Lists.newArrayList();
@@ -102,7 +102,7 @@ public class ErillishakuExcel {
                 kuuntelija,
                 Stream.concat(
                         esittelyt.stream(),
-                        arvoRivit(erillishakurivit).map(luoArvot(tyyppi))).collect(Collectors.toList()));
+                        arvoRivit(erillishakurivit).map(luoArvot(tyyppi, koodistoCachedAsyncResource))).collect(Collectors.toList()));
 
         rivit.add(dataRivit);
         this.excel = new Excel("Erillishaku", rivit);
@@ -144,7 +144,7 @@ public class ErillishakuExcel {
 
     }
 
-    private Function<ErillishakuRivi, Collection<Arvo>> luoArvot(Hakutyyppi tyyppi) {
+    private Function<ErillishakuRivi, Collection<Arvo>> luoArvot(Hakutyyppi tyyppi, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         return rivi -> {
             Collection<Arvo> a = Lists.newArrayList();
             a.add(new TekstiArvo(rivi.getSukunimi(), true, true));
@@ -160,12 +160,8 @@ public class ErillishakuExcel {
             if (tyyppi == Hakutyyppi.KORKEAKOULU) {
                 a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
 
-                //TODO: ErillishakuDataRivi.getEhdollisenHyvaksymisenEhtoKoodi
-               // a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), true, true));
-
-
                 if (rivi.getEhdollisestiHyvaksyttavissa() == true) {
-                    a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi()));
+                    a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), koodistoCachedAsyncResource));
                     a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
                     a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
                     a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoEN(), true, true));

@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
@@ -15,12 +16,14 @@ import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
+import fi.vm.sade.valinta.kooste.mocks.MockKoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
@@ -42,6 +45,7 @@ public class ErillishakuResourceTest {
     private String valintatapajonoOid = "14090336922663576781797489829886";
     private String henkiloOid = "hakija1";
     private final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+    final MockKoodistoCachedAsyncResource mockKoodistoCachedAsyncResource = new MockKoodistoCachedAsyncResource(mock(KoodistoAsyncResource.class));
 
     @Before
     public void startServer() {
@@ -140,7 +144,7 @@ public class ErillishakuResourceTest {
     }
 
     private void verifyCreatedExcelDocument(Hakutyyppi hakutyyppi, final InputStream storedDocument) {
-        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(hakutyyppi, storedDocument);
+        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(hakutyyppi, storedDocument, mockKoodistoCachedAsyncResource);
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO(
                 "SV",

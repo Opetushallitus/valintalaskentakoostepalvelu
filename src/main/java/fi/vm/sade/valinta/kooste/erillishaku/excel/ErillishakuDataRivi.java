@@ -16,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,15 +30,11 @@ public class ErillishakuDataRivi extends DataRivi {
     final static DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
     private final ErillishakuRiviKuuntelija kuuntelija;
     private final Hakutyyppi tyyppi;
-    @Autowired
-    private static KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
-
-    ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s){
+    ErillishakuDataRivi(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {
         super(s);
         this.tyyppi = tyyppi;
         this.kuuntelija = kuuntelija;
-
     }
 
     @Override
@@ -241,7 +236,7 @@ public class ErillishakuDataRivi extends DataRivi {
         return new MonivalintaArvo(arvo, MAKSUNTILA_ARVOT);
     }
 
-    public static MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
+    public static MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         Collection<String> ehdollisenHyvaksynnanEhdot = new ArrayList<>();
           Map<String, Koodi> hyvaksynnanEhdot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT);
         for (Koodi koodi : hyvaksynnanEhdot.values()) {

@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
@@ -31,14 +32,14 @@ public class ImportedErillisHakuExcel {
 
     }
 
-    public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, InputStream inputStream) {
-        this(createExcel(hakutyyppi, inputStream));
+    public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, InputStream inputStream, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+        this(createExcel(hakutyyppi, inputStream, koodistoCachedAsyncResource));
     }
 
-    private static List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream) throws ExcelValidointiPoikkeus {
+    private static List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream, KoodistoCachedAsyncResource koodistoCachedAsyncResource) throws ExcelValidointiPoikkeus {
         try {
             final List<ErillishakuRivi> rivit = Lists.newArrayList();
-            new ErillishakuExcel(hakutyyppi, rivi -> rivit.add(rivi.withAidinkieli(resolveAidinkieli(rivi.getAidinkieli()))))
+            new ErillishakuExcel(hakutyyppi, rivi -> rivit.add(rivi.withAidinkieli(resolveAidinkieli(rivi.getAidinkieli()))), koodistoCachedAsyncResource)
                     .getExcel()
                     .tuoXlsx(inputStream);
             return rivit;
