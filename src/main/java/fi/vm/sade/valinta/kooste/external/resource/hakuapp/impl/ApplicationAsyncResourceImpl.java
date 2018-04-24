@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import rx.Observable;
+import rx.functions.Func1;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -104,7 +105,10 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     private Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
-        return postAsObservableLazily(getUrl("haku-app.applications.list"), new TypeToken<List<Hakemus>>() {}.getType(),
+        Func1<List<Hakemus>, List<Hakemus>> filterApplicationsInDefaultStates = hs ->
+            hs.stream().filter(h ->
+                DEFAULT_STATES.contains(h.getState())).collect(Collectors.toList());
+        return this.<List<String>, List<Hakemus>>postAsObservableLazily(getUrl("haku-app.applications.list"), new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -115,7 +119,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                         client.query("keys", keys.toArray());
                     }
                     return client;
-                });
+                }).map(filterApplicationsInDefaultStates);
     }
 
     @Override

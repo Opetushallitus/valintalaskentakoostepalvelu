@@ -106,7 +106,7 @@ public class PistesyotonTuontiTestBase {
     }
 
     void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot, final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot, final String tiedosto, final String hakuOid, final String hakukohdeOid) throws IOException, ExcelValidointiPoikkeus {
-        List<Hakemus> hakemukset = Collections.emptyList();
+        List<Hakemus> hakemukset = convertToHakemusSkeletons(pistetiedot);
         Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
         PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(hakuOid, hakukohdeOid, null, "Haku",
@@ -155,6 +155,15 @@ public class PistesyotonTuontiTestBase {
 
     void tallenna(final Excel excel) throws IOException {
         IOUtils.copy(excel.vieXlsx(), new FileOutputStream("pistesyotto.xlsx"));
+    }
+
+    protected List<Hakemus> convertToHakemusSkeletons(List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos) {
+        return applicationAdditionalDataDtos.stream().map(applicationAdditionalDataDTO -> {
+              Hakemus h = new Hakemus();
+              h.setOid(applicationAdditionalDataDTO.getOid());
+              h.setPersonOid(applicationAdditionalDataDTO.getPersonOid());
+              return h;
+        }).collect(Collectors.toList());
     }
 
     public static class Result<T> {

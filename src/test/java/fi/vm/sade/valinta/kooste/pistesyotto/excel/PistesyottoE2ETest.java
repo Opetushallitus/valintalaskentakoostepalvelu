@@ -22,6 +22,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
@@ -100,7 +101,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
         mockToReturnJsonWithParams(GET,
                 "/haku-app/applications/listfull",
-                Collections.emptyList(),
+                convertToHakemusSkeletons(applicationAdditionalDataDtos),
                 ImmutableMap.of("asId", "testioidi1", "aoOid", "1.2.246.562.5.85532589612"));
 
         mockToReturnJson(POST,

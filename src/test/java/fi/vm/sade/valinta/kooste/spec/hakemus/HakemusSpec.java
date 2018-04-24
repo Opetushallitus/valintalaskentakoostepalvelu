@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.spec.hakemus;
 
 import com.google.common.collect.Maps;
+
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -88,6 +90,7 @@ public class HakemusSpec extends ConstantsSpec {
         }
 
         public Hakemus build() {
+            hakemus.setState(ApplicationAsyncResource.DEFAULT_STATES.get(0));
             return hakemus;
         }
     }

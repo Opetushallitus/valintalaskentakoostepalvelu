@@ -137,12 +137,12 @@ public class PistesyottoExcel {
                             Collection<String> valintakoeTunnisteet,
                             List<ValintakoeOsallistuminenDTO> osallistumistiedot,
                             List<ValintaperusteDTO> valintaperusteet,
-                            List<ApplicationAdditionalDataDTO> pistetiedot,
+                            List<ApplicationAdditionalDataDTO> kaikkiPistetiedot,
                             Collection<PistesyottoDataRiviKuuntelija> kuuntelijat
     ) {
         this.aikaleimaRivi = new AikaleimaRivi(aikaleima);
-        if (pistetiedot == null) {
-            pistetiedot = Collections.emptyList();
+        if (kaikkiPistetiedot == null) {
+            kaikkiPistetiedot = Collections.emptyList();
         }
 
         Collections.sort(valintaperusteet, comparing(ValintaperusteDTO::getKuvaus));
@@ -184,14 +184,16 @@ public class PistesyottoExcel {
 
         Collection<Collection<Arvo>> sx = Lists.newArrayList();
 
-        Collections.sort(pistetiedot, ApplicationAdditionalDataComparator.ASCENDING);
+        Collections.sort(kaikkiPistetiedot, ApplicationAdditionalDataComparator.ASCENDING);
 
         // Asennetaan konvertterit
         Collection<PistesyottoDataArvo> dataArvot = getPistesyotonDataArvot(valintaperusteet);
         Predicate<ValintakoeDTO> osallistuuValintakokeeseen = valintakoe ->
                 (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()));
         Map<String, HakemusWrapper> oidToWrapper = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> new HakemusWrapper(h)));
-        for (ApplicationAdditionalDataDTO data : pistetiedot) {
+        List<ApplicationAdditionalDataDTO> pistetiedotHakuAppistaLoytyvilleHakemuksille =
+            filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(hakemukset, kaikkiPistetiedot);
+        for (ApplicationAdditionalDataDTO data : pistetiedotHakuAppistaLoytyvilleHakemuksille) {
             final String hakemusOid = data.getOid();
             final boolean mahdollinenOsallistuja = osallistujat.contains(hakemusOid);
             // Hakemuksen <tunniste, valintakoeDTO> tiedot
@@ -253,6 +255,18 @@ public class PistesyottoExcel {
         // Piilotettavat sarakkeet:
         // Piilotettavat rivit: 4=valintakoetunnisteet
         this.excel = new Excel("Pistesyöttö", rivit, new int[]{}, new int[]{4});
+    }
+
+    private List<ApplicationAdditionalDataDTO> filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(Collection<Hakemus> hakemukset, List<ApplicationAdditionalDataDTO> pistetiedot) {
+        Set<String> hakuAppistaLoytyvatHakemusOidit = hakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet());
+        return pistetiedot.stream().filter(a -> {
+            boolean loytyyHakuAppista = hakuAppistaLoytyvatHakemusOidit.contains(a.getOid());
+            if (!loytyyHakuAppista) {
+                LOG.warn(String.format("Hakemuksen %s pistetiedot jätetään huomioimatta, " +
+                    "koska sille ei ole löytynyt aktiivista hakemusta.", a.getOid()));
+            }
+            return loytyyHakuAppista;
+        }).collect(Collectors.toList());
     }
 
     private Collection<PistesyottoDataArvo> getPistesyotonDataArvot(List<ValintaperusteDTO> valintaperusteet) {

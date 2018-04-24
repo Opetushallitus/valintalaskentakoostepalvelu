@@ -46,8 +46,8 @@ public class ApplicationAsyncResourceImplTest {
             else throw new IllegalArgumentException("Don't know URL with key '" + key + "'");
         }
     };
-    private final Hakemus hakemus1 = mock(Hakemus.class);
-    private final Hakemus hakemus2 = mock(Hakemus.class);
+    private final Hakemus hakemus1 = mock(Hakemus.class, "MOCK: hakemus1");
+    private final Hakemus hakemus2 = mock(Hakemus.class, "MOCK: hakemus2");
     private final String urlToApplicationsList = "/url/to/applications/list";
     private final String urlToApplicationsListFull = "/url/to/applications/list/full";
     private ApplicationAsyncResourceImpl applicationAsyncResource = new ApplicationAsyncResourceImpl(mock(CasKoosteInterceptor.class));
@@ -73,9 +73,36 @@ public class ApplicationAsyncResourceImplTest {
                 Mockito.verifyNoMoreInteractions(webClient);
                 return Observable.just(Arrays.asList(hakemus1, hakemus2));
             });
+        when(hakemus1.getState()).thenReturn(ApplicationAsyncResource.DEFAULT_STATES.get(0));
+        when(hakemus2.getState()).thenReturn(ApplicationAsyncResource.DEFAULT_STATES.get(0));
 
         Observable<List<Hakemus>> applicationsObservable = applicationAsyncResource.getApplicationsByHakemusOids(Arrays.asList("hakemus1Oid", "hakemus2Oid"));
         assertEquals(Arrays.asList(hakemus1, hakemus2), applicationsObservable.timeout(1, SECONDS).toBlocking().first());
+    }
+
+    @Test
+    public void passiveApplicationsAreFilteredOutWhenFetchingApplicationsByHakemusOidsWithoutKeysList() {
+        final Hakemus hakemus3 = mock(Hakemus.class, "MOCK: hakemus3");
+        when(wrappedHttpResource.postAsObservableLazily(eq(urlToApplicationsList),
+            eq(new TypeToken<List<Hakemus>>() {}.getType()),
+            eq(Entity.entity(Lists.newArrayList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid"), APPLICATION_JSON_TYPE)),
+            Mockito.any()))
+            .thenAnswer((Answer<Observable<List<Hakemus>>>) invocation -> {
+                Function<WebClient,WebClient> webClientModifier = invocation.getArgumentAt(3, Function.class);
+                WebClient webClient = mock(WebClient.class);
+                webClientModifier.apply(webClient);
+                verify(webClient).accept(APPLICATION_JSON_TYPE);
+                verify(webClient).query("rows", ApplicationAsyncResource.DEFAULT_ROW_LIMIT);
+                Mockito.verifyNoMoreInteractions(webClient);
+                return Observable.just(Arrays.asList(hakemus1, hakemus2, hakemus3));
+            });
+        when(hakemus1.getState()).thenReturn(ApplicationAsyncResource.DEFAULT_STATES.get(0));
+        when(hakemus2.getState()).thenReturn("PASSIVE");
+        when(hakemus3.getState()).thenReturn(ApplicationAsyncResource.DEFAULT_STATES.get(1));
+
+        Observable<List<Hakemus>> applicationsObservable = applicationAsyncResource.getApplicationsByHakemusOids(
+            Arrays.asList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid"));
+        assertEquals(Arrays.asList(hakemus1, hakemus3), applicationsObservable.timeout(1, SECONDS).toBlocking().first());
     }
 
     @Test
@@ -96,6 +123,8 @@ public class ApplicationAsyncResourceImplTest {
                 Mockito.verifyNoMoreInteractions(webClient);
                 return Observable.just(Arrays.asList(hakemus1, hakemus2));
             });
+        when(hakemus1.getState()).thenReturn(ApplicationAsyncResource.DEFAULT_STATES.get(0));
+        when(hakemus2.getState()).thenReturn(ApplicationAsyncResource.DEFAULT_STATES.get(0));
 
         Observable<List<Hakemus>> applicationsObservable = applicationAsyncResource.getApplicationsByhakemusOidsInParts("hakuOid",
             Arrays.asList("hakemus1Oid", "hakemus2Oid"),
