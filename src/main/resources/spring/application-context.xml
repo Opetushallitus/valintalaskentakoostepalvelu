@@ -296,6 +296,10 @@
 		<bean id="ValintaperusteetResource"
 			  class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource" />
 
+    <!-- Valintakoeosallistumiset -->
+    <bean id="AktiivistenHakemustenValintakoeResource"
+        class="fi.vm.sade.valinta.kooste.valintakokeet.AktiivistenHakemustenValintakoeResource" />
+
 		<!-- Pistesyotto -->
 		<bean id="PistesyottoResource"
 			  class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
@@ -455,6 +459,7 @@
 				<ref bean="ViestintapalveluProxyResource"/>
 				<ref bean="SessionResource"/>
 				<ref bean="HakemuksetResource"/>
+				<ref bean="AktiivistenHakemustenValintakoeResource"/>
 			</jaxrs:serviceBeans>
 			<jaxrs:providers>
 				<ref bean="jsonProvider" />
