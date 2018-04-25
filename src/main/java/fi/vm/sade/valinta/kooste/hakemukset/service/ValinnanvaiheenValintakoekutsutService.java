@@ -80,7 +80,7 @@ public class ValinnanvaiheenValintakoekutsutService {
             return;
         }
         LOG.info("Löydettiin {} hakemusta", hakemukset.size());
-        Set<String> hakutoiveet = Sets.intersection(collect(hakemukset), hakukohdeOidit).stream().filter(authorityCheck).collect(Collectors.toSet());
+        Set<String> hakutoiveet = Sets.intersection(collectHakutoiveOidsOf(hakemukset), hakukohdeOidit).stream().filter(authorityCheck).collect(Collectors.toSet());
         LOG.info("Hakutoivejoukon koko: {} hakutoivetta", hakutoiveet.size());
         if (hakutoiveet.isEmpty()) {
             successHandler.accept(new ArrayList<>());
@@ -149,7 +149,7 @@ public class ValinnanvaiheenValintakoekutsutService {
             exceptionHandler::accept);
     }
 
-    private Set<String> collect(List<Hakemus> hakemukset) {
+    private Set<String> collectHakutoiveOidsOf(List<Hakemus> hakemukset) {
         return hakemukset.stream().flatMap(h -> new HakemusWrapper(h).getHakutoiveOids().stream()).collect(Collectors.toSet());
     }
 
