@@ -155,6 +155,7 @@ public class ErillishakuExcel {
             a.add(new MonivalintaArvo(rivi.getSukupuoli().toString(), ErillishakuDataRivi.SUKUPUOLEN_ARVOT));
             a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
             // HUOM! AIDINKIELESTÄ EI VOI TEHDÄ DROPDOWNIA KOSKA EXCEL EI TUE NIIN PITKÄÄ DROPDOWNIA
+            //TODO: selvitä myös tämä
             a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
             if (tyyppi == Hakutyyppi.KORKEAKOULU) {
@@ -166,7 +167,7 @@ public class ErillishakuExcel {
                     a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
                     a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoEN(), true, true));
                 } else {
-                    a.add(new TekstiArvo("", true, true));
+                    a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi("", koodistoCachedAsyncResource));
                     a.add(new TekstiArvo("", true, true));
                     a.add(new TekstiArvo("", true, true));
                     a.add(new TekstiArvo("", true, true));

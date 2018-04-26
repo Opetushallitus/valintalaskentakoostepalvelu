@@ -237,12 +237,12 @@ public class ErillishakuDataRivi extends DataRivi {
     }
 
     public static MonivalintaArvo ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
-        Collection<String> ehdollisenHyvaksynnanEhdot = new ArrayList<>();
-          Map<String, Koodi> hyvaksynnanEhdot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT);
-        for (Koodi koodi : hyvaksynnanEhdot.values()) {
-            ehdollisenHyvaksynnanEhdot.add(koodi.getKoodiArvo());
-
+        Map<String, Koodi> hyvaksymisenEhdot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT);
+        Collection<String> ehdollisenHyvaksymisenEhdot = new ArrayList<>();
+        ehdollisenHyvaksymisenEhdot.add("");
+        for (Koodi koodi : hyvaksymisenEhdot.values()) {
+            ehdollisenHyvaksymisenEhdot.add(koodi.getKoodiArvo());
         }
-        return new MonivalintaArvo(ehdollisenHyvaksymisenEhtoKoodi, ehdollisenHyvaksynnanEhdot);
+        return new MonivalintaArvo(ehdollisenHyvaksymisenEhtoKoodi, ehdollisenHyvaksymisenEhdot);
     }
 }

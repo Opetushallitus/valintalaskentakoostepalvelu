@@ -70,6 +70,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         this.applicationAsyncResource = applicationAsyncResource;
         this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
+        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.scheduler = scheduler;
     }
 

@@ -60,7 +60,7 @@ public class MockKoodistoCachedAsyncResource extends KoodistoCachedAsyncResource
                         "00100", postinumeroKoodi);
             }
             case KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT: {
-               /* Koodi ehdollisenHyvaksynnanKoodi1 = new Koodi();
+                Koodi ehdollisenHyvaksynnanKoodi1 = new Koodi();
                 ehdollisenHyvaksynnanKoodi1.setMetadata(Arrays.asList(
                         createMetadata("Ehdollinen: lopullinen tutkintotodistus toimitettava määräaikaan mennessä", "FI"),
                         createMetadata("Villkor: lämna in ditt slutliga examensbetyg inom utsatt tid", "SV"),
@@ -87,40 +87,6 @@ public class MockKoodistoCachedAsyncResource extends KoodistoCachedAsyncResource
                         createMetadata("Villkor: lämna in kopia av examensbetyget för den examen som du använt som ansökningsgrund inom utsatt", "SV"),
                         createMetadata("Condition: Submit a copy of the qualification certificate of the qualification you used to prove your eligibility by the deadline", "EN")));
                 ehdollisenHyvaksynnanKoodi4.setKoodiArvo("ttk");
-
-
-                return ImmutableMap.of( "ltt", ehdollisenHyvaksynnanKoodi1,
-                        "muu", ehdollisenHyvaksynnanKoodi2,
-                        "lvn", ehdollisenHyvaksynnanKoodi3,
-                        "ttk", ehdollisenHyvaksynnanKoodi4);*/
-                Koodi ehdollisenHyvaksynnanKoodi1 = new Koodi();
-                ehdollisenHyvaksynnanKoodi1.setMetadata(Arrays.asList(
-                        createMetadata("Ehdollinen", "FI"),
-                        createMetadata("Villkor", "SV"),
-                        createMetadata("Condition", "EN")));
-                ehdollisenHyvaksynnanKoodi1.setKoodiArvo("ltt");
-
-                Koodi ehdollisenHyvaksynnanKoodi2 = new Koodi();
-                ehdollisenHyvaksynnanKoodi2.setMetadata(Arrays.asList(
-                        createMetadata("Muu", "FI"),
-                        createMetadata("Annan", "SV"),
-                        createMetadata("Other", "EN")));
-                ehdollisenHyvaksynnanKoodi2.setKoodiArvo("muu");
-
-                Koodi ehdollisenHyvaksynnanKoodi3 = new Koodi();
-                ehdollisenHyvaksynnanKoodi3.setMetadata(Arrays.asList(
-                        createMetadata("Ehdollinen", "FI"),
-                        createMetadata("Villkor", "SV"),
-                        createMetadata("Condition", "EN")));
-                ehdollisenHyvaksynnanKoodi3.setKoodiArvo("lvm");
-
-                Koodi ehdollisenHyvaksynnanKoodi4 = new Koodi();
-                ehdollisenHyvaksynnanKoodi4.setMetadata(Arrays.asList(
-                        createMetadata("Ehdollinen", "FI"),
-                        createMetadata("Villkor", "SV"),
-                        createMetadata("Condition", "EN")));
-                ehdollisenHyvaksynnanKoodi4.setKoodiArvo("ttk");
-
 
                 return ImmutableMap.of( "ltt", ehdollisenHyvaksynnanKoodi1,
                         "muu", ehdollisenHyvaksynnanKoodi2,
