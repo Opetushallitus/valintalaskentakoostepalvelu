@@ -76,7 +76,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                                 String rivinVirheilmoitukset = rivi.getArvot().stream()
                                     .filter(pistesyottoArvo -> !pistesyottoArvo.isValidi())
                                     .map(virhellinenArvo ->
-                                        String.format("virheellinen arvo %s kohdassa %s",
+                                        String.format("virheellinen arvo '%s' kohdassa %s",
                                             virhellinenArvo.getArvo(), virhellinenArvo.getTunniste()))
                                     .collect(Collectors.joining(", "));
                                 return Stream.of(new TuontiErrorDTO(rivi.getOid(), rivi.getNimi(), rivinVirheilmoitukset));
