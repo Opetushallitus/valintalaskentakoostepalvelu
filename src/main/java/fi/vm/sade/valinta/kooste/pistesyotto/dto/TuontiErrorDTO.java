@@ -1,15 +1,19 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 
-import java.util.Objects;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class TuontiErrorDTO {
-
     private final String applicationOID;
     private final String applicantName;
+    private final String errorMessage;
 
-    public TuontiErrorDTO(String applicationOID, String applicantName) {
+    public TuontiErrorDTO(String applicationOID, String applicantName, String errorMessage) {
         this.applicationOID = applicationOID;
         this.applicantName = applicantName;
+        this.errorMessage = errorMessage;
+
     }
 
     public String getApplicantName() {
@@ -20,25 +24,22 @@ public class TuontiErrorDTO {
         return applicationOID;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
     @Override
     public String toString() {
-        return "TuontiErrorDTO{" +
-                "applicationOID='" + applicationOID + '\'' +
-                ", applicantName='" + applicantName + '\'' +
-                '}';
+        return ToStringBuilder.reflectionToString(this);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TuontiErrorDTO that = (TuontiErrorDTO) o;
-        return Objects.equals(applicationOID, that.applicationOID) &&
-                Objects.equals(applicantName, that.applicantName);
+        return EqualsBuilder.reflectionEquals(this, o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(applicationOID, applicantName);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

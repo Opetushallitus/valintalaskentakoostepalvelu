@@ -185,7 +185,8 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                         singletonList(new Valintapisteet(Pair.of(username, pistetietoDTO))),
                         auditSession);
                 return failedPisteet.map(strings ->
-                        Collections.singleton(new TuontiErrorDTO(pistetietoDTO.getOid(), pistetietoDTO.getFirstNames() + " " + pistetietoDTO.getLastName())));
+                        Collections.singleton(new TuontiErrorDTO(pistetietoDTO.getOid(),
+                            pistetietoDTO.getFirstNames() + " " + pistetietoDTO.getLastName(), "Virhe tallennettaessa valintapisteitä")));
             } else {
                 Observable<Set<TuontiErrorDTO>> errors = Observable.merge(kielikoePistetiedot.keySet().stream().map(kielikoetunniste -> {
                     ApplicationAdditionalDataDTO a = poistaKielikoepistetiedot(pistetietoDTO);
@@ -212,7 +213,8 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             Observable<Set<String>> failedPisteet = tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, auditSession);
             return failedPisteet.map(ids -> pistetiedotHakemukselle.stream()
                     .filter(u -> ids.contains(u.getOid()))
-                    .map(dto -> new TuontiErrorDTO(dto.getOid(), dto.getFirstNames() + " " + dto.getLastName()))
+                    .map(dto -> new TuontiErrorDTO(dto.getOid(), dto.getFirstNames() + " " + dto.getLastName(),
+                        "Yritettiin kirjoittaa yli uudempia pistetietoja"))
                     .collect(Collectors.toSet()));
 
         } catch (Exception e) {

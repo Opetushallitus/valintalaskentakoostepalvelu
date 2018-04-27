@@ -60,43 +60,26 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Pistesyötön tuonti epäonnistui", t), t);
     }
 
-    private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, Map<String, ApplicationAdditionalDataDTO> oidToAdditionalMapping) {
+    private List<TuontiErrorDTO> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, Map<String, ApplicationAdditionalDataDTO> oidToAdditionalMapping) {
         return pistesyottoTuontiAdapteri
                 .getRivit().stream()
                 .flatMap(
                         rivi -> {
                             String nimi = PistesyottoExcel.additionalDataToNimi(oidToAdditionalMapping.get(rivi.getOid()));
                             if (!Optional.ofNullable(rivi.getNimi()).orElse("").equals(nimi)) {
-                                String virheIlmoitus = new StringBuffer()
-                                        .append("Hakemuksella (OID = ")
-                                        .append(rivi.getOid())
-                                        .append(") nimet ei täsmää: ")
-                                        .append(rivi.getNimi())
-                                        .append(" != ")
-                                        .append(nimi)
-                                        .toString();
-                                return Stream.of(virheIlmoitus);
+                                String virheIlmoitus = String.format("nimet eivät täsmää: %s != %s",
+                                    rivi.getNimi(), nimi);
+                                return Stream.of(new TuontiErrorDTO(rivi.getOid(), rivi.getNimi(), virheIlmoitus));
                             }
                             if (!rivi.isValidi()) {
                                 LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
-
-                                for (PistesyottoArvo arvo : rivi.getArvot()) {
-                                    if (!arvo.isValidi()) {
-                                        String virheIlmoitus = new StringBuffer()
-                                                .append("Henkilöllä ")
-                                                .append(rivi.getNimi())
-                                                .append(" (")
-                                                .append(rivi.getOid())
-                                                .append(")")
-                                                .append(" oli virheellinen arvo '")
-                                                .append(arvo.getArvo())
-                                                .append("'")
-                                                .append(" kohdassa ")
-                                                .append(arvo.getTunniste())
-                                                .toString();
-                                        return Stream.of(virheIlmoitus);
-                                    }
-                                }
+                                String rivinVirheilmoitukset = rivi.getArvot().stream()
+                                    .filter(pistesyottoArvo -> !pistesyottoArvo.isValidi())
+                                    .map(virhellinenArvo ->
+                                        String.format("virheellinen arvo %s kohdassa %s",
+                                            virhellinenArvo.getArvo(), virhellinenArvo.getTunniste()))
+                                    .collect(Collectors.joining(", "));
+                                return Stream.of(new TuontiErrorDTO(rivi.getOid(), rivi.getNimi(), rivinVirheilmoitukset));
                             }
                             return Stream.empty();
                         }
@@ -114,10 +97,9 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                     } catch (IOException e) {
                         return Observable.error(e);
                     }
-                    List<String> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, pistetiedot);
+                    List<TuontiErrorDTO> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, pistetiedot);
                     if (!virheet.isEmpty()) {
-                        String v = virheet.stream().collect(Collectors.joining(", "));
-                        return Observable.error(new RuntimeException(String.format("Virheitä pistesyöttöriveissä %s", v)));
+                        return Observable.error(new PistesyotonTuontivirhe(virheet));
                     }
                     Date valmistuminen = new Date();
                     Map<String, List<SingleKielikoeTulos>> uudetKielikoetulokset = new HashMap<>();
@@ -148,7 +130,8 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                                 uudetKielikoetulokset, username, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, auditSession);
                         return failedPisteet.map(ids -> uudetPistetiedot.stream()
                                 .filter(u -> ids.contains(u.getOid()))
-                                .map(dto -> new TuontiErrorDTO(dto.getOid(), dto.getFirstNames() + " " + dto.getLastName()))
+                                .map(dto -> new TuontiErrorDTO(dto.getOid(), dto.getFirstNames() + " " + dto.getLastName(),
+                                    "Yritettiin kirjoittaa yli uudempaa pistetietoa"))
                                 .collect(Collectors.toSet()));
                     }
                 });

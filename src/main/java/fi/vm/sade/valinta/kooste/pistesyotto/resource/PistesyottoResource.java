@@ -19,6 +19,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Audit
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyotonTuontivirhe;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
@@ -457,8 +458,14 @@ public class PistesyottoResource {
                         }
                     },
                     error -> {
-                        logError("Tuntematon virhetilanne", error);
-                        resumeWithException(asyncResponse, error);
+                        if (error instanceof PistesyotonTuontivirhe) {
+                            logError("tallennaKoostetutPistetiedot epäonnistui, vaikuttaa huonolta syötteeltä", error);
+                            asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                                .entity(((PistesyotonTuontivirhe) error).virheet).build());
+                        } else {
+                            logError("Tuntematon virhetilanne", error);
+                            resumeWithException(asyncResponse, error);
+                        }
                     }
             );
         } catch (Exception e) {
