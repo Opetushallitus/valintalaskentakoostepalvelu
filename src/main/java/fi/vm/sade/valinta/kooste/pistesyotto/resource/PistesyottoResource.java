@@ -459,9 +459,11 @@ public class PistesyottoResource {
                     },
                     error -> {
                         if (error instanceof PistesyotonTuontivirhe) {
-                            logError("tallennaKoostetutPistetiedot epäonnistui, vaikuttaa huonolta syötteeltä", error);
+                            PistesyotonTuontivirhe pistesyotonTuontivirhe = (PistesyotonTuontivirhe) error;
+                            LOG.warn(String.format("tallennaKoostetutPistetiedot epäonnistui, vaikuttaa huonolta syötteeltä: " +
+                                "%s", pistesyotonTuontivirhe.virheet));
                             asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
-                                .entity(((PistesyotonTuontivirhe) error).virheet).build());
+                                .entity(pistesyotonTuontivirhe.virheet).build());
                         } else {
                             logError("Tuntematon virhetilanne", error);
                             resumeWithException(asyncResponse, error);
