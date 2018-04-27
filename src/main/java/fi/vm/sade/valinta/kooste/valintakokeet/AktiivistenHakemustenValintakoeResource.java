@@ -60,7 +60,8 @@ public class AktiivistenHakemustenValintakoeResource {
         asyncResponse.setTimeout(30, TimeUnit.SECONDS);
 
         valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
-            .flatMap(this::filtteroiPoisPassiivistenHakemustenOsallistumistiedot)
+            .flatMap(osallistumiset ->
+                filtteroiPoisPassiivistenHakemustenOsallistumistiedot(osallistumiset, hakukohdeOid))
             .subscribe(
                 osallistumiset ->
                     asyncResponse.resume(Response.ok(osallistumiset, APPLICATION_JSON_TYPE).build()),
@@ -74,7 +75,7 @@ public class AktiivistenHakemustenValintakoeResource {
     }
 
     private Observable<List<ValintakoeOsallistuminenDTO>> filtteroiPoisPassiivistenHakemustenOsallistumistiedot(
-        List<ValintakoeOsallistuminenDTO> osallistumiset) {
+        List<ValintakoeOsallistuminenDTO> osallistumiset, String hakukohdeOid) {
         List<String> kaikkiOsallistumistenHakemusOidit = osallistumiset.stream()
             .map(ValintakoeOsallistuminenDTO::getHakemusOid).distinct().collect(Collectors.toList());
 
@@ -85,8 +86,10 @@ public class AktiivistenHakemustenValintakoeResource {
                 return osallistumiset.stream().filter(o -> {
                     boolean onAktiivinen = aktiivistenHakemusOidit.contains(o.getHakemusOid());
                     if (!onAktiivinen) {
-                        LOG.warn(String.format("Hakemuksen %s valintakoeosallistuminen filtteröidään pois, " +
-                            "koska sille ei löydy aktiivista hakemusta haku-appista.", o.getHakemusOid()));
+                        LOG.warn(String.format("Hakemuksen %s valintakoeosallistuminen filtteröidään pois " +
+                            "haettaessa hakukohteen %s osallistumistietoja, " +
+                            "koska hakemusnumerolla ei löydy aktiivista hakemusta haku-appista.",
+                            o.getHakemusOid(), hakukohdeOid));
                     }
                     return onAktiivinen;
                 }).collect(Collectors.toList());
