@@ -42,7 +42,8 @@ public class AktiivistenHakemustenValintakoeResource {
     private final ApplicationAsyncResource applicationAsyncResource;
 
     @Autowired
-    public AktiivistenHakemustenValintakoeResource(ValintalaskentaValintakoeAsyncResource valintakoeAsyncResource, ApplicationAsyncResource applicationAsyncResource) {
+    public AktiivistenHakemustenValintakoeResource(ValintalaskentaValintakoeAsyncResource valintakoeAsyncResource,
+                                                   ApplicationAsyncResource applicationAsyncResource) {
         this.valintakoeAsyncResource = valintakoeAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
     }
@@ -64,13 +65,16 @@ public class AktiivistenHakemustenValintakoeResource {
                 osallistumiset ->
                     asyncResponse.resume(Response.ok(osallistumiset, APPLICATION_JSON_TYPE).build()),
                 exception -> {
-                    String message = String.format("Virhe haettaessa valintakoeosallistumisia hakukohteelle %s", hakukohdeOid);
+                    String message = String.format("Virhe haettaessa valintakoeosallistumisia hakukohteelle %s",
+                        hakukohdeOid);
                     LOG.error(message, exception);
-                    asyncResponse.resume(Response.serverError().entity(String.format("%s : %s", message, exception.getMessage())).build());
+                    asyncResponse.resume(Response
+                        .serverError().entity(String.format("%s : %s", message, exception.getMessage())).build());
                 });
     }
 
-    private Observable<List<ValintakoeOsallistuminenDTO>> filtteroiPoisPassiivistenHakemustenOsallistumistiedot(List<ValintakoeOsallistuminenDTO> osallistumiset) {
+    private Observable<List<ValintakoeOsallistuminenDTO>> filtteroiPoisPassiivistenHakemustenOsallistumistiedot(
+        List<ValintakoeOsallistuminenDTO> osallistumiset) {
         List<String> kaikkiOsallistumistenHakemusOidit = osallistumiset.stream()
             .map(ValintakoeOsallistuminenDTO::getHakemusOid).distinct().collect(Collectors.toList());
 
