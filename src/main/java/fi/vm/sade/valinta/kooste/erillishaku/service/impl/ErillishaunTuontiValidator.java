@@ -121,7 +121,14 @@ public class ErillishaunTuontiValidator {
             validateKorkeakoulu(rivi, errors, asuinmaa, kansalaisuus, toisenAsteenSuoritusmaa, kotikunta);
         }
         //Tämä on toimiva validaatio, mutta sitä kannattaa käyttää vasta kun vaihtoehdot ehdolliselle hyväksymiselle saadaan valittua excelin pudotusvalikosta.
-        // validateEhdollinenHyvaksynta(rivi, errors);
+
+        //Since we now have dropdown with codes & explanations, we'll split the ehdollisenHyvaksymisenEhtoKoodi and just take the code part:
+        if (rivi.getEhdollisenHyvaksymisenEhtoKoodi() != null) {
+            String[] splitCode = rivi.getEhdollisenHyvaksymisenEhtoKoodi().split("\\s+");
+            rivi.setEhdollisenHyvaksymisenEhtoKoodi(splitCode[0]);
+        }
+
+        validateEhdollinenHyvaksynta(rivi, errors);
         validateEhdollisenHyvaksynnanKoodi(rivi, errors);
 
         return errors;
@@ -335,10 +342,7 @@ public class ErillishaunTuontiValidator {
         if (rivi.getEhdollisestiHyvaksyttavissa()) {
             Map<String, Koodi> ehdot = koodistoCachedAsyncResource.haeKoodisto("hyvaksynnanehdot");
             if (!ehdot.isEmpty()) {
-                Boolean sallittuehto = ehdot.values().stream()
-                        .flatMap(x -> x.getMetadata().stream())
-                        .map(Metadata::getNimi)
-                        .anyMatch(x -> x.equalsIgnoreCase(rivi.getEhdollisenHyvaksymisenEhtoKoodi()));
+                Boolean sallittuehto = ehdot.containsKey(rivi.getEhdollisenHyvaksymisenEhtoKoodi());
                 if (!sallittuehto)
                     errors.add("Jos ehdollinen hyväksyntä on aktiivinen, on hyväksymisen ehdon oltava jokin pudotusvalikon arvoista.");
             }

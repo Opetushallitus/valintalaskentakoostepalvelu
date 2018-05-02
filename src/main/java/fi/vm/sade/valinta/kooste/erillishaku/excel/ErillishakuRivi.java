@@ -39,7 +39,7 @@ public class ErillishakuRivi {
     @ApiModelProperty(required = true)
     private final String hakemuksenTila;
     private final boolean ehdollisestiHyvaksyttavissa;
-    private final String ehdollisenHyvaksymisenEhtoKoodi;
+    private String ehdollisenHyvaksymisenEhtoKoodi;
     private final String ehdollisenHyvaksymisenEhtoFI;
     private final String ehdollisenHyvaksymisenEhtoSV;
     private final String ehdollisenHyvaksymisenEhtoEN;
@@ -168,6 +168,10 @@ public class ErillishakuRivi {
 
     public String getEhdollisenHyvaksymisenEhtoKoodi() {
         return ehdollisenHyvaksymisenEhtoKoodi;
+    }
+
+    public void setEhdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
+        this.ehdollisenHyvaksymisenEhtoKoodi = ehdollisenHyvaksymisenEhtoKoodi;
     }
 
     public String getEhdollisenHyvaksymisenEhtoFI() {

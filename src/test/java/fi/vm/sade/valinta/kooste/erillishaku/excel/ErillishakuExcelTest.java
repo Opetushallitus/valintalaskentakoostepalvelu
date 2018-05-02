@@ -34,7 +34,7 @@ public class ErillishakuExcelTest {
                 .aidinkieli("FI")
                 .hakemuksenTila("HYLATTY")
                 .ehdollisestiHyvaksyttavissa(true)
-                .ehdollisenHyvaksymisenEhtoKoodi("ttku")
+                .ehdollisenHyvaksymisenEhtoKoodi("lvm Ehdollinen: lukuvuosimaksu maksettava määräaikaan mennessä, ennen kuin voit ilmoittautua")
                 .ehdollisenHyvaksymisenEhtoFI("")
                 .ehdollisenHyvaksymisenEhtoSV("")
                 .ehdollisenHyvaksymisenEhtoEN("")
