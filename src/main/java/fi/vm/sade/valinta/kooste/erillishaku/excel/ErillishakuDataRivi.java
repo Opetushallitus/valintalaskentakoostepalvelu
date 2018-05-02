@@ -241,8 +241,19 @@ public class ErillishakuDataRivi extends DataRivi {
         Collection<String> ehdollisenHyvaksymisenEhdot = new ArrayList<>();
         ehdollisenHyvaksymisenEhdot.add("");
         for (Koodi koodi : hyvaksymisenEhdot.values()) {
-            ehdollisenHyvaksymisenEhdot.add(koodi.getKoodiArvo());
+            ehdollisenHyvaksymisenEhdot.add(koodi.getKoodiArvo() + " " + KoodistoCachedAsyncResource.haeKoodistaArvo(koodi, "FI", null));
         }
         return new MonivalintaArvo(ehdollisenHyvaksymisenEhtoKoodi, ehdollisenHyvaksymisenEhdot);
+    }
+
+    public static MonivalintaArvo aidinkieli(String aidinkieli, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+        Map<String, Koodi> kielet = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KIELI);
+        Collection<String> aidinkielet = new ArrayList<>();
+        aidinkielet.add("");
+        for (Koodi koodi : kielet.values()) {
+            aidinkielet.add(koodi.getKoodiArvo());
+
+        }
+        return new MonivalintaArvo(aidinkieli, aidinkielet);
     }
 }

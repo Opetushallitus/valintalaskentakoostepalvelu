@@ -11,25 +11,16 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.javautils.poi.OphCellStyles.OphXssfCellStyles;
 import org.apache.poi.POIXMLException;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFDataFormat;
-import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Iterator;
+import java.awt.Color;
+import java.io.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class Excel {
     private static final Logger LOG = LoggerFactory.getLogger(Excel.class);
@@ -103,7 +94,7 @@ public class Excel {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet(nimi);
         XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
-
+        int hiddenSheetCount=0;
         XSSFDataFormat fmt = workbook.createDataFormat();
         OphXssfCellStyles defaultStyles = new OphXssfCellStyles(workbook);
         defaultStyles.visit(s -> {
@@ -179,16 +170,47 @@ public class Excel {
                     } else if (solu.isMonivalinta()) {
                         cell = row.createCell(cellNum, STRING);
                         cell.setCellValue(solu.toTeksti().getTeksti());
+
                         defaultStyles.apply(cell);
 
                         Monivalinta monivalinta = solu.toMonivalinta();
                         MonivalintaJoukko joukko;
-                        if (!constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
+
+                        if (monivalinta.getVaihtoehdot().toString().length() >= 255 && !constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
+                            XSSFSheet hiddenSheet;
+                            String sheetName = String.valueOf(cellNum);
+
+                            try {
+
+                                 hiddenSheet = workbook.createSheet(sheetName);
+                                 int i = 0;
+                                 for (String vaihtoehto : monivalinta.getVaihtoehdot()) {
+
+                                    XSSFRow hiddenRow = hiddenSheet.createRow(i);
+                                    XSSFCell hiddenCell = hiddenRow.createCell(0);
+                                    hiddenCell.setCellValue(vaihtoehto);
+                                    i++;
+                                 }
+                                 hiddenSheetCount++;
+
+                            } catch (IllegalArgumentException e) {
+                                // This is ok, since we have created the hidden sheet for this column.
+                            }
+
+                            CellRangeAddressList addressList = new CellRangeAddressList(rowIndex,rowIndex,cellNum,cellNum);
+                            XSSFDataValidationConstraint constraint = (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(sheetName+"!$A$1:$A$" + monivalinta.getVaihtoehdot().size());
+                            XSSFDataValidation dataValidation = (XSSFDataValidation) dvHelper.createValidation(constraint, addressList);
+                            dataValidation.setSuppressDropDownArrow(true);
+                            workbook.setSheetHidden(hiddenSheetCount, true);
+                            sheet.addValidationData(dataValidation);
+                            constraintSets.put(monivalinta.getVaihtoehdot(), joukko = new MonivalintaJoukko(monivalinta.getVaihtoehdot(), sheet, dvHelper, constraint, dataValidation));
+                        } else if (!constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
                             constraintSets.put(monivalinta.getVaihtoehdot(), joukko = new MonivalintaJoukko(monivalinta.getVaihtoehdot(), sheet, dvHelper));
                         } else {
                             joukko = constraintSets.get(monivalinta.getVaihtoehdot());
                         }
                         joukko.addAddress(rowIndex, cellNum);
+
                     }
                     if (cell != null) {
                         if (solu.isKeskitettyTasaus()) {

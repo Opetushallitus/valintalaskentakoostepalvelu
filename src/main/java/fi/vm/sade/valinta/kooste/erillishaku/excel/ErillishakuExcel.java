@@ -106,6 +106,8 @@ public class ErillishakuExcel {
 
         rivit.add(dataRivit);
         this.excel = new Excel("Erillishaku", rivit);
+
+
     }
 
     private Stream<ErillishakuRivi> arvoRivit(List<ErillishakuRivi> erillishakurivit) {
@@ -154,18 +156,25 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo(rivi.getSyntymaAika(), true, true));
             a.add(new MonivalintaArvo(rivi.getSukupuoli().toString(), ErillishakuDataRivi.SUKUPUOLEN_ARVOT));
             a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
-            // HUOM! AIDINKIELESTÄ EI VOI TEHDÄ DROPDOWNIA KOSKA EXCEL EI TUE NIIN PITKÄÄ DROPDOWNIA
-            //TODO: selvitä myös tämä
-            a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
+            a.add(ErillishakuDataRivi.aidinkieli(rivi.getAidinkieli(), koodistoCachedAsyncResource));
             a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
             if (tyyppi == Hakutyyppi.KORKEAKOULU) {
                 a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
 
                 if (rivi.getEhdollisestiHyvaksyttavissa() == true) {
+
+
                     a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), koodistoCachedAsyncResource));
-                    a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
-                    a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
-                    a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoEN(), true, true));
+                    if (StringUtils.equals(rivi.getEhdollisenHyvaksymisenEhtoKoodi() , "muu")) {
+                        a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
+                        a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
+                        a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoEN(), true, true));
+                    } else {
+                        a.add(new TekstiArvo("", true, true));
+                        a.add(new TekstiArvo("", true, true));
+                        a.add(new TekstiArvo("", true, true));
+                    }
+
                 } else {
                     a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi("", koodistoCachedAsyncResource));
                     a.add(new TekstiArvo("", true, true));
