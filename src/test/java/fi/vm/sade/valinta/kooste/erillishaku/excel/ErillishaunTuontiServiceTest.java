@@ -384,7 +384,7 @@ class ErillisHakuTuontiTestCase {
 
         Map<String, Koodi> ehdollisenHyvaksynnanKoodit = ImmutableMap.of( "ltt", ehdollisenHyvaksynnanKoodi1,
                 "muu", ehdollisenHyvaksynnanKoodi2,
-                "lvn", ehdollisenHyvaksynnanKoodi3,
+                "lvm", ehdollisenHyvaksynnanKoodi3,
                 "ttk", ehdollisenHyvaksynnanKoodi4);
 
         when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.HYVAKSYNNAN_EHDOT)).thenReturn(ehdollisenHyvaksynnanKoodit);

@@ -90,7 +90,7 @@ public class MockKoodistoCachedAsyncResource extends KoodistoCachedAsyncResource
 
                 return ImmutableMap.of( "ltt", ehdollisenHyvaksynnanKoodi1,
                         "muu", ehdollisenHyvaksynnanKoodi2,
-                        "lvn", ehdollisenHyvaksynnanKoodi3,
+                        "lvm", ehdollisenHyvaksynnanKoodi3,
                         "ttk", ehdollisenHyvaksynnanKoodi4);
             }
             default: assert false; return new HashMap<>();
