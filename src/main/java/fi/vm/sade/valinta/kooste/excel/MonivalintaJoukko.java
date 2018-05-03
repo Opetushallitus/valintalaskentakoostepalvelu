@@ -21,14 +21,11 @@ public class MonivalintaJoukko {
 
     }
 
-    public MonivalintaJoukko(Collection<String> joukko, XSSFSheet sheet, XSSFDataValidationHelper dvHelper, XSSFDataValidationConstraint dvConstraint, XSSFDataValidation validation) {
+    public MonivalintaJoukko(Collection<String> joukko, XSSFSheet sheet, XSSFDataValidationHelper dvHelper, String formula) {
         this.joukko = joukko;
         this.dvHelper = dvHelper;
         this.sheet = sheet;
-        this.dvConstraint = dvConstraint;
-        sheet.addValidationData(validation);
-        validation.setSuppressDropDownArrow(false);
-
+        this.dvConstraint = (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(formula);
     }
 
     public void addAddress(int row, int col) {
@@ -37,7 +34,6 @@ public class MonivalintaJoukko {
         sheet.addValidationData(validation);
         validation.setSuppressDropDownArrow(false);
     }
-
 
     public Collection<String> getJoukko() { return joukko; }
 }

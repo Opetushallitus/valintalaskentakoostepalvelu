@@ -170,47 +170,35 @@ public class Excel {
                     } else if (solu.isMonivalinta()) {
                         cell = row.createCell(cellNum, STRING);
                         cell.setCellValue(solu.toTeksti().getTeksti());
-
                         defaultStyles.apply(cell);
-
                         Monivalinta monivalinta = solu.toMonivalinta();
                         MonivalintaJoukko joukko;
 
-                        if (monivalinta.getVaihtoehdot().toString().length() >= 255 && !constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
+                        if (monivalinta.getVaihtoehdot().toString().length() >= 250 && !constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
                             XSSFSheet hiddenSheet;
                             String sheetName = String.valueOf(cellNum);
-
                             try {
-
                                  hiddenSheet = workbook.createSheet(sheetName);
                                  int i = 0;
                                  for (String vaihtoehto : monivalinta.getVaihtoehdot()) {
-
                                     XSSFRow hiddenRow = hiddenSheet.createRow(i);
                                     XSSFCell hiddenCell = hiddenRow.createCell(0);
                                     hiddenCell.setCellValue(vaihtoehto);
                                     i++;
                                  }
                                  hiddenSheetCount++;
-
                             } catch (IllegalArgumentException e) {
-                                // This is ok, since we have created the hidden sheet for this column.
+                                // Should never happen since we have already created the hidden sheet for this column.
                             }
-
-                            CellRangeAddressList addressList = new CellRangeAddressList(rowIndex,rowIndex,cellNum,cellNum);
-                            XSSFDataValidationConstraint constraint = (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(sheetName+"!$A$1:$A$" + monivalinta.getVaihtoehdot().size());
-                            XSSFDataValidation dataValidation = (XSSFDataValidation) dvHelper.createValidation(constraint, addressList);
-                            dataValidation.setSuppressDropDownArrow(true);
                             workbook.setSheetHidden(hiddenSheetCount, true);
-                            sheet.addValidationData(dataValidation);
-                            constraintSets.put(monivalinta.getVaihtoehdot(), joukko = new MonivalintaJoukko(monivalinta.getVaihtoehdot(), sheet, dvHelper, constraint, dataValidation));
+                            constraintSets.put(monivalinta.getVaihtoehdot(), joukko = new MonivalintaJoukko(monivalinta.getVaihtoehdot(), sheet, dvHelper,
+                                    sheetName+"!$A$1:$A$" + monivalinta.getVaihtoehdot().size()));
                         } else if (!constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
                             constraintSets.put(monivalinta.getVaihtoehdot(), joukko = new MonivalintaJoukko(monivalinta.getVaihtoehdot(), sheet, dvHelper));
                         } else {
                             joukko = constraintSets.get(monivalinta.getVaihtoehdot());
                         }
                         joukko.addAddress(rowIndex, cellNum);
-
                     }
                     if (cell != null) {
                         if (solu.isKeskitettyTasaus()) {
