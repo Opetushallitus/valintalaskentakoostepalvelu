@@ -162,8 +162,6 @@ public class ErillishakuExcel {
                 a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO, ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
 
                 if (rivi.getEhdollisestiHyvaksyttavissa() == true) {
-
-
                     a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), koodistoCachedAsyncResource));
                     if (StringUtils.equals(rivi.getEhdollisenHyvaksymisenEhtoKoodi() , "muu")) {
                         a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
@@ -174,15 +172,12 @@ public class ErillishakuExcel {
                         a.add(new TekstiArvo("", true, true));
                         a.add(new TekstiArvo("", true, true));
                     }
-
                 } else {
                     a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi("", koodistoCachedAsyncResource));
                     a.add(new TekstiArvo("", true, true));
                     a.add(new TekstiArvo("", true, true));
                     a.add(new TekstiArvo("", true, true));
                 }
-
-
             }
             a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null ? "" : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
