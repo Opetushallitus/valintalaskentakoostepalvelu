@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyypp
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ListFullSearchDTO;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +108,9 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     private Observable<List<Hakemus>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
         Func1<List<Hakemus>, List<Hakemus>> filterApplicationsInDefaultStates = hs ->
             hs.stream().filter(h ->
-                DEFAULT_STATES.contains(h.getState())).collect(Collectors.toList());
+                    StringUtils.isEmpty(h.getState()) ||
+                    DEFAULT_STATES.contains(h.getState())
+            ).collect(Collectors.toList());
         return this.<List<String>, List<Hakemus>>postAsObservableLazily(getUrl("haku-app.applications.list"), new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
