@@ -226,7 +226,7 @@ public class ViestintapalveluAktivointiResource {
     @Produces("application/json")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa", response = Response.class)
-    public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(  // PETAR this one serves "Muodosta hyväksymiskirjeet"
+    public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(
             DokumentinLisatiedot hakemuksillaRajaus,
             @QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("tarjoajaOid") String tarjoajaOid,
