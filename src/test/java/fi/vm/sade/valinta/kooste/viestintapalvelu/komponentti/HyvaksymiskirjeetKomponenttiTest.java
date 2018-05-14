@@ -115,7 +115,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
 
         assertEquals("null, null null", letter.getAddressLabel().toString());
         assertNull(letter.getLanguageCode());
-        assertEquals(12, letter.getTemplateReplacements().size());
+        assertEquals(13, letter.getTemplateReplacements().size());
         assertEquals(PALAUTUS_PVM, letter.getTemplateReplacements().get("palautusPvm"));
         assertEquals(PALAUTUS_AIKA, letter.getTemplateReplacements().get("palautusAika"));
         assertTrue(letter.getTemplateReplacements().containsKey("tulokset"));
@@ -131,6 +131,8 @@ public class HyvaksymiskirjeetKomponenttiTest {
         assertNull(letter.getLetterContent());
         assertNull(letter.getEmailAddress());
         assertEquals(HAKIJA_OID, letter.getPersonOid());
+        assertTrue("Hakija OID has to be also available to template", letter.getTemplateReplacements().containsKey("hakijaOid"));
+        assertEquals(HAKIJA_OID, letter.getTemplateReplacements().get("hakijaOid"));
         assertEquals(HAKEMUS_OID, letter.getApplicationOid());
         assertEquals(skipIPosti, letter.isSkipIPosti());
 

@@ -223,6 +223,7 @@ public class HyvaksymiskirjeetKomponentti {
                 replacements.put("henkilotunnus", hakemusWrapper.getHenkilotunnus());
                 replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
                 replacements.put("hakemusOid", hakemus.getOid());
+                replacements.put("hakijaOid", hakija.getHakijaOid());
 
                 replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
                 replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)));
