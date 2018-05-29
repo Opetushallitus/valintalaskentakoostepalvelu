@@ -174,7 +174,10 @@ public class Excel {
                         Monivalinta monivalinta = solu.toMonivalinta();
                         MonivalintaJoukko joukko;
 
-                        if (monivalinta.getVaihtoehdot().toString().length() >= 250 && !constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
+                        // Pilkulla erotetun merkkijonon maksimipituus excel-solussa 255 (OY-190).
+                        int excelSolunMaxPituus = 250;
+
+                        if (monivalinta.getVaihtoehdot().toString().length() >= excelSolunMaxPituus && !constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
                             XSSFSheet hiddenSheet;
                             String sheetName = String.valueOf(cellNum);
                             try {
