@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
-@Path("/valintalaskenta-laskenta-service/resources/hakukohde")
+@Path("/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde")
 public interface HakukohdeResource {
 
     @GET
