@@ -1798,6 +1798,48 @@ public class HakemuksetConverterUtilTest {
                     hakemus.getAvaimet().stream().filter(a -> "LK_AI".equals(a.getAvain()) && "8".equals(a.getArvo())).count() == 1L);
     }
 
+    @Test
+    public void lkSamanArvosananToistuessaToisessaSuorituksessaKaytetaanParasta() {
+        HakemusDTO hakemus = new HakemusDTO();
+        Oppija tuntematonAsteikkoMuttaTunnistetaanNumeroksi = new SuoritusrekisteriSpec.OppijaBuilder()
+                .suoritus()
+                    .setLukio()
+                    .setValmistuminen("1.1.2015")
+                    .setValmis()
+                    .arvosana()
+                        .setAine("AI")
+                        .setAsteikko("")
+                        .setArvosana("9")
+                        .build()
+                    .arvosana()
+                        .setAine("AI")
+                        .setAsteikko("")
+                        .setArvosana("8")
+                        .build()
+                    .build()
+                .suoritus()
+                    .setLukio()
+                    .setValmistuminen("1.1.2015")
+                    .setValmis()
+                    .arvosana()
+                        .setAine("AI")
+                        .setAsteikko("")
+                        .setArvosana("10")
+                        .build()
+                    .build()
+                .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tuntematonAsteikkoMuttaTunnistetaanNumeroksi, hakemus, true);
+
+        long count = hakemus.getAvaimet().stream().filter(a -> "LK_AI".equals(a.getAvain())).count();
+        assertEquals("käsitellyssä datassa pitäisi olla vain yksi arvosana (paras arvosana) per aine ", 1, count);
+
+        AvainArvoDTO avainArvoDTO = hakemus.getAvaimet().stream().filter(a -> "LK_AI".equals(a.getAvain())).findFirst().get();
+        String arvo = "10";
+        AvainArvoDTO expected = new AvainArvoDTO("LK_AI", arvo);
+        assertEquals(String.format("LK_AI arvo pitäisi olla toisesta suorituksesta löytyvä korotettu numero {}", arvo), expected, avainArvoDTO);
+    }
+
     // KYMPPILUOKKA:
     // PK_TILA_10 = false // default
     // VAAN YKS SUORITUS (LISÄOPETUS)
