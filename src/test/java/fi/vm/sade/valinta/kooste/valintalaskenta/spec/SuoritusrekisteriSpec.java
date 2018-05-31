@@ -246,6 +246,10 @@ public class SuoritusrekisteriSpec {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_10_KOMO);
             return SuoritusBuilder.this;
         }
+        public SuoritusBuilder setPerusopetuksenOppiaineenOppimaara() {
+            suoritus.setKomo(SuoritusJaArvosanatWrapper.POO_KOMO);
+            return SuoritusBuilder.this;
+        }
         public SuoritusBuilder setUlkomainenKorvaava() {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.ULKOMAINENKORVAAVA);
             return SuoritusBuilder.this;

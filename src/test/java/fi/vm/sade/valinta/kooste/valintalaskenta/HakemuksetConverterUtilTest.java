@@ -1823,6 +1823,56 @@ public class HakemuksetConverterUtilTest {
                 hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "7".equals(a.getArvo())).count() == 1L);
     }
 
+    @Test
+    public void perusopetuksenOppiaineenOppimaara() {
+        HakemusDTO hakemus = new HakemusDTO();
+        Oppija oikeinKoskaVainValmisSuoritus = new SuoritusrekisteriSpec.OppijaBuilder()
+                .suoritus()
+                    .setPerusopetuksenOppiaineenOppimaara()
+                    .setVahvistettu(true)
+                    .setValmistuminen("1.1.2015")
+                        .arvosana()
+                        .setAine("AI")
+                        .setArvosana("8")
+                        .build()
+                    .build()
+                .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaVainValmisSuoritus, hakemus, true);
+        Assert.assertTrue("PK_AI löytyy ja sen arvo on 8",
+                hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "8".equals(a.getArvo())).count() == 1L);
+    }
+
+    @Test
+    public void perusopetuksenArvosanaaKorotettuPerusopetuksenOppiaineenOppimaarassa() {
+        HakemusDTO hakemus = new HakemusDTO();
+        Oppija oikeinKoskaVainValmisSuoritus = new SuoritusrekisteriSpec.OppijaBuilder()
+                    .suoritus()
+                    .setPerusopetus()
+                    .setVahvistettu(true)
+                    .setValmistuminen("1.1.2015")
+                    .arvosana()
+                        .setAine("AI")
+                        .setArvosana("8")
+                        .build()
+                    .build()
+                .suoritus()
+                    .setPerusopetuksenOppiaineenOppimaara()
+                    .setVahvistettu(true)
+                    .setValmistuminen("12.12.2015")
+                    .arvosana()
+                        .setAine("AI")
+                        .setArvosana("9")
+                        .build()
+                    .build()
+                .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oikeinKoskaVainValmisSuoritus, hakemus, true);
+        Assert.assertTrue("PK_AI löytyy ja sen arvo on 9",
+                hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "9".equals(a.getArvo())).count() == 1L);
+    }
+
+
     public static boolean testEquality(List<Map<String, String>> a, List<Map<String, String>> b) {
         return a.stream().anyMatch(a0 -> b.stream().anyMatch(b0 -> b0.entrySet().containsAll(a0.entrySet())));
         //a.entrySet().containsAll(b.entrySet());
