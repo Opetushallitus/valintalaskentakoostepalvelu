@@ -315,13 +315,17 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         public TasoJaLaajuusDTO getTutkinnontaso(String hakukohdeOid) {
                             if (!c.containsKey(hakukohdeOid)) {
                                 try {
-                                    c.put(hakukohdeOid, kelaResource.tutkinnontaso(hakukohdeOid));
+                                    TasoJaLaajuusDTO tutkinnontaso = kelaResource.tutkinnontaso(hakukohdeOid);
+                                    LOG.info("Tutkinnon tasokoodi hakukohteelle {} oli {}", hakukohdeOid, tutkinnontaso.getTasoCode());
+                                    c.put(hakukohdeOid, tutkinnontaso);
+                                    return tutkinnontaso;
                                 } catch (Exception e) {
                                     LOG.error("Ei saatu kela-rajapinnalta tutkinnon tasoa hakukohteelle" + hakukohdeOid, e);
                                     throw e;
                                 }
+                            } else {
+                                return c.get(hakukohdeOid);
                             }
-                            return c.get(hakukohdeOid);
                         }
 
                         @Override
