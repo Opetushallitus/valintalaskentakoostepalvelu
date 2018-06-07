@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.service;
 
 import com.google.common.collect.Sets;
-
+import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -18,7 +18,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.apache.poi.util.IOUtils;
@@ -98,26 +97,24 @@ public class OsoitetarratService {
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
 
-            valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid, hakukohdeOid).subscribe(
-                hakijaPaginationObject -> {
-                    List<String> hyvaksytytHakijat = hakijaPaginationObject.getResults().stream()
-                            .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
-                            .map(h -> h.getHakemusOid())
-                            .collect(Collectors.toList());
-                    boolean onkoHyvaksyttyjaHakijoita = !hyvaksytytHakijat.isEmpty();
-                    if (onkoHyvaksyttyjaHakijoita) {
-                        applicationAsyncResource.getApplicationsByOids(hyvaksytytHakijat).subscribe(
-                            hakemukset -> {
-                                haetutHakemuksetRef.set(hakemukset);
-                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                            },
-                            poikkeuskasittelija::accept);
-                    } else {
-                        LOG.error("Sijoittelussa ei ole hyväksyttyjä hakijoita");
-                        prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Osoitetarrojen luonti epäonnistui:", "Sijoittelussa ei ole hyväksyttyjä hakijoita"));
-                    }
-                }, poikkeuskasittelija::accept
-            );
+            valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid)
+                    .map(hakukohteenTulos -> hakukohteenTulos.getValintatapajonot().stream()
+                            .flatMap(valintatapajono -> valintatapajono.getHakemukset().stream())
+                            .filter(hakemus -> hakemus.getTila().isHyvaksytty())
+                            .map(HakemusDTO::getHakemusOid)
+                            .distinct()
+                            .collect(Collectors.toList()))
+                    .flatMap(hyvaksytytHakemukset -> {
+                        if (hyvaksytytHakemukset.isEmpty()) {
+                            return rx.Observable.error(new RuntimeException("Sijoittelussa ei ole hyväksyttyjä hakijoita"));
+                        } else {
+                            return applicationAsyncResource.getApplicationsByOids(hyvaksytytHakemukset);
+                        }
+                    })
+                    .subscribe(hakemukset -> {
+                        haetutHakemuksetRef.set(hakemukset);
+                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    }, poikkeuskasittelija::accept);
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
