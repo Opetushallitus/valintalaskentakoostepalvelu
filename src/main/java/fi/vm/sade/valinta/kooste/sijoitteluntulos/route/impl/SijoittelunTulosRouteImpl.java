@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -287,30 +288,32 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Hakukohteelle ei saatu tarjoajaOidia!"));
                         }
                         stopWatch.stop();
-                        List<String> o;
                         try {
                             stopWatch.start("Tiedot koodistosta");
                             Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
                             Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
                             stopWatch.stop();
-                            List<HakijaDTO> l = Lists.newArrayList();
                             stopWatch.start("Tiedot valintarekisteristä");
-                            HakijaPaginationObject hakijat = toBlocking(valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid(exchange), hakukohdeOid), 5, MINUTES)
-                                .toFuture().get();
+                            fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hakukohteenTulos = toBlocking(
+                                    valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(
+                                            hakuOid(exchange),
+                                            hakukohdeOid
+                                    ),
+                                    5, MINUTES
+                            ).toFuture().get();
                             stopWatch.stop();
-                            for (HakijaDTO hakija : hakijat.getResults()) {
-                                l.add(hakija);
-                            }
-                            o = l.stream()
-                                    .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
-                                    .map(HakijaDTO::getHakemusOid)
+                            List<String> hyvaksytytHakemukset = hakukohteenTulos.getValintatapajonot().stream()
+                                    .flatMap(valintatapajono -> valintatapajono.getHakemukset().stream())
+                                    .filter(hakemus -> hakemus.getTila().isHyvaksytty())
+                                    .map(HakemusDTO::getHakemusOid)
+                                    .distinct()
                                     .collect(Collectors.toList());
-                            if (o.isEmpty()) {
+                            if (hyvaksytytHakemukset.isEmpty()) {
                                 prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
                                 return;
                             }
                             stopWatch.start("Tiedot hakemuksilta");
-                            List<Hakemus> hakemukset = applicationResource.getApplicationsByOids(o);
+                            List<Hakemus> hakemukset = applicationResource.getApplicationsByOids(hyvaksytytHakemukset);
                             stopWatch.stop();
                             List<Osoite> addressLabels = Lists.newArrayList();
 
