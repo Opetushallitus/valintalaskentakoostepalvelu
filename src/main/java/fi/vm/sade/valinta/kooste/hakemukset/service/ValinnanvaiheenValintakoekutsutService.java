@@ -16,7 +16,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
@@ -120,7 +120,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                                     .collect(Collectors.toSet()));                                          // <Hakutoive, ValintakoeTunniste>
                         }
 
-                        final List<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids().stream().filter(authorityCheck).collect(Collectors.toList());
+                        final List<String> hakutoiveOids = new HakuappHakemusWrapper(hakemus).getHakutoiveOids().stream().filter(authorityCheck).collect(Collectors.toList());
                         final List<HakukohdeJaValintaperusteDTO> hakukohteet = hakutoiveOids
                                 .stream()
                                 .map(x -> valintakoeDTOMap.get(x))
@@ -150,7 +150,7 @@ public class ValinnanvaiheenValintakoekutsutService {
     }
 
     private Set<String> collectHakutoiveOidsOf(List<Hakemus> hakemukset) {
-        return hakemukset.stream().flatMap(h -> new HakemusWrapper(h).getHakutoiveOids().stream()).collect(Collectors.toSet());
+        return hakemukset.stream().flatMap(h -> new HakuappHakemusWrapper(h).getHakutoiveOids().stream()).collect(Collectors.toSet());
     }
 
     private HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, List<HakukohdeJaValintaperusteDTO> valintaperusteDTOs) {

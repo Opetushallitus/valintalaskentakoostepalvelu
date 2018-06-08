@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
 import java.math.BigDecimal;
 
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import org.apache.commons.lang.StringUtils;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -14,7 +15,7 @@ public class ValintatapajonoRiviAsJonosijaConverter {
 
     public static JonosijaDTO convert(String hakukohdeOid, ValintatapajonoRivi rivi, Hakemus hakemus) {
         JonosijaDTO j = new JonosijaDTO();
-        HakemusWrapper h = new HakemusWrapper(hakemus);
+        HakemusWrapper h = new HakuappHakemusWrapper(hakemus);
         j.setEtunimi(h.getEtunimi());
         j.setSukunimi(h.getSukunimi());
         j.setHakemusOid(hakemus.getOid());

@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.TuloskirjeNimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -219,7 +220,7 @@ public class HyvaksymiskirjeetKomponentti {
                 } else {
                     LOG.error("Hakijalle (hakemusOid={},hakijaOid={}) hakutoiveessa={} ei saatu hakijapalveluiden osoitetta tarjoajalle {}", hakija.getHakemusOid(), hakija.getHakijaOid(), hakukohdeOid, tarjoajaOid);
                 }
-                HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+                HakemusWrapper hakemusWrapper = new HakuappHakemusWrapper(hakemus);
                 replacements.put("henkilotunnus", hakemusWrapper.getHenkilotunnus());
                 replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
                 replacements.put("hakemusOid", hakemus.getOid());

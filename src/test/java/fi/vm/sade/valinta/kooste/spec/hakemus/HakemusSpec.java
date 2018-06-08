@@ -7,7 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 
 /**
  * @author Jussi Jartamo
@@ -51,24 +51,24 @@ public class HakemusSpec extends ConstantsSpec {
             this.hakemus.getAnswers().setHenkilotiedot(Maps.newHashMap());
         }
         public HakemusBuilder setEtunimiJaSukunimi(String etunimi, String sukunimi) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.ETUNIMET, etunimi);
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SUKUNIMI, sukunimi);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.ETUNIMET, etunimi);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.SUKUNIMI, sukunimi);
             return this;
         }
         public HakemusBuilder setHenkilotunnus(String henkilotunnus) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.HETU, henkilotunnus);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.HETU, henkilotunnus);
             return this;
         }
         public HakemusBuilder setSyntymaaika(String syntymaaika) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SYNTYMAAIKA, syntymaaika);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.SYNTYMAAIKA, syntymaaika);
             return this;
         }
         public HakemusBuilder setSahkoposti(String sahkoposti) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SAHKOPOSTI, sahkoposti);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.SAHKOPOSTI, sahkoposti);
             return this;
         }
         public HakemusBuilder setVainSahkoinenViestinta(boolean vainSahkoinenViestinta) {
-            hakemus.getAnswers().getLisatiedot().put(HakemusWrapper.LUPA_SAHKOISEEN_VIESTINTAAN, vainSahkoinenViestinta ? "true" : "false");
+            hakemus.getAnswers().getLisatiedot().put(HakuappHakemusWrapper.LUPA_SAHKOISEEN_VIESTINTAAN, vainSahkoinenViestinta ? "true" : "false");
             return this;
         }
         public HakemusBuilder setOid(String oid) {
@@ -81,7 +81,7 @@ public class HakemusSpec extends ConstantsSpec {
             return this;
         }
         public HakemusBuilder setAsiointikieli(String asiointikieli) {
-            hakemus.getAnswers().getLisatiedot().put(HakemusWrapper.ASIOINTIKIELI, asiointikieli);
+            hakemus.getAnswers().getLisatiedot().put(HakuappHakemusWrapper.ASIOINTIKIELI, asiointikieli);
             return this;
         }
         public HakemusBuilder addHakutoive(String hakukohdeOid) {

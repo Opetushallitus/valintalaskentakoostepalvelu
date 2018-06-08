@@ -7,7 +7,8 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.*;
 import fi.vm.sade.valinta.kooste.excel.*;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.util.*;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -22,10 +23,6 @@ import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.util.ApplicationAdditionalDataComparator;
-import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 
@@ -190,7 +187,7 @@ public class PistesyottoExcel {
         Collection<PistesyottoDataArvo> dataArvot = getPistesyotonDataArvot(valintaperusteet);
         Predicate<ValintakoeDTO> osallistuuValintakokeeseen = valintakoe ->
                 (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()));
-        Map<String, HakemusWrapper> oidToWrapper = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> new HakemusWrapper(h)));
+        Map<String, HakemusWrapper> oidToWrapper = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> new HakuappHakemusWrapper(h)));
         List<ApplicationAdditionalDataDTO> pistetiedotHakuAppistaLoytyvilleHakemuksille =
             filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(hakemukset, kaikkiPistetiedot);
         for (ApplicationAdditionalDataDTO data : pistetiedotHakuAppistaLoytyvilleHakemuksille) {

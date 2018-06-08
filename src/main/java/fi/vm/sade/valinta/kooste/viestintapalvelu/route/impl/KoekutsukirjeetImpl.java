@@ -14,7 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
@@ -24,7 +24,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -161,18 +159,11 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
             }
             // // Puuttuvat hakemukset //
             try {
-                Function<Hakemus, Stream<String>> hakutoiveetHakemuksesta = h -> (Stream<String>) new HakemusWrapper(h).getHakutoiveet()
-                        .entrySet()
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .filter(e -> StringUtils.trimToEmpty(e.getKey()).endsWith("Opetuspiste-id"))
-                        .map(Map.Entry::getValue);
-
                 LOG.info("Haetaan valintakokeet hakutoiveille!");
                 final Map<String, HakukohdeJaValintakoeDTO> valintakoeOidsHakutoiveille;
                 try {
                     Set<String> hakutoiveetKaikistaHakemuksista = Sets.newHashSet(hakemukset.stream()
-                            .flatMap(hakutoiveetHakemuksesta).collect(Collectors.toSet()));
+                            .flatMap(h -> new HakuappHakemusWrapper(h).getHakutoiveOids().stream()).collect(Collectors.toSet()));
                     hakutoiveetKaikistaHakemuksista.add(koekutsu.getHakukohdeOid());
                     LOG.info("Hakutoiveet hakemuksista:\r\n{}", Arrays.toString(hakutoiveetKaikistaHakemuksista.toArray()));
                     valintakoeOidsHakutoiveille = valintakoeResource
@@ -204,16 +195,11 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                     LOG.info("Mapataan muut hakukohteet");
                     hakemusOidJaHakijanMuutHakutoiveOids = hakemukset
                             .stream()
-                            .filter(Objects::nonNull)
-                            .filter(h -> h.getOid() != null)
                             .collect(
                                     Collectors.toMap(
                                             Hakemus::getOid,
-                                            h -> hakutoiveetHakemuksesta
-                                                    .apply(h)
-                                                    .filter(Objects::nonNull)
-                                                            // jos joku hakutoive sisaltaa valintakokeen
-                                                            // jolla sama tunniste kuin taman hakukohteen valintakokeilla
+                                            h -> new HakuappHakemusWrapper(h)
+                                                    .getHakutoiveOids().stream()
                                                     .filter(valintakoeOidsHakutoiveille::containsKey)
                                                     .filter(hakutoive -> valintakoeOidsHakutoiveille
                                                             .get(hakutoive)

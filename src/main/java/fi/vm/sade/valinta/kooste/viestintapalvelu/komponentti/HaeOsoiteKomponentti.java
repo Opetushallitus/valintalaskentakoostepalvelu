@@ -9,9 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -29,7 +27,6 @@ import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
-import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Maakoodi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 
@@ -106,7 +103,7 @@ public class HaeOsoiteKomponentti {
     }
 
     public static Osoite haeOsoite(Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, Hakemus hakemus, NimiPaattelyStrategy nimiPaattelyStrategy) {
-        HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
         Koodi postiKoodi = posti.get(wrapper.getSuomalainenPostinumero());
         String postitoimipaikka = KoodistoCachedAsyncResource.haeKoodistaArvo(postiKoodi, KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());
 

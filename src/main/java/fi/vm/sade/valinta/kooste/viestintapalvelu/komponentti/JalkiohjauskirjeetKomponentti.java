@@ -11,8 +11,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
-import fi.vm.sade.valinta.kooste.util.TuloskirjeNimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -31,8 +30,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
@@ -82,7 +79,7 @@ public class JalkiohjauskirjeetKomponentti {
             final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new TuloskirjeNimiPaattelyStrategy());
             final List<Map<String, Object>> tulosList = new ArrayList<>();
             if (!kaytetaanYlikirjoitettuKielikoodia) {
-                preferoituKielikoodi = new HakemusWrapper(hakemus).getAsiointikieli();
+                preferoituKielikoodi = new HakuappHakemusWrapper(hakemus).getAsiointikieli();
             }
 
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -106,7 +103,7 @@ public class JalkiohjauskirjeetKomponentti {
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());
                 tulosList.add(tulokset);
             }
-            HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+            HakemusWrapper hakemusWrapper = new HakuappHakemusWrapper(hakemus);
             Map<String, Object> replacements = Maps.newHashMap();
             replacements.put("tulokset", tulosList);
             replacements.put("henkilotunnus", hakemusWrapper.getHenkilotunnus());

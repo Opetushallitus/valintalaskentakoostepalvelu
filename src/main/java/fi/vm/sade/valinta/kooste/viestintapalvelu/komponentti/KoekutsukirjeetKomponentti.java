@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.*;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -27,9 +27,6 @@ import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.Kieli;
-import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.NimiJaOpetuskieli;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
@@ -104,7 +101,7 @@ public class KoekutsukirjeetKomponentti {
             Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
             Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
             for (Hakemus hakemus : hakemukset) {
-                HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
+                HakemusWrapper hakemusWrapper = new HakuappHakemusWrapper(hakemus);
                 Osoite addressLabel = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new NimiPaattelyStrategy());
 
                 hakukohdeNimiTietyllaKielella = kohdeHakukohdeNimi.getHakukohdeNimi().getTeksti(opetuskieli);

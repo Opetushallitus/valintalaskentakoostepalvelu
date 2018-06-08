@@ -25,7 +25,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -187,7 +187,7 @@ public class PistesyottoResource {
                 )),
                 applicationAsyncResource.getApplication(hakemusOid),
                 (authorityCheck, hakemus) -> {
-                    Collection<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids();
+                    Collection<String> hakutoiveOids = new HakuappHakemusWrapper(hakemus).getHakutoiveOids();
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(
                                 pistetiedot, ifUnmodifiedSince, username, auditSession

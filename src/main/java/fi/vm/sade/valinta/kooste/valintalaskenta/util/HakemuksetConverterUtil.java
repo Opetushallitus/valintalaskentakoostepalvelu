@@ -10,7 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.util.Converter;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
@@ -80,7 +80,7 @@ public class HakemuksetConverterUtil {
                                                                        ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
         ensurePersonOids(hakemukset, hakukohdeOid);
         List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, ofNullable(valintapisteet).orElse(emptyList()), hakukohdeRyhmasForHakukohdes);
-        Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(Hakemus::getOid, h -> new HakemusWrapper(h).hasHenkilotunnus()));
+        Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(Hakemus::getOid, h -> new HakuappHakemusWrapper(h).hasHenkilotunnus()));
         Map<String, Exception> errors = Maps.newHashMap();
         return getHakemusDTOS(haku, hakukohdeOid, oppijat, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
     }

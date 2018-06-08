@@ -25,7 +25,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.mocks.MockKoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
@@ -102,8 +102,8 @@ public class ErillishakuResourceTest {
         answers.getHenkilotiedot().put("kotikunta", "091");
         answers.getLisatiedot().put("asiointikieli", "ruotsi");
         if(hakutyyppi == Hakutyyppi.KORKEAKOULU) {
-            answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
-            answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUSMAA, "FIN");
+            answers.getKoulutustausta().put(HakuappHakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
+            answers.getKoulutustausta().put(HakuappHakemusWrapper.TOISEN_ASTEEN_SUORITUSMAA, "FIN");
         }
         hakemus.setAnswers(answers);
         return Collections.singletonList(hakemus);

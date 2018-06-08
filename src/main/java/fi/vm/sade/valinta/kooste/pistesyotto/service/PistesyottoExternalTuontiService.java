@@ -19,6 +19,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Audit
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.VirheDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.OsallistuminenTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -258,8 +259,8 @@ public class PistesyottoExternalTuontiService {
     }
 
     private List<HakemusJaHakutoiveet> collect(List<HakemusDTO> hakemukset, List<Hakemus> hakemuses) {
-        Map<String, HakemusWrapper> hakemusOID2Hakemus = hakemuses.stream().collect(Collectors.toMap(h -> h.getOid(), h -> new HakemusWrapper(h)));
-        Map<String, Collection<String>> hakemusOidJaHakutoiveet = hakemuses.stream().collect(Collectors.toMap(h -> h.getOid(), h -> new HakemusWrapper(h).getHakutoiveOids()));
+        Map<String, HakemusWrapper> hakemusOID2Hakemus = hakemuses.stream().collect(Collectors.toMap(h -> h.getOid(), h -> new HakuappHakemusWrapper(h)));
+        Map<String, Collection<String>> hakemusOidJaHakutoiveet = hakemuses.stream().collect(Collectors.toMap(h -> h.getOid(), h -> new HakuappHakemusWrapper(h).getHakutoiveOids()));
         return hakemukset.stream().map(h -> new HakemusJaHakutoiveet(
                 h,
                 Optional.ofNullable(hakemusOidJaHakutoiveet.get(h.getHakemusOid())).orElse(Collections.emptyList()),

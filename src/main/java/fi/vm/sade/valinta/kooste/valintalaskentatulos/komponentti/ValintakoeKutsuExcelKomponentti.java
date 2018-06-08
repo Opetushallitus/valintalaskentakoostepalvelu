@@ -1,32 +1,29 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
-import java.io.InputStream;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.*;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
+import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeNimi;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeRivi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.InputStream;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  *         Komponentti tulosten kasaamiseen Excel-muodossa
@@ -90,7 +87,7 @@ public class ValintakoeKutsuExcelKomponentti {
                         if (!onkoHakemusWhiteListilla.apply(hakemus.getOid())) {
                             continue;
                         }
-                        HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+                        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
                         Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null, new NimiPaattelyStrategy());
                         ValintakoeRivi v = new ValintakoeRivi(wrapper.getSukunimi(), wrapper.getEtunimi(),
                                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
@@ -179,7 +176,7 @@ public class ValintakoeKutsuExcelKomponentti {
             }
         }
         Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, null, null, new NimiPaattelyStrategy());
-        HakemusWrapper wrapper = new HakemusWrapper(h);
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(h);
         return new ValintakoeRivi(o.getSukunimi(), o.getEtunimi(),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa()),

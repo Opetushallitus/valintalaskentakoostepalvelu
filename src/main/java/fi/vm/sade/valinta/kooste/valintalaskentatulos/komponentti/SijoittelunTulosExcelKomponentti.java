@@ -1,19 +1,21 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
-import java.io.InputStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.*;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
+import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.util.excel.Highlight;
+import fi.vm.sade.valinta.kooste.util.excel.Span;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -22,15 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.InputStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
-import fi.vm.sade.valinta.kooste.util.excel.Highlight;
-import fi.vm.sade.valinta.kooste.util.excel.Span;
-
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 
 /**
  *         Komponentti luo sijoittelun tulokset excel tiedostoksi!
@@ -162,7 +160,7 @@ public class SijoittelunTulosExcelKomponentti {
 
         Map<String, IlmoittautumisTila> hakemusJaJonoMappaus = valintatapajononTilat(valintatulokset);
         for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
-            HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
+            HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
             String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimet();
             List<Object> hakemusRivi = Lists.newArrayList();
             Maksuntila maksuntila = ofNullable(personOidToLukuvuosimaksu.get(hDto.getHakijaOid())).map(l -> l.getMaksuntila()).orElse(Maksuntila.MAKSAMATTA);
