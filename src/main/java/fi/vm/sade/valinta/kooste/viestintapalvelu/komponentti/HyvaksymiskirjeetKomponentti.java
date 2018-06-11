@@ -180,7 +180,7 @@ public class HyvaksymiskirjeetKomponentti {
                 String preferoituKielikoodi = asiointikieli.orElse(hyvaksyttyMeta.getOpetuskieli());
                 String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
                 final String hakemusOid = hakija.getHakemusOid();
-                final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
+                final Hakemus hakemus = Objects.requireNonNull(hakukohteenHakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
                 final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new TuloskirjeNimiPaattelyStrategy());
                 final List<Map<String, Object>> tulosList = new ArrayList<>();
 
