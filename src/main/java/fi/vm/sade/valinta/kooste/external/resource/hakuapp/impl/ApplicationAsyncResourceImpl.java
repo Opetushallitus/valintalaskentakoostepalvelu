@@ -128,17 +128,10 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     @Override
     public Observable<List<Hakemus>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
         LOG.info("Haetaan " + hakemusOids.size() + " hakemusta haku-app:sta");
-        List<Observable<List<Hakemus>>> allApplications = new ArrayList<>();
-        List<List<String>> partialIdLists = Lists.partition(hakemusOids, DEFAULT_PART_ROW_LIMIT);
-        for (int batchNo = 1; batchNo <= partialIdLists.size(); batchNo++) {
-            Observable<List<Hakemus>> applicationBatch = getApplicationsByHakemusOids(hakuOid, partialIdLists.get(batchNo - 1), keys);
-            allApplications.add(applicationBatch);
-            if (batchNo < partialIdLists.size()) {
-                LOG.info("Aloitettu " + allApplications.size() + " hakemuksen haku. Haetaan lisää.");
-            }
-        }
-        LOG.info("Aloitettu " + allApplications.size() + " hakemuksen haku haku-app:sta onnistuneesti.");
-        return Observable.merge(allApplications, 1);
+        return Observable.from(Lists.partition(hakemusOids, DEFAULT_ROW_LIMIT))
+                .concatMap(oids -> getApplicationsByHakemusOids(hakuOid, oids, keys))
+                .concatMap(Observable::from)
+                .toList();
     }
 
     @Override
