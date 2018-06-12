@@ -77,7 +77,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                     LOG.info("Hyväksyttyjä yhteensä {} hakukohteessa", list.size());
                     final ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue = new ConcurrentLinkedQueue<>(list);
                     final boolean onkoTarveSplitata = list.size() > 20;
-                    IntStream.range(0, onkoTarveSplitata ? 2 : 1).forEach(i -> hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue));
+                    IntStream.range(0, onkoTarveSplitata ? 6 : 1).forEach(i -> hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue));
                 },
                 error -> {
                     LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun " + hakuOid, error);
