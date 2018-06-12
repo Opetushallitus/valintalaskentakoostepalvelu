@@ -1,12 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru;
 
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import rx.Observable;
 
 import java.util.List;
 
 public interface AtaruAsyncResource {
-    Observable<List<AtaruHakemus>> getApplicationsByHakukohde(String hakukohdeOid);
+    Observable<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid);
 
-    Observable<List<AtaruHakemus>> getApplicationsByOids(List<String> oids);
+    Observable<List<HakemusWrapper>> getApplicationsByOids(List<String> oids);
 }

@@ -273,7 +273,7 @@ public class OppijanSuorituksetProxyResource {
 
         //final Map<String, Map<String, String>> allData = new HashMap<>();
         Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakemusOids, auditSession);
-        Observable<List<AtaruHakemus>> ataruHakemukset = ataruAsyncResource.getApplicationsByOids(hakemusOids);
+        Observable<List<HakemusWrapper>> ataruHakemukset = ataruAsyncResource.getApplicationsByOids(hakemusOids);
         Observable<HakuV1RDTO> hakuV1RDTOObservable = tarjontaAsyncResource.haeHaku(hakuOid);
         Observable.combineLatest(hakuV1RDTOObservable, valintapisteet, ataruHakemukset, (haku, pisteet, hakemukset) -> {
             if (hakemukset == null || hakemukset.isEmpty()) {
@@ -284,9 +284,9 @@ public class OppijanSuorituksetProxyResource {
             }
             LOG.info("Hae suoritukset {} hakemukselle", hakemukset.size());
 
-            List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).collect(Collectors.toList());
+            List<String> personOids = hakemukset.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
 
-            return resolveAtaruHakemusDTOs(hakuOid, hakemukset, pisteet.valintapisteet, personOids, fetchEnsikertalaisuus);
+            return resolveHakemusDTOs(hakuOid, hakemukset, pisteet.valintapisteet, personOids, fetchEnsikertalaisuus);
         }).flatMap(f -> f).subscribe(hakemusDTOs -> {
 
             Map<String, Map<String, String>> allData = hakemusDTOs.stream().collect(Collectors.toMap(HakemusDTO::getHakijaOid, this::getAvainArvoMap, (m0, m1) -> {
@@ -403,43 +403,10 @@ public class OppijanSuorituksetProxyResource {
                                                 Boolean fetchEnsikertalaisuus) {
 
         Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource
-            .hakukohdeRyhmasForHakukohdes(haku.getOid())
-            .timeout(1, MINUTES)
-            .toBlocking()
-            .first();
-        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
-    }
-
-    private Observable<List<HakemusDTO>> resolveAtaruHakemusDTOs(String hakuOid,
-                                                                 List<AtaruHakemus> hakemukset,
-                                                                 List<Valintapisteet> valintapisteet,
-                                                                 List<String> opiskelijaOids,
-                                                                 Boolean fetchEnsikertalaisuus) {
-
-        Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid);
-        Observable<ParametritDTO> parametritObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
-
-        Observable<List<Oppija>> suorituksetObservable = fetchEnsikertalaisuus
-                ? suoritusrekisteriAsyncResource.getSuorituksetByOppijas(opiskelijaOids, hakuOid)
-                : suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOids);
-
-        return Observable.zip(hakuObservable, suorituksetObservable, parametritObservable,
-                (haku, suoritukset, parametrit) -> createAtaruHakemusDTOs(haku, suoritukset, hakemukset, valintapisteet, parametrit, fetchEnsikertalaisuus)
-        );
-    }
-
-    private List<HakemusDTO> createAtaruHakemusDTOs(HakuV1RDTO haku,
-                                                    List<Oppija> suoritukset,
-                                                    List<AtaruHakemus> hakemukset,
-                                                    List<Valintapisteet> valintapisteet,
-                                                    ParametritDTO parametrit,
-                                                    Boolean fetchEnsikertalaisuus) {
-
-        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource
                 .hakukohdeRyhmasForHakukohdes(haku.getOid())
                 .timeout(1, MINUTES)
                 .toBlocking()
                 .first();
-        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromAtaruHakemukset(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
+        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
     }
 }

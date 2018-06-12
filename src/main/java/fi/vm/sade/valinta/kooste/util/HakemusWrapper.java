@@ -1,10 +1,11 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public abstract class HakemusWrapper {
     static String NAINEN = "2";
@@ -88,13 +89,11 @@ public abstract class HakemusWrapper {
 
     public abstract String getHakuoid();
 
-    public abstract Answers getAnswers();
-
-    public abstract List<Eligibility> getPreferenceEligibilities();
-
     public abstract String getState();
 
     public abstract int hashCode();
 
     public abstract boolean equals(Object o);
+
+    public abstract HakemusDTO toHakemusDto(Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes);
 }

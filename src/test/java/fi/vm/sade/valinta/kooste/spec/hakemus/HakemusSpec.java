@@ -1,12 +1,15 @@
 package fi.vm.sade.valinta.kooste.spec.hakemus;
 
 import com.google.common.collect.Maps;
+import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
+import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 
@@ -103,14 +106,18 @@ public class HakemusSpec extends ConstantsSpec {
 
     public static class AtaruHakemusBuilder {
         private final AtaruHakemus hakemus;
+        private final HenkiloPerustietoDto henkilo;
 
-        public AtaruHakemusBuilder(String oid) {
+        public AtaruHakemusBuilder(String oid, String personOid, String hetu) {
             hakemus = new AtaruHakemus();
             hakemus.setHakemusOid(oid);
+            henkilo = new HenkiloPerustietoDto();
+            henkilo.setOidHenkilo(personOid);
+            henkilo.setHetu(hetu);
         }
 
-        public AtaruHakemus build() {
-            return hakemus;
+        public HakemusWrapper build() {
+            return new AtaruHakemusWrapper(hakemus, henkilo);
         }
     }
 

@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
@@ -64,7 +65,8 @@ public class EligibilitiesKonvertointiTest {
                     .filter(Objects::nonNull)
                     .map(h -> {
                         try {
-                            return Converter.hakemusToHakemusDTO(new HakuappHakemusWrapper(h), new Valintapisteet(), Maps.newHashMap());
+							HakemusWrapper hakemus = new HakuappHakemusWrapper(h);
+                            return hakemus.toHakemusDto(new Valintapisteet(), Maps.newHashMap());
                         } catch (Exception e) {
                             epaonnistuneetKonversiot.put(h.getOid(), e);
                             return null;

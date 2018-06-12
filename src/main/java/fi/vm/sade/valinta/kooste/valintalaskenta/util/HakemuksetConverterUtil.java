@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 import com.google.common.collect.Maps;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
@@ -56,21 +57,6 @@ public class HakemuksetConverterUtil {
         } catch (Exception e) {
             errors.put(h.getHakemusoid(), e);
         }
-    }
-
-    public static List<HakemusDTO> muodostaHakemuksetDTOfromAtaruHakemukset(HakuV1RDTO haku,
-                                                                            String hakukohdeOid,
-                                                                            Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
-                                                                            List<AtaruHakemus> hakemukset,
-                                                                            List<Valintapisteet> valintapisteet,
-                                                                            List<Oppija> oppijat,
-                                                                            ParametritDTO parametritDTO,
-                                                                            Boolean fetchEnsikertalaisuus) {
-        // No need to check for personOids since Ataru api doesn't return such applications.
-        List<HakemusDTO> hakemusDtot = ataruHakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, ofNullable(valintapisteet).orElse(emptyList()), hakukohdeRyhmasForHakukohdes);
-        Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(AtaruHakemus::getHakemusOid, AtaruHakemus::hasHetu));
-        Map<String, Exception> errors = Maps.newHashMap();
-        return getHakemusDTOS(haku, hakukohdeOid, oppijat, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
     }
 
     public static List<HakemusDTO> muodostaHakemuksetDTOfromHakemukset(HakuV1RDTO haku, String hakukohdeOid,
@@ -133,46 +119,29 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    private static List<HakemusDTO> ataruHakemuksetToHakemusDTOs(String hakukohdeOid, List<AtaruHakemus> hakemukset, List<Valintapisteet> valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<HakemusWrapper> hakemukset, List<Valintapisteet> valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         List<HakemusDTO> hakemusDtot;
         Map<String, Valintapisteet> hakemusOIDtoValintapisteet = valintapisteet.stream().collect(Collectors.toMap(Valintapisteet::getHakemusOID, v -> v));
         Map<String, Exception> epaonnistuneetKonversiot = Maps.newConcurrentMap();
-        try {
-            hakemusDtot = hakemukset.parallelStream()
-                    .filter(Objects::nonNull)
-                    .map(h -> {
-                        try {
-                            return Converter.hakemusToHakemusDTO(h, hakemusOIDtoValintapisteet.get(h.getHakemusOid()), hakukohdeRyhmasForHakukohdes);
-                        } catch (Exception e) {
-                            epaonnistuneetKonversiot.put(h.getHakemusOid(), e);
-                            return null;
-                        }
-                    })
-                    .collect(toList());
-        } catch (Exception e) {
-            LOG.error(String.format("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle %s ja null hakemukselle.", hakukohdeOid), e);
-            throw e;
-        }
+        hakemusDtot = getHakemusDTOS(hakukohdeOid, hakemukset, hakukohdeRyhmasForHakukohdes, hakemusOIDtoValintapisteet, epaonnistuneetKonversiot);
         if (!epaonnistuneetKonversiot.isEmpty()) {
             RuntimeException e = new RuntimeException(
-                    String.format("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle %s ja hakemuksille (%d/%d) %s. Esimerkiksi %s!",
-                            hakukohdeOid, epaonnistuneetKonversiot.size(), hakemukset.size(), Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()), epaonnistuneetKonversiot.values().iterator().next().getMessage()));
+                    String.format("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle %s ja hakemuksille %s. Esimerkiksi %s!",
+                            hakukohdeOid, Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()), epaonnistuneetKonversiot.values().iterator().next().getMessage()));
             LOG.error("hakemuksetToHakemusDTOs", e);
             throw e;
         }
         return hakemusDtot;
     }
 
-    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<HakemusWrapper> hakemukset, List<Valintapisteet> valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+    private static List<HakemusDTO> getHakemusDTOS(String hakukohdeOid, List<HakemusWrapper> hakemukset, Map<String, List<String>> hakukohdeRyhmasForHakukohdes, Map<String, Valintapisteet> hakemusOIDtoValintapisteet, Map<String, Exception> epaonnistuneetKonversiot) {
         List<HakemusDTO> hakemusDtot;
-        Map<String, Valintapisteet> hakemusOIDtoValintapisteet = valintapisteet.stream().collect(Collectors.toMap(v -> v.getHakemusOID(), v -> v));
-        Map<String, Exception> epaonnistuneetKonversiot = Maps.newConcurrentMap();
         try {
             hakemusDtot = hakemukset.parallelStream()
                     .filter(Objects::nonNull)
                     .map(h -> {
                         try {
-                            return Converter.hakemusToHakemusDTO(h, hakemusOIDtoValintapisteet.get(h.getOid()), hakukohdeRyhmasForHakukohdes); // TODO there maybe come null pisteet here
+                            return h.toHakemusDto(hakemusOIDtoValintapisteet.get(h.getOid()), hakukohdeRyhmasForHakukohdes); // TODO there maybe come null pisteet here
                         } catch (Exception e) {
                             epaonnistuneetKonversiot.put(h.getOid(), e);
                             return null;
@@ -181,13 +150,6 @@ public class HakemuksetConverterUtil {
                     .collect(toList());
         } catch (Exception e) {
             LOG.error(String.format("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle %s ja null hakemukselle.", hakukohdeOid), e);
-            throw e;
-        }
-        if (!epaonnistuneetKonversiot.isEmpty()) {
-            RuntimeException e = new RuntimeException(
-                    String.format("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle %s ja hakemuksille %s. Esimerkiksi %s!",
-                            hakukohdeOid, Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()), epaonnistuneetKonversiot.values().iterator().next().getMessage()));
-            LOG.error("hakemuksetToHakemusDTOs", e);
             throw e;
         }
         return hakemusDtot;

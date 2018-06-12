@@ -2,10 +2,13 @@ package fi.vm.sade.valinta.kooste.util;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
+import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -15,8 +18,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static fi.vm.sade.valinta.kooste.util.Converter.*;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 /**
  *         Hakemustietojen luku hakemustietueesta vikasietoisesti
@@ -54,6 +57,9 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
     private final static String POHJAKOULUTUS                   = "POHJAKOULUTUS";
     private final static String POHJAKOULUTUS_ULKOMAILLA        = "0";
     private final static String POHJAKOULUTUS_KESKEYTETTY       = "7";
+    private final static String PREFERENCE                      = "preference";
+    private final static String KOULUTUS_ID                     = "Koulutus-id";
+    private final static String DISCRETIONARY                   = "discretionary";
 
     private Yhteystiedot yhteystiedot = null;
 
@@ -376,12 +382,6 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
     public String getHakuoid() { return hakemus.getApplicationSystemId(); }
 
     @Override
-    public Answers getAnswers() { return hakemus.getAnswers(); }
-
-    @Override
-    public List<Eligibility> getPreferenceEligibilities() { return hakemus.getPreferenceEligibilities(); }
-
-    @Override
     public String getState() { return hakemus.getState(); }
 
     @Override
@@ -400,6 +400,140 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public HakemusDTO toHakemusDto(Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+        HakemusDTO hakemusTyyppi = new HakemusDTO();
+        hakemusTyyppi.setHakemusoid(getOid());
+        hakemusTyyppi.setHakijaOid(getPersonOid());
+        hakemusTyyppi.setHakuoid(getHakuoid());
+        if (hakemus.getAnswers() != null) {
+            try {
+                if (hakemus.getAnswers().getHenkilotiedot() != null) {
+                    hakemusTyyppi.setEtunimi(hakemus.getAnswers().getHenkilotiedot().get(ETUNIMET));
+                    hakemusTyyppi.setSukunimi(hakemus.getAnswers().getHenkilotiedot().get(SUKUNIMI));
+                    for (Map.Entry<String, String> e : hakemus.getAnswers().getHenkilotiedot().entrySet()) {
+                        AvainArvoDTO aa = new AvainArvoDTO();
+                        aa.setAvain(e.getKey());
+                        aa.setArvo(sanitizeArvo(e.getValue()));
+                        hakemusTyyppi.getAvaimet().add(aa);
+                    }
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+
+            try {
+                try {
+                    hakemus.getAnswers().getHakutoiveet().putAll(mapEligibilityAndStatus(
+                            hakemus.getPreferenceEligibilities(), hakemus.getAnswers().getHakutoiveet()));
+                } catch (Exception e) {
+                    throw new RuntimeException("Eligibilities statusten mappaus preferensseihin epaonnistui!", e);
+                }
+                Map<Integer, Converter.Hakutoive> hakutoiveet = new HashMap<>();
+                if (hakemus.getAnswers().getHakutoiveet() != null) {
+                    for (Map.Entry<String, String> e : hakemus.getAnswers().getHakutoiveet().entrySet()) {
+                        AvainArvoDTO aa = new AvainArvoDTO();
+                        aa.setAvain(e.getKey());
+                        aa.setArvo(sanitizeArvo(e.getValue()));
+                        hakemusTyyppi.getAvaimet().add(aa);
+                        if (e.getKey().startsWith(PREFERENCE)) {
+                            Integer prioriteetti;
+                            String numberAfterPreference;
+                            try {
+                                numberAfterPreference = e.getKey().replaceAll("\\D+", "");
+                                if (StringUtils.isBlank(numberAfterPreference)) {
+                                    continue;
+                                }
+                                prioriteetti = Integer.valueOf(numberAfterPreference);
+                            } catch (Exception ee) {
+                                throw ee;
+                            }
+                            Converter.Hakutoive hakutoive;
+                            if (!hakutoiveet.containsKey(prioriteetti)) {
+                                hakutoive = new Converter.Hakutoive();
+                                hakutoiveet.put(prioriteetti, hakutoive);
+                            } else {
+                                hakutoive = hakutoiveet.get(prioriteetti);
+                            }
+
+                            if (e.getKey().endsWith(KOULUTUS_ID)) {
+                                hakutoive.setHakukohdeOid(e.getValue());
+                            } else if (e.getKey().endsWith(DISCRETIONARY)) {
+                                Boolean discretionary = Boolean.valueOf(e.getValue());
+                                discretionary = discretionary == null ? false : discretionary;
+                                hakutoive.setHarkinnanvaraisuus(discretionary);
+                            }
+                        }
+                    }
+
+                    for (Map.Entry<Integer, Converter.Hakutoive> e : hakutoiveet.entrySet()) {
+                        Converter.Hakutoive hakutoive = e.getValue();
+                        if (hakutoive != null) {
+                            if (hakutoive.getHakukohdeOid() != null && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
+                                HakukohdeDTO hk = new HakukohdeDTO();
+                                hk.setOid(hakutoive.getHakukohdeOid());
+                                hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
+                                hk.setPrioriteetti(e.getKey());
+                                hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(hakutoive.getHakukohdeOid()));
+                                hakemusTyyppi.getHakukohteet().add(hk);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+
+            try {
+                if (hakemus.getAnswers().getKoulutustausta() != null) {
+                    for (Map.Entry<String, String> e : hakemus.getAnswers().getKoulutustausta().entrySet()) {
+                        AvainArvoDTO aa = new AvainArvoDTO();
+                        aa.setAvain(e.getKey());
+                        aa.setArvo(sanitizeArvo(e.getValue()));
+                        hakemusTyyppi.getAvaimet().add(aa);
+                    }
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+
+            try {
+                if (hakemus.getAnswers().getLisatiedot() != null) {
+                    for (Map.Entry<String, String> e : hakemus.getAnswers().getLisatiedot().entrySet()) {
+                        AvainArvoDTO aa = new AvainArvoDTO();
+                        aa.setAvain(e.getKey());
+                        aa.setArvo(sanitizeArvo(e.getValue()));
+                        hakemusTyyppi.getAvaimet().add(aa);
+                    }
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+
+            try {
+                if (hakemus.getAnswers().getOsaaminen() != null) {
+                    final List<AvainArvoDTO> osaaminenIlmanArvosanoja = hakemus.getAnswers().getOsaaminen().entrySet()
+                            .stream()
+                            .filter(entry -> !entry.getKey().startsWith("PK_") && !entry.getKey().startsWith("LK_"))
+                            .map(e -> {
+                                AvainArvoDTO aa = new AvainArvoDTO();
+                                aa.setAvain(e.getKey());
+                                aa.setArvo(sanitizeArvo(e.getValue()));
+                                return aa;
+                            })
+                            .collect(Collectors.toList());
+                    hakemusTyyppi.getAvaimet().addAll(osaaminenIlmanArvosanoja);
+
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+        setHakemusDTOvalintapisteet(valintapisteet, hakemusTyyppi);
+
+        return hakemusTyyppi;
     }
 
     private Map<String, String> getHakutoiveet() {

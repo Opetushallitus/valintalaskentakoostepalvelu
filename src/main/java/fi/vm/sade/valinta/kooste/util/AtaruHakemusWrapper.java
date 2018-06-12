@@ -1,26 +1,40 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static fi.vm.sade.valinta.kooste.util.Converter.setHakemusDTOvalintapisteet;
 
 public class AtaruHakemusWrapper extends HakemusWrapper {
 
     private final AtaruHakemus hakemus;
     private final Map<String,String> keyvalues;
     private final HenkiloPerustietoDto henkilo;
+    private final static String PREFERENCE_REGEX = "preference\\d-Koulutus-id-eligibility";
+    private final static ImmutableMap<String, String> ELIGIBILITIES = new ImmutableMap.Builder<String, String>()
+            .put("eligible", "ELIGIBLE")
+            .put("uneligible", "INELIGIBLE")
+            .put("unreviewed", "NOT_CHECKED")
+            .build();
 
     public AtaruHakemusWrapper(AtaruHakemus ataruHakemus, HenkiloPerustietoDto onrHenkilo) {
         hakemus = Objects.requireNonNull(ataruHakemus, "Ataruhakemus oli null.");
         keyvalues = ataruHakemus.getKeyValues();
-        henkilo = onrHenkilo;
+        henkilo = Objects.requireNonNull(onrHenkilo, "Henkilo ataruhakemukselle oli null.");
     }
+
+    public Map<String,String> getKeyValyes() { return keyvalues; }
 
     @Override
     public String getOid() {
@@ -90,10 +104,10 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public String getSahkopostiOsoite() {return StringUtils.trimToEmpty(keyvalues.get("email")); }
 
     @Override
-    public String getSyntymaaika() { return StringUtils.trimToEmpty(henkilo.getHetu()); }
+    public String getSyntymaaika() { return henkilo.getSyntymaaika().toString(); }
 
     @Override
-    public String getHenkilotunnus() { return henkilo.getSyntymaaika().toString(); }
+    public String getHenkilotunnus() { return StringUtils.trimToEmpty(henkilo.getHetu()); }
 
     @Override
     public boolean hasHenkilotunnus() { return StringUtils.isNotEmpty(getHenkilotunnus()); }
@@ -157,12 +171,6 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public String getHakuoid() { return hakemus.getHakuOid(); }
 
     @Override
-    public Answers getAnswers() { return null; }
-
-    @Override
-    public List<Eligibility> getPreferenceEligibilities() { return null; }
-
-    @Override
     public String getState() { return null; }
 
     @Override
@@ -181,5 +189,58 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
         } else {
             return false;
         }
+    }
+
+    private static void setPreferenceValue(String value, AvainArvoDTO aa) {
+        if (ELIGIBILITIES.containsKey(value)) {
+            aa.setArvo(ELIGIBILITIES.get(value));
+        } else {
+            throw new IllegalArgumentException(String.format("Could not parse hakemus preference value: %s", value));
+        }
+    }
+
+    @Override
+    public HakemusDTO toHakemusDto(Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+        HakemusDTO hakemusDto = new HakemusDTO();
+        hakemusDto.setHakemusoid(getOid());
+        hakemusDto.setHakijaOid(getPersonOid());
+        hakemusDto.setHakuoid(getHakuoid());
+
+        if (hakemus.getKeyValues() != null) {
+            hakemus.getKeyValues().forEach((key, value) -> {
+                AvainArvoDTO aa = new AvainArvoDTO();
+                aa.setAvain(key);
+                if (key.matches(PREFERENCE_REGEX)) {
+                    setPreferenceValue(value, aa);
+                } else {
+                    aa.setArvo(value);
+                }
+                hakemusDto.getAvaimet().add(aa);
+            });
+        }
+
+        Map<Integer, Converter.Hakutoive> hakutoiveet = new HashMap<>();
+
+        if (hakemus.getHakutoiveet() != null) {
+            IntStream.range(0, hakemus.getHakutoiveet().size())
+                    .forEach(i -> {
+                        Converter.Hakutoive hakutoive = new Converter.Hakutoive();
+                        hakutoive.setHakukohdeOid(hakemus.getHakutoiveet().get(i));
+                        hakutoiveet.put(i + 1, hakutoive);
+                    });
+        }
+
+        hakutoiveet.forEach((key, hakutoive) -> {
+            HakukohdeDTO hk = new HakukohdeDTO();
+            hk.setOid(hakutoive.getHakukohdeOid());
+            hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
+            hk.setPrioriteetti(key);
+            hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(hakutoive.getHakukohdeOid()));
+            hakemusDto.getHakukohteet().add(hk);
+        });
+
+        setHakemusDTOvalintapisteet(valintapisteet, hakemusDto);
+
+        return hakemusDto;
     }
 }

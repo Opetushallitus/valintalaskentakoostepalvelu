@@ -287,7 +287,7 @@ public class LaskentaActorFactory {
                                                                          Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes,
                                                                          Observable<PisteetWithLastModified> valintapisteetForHakukohdes,
                                                                          Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat,
-                                                                         Observable<List<AtaruHakemus>> hakemukset) {
+                                                                         Observable<List<HakemusWrapper>> hakemukset) {
         return wrapAsRunOnlyOnceObservable(combineLatest(
                 valintapisteetForHakukohdes,
                 hakijaryhmat,
@@ -303,7 +303,7 @@ public class LaskentaActorFactory {
                                 haku.isKorkeakouluHaku(),
                                 actorParams.isErillishaku(),
                                 hakukohdeOid,
-                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromAtaruHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v);
+                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v);
 
                     } else {
                         return new LaskeDTO(
@@ -311,7 +311,7 @@ public class LaskentaActorFactory {
                                 haku.isKorkeakouluHaku(),
                                 actorParams.isErillishaku(),
                                 hakukohdeOid,
-                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromAtaruHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
+                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
                     }}));
     }
 
@@ -343,7 +343,7 @@ public class LaskentaActorFactory {
             valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : just(emptyList());
 
         if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
-            Observable<List<AtaruHakemus>> hakemukset = createResurssiObservable(tunniste,
+            Observable<List<HakemusWrapper>> hakemukset = createResurssiObservable(tunniste,
                     "applicationAsyncResource.getApplications",
                     ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
                     retryHakemuksetAndOppijat);

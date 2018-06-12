@@ -97,7 +97,7 @@ public class AktiivistenHakemustenValintakoeResource {
                     } else {
                         return ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit)
                                 .map(hakemukset -> hakemukset.stream()
-                                        .map(AtaruHakemus::getHakemusOid).collect(Collectors.toSet()));
+                                        .map(HakemusWrapper::getOid).collect(Collectors.toSet()));
                     }
                 })
                 .map(aktiivistenHakemusOidit ->

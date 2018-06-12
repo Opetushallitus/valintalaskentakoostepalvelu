@@ -5,6 +5,9 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,20 +19,25 @@ import rx.Observable;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements AtaruAsyncResource {
     private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
 
     @Autowired
     public AtaruAsyncResourceImpl(
-            @Qualifier("AtaruRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+            @Qualifier("AtaruRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor,
+            OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource1) {
         super(TimeUnit.HOURS.toMillis(1), casInterceptor);
+        this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource1;
     }
 
-    private Observable<List<AtaruHakemus>> getApplications(String hakukohdeOid, List<String> hakemusOids) {
-        return postAsObservableLazily(
+    private Observable<List<HakemusWrapper>> getApplications(String hakukohdeOid, List<String> hakemusOids) {
+        return this.<String, List<AtaruHakemus>>postAsObservableLazily(
                 getUrl("ataru.applications.by-hakukohde"),
                 new TypeToken<List<AtaruHakemus>>() {}.getType(),
                 Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON),
@@ -39,16 +47,22 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                     }
                     LOG.info("Calling url {}", client.getCurrentURI());
                     return client;
-                });
+                }).flatMap(hakemukset -> {
+                    Map<String, AtaruHakemus> hakemuksetByOid = hakemukset.stream().collect(Collectors.toMap(AtaruHakemus::getHakemusOid, h -> h));
+                    return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(hakemuksetByOid.keySet()))
+                            .map(persons -> persons.stream()
+                                    .map(person -> new AtaruHakemusWrapper(hakemuksetByOid.get(person.getOidHenkilo()), person))
+                                    .collect(Collectors.toList()));
+        });
     }
 
     @Override
-    public Observable<List<AtaruHakemus>> getApplicationsByHakukohde(String hakukohdeOid) {
+    public Observable<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
         return getApplications(hakukohdeOid, Lists.newArrayList());
     }
 
     @Override
-    public Observable<List<AtaruHakemus>> getApplicationsByOids(List<String> oids) {
+    public Observable<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
         return getApplications(null, oids);
     }
 }

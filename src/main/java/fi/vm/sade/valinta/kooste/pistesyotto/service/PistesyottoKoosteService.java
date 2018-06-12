@@ -100,7 +100,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             HakemusWrapper hakemus = ht.getKey();
             String hakuOid = hakemus.getHakuoid();
             Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ht.getValue();
-            HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus, pisteet.valintapisteet.iterator().next(), hakukohdeRyhmasForHakukohdes);
+            HakemusDTO hakemusDTO = hakemus.toHakemusDto(pisteet.valintapisteet.iterator().next(), hakukohdeRyhmasForHakukohdes);
             Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
             Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
             Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);

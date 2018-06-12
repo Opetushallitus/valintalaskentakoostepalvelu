@@ -40,9 +40,9 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     private HakemusWrapper hakemus2 = new HakemusSpec.HakemusBuilder().setOid("hakemus2").build();
     private HakemusWrapper hakemus3 = new HakemusSpec.HakemusBuilder().setOid("hakemus3").build();
 
-    private AtaruHakemus ataruHakemus1 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus1").build();
-    private AtaruHakemus ataruHakemus2 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus2").build();
-    private AtaruHakemus ataruHakemus3 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus3").build();
+    private HakemusWrapper ataruHakemus1 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus1", "personOid1", "hetu1").build();
+    private HakemusWrapper ataruHakemus2 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus2", "personOid2", "hetu2").build();
+    private HakemusWrapper ataruHakemus3 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus3", "personOid3", "hetu3").build();
 
     private List<String> hakemusOids = Arrays.asList("hakemus1", "hakemus2", "hakemus3");
     private List<String> ataruHakemusOids = Arrays.asList("ataruHakemus1", "ataruHakemus2", "ataruHakemus3");
@@ -54,11 +54,11 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         setHakemusOid(hakemus3.getOid()).build();
 
     private ValintakoeOsallistuminenDTO ataruOsallistuminen1 = new ValintakoeOsallistuminenBuilder().
-            setHakemusOid(ataruHakemus1.getHakemusOid()).build();
+            setHakemusOid(ataruHakemus1.getOid()).build();
     private ValintakoeOsallistuminenDTO ataruOsallistuminen2 = new ValintakoeOsallistuminenBuilder().
-            setHakemusOid(ataruHakemus2.getHakemusOid()).build();
+            setHakemusOid(ataruHakemus2.getOid()).build();
     private ValintakoeOsallistuminenDTO ataruOsallistuminen3 = new ValintakoeOsallistuminenBuilder().
-            setHakemusOid(ataruHakemus3.getHakemusOid()).build();
+            setHakemusOid(ataruHakemus3.getOid()).build();
 
     private final HakukohdeV1RDTO hakukohdeDTO = new TarjontaSpec.HakukohdeBuilder(hakuOid).build();
     private final HakuV1RDTO hakuDTOEditori = new TarjontaSpec.HakuBuilder(hakuOid, ataruLomakeAvain).build();
@@ -141,8 +141,8 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         List<ValintakoeOsallistuminenDTO> osallistumisetVastauksessa =
                 (List<ValintakoeOsallistuminenDTO>) responseReceivedInAsyncResponse.getEntity();
         assertThat(osallistumisetVastauksessa, Matchers.hasSize(2));
-        assertEquals(ataruHakemus1.getHakemusOid(), osallistumisetVastauksessa.get(0).getHakemusOid());
-        assertEquals(ataruHakemus3.getHakemusOid(), osallistumisetVastauksessa.get(1).getHakemusOid());
+        assertEquals(ataruHakemus1.getOid(), osallistumisetVastauksessa.get(0).getHakemusOid());
+        assertEquals(ataruHakemus3.getOid(), osallistumisetVastauksessa.get(1).getHakemusOid());
     }
 
     @Test
