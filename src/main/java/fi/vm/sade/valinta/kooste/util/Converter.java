@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.util;
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -133,12 +132,11 @@ public class Converter {
         }
     }
 
-    public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+    public static HakemusDTO hakemusToHakemusDTO(HakemusWrapper hakemus, Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         HakemusDTO hakemusTyyppi = new HakemusDTO();
         hakemusTyyppi.setHakemusoid(hakemus.getOid());
         hakemusTyyppi.setHakijaOid(hakemus.getPersonOid());
-        hakemusTyyppi.setHakuoid(hakemus.getApplicationSystemId());
-
+        hakemusTyyppi.setHakuoid(hakemus.getHakuoid());
         if (hakemus.getAnswers() != null) {
             try {
                 if (hakemus.getAnswers().getHenkilotiedot() != null) {

@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
@@ -19,7 +21,7 @@ import static java.util.Collections.emptyMap;
 /**
  *         Hakemustietojen luku hakemustietueesta vikasietoisesti
  */
-public class HakuappHakemusWrapper implements HakemusWrapper {
+public class HakuappHakemusWrapper extends HakemusWrapper {
     private final Hakemus       hakemus;
     private Map<String, String> henkilotiedot                   = null;
     private Map<String, String> lisatiedot                      = null;
@@ -31,7 +33,7 @@ public class HakuappHakemusWrapper implements HakemusWrapper {
     public final static String  ASIOINTIKIELI                   = "asiointikieli";
     private final static String LUPAJULKAISUUN                  = "lupaJulkaisu";
     public final static String  HETU                            = "Henkilotunnus";
-    public final static String SAHKOPOSTI                      = "Sähköposti";
+    public final static String SAHKOPOSTI                       = "Sähköposti";
     public final static String  SYNTYMAAIKA                     = "syntymaaika";
     private final static String KANSALLINEN_ID                  = "kansallinenIdTunnus";
     private final static String PASSINNUMERO                    = "passinnumero";
@@ -47,18 +49,21 @@ public class HakuappHakemusWrapper implements HakemusWrapper {
     private final static String KOTIKUNTA                       = "kotikunta";
     public final static String TOISEN_ASTEEN_SUORITUS           = "toisen_asteen_suoritus";
     public final static String TOISEN_ASTEEN_SUORITUSMAA        = "toisen_asteen_suoritusmaa";
-    public final static String LUPA_SAHKOISEEN_VIESTINTAAN     = "lupatiedot-sahkoinen-viestinta";
+    public final static String LUPA_SAHKOISEEN_VIESTINTAAN      = "lupatiedot-sahkoinen-viestinta";
+    private final static String ULKOMAA_POSTITOIMIPAIKKA        = "kaupunkiUlkomaa";
+    private final static String POHJAKOULUTUS                   = "POHJAKOULUTUS";
+    private final static String POHJAKOULUTUS_ULKOMAILLA        = "0";
+    private final static String POHJAKOULUTUS_KESKEYTETTY       = "7";
 
     private Yhteystiedot yhteystiedot = null;
 
     public HakuappHakemusWrapper(Hakemus hakemus) {
-        if (hakemus == null) {
-            this.henkilotiedot = emptyMap();
-            this.lisatiedot = emptyMap();
-            this.hakutoiveet = emptyMap();
-            this.koulutustausta = emptyMap();
-        }
-        this.hakemus = hakemus;
+        this.hakemus = Objects.requireNonNull(hakemus, "Hakuapp hakemus oli null.");
+    }
+
+    @Override
+    public String getOid() {
+        return hakemus.getOid();
     }
 
     @Override
@@ -103,6 +108,12 @@ public class HakuappHakemusWrapper implements HakemusWrapper {
     public String getUlkomainenPostinumero() {
         getHenkilotiedot();
         return Optional.ofNullable(henkilotiedot.get(POSTINUMERO_ULKOMAA)).orElse(StringUtils.EMPTY);
+    }
+
+    @Override
+    public String getUlkomainenPostitoimipaikka() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(ULKOMAA_POSTITOIMIPAIKKA)).orElse(StringUtils.EMPTY);
     }
 
     @Override
@@ -151,9 +162,24 @@ public class HakuappHakemusWrapper implements HakemusWrapper {
     @Override
     public String getPuhelinnumero() {
         if (yhteystiedot == null) {
-            this.yhteystiedot = Yhteystiedot.yhteystiedotHakemukselta(hakemus);
+            this.yhteystiedot = Yhteystiedot.yhteystiedotHakemukselta(this);
         }
         return yhteystiedot.getPuhelinnumerotAsString();
+    }
+
+    @Override
+    public Collection<String> getPuhelinnumerot() {
+        TreeMap<String, String> henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+        henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
+        Collection<String> nums = Lists.newArrayList();
+        for (Entry<String, String> e : henkilotiedot.tailMap(Yhteystiedot.MATKAPUHELINNUMERO, true).entrySet()) {
+            if (e.getKey().startsWith(Yhteystiedot.MATKAPUHELINNUMERO)) {
+                nums.add(e.getValue());
+            } else {
+                break;
+            }
+        }
+        return nums;
     }
 
     @Override
@@ -254,6 +280,12 @@ public class HakuappHakemusWrapper implements HakemusWrapper {
     }
 
     @Override
+    public String getKutsumanimi() {
+        getHenkilotiedot();
+        return henkilotiedot.get("Kutsumanimi");
+    }
+
+    @Override
     public String getSukunimi() {
         getHenkilotiedot(); // lazy load henkilotiedot
         if (henkilotiedot.containsKey(SUKUNIMI)) {
@@ -330,6 +362,54 @@ public class HakuappHakemusWrapper implements HakemusWrapper {
         return result;
     }
 
+    @Override
+    public boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt() {
+        if (hakemus.getAnswers().getKoulutustausta() != null) {
+            Map<String, String> koulutustausta = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+            koulutustausta.putAll(hakemus.getAnswers().getKoulutustausta());
+            String pohjakoulutus = koulutustausta.get(POHJAKOULUTUS);
+            return POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus) || POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus);
+        } return false;
+    }
+
+    @Override
+    public String getHakuoid() { return hakemus.getApplicationSystemId(); }
+
+    @Override
+    public Answers getAnswers() { return hakemus.getAnswers(); }
+
+    @Override
+    public List<Eligibility> getPreferenceEligibilities() { return hakemus.getPreferenceEligibilities(); }
+
+    @Override
+    public String getState() { return hakemus.getState(); }
+
+    @Override
+    public int hashCode() {
+        return Optional.ofNullable(getOid()).orElse("").hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        } else if (this == obj) {
+            return true;
+        } else if (obj instanceof HakuappHakemusWrapper) {
+            return this.getOid().equals(((HakuappHakemusWrapper) obj).getOid());
+        } else {
+            return false;
+        }
+    }
+
+    private Map<String, String> getHakutoiveet() {
+        if (hakutoiveet == null) {
+            hakutoiveet = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            hakutoiveet.putAll(hakemus.getAnswers().getHakutoiveet());
+        }
+        return hakutoiveet;
+    }
+
     private Map<String, String> getLisatiedot() {
         if (lisatiedot == null) {
             lisatiedot = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -352,13 +432,5 @@ public class HakuappHakemusWrapper implements HakemusWrapper {
             koulutustausta.putAll(hakemus.getAnswers().getKoulutustausta());
         }
         return koulutustausta;
-    }
-
-    private Map<String, String> getHakutoiveet() {
-        if (hakutoiveet == null) {
-            hakutoiveet = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-            hakutoiveet.putAll(hakemus.getAnswers().getHakutoiveet());
-        }
-        return hakutoiveet;
     }
 }

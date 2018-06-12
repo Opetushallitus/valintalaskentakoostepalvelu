@@ -1,20 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
-import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
-import static java.util.Arrays.asList;
-import static java.util.Collections.EMPTY_LIST;
-import static java.util.Collections.EMPTY_MAP;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
@@ -35,13 +28,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
+
+import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
+import static java.util.Arrays.asList;
+import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.EMPTY_MAP;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class ValintalaskennanTulosExcelTest {
     HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
@@ -188,13 +184,13 @@ public class ValintalaskennanTulosExcelTest {
         );
     }
 
-    private List<Hakemus> hakemukset() {
+    private List<HakemusWrapper> hakemukset() {
         final Answers answersWithHetu = new Answers();
         answersWithHetu.getHenkilotiedot().put("Henkilotunnus", "010101-123N");
         answersWithHetu.getHenkilotiedot().put("Sähköposti", "sukuetu1@testi.fi");
-        return Arrays.asList(
-            new Hakemus("", "", answersWithHetu, EMPTY_MAP, EMPTY_LIST, "Hakemus 1", "", "Hakija 1")
-        );
+        Hakemus hakemus = new Hakemus("", "", answersWithHetu, EMPTY_MAP, EMPTY_LIST, "Hakemus 1", "", "Hakija 1");
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
+        return Collections.singletonList(wrapper);
     }
 
 

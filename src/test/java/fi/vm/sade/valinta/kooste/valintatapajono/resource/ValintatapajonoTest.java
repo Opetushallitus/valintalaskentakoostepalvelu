@@ -1,12 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 
-import fi.vm.sade.valinta.kooste.valintatapajono.ValintatapajonoTestTools;
-
 import com.google.common.reflect.TypeToken;
-import com.google.gson.*;
-
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+import fi.vm.sade.valinta.kooste.valintatapajono.ValintatapajonoTestTools;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
@@ -22,12 +21,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.valinta.http.DateDeserializer.GSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Jussi Jartamo
@@ -55,8 +54,8 @@ public class ValintatapajonoTest extends ValintatapajonoTestTools{
                     "",
                     "",
                     valinnanvaiheet,
-                    hakemukset,
-                    Arrays.asList(listaus)
+                    hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()),
+                    Collections.singletonList(listaus)
             );
             valintatapajonoExcel.getExcel().tuoXlsx(new ClassPathResource("/valintatapajono/valintatapajono_yksi_hakija.xlsx").getInputStream());
         } catch(Throwable t) {
@@ -89,7 +88,8 @@ public class ValintatapajonoTest extends ValintatapajonoTestTools{
         );
 
         ValinnanvaiheDTO generoitu_valinnanvaihe =
-        ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet, hakemukset, valinnanvaihe, rivit.getRivit());
+        ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet,
+                hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()), valinnanvaihe, rivit.getRivit());
 
         String json = new GsonBuilder().setPrettyPrinting().create().toJson(generoitu_valinnanvaihe);
         LOG.error("{}", json);
@@ -121,7 +121,8 @@ public class ValintatapajonoTest extends ValintatapajonoTestTools{
         );
 
         ValinnanvaiheDTO generoitu_valinnanvaihe =
-                ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet, hakemukset, valinnanvaihe, rivit.getRivit());
+                ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet,
+                        hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()), valinnanvaihe, rivit.getRivit());
 
         String json = new GsonBuilder().setPrettyPrinting().create().toJson(generoitu_valinnanvaihe);
         LOG.error("{}", json);
@@ -153,7 +154,8 @@ public class ValintatapajonoTest extends ValintatapajonoTestTools{
         );
 
         ValinnanvaiheDTO generoitu_valinnanvaihe =
-                ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet, hakemukset, valinnanvaihe, rivit.getRivit());
+                ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet,
+                        hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()), valinnanvaihe, rivit.getRivit());
 
         String json = new GsonBuilder().setPrettyPrinting().create().toJson(generoitu_valinnanvaihe);
         LOG.error("{}", json);
@@ -186,7 +188,8 @@ public class ValintatapajonoTest extends ValintatapajonoTestTools{
         boolean exceptionThrown = false;
         try {
             ValinnanvaiheDTO generoitu_valinnanvaihe =
-                    ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet, hakemukset, valinnanvaihe, rivit.getRivit());
+                    ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet,
+                            hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()), valinnanvaihe, rivit.getRivit());
         } catch (RuntimeException re) {
             assertEquals("Samassa valintatapajonossa ei voida käyttää sekä jonosijoja että kokonaispisteitä.", re.getMessage());
             exceptionThrown = true;

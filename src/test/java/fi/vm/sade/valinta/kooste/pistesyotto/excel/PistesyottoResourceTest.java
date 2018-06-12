@@ -1,31 +1,11 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.lisatiedot;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintaperuste;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
+import com.google.gson.*;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
@@ -35,7 +15,6 @@ import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -44,21 +23,15 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
-import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
@@ -78,14 +51,19 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.lisatiedot;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintaperuste;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class PistesyottoResourceTest {
     final static Logger LOG = LoggerFactory.getLogger(PistesyottoResourceTest.class);
@@ -117,7 +95,7 @@ public class PistesyottoResourceTest {
     final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
     final String OSALLISTUMISENTUNNISTE2 = TUNNISTE2 + "-OSALLISTUMINEN";
     final String KIELIKOE_OSALLISTUMISENTUNNISTE = KIELIKOE_TUNNISTE + "-OSALLISTUMINEN";
-    private final List<Hakemus> hakemukset = Arrays.asList(
+    private final List<HakemusWrapper> hakemukset = Arrays.asList(
             hakemus()
                     .setOid(HAKEMUS1)
                     .setHenkilotunnus("123456-789x")
@@ -237,8 +215,8 @@ public class PistesyottoResourceTest {
                     hakemus().setOid(HAKEMUS1).build(),
                     hakemus().setOid(HAKEMUS2).build(),
                     hakemus().setOid(HAKEMUS3).build()),
-            Sets.newHashSet(Arrays.asList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
-            Arrays.asList(VALINTAKOE1), // TUNNISTEET
+            Sets.newHashSet(Collections.singletonList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
+            Collections.singletonList(VALINTAKOE1), // TUNNISTEET
             osallistumistiedot,
             valintaperusteet,
             Arrays.asList(
@@ -286,14 +264,14 @@ public class PistesyottoResourceTest {
 
         cleanMocks();
 
-        Hakemus hakemus1 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).build();
-        Hakemus hakemus2 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid2).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid2).build();
-        Hakemus hakemus3 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid3).addHakutoive(hakukohdeOid1).setPersonOid(hakemusInvalidPersonOid3).build();
-        Hakemus hakemus4 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid4).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid4).build();
-        Hakemus hakemus5 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid5).addHakutoive(hakukohdeOid2).setPersonOid(hakemusPersonOid5).build();
+        HakemusWrapper hakemus1 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).build();
+        HakemusWrapper hakemus2 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid2).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid2).build();
+        HakemusWrapper hakemus3 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid3).addHakutoive(hakukohdeOid1).setPersonOid(hakemusInvalidPersonOid3).build();
+        HakemusWrapper hakemus4 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid4).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid4).build();
+        HakemusWrapper hakemus5 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid5).addHakutoive(hakukohdeOid2).setPersonOid(hakemusPersonOid5).build();
 
 
-        List<Hakemus> hakemuses = Arrays.asList(hakemus1, hakemus2, hakemus3, hakemus4, hakemus5);
+        List<HakemusWrapper> hakemuses = Arrays.asList(hakemus1, hakemus2, hakemus3, hakemus4, hakemus5);
         MockApplicationAsyncResource.setResult(hakemuses);
         MockApplicationAsyncResource.setResultByOid(hakemuses);
 
@@ -354,7 +332,7 @@ public class PistesyottoResourceTest {
 
         cleanMocks();
 
-        List<Hakemus> hakemuses = Collections.singletonList(new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).build());
+        List<HakemusWrapper> hakemuses = Collections.singletonList(new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).setPersonOid(hakemusPersonOid1).build());
         MockApplicationAsyncResource.setResult(hakemuses);
         MockApplicationAsyncResource.setResultByOid(hakemuses);
 

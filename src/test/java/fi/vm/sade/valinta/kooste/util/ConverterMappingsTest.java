@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
@@ -19,9 +18,13 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
@@ -37,7 +40,8 @@ public class ConverterMappingsTest {
         Hakemus hakemus = hakemukset.stream()
                 .filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid()))
                 .distinct().iterator().next();
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()), Maps.newHashMap());
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(wrapper, new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "","", emptyList()), Maps.newHashMap());
         // LOG.error("\r\n{}", new GsonBuilder().setPrettyPrinting().create()
         // .toJson(dto));
         assertTrue(dto
@@ -64,7 +68,8 @@ public class ConverterMappingsTest {
         ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
         Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.49132232288", a);
 
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()),hakukohdeRyhmasForHakukohdes);
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(wrapper, new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "","", emptyList()),hakukohdeRyhmasForHakukohdes);
         assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
     }
 
@@ -144,7 +149,8 @@ public class ConverterMappingsTest {
         Hakemus hakemus = hakemukset.stream()
                 .filter(h -> "1.2.246.562.11.00003000803".equals(h.getOid()))
                 .distinct().iterator().next();
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()), Maps.newHashMap());
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(wrapper, new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "","", emptyList()), Maps.newHashMap());
 
         final int prefixes = dto.getAvaimet().stream()
                 .filter(a -> a.getAvain().startsWith("PK_") || a.getAvain().startsWith("LK_"))

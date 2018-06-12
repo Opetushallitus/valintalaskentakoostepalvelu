@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp;
 
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import rx.Observable;
 
 import javax.ws.rs.core.Response;
@@ -16,22 +16,22 @@ public interface ApplicationAsyncResource {
     List<String> DEFAULT_STATES = Arrays.asList("ACTIVE", "INCOMPLETE");
     int DEFAULT_ROW_LIMIT = 100000;
 
-    Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
+    Observable<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 
     Observable<Set<String>> getApplicationOids(String hakuOid, String hakukohdeOid);
 
-    Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
+    Observable<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
 
-    Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids);
+    Observable<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids);
 
-    Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids);
-    Observable<List<Hakemus>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys);
+    Observable<List<HakemusWrapper>> getApplicationsByHakemusOids(List<String> hakemusOids);
+    Observable<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys);
 
-    Observable<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);
+    Observable<List<HakemusWrapper>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);
 
-    Observable<Hakemus> getApplication(String hakemusOid);
+    Observable<HakemusWrapper> getApplication(String hakemusOid);
 
-    Observable<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids);
+    Observable<List<HakemusWrapper>> getApplicationsByOids(Collection<String> hakemusOids);
 
     Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOid, String reason);
 }

@@ -1,17 +1,7 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
-import static org.apache.commons.collections.ListUtils.union;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
@@ -20,7 +10,6 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
@@ -39,6 +28,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemuksenKoetulosYhteenveto;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviKuuntelija;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AmmatillisenKielikoetulosOperations.CompositeCommand;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -52,19 +42,18 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.observables.ConnectableObservable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.*;
+import static org.apache.commons.collections.ListUtils.union;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 public abstract class AbstractPistesyottoKoosteService {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
@@ -106,7 +95,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                                       String hakukohdeOid,
                                                       Optional<String> aikaleima,
                                                       List<ValintakoeOsallistuminenDTO> osallistumistiedot,
-                                                      List<Hakemus> hakemukset,
+                                                      List<HakemusWrapper> hakemukset,
                                                       List<ValintaperusteDTO> valintaperusteet,
                                                       List<ApplicationAdditionalDataDTO> pistetiedot,
                                                       List<HakukohdeJaValintakoeDTO> hakukohdeJaValintakoe,
@@ -156,9 +145,9 @@ public abstract class AbstractPistesyottoKoosteService {
                 prosessi.inkrementoiTehtyjaToita();
             });
         };
-        Func2<List<ValintakoeOsallistuminenDTO>, List<Hakemus>, Observable<List<Hakemus>>> haePuuttuvatHakemukset = (osallistumiset, hakemukset) -> {
+        Func2<List<ValintakoeOsallistuminenDTO>, List<HakemusWrapper>, Observable<List<HakemusWrapper>>> haePuuttuvatHakemukset = (osallistumiset, hakemukset) -> {
             Set<String> puuttuvatHakemukset = osallistumiset.stream().map(ValintakoeOsallistuminenDTO::getHakemusOid).collect(Collectors.toSet());
-            puuttuvatHakemukset.removeAll(hakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet()));
+            puuttuvatHakemukset.removeAll(hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet()));
             if (puuttuvatHakemukset.isEmpty()) {
                 return Observable.just(hakemukset);
             }
@@ -205,7 +194,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     ).collect(Collectors.toList()));
                 }
         );
-        Observable<List<Hakemus>> hakemuksetO = Observable.merge(Observable.zip(
+        Observable<List<HakemusWrapper>> hakemuksetO = Observable.merge(Observable.zip(
                 osallistumistiedotO,
                 applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
                 haePuuttuvatHakemukset

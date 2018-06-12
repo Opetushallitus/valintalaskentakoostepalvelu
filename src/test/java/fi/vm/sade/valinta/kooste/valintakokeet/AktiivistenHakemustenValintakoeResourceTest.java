@@ -5,12 +5,12 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.ValintakoeOsallistuminenBuilder;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -36,9 +36,9 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     private final String hakukohdeOid = "hakukohdeOid";
     private final String hakuOid = "hakuOid";
     private final String ataruLomakeAvain = "AtaruLomakeAvain";
-    private Hakemus hakemus1 = new HakemusSpec.HakemusBuilder().setOid("hakemus1").build();
-    private Hakemus hakemus2 = new HakemusSpec.HakemusBuilder().setOid("hakemus2").build();
-    private Hakemus hakemus3 = new HakemusSpec.HakemusBuilder().setOid("hakemus3").build();
+    private HakemusWrapper hakemus1 = new HakemusSpec.HakemusBuilder().setOid("hakemus1").build();
+    private HakemusWrapper hakemus2 = new HakemusSpec.HakemusBuilder().setOid("hakemus2").build();
+    private HakemusWrapper hakemus3 = new HakemusSpec.HakemusBuilder().setOid("hakemus3").build();
 
     private AtaruHakemus ataruHakemus1 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus1").build();
     private AtaruHakemus ataruHakemus2 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus2").build();

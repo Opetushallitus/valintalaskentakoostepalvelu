@@ -1,11 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import static java.util.Collections.singletonList;
-
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -24,6 +21,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistesyottoValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -34,15 +32,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.Collections.singletonList;
 
 public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     private static final Logger LOG = LoggerFactory.getLogger(PistesyottoKoosteService.class);
@@ -99,12 +93,12 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
     public Observable<HenkiloValilehtiDTO> koostaOsallistujanPistetiedot(String hakemusOid, AuditSession auditSession) {
         Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession);
-        Observable<Pair<Hakemus, Map<String, List<String>>>> hakemusAndTarjonta = applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus ->
-                tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakemus.getApplicationSystemId()).map(tarjonta -> Pair.of(hakemus, tarjonta)));
+        Observable<Pair<HakemusWrapper, Map<String, List<String>>>> hakemusAndTarjonta = applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus ->
+                tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakemus.getHakuoid()).map(tarjonta -> Pair.of(hakemus, tarjonta)));
 
         return Observable.combineLatest(valintapisteet, hakemusAndTarjonta, (pisteet, ht) -> {
-            Hakemus hakemus = ht.getKey();
-            String hakuOid = hakemus.getApplicationSystemId();
+            HakemusWrapper hakemus = ht.getKey();
+            String hakuOid = hakemus.getHakuoid();
             Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ht.getValue();
             HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(hakemus, pisteet.valintapisteet.iterator().next(), hakukohdeRyhmasForHakukohdes);
             Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);

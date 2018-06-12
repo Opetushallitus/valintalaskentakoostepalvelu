@@ -5,11 +5,9 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.TuloskirjeNimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -54,7 +52,7 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<Hakemus> hakemukset,
+            Collection<HakemusWrapper> hakemukset,
             String hakuOid,
             Optional<String> asiointikieli,
             String sisalto,
@@ -85,7 +83,7 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<Hakemus> hakemukset,
+            Collection<HakemusWrapper> hakemukset,
             String hakuOid,
             Optional<String> asiointikieli,
             String sisalto,
@@ -117,7 +115,7 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<Hakemus> hakemukset,
+            Collection<HakemusWrapper> hakemukset,
             String hakukohdeOid,
             String hakuOid,
             Optional<String> asiointikieli,
@@ -150,7 +148,7 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<Hakemus> hakemukset,
+            Collection<HakemusWrapper> hakemukset,
             String hakukohdeOidFromRequest,
             String hakuOid,
             Optional<String> asiointikieli,
@@ -163,8 +161,8 @@ public class HyvaksymiskirjeetKomponentti {
         try {
             assert (hakuOid != null);
             int kaikkiHyvaksytyt = hakukohteenHakijat.size();
-            LOG.info("Aloitetaan {} hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true. ", kaikkiHyvaksytyt);
-            Map<String, Hakemus> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
+            LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true.", kaikkiHyvaksytyt);
+            Map<String, HakemusWrapper> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
             final List<Letter> kirjeet = new ArrayList<>();
             Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
             Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);
@@ -181,7 +179,7 @@ public class HyvaksymiskirjeetKomponentti {
                 String preferoituKielikoodi = asiointikieli.orElse(hyvaksyttyMeta.getOpetuskieli());
                 String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
                 final String hakemusOid = hakija.getHakemusOid();
-                final Hakemus hakemus = Objects.requireNonNull(hakukohteenHakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
+                final HakemusWrapper hakemus = Objects.requireNonNull(hakukohteenHakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
                 final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new TuloskirjeNimiPaattelyStrategy());
                 final List<Map<String, Object>> tulosList = new ArrayList<>();
 
@@ -220,8 +218,7 @@ public class HyvaksymiskirjeetKomponentti {
                 } else {
                     LOG.error("Hakijalle (hakemusOid={},hakijaOid={}) hakutoiveessa={} ei saatu hakijapalveluiden osoitetta tarjoajalle {}", hakija.getHakemusOid(), hakija.getHakijaOid(), hakukohdeOid, tarjoajaOid);
                 }
-                HakemusWrapper hakemusWrapper = new HakuappHakemusWrapper(hakemus);
-                replacements.put("henkilotunnus", hakemusWrapper.getHenkilotunnus());
+                replacements.put("henkilotunnus", hakemus.getHenkilotunnus());
                 replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
                 replacements.put("hakemusOid", hakemus.getOid());
                 replacements.put("hakijaOid", hakija.getHakijaOid());
@@ -229,9 +226,9 @@ public class HyvaksymiskirjeetKomponentti {
                 replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
                 replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)));
                 replacements.put("ohjeetUudelleOpiskelijalle", hyvaksyttyMeta.getOhjeetUudelleOpiskelijalle());
-                replacements.put("syntymaaika", hakemusWrapper.getSyntymaaika());
+                replacements.put("syntymaaika", hakemus.getSyntymaaika());
 
-                String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
+                String sahkoposti = hakemus.getSahkopostiOsoite();
                 //boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
                 boolean skipIPosti = true;
                 kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(),

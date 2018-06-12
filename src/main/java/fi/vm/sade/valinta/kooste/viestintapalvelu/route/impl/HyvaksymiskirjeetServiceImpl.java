@@ -1,25 +1,19 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static rx.Observable.zip;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.OsoiteHaku;
@@ -48,14 +42,15 @@ import rx.subjects.PublishSubject;
 
 import javax.ws.rs.core.Response;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static rx.Observable.zip;
 
 @Service
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
@@ -102,7 +97,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
-            Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS);
+            Observable<List<HakemusWrapper>> hakemuksetFuture = applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS);
             Observable<List<HakijaDTO>> hakijatFuture = Observable.from(hakemusOids).concatMap(hakemus -> valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemus)).toList();
             Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
 
@@ -153,7 +148,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
     @Override
     public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-        Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
+        Observable<List<HakemusWrapper>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
         Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKaikkiHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Response> organisaatioObservable = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
         zip(
@@ -213,7 +208,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
         final String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
 
-        Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
+        Observable<List<HakemusWrapper>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
         Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());

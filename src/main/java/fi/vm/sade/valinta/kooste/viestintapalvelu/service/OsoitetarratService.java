@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
@@ -12,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -30,13 +30,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -83,7 +77,7 @@ public class OsoitetarratService {
                     + 1
                     // dokumenttipalveluun vienti
                     + 1);
-            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>();
+            final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
@@ -131,7 +125,7 @@ public class OsoitetarratService {
                     // dokumenttipalveluun vienti
                     + 1);
             final AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedotRef = new AtomicReference<>();
-            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>();
+            final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
@@ -217,7 +211,7 @@ public class OsoitetarratService {
                     + 1
                     // dokumenttipalveluun vienti
                     + 1);
-            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>();
+            final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
@@ -241,7 +235,7 @@ public class OsoitetarratService {
         }
     }
 
-    private void osoitetarratHakemuksille(List<Hakemus> haetutHakemukset, Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, DokumenttiProsessi prosessi) {
+    private void osoitetarratHakemuksille(List<HakemusWrapper> haetutHakemukset, Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, DokumenttiProsessi prosessi) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             Osoitteet osoitteet = new Osoitteet(haetutHakemukset.stream().map(h ->

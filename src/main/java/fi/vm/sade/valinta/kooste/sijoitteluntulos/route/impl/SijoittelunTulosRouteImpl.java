@@ -1,11 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl;
 
-import static fi.vm.sade.valinta.kooste.security.SecurityPreprocessor.SECURITY;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.apache.camel.LoggingLevel.ERROR;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -15,7 +11,6 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
@@ -32,6 +27,8 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukko
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
@@ -68,14 +65,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.valinta.kooste.security.SecurityPreprocessor.SECURITY;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.apache.camel.LoggingLevel.ERROR;
 
 @Component
 public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
@@ -125,7 +122,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti,
             ValintalaskentaAsyncResource valintalaskentaResource
     ) {
-        this.valintaTulosServiceAsyncResource= valintaTulosServiceAsyncResource;
+        this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
         this.applicationResource = applicationResource;
@@ -201,14 +198,15 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Hakukohteelle ei saatu tarjoajaOidia!"));
                         }
                         List<Valintatulos> tilat = Collections.emptyList();
-                        List<Hakemus> hakemukset = Collections.emptyList();
+                        List<HakemusWrapper> hakemukset = Collections.emptyList();
                         List<Lukuvuosimaksu> lukuvuosimaksus = Collections.emptyList();
                         fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hk = null;
                         HakuV1RDTO hakuDTO = null;
                         List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
                         try {
                             // TODO here it would make more sense to parallelise the asynchronous calls and bundle the results together after they all complete.
-                            hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
+                            hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX)
+                                    .stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
                             hk = toBlocking(valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid), 5, MINUTES).toFuture().get();
                             lukuvuosimaksus = toBlocking(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession), 5, MINUTES).toFuture().get();
                             valinnanvaiheet = toBlocking(valintalaskentaResource.laskennantulokset(hakukohdeOid), 1, MINUTES).toFuture().get();
@@ -313,11 +311,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 return;
                             }
                             stopWatch.start("Tiedot hakemuksilta");
-                            List<Hakemus> hakemukset = applicationResource.getApplicationsByOids(hyvaksytytHakemukset);
+                            List<HakemusWrapper> hakemukset = applicationResource.getApplicationsByOids(hyvaksytytHakemukset).stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
                             stopWatch.stop();
                             List<Osoite> addressLabels = Lists.newArrayList();
 
-                            for (Hakemus h : hakemukset) {
+                            for (HakemusWrapper h : hakemukset) {
                                 addressLabels.add(HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, h, new NimiPaattelyStrategy()));
                             }
                             stopWatch.start("Tarrat viestintäpalvelulta");

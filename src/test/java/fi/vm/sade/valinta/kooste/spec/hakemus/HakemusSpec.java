@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 
 /**
@@ -89,7 +90,12 @@ public class HakemusSpec extends ConstantsSpec {
             return this;
         }
 
-        public Hakemus build() {
+        public HakemusWrapper build() {
+            hakemus.setState(ApplicationAsyncResource.DEFAULT_STATES.get(0));
+            return new HakuappHakemusWrapper(hakemus);
+        }
+
+        public Hakemus buildHakuappHakemus() {
             hakemus.setState(ApplicationAsyncResource.DEFAULT_STATES.get(0));
             return hakemus;
         }

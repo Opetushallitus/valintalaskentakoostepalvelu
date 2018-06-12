@@ -1,8 +1,19 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
-import java.io.InputStream;
-import java.util.List;
-
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
+import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -11,19 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
-import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import java.io.InputStream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
@@ -87,10 +88,10 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Puutteelliset lähtötiedot"));
                             throw new RuntimeException("Pakolliset tiedot reitille puuttuu hakuOid, hakukohdeOid, valintatapajonoOid");
                         }
-                        final List<Hakemus> hakemukset;
+                        final List<HakemusWrapper> hakemukset;
                         try {
                             hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid,
-                                    ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
+                                    ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX).stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
                             LOG.debug("Saatiin hakemukset {}", hakemukset.size());
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {

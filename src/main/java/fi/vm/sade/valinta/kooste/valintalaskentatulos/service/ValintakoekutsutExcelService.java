@@ -6,13 +6,13 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintakoeKutsuExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -67,27 +67,25 @@ public class ValintakoekutsutExcelService {
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus.getMessage()));
         });
         try {
-            prosessi.setKokonaistyo(10); // 8 + luonti + dokumenttipalveluun vienti
+            prosessi.setKokonaistyo(9); // 7 + luonti + dokumenttipalveluun vienti
             final boolean useWhitelist = !Optional.ofNullable(hakemusOids).orElse(Collections.emptySet()).isEmpty();
             final AtomicReference<HakukohdeV1RDTO> hakukohdeRef = new AtomicReference<>();
             final AtomicReference<List<HakemusOsallistuminenDTO>> tiedotHakukohteelleRef = new AtomicReference<>();
             final AtomicReference<Map<String, ValintakoeDTO>> valintakokeetRef = new AtomicReference<>();
-            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>(Collections.emptyList());
-            final Consumer<List<Hakemus>> lisaaHakemuksiaAtomisestiHakemuksetReferenssiin = hakemuksia -> {
-                haetutHakemuksetRef.getAndUpdate(vanhatHakemukset ->
-                        Stream.concat(vanhatHakemukset.stream(), hakemuksia.stream()).collect(Collectors.toList()));
-            };
+            final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>(Collections.emptyList());
+            final Consumer<List<HakemusWrapper>> lisaaHakemuksiaAtomisestiHakemuksetReferenssiin = hakemuksia -> haetutHakemuksetRef.getAndUpdate(vanhatHakemukset ->
+                    Stream.concat(vanhatHakemukset.stream(), hakemuksia.stream()).collect(Collectors.toList()));
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
-                    .setLaskurinAlkuarvo(8)
+                    .setLaskurinAlkuarvo(7)
                     .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
                     .setSynkronoituToiminto(() -> {
                         String hakuNimi = new Teksti(haku.getNimi()).getTeksti();
                         String hakukohdeNimi = new Teksti(hakukohdeRef.get().getHakukohteenNimi()).getTeksti();
                         try {
                             InputStream filedata = valintakoeKutsuExcelKomponentti.luoTuloksetXlsMuodossa(hakuNimi, hakukohdeNimi,
-                                    hakukohdeOid, maatJaValtiot1Ref.get(), postiRef.get(), tiedotHakukohteelleRef.get(), valintakokeetRef.get(),
+                                    maatJaValtiot1Ref.get(), postiRef.get(), tiedotHakukohteelleRef.get(), valintakokeetRef.get(),
                                     haetutHakemuksetRef.get().stream().distinct().collect(Collectors.toList()),
                                     Optional.ofNullable(hakemusOids).orElse(Collections.emptySet())
                             );
@@ -145,7 +143,7 @@ public class ValintakoekutsutExcelService {
                                 Set<String> osallistujienHakemusOids = Sets.newHashSet(tiedotHakukohteelleRef.get().stream()
                                     .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
                                     .map(HakemusOsallistuminenDTO::getHakemusOid).collect(Collectors.toSet()));
-                                Set<String> joHaetutHakemukset = haetutHakemuksetRef.get().stream().map(Hakemus::getOid).collect(
+                                Set<String> joHaetutHakemukset = haetutHakemuksetRef.get().stream().map(HakemusWrapper::getOid).collect(
                                     Collectors.toSet()
                                 );
                                 osallistujienHakemusOids.removeAll(joHaetutHakemukset); // ei haeta jo haettuja hakemuksia

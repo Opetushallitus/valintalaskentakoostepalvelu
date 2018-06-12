@@ -3,9 +3,9 @@ package fi.vm.sade.valinta.kooste.valintakokeet;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -93,7 +93,7 @@ public class AktiivistenHakemustenValintakoeResource {
                     if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
                         return applicationAsyncResource.getApplicationsByHakemusOids(kaikkiOsallistumistenHakemusOidit)
                                 .map(hakemukset -> hakemukset.stream()
-                                        .map(Hakemus::getOid).collect(Collectors.toSet()));
+                                        .map(HakemusWrapper::getOid).collect(Collectors.toSet()));
                     } else {
                         return ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit)
                                 .map(hakemukset -> hakemukset.stream()

@@ -2,10 +2,12 @@ package fi.vm.sade.valinta.kooste.external.resource.ataru.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AtaruHakemus {

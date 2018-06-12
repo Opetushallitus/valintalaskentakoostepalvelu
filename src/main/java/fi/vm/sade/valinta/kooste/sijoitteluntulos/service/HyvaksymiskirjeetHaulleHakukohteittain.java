@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -11,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Viestintapal
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
@@ -125,7 +125,8 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                 .timeout(ViestintapalveluObservables.getDelay(Optional.of(resurssit.hakukohdeOid)), TimeUnit.MINUTES, Observable.just("timeout"));
     }
 
-    private Observable<String> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<String> defaultValue, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset) {
+    private Observable<String> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<String> defaultValue, Optional<String> asiointikieli,
+                                                                       List<HakijaDTO> hyvaksytytHakijat, Collection<HakemusWrapper> hakemukset) {
         return
                 tarjontaAsyncResource.haeHakukohde(hakukohdeOid).switchMap(
                         h -> {
@@ -160,7 +161,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     }
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, String tarjoajaOid, Optional<String> asiointikieli,
-                                                                List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue) {
+                                                                List<HakijaDTO> hyvaksytytHakijat, Collection<HakemusWrapper> hakemukset, String defaultValue) {
         try {
             LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);

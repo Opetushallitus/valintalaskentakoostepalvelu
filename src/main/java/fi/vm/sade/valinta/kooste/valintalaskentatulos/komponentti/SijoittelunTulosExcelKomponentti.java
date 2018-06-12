@@ -6,7 +6,6 @@ import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.*;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
@@ -40,10 +39,11 @@ public class SijoittelunTulosExcelKomponentti {
     @Autowired
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
-    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, List<Lukuvuosimaksu> lukuvuosimaksut, HakukohdeDTO hakukohde, HakuV1RDTO hakuDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet) {
+    public InputStream luoXls(List<Valintatulos> valintatulokset, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid,
+                              List<HakemusWrapper> hakemuksetList, List<Lukuvuosimaksu> lukuvuosimaksut, HakukohdeDTO hakukohde, HakuV1RDTO hakuDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet) {
         Map<String, Koodi> countryCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
-        Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
+        Map<String, HakemusWrapper> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
         boolean isKkHaku = hakuDTO.getKohdejoukkoUri().startsWith("haunkohdejoukko_12");
         if (hakukohde == null) {
             LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
@@ -160,10 +160,10 @@ public class SijoittelunTulosExcelKomponentti {
 
         Map<String, IlmoittautumisTila> hakemusJaJonoMappaus = valintatapajononTilat(valintatulokset);
         for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
-            HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
+            HakemusWrapper wrapper = hakemukset.get(hDto.getHakemusOid());
             String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimet();
             List<Object> hakemusRivi = Lists.newArrayList();
-            Maksuntila maksuntila = ofNullable(personOidToLukuvuosimaksu.get(hDto.getHakijaOid())).map(l -> l.getMaksuntila()).orElse(Maksuntila.MAKSAMATTA);
+            Maksuntila maksuntila = ofNullable(personOidToLukuvuosimaksu.get(hDto.getHakijaOid())).map(Lukuvuosimaksu::getMaksuntila).orElse(Maksuntila.MAKSAMATTA);
             hakemusRivi.addAll(Arrays.asList(
                     hDto.getHakemusOid(),
                     nimi,

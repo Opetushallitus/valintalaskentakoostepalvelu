@@ -4,11 +4,9 @@ package fi.vm.sade.valinta.kooste.hakemukset.service;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
@@ -16,7 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
-import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
@@ -26,14 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import rx.Observable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -74,7 +65,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                 e -> LOG.error("Ongelma haettaessa valintaryhmien perusteella hakukohteita valinnanvaiheelle " + valinnanvaiheOid, e));
     }
 
-    private void handleApplicationsResponse(List<Hakemus> hakemukset, HakukohdeOIDAuthorityCheck authorityCheck, Consumer<Collection<HakemusDTO>> successHandler, Consumer<Throwable> exceptionHandler, Set<String> hakukohdeOidit) {
+    private void handleApplicationsResponse(List<HakemusWrapper> hakemukset, HakukohdeOIDAuthorityCheck authorityCheck, Consumer<Collection<HakemusDTO>> successHandler, Consumer<Throwable> exceptionHandler, Set<String> hakukohdeOidit) {
         if (hakemukset == null) {
             exceptionHandler.accept(new RuntimeException("null response from applicationAsyncResource"));
             return;
@@ -120,7 +111,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                                     .collect(Collectors.toSet()));                                          // <Hakutoive, ValintakoeTunniste>
                         }
 
-                        final List<String> hakutoiveOids = new HakuappHakemusWrapper(hakemus).getHakutoiveOids().stream().filter(authorityCheck).collect(Collectors.toList());
+                        final List<String> hakutoiveOids = hakemus.getHakutoiveOids().stream().filter(authorityCheck).collect(Collectors.toList());
                         final List<HakukohdeJaValintaperusteDTO> hakukohteet = hakutoiveOids
                                 .stream()
                                 .map(x -> valintakoeDTOMap.get(x))
@@ -149,11 +140,11 @@ public class ValinnanvaiheenValintakoekutsutService {
             exceptionHandler::accept);
     }
 
-    private Set<String> collectHakutoiveOidsOf(List<Hakemus> hakemukset) {
-        return hakemukset.stream().flatMap(h -> new HakuappHakemusWrapper(h).getHakutoiveOids().stream()).collect(Collectors.toSet());
+    private Set<String> collectHakutoiveOidsOf(List<HakemusWrapper> hakemukset) {
+        return hakemukset.stream().flatMap(h -> h.getHakutoiveOids().stream()).collect(Collectors.toSet());
     }
 
-    private HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, List<HakukohdeJaValintaperusteDTO> valintaperusteDTOs) {
+    private HakemusDTO hakemusToHakemusDTO(HakemusWrapper hakemus, List<HakukohdeJaValintaperusteDTO> valintaperusteDTOs) {
         Map<String, Koodi> postCodes;
         try {
             postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
@@ -164,12 +155,12 @@ public class ValinnanvaiheenValintakoekutsutService {
         HakemusDTO hakemusDTO = new HakemusDTO();
         hakemusDTO.setHakemusOid(hakemus.getOid());
         hakemusDTO.setHenkiloOid(hakemus.getPersonOid());
-        hakemusDTO.setEtunimet(hakemus.getAnswers().getHenkilotiedot().get("Etunimet"));
-        hakemusDTO.setSukunimi(hakemus.getAnswers().getHenkilotiedot().get("Sukunimi"));
-        hakemusDTO.setKutsumanimi(hakemus.getAnswers().getHenkilotiedot().get("Kutsumanimi"));
-        hakemusDTO.setSahkoposti(hakemus.getAnswers().getHenkilotiedot().get("Sähköposti"));
-        hakemusDTO.setKatuosoite(hakemus.getAnswers().getHenkilotiedot().get("lahiosoite"));
-        String postinumero = hakemus.getAnswers().getHenkilotiedot().get("Postinumero");
+        hakemusDTO.setEtunimet(hakemus.getEtunimet());
+        hakemusDTO.setSukunimi(hakemus.getSukunimi());
+        hakemusDTO.setKutsumanimi(hakemus.getKutsumanimi());
+        hakemusDTO.setSahkoposti(hakemus.getSahkopostiOsoite());
+        hakemusDTO.setKatuosoite(hakemus.getSuomalainenLahiosoite());
+        String postinumero = hakemus.getSuomalainenPostinumero();
         hakemusDTO.setPostinumero(postinumero);
         hakemusDTO.setPostitoimipaikka(KoodistoCachedAsyncResource.haeKoodistaArvo(
                 postCodes.get(postinumero),

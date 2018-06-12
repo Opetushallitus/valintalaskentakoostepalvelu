@@ -3,14 +3,13 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 import com.google.common.collect.Maps;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.util.Converter;
-import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
@@ -76,11 +75,11 @@ public class HakemuksetConverterUtil {
 
     public static List<HakemusDTO> muodostaHakemuksetDTOfromHakemukset(HakuV1RDTO haku, String hakukohdeOid,
                                                                        Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
-                                                                       List<Hakemus> hakemukset, List<Valintapisteet> valintapisteet, List<Oppija> oppijat,
+                                                                       List<HakemusWrapper> hakemukset, List<Valintapisteet> valintapisteet, List<Oppija> oppijat,
                                                                        ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
         ensurePersonOids(hakemukset, hakukohdeOid);
         List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, ofNullable(valintapisteet).orElse(emptyList()), hakukohdeRyhmasForHakukohdes);
-        Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(Hakemus::getOid, h -> new HakuappHakemusWrapper(h).hasHenkilotunnus()));
+        Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(HakemusWrapper::getOid, HakemusWrapper::hasHenkilotunnus));
         Map<String, Exception> errors = Maps.newHashMap();
         return getHakemusDTOS(haku, hakukohdeOid, oppijat, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
     }
@@ -164,7 +163,7 @@ public class HakemuksetConverterUtil {
         return hakemusDtot;
     }
 
-    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<Hakemus> hakemukset, List<Valintapisteet> valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<HakemusWrapper> hakemukset, List<Valintapisteet> valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         List<HakemusDTO> hakemusDtot;
         Map<String, Valintapisteet> hakemusOIDtoValintapisteet = valintapisteet.stream().collect(Collectors.toMap(v -> v.getHakemusOID(), v -> v));
         Map<String, Exception> epaonnistuneetKonversiot = Maps.newConcurrentMap();
@@ -194,12 +193,12 @@ public class HakemuksetConverterUtil {
         return hakemusDtot;
     }
 
-    private static void ensurePersonOids(List<Hakemus> hakemukset, String hakukohdeOid) {
-        final List<Hakemus> noPersonOid = hakemukset.stream()
+    private static void ensurePersonOids(List<HakemusWrapper> hakemukset, String hakukohdeOid) {
+        final List<HakemusWrapper> noPersonOid = hakemukset.stream()
                 .filter(h -> StringUtils.isBlank(h.getPersonOid()))
                 .collect(toList());
         if (!noPersonOid.isEmpty()) {
-            String hakemusOids = noPersonOid.stream().map(h -> h.getOid()).collect(Collectors.joining(", "));
+            String hakemusOids = noPersonOid.stream().map(HakemusWrapper::getOid).collect(Collectors.joining(", "));
             RuntimeException e = new RuntimeException(
                     String.format("Hakukohteessa %s hakemuksilta %s puuttui personOid! Jalkikasittely ehka tekematta! Tarkista hakemusten tiedot!",
                             hakukohdeOid, hakemusOids));

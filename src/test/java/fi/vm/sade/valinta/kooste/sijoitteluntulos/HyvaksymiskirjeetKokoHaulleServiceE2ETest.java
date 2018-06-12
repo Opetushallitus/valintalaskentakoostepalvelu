@@ -77,11 +77,11 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .build()
+                        .buildHakuappHakemus()
         ));
 
         mockKoodisto();
@@ -103,11 +103,11 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .build()
+                        .buildHakuappHakemus()
         ));
 
 
@@ -129,11 +129,11 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.SUOMI)
-                        .build()
+                        .buildHakuappHakemus()
         ));
 
         mockKoodisto();
@@ -159,13 +159,13 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi2@sahkoposti.fi")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi@sahkoposti.fi")
-                        .build()
+                        .buildHakuappHakemus()
         ));
 
         mockKoodisto();
@@ -187,13 +187,13 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi@sahkoposti.fi")
-                        .build()
+                        .buildHakuappHakemus()
         ));
 
         mockKoodisto();
@@ -215,13 +215,13 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                 hakemus()
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setVainSahkoinenViestinta(false)
                         .setSahkoposti("testi@sahkoposti.fi")
-                        .build()
+                        .buildHakuappHakemus()
         ));
 
         mockKoodisto();
@@ -245,13 +245,13 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi2@sahkoposti.fi")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setVainSahkoinenViestinta(false)
                         .setSahkoposti("testi@sahkoposti.fi")
-                        .build()
+                        .buildHakuappHakemus()
         ));
 
         mockKoodisto();

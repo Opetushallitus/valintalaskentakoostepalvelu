@@ -1,74 +1,100 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
+
 import java.util.Collection;
+import java.util.List;
 
-public interface HakemusWrapper {
-    String NAINEN = "2";
-    String MIES = "1";
+public abstract class HakemusWrapper {
+    static String NAINEN = "2";
+    static String MIES = "1";
 
-    String getUlkomainenLahiosoite();
+    public abstract String getOid();
 
-    String getSukupuoli();
+    public abstract String getUlkomainenLahiosoite();
 
-    String getSukupuoliAsIs();
+    public abstract String getSukupuoli();
 
-    String getAidinkieli();
+    public abstract String getSukupuoliAsIs();
 
-    String getKaupunkiUlkomaa();
+    public abstract String getAidinkieli();
 
-    String getUlkomainenPostinumero();
+    public abstract String getKaupunkiUlkomaa();
 
-    String getSuomalainenLahiosoite();
+    public abstract String getUlkomainenPostinumero();
 
-    String getSuomalainenPostinumero();
+    public abstract String getUlkomainenPostitoimipaikka();
 
-    String getAsuinmaa();
+    public abstract String getSuomalainenLahiosoite();
 
-    String getKansallinenId();
+    public abstract String getSuomalainenPostinumero();
 
-    String getKansalaisuus();
+    public abstract String getAsuinmaa();
 
-    String getPassinnumero();
+    public abstract String getKansallinenId();
 
-    String getKotikunta();
+    public abstract String getKansalaisuus();
 
-    String getPuhelinnumero();
+    public abstract String getPassinnumero();
 
-    boolean isMaksuvelvollinen(String hakukohdeOid);
+    public abstract String getKotikunta();
 
-    String getSahkopostiOsoite();
+    public abstract String getPuhelinnumero();
 
-    String getSyntymaaika();
+    public abstract Collection<String> getPuhelinnumerot();
 
-    String getHenkilotunnus();
+    public abstract boolean isMaksuvelvollinen(String hakukohdeOid);
 
-    boolean hasHenkilotunnus();
+    public abstract String getSahkopostiOsoite();
 
-    String getPersonOid();
+    public abstract String getSyntymaaika();
 
-    Integer getHakutoiveenPrioriteetti(String hakukohdeOid);
+    public abstract String getHenkilotunnus();
 
-    Boolean getToisenAsteenSuoritus();
+    public abstract boolean hasHenkilotunnus();
 
-    String getToisenAsteenSuoritusmaa();
+    public abstract String getPersonOid();
 
-    String getEtunimi();
+    public abstract Integer getHakutoiveenPrioriteetti(String hakukohdeOid);
 
-    String getEtunimet();
+    public abstract Boolean getToisenAsteenSuoritus();
 
-    String getSukunimi();
+    public abstract String getToisenAsteenSuoritusmaa();
 
-    boolean getLupaJulkaisuun();
+    public abstract String getEtunimi();
 
-    boolean getVainSahkoinenViestinta();
+    public abstract String getKutsumanimi();
 
-    boolean hasAsiointikieli();
+    public abstract String getEtunimet();
 
-    String getAsiointikieli();
+    public abstract String getSukunimi();
 
-    boolean getLupaSahkoiseenAsiointiin();
+    public abstract boolean getLupaJulkaisuun();
 
-    Collection<String> getHakutoiveOids();
+    public abstract boolean getVainSahkoinenViestinta();
 
-    String getMaksuvelvollisuus(String hakukohdeOid);
+    public abstract boolean hasAsiointikieli();
+
+    public abstract String getAsiointikieli();
+
+    public abstract boolean getLupaSahkoiseenAsiointiin();
+
+    public abstract Collection<String> getHakutoiveOids();
+
+    public abstract String getMaksuvelvollisuus(String hakukohdeOid);
+
+    public abstract boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt();
+
+    public abstract String getHakuoid();
+
+    public abstract Answers getAnswers();
+
+    public abstract List<Eligibility> getPreferenceEligibilities();
+
+    public abstract String getState();
+
+    public abstract int hashCode();
+
+    public abstract boolean equals(Object o);
 }

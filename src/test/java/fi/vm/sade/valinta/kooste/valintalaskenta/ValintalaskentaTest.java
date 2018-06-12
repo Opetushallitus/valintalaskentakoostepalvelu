@@ -1,19 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -27,16 +18,13 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithL
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
-import fi.vm.sade.valinta.seuranta.dto.IlmoitusTyyppi;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
+import fi.vm.sade.valinta.seuranta.dto.*;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.hamcrest.Description;
 import org.junit.Before;
@@ -50,6 +38,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class ValintalaskentaTest {
     private static final Hakemus hakemus = new Hakemus();
@@ -135,9 +129,9 @@ public class ValintalaskentaTest {
 
     @Test
     public void onnistuneestaValintalaskennastaPidetaanKirjaaSeurantapalveluun() throws InterruptedException {
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
@@ -182,9 +176,9 @@ public class ValintalaskentaTest {
 
     @Test
     public void onnistuneestaValintaryhmalaskennastaPidetaanKirjaaSeurantapalveluun() throws InterruptedException {
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
 
         Integer vaiheenNumero = 1;
 
@@ -226,8 +220,8 @@ public class ValintalaskentaTest {
     public void epaonnistuneetLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(
             Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(hakemus)));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.KESKEYTETTY, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));

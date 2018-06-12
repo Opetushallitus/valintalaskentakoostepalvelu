@@ -1,15 +1,23 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.*;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.Kieli;
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.NimiJaOpetuskieli;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -17,20 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.NimiJaOpetuskieli;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class KoekutsukirjeetKomponentti {
@@ -50,7 +46,7 @@ public class KoekutsukirjeetKomponentti {
         this.tarjontaResource = tarjontaResource;
     }
 
-    public LetterBatch valmistaKoekutsukirjeet(@Body List<Hakemus> hakemukset,
+    public LetterBatch valmistaKoekutsukirjeet(@Body List<HakemusWrapper> hakemukset,
                                                @Property(OPH.HAKUOID) String hakuOid,
                                                @Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
                                                Map<String, Collection<String>> hakemusOidJaMuutHakukohdeOids,
@@ -100,8 +96,7 @@ public class KoekutsukirjeetKomponentti {
             String tarjoajaNimiTietyllaKielella = "";
             Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
             Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
-            for (Hakemus hakemus : hakemukset) {
-                HakemusWrapper hakemusWrapper = new HakuappHakemusWrapper(hakemus);
+            for (HakemusWrapper hakemus : hakemukset) {
                 Osoite addressLabel = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus, new NimiPaattelyStrategy());
 
                 hakukohdeNimiTietyllaKielella = kohdeHakukohdeNimi.getHakukohdeNimi().getTeksti(opetuskieli);
@@ -123,7 +118,7 @@ public class KoekutsukirjeetKomponentti {
                 replacements.put("koulutus", tarjoajaNimiTietyllaKielella);
                 replacements.put("tulokset", customLetterContents);
                 replacements.put("muut_hakukohteet", muutHakukohteet);
-                kirjeet.add(new Letter(addressLabel, templateName, opetuskieli, replacements, hakemusWrapper.getSahkopostiOsoite()));
+                kirjeet.add(new Letter(addressLabel, templateName, opetuskieli, replacements, hakemus.getSahkopostiOsoite()));
             }
             LOG.info("Luodaan koekutsukirjeet {} henkilolle", kirjeet.size());
             LetterBatch viesti = new LetterBatch(kirjeet);

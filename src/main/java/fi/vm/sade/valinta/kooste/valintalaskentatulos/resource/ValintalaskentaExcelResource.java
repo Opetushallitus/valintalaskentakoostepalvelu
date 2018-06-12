@@ -7,11 +7,11 @@ import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.VastaanottoFilterUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
@@ -84,9 +84,7 @@ public class ValintalaskentaExcelResource {
             DokumenttiProsessi p = new DokumenttiProsessi("Valintalaskentaexcel", "Valintakoekutsut taulukkolaskenta tiedosto", "", Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
             dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
             tarjontaAsyncResource.haeHaku(hakuOid)
-                    .subscribe(haku -> {
-                        valintakoekutsutExcelService.luoExcel(p, haku, hakukohdeOid, lisatiedot.getValintakoeTunnisteet(), Sets.newHashSet(Optional.ofNullable(lisatiedot.getHakemusOids()).orElse(Collections.emptyList())));
-                    });
+                    .subscribe(haku -> valintakoekutsutExcelService.luoExcel(p, haku, hakukohdeOid, lisatiedot.getValintakoeTunnisteet(), Sets.newHashSet(Optional.ofNullable(lisatiedot.getHakemusOids()).orElse(Collections.emptyList()))));
             return p.toProsessiId();
         } catch (Exception e) {
             LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle " + hakukohdeOid + ", valintakoeoideille" + Arrays.toString(lisatiedot.getValintakoeTunnisteet().toArray()), e);
@@ -179,7 +177,7 @@ public class ValintalaskentaExcelResource {
         Observable<HakukohdeV1RDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
         final Observable<HakuV1RDTO> hakuObservable = hakukohdeObservable.flatMap(hakukohde -> tarjontaResource.haeHaku(hakukohde.getHakuOid()));
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
-        final Observable<List<Hakemus>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
+        final Observable<List<HakemusWrapper>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
         final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakuObservable, hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel::luoExcel);
         workbookObservable.subscribe(
                 (workbook) -> asyncResponse.resume(

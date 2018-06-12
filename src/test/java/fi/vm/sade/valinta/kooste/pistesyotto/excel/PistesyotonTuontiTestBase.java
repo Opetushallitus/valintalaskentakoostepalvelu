@@ -21,6 +21,8 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -106,7 +108,7 @@ public class PistesyotonTuontiTestBase {
     }
 
     void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot, final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot, final String tiedosto, final String hakuOid, final String hakukohdeOid) throws IOException, ExcelValidointiPoikkeus {
-        List<Hakemus> hakemukset = convertToHakemusSkeletons(pistetiedot);
+        List<HakemusWrapper> hakemukset = convertToHakemusSkeletons(pistetiedot).stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
         Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
         PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(hakuOid, hakukohdeOid, null, "Haku",

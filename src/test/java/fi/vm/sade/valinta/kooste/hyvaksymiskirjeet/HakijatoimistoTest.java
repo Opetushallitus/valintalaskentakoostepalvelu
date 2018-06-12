@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.hyvaksymiskirjeet;
 
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static javax.ws.rs.HttpMethod.GET;
 import com.google.common.collect.ImmutableMap;
-
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -19,15 +16,14 @@ import org.junit.Before;
 import org.junit.Test;
 import rx.Observable;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static javax.ws.rs.HttpMethod.GET;
 
 /**
  * @author Jussi Jartamo
@@ -51,7 +47,7 @@ public class HakijatoimistoTest {
         OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl();
         final String host= Integraatiopalvelimet.mockServer.getUrl();
         ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(null);
-        Observable<List<Hakemus>> hakemuksetObservable = a.getApplicationsByOid(hakuOid, hakukohdeOid);
+        Observable<List<HakemusWrapper>> hakemuksetObservable = a.getApplicationsByOid(hakuOid, hakukohdeOid);
         //Observable<HakijaPaginationObject> hakijatFuture = s.getKoulutuspaikkalliset(hakuOid, hakukohdeOid);
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = o.haeHakutoimisto(tarjoajaOid);
         final Semaphore counter = new Semaphore(0);

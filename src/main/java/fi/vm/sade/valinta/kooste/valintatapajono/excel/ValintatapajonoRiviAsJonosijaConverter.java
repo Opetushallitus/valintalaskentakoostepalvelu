@@ -1,29 +1,25 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
-import java.math.BigDecimal;
-
-import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
-import org.apache.commons.lang.StringUtils;
-
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
+import org.apache.commons.lang.StringUtils;
+
+import java.math.BigDecimal;
 
 public class ValintatapajonoRiviAsJonosijaConverter {
 
-    public static JonosijaDTO convert(String hakukohdeOid, ValintatapajonoRivi rivi, Hakemus hakemus) {
+    public static JonosijaDTO convert(String hakukohdeOid, ValintatapajonoRivi rivi, HakemusWrapper hakemus) {
         JonosijaDTO j = new JonosijaDTO();
-        HakemusWrapper h = new HakuappHakemusWrapper(hakemus);
-        j.setEtunimi(h.getEtunimi());
-        j.setSukunimi(h.getSukunimi());
+        j.setEtunimi(hakemus.getEtunimi());
+        j.setSukunimi(hakemus.getSukunimi());
         j.setHakemusOid(hakemus.getOid());
         j.setHakijaOid(hakemus.getPersonOid());
         j.setJonosija(rivi.asJonosija());
         j.setMuokattu(false);
         j.setHarkinnanvarainen(false);
-        Integer prioriteetti = h.getHakutoiveenPrioriteetti(hakukohdeOid);
+        Integer prioriteetti = hakemus.getHakutoiveenPrioriteetti(hakukohdeOid);
         if (prioriteetti == null) {
             throw new RuntimeException("Hakemuspalvelu palautti hakemuksen hakukohteelle vaikka hakija ei ole siihen hakenut!");
         }
