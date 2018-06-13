@@ -20,6 +20,7 @@ import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,14 +52,18 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                     LOG.info("Calling url {}", client.getCurrentURI());
                     return client;
                 }).flatMap(hakemukset -> {
-                    List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).distinct().collect(Collectors.toList());
-                    return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(personOids))
-                            .map(persons -> {
-                                Map<String,HenkiloPerustietoDto> henkilotByOid = persons.stream().collect(Collectors.toMap(HenkiloPerustietoDto::getOidHenkilo, p -> p));
-                                return hakemukset.stream()
-                                        .map(hakemus -> new AtaruHakemusWrapper(hakemus, henkilotByOid.get(hakemus.getPersonOid())))
-                                        .collect(Collectors.toList());
-                            });
+            if (hakemukset.isEmpty()) {
+                return Observable.just(Collections.emptyList());
+            } else {
+                List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).distinct().collect(Collectors.toList());
+                return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(personOids))
+                        .map(persons -> {
+                            Map<String, HenkiloPerustietoDto> henkilotByOid = persons.stream().collect(Collectors.toMap(HenkiloPerustietoDto::getOidHenkilo, p -> p));
+                            return hakemukset.stream()
+                                    .map(hakemus -> new AtaruHakemusWrapper(hakemus, henkilotByOid.get(hakemus.getPersonOid())))
+                                    .collect(Collectors.toList());
+                        });
+            }
         });
     }
 
