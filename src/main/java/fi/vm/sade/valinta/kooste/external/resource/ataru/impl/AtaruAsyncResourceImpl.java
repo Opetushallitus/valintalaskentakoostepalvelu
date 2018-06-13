@@ -55,11 +55,9 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                     return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(hakemuksetByOid.keySet()))
                             .map(persons -> {
                                 if (persons.size() != hakemukset.size()) {
-                                    Set<String> missingPersonOids = Sets.difference(
-                                            persons.stream().map(HenkiloPerustietoDto::getOidHenkilo).collect(Collectors.toSet()),
-                                            hakemukset.stream().map(AtaruHakemus::getPersonOid).collect(Collectors.toSet())
-                                    );
-                                    throw new IllegalArgumentException(String.format("Kaikille hakemuksille ei löytynyt henkilöitä oppijanumerorekisteristä. Puuttuvat henkilöoidit: %s", String.join(", ", missingPersonOids)));
+                                    List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).collect(Collectors.toList());
+                                    personOids.removeAll(persons.stream().map(HenkiloPerustietoDto::getOidHenkilo).collect(Collectors.toList()));
+                                    throw new IllegalArgumentException(String.format("Kaikille hakemuksille ei löytynyt henkilöitä oppijanumerorekisteristä. Puuttuvat henkilöoidit: %s", String.join(", ", personOids)));
                                 }
                                 return persons.stream()
                                         .map(person -> new AtaruHakemusWrapper(hakemuksetByOid.get(person.getOidHenkilo()), person))
