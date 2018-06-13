@@ -34,8 +34,6 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
         henkilo = Objects.requireNonNull(onrHenkilo, "Henkilo ataruhakemukselle oli null.");
     }
 
-    public Map<String,String> getKeyValyes() { return keyvalues; }
-
     @Override
     public String getOid() {
         return StringUtils.trimToEmpty(hakemus.getHakemusOid());

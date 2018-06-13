@@ -1,11 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -20,6 +22,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -50,9 +53,18 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                 }).flatMap(hakemukset -> {
                     Map<String, AtaruHakemus> hakemuksetByOid = hakemukset.stream().collect(Collectors.toMap(AtaruHakemus::getHakemusOid, h -> h));
                     return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(hakemuksetByOid.keySet()))
-                            .map(persons -> persons.stream()
-                                    .map(person -> new AtaruHakemusWrapper(hakemuksetByOid.get(person.getOidHenkilo()), person))
-                                    .collect(Collectors.toList()));
+                            .map(persons -> {
+                                if (persons.size() != hakemukset.size()) {
+                                    Set<String> missingPersonOids = Sets.difference(
+                                            persons.stream().map(HenkiloPerustietoDto::getOidHenkilo).collect(Collectors.toSet()),
+                                            hakemukset.stream().map(AtaruHakemus::getPersonOid).collect(Collectors.toSet())
+                                    );
+                                    throw new IllegalArgumentException(String.format("Kaikille hakemuksille ei löytynyt henkilöitä oppijanumerorekisteristä. Puuttuvat henkilöoidit: %s", String.join(", ", missingPersonOids)));
+                                }
+                                return persons.stream()
+                                        .map(person -> new AtaruHakemusWrapper(hakemuksetByOid.get(person.getOidHenkilo()), person))
+                                        .collect(Collectors.toList());
+                            });
         });
     }
 
