@@ -26,6 +26,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -87,14 +88,17 @@ public class AktiivistenHakemustenValintakoeResource {
         List<String> kaikkiOsallistumistenHakemusOidit = osallistumiset.stream()
                 .map(ValintakoeOsallistuminenDTO::getHakemusOid).distinct().collect(Collectors.toList());
 
+        LOG.info(String.format("Haetaan valintakoeosallistumisille hakemukset: %s", String.join(", ", kaikkiOsallistumistenHakemusOidit)));
         return tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
                 .flatMap(hakukohde -> tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid()))
                 .flatMap(haku -> {
                     if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
+                        LOG.info("Haetaan hakemuksia haku-appista osallistumisien filtteröintiä varten.");
                         return applicationAsyncResource.getApplicationsByHakemusOids(kaikkiOsallistumistenHakemusOidit)
                                 .map(hakemukset -> hakemukset.stream()
                                         .map(HakemusWrapper::getOid).collect(Collectors.toSet()));
                     } else {
+                        LOG.info("Haetaan hakemuksia atarusta osallistumisien filtteröintiä varten.");
                         return ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit)
                                 .map(hakemukset -> hakemukset.stream()
                                         .map(HakemusWrapper::getOid).collect(Collectors.toSet()));
@@ -106,7 +110,7 @@ public class AktiivistenHakemustenValintakoeResource {
                             if (!onAktiivinen) {
                                 LOG.warn(String.format("Hakemuksen %s valintakoeosallistuminen filtteröidään pois " +
                                                 "haettaessa hakukohteen %s osallistumistietoja, " +
-                                                "koska hakemusnumerolla ei löydy aktiivista hakemusta haku-appista.",
+                                                "koska hakemusnumerolla ei löydy aktiivista hakemusta.",
                                         o.getHakemusOid(), hakukohdeOid));
                             }
                             return onAktiivinen;
