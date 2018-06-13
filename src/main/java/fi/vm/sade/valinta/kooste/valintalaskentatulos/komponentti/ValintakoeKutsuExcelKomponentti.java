@@ -166,9 +166,9 @@ public class ValintakoeKutsuExcelKomponentti {
             }
         }
         Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, null, null, new NimiPaattelyStrategy());
-        return new ValintakoeRivi(o.getSukunimi(), o.getEtunimi(),
+        return new ValintakoeRivi(h.getSukunimi(), h.getEtunimi(),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(h.getSuomalainenPostinumero()), KieliUtil.SUOMI, h.getSuomalainenPostinumero()),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(h.getAsuinmaa()), KieliUtil.ENGLANTI, h.getAsuinmaa()),
-                h, o.getHakemusOid(), date, osallistumistiedot, osoite, Yhteystiedot.yhteystiedotHakemukselta(h), osallistuuEdesYhteen);
+                h, h.getOid(), date, osallistumistiedot, osoite, Yhteystiedot.yhteystiedotHakemukselta(h), osallistuuEdesYhteen);
     }
 }
