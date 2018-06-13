@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -91,40 +92,40 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         }
     }
 
+    private Observable<List<Pair<String, List<ValintaperusteDTO>>>> getValintaperusteet(HakemusWrapper hakemus) {
+        return Observable.merge(
+                hakemus.getHakutoiveOids().stream()
+                        .map(hakukohdeOid -> valintaperusteetAsyncResource.findAvaimet(hakukohdeOid)
+                                .map(valintaperusteet -> Pair.of(hakukohdeOid, valintaperusteet)))
+                        .collect(Collectors.toList())
+        ).toList();
+    }
+
     public Observable<HenkiloValilehtiDTO> koostaOsallistujanPistetiedot(String hakemusOid, AuditSession auditSession) {
-        Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession);
-        Observable<Pair<HakemusWrapper, Map<String, List<String>>>> hakemusAndTarjonta = applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus ->
-                tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakemus.getHakuoid()).map(tarjonta -> Pair.of(hakemus, tarjonta)));
-
-        return Observable.combineLatest(valintapisteet, hakemusAndTarjonta, (pisteet, ht) -> {
-            HakemusWrapper hakemus = ht.getKey();
-            String hakuOid = hakemus.getHakuoid();
-            Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ht.getValue();
-            HakemusDTO hakemusDTO = hakemus.toHakemusDto(pisteet.valintapisteet.iterator().next(), hakukohdeRyhmasForHakukohdes);
-            Observable<ValintakoeOsallistuminenDTO> koeO = valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid);
-            Observable<Oppija> oppijaO = suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid());
-            Observable<ParametritDTO> parametritO = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
-
-
-            return Observable.merge(hakemusDTO.getHakukohteet().stream().map(hakukohde -> {
-                String hakukohdeOid = hakukohde.getOid();
-
-
-                return Observable.zip(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
-                        koeO,
-                        oppijaO,
-                        parametritO,
-                        (valintaperusteet, valintakoeOsallistuminen, oppija, ohjausparametrit) ->
-                                Pair.of(
-                                        hakukohdeOid,
-                                        new HakemuksenKoetulosYhteenveto(
-                                                pisteet.valintapisteet.iterator().next(),
-                                                Pair.of(hakukohdeOid, valintaperusteet),
-                                                valintakoeOsallistuminen,
-                                                oppija,
-                                                ohjausparametrit)));
-            }).collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight).map(y -> new HenkiloValilehtiDTO(pisteet.lastModified.orElse(null), y));
-        }).flatMap(f -> f);
+        return applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus ->
+                Observable.zip(
+                        getValintaperusteet(hakemus),
+                        valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession),
+                        valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid),
+                        suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid()),
+                        ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakemus.getHakuoid()),
+                        (valintaperusteetByHakukohdeOid, valintapisteet, valintakoeOsallistuminen, oppija, ohjausparametrit) ->
+                                new HenkiloValilehtiDTO(
+                                        valintapisteet.lastModified.orElse(null),
+                                        valintaperusteetByHakukohdeOid.stream()
+                                                .collect(Collectors.toMap(
+                                                        Pair::getLeft,
+                                                        valintaperusteet -> new HakemuksenKoetulosYhteenveto(
+                                                                valintapisteet.valintapisteet.iterator().next(),
+                                                                valintaperusteet,
+                                                                valintakoeOsallistuminen,
+                                                                oppija,
+                                                                ohjausparametrit
+                                                        )
+                                                ))
+                                )
+                )
+        );
     }
 
     private static Map<String, HakutoiveDTO> kielikokeidenHakukohteet(ValintakoeOsallistuminenDTO voDTO) {
