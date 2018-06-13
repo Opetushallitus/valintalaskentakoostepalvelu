@@ -8,6 +8,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -65,6 +66,7 @@ public abstract class AbstractPistesyottoKoosteService {
     public static String KIELIKOE_KEY_PREFIX = "kielikoe_";
 
     protected final ApplicationAsyncResource applicationAsyncResource;
+    protected final AtaruAsyncResource ataruAsyncResource;
     protected final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     protected final TarjontaAsyncResource tarjontaAsyncResource;
     protected final OhjausparametritAsyncResource ohjausparametritAsyncResource;
@@ -74,6 +76,7 @@ public abstract class AbstractPistesyottoKoosteService {
     protected final ValintapisteAsyncResource valintapisteAsyncResource;
 
     protected AbstractPistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
+                                               AtaruAsyncResource ataruAsyncResource,
                                                ValintapisteAsyncResource valintapisteAsyncResource,
                                                SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                                TarjontaAsyncResource tarjontaAsyncResource,
@@ -82,6 +85,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                                ValintaperusteetAsyncResource valintaperusteetAsyncResource,
                                                ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.valintapisteAsyncResource = valintapisteAsyncResource;
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;

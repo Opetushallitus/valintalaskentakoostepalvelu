@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -40,6 +41,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             ValintaperusteetAsyncResource valintaperusteetResource,
             ValintapisteAsyncResource valintapisteAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource,
             SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
             TarjontaAsyncResource tarjontaAsyncResource,
             OhjausparametritAsyncResource ohjausparametritAsyncResource,
@@ -47,6 +49,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
             ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         super(applicationAsyncResource,
+                ataruAsyncResource,
                 valintapisteAsyncResource,
                 suoritusrekisteriAsyncResource,
                 tarjontaAsyncResource,

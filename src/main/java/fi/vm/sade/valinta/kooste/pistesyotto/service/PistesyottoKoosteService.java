@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -44,6 +45,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
     @Autowired
     public PistesyottoKoosteService(ApplicationAsyncResource applicationAsyncResource,
+                                    AtaruAsyncResource ataruAsyncResource,
                                     ValintapisteAsyncResource valintapisteAsyncResource,
                                     SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
                                     TarjontaAsyncResource tarjontaAsyncResource,
@@ -52,6 +54,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                                     ValintaperusteetAsyncResource valintaperusteetAsyncResource,
                                     ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         super(applicationAsyncResource,
+                ataruAsyncResource,
                 valintapisteAsyncResource,
                 suoritusrekisteriAsyncResource,
                 tarjontaAsyncResource,
@@ -101,8 +104,19 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
         ).toList();
     }
 
+    private Observable<HakemusWrapper> getHakemus(String hakemusOid) {
+        return ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid))
+                .flatMap(hakemukset -> {
+                    if (hakemukset.isEmpty()) {
+                        return applicationAsyncResource.getApplication(hakemusOid);
+                    } else {
+                        return Observable.just(hakemukset.iterator().next());
+                    }
+                });
+    }
+
     public Observable<HenkiloValilehtiDTO> koostaOsallistujanPistetiedot(String hakemusOid, AuditSession auditSession) {
-        return applicationAsyncResource.getApplication(hakemusOid).flatMap(hakemus ->
+        return getHakemus(hakemusOid).flatMap(hakemus ->
                 Observable.zip(
                         getValintaperusteet(hakemus),
                         valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession),

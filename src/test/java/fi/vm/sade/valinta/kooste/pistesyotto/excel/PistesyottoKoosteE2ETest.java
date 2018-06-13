@@ -29,6 +29,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -74,6 +75,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -215,6 +217,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         answers.setHakutoiveet(new HashMap<>());
         answers.getHakutoiveet().put("preference1-Koulutus-id", "testihakukohde");
         hakemusHakuAppista.setAnswers(answers);
+        mockToReturnJson(POST,
+                "/lomake-editori/api/external/valintalaskenta",
+                new ArrayList<AtaruHakemus>());
         mockToReturnJson(GET,
                 "/haku-app/applications/" + applicationAdditionaData.getOid(),
                 hakemusHakuAppista
@@ -292,6 +297,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         answers.setHakutoiveet(new HashMap<>());
         answers.getHakutoiveet().put("preference1-Koulutus-id", "testihakukohde");
         hakemusHakuAppista.setAnswers(answers);
+        mockToReturnJson(POST,
+                "/lomake-editori/api/external/valintalaskenta",
+                new ArrayList<AtaruHakemus>());
         mockToReturnJson(GET,
                 "/haku-app/applications/" + applicationAdditionalDataDto.getOid(),
                 hakemusHakuAppista
@@ -337,6 +345,9 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         answers.setHakutoiveet(new HashMap<>());
         answers.getHakutoiveet().put("preference1-Koulutus-id", "testihakukohde");
         hakemusHakuAppista.setAnswers(answers);
+        mockToReturnJson(POST,
+                "/lomake-editori/api/external/valintalaskenta",
+                new ArrayList<AtaruHakemus>());
         mockToReturnJson(GET,
                 "/haku-app/applications/" + applicationAdditionalDataDto.getOid(),
                 hakemusHakuAppista
