@@ -51,16 +51,19 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                     LOG.info("Calling url {}", client.getCurrentURI());
                     return client;
                 }).flatMap(hakemukset -> {
-                    Map<String, AtaruHakemus> hakemuksetByOid = hakemukset.stream().collect(Collectors.toMap(AtaruHakemus::getHakemusOid, h -> h));
-                    return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(hakemuksetByOid.keySet()))
+                    Map<String, AtaruHakemus> hakemuksetByOidPersonOid = hakemukset.stream().collect(Collectors.toMap(AtaruHakemus::getPersonOid, h -> h));
+                    Set<String> personOids = hakemuksetByOidPersonOid.keySet();
+                    return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(personOids))
                             .map(persons -> {
-                                if (persons.size() != hakemukset.size()) {
-                                    List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).collect(Collectors.toList());
-                                    personOids.removeAll(persons.stream().map(HenkiloPerustietoDto::getOidHenkilo).collect(Collectors.toList()));
-                                    throw new IllegalArgumentException(String.format("Kaikille hakemuksille ei löytynyt henkilöitä oppijanumerorekisteristä. Puuttuvat henkilöoidit: %s", String.join(", ", personOids)));
+                                Set<String> fetchedPersonOids = persons.stream().map(HenkiloPerustietoDto::getOidHenkilo).collect(Collectors.toSet());
+                                personOids.removeAll(fetchedPersonOids); // Missing personOids!
+                                if (!personOids.isEmpty()) {
+                                    throw new IllegalArgumentException(
+                                            String.format("Kaikille hakemuksille ei löytynyt henkilöitä oppijanumerorekisteristä. Puuttuvat henkilöoidit: %s", String.join(", ", personOids))
+                                    );
                                 }
                                 return persons.stream()
-                                        .map(person -> new AtaruHakemusWrapper(hakemuksetByOid.get(person.getOidHenkilo()), person))
+                                        .map(person -> new AtaruHakemusWrapper(hakemuksetByOidPersonOid.get(person.getOidHenkilo()), person))
                                         .collect(Collectors.toList());
                             });
         });
