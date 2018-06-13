@@ -1336,7 +1336,9 @@ public class PistesyottoResourceTest {
 
     public void cleanMocks() {
         Mocks.reset();
+        MockTarjontaAsyncService.clear();
         MockApplicationAsyncResource.clear();
+        MockAtaruAsyncResource.clear();
         MockValintaperusteetAsyncResource.clear();
         MockValintalaskentaValintakoeAsyncResource.clear();
         MockSuoritusrekisteriAsyncResource.clear();

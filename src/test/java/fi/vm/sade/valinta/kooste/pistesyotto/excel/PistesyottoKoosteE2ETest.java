@@ -161,6 +161,8 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         mockToReturnJson(GET, "/valintapiste-service/api/haku/testihaku/hakukohde/testihakukohde",
             applicationAdditionalDataDtos.stream().map(APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET).collect(Collectors.toList())
         );
+        mockToReturnJson(POST, "/lomake-editori/api/external/valintalaskenta",
+                new ArrayList<AtaruHakemus>());
         mockToReturnJson(POST, "/haku-app/applications/listfull",
             applicationAdditionalDataDtos.stream().map(p -> new HakemusOid(p.getOid())).collect(Collectors.toList())
         );

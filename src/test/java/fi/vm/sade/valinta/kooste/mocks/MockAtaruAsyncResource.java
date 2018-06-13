@@ -24,20 +24,12 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
-        if (byHakukohdeRes.isEmpty()) {
-            return Observable.just(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
-        } else {
-            return Observable.just(byHakukohdeRes);
-        }
+        return Observable.just(byHakukohdeRes);
     }
 
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
-        if (byHakukohdeRes.isEmpty()) {
-            return Observable.just(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
-        } else {
-            return Observable.just(byOidsResult);
-        }
+        return Observable.just(byOidsResult);
     }
 
     public static void setByHakukohdeResult(List<HakemusWrapper> hakemukset) {

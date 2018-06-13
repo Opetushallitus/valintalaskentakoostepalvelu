@@ -8,6 +8,7 @@ import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
@@ -49,17 +50,20 @@ public class PistesyottoExternalTuontiService {
     private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
     private final ValintaperusteetAsyncResource valintaperusteetResource;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final ValintapisteAsyncResource valintapisteAsyncResource;
     @Autowired
     public PistesyottoExternalTuontiService(
             ValintalaskentaValintakoeAsyncResource valintakoeResource,
             ValintaperusteetAsyncResource valintaperusteetResource,
             ValintapisteAsyncResource valintapisteAsyncResource,
-            ApplicationAsyncResource applicationAsyncResource) {
+            ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource) {
         this.valintakoeResource = valintakoeResource;
         this.valintaperusteetResource = valintaperusteetResource;
         this.valintapisteAsyncResource = valintapisteAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
     }
 
     private Supplier<Stream<OsallistuminenHakutoiveeseen>> osallistumisenTunnistePuuttuuPalvelunKutsujanSyotteesta(
@@ -266,13 +270,21 @@ public class PistesyottoExternalTuontiService {
         )).collect(Collectors.toList());
     }
 
+    private Observable<List<HakemusWrapper>> getHakemuksetByHakemusOids(List<String> hakemusOids) {
+        return ataruAsyncResource.getApplicationsByOids(hakemusOids)
+                .flatMap(hakemukset -> {
+                    if (hakemukset.isEmpty()) {
+                        return applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids);
+                    } else {
+                        return Observable.just(hakemukset);
+                    }
+                });
+    }
+
     public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, String username, AuditSession auditSession,
                     String hakuOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler,
                     Consumer<Throwable> exceptionHandler) {
-        applicationAsyncResource.getApplicationsByHakemusOids(
-                hakemukset.stream()
-                        .map(HakemusDTO::getHakemusOid)
-                        .collect(Collectors.toList()))
+        getHakemuksetByHakemusOids(hakemukset.stream().map(HakemusDTO::getHakemusOid).collect(Collectors.toList()))
                 .subscribe(hakemusWrappers -> {
                     List<HakemusJaHakutoiveet> hakemusJaHakutoiveets = collect(hakemukset, hakemusWrappers);
                     Set<String> hakutoiveet = hakemusJaHakutoiveets.stream().flatMap(h -> h.hakutoiveet.stream()).collect(Collectors.toSet());

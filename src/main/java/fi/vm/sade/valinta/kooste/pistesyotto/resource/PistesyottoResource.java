@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -14,6 +15,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.*;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -74,6 +76,8 @@ public class PistesyottoResource {
     private PistesyottoKoosteService pistesyottoKoosteService;
     @Autowired
     private ApplicationAsyncResource applicationAsyncResource;
+    @Autowired
+    private AtaruAsyncResource ataruAsyncResource;
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
     @Context
@@ -160,6 +164,16 @@ public class PistesyottoResource {
             return;
         }
 
+        Observable<HakemusWrapper> hakemusO = ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid))
+                .flatMap(hakemukset -> {
+                    if (hakemukset.isEmpty()) {
+                        return applicationAsyncResource.getApplication(hakemusOid);
+                    } else {
+                        return Observable.just(hakemukset.iterator().next());
+                    }
+                });
+
+
         Observable.merge(Observable.zip(
                 authorityCheckService.getAuthorityCheckForRoles(asList(
                         "ROLE_APP_HAKEMUS_READ_UPDATE",
@@ -167,7 +181,7 @@ public class PistesyottoResource {
                         "ROLE_APP_HAKEMUS_LISATIETORU",
                         "ROLE_APP_HAKEMUS_LISATIETOCRUD"
                 )),
-                applicationAsyncResource.getApplication(hakemusOid),
+                hakemusO,
                 (authorityCheck, hakemus) -> {
                     Collection<String> hakutoiveOids = hakemus.getHakutoiveOids();
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
@@ -292,7 +306,14 @@ public class PistesyottoResource {
             return Observable.error(new ForbiddenException(
                     msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
             ));
-        }).flatMap(x -> applicationAsyncResource.getApplicationOids(hakuOid, hakukohdeOid)
+        }).flatMap(x -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
+                .flatMap(hakemukset -> {
+                    if (hakemukset.isEmpty()) {
+                        return applicationAsyncResource.getApplicationOids(hakuOid, hakukohdeOid);
+                    } else {
+                        return Observable.just(hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet()));
+                    }
+                })
                 .flatMap(hakukohteenHakemusOidit -> {
                     Set<String> eiHakukohteeseenHakeneet = pistetiedot.stream()
                             .map(ApplicationAdditionalDataDTO::getOid)

@@ -134,6 +134,8 @@ public class KoekutsukirjeetTest {
             Assert.assertEquals("Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.", 2, batch.getLetters().size());
             LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));
         } finally {
+            MockTarjontaAsyncService.clear();
+            MockAtaruAsyncResource.clear();
             MockApplicationAsyncResource.clear();
         }
     }
@@ -230,6 +232,7 @@ public class KoekutsukirjeetTest {
         } finally {
             MockTarjontaAsyncService.clear();
             MockAtaruAsyncResource.clear();
+            MockApplicationAsyncResource.clear();
         }
     }
 }

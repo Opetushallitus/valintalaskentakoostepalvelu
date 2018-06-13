@@ -34,6 +34,7 @@ import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaCo
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -125,6 +126,25 @@ public abstract class AbstractPistesyottoKoosteService {
                 pistetiedot, kuuntelijat);
     }
 
+    protected Observable<List<HakemusWrapper>> getHakemuksetByOids(List<String> hakemusOids) {
+        return ataruAsyncResource.getApplicationsByOids(hakemusOids)
+                .flatMap(hakemukset -> {
+                    if (hakemukset.isEmpty()) {
+                        return applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids);
+                    } else {
+                        return Observable.just(hakemukset);
+                    }
+                });
+    }
+
+    private Observable<List<HakemusWrapper>> getHakemukset(HakuV1RDTO haku, String hakukohdeOid) {
+        if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
+            return applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid);
+        } else {
+            return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
+        }
+    }
+
     protected Observable<Pair<PistesyottoExcel, Map<String, ApplicationAdditionalDataDTO>>> muodostaPistesyottoExcel(
             String hakuOid,
             String hakukohdeOid,
@@ -156,9 +176,10 @@ public abstract class AbstractPistesyottoKoosteService {
                 return Observable.just(hakemukset);
             }
             prosessi.inkrementoiKokonaistyota();
-            return applicationAsyncResource.getApplicationsByHakemusOids(new ArrayList<>(puuttuvatHakemukset))
+            return getHakemuksetByOids(new ArrayList<>(puuttuvatHakemukset))
                     .map(hs -> Stream.concat(hakemukset.stream(), hs.stream()).collect(Collectors.toList()))
                     .doOnCompleted(prosessi::inkrementoiTehtyjaToita);
+
         };
         Func1<List<ValintaperusteDTO>, Observable<List<Oppija>>> haeKielikoetulokset = kokeet -> {
             if (kokeet.stream().map(ValintaperusteDTO::getTunniste).anyMatch(t -> t.matches(PistesyottoExcel.KIELIKOE_REGEX))) {
@@ -198,9 +219,10 @@ public abstract class AbstractPistesyottoKoosteService {
                     ).collect(Collectors.toList()));
                 }
         );
+        Observable<HakuV1RDTO> hakuO = tarjontaAsyncResource.haeHaku(hakuOid);
         Observable<List<HakemusWrapper>> hakemuksetO = Observable.merge(Observable.zip(
                 osallistumistiedotO,
-                applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
+                hakuO.flatMap(haku -> getHakemukset(haku, hakukohdeOid)),
                 haePuuttuvatHakemukset
         ));
 
@@ -214,7 +236,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 kokeetO,
                 valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)),
                 tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
-                tarjontaAsyncResource.haeHaku(hakuOid),
+                hakuO,
                 (osallistumistiedot, lisatiedot, hakemukset, kokeet, valintakoeosallistumiset, hakukohde, haku) -> Pair.of(
                         muodostoPistesyottoExcel(hakuOid, hakukohdeOid, lisatiedot.getKey(), osallistumistiedot, hakemukset, kokeet,
                                 lisatiedot.getRight(), valintakoeosallistumiset, haku, hakukohde, kuuntelijat),
