@@ -277,44 +277,6 @@ public class LaskentaActorFactory {
                     }}));
     }
 
-    private Observable<LaskeDTO> getLaskeDTOObservableForAtaruHakemukset(String uuid,
-                                                                         HakuV1RDTO haku,
-                                                                         String hakukohdeOid,
-                                                                         LaskentaActorParams actorParams,
-                                                                         boolean withHakijaRyhmat,
-                                                                         Observable<List<ValintaperusteetDTO>> valintaperusteet,
-                                                                         Observable<List<Oppija>> oppijat,
-                                                                         Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes,
-                                                                         Observable<PisteetWithLastModified> valintapisteetForHakukohdes,
-                                                                         Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat,
-                                                                         Observable<List<HakemusWrapper>> hakemukset) {
-        return wrapAsRunOnlyOnceObservable(combineLatest(
-                valintapisteetForHakukohdes,
-                hakijaryhmat,
-                valintaperusteet,
-                hakemukset,
-                oppijat,
-                hakukohdeRyhmasForHakukohdes,
-                (vp, hr, v, h, o, r) -> {
-                    LOG.info("(Uuid: {}) Kaikki resurssit ataru hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
-                    if(!withHakijaRyhmat) {
-                        return new LaskeDTO(
-                                uuid,
-                                haku.isKorkeakouluHaku(),
-                                actorParams.isErillishaku(),
-                                hakukohdeOid,
-                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v);
-
-                    } else {
-                        return new LaskeDTO(
-                                uuid,
-                                haku.isKorkeakouluHaku(),
-                                actorParams.isErillishaku(),
-                                hakukohdeOid,
-                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
-                    }}));
-    }
-
     private Observable<LaskeDTO> fetchResourcesForOneLaskenta(final AuditSession auditSession,
                                                               final String uuid,
                                                               HakuV1RDTO haku,
@@ -348,7 +310,7 @@ public class LaskentaActorFactory {
                     ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
                     retryHakemuksetAndOppijat);
             LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
-            return getLaskeDTOObservableForAtaruHakemukset(uuid, haku, hakukohdeOid, actorParams, withHakijaRyhmat, valintaperusteet, oppijat, hakukohdeRyhmasForHakukohdes, valintapisteetForHakukohdes, hakijaryhmat, hakemukset);
+            return getLaskeDTOObservable(uuid, haku, hakukohdeOid, actorParams, withHakijaRyhmat, valintaperusteet, oppijat, hakukohdeRyhmasForHakukohdes, valintapisteetForHakukohdes, hakijaryhmat, hakemukset);
         } else {
             Observable<List<HakemusWrapper>> hakemukset = createResurssiObservable(tunniste,
                 "applicationAsyncResource.getApplicationsByOid",
