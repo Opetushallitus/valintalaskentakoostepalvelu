@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.service;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -19,6 +21,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +42,7 @@ public class ValintakoekutsutExcelService {
     private final ValintalaskentaValintakoeAsyncResource valintalaskentaAsyncResource;
     private final ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
     private final ApplicationAsyncResource applicationResource;
+    private AtaruAsyncResource ataruAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
@@ -49,6 +53,7 @@ public class ValintakoekutsutExcelService {
             ValintalaskentaValintakoeAsyncResource valintalaskentaAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetValintakoeResource,
             ApplicationAsyncResource applicationResource,
+            AtaruAsyncResource ataruAsyncResource,
             KoodistoCachedAsyncResource koodistoCachedAsyncResource,
             TarjontaAsyncResource tarjontaAsyncResource,
             DokumenttiAsyncResource dokumenttiAsyncResource
@@ -56,6 +61,7 @@ public class ValintakoekutsutExcelService {
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
         this.valintaperusteetValintakoeResource = valintaperusteetValintakoeResource;
         this.applicationResource = applicationResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
@@ -121,13 +127,7 @@ public class ValintakoekutsutExcelService {
                 },
                 poikkeuskasittelija);
             if (useWhitelist) {
-                // haetaan whitelistin hakemukset
-                applicationResource.getApplicationsByOids(hakemusOids).subscribe(
-                    hakemukset -> {
-                        lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
-                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                    },
-                    poikkeuskasittelija);
+                haeHakemuksia(haku, hakemusOids, poikkeuskasittelija, lisaaHakemuksiaAtomisestiHakemuksetReferenssiin, laskuri);
             }
             valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(hakukohdeOid).subscribe(
                 valintakokeet -> {
@@ -147,22 +147,26 @@ public class ValintakoekutsutExcelService {
                                     Collectors.toSet()
                                 );
                                 osallistujienHakemusOids.removeAll(joHaetutHakemukset); // ei haeta jo haettuja hakemuksia
-                                applicationResource.getApplicationsByOids(osallistujienHakemusOids).subscribe( // haetaan osallistujille hakemukset
-                                    hakemukset -> {
-                                        lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
-                                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                                    },
-                                    poikkeuskasittelija);
+                                haeHakemuksia(haku, osallistujienHakemusOids, poikkeuskasittelija, lisaaHakemuksiaAtomisestiHakemuksetReferenssiin, laskuri);
                             }
                             laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         }).build();
 
                     if (onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
-                        applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid).subscribe(hakemukset -> {
-                            lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
-                            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                            voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                        }, poikkeuskasittelija);
+                        if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
+                            applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid).subscribe(hakemukset -> {
+                                lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
+                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                            }, poikkeuskasittelija);
+                        } else {
+                            ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid).subscribe(hakemukset -> {
+                                lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
+                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                            }, poikkeuskasittelija);
+                        }
+
                     } else {
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
@@ -185,6 +189,24 @@ public class ValintakoekutsutExcelService {
             }, poikkeuskasittelija);
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
+        }
+    }
+
+    private void haeHakemuksia(HakuV1RDTO haku, Set<String> hakemusOids, PoikkeusKasittelijaSovitin poikkeuskasittelija, Consumer<List<HakemusWrapper>> lisaaHakemuksiaAtomisestiHakemuksetReferenssiin, SynkronoituLaskuri laskuri) {
+        if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
+            applicationResource.getApplicationsByOids(hakemusOids).subscribe(
+                hakemukset -> {
+                    lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
+                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                },
+                poikkeuskasittelija);
+        } else {
+            ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids)).subscribe(
+                    hakemukset -> {
+                        lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
+                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    },
+                    poikkeuskasittelija);
         }
     }
 }
