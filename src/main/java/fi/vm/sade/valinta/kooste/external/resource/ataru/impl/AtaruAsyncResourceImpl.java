@@ -51,19 +51,12 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                     LOG.info("Calling url {}", client.getCurrentURI());
                     return client;
                 }).flatMap(hakemukset -> {
-                    Map<String, AtaruHakemus> hakemuksetByOidPersonOid = hakemukset.stream().collect(Collectors.toMap(AtaruHakemus::getPersonOid, h -> h));
-                    Set<String> personOids = hakemuksetByOidPersonOid.keySet();
+                    List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).distinct().collect(Collectors.toList());
                     return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(personOids))
                             .map(persons -> {
-                                Set<String> fetchedPersonOids = persons.stream().map(HenkiloPerustietoDto::getOidHenkilo).collect(Collectors.toSet());
-                                personOids.removeAll(fetchedPersonOids); // Missing personOids!
-                                if (!personOids.isEmpty()) {
-                                    throw new IllegalArgumentException(
-                                            String.format("Kaikille hakemuksille ei löytynyt henkilöitä oppijanumerorekisteristä. Puuttuvat henkilöoidit: %s", String.join(", ", personOids))
-                                    );
-                                }
-                                return persons.stream()
-                                        .map(person -> new AtaruHakemusWrapper(hakemuksetByOidPersonOid.get(person.getOidHenkilo()), person))
+                                Map<String,HenkiloPerustietoDto> henkilotByOid = persons.stream().collect(Collectors.toMap(HenkiloPerustietoDto::getOidHenkilo, p -> p));
+                                return hakemukset.stream()
+                                        .map(hakemus -> new AtaruHakemusWrapper(hakemus, henkilotByOid.get(hakemus.getPersonOid())))
                                         .collect(Collectors.toList());
                             });
         });
