@@ -134,24 +134,20 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
     }
 
     private Stream<HakemusWrapper> getHakukohteenUlkopuolisetHakemukset(List<HakemusWrapper> hakemukset, Set<String> osallistujienHakemusOidit, HakuV1RDTO haku) {
-        Stream<HakemusWrapper> hakukohteenUlkopuolisetHakemukset;
-        {
-            Set<String> hakemusOids = hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
-            Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
-            hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
-            if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
-                hakukohteenUlkopuolisetHakemukset = ((StringUtils.isEmpty(haku.getOid()))
-                        ? applicationAsyncResource.getApplicationsByHakemusOids(Lists.newArrayList(hakemusOids))
-                        : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids)))
-                        .timeout(30, SECONDS)
-                        .toBlocking()
-                        .first()
-                        .stream();
-            } else {
-                hakukohteenUlkopuolisetHakemukset = Stream.empty();
-            }
+        Set<String> hakemusOids = hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
+        Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
+        hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
+        if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
+            return ((StringUtils.isEmpty(haku.getAtaruLomakeAvain()))
+                    ? applicationAsyncResource.getApplicationsByHakemusOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat))
+                    : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat)))
+                    .timeout(30, SECONDS)
+                    .toBlocking()
+                    .first()
+                    .stream();
+        } else {
+            return Stream.empty();
         }
-        return hakukohteenUlkopuolisetHakemukset;
     }
 
     private Action1<List<HakemusWrapper>> koekutsukirjeiksi(final KirjeProsessi prosessi, final KoekutsuDTO koekutsu) {
