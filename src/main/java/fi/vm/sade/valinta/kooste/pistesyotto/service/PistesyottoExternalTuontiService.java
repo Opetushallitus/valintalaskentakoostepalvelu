@@ -353,7 +353,16 @@ public class PistesyottoExternalTuontiService {
                                                         .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
                                                         .build())
                                         );
-                                        int onnistuneet = additionalData.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toSet()).size();
+                                        List<VirheDTO> valintapisteVirheet = conflictingHakemusOids.stream()
+                                                .map(hakemusOid -> {
+                                                    VirheDTO virhe = new VirheDTO();
+                                                    virhe.setHakemusOid(hakemusOid);
+                                                    virhe.setVirhe("Yritettiin kirjoittaa yli uudempia pistetietoja");
+                                                    return virhe;
+                                                })
+                                                .collect(Collectors.toList());
+                                        virheet.addAll(valintapisteVirheet);
+                                        int onnistuneet = additionalData.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toSet()).size() - valintapisteVirheet.size();
                                         successHandler.accept(onnistuneet, virheet);
                                     }, exceptionHandler::accept);
                                 } else {
