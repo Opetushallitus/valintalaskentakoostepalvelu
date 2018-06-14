@@ -1,7 +1,10 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.service;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -20,12 +23,14 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -41,6 +46,7 @@ public class OsoitetarratService {
 
     private final static Logger LOG = LoggerFactory.getLogger(OsoitetarratService.class);
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final HaeOsoiteKomponentti osoiteKomponentti;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
@@ -51,7 +57,7 @@ public class OsoitetarratService {
 
     @Autowired
     public OsoitetarratService(ApplicationAsyncResource applicationAsyncResource,
-                               KoodistoCachedAsyncResource koodistoCachedAsyncResource,
+                               AtaruAsyncResource ataruAsyncResource, KoodistoCachedAsyncResource koodistoCachedAsyncResource,
                                DokumenttiAsyncResource dokumenttiAsyncResource,
                                ViestintapalveluAsyncResource viestintapalveluAsyncResource,
                                ValintaperusteetAsyncResource valintaperusteetValintakoeResource,
@@ -59,6 +65,7 @@ public class OsoitetarratService {
                                ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource,
                                HaeOsoiteKomponentti osoiteKomponentti) {
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
@@ -100,7 +107,7 @@ public class OsoitetarratService {
                             .collect(Collectors.toList()))
                     .flatMap(hyvaksytytHakemukset -> {
                         if (hyvaksytytHakemukset.isEmpty()) {
-                            return rx.Observable.error(new RuntimeException("Sijoittelussa ei ole hyväksyttyjä hakijoita"));
+                            return Observable.error(new RuntimeException("Sijoittelussa ei ole hyväksyttyjä hakijoita"));
                         } else {
                             return applicationAsyncResource.getApplicationsByOids(hyvaksytytHakemukset);
                         }
@@ -114,41 +121,22 @@ public class OsoitetarratService {
         }
     }
 
-    public void osoitetarratValintakokeeseenOsallistujille(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, Set<String> selvitetytTunnisteet) {
+    public void osoitetarratValintakokeeseenOsallistujille(DokumenttiProsessi prosessi, HakuV1RDTO haku, String hakukohdeOid, Set<String> selvitetytTunnisteet) {
         PoikkeusKasittelijaSovitin poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
-            LOG.error("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
-            prosessi.setKokonaistyo(
-                    5
-                    // luonti
-                    + 1
-                    // dokumenttipalveluun vienti
-                    + 1);
+            LOG.info("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", haku.getOid(), hakukohdeOid);
+            prosessi.setKokonaistyo(5 + 1 + 1 ); // AtomicReferencet + luonti + dokumenttipalveluun vienti
             final AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedotRef = new AtomicReference<>();
             final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
-                    .setLaskurinAlkuarvo(
-                            2 // maat ja valtiot + posti
-                            +
-                            1 // ulkopuoliset hakijat
-                    )
-                    .setSuoritaJokaKerta(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    })
-                    .setSynkronoituToiminto(() -> {
-                        osoitetarratHakemuksille(haetutHakemuksetRef.get(), maatJaValtiot1Ref.get(), postiRef.get(), prosessi);
-                    }).build();
+                    .setLaskurinAlkuarvo(2 + 1) // maat ja valtiot + posti + ulkopuoliset hakijat
+                    .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
+                    .setSynkronoituToiminto(() -> osoitetarratHakemuksille(haetutHakemuksetRef.get(), maatJaValtiot1Ref.get(), postiRef.get(), prosessi)).build();
             final SynkronoituLaskuri laskuriHakukohteenUlkopuolisilleHakijoille = SynkronoituLaskuri.builder()
-                    .setLaskurinAlkuarvo(
-                            1 // Kaikki hakijat jos kaikki kutsutaan
-                                    +
-                                    1 // Osallistumistiedot mistä selviää hakukohteen ulkopuoliset hakijat
-                    )
-                    .setSuoritaJokaKerta(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    })
+                    .setLaskurinAlkuarvo(1 + 1) // Kaikki hakijat jos kaikki kutsutaan + Osallistumistiedot mistä selviää hakukohteen ulkopuoliset hakijat
+                    .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
                     .setSynkronoituToiminto(() -> {
                         // Haetaan ulkopuoliset hakijat
                         List<ValintakoeOsallistuminenDTO> osallistumistiedot = osallistumistiedotRef.get();
@@ -160,19 +148,21 @@ public class OsoitetarratService {
                                                             v.getValintakokeet().stream()
                                                                     .anyMatch(vk ->
                                                                             selvitetytTunnisteet.contains(vk.getValintakoeTunniste()) && Osallistuminen.OSALLISTUU.equals(vk.getOsallistuminenTulos().getOsallistuminen())))))
-                                .map(o -> o.getHakemusOid()).collect(Collectors.toSet());
-                        Set<String> mahdollisestiHakukohteenHakemusOidit = haetutHakemuksetRef.get().stream().map(h -> h.getOid()).collect(Collectors.toSet());
+                                .map(ValintakoeOsallistuminenDTO::getHakemusOid).collect(Collectors.toSet());
+                        Set<String> mahdollisestiHakukohteenHakemusOidit = haetutHakemuksetRef.get().stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
                         if (mahdollisestiHakukohteenHakemusOidit.containsAll(valintakokeisiinOsallistujienHakemusOidit)) {
                             laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         } else {
                             Set<String> puuttuvatHakemusOidit = Sets.newHashSet(valintakokeisiinOsallistujienHakemusOidit);
                             puuttuvatHakemusOidit.removeAll(mahdollisestiHakukohteenHakemusOidit);
-                            applicationAsyncResource.getApplicationsByOids(puuttuvatHakemusOidit).subscribe(
-                                puuttuvatHakemukset -> {
-                                    haetutHakemuksetRef.set(Stream.concat(haetutHakemuksetRef.get().stream(), puuttuvatHakemukset.stream()).collect(Collectors.toList()));
-                                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                                },
-                                poikkeuskasittelija);
+                            (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                    ? applicationAsyncResource.getApplicationsByOids(puuttuvatHakemusOidit)
+                                    : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(puuttuvatHakemusOidit)))
+                                    .subscribe(puuttuvatHakemukset -> {
+                                                haetutHakemuksetRef.set(Stream.concat(haetutHakemuksetRef.get().stream(), puuttuvatHakemukset.stream()).collect(Collectors.toList()));
+                                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                            },
+                                            poikkeuskasittelija);
                         }
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
@@ -182,10 +172,13 @@ public class OsoitetarratService {
                 valintakokeet -> {
                     boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> selvitetytTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                     if (kutsutaankoJossainKokeessaKaikki) {
-                        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
-                            haetutHakemuksetRef.set(hakemukset);
-                            laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                        }, poikkeuskasittelija);
+                        (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                ? applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid)
+                                : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                                .subscribe(hakemukset -> {
+                                    haetutHakemuksetRef.set(hakemukset);
+                                    laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                }, poikkeuskasittelija);
                     } else {
                         haetutHakemuksetRef.set(Collections.emptyList());
                         laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

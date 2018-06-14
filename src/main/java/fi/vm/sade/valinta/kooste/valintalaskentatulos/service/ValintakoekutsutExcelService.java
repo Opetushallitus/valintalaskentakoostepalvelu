@@ -42,7 +42,7 @@ public class ValintakoekutsutExcelService {
     private final ValintalaskentaValintakoeAsyncResource valintalaskentaAsyncResource;
     private final ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
     private final ApplicationAsyncResource applicationResource;
-    private AtaruAsyncResource ataruAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
     private final DokumenttiAsyncResource dokumenttiAsyncResource;

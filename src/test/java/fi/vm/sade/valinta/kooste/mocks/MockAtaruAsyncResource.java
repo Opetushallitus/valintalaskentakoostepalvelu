@@ -10,21 +10,23 @@ import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.Collections;
 import java.util.List;
 
+@Service
 public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
-        return Observable.from(Futures.immediateFuture(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063"))));
+        return Observable.just(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
     }
 
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
-        return Observable.from(Futures.immediateFuture(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063"))));
+        return Observable.just(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
     }
 
     public static HakemusWrapper getAtaruHakemus(String s) {

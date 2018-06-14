@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
@@ -57,6 +58,8 @@ public class ViestintapalveluAktivointiResource {
     private JalkiohjauskirjeService jalkiohjauskirjeService;
     @Autowired
     private EPostiService ePostiService;
+    @Autowired
+    private TarjontaAsyncResource tarjontaAsyncResource;
 
     @POST
     @Path("/osoitetarrat/aktivoi")
@@ -70,17 +73,17 @@ public class ViestintapalveluAktivointiResource {
             @QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet) {
         try {
-            if (hakemuksillaRajaus == null) {
-                hakemuksillaRajaus = new DokumentinLisatiedot();
-            }
-            DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Luo osoitetarrat", null, tags("osoitetarrat", hakemuksillaRajaus.getTag()));
+            DokumentinLisatiedot lisatiedot = hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
+            DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Luo osoitetarrat", null, tags("osoitetarrat", lisatiedot.getTag()));
             dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
 
-            if (hakemuksillaRajaus.getHakemusOids() != null) {
-                osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
-            } else {
-                osoitetarratService.osoitetarratValintakokeeseenOsallistujille(osoiteProsessi, hakuOid, hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet));
-            }
+            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+                if (lisatiedot.getHakemusOids() != null) {
+                    osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, lisatiedot.getHakemusOids());
+                } else {
+                    osoitetarratService.osoitetarratValintakokeeseenOsallistujille(osoiteProsessi, haku, hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet));
+                }
+            });
             return new ProsessiId(osoiteProsessi.getId());
         } catch (Exception e) {
             LOG.error("Osoitetarrojen luonnissa virhe!", e);

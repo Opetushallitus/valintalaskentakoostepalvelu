@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -21,7 +20,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
 
     private static AtomicReference<List<HakemusWrapper>> resultReference = new AtomicReference<>();
-    private static AtomicReference<List<AtaruHakemus>> ataruResultReference = new AtomicReference<>();
     private static AtomicReference<List<HakemusWrapper>> resultByOidReference = new AtomicReference<>();
     private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultReference = new AtomicReference<>();
     private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultByOidReference = new AtomicReference<>();
@@ -75,7 +73,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         additionalDataPutReference.set(null);
         additionalDataResultByOidReference.set(null);
         resultByOidReference.set(null);
-        ataruResultReference.set(null);
         resultReference.set(null);
     }
 
