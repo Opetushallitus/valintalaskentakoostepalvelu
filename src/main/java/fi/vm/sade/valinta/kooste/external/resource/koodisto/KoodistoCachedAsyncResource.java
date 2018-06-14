@@ -31,6 +31,7 @@ public class KoodistoCachedAsyncResource {
     private final Logger LOG = LoggerFactory.getLogger(KoodistoCachedAsyncResource.class);
     private final KoodistoAsyncResource koodistoAsyncResource;
     private final Cache<String, Map<String, Koodi>> koodistoCache = CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
+    private final Cache<String, Koodi> koodiCache = CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
 
     @Autowired
     public KoodistoCachedAsyncResource(KoodistoAsyncResource koodistoAsyncResource) {
@@ -47,6 +48,21 @@ public class KoodistoCachedAsyncResource {
                     .map(this::konversio)
                     .doOnNext(konvertoituKoodisto -> koodistoCache.put(koodistoUri, konvertoituKoodisto));
             }
+        } catch (Exception e) {
+            return Observable.error(e);
+        }
+    }
+
+    public Observable<Koodi> haeRinnasteinenKoodiAsync(String koodiUri) {
+        try {
+            Koodi koodi = koodiCache.getIfPresent(koodiUri);
+            if (koodi != null) {
+                return Observable.just(koodi);
+            } else {
+               return koodistoAsyncResource.haeRinnasteinenKoodi(koodiUri)
+               .doOnNext(konvertoituKoodi -> koodiCache.put(koodiUri, konvertoituKoodi));
+            }
+
         } catch (Exception e) {
             return Observable.error(e);
         }

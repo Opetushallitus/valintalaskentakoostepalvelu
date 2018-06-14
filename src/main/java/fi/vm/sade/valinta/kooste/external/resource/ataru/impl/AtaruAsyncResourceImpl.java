@@ -1,15 +1,17 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,21 +25,24 @@ import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements AtaruAsyncResource {
     private final Logger LOG = LoggerFactory.getLogger(getClass());
     private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
+    private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
     @Autowired
     public AtaruAsyncResourceImpl(
             @Qualifier("AtaruRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource1) {
+            OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource1,
+            KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         super(TimeUnit.HOURS.toMillis(1), casInterceptor);
         this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource1;
+        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
     private Observable<List<HakemusWrapper>> getApplications(String hakukohdeOid, List<String> hakemusOids) {
@@ -55,16 +60,39 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
             if (hakemukset.isEmpty()) {
                 return Observable.just(Collections.emptyList());
             } else {
-                List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).distinct().collect(Collectors.toList());
-                return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(personOids))
-                        .map(persons -> {
-                            Map<String, HenkiloPerustietoDto> henkilotByOid = persons.stream().collect(Collectors.toMap(HenkiloPerustietoDto::getOidHenkilo, p -> p));
-                            return hakemukset.stream()
-                                    .map(hakemus -> new AtaruHakemusWrapper(hakemus, henkilotByOid.get(hakemus.getPersonOid())))
-                                    .collect(Collectors.toList());
-                        });
+                Observable<Map<String, HenkiloPerustietoDto>> henkilotO = getHenkilotObservable(hakemukset);
+                Observable<Map<String, Koodi>> maakooditO = getMaakooditObservable(hakemukset);
+                return Observable.zip(henkilotO, maakooditO, (henkilot, maakoodit) ->
+                        hakemukset.stream()
+                                .map(hakemusToHakemusWrapper(henkilot, maakoodit))
+                                .collect(Collectors.toList())
+                );
             }
         });
+    }
+
+    private Observable<Map<String, HenkiloPerustietoDto>> getHenkilotObservable(List<AtaruHakemus> hakemukset) {
+        List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).distinct().collect(Collectors.toList());
+        return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(personOids))
+                .map(henkiloDtot -> henkiloDtot.stream().collect(Collectors.toMap(HenkiloPerustietoDto::getOidHenkilo, h -> h)));
+    }
+
+    private Function<AtaruHakemus, AtaruHakemusWrapper> hakemusToHakemusWrapper(Map<String, HenkiloPerustietoDto> henkilot, Map<String, Koodi> maakoodit) {
+        return hakemus -> {
+            String ISOmaakoodi = maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
+            hakemus.getKeyValues().replace("country-of-residence", ISOmaakoodi);
+            return new AtaruHakemusWrapper(hakemus, henkilot.get(hakemus.getPersonOid()));
+        };
+    }
+
+    private Observable<Map<String, Koodi>> getMaakooditObservable(List<AtaruHakemus> hakemukset) {
+        return Observable.merge(
+                hakemukset.stream()
+                        .map(h -> h.getKeyValues().get("country-of-residence"))
+                        .distinct()
+                        .map(koodiArvo -> koodistoCachedAsyncResource.haeRinnasteinenKoodiAsync("maatjavaltiot2_" + koodiArvo)
+                                .map(koodi -> Pair.of(koodiArvo, koodi)))
+                        .collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight);
     }
 
     @Override

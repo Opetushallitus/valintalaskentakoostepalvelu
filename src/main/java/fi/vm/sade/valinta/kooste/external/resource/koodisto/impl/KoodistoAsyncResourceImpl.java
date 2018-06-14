@@ -24,5 +24,13 @@ public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements 
             new GenericType<List<Koodi>>() {}.getType(),
             ACCEPT_JSON.andThen(client -> client.query("onlyValidKoodis", true)));
     }
+
+    @Override
+    public Observable<Koodi> haeRinnasteinenKoodi(String koodiUri) {
+        return getAsObservableLazily(
+                getUrl("koodisto-service.json.koodi.rinnasteinen", koodiUri),
+                new GenericType<List<Koodi>>() {}.getType(),
+                ACCEPT_JSON.andThen(client -> client.query("koodiVersio", 1)));
+    }
 }
 
