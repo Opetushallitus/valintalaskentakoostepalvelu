@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-import com.google.common.util.concurrent.Futures;
 import com.google.gson.Gson;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -19,16 +19,39 @@ import java.util.List;
 @Service
 public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
+    private static List<HakemusWrapper> byHakukohdeRes = Lists.newArrayList();
+    private static List<HakemusWrapper> byOidsResult = Lists.newArrayList();
+
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
-        return Observable.just(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
+        if (byHakukohdeRes.isEmpty()) {
+            return Observable.just(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
+        } else {
+            return Observable.just(byHakukohdeRes);
+        }
     }
 
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
-        return Observable.just(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
+        if (byHakukohdeRes.isEmpty()) {
+            return Observable.just(Collections.singletonList(getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
+        } else {
+            return Observable.just(byOidsResult);
+        }
     }
 
+    public static void setByHakukohdeResult(List<HakemusWrapper> hakemukset) {
+        byHakukohdeRes = hakemukset;
+    }
+
+    public static void setByOidsResult(List<HakemusWrapper> hakemukset) {
+        byOidsResult = hakemukset;
+    }
+
+    public static void clear() {
+        byOidsResult = Lists.newArrayList();
+        byHakukohdeRes = Lists.newArrayList();
+    }
     public static HakemusWrapper getAtaruHakemus(String s) {
         HenkiloPerustietoDto henkilo = new HenkiloPerustietoDto();
         henkilo.setOidHenkilo("Henkilo1");

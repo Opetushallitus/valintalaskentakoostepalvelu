@@ -1,20 +1,19 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.*;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import com.google.common.collect.Lists;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
+import javax.ws.rs.*;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *         Ei palauta PDF-tiedostoa vaan URI:n varsinaiseen resurssiin - koska
@@ -281,26 +277,22 @@ public class ViestintapalveluAktivointiResource {
             LOG.error("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
             throw new RuntimeException("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
         }
-        String tag;
         KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
         try {
-            if (templateName == null) {
-                templateName = "koekutsukirje";
-            }
-            if (hakemuksillaRajaus == null) {
-                hakemuksillaRajaus = new DokumentinLisatiedot();
-            }
-            tag = hakemuksillaRajaus.getTag();
-
-            if (hakemuksillaRajaus.getHakemusOids() != null) {
-                LOG.info("Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}", hakemuksillaRajaus.getHakemusOids());
-                koekutsukirjeetService.koekutsukirjeetHakemuksille(prosessi,
-                        new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(), tarjoajaOid, tag, hakukohdeOid, hakuOid, templateName), hakemuksillaRajaus.getHakemusOids());
-            } else {
-                LOG.info("Koekutsukirjeiden luonti aloitettu");
-                koekutsukirjeetService.koekutsukirjeetOsallistujille(prosessi,
-                        new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(), tarjoajaOid, tag, hakukohdeOid, hakuOid, templateName), valintakoeTunnisteet);
-            }
+            String template = templateName == null ? "koekutsukirje" : templateName;
+            DokumentinLisatiedot lisatiedot = hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
+            String tag = lisatiedot.getTag();
+            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+                if (lisatiedot.getHakemusOids() != null) {
+                    LOG.info("Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}", lisatiedot.getHakemusOids());
+                    koekutsukirjeetService.koekutsukirjeetHakemuksille(prosessi,
+                            new KoekutsuDTO(lisatiedot.getLetterBodyText(), tarjoajaOid, tag, hakukohdeOid, haku, template), lisatiedot.getHakemusOids());
+                } else {
+                    LOG.info("Koekutsukirjeiden luonti aloitettu");
+                    koekutsukirjeetService.koekutsukirjeetOsallistujille(prosessi,
+                            new KoekutsuDTO(lisatiedot.getLetterBodyText(), tarjoajaOid, tag, hakukohdeOid, haku, template), valintakoeTunnisteet);
+                }
+            });
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         } catch (Exception e) {
             LOG.error("Koekutsukirjeiden luonti epäonnistui!", e);

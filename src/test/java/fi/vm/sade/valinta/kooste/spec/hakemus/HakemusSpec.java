@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.spec.hakemus;
 
 import com.google.common.collect.Maps;
-import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -12,6 +11,8 @@ import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+
+import java.util.List;
 
 /**
  * @author Jussi Jartamo
@@ -110,11 +111,31 @@ public class HakemusSpec extends ConstantsSpec {
 
         public AtaruHakemusBuilder(String oid, String personOid, String hetu) {
             hakemus = new AtaruHakemus();
+            hakemus.setKeyValues(Maps.newHashMap());
             hakemus.setHakemusOid(oid);
             henkilo = new HenkiloPerustietoDto();
             henkilo.setOidHenkilo(personOid);
             henkilo.setHetu(hetu);
         }
+
+        public AtaruHakemusBuilder setOid(String oid) {
+            hakemus.setHakemusOid(oid);
+            return this;
+        }
+
+        public AtaruHakemusBuilder setHakutoiveet(List<String> oids) {
+            hakemus.setHakutoiveet(oids);
+            return this;
+        }
+        public AtaruHakemusBuilder setSuomalainenPostinumero(String postinumero) {
+            hakemus.getKeyValues().put("postal-code", postinumero);
+            return this;
+        }
+        public AtaruHakemusBuilder setPersonOid(String oid) {
+            henkilo.setOidHenkilo(oid);
+            return this;
+        }
+
 
         public HakemusWrapper build() {
             return new AtaruHakemusWrapper(hakemus, henkilo);
