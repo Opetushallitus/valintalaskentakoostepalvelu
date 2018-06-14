@@ -78,7 +78,7 @@ public class ValintakoeKutsuExcelKomponentti {
                         if (!onkoHakemusWhiteListilla.apply(hakemus.getOid())) {
                             continue;
                         }
-                        Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null, new NimiPaattelyStrategy());
+                        Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
                         ValintakoeRivi v = new ValintakoeRivi(hakemus.getSukunimi(), hakemus.getEtunimi(),
                                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(hakemus.getSuomalainenPostinumero()), KieliUtil.SUOMI, hakemus.getSuomalainenPostinumero()),
                                 KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(hakemus.getAsuinmaa()), KieliUtil.ENGLANTI, hakemus.getAsuinmaa()),
@@ -165,7 +165,7 @@ public class ValintakoeKutsuExcelKomponentti {
                 osallistumistiedot.put(tunniste.getSelvitettyTunniste(), "Määrittelemätön");
             }
         }
-        Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, null, null, new NimiPaattelyStrategy());
+        Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
         return new ValintakoeRivi(h.getSukunimi(), h.getEtunimi(),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(h.getSuomalainenPostinumero()), KieliUtil.SUOMI, h.getSuomalainenPostinumero()),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(h.getAsuinmaa()), KieliUtil.ENGLANTI, h.getAsuinmaa()),

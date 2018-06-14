@@ -9,7 +9,6 @@ import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
@@ -126,7 +125,7 @@ public class ValintatapajonoExcel {
             } else {
                 s.add(new NumeroArvo(null, 0, hakemukset.size()));
             }
-            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null, new NimiPaattelyStrategy());
+            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
             s.add(new TekstiArvo(osoite.getLastName() + " " + osoite.getFirstName()));
             s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))), VAIHTOEHDOT));
             if(kokonaispisteet.containsKey(hakemusOid) && null != kokonaispisteet.get(hakemusOid)) {

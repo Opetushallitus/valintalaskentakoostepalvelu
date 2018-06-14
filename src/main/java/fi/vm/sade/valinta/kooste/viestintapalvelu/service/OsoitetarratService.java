@@ -16,6 +16,7 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Viestintapal
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -232,7 +233,7 @@ public class OsoitetarratService {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             Osoitteet osoitteet = new Osoitteet(haetutHakemukset.stream().map(h ->
-                    HaeOsoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h, new NimiPaattelyStrategy())).collect(Collectors.toList()));
+                    OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, maatJaValtiot1, posti, new NimiPaattelyStrategy())).collect(Collectors.toList()));
             // Aakkosjarjestykseen
             osoitteet.getAddressLabels().sort(
                     (o1, o2) -> {

@@ -7,11 +7,9 @@ import fi.vm.sade.koodisto.service.types.common.KieliType;
 import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Maakoodi;
@@ -98,15 +96,6 @@ public class HaeOsoiteKomponentti {
             }
         }
         return StringUtils.EMPTY;
-    }
-
-    public static Osoite haeOsoite(Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, HakemusWrapper hakemus, NimiPaattelyStrategy nimiPaattelyStrategy) {
-        Koodi postiKoodi = posti.get(hakemus.getSuomalainenPostinumero());
-        String postitoimipaikka = KoodistoCachedAsyncResource.haeKoodistaArvo(postiKoodi, KieliUtil.SUOMI, hakemus.getSuomalainenPostinumero());
-
-        String maa = SUOMI.equalsIgnoreCase(hakemus.getAsuinmaa())
-                ? "Suomi" : KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(hakemus.getAsuinmaa()), KieliUtil.ENGLANTI, hakemus.getAsuinmaa());
-        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maa, postitoimipaikka, nimiPaattelyStrategy);
     }
 
     private static String getNimi(List<KoodiMetadataType> meta) {
