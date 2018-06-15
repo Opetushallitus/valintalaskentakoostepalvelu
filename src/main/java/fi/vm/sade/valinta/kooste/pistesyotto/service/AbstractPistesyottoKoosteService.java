@@ -37,6 +37,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -145,7 +146,7 @@ public abstract class AbstractPistesyottoKoosteService {
         }
     }
 
-    protected Observable<Pair<PistesyottoExcel, Map<String, ApplicationAdditionalDataDTO>>> muodostaPistesyottoExcel(
+    protected Observable<Triple<PistesyottoExcel, Map<String, ApplicationAdditionalDataDTO>, Map<String, HakemusWrapper>>> muodostaPistesyottoExcel(
             String hakuOid,
             String hakukohdeOid,
             AuditSession auditSession,
@@ -237,10 +238,11 @@ public abstract class AbstractPistesyottoKoosteService {
                 valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)),
                 tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                 hakuO,
-                (osallistumistiedot, lisatiedot, hakemukset, kokeet, valintakoeosallistumiset, hakukohde, haku) -> Pair.of(
+                (osallistumistiedot, lisatiedot, hakemukset, kokeet, valintakoeosallistumiset, hakukohde, haku) -> Triple.of(
                         muodostoPistesyottoExcel(hakuOid, hakukohdeOid, lisatiedot.getKey(), osallistumistiedot, hakemukset, kokeet,
                                 lisatiedot.getRight(), valintakoeosallistumiset, haku, hakukohde, kuuntelijat),
-                        lisatiedot.getRight().stream().collect(Collectors.toMap(l -> l.getOid(), l -> l))
+                        lisatiedot.getRight().stream().collect(Collectors.toMap(ApplicationAdditionalDataDTO::getOid, l -> l)),
+                        hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h))
                 )
         ).doOnCompleted(prosessi::inkrementoiTehtyjaToita);
     }

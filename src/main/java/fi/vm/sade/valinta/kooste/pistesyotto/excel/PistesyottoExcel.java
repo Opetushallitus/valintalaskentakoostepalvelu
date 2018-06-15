@@ -108,13 +108,6 @@ public class PistesyottoExcel {
         return tunnisteOid;
     }
 
-    public static String additionalDataToNimi(ApplicationAdditionalDataDTO data) {
-        if (data == null) {
-            return "'Hakemuksella ei ole nimeä'";
-        }
-        return data.getLastName() + ", " + data.getFirstNames();
-    }
-
     public Optional<String> getAikaleima() {
         return aikaleimaRivi.getCurrentAikaleima();
     }
@@ -193,9 +186,9 @@ public class PistesyottoExcel {
             // Hakemuksen <tunniste, valintakoeDTO> tiedot
             Map<String, ValintakoeDTO> tunnisteDTO = Optional.ofNullable(tunnisteValintakoe.get(data.getOid())).orElse(Collections.emptyMap());
             Collection<Arvo> s = Lists.newArrayList();
-            s.add(new TekstiArvo(data.getOid()));
-            s.add(new TekstiArvo(additionalDataToNimi(data)));
             HakemusWrapper wrapper = oidToWrapper.get(data.getOid());
+            s.add(new TekstiArvo(data.getOid()));
+            s.add(new TekstiArvo(wrapper.getSukunimi() + ", " + wrapper.getEtunimet()));
             s.add(new TekstiArvo(null == wrapper || null == wrapper.getHenkilotunnus() ? "" : wrapper.getHenkilotunnus()));
             s.add(new TekstiArvo(null == wrapper || null == wrapper.getSyntymaaika() ? "" : wrapper.getSyntymaaika()));
             boolean syote = false;

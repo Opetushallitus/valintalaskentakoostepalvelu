@@ -161,10 +161,12 @@ public class PistesyotonTuontiTestBase {
 
     protected List<Hakemus> convertToHakemusSkeletons(List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos) {
         return applicationAdditionalDataDtos.stream().map(applicationAdditionalDataDTO -> {
-              Hakemus h = new Hakemus();
-              h.setOid(applicationAdditionalDataDTO.getOid());
-              h.setPersonOid(applicationAdditionalDataDTO.getPersonOid());
-              return h;
+            Hakemus h = new Hakemus();
+            h.setOid(applicationAdditionalDataDTO.getOid());
+            h.setPersonOid(applicationAdditionalDataDTO.getPersonOid());
+            h.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.SUKUNIMI, applicationAdditionalDataDTO.getLastName());
+            h.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.ETUNIMET, applicationAdditionalDataDTO.getFirstNames());
+            return h;
         }).collect(Collectors.toList());
     }
 

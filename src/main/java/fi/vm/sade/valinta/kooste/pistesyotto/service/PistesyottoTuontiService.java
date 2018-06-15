@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import org.apache.commons.lang.StringUtils;
@@ -63,12 +64,13 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         LOG.error(HttpExceptionWithResponse.appendWrappedResponse("Pistesyötön tuonti epäonnistui", t), t);
     }
 
-    private List<TuontiErrorDTO> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, Map<String, ApplicationAdditionalDataDTO> oidToAdditionalMapping) {
+    private List<TuontiErrorDTO> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, Map<String, HakemusWrapper> hakemukset) {
         return pistesyottoTuontiAdapteri
                 .getRivit().stream()
                 .flatMap(
                         rivi -> {
-                            String nimi = PistesyottoExcel.additionalDataToNimi(oidToAdditionalMapping.get(rivi.getOid()));
+                            HakemusWrapper hakemus = hakemukset.get(rivi.getOid());
+                            String nimi = hakemus.getSukunimi() + ", " + hakemus.getEtunimet();
                             if (!Optional.ofNullable(rivi.getNimi()).orElse("").equals(nimi)) {
                                 String virheIlmoitus = String.format("nimet eivät täsmää: %s != %s",
                                     rivi.getNimi(), nimi);
@@ -94,13 +96,14 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         Observable<Set<TuontiErrorDTO>> errors = muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.singleton(pistesyottoTuontiAdapteri))
                 .flatMap(p -> {
                     PistesyottoExcel pistesyottoExcel = p.getLeft();
-                    Map<String, ApplicationAdditionalDataDTO> pistetiedot = p.getRight();
+                    Map<String, ApplicationAdditionalDataDTO> pistetiedot = p.getMiddle();
+                    Map<String, HakemusWrapper> hakemukset = p.getRight();
                     try {
                         pistesyottoExcel.getExcel().tuoXlsx(stream);
                     } catch (IOException e) {
                         return Observable.error(e);
                     }
-                    List<TuontiErrorDTO> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, pistetiedot);
+                    List<TuontiErrorDTO> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, hakemukset);
                     if (!virheet.isEmpty()) {
                         return Observable.error(new PistesyotonTuontivirhe(virheet));
                     }
