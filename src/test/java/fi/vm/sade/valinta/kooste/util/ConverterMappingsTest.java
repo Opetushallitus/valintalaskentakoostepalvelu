@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
@@ -23,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource.getAtaruHakemus;
+import static fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource.getAtaruHakemusWrapper;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
@@ -178,7 +177,7 @@ public class ConverterMappingsTest {
 
     @Test
     public void testaaAtaruhakemustenKonversio() throws JsonSyntaxException, IOException {
-        HakemusWrapper wrapper = getAtaruHakemus("1.2.246.562.11.00000000000000000063");
+        HakemusWrapper wrapper = getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063");
 
         ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
         Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.90242725084", a);
@@ -187,7 +186,7 @@ public class ConverterMappingsTest {
 
         assertEquals(wrapper.getOid(), dto.getHakemusoid());
 
-        assertEquals(38, dto.getAvaimet().size());
+        assertEquals(20, dto.getAvaimet().size());
 
         assertEquals(1, dto.getHakukohteet().stream()
                 .filter(h -> "1.2.246.562.20.90242725084".equals(h.getOid()))

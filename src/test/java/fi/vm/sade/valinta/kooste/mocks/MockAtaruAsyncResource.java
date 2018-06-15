@@ -9,12 +9,15 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import org.apache.commons.io.IOUtils;
+import org.mockito.internal.util.collections.Sets;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MockAtaruAsyncResource implements AtaruAsyncResource {
@@ -44,21 +47,31 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
         byOidsResult = Lists.newArrayList();
         byHakukohdeRes = Lists.newArrayList();
     }
-    public static HakemusWrapper getAtaruHakemus(String s) {
-        HenkiloPerustietoDto henkilo = new HenkiloPerustietoDto();
-        henkilo.setOidHenkilo("Henkilo1");
-        henkilo.setHetu("Hetu1");
+
+    public static List<AtaruHakemus> getAtaruHakemukset(Set<String> oids) {
         try {
             List<AtaruHakemus> hakemukset = new Gson().fromJson(IOUtils
                     .toString(new ClassPathResource("ataruhakemukset.json")
-                            .getInputStream()), new TypeToken<List<AtaruHakemus>>() {}.getType());
+                            .getInputStream()), new TypeToken<List<AtaruHakemus>>() {
+            }.getType());
 
-            return hakemukset.stream()
-                    .map(h -> new AtaruHakemusWrapper(h, henkilo))
-                    .filter(h -> s.equals(h.getOid()))
-                    .distinct().iterator().next();
+            if (oids == null) {
+                return hakemukset;
+            } else {
+                return hakemukset.stream()
+                        .filter(h -> oids.contains(h.getHakemusOid()))
+                        .collect(Collectors.toList());
+            }
         } catch (Exception e) {
             throw new RuntimeException("Couldn't fetch mock ataru application", e);
         }
+    }
+
+    public static HakemusWrapper getAtaruHakemusWrapper(String s) {
+        HenkiloPerustietoDto henkilo = new HenkiloPerustietoDto();
+        henkilo.setOidHenkilo("Henkilo1");
+        henkilo.setHetu("Hetu1");
+        AtaruHakemus hakemus = getAtaruHakemukset(Sets.newSet(s)).iterator().next();
+        return new AtaruHakemusWrapper(hakemus, henkilo);
     }
 }

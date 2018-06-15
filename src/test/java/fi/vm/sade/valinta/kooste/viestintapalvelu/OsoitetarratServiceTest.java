@@ -150,7 +150,7 @@ public class OsoitetarratServiceTest {
                             .build()
             ));
             MockTarjontaAsyncService.setMockHaku(new TarjontaSpec.HakuBuilder(HAKU1, "AtaruLomakeAvain").build());
-            MockAtaruAsyncResource.setByHakukohdeResult(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemus("1.2.246.562.11.00000000000000000063")));
+            MockAtaruAsyncResource.setByHakukohdeResult(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063")));
             ArgumentCaptor<Osoitteet> osoitteetArgumentCaptor = ArgumentCaptor.forClass(Osoitteet.class);
             Mockito.reset(Mocks.getViestintapalveluAsyncResource());
             Mockito.when(Mocks.getViestintapalveluAsyncResource().haeOsoitetarrat(osoitteetArgumentCaptor.capture())).thenReturn(byteArrayResponse);
