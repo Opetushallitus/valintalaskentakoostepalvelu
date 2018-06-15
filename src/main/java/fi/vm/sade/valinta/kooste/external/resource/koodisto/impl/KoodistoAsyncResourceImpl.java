@@ -27,10 +27,15 @@ public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     public Observable<Koodi> haeRinnasteinenKoodi(String koodiUri) {
-        return getAsObservableLazily(
+        return this.<List<Koodi>>getAsObservableLazily(
                 getUrl("koodisto-service.json.koodi.rinnasteinen", koodiUri),
                 new GenericType<List<Koodi>>() {}.getType(),
-                ACCEPT_JSON.andThen(client -> client.query("koodiVersio", 1)));
+                ACCEPT_JSON.andThen(client -> client.query("koodiVersio", 1)))
+                .map(koodit -> koodit
+                        .stream()
+                        .filter(k -> k.getKoodistoUri().equals("maatjavaltiot1"))
+                        .findFirst()
+                        .orElseThrow(IllegalArgumentException::new));
     }
 }
 

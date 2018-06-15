@@ -4,11 +4,24 @@ import fi.vm.sade.service.valintaperusteet.dto.KoodiDTO;
 
 import java.util.List;
 
+class Koodisto {
+    private String koodistoUri;
+
+    public String getKoodistoUri() {
+        return koodistoUri;
+    }
+
+    public void setKoodistoUri(String koodistoUri) {
+        this.koodistoUri = koodistoUri;
+    }
+}
+
 public class Koodi {
 
     private String koodiArvo;
     private String tila;
     private int versio;
+    private Koodisto koodisto;
     //private int version;
     private String voimassaAlkuPvm;
     private String voimassaLoppuPvm;
@@ -44,5 +57,17 @@ public class Koodi {
 
     public void setKoodiArvo(String koodiArvo) {
         this.koodiArvo = koodiArvo;
+    }
+
+    public Koodisto getKoodisto() {
+        return koodisto;
+    }
+
+    public void setKoodisto(Koodisto koodisto) {
+        this.koodisto = koodisto;
+    }
+
+    public String getKoodistoUri() {
+        return koodisto.getKoodistoUri();
     }
 }

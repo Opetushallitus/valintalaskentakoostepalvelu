@@ -62,7 +62,6 @@ public class KoodistoCachedAsyncResource {
                return koodistoAsyncResource.haeRinnasteinenKoodi(koodiUri)
                .doOnNext(konvertoituKoodi -> koodiCache.put(koodiUri, konvertoituKoodi));
             }
-
         } catch (Exception e) {
             return Observable.error(e);
         }
