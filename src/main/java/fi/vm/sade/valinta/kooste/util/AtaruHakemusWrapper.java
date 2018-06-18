@@ -217,25 +217,16 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
             });
         }
 
-        Map<Integer, Converter.Hakutoive> hakutoiveet = new HashMap<>();
-
-        if (hakemus.getHakutoiveet() != null) {
-            IntStream.range(0, hakemus.getHakutoiveet().size())
-                    .forEach(i -> {
-                        Converter.Hakutoive hakutoive = new Converter.Hakutoive();
-                        hakutoive.setHakukohdeOid(hakemus.getHakutoiveet().get(i));
-                        hakutoiveet.put(i + 1, hakutoive);
-                    });
-        }
-
-        hakutoiveet.forEach((key, hakutoive) -> {
-            HakukohdeDTO hk = new HakukohdeDTO();
-            hk.setOid(hakutoive.getHakukohdeOid());
-            hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
-            hk.setPrioriteetti(key);
-            hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(hakutoive.getHakukohdeOid()));
-            hakemusDto.getHakukohteet().add(hk);
-        });
+        IntStream.range(0, hakemus.getHakutoiveet().size())
+                .forEach(i -> {
+                    HakukohdeDTO hk = new HakukohdeDTO();
+                    String oid = hakemus.getHakutoiveet().get(i);
+                    hk.setOid(oid);
+                    hk.setPrioriteetti(i + 1);
+                    hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(oid));
+                    hk.setHarkinnanvaraisuus(false);
+                    hakemusDto.getHakukohteet().add(hk);
+                });
 
         setHakemusDTOvalintapisteet(valintapisteet, hakemusDto);
 
