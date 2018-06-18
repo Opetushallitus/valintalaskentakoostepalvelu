@@ -4,18 +4,6 @@ import fi.vm.sade.service.valintaperusteet.dto.KoodiDTO;
 
 import java.util.List;
 
-class Koodisto {
-    private String koodistoUri;
-
-    public String getKoodistoUri() {
-        return koodistoUri;
-    }
-
-    public void setKoodistoUri(String koodistoUri) {
-        this.koodistoUri = koodistoUri;
-    }
-}
-
 public class Koodi {
 
     private String koodiArvo;
