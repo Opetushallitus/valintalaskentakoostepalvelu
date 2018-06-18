@@ -16,10 +16,10 @@ import fi.vm.sade.integrationtest.util.ProjectRootFinder;
  *
  *    * add necessary tunnels to your test environments, e.g. have something like this in you ~/.ssh/config :
  *        Host bastion.pallero
- *            HostName %h.aws.opintopolku.fi
+ *            HostName bastion.testiopintopolku.fi
  *            ...
- *            LocalForward 2389 ldap.ldap.pallero.aws.opintopolku.fi:389
- *            LocalForward 18888 alb.pallero.aws.opintopolku.fi:80
+ *            LocalForward 2389 ldap.ldap.testiopintopolku.fi:389
+ *            LocalForward 18888 alb.testiopintopolku.fi:80
  *
  *    * copy oph-configuration directory from the container of valinta to your machine
  *
@@ -27,12 +27,12 @@ import fi.vm.sade.integrationtest.util.ProjectRootFinder;
  *        diff -r valinta-pallero-oph-configuration/common.properties local-valinta-pallero-oph-configuration/common.properties
  *        12a13
  *        14,16c15,19
- *        < host.ilb=https://virkailija.pallero.aws.opintopolku.fi
- *        < host.alb=http://alb.pallero.aws.opintopolku.fi
- *        < host.ldap=ldap.ldap.pallero.aws.opintopolku.fi
+ *        < host.ilb=https://virkailija.testiopintopolku.fi
+ *        < host.alb=http://alb.testiopintopolku.fi
+ *        < host.ldap=ldap.ldap.testiopintopolku.fi
  *        ---
  *        > host.ilb=http://localhost:18888
- *        > host.alb=localhost:18888
+ *        > host.alb=http://localhost:18888
  *        > host.ldap=localhost:2389
  *        84c87,88
  *        < cas.service.valintalaskentakoostepalvelu=https://${host.virkailija}/valintalaskentakoostepalvelu
