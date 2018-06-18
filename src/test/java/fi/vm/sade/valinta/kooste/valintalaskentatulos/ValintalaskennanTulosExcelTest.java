@@ -5,6 +5,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
@@ -32,36 +33,37 @@ import java.util.*;
 
 import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
 import static java.util.Arrays.asList;
-import static java.util.Collections.EMPTY_LIST;
-import static java.util.Collections.EMPTY_MAP;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class ValintalaskennanTulosExcelTest {
-    HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
+    private HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
+
     {
         hakukohdeDTO.setHakukohteenNimet(map("fi", "Hakukohde 1"));
         hakukohdeDTO.setTarjoajaNimet(map("fi", "Tarjoaja 1"));
     }
 
     private HakuV1RDTO haku = new HakuV1RDTO();
+
     {
         haku.setNimi(map("fi", "Haku 1"));
     }
-    DateTime nyt = DateTime.now();
 
-    XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
-        valinnanvaihe(1, nyt.toDate(), asList(
-                valintatapajono(1, jonosijat()),
-                valintatapajono(2, EMPTY_LIST)
-        )),
-        valinnanvaihe(2, nyt.minusMonths(12).toDate(), asList(valintatapajono(1, EMPTY_LIST))
-        )), hakemukset());
+    private DateTime nyt = DateTime.now();
 
     @Test
     public void sheetNames() {
+        XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
+                valinnanvaihe(1, nyt.toDate(), asList(
+                        valintatapajono(1, jonosijat()),
+                        valintatapajono(2, Collections.emptyList())
+                )),
+                valinnanvaihe(2, nyt.minusMonths(12).toDate(), Collections.singletonList(valintatapajono(1, Collections.emptyList()))
+                )), hakemukset());
+
         assertEquals(3, workbook.getNumberOfSheets());
         assertEquals("Jono 1", workbook.getSheetName(0));
         assertEquals("Jono 2", workbook.getSheetName(1));
@@ -70,39 +72,105 @@ public class ValintalaskennanTulosExcelTest {
 
     @Test
     public void sheetContents() {
+        XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
+                valinnanvaihe(1, nyt.toDate(), asList(
+                        valintatapajono(1, jonosijat()),
+                        valintatapajono(2, Collections.emptyList())
+                )),
+                valinnanvaihe(2, nyt.minusMonths(12).toDate(), Collections.singletonList(valintatapajono(1, Collections.emptyList()))
+                )), hakemukset());
+
         assertEquals(
-            asList(
-                asList("Haku", "Haku 1"),
-                asList("Tarjoaja", "Tarjoaja 1"),
-                asList("Hakukohde", "Hakukohde 1"),
-                asList("Vaihe", "Vaihe 1"),
-                asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
-                asList("Jono", "Jono 1"),
-                asList(),
-                asList("Jonosija", "Sukunimi",  "Etunimi", "Henkilötunnus",  "Sähköpostiosoite",    "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet",  "pääsykoetulos",  "keskiarvo"),
-                asList("1",        "Suku 2",    "Etu 2",   "",               "",                    "Hakemus 2",    "2",            "VIRHE",            "Puuttuu",  "",                 "",               "8"),
-                asList("2",        "Suku 1",    "Etu 1",   "010101-123N",    "sukuetu1@testi.fi",   "Hakemus 1",    "1",            "HYVAKSYTTAVISSA",  "",         "666",              "10",             "9")
-            ), getWorksheetData(workbook.getSheetAt(0)));
+                asList(
+                        asList("Haku", "Haku 1"),
+                        asList("Tarjoaja", "Tarjoaja 1"),
+                        asList("Hakukohde", "Hakukohde 1"),
+                        asList("Vaihe", "Vaihe 1"),
+                        asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
+                        asList("Jono", "Jono 1"),
+                        Collections.emptyList(),
+                        asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "pääsykoetulos", "keskiarvo"),
+                        asList("2", "Suku 1", "Etu 1", "010101-123N", "sukuetu1@testi.fi", "Hakemus 1", "1", "HYVAKSYTTAVISSA", "", "666", "10", "9")
+                ), getWorksheetData(workbook.getSheetAt(0)));
+    }
+
+    @Test
+    public void ataruSheetContents() {
+        XSSFWorkbook ataruWorkbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
+                valinnanvaihe(1, nyt.toDate(), asList(
+                        valintatapajono(1, ataruJonosijat()),
+                        valintatapajono(2, Collections.emptyList())
+                )),
+                valinnanvaihe(2, nyt.minusMonths(12).toDate(), Collections.singletonList(valintatapajono(1, Collections.emptyList()))
+                )), Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063")));
+
+        assertEquals(
+                asList(
+                        asList("Haku", "Haku 1"),
+                        asList("Tarjoaja", "Tarjoaja 1"),
+                        asList("Hakukohde", "Hakukohde 1"),
+                        asList("Vaihe", "Vaihe 1"),
+                        asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
+                        asList("Jono", "Jono 1"),
+                        Collections.emptyList(),
+                        asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "pääsykoetulos", "keskiarvo"),
+                        asList("2", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000063", "1", "HYVAKSYTTAVISSA", "", "666", "10", "9")
+                ), getWorksheetData(ataruWorkbook.getSheetAt(0)));
     }
 
     @Test
     public void emptySheet() {
+        XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
+                valinnanvaihe(1, nyt.toDate(), asList(
+                        valintatapajono(1, jonosijat()),
+                        valintatapajono(2, Collections.emptyList())
+                )),
+                valinnanvaihe(2, nyt.minusMonths(12).toDate(), Collections.singletonList(valintatapajono(1, Collections.emptyList()))
+                )), hakemukset());
+
         assertEquals(
-            asList(
-                asList("Haku", "Haku 1"),
-                asList("Tarjoaja", "Tarjoaja 1"),
-                asList("Hakukohde", "Hakukohde 1"),
-                asList("Vaihe", "Vaihe 1"),
-                asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())),
-                asList("Jono", "Jono 2"),
-                asList(),
-                asList("Jonolle ei ole valintalaskennan tuloksia")
-            ), getWorksheetData(workbook.getSheetAt(1))
+                asList(
+                        asList("Haku", "Haku 1"),
+                        asList("Tarjoaja", "Tarjoaja 1"),
+                        asList("Hakukohde", "Hakukohde 1"),
+                        asList("Vaihe", "Vaihe 1"),
+                        asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())),
+                        asList("Jono", "Jono 2"),
+                        Collections.emptyList(),
+                        Collections.singletonList("Jonolle ei ole valintalaskennan tuloksia")
+                ), getWorksheetData(workbook.getSheetAt(1))
         );
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void sheetGenerationFailsNoApplication() {
+        List<JonosijaDTO> jonosijatToisellaEiHakemusta = Arrays.asList(
+                new JonosijaDTO(1, "Hakemus 2", "Hakija 2",
+                        jarjestyskriteerit(JarjestyskriteerituloksenTila.VIRHE, map("fi", "Puuttuu"), null),
+                        2, "Suku 2", "Etu 2", false, JarjestyskriteerituloksenTila.VIRHE, Collections.emptyList(), Collections.emptyList(), Arrays.asList(new FunktioTulosDTO("pääsykoetulos", null), new FunktioTulosDTO("keskiarvo", "8")), false, false),
+                new JonosijaDTO(2, "Hakemus 1", "Hakija 1",
+                        jarjestyskriteerit(HYVAKSYTTAVISSA, Collections.emptyMap(), new BigDecimal(666)),
+                        1, "Suku 1", "Etu 1", false, HYVAKSYTTAVISSA, Collections.emptyList(), Collections.emptyList(), Arrays.asList(new FunktioTulosDTO("pääsykoetulos", "10"), new FunktioTulosDTO("keskiarvo", "9")), false, false)
+        );
+        ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
+                valinnanvaihe(1, nyt.toDate(), asList(
+                        valintatapajono(1, jonosijatToisellaEiHakemusta),
+                        valintatapajono(2, Collections.emptyList())
+                )),
+                valinnanvaihe(2, nyt.minusMonths(12).toDate(), Collections.singletonList(valintatapajono(1, Collections.emptyList()))
+                )), hakemukset());
     }
 
     @Test
     public void generoiTiedosto() throws IOException {
+        XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
+                valinnanvaihe(1, nyt.toDate(), asList(
+                        valintatapajono(1, jonosijat()),
+                        valintatapajono(2, Collections.emptyList())
+                )),
+                valinnanvaihe(2, nyt.minusMonths(12).toDate(), Collections.singletonList(valintatapajono(1, Collections.emptyList()))
+                )), hakemukset());
+
         File outputFile = new File("valintatulokset.xlsx");
         try {
             StreamUtils.copy(Excel.export(workbook), new FileOutputStream(outputFile.getName()));
@@ -145,7 +213,7 @@ public class ValintalaskennanTulosExcelTest {
                 "Vaihe " + jarjestysnumero,
                 d,
                 jonot,
-                EMPTY_LIST
+                Collections.emptyList()
         );
     }
 
@@ -164,7 +232,7 @@ public class ValintalaskennanTulosExcelTest {
                 true,
                 jonosijat,
                 true,
-                EMPTY_LIST,
+                Collections.emptyList(),
                 2,
                 10,
                 new DateTime().plusDays(1).toDate(),
@@ -174,13 +242,18 @@ public class ValintalaskennanTulosExcelTest {
     }
 
     private List<JonosijaDTO> jonosijat() {
-        return Arrays.asList(
+        return Collections.singletonList(
                 new JonosijaDTO(2, "Hakemus 1", "Hakija 1",
-                        jarjestyskriteerit(HYVAKSYTTAVISSA, EMPTY_MAP, new BigDecimal(666)),
-                        1, "Suku 1", "Etu 1", false, HYVAKSYTTAVISSA, EMPTY_LIST, EMPTY_LIST, Arrays.asList(new FunktioTulosDTO("pääsykoetulos", "10"), new FunktioTulosDTO("keskiarvo", "9")), false, false),
-                new JonosijaDTO(1, "Hakemus 2", "Hakija 2",
-                        jarjestyskriteerit(JarjestyskriteerituloksenTila.VIRHE, map("fi", "Puuttuu"), null),
-                        2, "Suku 2", "Etu 2", false, JarjestyskriteerituloksenTila.VIRHE, EMPTY_LIST, EMPTY_LIST, Arrays.asList(new FunktioTulosDTO("pääsykoetulos", null), new FunktioTulosDTO("keskiarvo", "8")), false, false)
+                        jarjestyskriteerit(HYVAKSYTTAVISSA, Collections.emptyMap(), new BigDecimal(666)),
+                        1, "Suku 1", "Etu 1", false, HYVAKSYTTAVISSA, Collections.emptyList(), Collections.emptyList(), Arrays.asList(new FunktioTulosDTO("pääsykoetulos", "10"), new FunktioTulosDTO("keskiarvo", "9")), false, false)
+        );
+    }
+
+    private List<JonosijaDTO> ataruJonosijat() {
+        return Collections.singletonList(
+                new JonosijaDTO(2, "1.2.246.562.11.00000000000000000063", "1.2.246.562.24.86368188549",
+                        jarjestyskriteerit(HYVAKSYTTAVISSA, Collections.emptyMap(), new BigDecimal(666)),
+                        1, "Suku 1", "Etu 1", false, HYVAKSYTTAVISSA, Collections.emptyList(), Collections.emptyList(), Arrays.asList(new FunktioTulosDTO("pääsykoetulos", "10"), new FunktioTulosDTO("keskiarvo", "9")), false, false)
         );
     }
 
@@ -188,7 +261,10 @@ public class ValintalaskennanTulosExcelTest {
         final Answers answersWithHetu = new Answers();
         answersWithHetu.getHenkilotiedot().put("Henkilotunnus", "010101-123N");
         answersWithHetu.getHenkilotiedot().put("Sähköposti", "sukuetu1@testi.fi");
-        Hakemus hakemus = new Hakemus("", "", answersWithHetu, EMPTY_MAP, EMPTY_LIST, "Hakemus 1", "", "Hakija 1");
+        answersWithHetu.getHenkilotiedot().put("Etunimet", "Etu 1");
+        answersWithHetu.getHenkilotiedot().put("Sukunimi", "Suku 1");
+
+        Hakemus hakemus = new Hakemus("", "", answersWithHetu, Collections.emptyMap(), Collections.emptyList(), "Hakemus 1", "", "Hakija 1");
         HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
         return Collections.singletonList(wrapper);
     }

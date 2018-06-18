@@ -1,10 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
+import com.ctc.wstx.util.StringUtil;
 import com.google.common.collect.Sets;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -26,6 +28,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCac
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -67,6 +70,8 @@ public class ValintalaskentaExcelResource {
     private TarjontaAsyncResource tarjontaResource;
     @Autowired
     private ApplicationAsyncResource applicationResource;
+    @Autowired
+    private AtaruAsyncResource ataruAsyncResource;
     @Context
     private HttpServletRequest httpServletRequestJaxRS;
 
@@ -177,7 +182,13 @@ public class ValintalaskentaExcelResource {
         Observable<HakukohdeV1RDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
         final Observable<HakuV1RDTO> hakuObservable = hakukohdeObservable.flatMap(hakukohde -> tarjontaResource.haeHaku(hakukohde.getHakuOid()));
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
-        final Observable<List<HakemusWrapper>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
+        final Observable<List<HakemusWrapper>> hakemuksetObservable = hakuObservable.flatMap(haku -> {
+            if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
+                return applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid);
+            } else {
+                return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
+            }
+        });
         final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakuObservable, hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel::luoExcel);
         workbookObservable.subscribe(
                 (workbook) -> asyncResponse.resume(

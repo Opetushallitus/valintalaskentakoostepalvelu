@@ -67,11 +67,17 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
         }
     }
 
-    public static HakemusWrapper getAtaruHakemusWrapper(String s) {
+    private static HenkiloPerustietoDto createHenkilo() {
         HenkiloPerustietoDto henkilo = new HenkiloPerustietoDto();
-        henkilo.setOidHenkilo("Henkilo1");
-        henkilo.setHetu("Hetu1");
+        henkilo.setSukunimi("TAUsuL4BQc");
+        henkilo.setEtunimet("Zl2A5");
+        henkilo.setOidHenkilo("1.2.246.562.24.86368188549");
+        henkilo.setHetu("020202A0202");
+        return henkilo;
+    }
+
+    public static HakemusWrapper getAtaruHakemusWrapper(String s) {
         AtaruHakemus hakemus = getAtaruHakemukset(Sets.newSet(s)).iterator().next();
-        return new AtaruHakemusWrapper(hakemus, henkilo);
+        return new AtaruHakemusWrapper(hakemus, createHenkilo());
     }
 }

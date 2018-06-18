@@ -88,7 +88,7 @@ public class ValintalaskennanTulosExcel {
                 .map(hakija -> {
                     final Stream<Column> fixedColumnValuesStream = fixedColumns.stream();
                     final Stream<Column> dynamicColumnValuesStream = hakija.getFunktioTulokset().stream().map(FunktioTulosDTO::getTunniste).map(t -> new Column(t, 14, rivi -> extractValue(t, rivi)));
-                    final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus));
+                    final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()));
                     return Stream.concat(fixedColumnValuesStream, dynamicColumnValuesStream)
                             .map(column -> column.extractor.apply(hakemusRivi))
                             .collect(Collectors.toList());
@@ -115,8 +115,6 @@ public class ValintalaskennanTulosExcel {
                 .orElse("");
     }
 
-    private static HakemusWrapper emptyHakemus = new HakuappHakemusWrapper(new Hakemus());
-
     private static class Column {
         public final String name;
         public final int widthInCharacters;
@@ -133,27 +131,19 @@ public class ValintalaskennanTulosExcel {
         public final JonosijaDTO hakija;
         public final HakemusWrapper hakemus;
 
-        public HakemusRivi(final JonosijaDTO hakija, final HakemusWrapper hakemus) {
+        HakemusRivi(final JonosijaDTO hakija, final HakemusWrapper hakemus) {
             this.hakija = hakija;
-            this.hakemus = hakemus;
+            this.hakemus = Objects.requireNonNull(hakemus, String.format("Hakemusta oidilla %s ei löytynyt", hakija.getHakemusOid()));
         }
-
-        public String getHetu() {
-            return trimToEmpty(hakemus.getHenkilotunnus());
-        }
-        public String getSahkoposti() {
-            return trimToEmpty(hakemus.getSahkopostiOsoite());
-        }
-
     }
 
     private static List<Column> fixedColumns = Arrays.asList(
             new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
-            new Column("Sukunimi", 20, rivi -> rivi.hakija.getSukunimi()),
-            new Column("Etunimi", 20, rivi -> rivi.hakija.getEtunimi()),
-            new Column("Henkilötunnus", 20, rivi -> rivi.getHetu()),
-            new Column("Sähköpostiosoite", 20, rivi -> rivi.getSahkoposti()),
-            new Column("Hakemus OID", 20, rivi -> rivi.hakija.getHakemusOid()),
+            new Column("Sukunimi", 20, rivi -> rivi.hakemus.getSukunimi()),
+            new Column("Etunimi", 20, rivi -> rivi.hakemus.getEtunimi()),
+            new Column("Henkilötunnus", 20, rivi -> rivi.hakemus.getHenkilotunnus()),
+            new Column("Sähköpostiosoite", 20, rivi -> rivi.hakemus.getSahkopostiOsoite()),
+            new Column("Hakemus OID", 20, rivi -> rivi.hakemus.getOid()),
             new Column("Hakutoive", 14, rivi -> String.valueOf(rivi.hakija.getPrioriteetti())),
             new Column("Laskennan tulos", 20, rivi -> rivi.hakija.getTuloksenTila().toString()),
             new Column("Selite", 30, rivi -> getTeksti(getJarjestyskriteeri(rivi.hakija).getKuvaus())),
