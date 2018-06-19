@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KansalaisuusDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements AtaruAsyncResource {
@@ -48,7 +50,8 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
     private Observable<List<HakemusWrapper>> getApplications(String hakukohdeOid, List<String> hakemusOids) {
         return this.<String, List<AtaruHakemus>>postAsObservableLazily(
                 getUrl("ataru.applications.by-hakukohde"),
-                new TypeToken<List<AtaruHakemus>>() {}.getType(),
+                new TypeToken<List<AtaruHakemus>>() {
+                }.getType(),
                 Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON),
                 client -> {
                     if (hakukohdeOid != null) {
@@ -60,13 +63,16 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
             if (hakemukset.isEmpty()) {
                 return Observable.just(Collections.emptyList());
             } else {
-                Observable<Map<String, HenkiloPerustietoDto>> henkilotO = getHenkilotObservable(hakemukset);
-                Observable<Map<String, Koodi>> maakooditO = getMaakooditObservable(hakemukset);
-                return Observable.zip(henkilotO, maakooditO, (henkilot, maakoodit) ->
-                        hakemukset.stream()
-                                .map(hakemusToHakemusWrapper(henkilot, maakoodit))
-                                .collect(Collectors.toList())
-                );
+                return getHenkilotObservable(hakemukset)
+                        .flatMap(henkilot -> {
+                            Stream<String> asuinmaaKoodit = hakemukset.stream().map(h -> h.getKeyValues().get("country-of-residence"));
+                            Stream<String> kansalaisuusKoodit = henkilot.values().stream().flatMap(h -> h.getKansalaisuus().stream().map(KansalaisuusDto::getKansalaisuusKoodi));
+                            return getMaakooditObservable(asuinmaaKoodit, kansalaisuusKoodit)
+                                    .map(maakoodit ->
+                                            hakemukset.stream()
+                                                    .map(hakemusToHakemusWrapper(henkilot, maakoodit))
+                                                    .collect(Collectors.toList()));
+                        });
             }
         });
     }
@@ -80,15 +86,20 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
     private Function<AtaruHakemus, AtaruHakemusWrapper> hakemusToHakemusWrapper(Map<String, HenkiloPerustietoDto> henkilot, Map<String, Koodi> maakoodit) {
         return hakemus -> {
             String ISOmaakoodi = maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
+            HenkiloPerustietoDto henkilo = henkilot.get(hakemus.getPersonOid());
+            List<String> kansalaisuudet = henkilo.getKansalaisuus().stream()
+                    .map(k -> maakoodit.get(k.getKansalaisuusKoodi()).getKoodiArvo())
+                    .collect(Collectors.toList());
             hakemus.getKeyValues().replace("country-of-residence", ISOmaakoodi);
-            return new AtaruHakemusWrapper(hakemus, henkilot.get(hakemus.getPersonOid()));
+            AtaruHakemusWrapper wrapper = new AtaruHakemusWrapper(hakemus, henkilo);
+            wrapper.setKansalaisuus(kansalaisuudet);
+            return wrapper;
         };
     }
 
-    private Observable<Map<String, Koodi>> getMaakooditObservable(List<AtaruHakemus> hakemukset) {
+    private Observable<Map<String, Koodi>> getMaakooditObservable(Stream<String> asuinmaaKoodit, Stream<String> kansalaisuusKoodit) {
         return Observable.merge(
-                hakemukset.stream()
-                        .map(h -> h.getKeyValues().get("country-of-residence"))
+                Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
                         .distinct()
                         .map(koodiArvo -> koodistoCachedAsyncResource.haeRinnasteinenKoodiAsync("maatjavaltiot2_" + koodiArvo)
                                 .map(koodi -> Pair.of(koodiArvo, koodi)))

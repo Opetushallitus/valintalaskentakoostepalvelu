@@ -156,7 +156,7 @@ public class SijoittelunTulosExcelKomponentti {
         Map<String, Map<String, HakemusDTO>> jonoOidHakemusOidHakemusDto = valintatapajonot.stream()
                 .collect(Collectors.toMap(ValintatapajonoDTO::getOid, v -> v.getHakemukset().stream().collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h))));
 
-        Map<String, Lukuvuosimaksu> personOidToLukuvuosimaksu = lukuvuosimaksut.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l));
+        Map<String, Lukuvuosimaksu> personOidToLukuvuosimaksu = lukuvuosimaksut.stream().collect(Collectors.toMap(Lukuvuosimaksu::getPersonOid, l -> l));
 
         Map<String, IlmoittautumisTila> hakemusJaJonoMappaus = valintatapajononTilat(valintatulokset);
         for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {

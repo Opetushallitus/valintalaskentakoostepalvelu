@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.cas.CasKoosteInterceptor;
@@ -9,13 +10,12 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KansalaisuusDto;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 import rx.Observable;
@@ -23,14 +23,14 @@ import rx.Observable;
 import javax.ws.rs.client.Entity;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AtaruAsyncResourceTest {
     private final HttpResource wrappedHttpResource = mock(HttpResource.class);
@@ -68,6 +68,10 @@ public class AtaruAsyncResourceTest {
         onrHenkilo.setEtunimet("Feliks Esaias");
         onrHenkilo.setSukunimi("Pakarinen");
 
+        KansalaisuusDto kansalaisuus = new KansalaisuusDto();
+        kansalaisuus.setKansalaisuusKoodi("246");
+        onrHenkilo.setKansalaisuus(Sets.newHashSet(kansalaisuus));
+
         when(wrappedHttpResource.gson()).thenReturn(HttpResource.DEFAULT_GSON);
 
         when(wrappedHttpResource.postAsObservableLazily(
@@ -88,5 +92,6 @@ public class AtaruAsyncResourceTest {
         assertEquals("FIN", applications.get(0).getAsuinmaa());
         assertEquals("MAF", applications.get(1).getAsuinmaa());
         assertEquals("Feliks", applications.get(2).getEtunimi());
+        assertEquals("FIN", applications.get(0).getKansalaisuus());
     }
 }

@@ -21,6 +21,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     private final AtaruHakemus hakemus;
     private final Map<String,String> keyvalues;
     private final HenkiloPerustietoDto henkilo;
+    private List<String> kansalaisuudet;
     private final static String PREFERENCE_REGEX = "preference\\d-Koulutus-id-eligibility";
     private final static ImmutableMap<String, String> ELIGIBILITIES = new ImmutableMap.Builder<String, String>()
             .put("eligible", "ELIGIBLE")
@@ -86,7 +87,12 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public String getKansallinenId() { return StringUtils.trimToEmpty(keyvalues.get("national-id-number")); }
 
     @Override
-    public String getKansalaisuus() { return StringUtils.trimToEmpty(henkilo.getKansalaisuus().iterator().next().getKansalaisuusKoodi()); }
+    public String getKansalaisuus() {
+        return kansalaisuudet != null ? kansalaisuudet.iterator().next() : StringUtils.trimToEmpty(henkilo.getKansalaisuus().iterator().next().getKansalaisuusKoodi()); }
+
+    public void setKansalaisuus(List<String> kansalaisuudet) {
+        this.kansalaisuudet = kansalaisuudet;
+    }
 
     @Override
     public String getPassinnumero() { return StringUtils.trimToEmpty(keyvalues.get("passport-number")); }
