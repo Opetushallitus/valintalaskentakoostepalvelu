@@ -59,24 +59,6 @@ public class OppilaitosKomponentti {
         throw new OrganisaatioException("Organisaatiopalvelu ei palauttanut oppilaitosnumeroa tarjoajalle " + tarjoajaOid);
     }
 
-    public String haeOppilaitosKoodi(String tarjoajaOid) {
-        try {
-            OrganisaatioRDTO organisaatio = organisaatioProxy.getOrganisaatioByOID(tarjoajaOid);
-            if (organisaatio == null) {
-                LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
-            } else {
-                if (organisaatio.getYhteishaunKoulukoodi() == null) {
-                    LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
-                } else {
-                    return organisaatio.getYhteishaunKoulukoodi();
-                }
-            }
-        } catch (Exception e) {
-            LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle " + tarjoajaOid, e);
-        }
-        throw new OrganisaatioException("Organisaatiopalvelu ei palauttanut yhteishaun koulukoodia tarjoajalle " + tarjoajaOid);
-    }
-
     private String getOppilaitosnumeroFromParent(OrganisaatioRDTO organisaatio) {
         List<String> visitedOids = new LinkedList<>();
         String tarjoajaOid = organisaatio.getOid();

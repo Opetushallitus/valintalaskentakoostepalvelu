@@ -287,16 +287,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         }
                     };
                     OppilaitosSource oppilaitosSource = new OppilaitosSource() {
-                        Cache<String, String> koodiCache = CacheBuilder.<String, String>newBuilder().build();
                         Cache<String, String> numeroCache = CacheBuilder.<String, String>newBuilder().build();
-
-                        public String getOppilaitosKoodi(String tarjoajaOid) {
-                            try {
-                                return koodiCache.get(tarjoajaOid, () -> oppilaitosKomponentti.haeOppilaitosKoodi(tarjoajaOid));
-                            } catch (Throwable t) {
-                                throw new RuntimeException(t);
-                            }
-                        }
 
                         public String getOppilaitosnumero(String tarjoajaOid) {
                             try {
