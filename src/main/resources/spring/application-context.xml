@@ -169,12 +169,6 @@
 							 address="${valintalaskentakoostepalvelu.organisaatioService.rest.url}"
 							 serviceClass="fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource"
 							 inheritHeaders="true">
-			<jaxrs-client:outInterceptors>
-				<ref bean="OrganisaatioResourceClientCasInterceptor"/>
-			</jaxrs-client:outInterceptors>
-			<jaxrs-client:inInterceptors>
-				<ref bean="OrganisaatioResourceClientCasInterceptor"/>
-			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />

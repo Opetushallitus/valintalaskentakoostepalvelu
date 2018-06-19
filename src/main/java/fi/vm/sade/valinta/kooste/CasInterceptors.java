@@ -102,14 +102,6 @@ public class CasInterceptors {
             @Value("${valintalaskentakoostepalvelu.app.password.to.koodisto}") String appClientPassword) {
         return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
     }
-    @Bean(name="OrganisaatioResourceClientCasInterceptor")
-    public AbstractPhaseInterceptor<Message> getOrganisaatioResourceClientCasInterceptor(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.organisaatio-service}/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
-        return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
-    }
 
     private AbstractPhaseInterceptor<Message> createCasInterceptor(
             String webCasUrl,String targetService,String appClientUsername,String appClientPassword) {
