@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
-import com.ctc.wstx.util.StringUtil;
 import com.google.common.collect.Sets;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
@@ -118,53 +117,58 @@ public class ValintalaskentaExcelResource {
         try {
             final DokumenttiProsessi p = new DokumenttiProsessi("Sijoitteluntulosexcel", "Sijoitteluntulokset taulukkolaskenta tiedosto", "", Arrays.asList("sijoitteluntulos", "taulukkolaskenta"));
             p.setKokonaistyo(1);
-            Observable.combineLatest(
-                    tarjontaAsyncResource.haeHaku(hakuOid),
-                    tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
-                    valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
-                    valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.createAuditSession(httpServletRequestJaxRS)),
-                    valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
-                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
-                    valintalaskentaResource.laskennantulokset(hakukohdeOid),
-                    (haku, tarjonta, valintatulokset, lukuvuosimaksut, hakukohde, hakemukset, valinnanvaiheet) -> {
-                        try {
-                            String opetuskieli = KirjeetHakukohdeCache.getOpetuskieli(tarjonta.getOpetusKielet());
-                            Teksti hakukohteenNimet = new Teksti(tarjonta.getHakukohteenNimet());
-                            Teksti tarjoajaNimet = new Teksti(tarjonta.getTarjoajaNimet());
+            tarjontaAsyncResource.haeHaku(hakuOid)
+                    .subscribe(haku -> {
+                        Observable<List<HakemusWrapper>> hakemuksetO = ((StringUtils.isEmpty(haku.getAtaruLomakeAvain()))
+                            ? applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid)
+                            : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
+                        Observable.combineLatest(
+                                tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
+                                valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
+                                valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, AuthorizationUtil.createAuditSession(httpServletRequestJaxRS)),
+                                hakemuksetO,
+                                valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
+                                valintalaskentaResource.laskennantulokset(hakukohdeOid),
+                                (tarjontaHakukohde, valintatulokset, lukuvuosimaksut, hakemukset, hakukohde, valinnanvaiheet) -> {
+                                    try {
+                                        String opetuskieli = KirjeetHakukohdeCache.getOpetuskieli(tarjontaHakukohde.getOpetusKielet());
+                                        Teksti hakukohteenNimet = new Teksti(tarjontaHakukohde.getHakukohteenNimet());
+                                        Teksti tarjoajaNimet = new Teksti(tarjontaHakukohde.getTarjoajaNimet());
 
-                            InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(VastaanottoFilterUtil.nullifyVastaanottoBasedOnHakemuksenTila(valintatulokset, hakukohde), opetuskieli,
-                                    hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, lukuvuosimaksut, hakukohde, haku, valinnanvaiheet);
-                            String id = UUID.randomUUID().toString();
-                            Observable<Response> response = dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", DateTime.now().plusHours(24).toDate().getTime(), Arrays.asList(), "application/vnd.ms-excel", xls);
-                            response.subscribe(
-                                    ehkaOk -> {
-                                        if (ehkaOk.getStatus() < 300) {
-                                            p.setDokumenttiId(id);
-                                            p.inkrementoiTehtyjaToita();
-                                        } else {
-                                            LOG.error("Dokumentin tallennus epäonnistui: Dokumentti palvelun paluuarvo {}", ehkaOk.getStatus());
-                                            p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumenttipalvelulle tallennus"));
-                                        }
-                                    },
-                                    poikkeus -> {
-                                        LOG.error("Dokumentin tallennus epäonnistui", poikkeus);
-                                        p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumenttipalvelulle tallennus", poikkeus.getMessage()));
+                                        InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(VastaanottoFilterUtil.nullifyVastaanottoBasedOnHakemuksenTila(valintatulokset, hakukohde), opetuskieli,
+                                                hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, lukuvuosimaksut, hakukohde, haku, valinnanvaiheet);
+                                        String id = UUID.randomUUID().toString();
+                                        Observable<Response> response = dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", DateTime.now().plusHours(24).toDate().getTime(), Arrays.asList(), "application/vnd.ms-excel", xls);
+                                        response.subscribe(
+                                                ehkaOk -> {
+                                                    if (ehkaOk.getStatus() < 300) {
+                                                        p.setDokumenttiId(id);
+                                                        p.inkrementoiTehtyjaToita();
+                                                    } else {
+                                                        LOG.error("Dokumentin tallennus epäonnistui: Dokumentti palvelun paluuarvo {}", ehkaOk.getStatus());
+                                                        p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumenttipalvelulle tallennus"));
+                                                    }
+                                                },
+                                                poikkeus -> {
+                                                    LOG.error("Dokumentin tallennus epäonnistui", poikkeus);
+                                                    p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumenttipalvelulle tallennus", poikkeus.getMessage()));
+                                                }
+                                        );
+                                        return response;
+                                    } catch (Throwable e) {
+                                        LOG.error("Dokumentin generointi epäonnistui", e);
+                                        p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumentin generointi", e.getMessage()));
+                                        return Observable.error(e);
                                     }
-                            );
-                            return response;
-                        } catch (Throwable e) {
-                            LOG.error("Dokumentin generointi epäonnistui", e);
-                            p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumentin generointi", e.getMessage()));
-                            return Observable.error(e);
-                        }
-                    }
-            ).flatMap(o -> o).subscribe(
-                    ok -> LOG.info("Dokumentin generointi valmistui onnistuneesti"),
-                    poikkeus -> {
-                        LOG.error("Dokumentin generointi epäonnistui", poikkeus);
-                        p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumentin generointi", poikkeus.getMessage()));
-                    }
-            );
+                                }
+                        ).flatMap(o -> o).subscribe(
+                                ok -> LOG.info("Dokumentin generointi valmistui onnistuneesti"),
+                                poikkeus -> {
+                                    LOG.error("Dokumentin generointi epäonnistui", poikkeus);
+                                    p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumentin generointi", poikkeus.getMessage()));
+                                }
+                        );
+                    });
             dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
             return p.toProsessiId();
         } catch (Exception e) {
