@@ -61,7 +61,8 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public String getSukupuoliAsIs() { return StringUtils.trimToEmpty(henkilo.getSukupuoli()); }
 
     @Override
-    public String getAidinkieli() { return StringUtils.trimToEmpty(henkilo.getAidinkieli().getKieliKoodi()); }
+    public String getAidinkieli() {
+        return henkilo.getAidinkieli() != null ? StringUtils.trimToEmpty(henkilo.getAidinkieli().getKieliKoodi()) : ""; }
 
     @Override
     public String getKaupunkiUlkomaa() { return StringUtils.trimToEmpty(keyvalues.get("home-town")); }
@@ -143,10 +144,11 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public boolean getVainSahkoinenViestinta() { return false; }
 
     @Override
-    public boolean hasAsiointikieli() { return StringUtils.isNotEmpty(henkilo.getAsiointiKieli().getKieliKoodi()); }
+    public boolean hasAsiointikieli() { return henkilo.getAsiointiKieli() != null; }
 
     @Override
-    public String getAsiointikieli() { return StringUtils.trimToEmpty(henkilo.getAsiointiKieli().getKieliKoodi()); }
+    public String getAsiointikieli() { return
+            hasAsiointikieli() ? StringUtils.trimToEmpty(henkilo.getAsiointiKieli().getKieliKoodi()) : ""; }
 
     @Override
     public boolean getLupaSahkoiseenAsiointiin() { return false; }
