@@ -200,9 +200,7 @@ public class OsoitetarratService {
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
                     .setLaskurinAlkuarvo(3)
-                    .setSuoritaJokaKerta(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    })
+                    .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
                     .setSynkronoituToiminto(() -> {
                         osoitetarratHakemuksille(haetutHakemuksetRef.get(), maatJaValtiot1Ref.get(), postiRef.get(), prosessi);
                     }).build();

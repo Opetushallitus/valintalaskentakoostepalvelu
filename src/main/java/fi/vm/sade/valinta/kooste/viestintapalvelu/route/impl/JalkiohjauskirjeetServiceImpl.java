@@ -4,7 +4,9 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -47,6 +49,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
     private final JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private AtaruAsyncResource ataruAsyncResource;
+    private TarjontaAsyncResource tarjontaAsyncResource;
     private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
     private final int pollingIntervalMillis;
     private final int viePdfTimeoutMinutes;
@@ -57,6 +61,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti,
         ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
         ApplicationAsyncResource applicationAsyncResource,
+        AtaruAsyncResource ataruAsyncResource,
+        TarjontaAsyncResource tarjontaAsyncResource,
         KirjeetHakukohdeCache kirjeetHakukohdeCache,
         @Value("${valintalaskentakoostepalvelu.jalkiohjauskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis,
         @Value("${valintalaskentakoostepalvelu.jalkiohjauskirjeet.viePdf.timeout.minutes:15}") int viePdfTimeoutMinutes) {
@@ -64,6 +70,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
+        this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
         this.pollingIntervalMillis = pollingIntervalMillis;
         this.viePdfTimeoutMinutes = viePdfTimeoutMinutes;
@@ -126,8 +134,11 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
         List<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
         try {
-            Observable<List<HakemusWrapper>> hakemuksetObservable = applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS);
-            return hakemuksetObservable.timeout(5, MINUTES).toBlocking().first();
+            return tarjontaAsyncResource.haeHaku(hakuOid)
+                    .flatMap(haku -> (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                            ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
+                            : ataruAsyncResource.getApplicationsByOids(hakemusOids)))
+                    .timeout(5, MINUTES).toBlocking().first();
         } catch (Throwable e) {
             LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
             throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
