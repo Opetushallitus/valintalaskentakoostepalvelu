@@ -76,41 +76,37 @@ public class OsoitetarratService {
         this.osoiteKomponentti = osoiteKomponentti;
     }
 
-    public void osoitetarratSijoittelussaHyvaksytyille(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid) {
+    public void osoitetarratSijoittelussaHyvaksytyille(DokumenttiProsessi prosessi, HakuV1RDTO haku, String hakukohdeOid) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
-            LOG.error("Luodaan osoitetarrat sijoittelussa hyväksytyille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
-            prosessi.setKokonaistyo(
-                    3 // luonti
-                    + 1
-                    // dokumenttipalveluun vienti
-                    + 1);
+            LOG.error("Luodaan osoitetarrat sijoittelussa hyväksytyille (haku={}, hakukohde={})", haku.getOid(), hakukohdeOid);
+            prosessi.setKokonaistyo(5);
             final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
                     .setLaskurinAlkuarvo(3)
-                    .setSuoritaJokaKerta(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    })
+                    .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
                     .setSynkronoituToiminto(() -> {
                         osoitetarratHakemuksille(haetutHakemuksetRef.get(), maatJaValtiot1Ref.get(), postiRef.get(), prosessi);
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
 
-            valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid)
+            valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(haku.getOid(), hakukohdeOid)
                     .map(hakukohteenTulos -> hakukohteenTulos.getValintatapajonot().stream()
                             .flatMap(valintatapajono -> valintatapajono.getHakemukset().stream())
                             .filter(hakemus -> hakemus.getTila().isHyvaksytty())
                             .map(HakemusDTO::getHakemusOid)
                             .distinct()
                             .collect(Collectors.toList()))
-                    .flatMap(hyvaksytytHakemukset -> {
-                        if (hyvaksytytHakemukset.isEmpty()) {
+                    .flatMap(hakemusOids -> {
+                        if (hakemusOids.isEmpty()) {
                             return Observable.error(new RuntimeException("Sijoittelussa ei ole hyväksyttyjä hakijoita"));
                         } else {
-                            return applicationAsyncResource.getApplicationsByOids(hyvaksytytHakemukset);
+                            return StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                    ? applicationAsyncResource.getApplicationsByOids(hakemusOids)
+                                    : ataruAsyncResource.getApplicationsByOids(hakemusOids);
                         }
                     })
                     .subscribe(hakemukset -> {

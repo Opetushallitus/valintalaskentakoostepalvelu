@@ -105,16 +105,16 @@ public class ViestintapalveluAktivointiResource {
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
         try {
-            if (hakemuksillaRajaus == null) {
-                hakemuksillaRajaus = new DokumentinLisatiedot();
-            }
-            DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Sijoittelussa hyväksytyille", hakuOid, tags("osoitetarrat", hakemuksillaRajaus.getTag()));
+            DokumentinLisatiedot lisatiedot = hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
+            DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Sijoittelussa hyväksytyille", hakuOid, tags("osoitetarrat", lisatiedot.getTag()));
             dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-            if (hakemuksillaRajaus.getHakemusOids() != null) {
-                osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
-            } else {
-                osoitetarratService.osoitetarratSijoittelussaHyvaksytyille(osoiteProsessi, hakuOid, hakukohdeOid);
-            }
+            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+                if (lisatiedot.getHakemusOids() != null) {
+                    osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, lisatiedot.getHakemusOids());
+                } else {
+                    osoitetarratService.osoitetarratSijoittelussaHyvaksytyille(osoiteProsessi, haku, hakukohdeOid);
+                }
+            });
             return osoiteProsessi.toProsessiId();
         } catch (Exception e) {
             LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe!", e);
