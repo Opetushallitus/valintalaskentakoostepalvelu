@@ -10,6 +10,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import org.apache.commons.lang.StringUtils;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -109,7 +110,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public String getSahkopostiOsoite() {return StringUtils.trimToEmpty(keyvalues.get("email")); }
 
     @Override
-    public String getSyntymaaika() { return henkilo.getSyntymaaika().toString(); }
+    public String getSyntymaaika() { return henkilo.getSyntymaaika().format(DateTimeFormatter.ISO_LOCAL_DATE); }
 
     @Override
     public String getHenkilotunnus() { return StringUtils.trimToEmpty(henkilo.getHetu()); }

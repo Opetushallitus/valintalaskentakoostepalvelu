@@ -109,6 +109,12 @@ public class HakemusSpec extends ConstantsSpec {
         private final AtaruHakemus hakemus;
         private final HenkiloPerustietoDto henkilo;
 
+        public AtaruHakemusBuilder() {
+            hakemus = new AtaruHakemus();
+            hakemus.setKeyValues(Maps.newHashMap());
+            henkilo = null;
+        }
+
         public AtaruHakemusBuilder(String oid, String personOid, String hetu) {
             hakemus = new AtaruHakemus();
             hakemus.setKeyValues(Maps.newHashMap());
@@ -131,14 +137,25 @@ public class HakemusSpec extends ConstantsSpec {
             hakemus.getKeyValues().put("postal-code", postinumero);
             return this;
         }
+        public AtaruHakemusBuilder setCountryOfResidence(String countryCode) {
+            hakemus.getKeyValues().put("country-of-residence", countryCode);
+            return this;
+        }
         public AtaruHakemusBuilder setPersonOid(String oid) {
             henkilo.setOidHenkilo(oid);
+            return this;
+        }
+        public AtaruHakemusBuilder setHakemusPersonOid(String oid) {
+            hakemus.setPersonOid(oid);
             return this;
         }
 
 
         public HakemusWrapper build() {
             return new AtaruHakemusWrapper(hakemus, henkilo);
+        }
+        public AtaruHakemus getHakemus() {
+            return hakemus;
         }
     }
 

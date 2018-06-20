@@ -201,7 +201,7 @@ public class ViestintapalveluObservables {
     }
 
     public static HaunResurssit filtteroiAsiointikielella(String asiointkieli, HaunResurssit haunResurssit) {
-        HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> asiointkieli.equals(hakemus.getAsiointikieli()));
+        HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> asiointkieli.equalsIgnoreCase(hakemus.getAsiointikieli()));
         LOG.info("Asiointikielellä filtteröinnin jälkeen {} kpl", filteroidytResurssit.hakemukset.size());
         return filteroidytResurssit;
     }

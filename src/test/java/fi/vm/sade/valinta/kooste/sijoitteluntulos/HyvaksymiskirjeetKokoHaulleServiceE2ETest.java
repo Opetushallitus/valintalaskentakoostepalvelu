@@ -1,20 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS2;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE1;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE2;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.HAKEMUS1;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.POST;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
@@ -25,7 +12,10 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodisto;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
@@ -44,6 +34,15 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.HAKEMUS1;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
 
 public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
@@ -83,6 +82,28 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .buildHakuappHakemus()
         ));
+
+        mockKoodisto();
+
+        mockLetterKutsut("^(?!.*HAKEMUS2).*HAKEMUS1.*$");
+        ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
+        pollAndAssertDokumenttiProsessi(dokumenttiId);
+
+    }
+
+    @Test
+    public void ataruTestaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws InterruptedException, IOException {
+        mockHakukohde1Kutsu();
+        mockAtaruHakuKutsu();
+        mockYksiHyvaksyttyKutsu();
+
+        mockToReturnJson(POST, "/lomake-editori/api/external/valintalaskenta", Arrays.asList(
+                new HakemusSpec.AtaruHakemusBuilder().setOid(HAKEMUS1).setHakemusPersonOid("person1").setCountryOfResidence("246").getHakemus(),
+                new HakemusSpec.AtaruHakemusBuilder().setOid(HAKEMUS2).setHakemusPersonOid("person1").setCountryOfResidence("246").getHakemus()
+        ));
+
+        // Sorry..
+        mockToReturnString(POST, "/oppijanumerorekisteri-service/henkilo/henkiloPerustietosByHenkiloOidList", "[{\"oidHenkilo\":\"person1\",\"hetu\":\"020202A0202\",\"etunimet\":\"Josefina Testi\",\"kutsumanimi\":\"Josefina\",\"sukunimi\":\"Andersson-Testi\",\"syntymaaika\":\"1990-01-01\",\"turvakielto\": false,\"aidinkieli\": null,\"asiointiKieli\": {\"kieliKoodi\":\"sv\"},\"kansalaisuus\": [{\"kansalaisuusKoodi\":\"246\"}],\"sukupuoli\":\"2\"}]");
 
         mockKoodisto();
 
@@ -338,6 +359,13 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
     }
 
+    private void mockAtaruHakuKutsu() {
+        HakuV1RDTO haku = new HakuV1RDTO();
+        haku.setAtaruLomakeAvain("atarulomakeavain");
+        haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
+    }
+
     private void mockLetterKutsut(String regex) {
         LetterResponse letterResponse = new LetterResponse();
         letterResponse.setBatchId("testBatchId");
@@ -360,6 +388,18 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockToReturnString(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", maatjavaltiot1);
         final String posti = IOUtils.toString(new ClassPathResource("/koodisto/posti.json").getInputStream());
         mockToReturnString(GET, "/koodisto-service/rest/json/posti/koodi", posti);
+
+        Koodi suomiKoodi = new Koodi();
+        suomiKoodi.setKoodiArvo("FIN");
+
+        Koodisto koodisto = new Koodisto();
+        koodisto.setKoodistoUri("maatjavaltiot1");
+
+        suomiKoodi.setKoodisto(koodisto);
+
+        mockToReturnJson(GET, "/koodisto-service/rest/json/relaatio/rinnasteinen/.*", Lists.newArrayList(
+                suomiKoodi
+        ));
     }
 
 }
