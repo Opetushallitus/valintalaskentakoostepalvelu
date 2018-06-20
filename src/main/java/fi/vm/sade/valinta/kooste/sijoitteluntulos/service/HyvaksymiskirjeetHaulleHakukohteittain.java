@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -21,6 +22,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluOb
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HakukohdeJaResurssit;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetHaulleHakukohteittain.class);
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
@@ -51,11 +54,12 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
 
     @Autowired
     public HyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti, ApplicationAsyncResource applicationAsyncResource,
-                                                  ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource, TarjontaAsyncResource tarjontaAsyncResource, DokumenttiAsyncResource dokumenttiAsyncResource,
+                                                  AtaruAsyncResource ataruAsyncResource, ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource, TarjontaAsyncResource tarjontaAsyncResource, DokumenttiAsyncResource dokumenttiAsyncResource,
                                                   OrganisaatioAsyncResource organisaatioAsyncResource, ViestintapalveluAsyncResource viestintapalveluAsyncResource,
                                                   HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl, HakuParametritService hakuParametritService) {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
@@ -66,10 +70,12 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     }
 
     public void muodostaKirjeet(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
-
         Observable<List<HakukohdeJaResurssit>> hakukohdeJaResurssitObs =
                 ViestintapalveluObservables.hakukohteetJaResurssit(valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid), (oids) ->
-                    applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS))
+                    tarjontaAsyncResource.haeHaku(hakuOid)
+                        .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)
+                                : ataruAsyncResource.getApplicationsByOids(oids)))
                         .doOnNext(list -> prosessi.setKokonaistyo(list.size()));
 
         hakukohdeJaResurssitObs.subscribe(
