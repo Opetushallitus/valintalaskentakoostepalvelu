@@ -194,13 +194,7 @@ public class OsoitetarratService {
     public void osoitetarratHakemuksille(DokumenttiProsessi prosessi, List<String> hakemusOids) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
-            LOG.error("Luodaan osoitetarrat hakemuksille (size={})", hakemusOids.size());
-            prosessi.setKokonaistyo(
-                    3
-                    // luonti
-                    + 1
-                    // dokumenttipalveluun vienti
-                    + 1);
+            prosessi.setKokonaistyo(5);
             final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
@@ -214,12 +208,14 @@ public class OsoitetarratService {
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
-            applicationAsyncResource.getApplicationsByOids(hakemusOids).subscribe(
-                hakemukset -> {
-                    haetutHakemuksetRef.set(hakemukset);
-                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                },
-                poikkeuskasittelija::accept);
+            applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)
+                    .flatMap(hakemukset -> hakemukset.isEmpty()
+                        ? ataruAsyncResource.getApplicationsByOids(hakemusOids)
+                        : Observable.just(hakemukset))
+                    .subscribe(hakemukset -> {
+                        haetutHakemuksetRef.set(hakemukset);
+                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    }, poikkeuskasittelija::accept);
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
