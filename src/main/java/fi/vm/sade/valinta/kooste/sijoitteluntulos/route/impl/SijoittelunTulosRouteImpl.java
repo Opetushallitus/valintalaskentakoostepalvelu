@@ -8,9 +8,11 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -92,6 +94,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final String dokumenttipalveluUrl;
     private final String muodostaDokumentit;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
+    private TarjontaAsyncResource tarjontaAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti;
     private final ValintalaskentaAsyncResource valintalaskentaResource;
@@ -108,14 +112,18 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
             HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta,
             HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
+            TarjontaAsyncResource tarjontaAsyncResource,
             ViestintapalveluResource viestintapalveluResource,
             HaeOsoiteKomponentti osoiteKomponentti,
             ApplicationResource applicationResource,
+            AtaruAsyncResource ataruAsyncResource,
             DokumenttiResource dokumenttiResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti,
             ValintalaskentaAsyncResource valintalaskentaResource
     ) {
+        this.tarjontaAsyncResource = tarjontaAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
@@ -199,8 +207,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
                         try {
                             // TODO here it would make more sense to parallelise the asynchronous calls and bundle the results together after they all complete.
-                            hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX)
-                                    .stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
+                            hakemukset = tarjontaAsyncResource.haeHaku(hakuOid)
+                                    .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                            ? Observable.just(applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX)
+                                            .stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
+                                            : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)).timeout(5, MINUTES).toBlocking().first();
                             hk = toBlocking(valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid), 5, MINUTES).toFuture().get();
                             lukuvuosimaksus = toBlocking(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession), 5, MINUTES).toFuture().get();
                             valinnanvaiheet = toBlocking(valintalaskentaResource.laskennantulokset(hakukohdeOid), 1, MINUTES).toFuture().get();
@@ -305,7 +316,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 return;
                             }
                             stopWatch.start("Tiedot hakemuksilta");
-                            List<HakemusWrapper> hakemukset = applicationResource.getApplicationsByOids(hyvaksytytHakemukset).stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
+                            List<HakemusWrapper> hakemukset = tarjontaAsyncResource.haeHaku(hakuOid(exchange))
+                                    .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                            ? Observable.just(applicationResource.getApplicationsByOids(hyvaksytytHakemukset).stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
+                                            : ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset)).timeout(5, MINUTES).toBlocking().first();
                             stopWatch.stop();
                             List<Osoite> addressLabels = Lists.newArrayList();
 
