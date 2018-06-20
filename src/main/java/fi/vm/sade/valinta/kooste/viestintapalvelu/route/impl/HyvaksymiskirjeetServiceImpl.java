@@ -7,8 +7,10 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
@@ -59,6 +61,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private AtaruAsyncResource ataruAsyncResource;
+    private TarjontaAsyncResource tarjontaAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final HaeOsoiteKomponentti haeOsoiteKomponentti;
     private final HakuParametritService hakuParametritService;
@@ -73,6 +77,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource,
+            TarjontaAsyncResource tarjontaAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             HaeOsoiteKomponentti haeOsoiteKomponentti,
             HakuParametritService hakuParametritService,
@@ -81,6 +87,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
+        this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.haeOsoiteKomponentti = haeOsoiteKomponentti;
         this.hakuParametritService = hakuParametritService;
@@ -148,7 +156,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
     @Override
     public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-        Observable<List<HakemusWrapper>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
+        Observable<List<HakemusWrapper>> hakemuksetObservable = tarjontaAsyncResource.haeHaku(hyvaksymiskirjeDTO.getHakuOid())
+                .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                        ? applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Collections.singletonList(hyvaksymiskirjeDTO.getHakukohdeOid()))
+                        : ataruAsyncResource.getApplicationsByHakukohde(hyvaksymiskirjeDTO.getHakukohdeOid()));
         Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKaikkiHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Response> organisaatioObservable = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
         zip(
