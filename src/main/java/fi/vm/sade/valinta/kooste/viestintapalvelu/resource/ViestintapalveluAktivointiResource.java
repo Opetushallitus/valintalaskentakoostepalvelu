@@ -232,7 +232,6 @@ public class ViestintapalveluAktivointiResource {
             @QueryParam("palautusAika") String palautusAika,
             @QueryParam("palautusPvm") String palautusPvm,
             @QueryParam("templateName") String templateName,
-            @QueryParam("tag") String tag,
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
         try {
@@ -242,7 +241,7 @@ public class ViestintapalveluAktivointiResource {
             if (hakemuksillaRajaus == null) {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
-            tag = hakemuksillaRajaus.getTag();
+            String tag = hakemuksillaRajaus.getTag();
             KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
