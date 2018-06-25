@@ -4,11 +4,18 @@ import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.kuvaus;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.prosessi;
 import static fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
+import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
+import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
+import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
+import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
+import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import org.apache.camel.AsyncCallback;
+import org.apache.camel.AsyncProcessor;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
@@ -20,16 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
-import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
-import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
-import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
-import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
-import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Component
 public class HakuImportRouteImpl extends SpringRouteBuilder {
@@ -132,15 +133,25 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                         //
                 .executorService(hakukohdeImportThreadPool)
                     //
-                .process(new Processor() {
+                .process(new AsyncProcessor() {
+                    @Override
+                    public boolean process(Exchange exchange, AsyncCallback callback) {
+                        HakukohdeImportDTO hki = exchange.getIn().getBody(
+                            HakukohdeImportDTO.class);
+                        valintaperusteetRestResource.tuoHakukohde(hki).subscribe(
+                            ok -> callback.done(false),
+                            error -> {
+                                callback.done(false);
+                                LOG.error("valintaperusteetRestResource.tuoHakukohde palautti virheen", error);
+                            }
+                        );
+                        return false;
+                    }
+
                     @Override
                     public void process(Exchange exchange) {
-                        HakukohdeImportDTO hki = exchange.getIn().getBody(
-                                HakukohdeImportDTO.class);
-                        valintaperusteetRestResource.tuoHakukohde(hki).subscribe(
-                            ok -> {},
-                            error -> LOG.error("valintaperusteetRestResource.tuoHakukohde palautti virheen", error)
-                        );
+                        throw new UnsupportedOperationException("Hakukohteiden käsittelyn pitäisi tapahtua asynkronisesti," +
+                            " tänne ei pitäisi koskaan päätyä.");
                     }
                 })
                         //
