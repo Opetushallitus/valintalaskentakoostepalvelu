@@ -50,6 +50,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         this.tarjontaJaKoodistoHakukohteenHakuKomponentti = tarjontaJaKoodistoHakukohteenHakuKomponentti;
         this.valintaperusteetRestResource = valintaperusteetRestResource;
         this.hakuImportThreadPool = Executors.newFixedThreadPool(hakuImportThreadpoolSize);
+        LOG.info("Using thread pool size " + hakuImportThreadpoolSize);
     }
 
     public static class PrepareHakuImportProcessDescription {
