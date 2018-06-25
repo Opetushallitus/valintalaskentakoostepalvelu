@@ -39,10 +39,12 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
     private final SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti;
     private final ValintaperusteetAsyncResource valintaperusteetRestResource;
     private final ExecutorService hakuImportThreadPool;
+    private final ExecutorService hakukohdeImportThreadPool;
 
     @Autowired
     public HakuImportRouteImpl(
             @Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}") Integer hakuImportThreadpoolSize,
+            @Value("${valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize:10}") Integer hakukohdeImportThreadpoolSize,
             SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
             ValintaperusteetAsyncResource valintaperusteetRestResource,
             SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
@@ -50,7 +52,9 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         this.tarjontaJaKoodistoHakukohteenHakuKomponentti = tarjontaJaKoodistoHakukohteenHakuKomponentti;
         this.valintaperusteetRestResource = valintaperusteetRestResource;
         this.hakuImportThreadPool = Executors.newFixedThreadPool(hakuImportThreadpoolSize);
-        LOG.info("Using thread pool size " + hakuImportThreadpoolSize);
+        LOG.info("Using hakuImportThreadPool thread pool size " + hakuImportThreadpoolSize);
+        this.hakukohdeImportThreadPool = Executors.newFixedThreadPool(hakukohdeImportThreadpoolSize);
+        LOG.info("Using hakuImportThreadPool thread pool size " + hakukohdeImportThreadpoolSize);
     }
 
     public static class PrepareHakuImportProcessDescription {
@@ -124,6 +128,10 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                         //
                 .process(SecurityPreprocessor.SECURITY)
                         //
+                .split(body())
+                        //
+                .executorService(hakukohdeImportThreadPool)
+                    //
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) {

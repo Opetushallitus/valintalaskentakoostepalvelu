@@ -74,7 +74,7 @@ public class HakuImportTest extends CamelTestSupport {
 		template.send(new Processor() {
 
 			@Override
-			public void process(Exchange exchange) throws Exception {
+			public void process(Exchange exchange) {
 				exchange.setProperty("hakuOid", "hakuOid");
 				exchange.setProperty(
 						ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI,
@@ -86,7 +86,7 @@ public class HakuImportTest extends CamelTestSupport {
 		});
 	}
 
-	protected RouteBuilder createRouteBuilder() throws Exception {
+	protected RouteBuilder createRouteBuilder() {
 		final String VIALLINEN_HAKUKOHDE = "throws";
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) context()
 				.getRegistry();
@@ -153,7 +153,7 @@ public class HakuImportTest extends CamelTestSupport {
 		SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti = new SuoritaHakukohdeImportKomponentti(
 				w);
 
-		return new HakuImportRouteImpl(1, suoritaHakuImportKomponentti,
+		return new HakuImportRouteImpl(1, 1, suoritaHakuImportKomponentti,
 				valintaperusteetRestResource,
 				tarjontaJaKoodistoHakukohteenHakuKomponentti);
 	}
