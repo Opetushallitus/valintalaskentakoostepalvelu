@@ -54,7 +54,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         this.hakuImportThreadPool = Executors.newFixedThreadPool(hakuImportThreadpoolSize);
         LOG.info("Using hakuImportThreadPool thread pool size " + hakuImportThreadpoolSize);
         this.hakukohdeImportThreadPool = Executors.newFixedThreadPool(hakukohdeImportThreadpoolSize);
-        LOG.info("Using hakuImportThreadPool thread pool size " + hakukohdeImportThreadpoolSize);
+        LOG.info("Using hakukohdeImportThreadPool thread pool size " + hakukohdeImportThreadpoolSize);
     }
 
     public static class PrepareHakuImportProcessDescription {
