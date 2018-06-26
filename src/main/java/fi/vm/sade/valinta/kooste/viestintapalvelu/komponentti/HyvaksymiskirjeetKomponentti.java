@@ -256,7 +256,8 @@ public class HyvaksymiskirjeetKomponentti {
             viesti.setApplicationPeriod(hakuOid);
             viesti.setTag(tag);
             viesti.setTemplateName(templateName);
-            viesti.setIposti(iPosti);
+            //viesti.setIposti(iPosti);
+            viesti.setIposti(false);
             viesti.setSkipDokumenttipalvelu(sahkoinenKorkeakoulunMassaposti);
             Map<String, Object> templateReplacements = Maps.newHashMap();
             templateReplacements.put("sisalto", sisalto);
