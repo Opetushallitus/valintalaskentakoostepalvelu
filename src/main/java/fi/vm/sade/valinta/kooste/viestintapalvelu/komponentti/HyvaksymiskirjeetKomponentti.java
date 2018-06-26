@@ -162,7 +162,7 @@ public class HyvaksymiskirjeetKomponentti {
         try {
             assert (hakuOid != null);
             int kaikkiHyvaksytyt = hakukohteenHakijat.size();
-            LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti", kaikkiHyvaksytyt);
+            LOG.info("Aloitetaan {} hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true. ", kaikkiHyvaksytyt);
             Map<String, Hakemus> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
             final List<Letter> kirjeet = new ArrayList<>();
             Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
@@ -231,7 +231,8 @@ public class HyvaksymiskirjeetKomponentti {
                 replacements.put("syntymaaika", hakemusWrapper.getSyntymaaika());
 
                 String sahkoposti = hakemusWrapper.getSahkopostiOsoite();
-                boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
+                //boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
+                boolean skipIPosti = true;
                 kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(),
                         skipIPosti, sahkoposti, hakija.getHakemusOid()));
 
