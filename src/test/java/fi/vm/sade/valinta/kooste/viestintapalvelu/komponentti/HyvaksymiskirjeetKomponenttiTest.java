@@ -84,13 +84,13 @@ public class HyvaksymiskirjeetKomponenttiTest {
     @Test
     public void testKorkeakoulunMassaAjoMukaanIPostiin1() {
         LetterBatch batch = mkTestLetterBatch(0, -2, false, false, true);
-        assertLetterBatchCorrect(batch,"0 / -2", null, false, true);
+        assertLetterBatchCorrect(batch,"0 / -2", null, true, true);
     }
 
     @Test
     public void testKorkeakoulunMassaAjoMukaanIPostiin2() {
         LetterBatch batch = mkTestLetterBatch(0, -2, true, false, true);
-        assertLetterBatchCorrect(batch,"0 / -2", null, false, true);
+        assertLetterBatchCorrect(batch,"0 / -2", null, true, true);
     }
 
     @Test

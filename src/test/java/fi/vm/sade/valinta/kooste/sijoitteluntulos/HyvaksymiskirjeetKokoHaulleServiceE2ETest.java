@@ -67,7 +67,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws InterruptedException, IOException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -93,7 +93,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleKaksiHyvaksyttyaHakija() throws InterruptedException, IOException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleKaksiHyvaksyttyaHakija() throws IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -119,7 +119,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleSuodataAsiointikielella() throws InterruptedException, IOException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleSuodataAsiointikielella() throws IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -147,7 +147,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     //skipIPosti
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleVainSahkoposti() throws InterruptedException, IOException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleVainSahkoposti() throws IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -177,7 +177,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleToiselleHakijalleEiIPostia() throws InterruptedException, IOException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleToiselleHakijalleEiIPostia() throws IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -198,14 +198,14 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
         mockKoodisto();
 
-        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":true).*");
+        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":true).*HAKEMUS2.*(?=skipIPosti\":true).*");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleIPostia() throws InterruptedException, IOException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleIPostia() throws IOException {
 
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
@@ -226,14 +226,14 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
         mockKoodisto();
 
-        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":false).*");
+        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":true).*HAKEMUS2.*(?=skipIPosti\":true).*");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
     }
 
     @Test
-    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleIPostiToinenAste() throws InterruptedException, IOException {
+    public void testaaHyvaksymiskirjeenLuontiaKokoHaulleIPostiToinenAste() throws IOException {
 
         mockHakukohde1Kutsu();
         mockToinenAsteHaku1Kutsu();
@@ -256,7 +256,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
         mockKoodisto();
 
-        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":false).*HAKEMUS2.*(?=skipIPosti\":false).*");
+        mockLetterKutsut(".*HAKEMUS1.*(?=skipIPosti\":true).*HAKEMUS2.*(?=skipIPosti\":true).*");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
 
