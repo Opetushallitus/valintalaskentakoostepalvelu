@@ -56,6 +56,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
     private final ApplicationAsyncResource applicationAsyncResource;
     private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
     private final int pollingIntervalMillis;
+    private final int viePdfTimeoutMinutes;
 
     @Autowired
     public JalkiohjauskirjeetServiceImpl(
@@ -64,13 +65,15 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
         ApplicationAsyncResource applicationAsyncResource,
         KirjeetHakukohdeCache kirjeetHakukohdeCache,
-        @Value("${valintalaskentakoostepalvelu.jalkiohjauskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
+        @Value("${valintalaskentakoostepalvelu.jalkiohjauskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis,
+        @Value("${valintalaskentakoostepalvelu.jalkiohjauskirjeet.viePdf.timeout.minutes:15}") int viePdfTimeoutMinutes) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
         this.pollingIntervalMillis = pollingIntervalMillis;
+        this.viePdfTimeoutMinutes = viePdfTimeoutMinutes;
     }
 
     @Override
@@ -157,7 +160,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 }
                 LOG.info("Aloitetaan jalkiohjauskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
                 //TODO: Muuta aidosti asynkroniseksi
-                LetterResponse batchId = from(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).timeout(5, MINUTES)).first();
+                LetterResponse batchId = from(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).timeout(viePdfTimeoutMinutes, MINUTES)).first();
 
                 int timesToPoll = (int) (VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / pollingIntervalMillis);
                 LOG.info(String.format("Saatiin jalkiohjauskirjeen seurantaId %s ja aloitetaan valmistumisen pollaus! " +
