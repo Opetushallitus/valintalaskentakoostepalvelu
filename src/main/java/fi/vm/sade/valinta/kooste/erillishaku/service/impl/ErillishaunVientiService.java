@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -43,6 +44,7 @@ public class ErillishaunVientiService {
     private final ValintaTulosServiceAsyncResource tilaAsyncResource;
     private final TarjontaAsyncResource hakuV1AsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final DokumenttiResource dokumenttiResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
@@ -50,12 +52,14 @@ public class ErillishaunVientiService {
     public ErillishaunVientiService(
             ValintaTulosServiceAsyncResource tilaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource,
             TarjontaAsyncResource hakuV1AsyncResource,
             DokumenttiResource dokumenttiResource,
             KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         this.tilaAsyncResource = tilaAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.dokumenttiResource = dokumenttiResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         LOG.info("Luetaan valinnantulokset ja sijoittelu valinta-tulos-servicestä!!!!!!!");
@@ -66,8 +70,14 @@ public class ErillishaunVientiService {
     }
 
     public void vie(final AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku) {
-        Observable<List<HakemusWrapper>> hakemusObservable = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
         Observable<HakuV1RDTO> hakuFuture = hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid());
+        Observable<List<HakemusWrapper>> hakemusObservable = hakuFuture.flatMap(haku -> {
+            if (haku.getAtaruLomakeAvain() == null) {
+                return applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
+            } else {
+                return ataruAsyncResource.getApplicationsByHakukohde(erillishaku.getHakukohdeOid());
+            }
+        });
         Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());
         Observable<List<Lukuvuosimaksu>> lukuvuosimaksutObs = tilaAsyncResource.fetchLukuvuosimaksut(erillishaku.getHakukohdeOid(), auditSession);
 
