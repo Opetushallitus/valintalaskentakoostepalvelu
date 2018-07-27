@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.valinta.kooste.util.SecurityUtil.*;

@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 @Api(value = "/valintalaskentakerralla", description = "Valintalaskenta kaikille valinnanvaiheille kerralla")
 public class ValintalaskentaKerrallaResource {
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaResource.class);
+    private static final List<String> valintaperusteetCRUDRoles = asList("ROLE_APP_VALINTAPERUSTEET_CRUD", "ROLE_APP_VALINTAPERUSTEETKK_CRUD");
 
     @Autowired
     private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
@@ -70,10 +71,8 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("haunnimi") String haunnimi,
             @QueryParam("nimi") String nimi,
             @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.getAuthorityCheckForRoles(
-                asList("APP_VALINTAPERUSTEET_CRUD", "APP_VALINTAPERUSTEETKK_CRUD")
-        ).subscribe(
-                authCheck -> {
+        authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles)
+                .subscribe(authCheck -> {
                     if(authCheck.test(hakuOid)) {
                         asyncResponse.resume(unAuthorizedResponse());
                     } else {
@@ -116,10 +115,8 @@ public class ValintalaskentaKerrallaResource {
             @PathParam("whitelist") boolean whitelist,
             List<String> stringMaski,
             @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.getAuthorityCheckForRoles(
-                asList("APP_VALINTAPERUSTEET_CRUD", "APP_VALINTAPERUSTEETKK_CRUD")
-        ).subscribe(
-                authCheck -> {
+        authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles)
+                .subscribe(authCheck -> {
                     if(authCheck.test(hakuOid)) {
                         asyncResponse.resume(unAuthorizedResponse());
                     } else {
@@ -155,10 +152,8 @@ public class ValintalaskentaKerrallaResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.getAuthorityCheckForRoles(
-                asList("APP_VALINTAPERUSTEET_CRUD", "APP_VALINTAPERUSTEETKK_CRUD")
-        ).subscribe(
-                authCheck -> {
+        authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles)
+                .subscribe(authCheck -> {
                     if(authCheck.test(uuid)) {
                         asyncResponse.resume(unAuthorizedResponse());
                     } else {
@@ -209,10 +204,8 @@ public class ValintalaskentaKerrallaResource {
     @Produces("application/vnd.ms-excel")
     @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
     public void statusXls(@PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
-        authorityCheckService.getAuthorityCheckForRoles(
-                asList("APP_VALINTAPERUSTEET_CRUD", "APP_VALINTAPERUSTEETKK_CRUD")
-        ).subscribe(
-                authCheck -> {
+        authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles)
+                .subscribe(authCheck -> {
                     if(authCheck.test(uuid)) {
                         asyncResponse.resume(unAuthorizedResponse());
                     } else {
