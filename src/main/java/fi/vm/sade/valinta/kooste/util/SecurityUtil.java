@@ -5,8 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import javax.ws.rs.ForbiddenException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -70,5 +73,31 @@ public class SecurityUtil {
     }
     public static Set<String> parseOrganizationGroupOidsFromSecurityRoles(Collection<String> roles) {
         return roles.stream().flatMap(r -> parseOrganizationGroupOidFromSecurityRole(r).map(org -> Stream.of(org)).orElse(Stream.empty())).collect(Collectors.toSet());
+    }
+
+    public static Collection<? extends GrantedAuthority> getRoles() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context == null) {
+            String msg = "No SecurityContext found";
+            throw new ForbiddenException(msg);
+        }
+
+        Authentication authentication = context.getAuthentication();
+        if (authentication == null) {
+            String msg = "No Authentication found in SecurityContext";
+            throw new ForbiddenException(msg);
+        }
+
+        return authentication.getAuthorities();
+    }
+
+    public static boolean containsOphRole(Collection<? extends GrantedAuthority> userRoles) {
+        for (GrantedAuthority auth : userRoles) {
+            Optional<String> optionalOID = parseOrganizationOidFromSecurityRole(auth.getAuthority());
+            if (optionalOID.isPresent() && isRootOrganizationOID(optionalOID.get()))
+                return true;
+        }
+
+        return false;
     }
 }

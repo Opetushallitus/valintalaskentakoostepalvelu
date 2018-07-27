@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -15,16 +16,15 @@ import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
+import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
+import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.google.gson.Gson;
@@ -75,6 +75,9 @@ public class SijoitteluAktivointiResource {
 
     @Autowired
     private OrganisaatioResource organisaatioProxy;
+
+    @Autowired
+    private AuthorityCheckService authorityCheckService;
 
     @GET
     @Path("/status/{hakuoid}")
@@ -138,7 +141,7 @@ public class SijoitteluAktivointiResource {
                 LOG.warn("Haulta {} puuttuu jatkuvan sijoittelun parametreja. Ei aktivoida jatkuvaa sijoittelua.");
                 return "ei aktivoitu";
             } else {
-                checkAuthorizationForHaku(hakuOid);
+                authorityCheckService.checkAuthorizationForHaku(hakuOid, Collections.singleton("ROLE_APP_SIJOITTELU_CRUD"));
 
                 LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
                 sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid, true);
@@ -162,7 +165,7 @@ public class SijoitteluAktivointiResource {
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
-            checkAuthorizationForHaku(hakuOid);
+            authorityCheckService.checkAuthorizationForHaku(hakuOid, Collections.singleton("ROLE_APP_SIJOITTELU_CRUD"));
 
             LOG.info("jatkuva sijoittelu poistettu haulta {}", hakuOid);
             sijoittelunSeurantaResource.poistaSijoittelu(hakuOid);
@@ -192,12 +195,14 @@ public class SijoitteluAktivointiResource {
             asyncResponse1.resume(Response.serverError().entity("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu").build());
         });
 
-        Collection<? extends GrantedAuthority> userRoles = getRoles();
+        Collection<? extends GrantedAuthority> userRoles = SecurityUtil.getRoles();
 
         tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
             String[] organisaatioOids = haku.getTarjoajaOids();
 
-            boolean isAuthorizedForHaku = containsOphRole(userRoles) || isAuthorizedForAnyParentOid(organisaatioOids, userRoles);
+            boolean isAuthorizedForHaku =
+                    containsOphRole(userRoles) || authorityCheckService.isAuthorizedForAnyParentOid(
+                            organisaatioOids, userRoles, Collections.singleton("ROLE_APP_SIJOITTELU_CRUD"));
 
             if (isAuthorizedForHaku) {
                 String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
@@ -214,73 +219,10 @@ public class SijoitteluAktivointiResource {
         });
     }
 
-    private void checkAuthorizationForHaku(String hakuOid) {
-        Collection<? extends GrantedAuthority> userRoles = getRoles();
-
-        if (containsOphRole(userRoles)) {
-            // on OPH-käyttäjä, ei tarvitse käydä läpi organisaatioita
-            return;
-        }
-
-        boolean isAuthorized = tarjontaResource.haeHaku(hakuOid).map(haku -> {
-            String[] organisaatioOids = haku.getTarjoajaOids();
-            return isAuthorizedForAnyParentOid(organisaatioOids, userRoles);
-        }).toBlocking().first();
-
-        if (!isAuthorized) {
-            String msg = String.format(
-                    "Käyttäjällä ei oikeutta haun %s tarjoajaan tai sen yläorganisaatioihin.",
-                    hakuOid
-            );
-            LOG.error(msg);
-            throw new ForbiddenException(msg);
-        }
-    }
-
-    private Collection<? extends GrantedAuthority> getRoles() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        if (context == null) {
-            String msg = "No SecurityContext found";
-            throw new ForbiddenException(msg);
-        }
-
-        Authentication authentication = context.getAuthentication();
-        if (authentication == null) {
-            String msg = "No Authentication found in SecurityContext";
-            throw new ForbiddenException(msg);
-        }
-
-        return authentication.getAuthorities();
-    }
-
     private boolean containsOphRole(Collection<? extends GrantedAuthority> userRoles) {
         for (GrantedAuthority auth : userRoles) {
             if (OPH_CRUD_ROLE.equals(auth.getAuthority()))
                 return true;
-        }
-
-        return false;
-    }
-
-    private boolean isAuthorizedForAnyParentOid(String[] organisaatioOids, Collection<? extends GrantedAuthority> userRoles) {
-        try {
-            for (String organisaatioOid : organisaatioOids) {
-                String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
-                String[] parentOids = parentOidsPath.split("/");
-
-                for (String oid : parentOids) {
-                    String organizationRole = "ROLE_APP_SIJOITTELU_CRUD_" + oid;
-
-                    for (GrantedAuthority auth : userRoles) {
-                        if (organizationRole.equals(auth.getAuthority()))
-                           return true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            String msg = String.format("Organisaatioiden %s parentOids -haku epäonnistui", Arrays.toString(organisaatioOids));
-            LOG.error(msg, e);
-           throw new ForbiddenException(msg);
         }
 
         return false;
@@ -310,7 +252,7 @@ public class SijoitteluAktivointiResource {
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
-            checkAuthorizationForHaku(hakuOid);
+            authorityCheckService.checkAuthorizationForHaku(hakuOid, Collections.singleton("ROLE_APP_SIJOITTELU_CRUD"));
 
             sijoittelunSeurantaResource.paivitaSijoittelunAloitusajankohta(hakuOid, aloitusajankohta, ajotiheys);
             return "paivitetty";

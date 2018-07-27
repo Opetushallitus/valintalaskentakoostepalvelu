@@ -71,33 +71,20 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("haunnimi") String haunnimi,
             @QueryParam("nimi") String nimi,
             @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles)
-                .subscribe(authCheck -> {
-                    if(authCheck.test(hakuOid)) {
-                        asyncResponse.resume(unAuthorizedResponse());
-                    } else {
-                        try {
-                            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-                            asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
-                                LOG.error("Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/HAKU?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, valinnanvaihe, valintakoelaskenta);
-                                asyncResponse.resume(errorResponse("Ajo laskennalle aikakatkaistu!"));
-                            });
-                            final String userOID = AuthorizationUtil.getCurrentUser();
-                            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(
-                                    userOID, haunnimi, nimi, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe,
-                                    hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
-                        } catch (Throwable e) {
-                            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
-                            asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
-                            throw e;
-                        }
-                    }
-                },
-                exception -> {
-                    LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe, authcheck epäonnistui!", exception);
-                    asyncResponse.resume(errorResponse(exception.getMessage()));
-                }
-        );
+        authorityCheckService.checkAuthorizationForHaku(hakuOid, valintaperusteetCRUDRoles);
+        try {
+            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+            asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
+                LOG.error("Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/HAKU?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, valinnanvaihe, valintakoelaskenta);
+                asyncResponse.resume(errorResponse("Ajo laskennalle aikakatkaistu!"));
+            });
+            final String userOID = AuthorizationUtil.getCurrentUser();
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, haunnimi, nimi, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
+        } catch (Throwable e) {
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
+            asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+            throw e;
+        }
     }
 
     @POST
@@ -115,68 +102,46 @@ public class ValintalaskentaKerrallaResource {
             @PathParam("whitelist") boolean whitelist,
             List<String> stringMaski,
             @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles)
-                .subscribe(authCheck -> {
-                    if(authCheck.test(hakuOid)) {
-                        asyncResponse.resume(unAuthorizedResponse());
-                    } else {
-                        try {
-                            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-                            asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
-                                final String hakukohdeOids = hakukohdeOidsFromMaskiToString(stringMaski);
-                                LOG.error("Laskennan kaynnistys timeouttasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, laskentatyyppi, whitelist, valinnanvaihe, valintakoelaskenta, hakukohdeOids);
-                                asyncResponse.resume(errorResponse("Uudelleen ajo laskennalle aikakatkaistu!"));
-                            });
+        authorityCheckService.checkAuthorizationForHaku(hakuOid, valintaperusteetCRUDRoles);
+        try {
+            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+            asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
+                final String hakukohdeOids = hakukohdeOidsFromMaskiToString(stringMaski);
+                LOG.error("Laskennan kaynnistys timeouttasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, laskentatyyppi, whitelist, valinnanvaihe, valintakoelaskenta, hakukohdeOids);
+                asyncResponse.resume(errorResponse("Uudelleen ajo laskennalle aikakatkaistu!"));
+            });
 
-                            Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
-                            final String userOID = AuthorizationUtil.getCurrentUser();
-                            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(
-                                    userOID, haunnimi, nimi, laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid,
-                                    Optional.of(maski), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
-                        } catch (Throwable e) {
-                            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
-                            asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
-                            throw e;
-                        }
-                    }
-                },
-                exception -> {
-                    LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe, authcheck epäonnistui!", exception);
-                    asyncResponse.resume(errorResponse(exception.getMessage()));
-                }
-        );
+            Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
+            final String userOID = AuthorizationUtil.getCurrentUser();
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, haunnimi, nimi, laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
+        } catch (Throwable e) {
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
+            asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+            throw e;
+        }
     }
+
 
     @POST
     @Path("/uudelleenyrita/{uuid}")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles)
-                .subscribe(authCheck -> {
-                    if(authCheck.test(uuid)) {
-                        asyncResponse.resume(unAuthorizedResponse());
-                    } else {
-                        try {
-                            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-                            asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
-                                LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
-                                asyncResponseTimeout.resume(errorResponse("Uudelleen ajo laskennalle timeouttasi!"));
-                            });
-                            valintalaskentaKerrallaService.kaynnistaLaskentaUudelleen(uuid, asyncResponse::resume);
-                        } catch (Throwable e) {
-                            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", e);
-                            asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
-                            throw e;
-                        }
-                    }
-                },
-                exception -> {
-                    LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe, authcheck epäonnistui!", exception);
-                    asyncResponse.resume(errorResponse(exception.getMessage()));
-                }
-        );
+        authorityCheckService.checkAuthorizationForHaku(uuid, valintaperusteetCRUDRoles);
+        try {
+            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+            asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
+                LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
+                asyncResponseTimeout.resume(errorResponse("Uudelleen ajo laskennalle timeouttasi!"));
+            });
+            valintalaskentaKerrallaService.kaynnistaLaskentaUudelleen(uuid, (Response response) -> asyncResponse.resume(response));
+        } catch (Throwable e) {
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", e);
+            asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+            throw e;
+        }
     }
+
 
     @GET
     @Path("/status")
@@ -191,6 +156,7 @@ public class ValintalaskentaKerrallaResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
     public Laskenta status(@PathParam("uuid") String uuid) {
+        authorityCheckService.checkAuthorizationForHaku(uuid, valintaperusteetCRUDRoles);
         try {
             return valintalaskentaValvomo.fetchLaskenta(uuid);
         } catch (Exception e) {
@@ -204,22 +170,12 @@ public class ValintalaskentaKerrallaResource {
     @Produces("application/vnd.ms-excel")
     @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
     public void statusXls(@PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
-        authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles)
-                .subscribe(authCheck -> {
-                    if(authCheck.test(uuid)) {
-                        asyncResponse.resume(unAuthorizedResponse());
-                    } else {
-                        asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
-                        asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
-                        valintalaskentaStatusExcelHandler.getStatusXls(uuid, asyncResponse::resume);
-                    }
-                },
-                exception -> {
-                    LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe, authcheck epäonnistui!", exception);
-                    asyncResponse.resume(errorResponse(exception.getMessage()));
-                }
-        );
+        authorityCheckService.checkAuthorizationForHaku(uuid, valintaperusteetCRUDRoles);
+        asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
+        valintalaskentaStatusExcelHandler.getStatusXls(uuid, (Response response) -> asyncResponse.resume(response));
     }
+
 
     @DELETE
     @Path("/haku/{uuid}")
@@ -227,6 +183,9 @@ public class ValintalaskentaKerrallaResource {
         if (uuid == null) {
             return errorResponse("Uuid on pakollinen");
         }
+
+        authorityCheckService.checkAuthorizationForHaku(uuid, valintaperusteetCRUDRoles);
+
         if(Boolean.TRUE.equals(lopetaVainJonossaOlevaLaskenta)) {
             boolean onkoLaskentaVielaJonossa = valintalaskentaValvomo.fetchLaskenta(uuid) == null;
             if(!onkoLaskentaVielaJonossa) {
@@ -245,10 +204,6 @@ public class ValintalaskentaKerrallaResource {
 
     private Response errorResponse(final String errorMessage) {
         return Response.serverError().entity(errorMessage).build();
-    }
-
-    private Response unAuthorizedResponse() {
-        return Response.status(Response.Status.UNAUTHORIZED).entity("Unauthorized").build();
     }
 
     private String hakukohdeOidsFromMaskiToString(List<String> maski) {

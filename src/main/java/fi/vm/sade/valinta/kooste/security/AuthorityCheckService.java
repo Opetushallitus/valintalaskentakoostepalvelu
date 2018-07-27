@@ -5,12 +5,18 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
+import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import javax.ws.rs.ForbiddenException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,6 +28,10 @@ public class AuthorityCheckService {
 
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
+    @Autowired
+    private OrganisaatioResource organisaatioProxy;
+    @Autowired
+    private TarjontaAsyncResource tarjontaResource;
 
     public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(Collection<String> roles) {
         final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
@@ -35,7 +45,8 @@ public class AuthorityCheckService {
                 return Observable.error(new RuntimeException("Unauthorized. User has no organization OIDS"));
             }
             Observable<List<ResultOrganization>> searchByOrganizationOids =
-                    Optional.of(organizationOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids).orElse(Observable.just(Collections.emptyList()));
+                    Optional.of(organizationOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids)
+                            .orElse(Observable.just(Collections.emptyList()));
 
             Observable<List<ResultOrganization>> searchByOrganizationGroupOids =
                     Optional.of(organizationGroupOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
@@ -48,5 +59,54 @@ public class AuthorityCheckService {
                 return (oid) -> Sets.union(hakukohdeOidSet1, hakukohdeOidSet2).contains(oid);
             });
         }
+    }
+
+    public void checkAuthorizationForHaku(String hakuOid, Collection<String> requiredRoles) {
+        Collection<? extends GrantedAuthority> userRoles = getRoles();
+
+        if (containsOphRole(userRoles)) {
+            // on OPH-käyttäjä, ei tarvitse käydä läpi organisaatioita
+            return;
+        }
+
+        boolean isAuthorized = tarjontaResource.haeHaku(hakuOid).map(haku -> {
+            String[] organisaatioOids = haku.getTarjoajaOids();
+            return isAuthorizedForAnyParentOid(organisaatioOids, userRoles, requiredRoles);
+        }).toBlocking().first();
+
+        if (!isAuthorized) {
+            String msg = String.format(
+                    "Käyttäjällä ei oikeutta haun %s tarjoajaan tai sen yläorganisaatioihin.",
+                    hakuOid
+            );
+            LOG.error(msg);
+            throw new ForbiddenException(msg);
+        }
+    }
+
+    public boolean isAuthorizedForAnyParentOid(String[] organisaatioOids, Collection<? extends GrantedAuthority> userRoles, Collection<String> requiredRoles) {
+        try {
+            for (String organisaatioOid : organisaatioOids) {
+                String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
+                String[] parentOids = parentOidsPath.split("/");
+
+                for (String oid : parentOids) {
+                    for (String role : requiredRoles) {
+                        String organizationRole = role + "_" + oid;
+
+                        for (GrantedAuthority auth : userRoles) {
+                            if (organizationRole.equals(auth.getAuthority()))
+                                return true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            String msg = String.format("Organisaatioiden %s parentOids -haku epäonnistui", Arrays.toString(organisaatioOids));
+            LOG.error(msg, e);
+            throw new ForbiddenException(msg);
+        }
+
+        return false;
     }
 }
