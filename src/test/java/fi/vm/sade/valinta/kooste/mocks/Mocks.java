@@ -6,7 +6,6 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
-import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
