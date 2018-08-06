@@ -9,10 +9,7 @@ import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -30,8 +27,6 @@ public class AuthorityCheckService {
     private TarjontaAsyncResource tarjontaAsyncResource;
     @Autowired
     private OrganisaatioResource organisaatioProxy;
-    @Autowired
-    private TarjontaAsyncResource tarjontaResource;
 
     public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(Collection<String> roles) {
         final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
@@ -69,7 +64,7 @@ public class AuthorityCheckService {
             return;
         }
 
-        boolean isAuthorized = tarjontaResource.haeHaku(hakuOid).map(haku -> {
+        boolean isAuthorized = tarjontaAsyncResource.haeHaku(hakuOid).map(haku -> {
             String[] organisaatioOids = haku.getTarjoajaOids();
             return isAuthorizedForAnyParentOid(organisaatioOids, userRoles, requiredRoles);
         }).toBlocking().first();
