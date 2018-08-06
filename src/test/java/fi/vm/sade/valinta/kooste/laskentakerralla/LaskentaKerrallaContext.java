@@ -1,12 +1,16 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
-
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockAuthorityCheckService;
+import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
+import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
@@ -18,6 +22,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -86,5 +91,20 @@ public class LaskentaKerrallaContext {
     @Bean
     public LaskentaActorSystem valintalaskentaKerrallaRoute() {
         return Mocks.laskentaActorSystem;
+    }
+
+    @Bean
+    public OrganisaatioResource organisaatioResource() {
+        return Mocks.organisaatioResource;
+    }
+
+    @Bean
+    public TarjontaAsyncResource tarjontaAsyncResource() {
+        return Mocks.tarjontaAsyncResource;
+    }
+
+    @Bean
+    public AuthorityCheckService authorityCheckService() {
+        return new MockAuthorityCheckService();
     }
 }

@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 
 public class Mocks {
+    static OrganisaatioResource organisaatioResource = mock(OrganisaatioResource.class);
     static ValintalaskentaKerrallaRouteValvomo valintalaskentaKerrallaRouteValvomo = mock(ValintalaskentaKerrallaRouteValvomo.class);
     static ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
     static ValintaperusteetAsyncResource valintaperusteetAsyncResource = mock(ValintaperusteetAsyncResource.class);
