@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import javax.ws.rs.ForbiddenException;
 import java.util.Collection;
 
 @Service
@@ -17,7 +18,11 @@ public class MockAuthorityCheckService extends AuthorityCheckService {
     }
 
     @Override
-    public void checkAuthorizationForHaku(String hakuOid, Collection<String> requiredRoles) { }
+    public void checkAuthorizationForHaku(String hakuOid, Collection<String> requiredRoles) {
+        if (hakuOid.equals("unauthorized.oid")) {
+            throw new ForbiddenException("Test unauthorized");
+        }
+    }
 
     @Override
     public boolean isAuthorizedForAnyParentOid(String[] organisaatioOids, Collection<? extends GrantedAuthority> userRoles, Collection<String> requiredRoles) {
