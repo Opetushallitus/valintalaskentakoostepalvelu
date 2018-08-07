@@ -43,23 +43,17 @@ public class SecurityUtil {
     }
 
     public static Optional<String> parseOrganizationOidFromSecurityRole(String role) {
-        String[] pieces = StringUtils.trimToEmpty(role).split("_");
-        if(pieces.length > 0) {
-            String lastPiece = pieces[pieces.length - 1];
-            if(lastPiece.startsWith(ORGANIZATION_OID_PREFIX)) {
-                return Optional.of(lastPiece);
-            } else {
-                return Optional.empty();
-            }
-        } else {
-            return Optional.empty();
-        }
+        return parseOidFromSecurityRole(role, ORGANIZATION_OID_PREFIX);
     }
     public static Optional<String> parseOrganizationGroupOidFromSecurityRole(String role) {
+        return parseOidFromSecurityRole(role, ORGANIZATION_GROUP_OID_PREFIX);
+    }
+
+    private static Optional<String> parseOidFromSecurityRole(String role, String prefix) {
         String[] pieces = StringUtils.trimToEmpty(role).split("_");
         if(pieces.length > 0) {
             String lastPiece = pieces[pieces.length - 1];
-            if(lastPiece.startsWith(ORGANIZATION_GROUP_OID_PREFIX)) {
+            if(lastPiece.startsWith(prefix)) {
                 return Optional.of(lastPiece);
             } else {
                 return Optional.empty();

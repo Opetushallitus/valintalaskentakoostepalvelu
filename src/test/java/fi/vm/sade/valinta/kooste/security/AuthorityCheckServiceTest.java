@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.security;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -16,7 +15,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.ws.rs.ForbiddenException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 

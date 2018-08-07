@@ -26,7 +26,7 @@ public class AuthorityCheckService {
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
     @Autowired
-    private OrganisaatioResource organisaatioProxy;
+    private OrganisaatioResource organisaatioResource;
 
     public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(Collection<String> roles) {
         final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
@@ -82,7 +82,7 @@ public class AuthorityCheckService {
     public boolean isAuthorizedForAnyParentOid(String[] organisaatioOids, Collection<? extends GrantedAuthority> userRoles, Collection<String> requiredRoles) {
         try {
             for (String organisaatioOid : organisaatioOids) {
-                String parentOidsPath = organisaatioProxy.parentoids(organisaatioOid);
+                String parentOidsPath = organisaatioResource.parentoids(organisaatioOid);
                 String[] parentOids = parentOidsPath.split("/");
 
                 for (String oid : parentOids) {

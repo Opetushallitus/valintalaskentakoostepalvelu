@@ -18,7 +18,6 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
-import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +71,6 @@ public class SijoitteluAktivointiResource {
 
     @Autowired
     private TarjontaAsyncResource tarjontaResource;
-
-    @Autowired
-    private OrganisaatioResource organisaatioProxy;
 
     @Autowired
     private AuthorityCheckService authorityCheckService;
