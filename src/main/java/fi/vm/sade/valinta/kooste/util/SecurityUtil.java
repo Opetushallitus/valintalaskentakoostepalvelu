@@ -31,7 +31,7 @@ public class SecurityUtil {
         return ROOTOID.equals(organizationOID);
     }
 
-    public static Collection<String> getAuthoritiesFromAuthentication() {
+    private static Collection<String> getAuthoritiesFromAuthentication() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication instanceof CasAuthenticationToken) {
             CasAuthenticationToken casAuthenticationToken = (CasAuthenticationToken)authentication;
@@ -42,10 +42,10 @@ public class SecurityUtil {
         }
     }
 
-    public static Optional<String> parseOrganizationOidFromSecurityRole(String role) {
+    static Optional<String> parseOrganizationOidFromSecurityRole(String role) {
         return parseOidFromSecurityRole(role, ORGANIZATION_OID_PREFIX);
     }
-    public static Optional<String> parseOrganizationGroupOidFromSecurityRole(String role) {
+    static Optional<String> parseOrganizationGroupOidFromSecurityRole(String role) {
         return parseOidFromSecurityRole(role, ORGANIZATION_GROUP_OID_PREFIX);
     }
 
