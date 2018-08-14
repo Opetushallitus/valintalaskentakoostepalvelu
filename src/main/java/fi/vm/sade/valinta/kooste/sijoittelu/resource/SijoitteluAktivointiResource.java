@@ -96,6 +96,8 @@ public class SijoitteluAktivointiResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD')")
     @ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
     public void aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
+        authorityCheckService.checkAuthorizationForHaku(hakuOid, Collections.singleton("ROLE_APP_SIJOITTELU_CRUD"));
+
         if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
             LOG.error("Sijoittelua yritettiin käynnistää haulle({}) ilman käyttöoikeuksia!", hakuOid);
             throw new RuntimeException("Ei käyttöoikeuksia!");
