@@ -64,18 +64,21 @@ public class ValintalaskentaKerrallaService {
                 (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                     Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
 
-                    Optional<HakukohdeOIDAuthorityCheck> optionalAuthCheck = authCheck.map(Optional::of).toBlocking().singleOrDefault(Optional.empty());
+                    boolean authorized =
+                            authCheck.map(Optional::of)
+                                    .toBlocking()
+                                    .singleOrDefault(Optional.empty())
+                                    .map(
+                                            authorityCheck -> haunHakukohteetOids
+                                                    .stream()
+                                                    .allMatch(hk -> authorityCheck.test(hk.getHakukohdeOid()))
+                                    ).orElse(true);
 
-                    optionalAuthCheck.ifPresent(
-                        authorityCheck -> haunHakukohteetOids.forEach(hk -> {
-                            if (!authorityCheck.test(hk.getHakukohdeOid())) {
-                                callback.accept(forbiddenResponse("Ei oikeutta kaynnistää laskentaa"));
-                                throw new ForbiddenException(String.format("Ei oikeutta kaynnistää laskentaa hakukohteelle %s haussa %s", hk.getHakukohdeOid(), hakuOid));
-                            }
-                        })
-                    );
-
-                    createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
+                    if(authorized) {
+                        createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
+                    } else {
+                        callback.accept(forbiddenResponse("Ei oikeutta aloittaa laskentaa"));
+                    }
                 },
                 (Throwable poikkeus) -> {
                     LOG.error("kaynnistaLaskentaHaulle throws", poikkeus);
