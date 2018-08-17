@@ -4,6 +4,7 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaInfo;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
@@ -45,6 +47,10 @@ public class ValintalaskentaKerrallaService {
     }
 
     public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
+        kaynnistaLaskentaHaulle(laskentaParams, callback, Observable.empty());
+    }
+
+    public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback, Observable<HakukohdeOIDAuthorityCheck> authCheck) {
         String hakuOid = laskentaParams.getHakuOid();
         Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(laskentaParams.getMaski(), hakuOid);
 
@@ -57,6 +63,13 @@ public class ValintalaskentaKerrallaService {
             valintaperusteetAsyncResource.haunHakukohteet(hakuOid).subscribe(
                 (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                     Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
+
+                    authCheck.forEach(authorityCheck -> haunHakukohteetOids.forEach(hk -> {
+                                if (!authorityCheck.test(hk.getHakukohdeOid())) {
+                                    throw new ForbiddenException(String.format("Ei oikeutta kaynnistää laskentaa hakukohteelle %s haussa %s", hk.getHakukohdeOid(), hakuOid));
+                                }
+                            }));
+
                     createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                 },
                 (Throwable poikkeus) -> {

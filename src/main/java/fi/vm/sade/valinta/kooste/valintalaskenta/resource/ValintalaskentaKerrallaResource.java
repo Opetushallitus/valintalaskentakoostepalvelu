@@ -4,6 +4,7 @@ import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static java.util.Arrays.asList;
 
+import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -22,15 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import rx.Observable;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
@@ -39,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Controller("ValintalaskentaKerrallaResource")
 @Path("valintalaskentakerralla")
@@ -79,7 +75,10 @@ public class ValintalaskentaKerrallaResource {
                 asyncResponse.resume(errorResponse("Ajo laskennalle aikakatkaistu!"));
             });
             final String userOID = AuthorizationUtil.getCurrentUser();
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, haunnimi, nimi, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(
+                    new LaskentaParams(userOID, haunnimi, nimi, LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe,
+                            hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)),
+                    asyncResponse::resume);
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
@@ -102,7 +101,6 @@ public class ValintalaskentaKerrallaResource {
             @PathParam("whitelist") boolean whitelist,
             List<String> stringMaski,
             @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.checkAuthorizationForHaku(hakuOid, valintaperusteetCRUDRoles);
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
@@ -112,8 +110,14 @@ public class ValintalaskentaKerrallaResource {
             });
 
             Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
+
             final String userOID = AuthorizationUtil.getCurrentUser();
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(userOID, haunnimi, nimi, laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(
+                    new LaskentaParams(userOID, haunnimi, nimi, laskentatyyppi, valintakoelaskenta,
+                            valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)),
+                    asyncResponse::resume,
+                    authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles));
+
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
