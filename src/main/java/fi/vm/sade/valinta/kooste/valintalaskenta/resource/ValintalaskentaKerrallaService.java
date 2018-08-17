@@ -64,11 +64,15 @@ public class ValintalaskentaKerrallaService {
                 (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                     Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
 
-                    authCheck.forEach(authorityCheck -> haunHakukohteetOids.forEach(hk -> {
-                                if (!authorityCheck.test(hk.getHakukohdeOid())) {
-                                    throw new ForbiddenException(String.format("Ei oikeutta kaynnistää laskentaa hakukohteelle %s haussa %s", hk.getHakukohdeOid(), hakuOid));
-                                }
-                            }));
+                    Optional<HakukohdeOIDAuthorityCheck> optionalAuthCheck = authCheck.map(Optional::of).toBlocking().singleOrDefault(Optional.empty());
+
+                    optionalAuthCheck.ifPresent(
+                        authorityCheck -> haunHakukohteetOids.forEach(hk -> {
+                            if (!authorityCheck.test(hk.getHakukohdeOid())) {
+                                throw new ForbiddenException(String.format("Ei oikeutta kaynnistää laskentaa hakukohteelle %s haussa %s", hk.getHakukohdeOid(), hakuOid));
+                            }
+                        })
+                    );
 
                     createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                 },
