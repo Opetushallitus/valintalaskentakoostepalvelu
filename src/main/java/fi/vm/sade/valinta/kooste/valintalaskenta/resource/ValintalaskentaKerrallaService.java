@@ -69,6 +69,7 @@ public class ValintalaskentaKerrallaService {
                     optionalAuthCheck.ifPresent(
                         authorityCheck -> haunHakukohteetOids.forEach(hk -> {
                             if (!authorityCheck.test(hk.getHakukohdeOid())) {
+                                callback.accept(forbiddenResponse("Ei oikeutta kaynnistää laskentaa"));
                                 throw new ForbiddenException(String.format("Ei oikeutta kaynnistää laskentaa hakukohteelle %s haussa %s", hk.getHakukohdeOid(), hakuOid));
                             }
                         })
@@ -199,6 +200,10 @@ public class ValintalaskentaKerrallaService {
 
     private static Response errorResponse(final String errorMessage) {
         return Response.serverError().entity(errorMessage).build();
+    }
+
+    private static Response forbiddenResponse(final String errorMessage) {
+        return Response.status(Response.Status.FORBIDDEN).entity(errorMessage).build();
     }
 
     private static List<HakukohdeDto> toHakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
