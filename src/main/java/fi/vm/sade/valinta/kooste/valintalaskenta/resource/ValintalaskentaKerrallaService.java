@@ -77,7 +77,9 @@ public class ValintalaskentaKerrallaService {
                     if(authorized) {
                         createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                     } else {
-                        callback.accept(forbiddenResponse("Ei oikeutta aloittaa laskentaa"));
+                        LOG.error("Ei oikeutta aloittaa laskentaa jollekin hakukohteista");
+                        throw new ForbiddenException("Ei oikeutta aloittaa laskentaa");
+                        //callback.accept(forbiddenResponse("Ei oikeutta aloittaa laskentaa"));
                     }
                 },
                 (Throwable poikkeus) -> {
