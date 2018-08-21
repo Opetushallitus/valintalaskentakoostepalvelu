@@ -118,6 +118,9 @@ public class ValintalaskentaKerrallaResource {
                     asyncResponse::resume,
                     authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles));
 
+        } catch (ForbiddenException fe) {
+            asyncResponse.resume(errorResponse(fe.getMessage()));
+            throw fe;
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));

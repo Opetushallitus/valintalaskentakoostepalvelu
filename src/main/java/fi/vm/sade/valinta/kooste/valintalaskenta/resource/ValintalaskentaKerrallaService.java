@@ -64,23 +64,16 @@ public class ValintalaskentaKerrallaService {
                 (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                     Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
 
-                    boolean authorized =
-                            authCheck.map(Optional::of)
-                                    .toBlocking()
-                                    .singleOrDefault(Optional.empty())
-                                    .map(
-                                            authorityCheck -> haunHakukohteetOids
-                                                    .stream()
-                                                    .allMatch(hk -> authorityCheck.test(hk.getHakukohdeOid()))
-                                    ).orElse(true);
+                    authCheck.forEach(
+                            authorityCheck -> haunHakukohteetOids
+                                    .forEach(hk -> {
+                                        if (!authorityCheck.test(hk.getHakukohdeOid())) {
+                                            LOG.error(String.format("Ei oikeutta aloittaa laskentaa hakukohteelle %s haussa %s", hk.getHakukohdeOid(), hakuOid));
+                                            throw new ForbiddenException("Ei oikeutta aloittaa laskentaa");
+                                        }
+                                    }));
 
-                    if(authorized) {
-                        createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
-                    } else {
-                        LOG.error("Ei oikeutta aloittaa laskentaa jollekin hakukohteista");
-                        throw new ForbiddenException("Ei oikeutta aloittaa laskentaa");
-                        //callback.accept(forbiddenResponse("Ei oikeutta aloittaa laskentaa"));
-                    }
+                    createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                 },
                 (Throwable poikkeus) -> {
                     LOG.error("kaynnistaLaskentaHaulle throws", poikkeus);
