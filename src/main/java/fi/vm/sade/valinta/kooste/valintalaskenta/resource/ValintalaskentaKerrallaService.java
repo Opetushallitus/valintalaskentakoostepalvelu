@@ -200,10 +200,6 @@ public class ValintalaskentaKerrallaService {
         return Response.serverError().entity(errorMessage).build();
     }
 
-    private static Response forbiddenResponse(final String errorMessage) {
-        return Response.status(Response.Status.FORBIDDEN).entity(errorMessage).build();
-    }
-
     private static List<HakukohdeDto> toHakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
         return hakukohdeData.stream()
                 .filter(Objects::nonNull)

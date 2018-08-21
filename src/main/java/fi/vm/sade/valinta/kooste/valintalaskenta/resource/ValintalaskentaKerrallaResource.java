@@ -4,7 +4,6 @@ import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static java.util.Arrays.asList;
 
-import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import rx.Observable;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
@@ -34,7 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Controller("ValintalaskentaKerrallaResource")
 @Path("valintalaskentakerralla")
@@ -120,6 +117,7 @@ public class ValintalaskentaKerrallaResource {
 
         } catch (ForbiddenException fe) {
             asyncResponse.resume(fe);
+            throw fe;
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
