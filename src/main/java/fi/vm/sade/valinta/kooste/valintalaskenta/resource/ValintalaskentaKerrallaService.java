@@ -64,7 +64,7 @@ public class ValintalaskentaKerrallaService {
                 (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                     Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
 
-                    authCheck.forEach(
+                    authCheck.toBlocking().forEach(
                             authorityCheck -> haunHakukohteetOids
                                     .forEach(hk -> {
                                         if (!authorityCheck.test(hk.getHakukohdeOid())) {
