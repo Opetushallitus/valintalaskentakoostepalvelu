@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
@@ -351,7 +352,7 @@ public class PistesyottoExternalTuontiService {
                                             additionalAuditInfo.put("Username from params", auditSession.getPersonOid());
                                             additionalAuditInfo.put("hakuOid", hakuOid);
                                             additionalAuditInfo.put("hakijaOid", pistetieto.getPersonOid());
-                                            AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, ValintaResource.PISTESYOTTOEXTERNALSERVICE, pistetieto.getOid(), pistetieto, null, additionalAuditInfo);
+                                            AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, ValintaResource.PISTESYOTTOEXTERNALSERVICE, pistetieto.getOid(), Changes.addedDto(pistetieto), additionalAuditInfo);
                                         });
                                         List<VirheDTO> valintapisteVirheet = conflictingHakemusOids.stream()
                                                 .map(hakemusOid -> {

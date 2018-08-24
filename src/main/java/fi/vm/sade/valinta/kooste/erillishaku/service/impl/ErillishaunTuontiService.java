@@ -17,6 +17,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static rx.schedulers.Schedulers.newThread;
 
+import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
@@ -172,9 +173,9 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                                 additionalAuditInfo.put("hakukohdeOid", haku.getHakukohdeOid());
                                 additionalAuditInfo.put("valintatapajonoOid", haku.getValintatapajonoOid());
                                 if (hakijaDTO.getPoistetaankoTulokset()) {
-                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), null, hakijaDTO, additionalAuditInfo);
+                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), Changes.deleteDto(hakijaDTO), additionalAuditInfo);
                                 } else {
-                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), hakijaDTO, null, additionalAuditInfo);
+                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS, ValintaResource.ERILLISHAUNTUONTISERVICE, hakijaDTO.getHakijaOid(), Changes.addedDto(hakijaDTO), additionalAuditInfo);
                                 }
                         });
                     if (poikkeukset.isEmpty()) {

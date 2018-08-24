@@ -9,6 +9,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 import com.google.common.collect.Sets;
 
+import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.User;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
@@ -322,8 +323,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     auditLogOperation,
                     ValintaResource.PISTESYOTTOSERVICE,
                     processedArvosana.getId(),
-                    processedArvosana,
-                    null,
+                    Changes.addedDto(processedArvosana),
                     additionalAuditInfo);
             });
         }).lastOrDefault(null).<Void>map(x -> null).doOnCompleted(() ->
@@ -351,7 +351,7 @@ public abstract class AbstractPistesyottoKoosteService {
                                     additionalInfo.put("hakuOid", hakuOid);
                                     additionalInfo.put("hakukohdeOid", hakukohdeOid);
                                     additionalInfo.put("hakijaOid", pistetieto.getPersonOid());
-                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), auditLogOperation, ValintaResource.PISTESYOTTOSERVICE, pistetieto.getOid(), pistetieto, null, additionalInfo);
+                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), auditLogOperation, ValintaResource.PISTESYOTTOSERVICE, pistetieto.getOid(), Changes.addedDto(pistetieto), additionalInfo);
                                 }
                         ))
                             .onErrorResumeNext(t -> Observable.error(new IllegalStateException(

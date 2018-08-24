@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
 import com.google.gson.GsonBuilder;
 
+import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.User;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
@@ -94,7 +95,7 @@ public class ValintatapajonoTuontiService {
                                                             additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
                                                             additionalAuditFields.put("valinnanvaiheOid", valinnanvaihe.getValinnanvaiheoid());
                                                             additionalAuditFields.put("valintatapajonoOid", v.getValintatapajonooid());
-                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), hakija, null, additionalAuditFields);
+                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), Changes.addedDto(hakija), additionalAuditFields);
                                                         });
                                                     }
                                             );

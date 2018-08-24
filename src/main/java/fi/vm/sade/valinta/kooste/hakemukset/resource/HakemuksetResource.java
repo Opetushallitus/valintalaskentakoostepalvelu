@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.hakemukset.resource;
 import static java.util.Arrays.asList;
 import com.google.common.base.Preconditions;
 
+import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
@@ -61,7 +62,7 @@ public class HakemuksetResource {
         Map<String, String> additionalAuditInfo = new HashMap<>();
         additionalAuditInfo.put("hakuOid", hakuOid);
         additionalAuditInfo.put("ValinnanvaiheOid",valinnanvaiheOid);
-        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU, ValintaResource.HAKEMUKSET, valinnanvaiheOid, null, null, additionalAuditInfo);
+        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU, ValintaResource.HAKEMUKSET, valinnanvaiheOid, Changes.EMPTY, additionalAuditInfo);
 
         LOG.warn("Aloitetaan hakemusten listaaminen valinnanvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
         Long started = System.currentTimeMillis();
