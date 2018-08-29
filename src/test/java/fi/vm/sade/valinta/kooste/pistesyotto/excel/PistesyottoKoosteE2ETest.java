@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.gson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNotFound;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
@@ -101,6 +102,36 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     public void startServer() {
         startShared();
         MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_1.2.246.562.10.00000000001");
+    }
+
+    @Test
+    public void testKoostaaTyhjatPisteteidotJosParametriEiLoydy() throws Exception { //P
+
+        HttpResourceBuilder.WebClientExposingHttpResource http = createClient(resourcesAddress + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
+
+        List<ApplicationAdditionalDataDTO> applicationAdditionalDatas = readAdditionalData();
+        List<String> hakemusOids = applicationAdditionalDatas.stream().map(ApplicationAdditionalDataDTO::getOid).collect(Collectors.toList());
+
+        assertFalse(applicationAdditionalDatas.stream().anyMatch(p -> p.getAdditionalData().containsKey("kielikoe_fi")));
+
+        mockHakuAppKutsu(applicationAdditionalDatas);
+        mockValintaPisteServiceKutsu(applicationAdditionalDatas);
+
+        mockSureKutsu(createOppijat());
+        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/testihakukohde",
+                Collections.singletonList(kielikoeFi));
+        mockToReturnJson(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/testihakukohde",
+                Collections.<ValintakoeOsallistuminenDTO>emptyList());
+        mockToNotFound(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku");
+
+        Response r = http.getWebClient()
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .get();
+
+        assertEquals(200, r.getStatus());
+        PistesyottoValilehtiDTO tulokset = gson().fromJson(new InputStreamReader((InputStream) r.getEntity()), PistesyottoValilehtiDTO.class);
+        assertEquals(210, tulokset.getValintapisteet().size());
     }
 
     @Test

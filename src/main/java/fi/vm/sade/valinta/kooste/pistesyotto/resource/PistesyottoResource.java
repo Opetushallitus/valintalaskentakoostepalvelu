@@ -266,6 +266,7 @@ public class PistesyottoResource {
                 }
         );
     }
+
     private Optional<String> ifUnmodifiedSinceFromHeader() {
         HttpServletRequest h = AuthorizationUtil.request(httpServletRequestJaxRS);
         return list(h.getHeaderNames()).stream()
