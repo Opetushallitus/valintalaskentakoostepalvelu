@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeHakemusDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
@@ -337,7 +338,7 @@ public class HakemusSijoitteluntulosMergeUtil {
     private static MergeHakemusDTO luo(Optional<Hakemus> hakemus) {
         MergeHakemusDTO dto = new MergeHakemusDTO();
         if (hakemus.isPresent()) {
-            HakemusWrapper wrapper = new HakemusWrapper(hakemus.get());
+            HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus.get());
             dto.setEtunimi(wrapper.getEtunimet());
             dto.setSukunimi(wrapper.getSukunimi());
             dto.setSahkoposti(wrapper.getSahkopostiOsoite());

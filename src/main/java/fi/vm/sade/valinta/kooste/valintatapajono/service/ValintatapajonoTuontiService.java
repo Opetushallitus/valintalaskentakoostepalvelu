@@ -1,5 +1,25 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
+import com.google.gson.GsonBuilder;
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
+import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
+import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
+import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -8,29 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.core.Response;
-
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.google.gson.GsonBuilder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
-import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
-import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
-import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
 @Service
 public class ValintatapajonoTuontiService {
@@ -47,7 +46,7 @@ public class ValintatapajonoTuontiService {
 
     public void tuo(
             String username,
-            BiFunction<List<ValintatietoValinnanvaiheDTO>, List<Hakemus>, Collection<ValintatapajonoRivi>> riviFunction,
+            BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
             final String hakuOid,
             final String hakukohdeOid,
             final String tarjoajaOid,
@@ -63,7 +62,7 @@ public class ValintatapajonoTuontiService {
         );
         AtomicReference<List<ValintatietoValinnanvaiheDTO>> valinnanvaiheetRef = new AtomicReference<>();
         AtomicReference<List<ValinnanVaiheJonoillaDTO>> valintaperusteetRef = new AtomicReference<>();
-        AtomicReference<List<Hakemus>> hakemuksetRef = new AtomicReference<>();
+        AtomicReference<List<HakemusWrapper>> hakemuksetRef = new AtomicReference<>();
 
         final Supplier<Void> mergeSuplier = () -> {
             if (counter.decrementAndGet() == 0) {

@@ -71,12 +71,12 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A123")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A321")
-                        .build()
+                        .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
@@ -94,12 +94,12 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A123")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A321")
-                        .build()
+                        .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
@@ -117,12 +117,12 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A123")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.ENGLANTI)
                         .setHenkilotunnus("010111A321")
-                        .build()
+                        .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
@@ -142,14 +142,14 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .setHenkilotunnus("010111A123")
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi2@sahkoposti.fi")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A321")
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi@sahkoposti.fi")
-                        .build()
+                        .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
@@ -167,14 +167,14 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A123")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A321")
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi@sahkoposti.fi")
-                        .build()
+                        .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
@@ -192,14 +192,14 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A123")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A321")
                         .setVainSahkoinenViestinta(false)
                         .setSahkoposti("testi@sahkoposti.fi")
-                        .build()
+                        .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
@@ -217,14 +217,14 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .setOid(HAKEMUS1)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A123")
-                        .build(),
+                        .buildHakuappHakemus(),
                 hakemus()
                         .setOid(HAKEMUS2)
                         .setAsiointikieli(KieliUtil.RUOTSI)
                         .setHenkilotunnus("010111A321")
                         .setVainSahkoinenViestinta(true)
                         .setSahkoposti("testi@sahkoposti.fi")
-                        .build()
+                        .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
         mockHaku1KutsuToinenAste();

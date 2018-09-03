@@ -1,10 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintapiste;
 
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import org.apache.commons.io.IOUtils;
+import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +73,13 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
         }
     }
 
+    private void setAuditInfo(WebClient client, AuditSession auditSession) {
+        client.query("sessionId", auditSession.getSessionId());
+        client.query("uid", auditSession.getPersonOid());
+        client.query("inetAddress", auditSession.getInetAddress());
+        client.query("userAgent", auditSession.getUserAgent());
+    }
+
     @Override
     public Observable<PisteetWithLastModified> getValintapisteet(String hakuOID, String hakukohdeOID, AuditSession auditSession) {
         Observable<Response> response = getAsObservableLazily(
@@ -78,10 +87,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                 //new GenericType<List<Valintapisteet>>(){}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    client.query("sessionId", auditSession.getSessionId());
-                    client.query("uid", auditSession.getPersonOid());
-                    client.query("inetAddress", auditSession.getInetAddress());
-                    client.query("userAgent", auditSession.getUserAgent());
+                    setAuditInfo(client, auditSession);
                     return client;
                 });
 
@@ -94,10 +100,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                 getUrl("valintapiste-service.get.pisteet.with.hakemusoids"),
                 Entity.entity(hakemusOIDs, MediaType.APPLICATION_JSON_TYPE), client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    client.query("sessionId", auditSession.getSessionId());
-                    client.query("uid", auditSession.getPersonOid());
-                    client.query("inetAddress", auditSession.getInetAddress());
-                    client.query("userAgent", auditSession.getUserAgent());
+                    setAuditInfo(client, auditSession);
                     return client;
                 });
         return response.switchMap(this::handleResponse);
@@ -105,29 +108,17 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public Observable<Set<String>> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
-        Observable<Response> response = putAsObservableLazily(
+        return putAsObservableLazily(
                 getUrl("valintapiste-service.put.pisteet"),
+                new TypeToken<Set<String>>() { }.getType(),
                 Entity.entity(DEFAULT_GSON.toJson(pisteet), MediaType.APPLICATION_JSON_TYPE)
                 , client -> {
                     ifUnmodifiedSince.ifPresent(since -> client.header(IF_UNMODIFIED_SINCE, since));
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    client.query("sessionId", auditSession.getSessionId());
-                    client.query("uid", auditSession.getPersonOid());
-                    client.query("inetAddress", auditSession.getInetAddress());
-                    client.query("userAgent", auditSession.getUserAgent());
+                    setAuditInfo(client, auditSession);
                     client.query("save-partially", "true");
                     return client;
                 }
         );
-        return response.switchMap(r -> {
-        try {
-            final String entity = body(r);
-            Set<String> conflictingHakemusOids = gson().fromJson(entity, new GenericType<Set<String>>() {
-            }.getType());
-            return Observable.just(conflictingHakemusOids);
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
-        });
     }
 }

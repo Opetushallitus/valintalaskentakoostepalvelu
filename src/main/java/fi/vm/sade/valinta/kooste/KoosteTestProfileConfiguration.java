@@ -152,6 +152,11 @@ public class KoosteTestProfileConfiguration {
         return INTERCEPTOR;
     }
 
+    @Bean(name = "AtaruRestClientAsAdminCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getAtaruRestClientAsAdminCasInterceptor() {
+        return INTERCEPTOR;
+    }
+
     @Bean(name = "adminDokumenttipalveluRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getAdminDokumenttipalveluRestClientCasInterceptor() {
         return INTERCEPTOR;

@@ -1,16 +1,10 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
-import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
-import static fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource.IF_UNMODIFIED_SINCE;
-import static java.util.Arrays.asList;
-import static java.util.Collections.list;
-import static java.util.Collections.singletonList;
-import static java.util.concurrent.TimeUnit.MINUTES;
 import com.google.common.collect.Lists;
-
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -19,11 +13,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Audit
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyotonTuontivirhe;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.*;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -42,16 +32,7 @@ import org.springframework.stereotype.Controller;
 import rx.Observable;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
@@ -61,13 +42,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
+import static fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource.IF_UNMODIFIED_SINCE;
+import static java.util.Arrays.asList;
+import static java.util.Collections.list;
+import static java.util.Collections.singletonList;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Controller("PistesyottoResource")
 @Path("pistesyotto")
@@ -92,6 +76,8 @@ public class PistesyottoResource {
     private PistesyottoKoosteService pistesyottoKoosteService;
     @Autowired
     private ApplicationAsyncResource applicationAsyncResource;
+    @Autowired
+    private AtaruAsyncResource ataruAsyncResource;
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
     @Context
@@ -178,6 +164,16 @@ public class PistesyottoResource {
             return;
         }
 
+        Observable<HakemusWrapper> hakemusO = ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid))
+                .flatMap(hakemukset -> {
+                    if (hakemukset.isEmpty()) {
+                        return applicationAsyncResource.getApplication(hakemusOid);
+                    } else {
+                        return Observable.just(hakemukset.iterator().next());
+                    }
+                });
+
+
         Observable.merge(Observable.zip(
                 authorityCheckService.getAuthorityCheckForRoles(asList(
                         "ROLE_APP_HAKEMUS_READ_UPDATE",
@@ -185,9 +181,9 @@ public class PistesyottoResource {
                         "ROLE_APP_HAKEMUS_LISATIETORU",
                         "ROLE_APP_HAKEMUS_LISATIETOCRUD"
                 )),
-                applicationAsyncResource.getApplication(hakemusOid),
+                hakemusO,
                 (authorityCheck, hakemus) -> {
-                    Collection<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids();
+                    Collection<String> hakutoiveOids = hakemus.getHakutoiveOids();
                     if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
                         return pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(
                                 pistetiedot, ifUnmodifiedSince, username, auditSession
@@ -311,7 +307,14 @@ public class PistesyottoResource {
             return Observable.error(new ForbiddenException(
                     msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
             ));
-        }).flatMap(x -> applicationAsyncResource.getApplicationOids(hakuOid, hakukohdeOid)
+        }).flatMap(x -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
+                .flatMap(hakemukset -> {
+                    if (hakemukset.isEmpty()) {
+                        return applicationAsyncResource.getApplicationOids(hakuOid, hakukohdeOid);
+                    } else {
+                        return Observable.just(hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet()));
+                    }
+                })
                 .flatMap(hakukohteenHakemusOidit -> {
                     Set<String> eiHakukohteeseenHakeneet = pistetiedot.stream()
                             .map(ApplicationAdditionalDataDTO::getOid)

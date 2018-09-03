@@ -1,14 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,15 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import com.google.common.collect.Maps;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.util.Converter;
-import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -54,50 +53,44 @@ public class EligibilitiesKonvertointiTest {
 	@Ignore
 	@Test
 	public void te() throws JsonSyntaxException, IOException {
-		String hakukohdeOid = "";
-		// List<String> sq = Arrays.asList("s", "s");
-		// sq.stream().collect(Collectors.toMap(s -> s, s -> 6));
-		List<Hakemus> hakemukset = new Gson().fromJson(
-				IOUtils.toString(new ClassPathResource("xxlistfull")
-						.getInputStream()), new TypeToken<List<Hakemus>>() {
-				}.getType());
+        String hakukohdeOid = "";
+        List<Hakemus> hakemukset = new Gson().fromJson(
+                IOUtils.toString(new ClassPathResource("xxlistfull")
+                        .getInputStream()), new TypeToken<List<Hakemus>>() {
+                }.getType());
+        Map<String, Exception> epaonnistuneetKonversiot = Maps
+                .newConcurrentMap();
+        try {
+            hakemukset.parallelStream()
+                    .filter(Objects::nonNull)
+                    .map(h -> {
+                        try {
+							HakemusWrapper hakemus = new HakuappHakemusWrapper(h);
+                            return hakemus.toHakemusDto(new Valintapisteet(), Maps.newHashMap());
+                        } catch (Exception e) {
+                            epaonnistuneetKonversiot.put(h.getOid(), e);
+                            return null;
+                        }
+                    }).collect(Collectors.toList());
+        } catch (Exception e) {
+            LOG.error("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle " + hakukohdeOid + " +  ja null hakemukselle", e);
+            throw e;
+        }
+        if (!epaonnistuneetKonversiot.isEmpty()) {
+            LOG.error(
+                    "Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle {} ja hakemuksille {}. Esimerkiksi {}!",
+                    hakukohdeOid, Arrays.toString(epaonnistuneetKonversiot
+                            .keySet().toArray()), epaonnistuneetKonversiot
+                            .values().iterator().next().getMessage());
+            throw new RuntimeException(
+                    "Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle "
+                            + hakukohdeOid
+                            + " ja hakemuksille "
+                            + Arrays.toString(epaonnistuneetKonversiot.keySet()
+                            .toArray()) + "!");
+        }
 
-		List<HakemusDTO> hakemusDtot;
-		Map<String, Exception> epaonnistuneetKonversiot = Maps
-				.newConcurrentMap();
-		try {
-
-			hakemusDtot = hakemukset.parallelStream()
-			//
-					.filter(Objects::nonNull)
-					//
-					.map(h -> {
-						try {
-							return Converter.hakemusToHakemusDTO(h, new Valintapisteet(), Maps.newHashMap());
-						} catch (Exception e) {
-							epaonnistuneetKonversiot.put(h.getOid(), e);
-							return null;
-						}
-					}).collect(Collectors.toList());
-		} catch (Exception e) {
-			LOG.error("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle " + hakukohdeOid + " +  ja null hakemukselle", e);
-			throw e;
-		}
-		if (!epaonnistuneetKonversiot.isEmpty()) {
-			LOG.error(
-					"Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle {} ja hakemuksille {}. Esimerkiksi {}!",
-					hakukohdeOid, Arrays.toString(epaonnistuneetKonversiot
-							.keySet().toArray()), epaonnistuneetKonversiot
-							.values().iterator().next().getMessage());
-			throw new RuntimeException(
-					"Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle "
-							+ hakukohdeOid
-							+ " ja hakemuksille "
-							+ Arrays.toString(epaonnistuneetKonversiot.keySet()
-									.toArray()) + "!");
-		}
-
-	}
+    }
 
 	@Ignore
 	@Test

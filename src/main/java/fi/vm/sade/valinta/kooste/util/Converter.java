@@ -1,52 +1,36 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Piste;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class Converter {
     private static final Logger LOG = LoggerFactory.getLogger(Converter.class);
-    private final static String ETUNIMET = "Etunimet";
-    private final static String SUKUNIMI = "Sukunimi";
-    private final static String PREFERENCE = "preference";
-    private final static String KOULUTUS_ID = "Koulutus-id";
-    private final static String DISCRETIONARY = "discretionary";
-
     private final static String EI_ARVOSANAA = "Ei arvosanaa";
 
-    private static class Hakutoive {
+    public static class Hakutoive {
         private Boolean harkinnanvaraisuus;
         private String hakukohdeOid;
 
-        private Boolean getHarkinnanvaraisuus() {
+        Boolean getHarkinnanvaraisuus() {
             return harkinnanvaraisuus;
         }
 
-        private void setHarkinnanvaraisuus(Boolean harkinnanvaraisuus) {
+        void setHarkinnanvaraisuus(Boolean harkinnanvaraisuus) {
             this.harkinnanvaraisuus = harkinnanvaraisuus;
         }
 
-        private String getHakukohdeOid() {
+        public String getHakukohdeOid() {
             return hakukohdeOid;
         }
 
-        private void setHakukohdeOid(String hakukohdeOid) {
+        public void setHakukohdeOid(String hakukohdeOid) {
             this.hakukohdeOid = hakukohdeOid;
         }
     }
@@ -55,7 +39,7 @@ public class Converter {
      * Poistaa "Ei arvosanaa" -kentät hakemukselta. Tämän funkkarin voi poistaa
      * kunhan hakemuspalveluun saadaan tehtyä filtteri näille kentille
      */
-    private static String sanitizeArvo(String arvo) {
+    static String sanitizeArvo(String arvo) {
         if (arvo != null && EI_ARVOSANAA.equals(arvo)) {
             return "";
         }
@@ -63,155 +47,20 @@ public class Converter {
         return arvo;
     }
 
-    public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
-        HakemusDTO hakemusTyyppi = new HakemusDTO();
-        hakemusTyyppi.setHakemusoid(hakemus.getOid());
-        hakemusTyyppi.setHakijaOid(hakemus.getPersonOid());
-        hakemusTyyppi.setHakuoid(hakemus.getApplicationSystemId());
-
-        if (hakemus.getAnswers() != null) {
-            try {
-                if (hakemus.getAnswers().getHenkilotiedot() != null) {
-                    hakemusTyyppi.setEtunimi(hakemus.getAnswers().getHenkilotiedot().get(ETUNIMET));
-                    hakemusTyyppi.setSukunimi(hakemus.getAnswers().getHenkilotiedot().get(SUKUNIMI));
-                    for (Map.Entry<String, String> e : hakemus.getAnswers().getHenkilotiedot().entrySet()) {
-                        AvainArvoDTO aa = new AvainArvoDTO();
-                        aa.setAvain(e.getKey());
-                        aa.setArvo(sanitizeArvo(e.getValue()));
-                        hakemusTyyppi.getAvaimet().add(aa);
-                    }
-                }
-            } catch (Exception e) {
-                LOG.error("Epaonnistuminen henkilotietojen konversioon!", e);
-                throw e;
-            }
-
-            try {
-                try {
-                    hakemus.getAnswers().getHakutoiveet().putAll(mapEligibilityAndStatus(
-                            hakemus.getPreferenceEligibilities(), hakemus.getAnswers().getHakutoiveet()));
-                } catch (Exception e) {
-                    throw new RuntimeException("Eligibilities statusten mappaus preferensseihin epaonnistui!", e);
-                }
-                Map<Integer, Hakutoive> hakutoiveet = new HashMap<Integer, Hakutoive>();
-                if (hakemus.getAnswers().getHakutoiveet() != null) {
-                    for (Map.Entry<String, String> e : hakemus.getAnswers().getHakutoiveet().entrySet()) {
-                        AvainArvoDTO aa = new AvainArvoDTO();
-                        aa.setAvain(e.getKey());
-                        aa.setArvo(sanitizeArvo(e.getValue()));
-                        hakemusTyyppi.getAvaimet().add(aa);
-                        if (e.getKey().startsWith(PREFERENCE)) {
-                            Integer prioriteetti;
-                            String numberAfterPreference;
-                            try {
-                                numberAfterPreference = e.getKey().replaceAll("\\D+", "");
-                                if (StringUtils.isBlank(numberAfterPreference)) {
-                                    continue;
-                                }
-                                prioriteetti = Integer.valueOf(numberAfterPreference);
-                            } catch (Exception ee) {
-                                LOG.error("Toivomusjarjestykseton preferenssi {}", e.getKey());
-                                throw ee;
-                            }
-                            Hakutoive hakutoive;
-                            if (!hakutoiveet.containsKey(prioriteetti)) {
-                                hakutoive = new Hakutoive();
-                                hakutoiveet.put(prioriteetti, hakutoive);
-                            } else {
-                                hakutoive = hakutoiveet.get(prioriteetti);
-                            }
-
-                            if (e.getKey().endsWith(KOULUTUS_ID)) {hakutoive.setHakukohdeOid(e.getValue());
-                            } else if (e.getKey().endsWith(DISCRETIONARY)) {
-                                Boolean discretionary = Boolean.valueOf(e.getValue());
-                                discretionary = discretionary == null ? false : discretionary;
-                                hakutoive.setHarkinnanvaraisuus(discretionary);
-                            }
-                        }
-                    }
-
-                    for (Map.Entry<Integer, Hakutoive> e : hakutoiveet.entrySet()) {
-                        Hakutoive hakutoive = e.getValue();
-                        if (hakutoive != null) {
-                            if (hakutoive.getHakukohdeOid() != null && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
-                                HakukohdeDTO hk = new HakukohdeDTO();
-                                hk.setOid(hakutoive.getHakukohdeOid());
-                                hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
-                                hk.setPrioriteetti(e.getKey());
-                                hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(hakutoive.getHakukohdeOid()));
-                                hakemusTyyppi.getHakukohteet().add(hk);
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                LOG.error("Epaonnistuminen hakuvoiteiden konversioon!", e);
-                throw e;
-            }
-
-            try {
-                if (hakemus.getAnswers().getKoulutustausta() != null) {
-                    for (Map.Entry<String, String> e : hakemus.getAnswers().getKoulutustausta().entrySet()) {
-                        AvainArvoDTO aa = new AvainArvoDTO();
-                        aa.setAvain(e.getKey());
-                        aa.setArvo(sanitizeArvo(e.getValue()));
-                        hakemusTyyppi.getAvaimet().add(aa);
-                    }
-                }
-            } catch (Exception e) {
-                LOG.error("Epaonnistuminen koulutustaustan konversioon!", e);
-                throw e;
-            }
-
-            try {
-                if (hakemus.getAnswers().getLisatiedot() != null) {
-                    for (Map.Entry<String, String> e : hakemus.getAnswers().getLisatiedot().entrySet()) {
-                        AvainArvoDTO aa = new AvainArvoDTO();
-                        aa.setAvain(e.getKey());
-                        aa.setArvo(sanitizeArvo(e.getValue()));
-                        hakemusTyyppi.getAvaimet().add(aa);
-                    }
-                }
-            } catch (Exception e) {
-                LOG.error("Epaonnistuminen lisatietojen konversioon!", e);
-                throw e;
-            }
-
-            try {
-                if (hakemus.getAnswers().getOsaaminen() != null) {
-                    final List<AvainArvoDTO> osaaminenIlmanArvosanoja = hakemus.getAnswers().getOsaaminen().entrySet()
-                            .stream()
-                            .filter(entry -> !entry.getKey().startsWith("PK_") && !entry.getKey().startsWith("LK_"))
-                            .map(e -> {
-                                AvainArvoDTO aa = new AvainArvoDTO();
-                                aa.setAvain(e.getKey());
-                                aa.setArvo(sanitizeArvo(e.getValue()));
-                                return aa;
-                            })
-                            .collect(Collectors.toList());
-                    hakemusTyyppi.getAvaimet().addAll(osaaminenIlmanArvosanoja);
-
-                }
-            } catch (Exception e) {
-                LOG.error("Epaonnistuminen osaamisen konversioon!", e);
-                throw e;
-            }
-        }
+    static void setHakemusDTOvalintapisteet(Valintapisteet valintapisteet, HakemusDTO hakemusDto) {
         try {
             if(valintapisteet != null) {
                 Valintapisteet.toAdditionalData(valintapisteet).getAdditionalData().forEach((k, v) -> {
                     AvainArvoDTO aa = new AvainArvoDTO();
                     aa.setAvain(k);
                     aa.setArvo(v);
-                    hakemusTyyppi.getAvaimet().add(aa);
+                    hakemusDto.getAvaimet().add(aa);
                 });
             }
         } catch (Exception e) {
-            LOG.error("Epaonnistuminen avainten konversioon!", e);
+            LOG.error("Epäonnistuminen hakemuksen valintapisteiden asettamisessa", e);
             throw e;
         }
-
-        return hakemusTyyppi;
     }
 
     public static Map<String, String> mapEligibilityAndStatus(List<Eligibility> eligibilities, Map<String, String> hakutoiveet) {
@@ -222,7 +71,7 @@ public class Converter {
                         // .map(e -> e.getAoId())
                 .collect(Collectors.toList())
                 .stream()
-                .collect(Collectors.toMap(e -> e.getAoId(), e -> e.getParsedEligibilityStatus()));
+                .collect(Collectors.toMap(Eligibility::getAoId, Eligibility::getParsedEligibilityStatus));
         return Optional
                 .ofNullable(hakutoiveet)
                 .orElse(Collections.emptyMap())

@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.cas;
 
-import static fi.vm.sade.valinta.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
-
 import fi.vm.sade.authentication.cas.CasClient;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
@@ -17,29 +15,38 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static fi.vm.sade.valinta.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
+
 public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CasKoosteInterceptor.class);
     private static final Integer HTTP_401_UNAUTHORIZED = Integer.valueOf(401);
-    public static final String JSESSIONID = "JSESSIONID";
+    private static final int MAX_RETRIES = 10;
 
     private final String webCasUrl;
     private final String targetService;
     private final String appClientUsername;
     private final String appClientPassword;
+    private final String cookieName;
+    private final boolean legacySpringFilter;
 
     private AtomicReference<CompletableFuture<String>> sessionCookiePromise;
 
-    public CasKoosteInterceptor(String webCasUrl, String targetService, String appClientUsername, String appClientPassword) {
+    public CasKoosteInterceptor(String webCasUrl, String targetService, String appClientUsername,
+                                String appClientPassword, String cookieName, boolean legacySpringFilter) {
         super(Phase.PRE_PROTOCOL);
         this.webCasUrl = webCasUrl;
         this.targetService = targetService;
         this.appClientUsername = appClientUsername;
         this.appClientPassword = appClientPassword;
+        this.cookieName = cookieName;
+        this.legacySpringFilter = legacySpringFilter;
         this.sessionCookiePromise = new AtomicReference<>(CompletableFuture.completedFuture(null));
     }
 
@@ -59,38 +66,38 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         return false;
     }
 
-    private String getResponseCookie(Message message, String cookieName) {
+    private Optional<String> getResponseCookie(Message message) {
         Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
         if (!headers.containsKey("Set-Cookie")) {
-            return null;
+            return Optional.empty();
         }
         for (String cookie : headers.get("Set-Cookie")) {
-            if (cookie.startsWith(cookieName)) {
-                return cookie.split(";")[0].split("=")[1];
+            if (cookie.startsWith(this.cookieName)) {
+                return Optional.of(cookie.split(";")[0].split("=")[1]);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    private String getRequestCookie(Message message, String cookieName) {
+    private String getRequestCookie(Message message) {
         Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
         if (!headers.containsKey("Cookie")) {
             return null;
         }
         for (String cookie : headers.get("Cookie")) {
-            if (cookie.startsWith(cookieName)) {
+            if (cookie.startsWith(this.cookieName)) {
                 return cookie.split(";")[0].split("=")[1];
             }
         }
         return null;
     }
 
-    private void addCookie(Message message, String cookieName, String cookieValue) {
+    private void addCookie(Message message, String cookieValue) {
         Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
         if (!headers.containsKey("Cookie")) {
             headers.put("Cookie", new ArrayList<>());
         }
-        headers.get("Cookie").add(cookieName + "=" + cookieValue);
+        headers.get("Cookie").add(this.cookieName + "=" + cookieValue);
     }
 
     @Override
@@ -110,7 +117,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         boolean isUnauthorized = HTTP_401_UNAUTHORIZED.equals(message.get(Message.RESPONSE_CODE));
         if (isUnauthorized || isRedirectToCas(message)) {
             Message request = message.getExchange().getOutMessage();
-            String session = getRequestCookie(request, JSESSIONID);
+            String session = getRequestCookie(request);
             if (session == null) {
                 String serviceTicket = ((HttpURLConnection) request.get("http.connection")).getRequestProperty("CasSecurityTicket");
                 LOGGER.warn(String.format("Authentication to %s failed using service ticket %s", this.targetService, serviceTicket));
@@ -127,33 +134,51 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
                 httpHeaders.put(CAS_302_REDIRECT_MARKER.getKey(), Collections.singletonList(CAS_302_REDIRECT_MARKER.getValue()));
             }
         } else {
-            String session = getResponseCookie(message, JSESSIONID);
-            if (session != null && this.sessionCookiePromise.get().complete(session)) {
-                LOGGER.info(String.format("New session %s for %s", session, this.targetService));
-            }
+            getResponseCookie(message).ifPresent(session -> {
+                if (this.sessionCookiePromise.get().complete(session)) {
+                    LOGGER.info(String.format("New session %s for %s", session, targetService));
+                }
+            });
         }
     }
 
-    private void handleOutboundMessage(Message message) throws InterruptedException, java.util.concurrent.ExecutionException {
-        CompletableFuture<String> p = this.sessionCookiePromise.get();
-        String session;
-        try {
-            session = p.get(10, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            LOGGER.warn("Fetching a session has taken over 10 seconds");
-            session = null;
+    private String getServiceTicket() {
+        LOGGER.info(String.format("Fetching a new CAS service ticket for %s", this.targetService));
+        String serviceTicket = CasClient.getTicket(this.webCasUrl, this.appClientUsername, this.appClientPassword, this.targetService, this.legacySpringFilter);
+        LOGGER.info(String.format("Got a service ticket %s for %s", serviceTicket, this.targetService));
+        return serviceTicket;
+    }
+
+    private CompletableFuture<String> getCookieFuture() throws ExecutionException, InterruptedException {
+        for (int tries = 0; tries < MAX_RETRIES; tries++) {
+            CompletableFuture<String> p = this.sessionCookiePromise.get();
+            try {
+                String session = p.get(10, TimeUnit.SECONDS);
+                if (session != null) {
+                    return p;
+                }
+            } catch (TimeoutException e) { }
+            CompletableFuture<String> pp = new CompletableFuture<>();
+            if (this.sessionCookiePromise.compareAndSet(p, pp)) {
+                return pp;
+            }
         }
-        if (session == null) {
-            if (this.sessionCookiePromise.compareAndSet(p, new CompletableFuture<>())) {
-                LOGGER.info(String.format("Fetching a new CAS service ticket for %s", this.targetService));
-                String serviceTicket = CasClient.getTicket(webCasUrl, appClientUsername, appClientPassword, targetService);
-                LOGGER.info(String.format("Got a service ticket %s for %s", serviceTicket, this.targetService));
+        throw new RuntimeException(String.format("Failed to authenticate after %d retries", MAX_RETRIES));
+    }
+
+    private void handleOutboundMessage(Message message) throws ExecutionException, InterruptedException {
+        CompletableFuture<String> f = getCookieFuture();
+        if (!f.isDone()) {
+            String serviceTicket = getServiceTicket();
+            if (this.legacySpringFilter) {
                 ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
             } else {
-                // TODO retry – or not? The current retry functionality is in fi.vm.sade.valinta.http.HttpResourceImpl lazy methods
+                String session = CasClient.initServiceSession(this.targetService, serviceTicket, this.cookieName).getValue();
+                if (f.complete(session)) {
+                    LOGGER.info(String.format("New session %s for %s", session, this.targetService));
+                }
             }
-        } else {
-            addCookie(message, JSESSIONID, session);
         }
+        Optional.ofNullable(f.getNow(null)).ifPresent(session -> addCookie(message, session));
     }
 }

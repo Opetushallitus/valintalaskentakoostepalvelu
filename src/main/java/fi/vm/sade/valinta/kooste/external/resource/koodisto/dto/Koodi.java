@@ -9,6 +9,7 @@ public class Koodi {
     private String koodiArvo;
     private String tila;
     private int versio;
+    private Koodisto koodisto;
     //private int version;
     private String voimassaAlkuPvm;
     private String voimassaLoppuPvm;
@@ -44,5 +45,17 @@ public class Koodi {
 
     public void setKoodiArvo(String koodiArvo) {
         this.koodiArvo = koodiArvo;
+    }
+
+    public Koodisto getKoodisto() {
+        return koodisto;
+    }
+
+    public void setKoodisto(Koodisto koodisto) {
+        this.koodisto = koodisto;
+    }
+
+    public String getKoodistoUri() {
+        return koodisto.getKoodistoUri();
     }
 }

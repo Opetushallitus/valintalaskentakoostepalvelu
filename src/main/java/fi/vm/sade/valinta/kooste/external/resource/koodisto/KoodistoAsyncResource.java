@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface KoodistoAsyncResource {
     Observable<List<Koodi>> haeKoodisto(String koodistoUri);
+
+    Observable<Koodi> haeRinnasteinenKoodi(String koodiUri);
 }

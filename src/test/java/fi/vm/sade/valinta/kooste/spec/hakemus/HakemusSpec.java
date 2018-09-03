@@ -1,13 +1,18 @@
 package fi.vm.sade.valinta.kooste.spec.hakemus;
 
 import com.google.common.collect.Maps;
-
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
+import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+
+import java.util.List;
 
 /**
  * @author Jussi Jartamo
@@ -51,24 +56,24 @@ public class HakemusSpec extends ConstantsSpec {
             this.hakemus.getAnswers().setHenkilotiedot(Maps.newHashMap());
         }
         public HakemusBuilder setEtunimiJaSukunimi(String etunimi, String sukunimi) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.ETUNIMET, etunimi);
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SUKUNIMI, sukunimi);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.ETUNIMET, etunimi);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.SUKUNIMI, sukunimi);
             return this;
         }
         public HakemusBuilder setHenkilotunnus(String henkilotunnus) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.HETU, henkilotunnus);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.HETU, henkilotunnus);
             return this;
         }
         public HakemusBuilder setSyntymaaika(String syntymaaika) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SYNTYMAAIKA, syntymaaika);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.SYNTYMAAIKA, syntymaaika);
             return this;
         }
         public HakemusBuilder setSahkoposti(String sahkoposti) {
-            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SAHKOPOSTI, sahkoposti);
+            hakemus.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.SAHKOPOSTI, sahkoposti);
             return this;
         }
         public HakemusBuilder setVainSahkoinenViestinta(boolean vainSahkoinenViestinta) {
-            hakemus.getAnswers().getLisatiedot().put(HakemusWrapper.LUPA_SAHKOISEEN_VIESTINTAAN, vainSahkoinenViestinta ? "true" : "false");
+            hakemus.getAnswers().getLisatiedot().put(HakuappHakemusWrapper.LUPA_SAHKOISEEN_VIESTINTAAN, vainSahkoinenViestinta ? "true" : "false");
             return this;
         }
         public HakemusBuilder setOid(String oid) {
@@ -81,7 +86,7 @@ public class HakemusSpec extends ConstantsSpec {
             return this;
         }
         public HakemusBuilder setAsiointikieli(String asiointikieli) {
-            hakemus.getAnswers().getLisatiedot().put(HakemusWrapper.ASIOINTIKIELI, asiointikieli);
+            hakemus.getAnswers().getLisatiedot().put(HakuappHakemusWrapper.ASIOINTIKIELI, asiointikieli);
             return this;
         }
         public HakemusBuilder addHakutoive(String hakukohdeOid) {
@@ -89,8 +94,67 @@ public class HakemusSpec extends ConstantsSpec {
             return this;
         }
 
-        public Hakemus build() {
+        public HakemusWrapper build() {
             hakemus.setState(ApplicationAsyncResource.DEFAULT_STATES.get(0));
+            return new HakuappHakemusWrapper(hakemus);
+        }
+
+        public Hakemus buildHakuappHakemus() {
+            hakemus.setState(ApplicationAsyncResource.DEFAULT_STATES.get(0));
+            return hakemus;
+        }
+    }
+
+    public static class AtaruHakemusBuilder {
+        private final AtaruHakemus hakemus;
+        private final HenkiloPerustietoDto henkilo;
+
+        public AtaruHakemusBuilder() {
+            hakemus = new AtaruHakemus();
+            hakemus.setKeyValues(Maps.newHashMap());
+            henkilo = null;
+        }
+
+        public AtaruHakemusBuilder(String oid, String personOid, String hetu) {
+            hakemus = new AtaruHakemus();
+            hakemus.setKeyValues(Maps.newHashMap());
+            hakemus.setHakemusOid(oid);
+            henkilo = new HenkiloPerustietoDto();
+            henkilo.setOidHenkilo(personOid);
+            henkilo.setHetu(hetu);
+        }
+
+        public AtaruHakemusBuilder setOid(String oid) {
+            hakemus.setHakemusOid(oid);
+            return this;
+        }
+
+        public AtaruHakemusBuilder setHakutoiveet(List<String> oids) {
+            hakemus.setHakutoiveet(oids);
+            return this;
+        }
+        public AtaruHakemusBuilder setSuomalainenPostinumero(String postinumero) {
+            hakemus.getKeyValues().put("postal-code", postinumero);
+            return this;
+        }
+        public AtaruHakemusBuilder setCountryOfResidence(String countryCode) {
+            hakemus.getKeyValues().put("country-of-residence", countryCode);
+            return this;
+        }
+        public AtaruHakemusBuilder setPersonOid(String oid) {
+            henkilo.setOidHenkilo(oid);
+            return this;
+        }
+        public AtaruHakemusBuilder setHakemusPersonOid(String oid) {
+            hakemus.setPersonOid(oid);
+            return this;
+        }
+
+
+        public HakemusWrapper build() {
+            return new AtaruHakemusWrapper(hakemus, henkilo);
+        }
+        public AtaruHakemus getHakemus() {
             return hakemus;
         }
     }

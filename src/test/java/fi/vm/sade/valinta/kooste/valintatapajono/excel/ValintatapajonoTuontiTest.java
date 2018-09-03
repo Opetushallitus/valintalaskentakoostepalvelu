@@ -1,30 +1,25 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
-import fi.vm.sade.valinta.kooste.excel.Excel;
+import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintatapajono.ValintatapajonoTestTools;
-
-import static fi.vm.sade.valinta.http.DateDeserializer.GSON;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-
+import static fi.vm.sade.valinta.http.DateDeserializer.GSON;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -41,7 +36,9 @@ public class ValintatapajonoTuontiTest extends ValintatapajonoTestTools {
         List<ValintatietoValinnanvaiheDTO> valinnanvaihe = GSON.fromJson(resurssi("valinnanvaihe.json"), valinnanVaiheListType);
         List<Hakemus> hakemukset = GSON.fromJson(resurssi("listfull.json"), hakemusListType);
         ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
-        ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel("1.2.246.562.5.2013080813081926341927", "1.2.246.562.14.2013082110450143806511", "14017934785463582418268204255542", "Haun Nimi", "Hakukohteen Nimi", valinnanvaihe, hakemukset, Arrays.asList(listaus));
+        ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel("1.2.246.562.5.2013080813081926341927", "1.2.246.562.14.2013082110450143806511",
+                "14017934785463582418268204255542", "Haun Nimi", "Hakukohteen Nimi", valinnanvaihe, hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()),
+                Collections.singletonList(listaus));
         valintatapajonoExcel.getExcel().tuoXlsx(new ClassPathResource("valintatapajono/valintatapajono.xlsx").getInputStream());
         for (ValintatapajonoRivi r : listaus.getRivit()) {
             LOG.info("{} {} {} {}", r.getJonosija(), r.getNimi(), r.isValidi(), r.getTila());
@@ -76,7 +73,8 @@ public class ValintatapajonoTuontiTest extends ValintatapajonoTestTools {
         List<ValintatietoValinnanvaiheDTO> valinnanvaihe = GSON.fromJson(resurssi("valinnanvaihe.json"), valinnanVaiheListType);
         List<Hakemus> hakemukset = GSON.fromJson(resurssi("listfull.json"), hakemusListType);
         ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
-        ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel("1.2.246.562.5.2013080813081926341927", "1.2.246.562.14.2013082110450143806511", "14017934785463582418268204255542", "Haun Nimi", "Hakukohteen Nimi", valinnanvaihe, hakemukset, Arrays.asList(listaus));
+        ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel("1.2.246.562.5.2013080813081926341927", "1.2.246.562.14.2013082110450143806511", "14017934785463582418268204255542",
+                "Haun Nimi", "Hakukohteen Nimi", valinnanvaihe, hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()), Collections.singletonList(listaus));
         valintatapajonoExcel.getExcel().tuoXlsx(new ClassPathResource("valintatapajono/valintatapajono_kokonaispisteet.xlsx").getInputStream());
         for (ValintatapajonoRivi r : listaus.getRivit()) {
             LOG.info("{} {} {} {}", r.getJonosija(), r.getNimi(), r.isValidi(), r.getTila());

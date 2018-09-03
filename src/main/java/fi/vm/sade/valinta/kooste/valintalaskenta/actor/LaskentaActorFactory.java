@@ -1,18 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
-import static fi.vm.sade.valinta.http.ObservableUtil.wrapAsRunOnlyOnceObservable;
-import static java.util.Collections.emptyList;
-import static org.apache.commons.lang3.tuple.Pair.of;
-import static rx.Observable.combineLatest;
-import static rx.Observable.just;
-import static rx.Observable.timer;
-
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -22,10 +16,12 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuObservable.PyynnonTunniste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,15 +35,7 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -55,11 +43,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.valinta.http.ObservableUtil.wrapAsRunOnlyOnceObservable;
-import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
-import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.tuple.Pair.of;
-import static rx.Observable.*;
+import static rx.Observable.combineLatest;
+import static rx.Observable.just;
 
 @Service
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
@@ -69,6 +56,7 @@ public class LaskentaActorFactory {
     private final ValintapisteAsyncResource valintapisteAsyncResource;
     private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
@@ -80,6 +68,7 @@ public class LaskentaActorFactory {
             @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:1}") int splittaus,
             ValintalaskentaAsyncResource valintalaskentaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
             LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
             SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
@@ -89,6 +78,7 @@ public class LaskentaActorFactory {
         this.splittaus = splittaus;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource  = ataruAsyncResource;
         this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
         this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
@@ -249,7 +239,47 @@ public class LaskentaActorFactory {
         return new LaskentaActorForSingleHakukohde(actorParams, r, laskentaSupervisor, laskentaSeurantaAsyncResource, splittaus);
     }
 
-    private Observable<LaskeDTO> fetchResourcesForOneLaskenta(final AuditSession auditSession, final String uuid, HakuV1RDTO haku,
+    private Observable<LaskeDTO> getLaskeDTOObservable(String uuid,
+                                                       HakuV1RDTO haku,
+                                                       String hakukohdeOid,
+                                                       LaskentaActorParams actorParams,
+                                                       boolean withHakijaRyhmat,
+                                                       Observable<List<ValintaperusteetDTO>> valintaperusteet,
+                                                       Observable<List<Oppija>> oppijat,
+                                                       Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes,
+                                                       Observable<PisteetWithLastModified> valintapisteetForHakukohdes,
+                                                       Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat,
+                                                       Observable<List<HakemusWrapper>> hakemukset) {
+        return wrapAsRunOnlyOnceObservable(combineLatest(
+                valintapisteetForHakukohdes,
+                hakijaryhmat,
+                valintaperusteet,
+                hakemukset,
+                oppijat,
+                hakukohdeRyhmasForHakukohdes,
+                (vp, hr, v, h, o, r) -> {
+                    LOG.info("(Uuid: {}) Kaikki resurssit hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
+                    if(!withHakijaRyhmat) {
+                        return new LaskeDTO(
+                                uuid,
+                                haku.isKorkeakouluHaku(),
+                                actorParams.isErillishaku(),
+                                hakukohdeOid,
+                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v);
+
+                    } else {
+                        return new LaskeDTO(
+                                uuid,
+                                haku.isKorkeakouluHaku(),
+                                actorParams.isErillishaku(),
+                                hakukohdeOid,
+                                HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
+                    }}));
+    }
+
+    private Observable<LaskeDTO> fetchResourcesForOneLaskenta(final AuditSession auditSession,
+                                                              final String uuid,
+                                                              HakuV1RDTO haku,
                                                               final String hakukohdeOid,
                                                               LaskentaActorParams actorParams,
                                                               boolean retryHakemuksetAndOppijat,
@@ -260,10 +290,6 @@ public class LaskentaActorFactory {
         Observable<List<ValintaperusteetDTO>> valintaperusteet = createResurssiObservable(tunniste,
             "valintaperusteetAsyncResource.haeValintaperusteet",
             valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()));
-        Observable<List<Hakemus>> hakemukset = createResurssiObservable(tunniste,
-            "applicationAsyncResource.getApplicationsByOid",
-            applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
-            retryHakemuksetAndOppijat);
         Observable<List<Oppija>> oppijat = createResurssiObservable(tunniste,
             "suoritusrekisteriAsyncResource.getOppijatByHakukohde",
             suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid),
@@ -278,32 +304,21 @@ public class LaskentaActorFactory {
             "valintaperusteetAsyncResource.haeHakijaryhmat",
             valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : just(emptyList());
 
-        LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
-        return wrapAsRunOnlyOnceObservable(combineLatest(
-                valintapisteetForHakukohdes,
-                hakijaryhmat,
-                valintaperusteet,
-                hakemukset,
-                oppijat,
-                hakukohdeRyhmasForHakukohdes,
-                (vp, hr, v, h, o, r) -> {
-                    LOG.info("(Uuid: {}) Kaikki resurssit hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
-                    if(!withHakijaRyhmat) {
-                        return new LaskeDTO(
-                            uuid,
-                            haku.isKorkeakouluHaku(),
-                            actorParams.isErillishaku(),
-                            hakukohdeOid,
-                            HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v);
-
-                    } else {
-                        return new LaskeDTO(
-                            uuid,
-                            haku.isKorkeakouluHaku(),
-                            actorParams.isErillishaku(),
-                            hakukohdeOid,
-                            HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
-                }}));
+        if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
+            Observable<List<HakemusWrapper>> hakemukset = createResurssiObservable(tunniste,
+                    "applicationAsyncResource.getApplications",
+                    ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
+                    retryHakemuksetAndOppijat);
+            LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
+            return getLaskeDTOObservable(uuid, haku, hakukohdeOid, actorParams, withHakijaRyhmat, valintaperusteet, oppijat, hakukohdeRyhmasForHakukohdes, valintapisteetForHakukohdes, hakijaryhmat, hakemukset);
+        } else {
+            Observable<List<HakemusWrapper>> hakemukset = createResurssiObservable(tunniste,
+                "applicationAsyncResource.getApplicationsByOid",
+                applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
+                retryHakemuksetAndOppijat);
+            LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
+            return getLaskeDTOObservable(uuid, haku, hakukohdeOid, actorParams, withHakijaRyhmat, valintaperusteet, oppijat, hakukohdeRyhmasForHakukohdes, valintapisteetForHakukohdes, hakijaryhmat, hakemukset);
+        }
     }
 
     private <T> Observable<T> createResurssiObservable(PyynnonTunniste tunniste, String resurssi, Observable<T> sourceObservable, boolean retry) {

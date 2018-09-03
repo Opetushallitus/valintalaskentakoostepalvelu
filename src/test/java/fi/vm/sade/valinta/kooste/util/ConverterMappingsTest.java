@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -18,9 +17,14 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import static java.util.Collections.*;
+import static fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource.getAtaruHakemusWrapper;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
@@ -36,7 +40,8 @@ public class ConverterMappingsTest {
         Hakemus hakemus = hakemukset.stream()
                 .filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid()))
                 .distinct().iterator().next();
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()), Maps.newHashMap());
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
+        HakemusDTO dto = wrapper.toHakemusDto(new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "","", emptyList()), Maps.newHashMap());
         // LOG.error("\r\n{}", new GsonBuilder().setPrettyPrinting().create()
         // .toJson(dto));
         assertTrue(dto
@@ -63,7 +68,8 @@ public class ConverterMappingsTest {
         ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
         Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.49132232288", a);
 
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()),hakukohdeRyhmasForHakukohdes);
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
+        HakemusDTO dto = wrapper.toHakemusDto(new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "","", emptyList()),hakukohdeRyhmasForHakukohdes);
         assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
     }
 
@@ -143,7 +149,8 @@ public class ConverterMappingsTest {
         Hakemus hakemus = hakemukset.stream()
                 .filter(h -> "1.2.246.562.11.00003000803".equals(h.getOid()))
                 .distinct().iterator().next();
-        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus, new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "","", emptyList()), Maps.newHashMap());
+        HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
+        HakemusDTO dto = wrapper.toHakemusDto(new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "","", emptyList()), Maps.newHashMap());
 
         final int prefixes = dto.getAvaimet().stream()
                 .filter(a -> a.getAvain().startsWith("PK_") || a.getAvain().startsWith("LK_"))
@@ -166,6 +173,35 @@ public class ConverterMappingsTest {
                 .findFirst().get();
 
         Assert.assertNotNull(yleinen_kielitutkinto_sv);
+    }
+
+    @Test
+    public void testaaAtaruhakemustenKonversio() throws JsonSyntaxException, IOException {
+        HakemusWrapper wrapper = getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063");
+
+        ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
+        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.90242725084", a);
+
+        HakemusDTO dto = wrapper.toHakemusDto(new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()), hakukohdeRyhmasForHakukohdes);
+
+        assertEquals(wrapper.getOid(), dto.getHakemusoid());
+
+        assertEquals(20, dto.getAvaimet().size());
+
+        assertEquals(1, dto.getHakukohteet().stream()
+                .filter(h -> "1.2.246.562.20.90242725084".equals(h.getOid()))
+                .distinct().iterator().next()
+                .getPrioriteetti());
+
+        assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
+
+        assertEquals("NOT_CHECKED", dto.getAvaimet().stream()
+                                        .filter(pari -> "preference1-Koulutus-id-eligibility".equals(pari.getAvain()))
+                                        .distinct().iterator().next().getArvo());
+
+        assertEquals("ELIGIBLE", dto.getAvaimet().stream()
+                .filter(pari -> "preference2-Koulutus-id-eligibility".equals(pari.getAvain()))
+                .distinct().iterator().next().getArvo());
     }
 
 }

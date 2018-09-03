@@ -1,17 +1,19 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import static fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil.ASUINMAA;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.koodisto.service.types.common.KieliType;
+import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
+import fi.vm.sade.koodisto.service.types.common.KoodiType;
+import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Maakoodi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -19,19 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-import fi.vm.sade.koodisto.service.KoodiService;
-import fi.vm.sade.koodisto.service.types.common.KieliType;
-import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
-import fi.vm.sade.koodisto.service.types.common.KoodiType;
-import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
-import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Maakoodi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class HaeOsoiteKomponentti {
@@ -103,22 +96,6 @@ public class HaeOsoiteKomponentti {
             }
         }
         return StringUtils.EMPTY;
-    }
-
-    public static Osoite haeOsoite(Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, Hakemus hakemus, NimiPaattelyStrategy nimiPaattelyStrategy) {
-        HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-        Koodi postiKoodi = posti.get(wrapper.getSuomalainenPostinumero());
-        String postitoimipaikka = KoodistoCachedAsyncResource.haeKoodistaArvo(postiKoodi, KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());
-
-        Maakoodi maakoodi;
-        // onko ulkomaalainen?
-        if (SUOMI.equalsIgnoreCase(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
-            maakoodi = new Maakoodi(postitoimipaikka, "Suomi");
-        } else {
-            String asuinmaaEnglanniksi = KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa());
-            maakoodi = new Maakoodi(postitoimipaikka, asuinmaaEnglanniksi);
-        }
-        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maakoodi.getMaa(), maakoodi.getPostitoimipaikka(), nimiPaattelyStrategy);
     }
 
     private static String getNimi(List<KoodiMetadataType> meta) {

@@ -1,12 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
@@ -21,6 +16,8 @@ import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -36,14 +33,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.*;
 
 public class OppijanSuorituksetProxyResourceTest {
     private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResourceTest.class);
@@ -219,7 +213,9 @@ public class OppijanSuorituksetProxyResourceTest {
                 .fromJson(classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {
                 }.getType());
 
-        Valintapisteet v = new Valintapisteet(expectedHakemus.getOid(), expectedHakemus.getPersonOid(),"","",Collections.emptyList());
+        HakemusWrapper expectedWrapper = new HakuappHakemusWrapper(expectedHakemus);
+
+        Valintapisteet v = new Valintapisteet(expectedWrapper.getOid(), expectedWrapper.getPersonOid(),"","",Collections.emptyList());
 
         Mockito.when(
                 Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.any(), Mockito.any())).thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(),
@@ -227,7 +223,7 @@ public class OppijanSuorituksetProxyResourceTest {
 
 
         MockTarjontaAsyncService.setMockHaku(expectedHaku);
-        MockApplicationAsyncResource.setResultByOid(Arrays.asList(expectedHakemus));
+        MockApplicationAsyncResource.setResultByOid(Collections.singletonList(expectedWrapper));
         MockSuoritusrekisteriAsyncResource.setResult(expectedOppijanSuoritukset);
     }
 
@@ -240,17 +236,19 @@ public class OppijanSuorituksetProxyResourceTest {
                 .fromJson(classpathResourceAsString(oppijanHakemusFile), new TypeToken<List<Hakemus>>() {
                 }.getType());
 
+        List<HakemusWrapper> expectedWrappers = expectedHakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
+
         HakuV1RDTO expectedHaku = GSON
                 .fromJson(classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {
                 }.getType());
-        List<Valintapisteet> v = expectedHakemukset.stream().map(h -> new Valintapisteet(h.getOid(), h.getPersonOid(),"","",Collections.emptyList())).collect(Collectors.toList());
+        List<Valintapisteet> v = expectedWrappers.stream().map(h -> new Valintapisteet(h.getOid(), h.getPersonOid(),"","",Collections.emptyList())).collect(Collectors.toList());
 
         Mockito.when(
                 Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.any(), Mockito.any())).thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(),
                 v)));
 
         MockTarjontaAsyncService.setMockHaku(expectedHaku);
-        MockApplicationAsyncResource.setResultByOid(expectedHakemukset);
+        MockApplicationAsyncResource.setResultByOid(expectedWrappers);
         MockSuoritusrekisteriAsyncResource.setResults(expectedOppijanSuoritukset);
     }
 

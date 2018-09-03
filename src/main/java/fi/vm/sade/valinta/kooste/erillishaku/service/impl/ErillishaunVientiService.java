@@ -5,8 +5,11 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -31,7 +34,7 @@ import rx.schedulers.Schedulers;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static rx.Observable.zip;
 
@@ -41,6 +44,7 @@ public class ErillishaunVientiService {
     private final ValintaTulosServiceAsyncResource tilaAsyncResource;
     private final TarjontaAsyncResource hakuV1AsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final DokumenttiResource dokumenttiResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
@@ -48,12 +52,14 @@ public class ErillishaunVientiService {
     public ErillishaunVientiService(
             ValintaTulosServiceAsyncResource tilaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource,
             TarjontaAsyncResource hakuV1AsyncResource,
             DokumenttiResource dokumenttiResource,
             KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         this.tilaAsyncResource = tilaAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.dokumenttiResource = dokumenttiResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         LOG.info("Luetaan valinnantulokset ja sijoittelu valinta-tulos-servicestä!!!!!!!");
@@ -64,8 +70,14 @@ public class ErillishaunVientiService {
     }
 
     public void vie(final AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku) {
-        Observable<List<Hakemus>> hakemusObservable = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
         Observable<HakuV1RDTO> hakuFuture = hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid());
+        Observable<List<HakemusWrapper>> hakemusObservable = hakuFuture.flatMap(haku -> {
+            if (haku.getAtaruLomakeAvain() == null) {
+                return applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
+            } else {
+                return ataruAsyncResource.getApplicationsByHakukohde(erillishaku.getHakukohdeOid());
+            }
+        });
         Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());
         Observable<List<Lukuvuosimaksu>> lukuvuosimaksutObs = tilaAsyncResource.fetchLukuvuosimaksut(erillishaku.getHakukohdeOid(), auditSession);
 
@@ -102,7 +114,7 @@ public class ErillishaunVientiService {
 
     private Observable<ErillishakuExcel> generoiValintarekisterista(AuditSession auditSession,
                                                                     ErillishakuDTO erillishaku,
-                                                                    Observable<List<Hakemus>> hakemusObservable,
+                                                                    Observable<List<HakemusWrapper>> hakemusObservable,
                                                                     Observable<HakuV1RDTO> hakuFuture,
                                                                     Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable,
                                                                     Observable<List<Lukuvuosimaksu>> lukuvuosimaksuObs) {
@@ -119,7 +131,7 @@ public class ErillishaunVientiService {
         );
     }
 
-    private ErillishakuExcel generoiValinnantuloksista(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
+    private ErillishakuExcel generoiValinnantuloksista(final ErillishakuDTO erillishaku, final List<HakemusWrapper> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
                                                        final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde,
                                                        final List<Valinnantulos> valinnantulos) {
         LOG.info("Muodostetaan Excel valinnantuloksista!");
@@ -128,7 +140,7 @@ public class ErillishaunVientiService {
             Optional<Valinnantulos> tulosOpt = Optional.ofNullable(valinnantulokset.get(hakemus.getOid()));
             Optional<Maksuntila> maksuntila = lukuvuosimaksus.stream().filter(l -> hakemus.getPersonOid().equals(l.getPersonOid())).map(Lukuvuosimaksu::getMaksuntila).findAny();
             return tulosOpt.map(tulos ->
-                    createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus),
+                    createErillishakuRivi(hakemus.getOid(), hakemus,
                             maksuntila,
                             tulos.getValinnantila().toString(),
                             new Valintatulos(
@@ -152,7 +164,7 @@ public class ErillishaunVientiService {
                             tulos.getHakukohdeOid()
                     )
             ).orElse(
-                    createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus),
+                    createErillishakuRivi(hakemus.getOid(), hakemus,
                             maksuntila,
                             "KESKEN",
                             null,
@@ -163,12 +175,12 @@ public class ErillishaunVientiService {
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakuRivit, koodistoCachedAsyncResource);
     }
 
-    private ErillishakuExcel generoiIlmanHakukohdettaJaTuloksia(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
+    private ErillishakuExcel generoiIlmanHakukohdettaJaTuloksia(final ErillishakuDTO erillishaku, final List<HakemusWrapper> hakemukset, final List<Lukuvuosimaksu> lukuvuosimaksus,
                                                                 final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde) {
         LOG.info("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
         Map<String, Maksuntila> personOidToMaksuntila = lukuvuosimaksus.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus ->
-            createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), ofNullable(personOidToMaksuntila.get(hakemus.getPersonOid())), "KESKEN", null, tarjontaHakukohde.getOid())
+            createErillishakuRivi(hakemus.getOid(), hakemus, ofNullable(personOidToMaksuntila.get(hakemus.getPersonOid())), "KESKEN", null, tarjontaHakukohde.getOid())
         ).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), rivit, koodistoCachedAsyncResource);
     }

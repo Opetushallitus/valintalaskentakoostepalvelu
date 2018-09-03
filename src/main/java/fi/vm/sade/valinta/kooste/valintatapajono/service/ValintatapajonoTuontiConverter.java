@@ -1,24 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.EnumConverter;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRiviAsJonosijaConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
@@ -26,12 +12,18 @@ import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ValintatapajonoTuontiConverter {
     private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoTuontiConverter.class);
 
     public static ValinnanvaiheDTO konvertoi(String hakuOid, String hakukohdeOid, String valintatapajonoOid, List<ValinnanVaiheJonoillaDTO> valintaperusteet,
-            List<Hakemus> hakemukset, List<ValintatietoValinnanvaiheDTO> valinnanvaiheet, Collection<ValintatapajonoRivi> rivit) {
+                                             List<HakemusWrapper> hakemukset, List<ValintatietoValinnanvaiheDTO> valinnanvaiheet, Collection<ValintatapajonoRivi> rivit) {
         ValintatietoValinnanvaiheDTO vaihe = haeValinnanVaihe(valintatapajonoOid, valinnanvaiheet);
         if (vaihe == null) {
             vaihe = luoValinnanVaihe(valintaperusteet, hakukohdeOid, hakuOid, Optional.ofNullable(valintatapajonoOid));
@@ -48,7 +40,7 @@ public class ValintatapajonoTuontiConverter {
         jono.setKaytetaanKokonaispisteita(hasKokonaispisteita);
         vaihe.setValintatapajonot(Arrays.asList(jono));
         List<JonosijaDTO> jonosijat = Lists.newArrayList();
-        Map<String, Hakemus> hakemusmappaus = mapHakemukset(hakemukset);
+        Map<String, HakemusWrapper> hakemusmappaus = mapHakemukset(hakemukset);
         for (ValintatapajonoRivi rivi : rivit) {
             if (rivi.isValidi()) {
                 jonosijat.add(ValintatapajonoRiviAsJonosijaConverter.convert(hakukohdeOid, rivi, hakemusmappaus.get(rivi.getOid())));
@@ -135,9 +127,9 @@ public class ValintatapajonoTuontiConverter {
         return v0;
     }
 
-    private static Map<String, Hakemus> mapHakemukset(Collection<Hakemus> hakemukset) {
-        Map<String, Hakemus> tmp = Maps.newHashMap();
-        for (Hakemus h : hakemukset) {
+    private static Map<String, HakemusWrapper> mapHakemukset(Collection<HakemusWrapper> hakemukset) {
+        Map<String, HakemusWrapper> tmp = Maps.newHashMap();
+        for (HakemusWrapper h : hakemukset) {
             tmp.put(h.getOid(), h);
         }
         return tmp;

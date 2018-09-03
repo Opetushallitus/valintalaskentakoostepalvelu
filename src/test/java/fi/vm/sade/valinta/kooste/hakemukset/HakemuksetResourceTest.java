@@ -1,8 +1,5 @@
 package fi.vm.sade.valinta.kooste.hakemukset;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
@@ -10,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
@@ -22,6 +18,8 @@ import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.httpclient.HttpStatus;
@@ -36,6 +34,11 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class HakemuksetResourceTest {
 
@@ -78,9 +81,9 @@ public class HakemuksetResourceTest {
         Mocks.reset();
         String listFull = IOUtils.toString(new ClassPathResource("listSingleApplication.json").getInputStream());
         List<Hakemus> hakemukset  = hakemuksetValinnanvaiheResource.gson().fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
-
-        MockApplicationAsyncResource.setResult(hakemukset);
-        MockApplicationAsyncResource.setResultByOid(hakemukset);
+        List<HakemusWrapper> wrappers = hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
+        MockApplicationAsyncResource.setResult(wrappers);
+        MockApplicationAsyncResource.setResultByOid(wrappers);
 
         Response r = hakemuksetValinnanvaiheResource.getWebClient()
                 .query("hakuOid", "")

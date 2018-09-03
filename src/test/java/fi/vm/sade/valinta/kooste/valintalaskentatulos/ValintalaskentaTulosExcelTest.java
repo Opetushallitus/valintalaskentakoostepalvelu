@@ -1,25 +1,19 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.hakemusOsallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import com.google.common.reflect.TypeToken;
-
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -42,8 +36,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.hakemusOsallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Jussi Jartamo
@@ -67,6 +67,7 @@ public class ValintalaskentaTulosExcelTest {
     final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
     final String TUNNISTE2 = "TUNNISTE2";
     final String SELVITETTY_TUNNISTE2 = "SELVITETTY_TUNNISTE2";
+    final HakuV1RDTO haku = new TarjontaSpec.HakuBuilder(HAKU1, null).build();
 
     @Before
     public void startServer() {
@@ -80,20 +81,19 @@ public class ValintalaskentaTulosExcelTest {
         String osallistumiset = IOUtils.toString(new FileInputStream("osallistumiset.json"));
         String valintakoe = IOUtils.toString(new FileInputStream("valintakoe.json"));
         List<Hakemus> hakemuses = hakemusResource.gson().fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
+        List<HakemusWrapper> hakemusWrappers = hakemuses.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
 
         List<HakemusOsallistuminenDTO> osallistuminenDTOs = valintakoekutsutResource.gson().fromJson(osallistumiset, new TypeToken<List<HakemusOsallistuminenDTO>>() { }.getType());
 
         List<ValintakoeDTO> valintakoeDTOs = valintakoekutsutResource.gson().fromJson(valintakoe, new TypeToken<List<ValintakoeDTO>>() {}.getType());
-        Set<String> h = hakemuses.stream().map(h0 -> h0.getOid()).collect(Collectors.toSet());
-        Set<String> o = osallistuminenDTOs.stream().map(h0 -> h0.getHakemusOid()).collect(Collectors.toSet());
         Mocks.reset();
         try {
-            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList();
+            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Collections.emptyList();
             Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
             MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(osallistuminenDTOs);
             MockValintaperusteetAsyncResource.setValintakokeetResult(valintakoeDTOs);
-            MockApplicationAsyncResource.setResult(hakemuses);
-            MockApplicationAsyncResource.setResultByOid(hakemuses);
+            MockApplicationAsyncResource.setResult(hakemusWrappers);
+            MockApplicationAsyncResource.setResultByOid(hakemusWrappers);
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
             ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
             Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
@@ -125,8 +125,9 @@ public class ValintalaskentaTulosExcelTest {
     public void testaaExcelinLuontiKaikkiOsallistuu() throws Throwable {
         Mocks.reset();
         try {
-            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList();
+            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Collections.emptyList();
             Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            MockTarjontaAsyncService.setMockHaku(haku);
             MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(
                     Arrays.asList(
                             hakemusOsallistuminen()

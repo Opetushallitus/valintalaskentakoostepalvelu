@@ -1,16 +1,12 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import static java.util.concurrent.TimeUnit.HOURS;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static rx.Observable.zip;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
@@ -34,16 +30,13 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.concurrent.TimeUnit.*;
+import static rx.Observable.zip;
 
 @Service
 public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
@@ -51,6 +44,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
             .getLogger(KoekutsukirjeetImpl.class);
     private final KoekutsukirjeetKomponentti koekutsukirjeetKomponentti;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private final ValintaperusteetAsyncResource valintakoeResource;
     private final ValintalaskentaValintakoeAsyncResource osallistumisetResource;
@@ -59,11 +53,12 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
     public KoekutsukirjeetImpl(
             KoekutsukirjeetKomponentti koekutsukirjeetKomponentti,
             ApplicationAsyncResource applicationAsyncResource,
-            ViestintapalveluAsyncResource viestintapalveluAsyncResource,
+            AtaruAsyncResource ataruAsyncResource, ViestintapalveluAsyncResource viestintapalveluAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetValintakoeAsyncResource,
             ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
         this.koekutsukirjeetKomponentti = koekutsukirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.valintakoeResource = valintaperusteetValintakoeAsyncResource;
         this.osallistumisetResource = valintalaskentaValintakoeAsyncResource;
@@ -71,7 +66,9 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 
     @Override
     public void koekutsukirjeetHakemuksille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, Collection<String> hakemusOids) {
-        applicationAsyncResource.getApplicationsByOids(hakemusOids)
+        ((StringUtils.isEmpty(koekutsu.getHaku().getAtaruLomakeAvain()))
+                ? applicationAsyncResource.getApplicationsByHakemusOids(Lists.newArrayList(hakemusOids))
+                : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids)))
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(koekutsukirjeiksi(prosessi, koekutsu),
                         t1 -> {
@@ -85,7 +82,9 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
     public void koekutsukirjeetOsallistujille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, List<String> valintakoeTunnisteet) {
         final Observable<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource.haeHakutoiveelle(koekutsu.getHakukohdeOid());
         final Observable<List<ValintakoeDTO>> valintakokeetObservable = valintakoeResource.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
-        final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(koekutsu.getHakuOid(), koekutsu.getHakukohdeOid());
+        final Observable<List<HakemusWrapper>> hakemuksetObservable = ((StringUtils.isEmpty(koekutsu.getHaku().getAtaruLomakeAvain()))
+                ? applicationAsyncResource.getApplicationsByOid(koekutsu.getHaku().getOid(), koekutsu.getHakukohdeOid())
+                : ataruAsyncResource.getApplicationsByHakukohde(koekutsu.getHakukohdeOid()));
 
         zip(valintakokeetObservable, hakemuksetObservable,
                 (valintakoes, hakemukset) -> {
@@ -111,9 +110,9 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                 .filter(OsallistujatPredicate.osallistujat(valintakoeTunnisteet, koekutsu.getHakukohdeOid()))
                                 .map(ValintakoeOsallistuminenDTO::getHakemusOid)
                                 .collect(Collectors.toSet());
-                            Stream<Hakemus> hakukohteenUlkopuolisetHakemukset = getHakukohteenUlkopuolisetHakemukset(hakemukset, osallistujienHakemusOidit);
+                            Stream<HakemusWrapper> hakukohteenUlkopuolisetHakemukset = getHakukohteenUlkopuolisetHakemukset(hakemukset, osallistujienHakemusOidit, koekutsu.getHaku());
                             // vain hakukohteen osallistujat
-                            List<Hakemus> lopullinenHakemusJoukko = Stream.concat(hakukohteenUlkopuolisetHakemukset,
+                            List<HakemusWrapper> lopullinenHakemusJoukko = Stream.concat(hakukohteenUlkopuolisetHakemukset,
                                 hakemukset.stream().filter(h -> osallistujienHakemusOidit.contains(h.getOid())))
                                 .collect(Collectors.toList());
                             LOG.info("{}", lopullinenHakemusJoukko.size());
@@ -134,26 +133,24 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                 );
     }
 
-    Stream<Hakemus> getHakukohteenUlkopuolisetHakemukset(List<Hakemus> hakemukset, Set<String> osallistujienHakemusOidit) {
-        Stream<Hakemus> hakukohteenUlkopuolisetHakemukset;
-        {
-            Set<String> hakemusOids = hakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet());
-            Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
-            hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
-            if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
-                hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat)
+    private Stream<HakemusWrapper> getHakukohteenUlkopuolisetHakemukset(List<HakemusWrapper> hakemukset, Set<String> osallistujienHakemusOidit, HakuV1RDTO haku) {
+        Set<String> hakemusOids = hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
+        Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
+        hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
+        if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
+            return ((StringUtils.isEmpty(haku.getAtaruLomakeAvain()))
+                    ? applicationAsyncResource.getApplicationsByHakemusOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat))
+                    : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat)))
                     .timeout(30, SECONDS)
                     .toBlocking()
                     .first()
                     .stream();
-            } else {
-                hakukohteenUlkopuolisetHakemukset = Stream.empty();
-            }
+        } else {
+            return Stream.empty();
         }
-        return hakukohteenUlkopuolisetHakemukset;
     }
 
-    private Action1<List<Hakemus>> koekutsukirjeiksi(final KirjeProsessi prosessi, final KoekutsuDTO koekutsu) {
+    private Action1<List<HakemusWrapper>> koekutsukirjeiksi(final KirjeProsessi prosessi, final KoekutsuDTO koekutsu) {
         return hakemukset -> {
             if (hakemukset.isEmpty()) {
                 LOG.error("Hakutoiveeseen {} ei ole hakijoita. Yritettiin muodostaa koekutsukirjetta!", koekutsu.getHakukohdeOid());
@@ -161,18 +158,11 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
             }
             // // Puuttuvat hakemukset //
             try {
-                Function<Hakemus, Stream<String>> hakutoiveetHakemuksesta = h -> (Stream<String>) new HakemusWrapper(h).getHakutoiveet()
-                        .entrySet()
-                        .stream()
-                        .filter(Objects::nonNull)
-                        .filter(e -> StringUtils.trimToEmpty(e.getKey()).endsWith("Opetuspiste-id"))
-                        .map(Map.Entry::getValue);
-
                 LOG.info("Haetaan valintakokeet hakutoiveille!");
                 final Map<String, HakukohdeJaValintakoeDTO> valintakoeOidsHakutoiveille;
                 try {
                     Set<String> hakutoiveetKaikistaHakemuksista = Sets.newHashSet(hakemukset.stream()
-                            .flatMap(hakutoiveetHakemuksesta).collect(Collectors.toSet()));
+                            .flatMap(h -> h.getHakutoiveOids().stream()).collect(Collectors.toSet()));
                     hakutoiveetKaikistaHakemuksista.add(koekutsu.getHakukohdeOid());
                     LOG.info("Hakutoiveet hakemuksista:\r\n{}", Arrays.toString(hakutoiveetKaikistaHakemuksista.toArray()));
                     valintakoeOidsHakutoiveille = valintakoeResource
@@ -204,16 +194,10 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                     LOG.info("Mapataan muut hakukohteet");
                     hakemusOidJaHakijanMuutHakutoiveOids = hakemukset
                             .stream()
-                            .filter(Objects::nonNull)
-                            .filter(h -> h.getOid() != null)
                             .collect(
                                     Collectors.toMap(
-                                            Hakemus::getOid,
-                                            h -> hakutoiveetHakemuksesta
-                                                    .apply(h)
-                                                    .filter(Objects::nonNull)
-                                                            // jos joku hakutoive sisaltaa valintakokeen
-                                                            // jolla sama tunniste kuin taman hakukohteen valintakokeilla
+                                            HakemusWrapper::getOid,
+                                            h -> h.getHakutoiveOids().stream()
                                                     .filter(valintakoeOidsHakutoiveille::containsKey)
                                                     .filter(hakutoive -> valintakoeOidsHakutoiveille
                                                             .get(hakutoive)
@@ -229,7 +213,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                     throw e;
                 }
                 LOG.info("Luodaan kirje.");
-                LetterBatch letterBatch = koekutsukirjeetKomponentti.valmistaKoekutsukirjeet(hakemukset, koekutsu.getHakuOid(),
+                LetterBatch letterBatch = koekutsukirjeetKomponentti.valmistaKoekutsukirjeet(hakemukset, koekutsu.getHaku().getOid(),
                         koekutsu.getHakukohdeOid(), hakemusOidJaHakijanMuutHakutoiveOids, koekutsu.getLetterBodyText(),
                         koekutsu.getTarjoajaOid(), koekutsu.getTag(), koekutsu.getTemplateName());
                 LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");

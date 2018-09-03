@@ -1,37 +1,38 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.excel;
 
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
-import static java.util.Arrays.asList;
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.codepoetics.protonpack.Indexed;
 import com.codepoetics.protonpack.StreamUtils;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
+import static java.util.Arrays.asList;
+import static org.apache.commons.lang.StringUtils.trimToEmpty;
 
 
 public class ValintalaskennanTulosExcel {
-    public static XSSFWorkbook luoExcel(HakuV1RDTO haku, final HakukohdeV1RDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
-        final Map<String, Hakemus> hakemusByOid = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
+    public static XSSFWorkbook luoExcel(HakuV1RDTO haku, final HakukohdeV1RDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<HakemusWrapper> hakemukset) {
+        final Map<String, HakemusWrapper> hakemusByOid = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         valinnanVaiheet.stream()
@@ -82,12 +83,12 @@ public class ValintalaskennanTulosExcel {
         return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), truncatedSheetName);
     }
 
-    private static void addJonosijaRows(Map<String, Hakemus> hakemusByOid, ValintatietoValintatapajonoDTO jono, XSSFSheet sheet) {
+    private static void addJonosijaRows(Map<String, HakemusWrapper> hakemusByOid, ValintatietoValintatapajonoDTO jono, XSSFSheet sheet) {
         sortedJonosijat(jono)
                 .map(hakija -> {
                     final Stream<Column> fixedColumnValuesStream = fixedColumns.stream();
                     final Stream<Column> dynamicColumnValuesStream = hakija.getFunktioTulokset().stream().map(FunktioTulosDTO::getTunniste).map(t -> new Column(t, 14, rivi -> extractValue(t, rivi)));
-                    final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus));
+                    final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()));
                     return Stream.concat(fixedColumnValuesStream, dynamicColumnValuesStream)
                             .map(column -> column.extractor.apply(hakemusRivi))
                             .collect(Collectors.toList());
@@ -114,8 +115,6 @@ public class ValintalaskennanTulosExcel {
                 .orElse("");
     }
 
-    private static Hakemus emptyHakemus = new Hakemus();
-
     private static class Column {
         public final String name;
         public final int widthInCharacters;
@@ -130,29 +129,21 @@ public class ValintalaskennanTulosExcel {
 
     private static class HakemusRivi {
         public final JonosijaDTO hakija;
-        public final Hakemus hakemus;
+        public final HakemusWrapper hakemus;
 
-        public HakemusRivi(final JonosijaDTO hakija, final Hakemus hakemus) {
+        HakemusRivi(final JonosijaDTO hakija, final HakemusWrapper hakemus) {
             this.hakija = hakija;
-            this.hakemus = hakemus;
+            this.hakemus = Objects.requireNonNull(hakemus, String.format("Hakemusta oidilla %s ei löytynyt", hakija.getHakemusOid()));
         }
-
-        public String getHetu() {
-            return trimToEmpty(hakemus.getAnswers().getHenkilotiedot().get("Henkilotunnus"));
-        }
-        public String getSahkoposti() {
-            return trimToEmpty(hakemus.getAnswers().getHenkilotiedot().get("Sähköposti"));
-        }
-
     }
 
     private static List<Column> fixedColumns = Arrays.asList(
             new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
-            new Column("Sukunimi", 20, rivi -> rivi.hakija.getSukunimi()),
-            new Column("Etunimi", 20, rivi -> rivi.hakija.getEtunimi()),
-            new Column("Henkilötunnus", 20, rivi -> rivi.getHetu()),
-            new Column("Sähköpostiosoite", 20, rivi -> rivi.getSahkoposti()),
-            new Column("Hakemus OID", 20, rivi -> rivi.hakija.getHakemusOid()),
+            new Column("Sukunimi", 20, rivi -> rivi.hakemus.getSukunimi()),
+            new Column("Etunimi", 20, rivi -> rivi.hakemus.getEtunimi()),
+            new Column("Henkilötunnus", 20, rivi -> rivi.hakemus.getHenkilotunnus()),
+            new Column("Sähköpostiosoite", 20, rivi -> rivi.hakemus.getSahkopostiOsoite()),
+            new Column("Hakemus OID", 20, rivi -> rivi.hakemus.getOid()),
             new Column("Hakutoive", 14, rivi -> String.valueOf(rivi.hakija.getPrioriteetti())),
             new Column("Laskennan tulos", 20, rivi -> rivi.hakija.getTuloksenTila().toString()),
             new Column("Selite", 30, rivi -> getTeksti(getJarjestyskriteeri(rivi.hakija).getKuvaus())),

@@ -1,17 +1,9 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-
 import fi.vm.sade.valinta.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -26,6 +18,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.mocks.MockKoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
@@ -37,6 +30,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 public class ErillishakuResourceTest {
     private String hakuOid = "1.2.246.562.5.2013080813081926341928";
@@ -82,7 +79,7 @@ public class ErillishakuResourceTest {
         testVientiExcelTiedostoon(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS);
     }
 
-    private List<Hakemus> createVientiHakemus(Hakutyyppi hakutyyppi) {
+    private List<HakemusWrapper> createVientiHakemus(Hakutyyppi hakutyyppi) {
         Hakemus hakemus = new Hakemus();
         hakemus.setOid(MockData.hakemusOid);
         hakemus.setPersonOid(MockData.hakijaOid);
@@ -102,11 +99,11 @@ public class ErillishakuResourceTest {
         answers.getHenkilotiedot().put("kotikunta", "091");
         answers.getLisatiedot().put("asiointikieli", "ruotsi");
         if(hakutyyppi == Hakutyyppi.KORKEAKOULU) {
-            answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
-            answers.getKoulutustausta().put(HakemusWrapper.TOISEN_ASTEEN_SUORITUSMAA, "FIN");
+            answers.getKoulutustausta().put(HakuappHakemusWrapper.TOISEN_ASTEEN_SUORITUS, "true");
+            answers.getKoulutustausta().put(HakuappHakemusWrapper.TOISEN_ASTEEN_SUORITUSMAA, "FIN");
         }
         hakemus.setAnswers(answers);
-        return Collections.singletonList(hakemus);
+        return Collections.singletonList(new HakuappHakemusWrapper(hakemus));
     }
 
     @Test

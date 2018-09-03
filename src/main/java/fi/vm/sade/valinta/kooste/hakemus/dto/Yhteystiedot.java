@@ -1,14 +1,9 @@
 package fi.vm.sade.valinta.kooste.hakemus.dto;
 
-import java.util.Collection;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.collect.Lists;
-
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import java.util.Collection;
 
 public class Yhteystiedot {
 
@@ -49,19 +44,9 @@ public class Yhteystiedot {
         return StringUtils.trimToEmpty(sahkoposti);
     }
 
-    public static Yhteystiedot yhteystiedotHakemukselta(Hakemus hakemus) {
+    public static Yhteystiedot yhteystiedotHakemukselta(HakemusWrapper hakemus) {
         if (hakemus != null) {
-            TreeMap<String, String> henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-            henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
-            Collection<String> nums = Lists.newArrayList();
-            for (Entry<String, String> e : henkilotiedot.tailMap(Yhteystiedot.MATKAPUHELINNUMERO, true).entrySet()) {
-                if (e.getKey().startsWith(Yhteystiedot.MATKAPUHELINNUMERO)) {
-                    nums.add(e.getValue());
-                } else {
-                    break;
-                }
-            }
-            return new Yhteystiedot(henkilotiedot.get(SAHKOPOSTI), nums);
+            return new Yhteystiedot(hakemus.getSahkopostiOsoite(), hakemus.getPuhelinnumerot());
         }
         return new Yhteystiedot();
     }

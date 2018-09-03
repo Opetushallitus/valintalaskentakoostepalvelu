@@ -1,9 +1,10 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.util.concurrent.Futures;
-
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -18,8 +19,8 @@ import java.util.stream.Collectors;
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
 
-    private static AtomicReference<List<Hakemus>> resultReference = new AtomicReference<>();
-    private static AtomicReference<List<Hakemus>> resultByOidReference = new AtomicReference<>();
+    private static AtomicReference<List<HakemusWrapper>> resultReference = new AtomicReference<>();
+    private static AtomicReference<List<HakemusWrapper>> resultByOidReference = new AtomicReference<>();
     private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultReference = new AtomicReference<>();
     private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultByOidReference = new AtomicReference<>();
     private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataPutReference = new AtomicReference<>();
@@ -59,11 +60,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         return additionalDataPutReference.get();
     }
 
-    public static void setResult(List<Hakemus> result) {
+    public static void setResult(List<HakemusWrapper> result) {
         resultReference.set(result);
     }
 
-    public static void setResultByOid(List<Hakemus> result) {
+    public static void setResultByOid(List<HakemusWrapper> result) {
         resultByOidReference.set(result);
     }
 
@@ -76,12 +77,12 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByHakemusOids(List<String> hakemusOids) {
-        List<Hakemus> nonMatching = resultByOidReference.get().stream().filter(oid -> !hakemusOids.contains(oid.getOid())).collect(Collectors.toList());
+    public Observable<List<HakemusWrapper>> getApplicationsByHakemusOids(List<String> hakemusOids) {
+        List<HakemusWrapper> nonMatching = resultByOidReference.get().stream().filter(oid -> !hakemusOids.contains(oid.getOid())).collect(Collectors.toList());
         if (!nonMatching.isEmpty()) {
             throw new RuntimeException(String.format(
                     "Mock data contains OIDs %s not in query %s",
-                    nonMatching.stream().map(h -> h.getOid()).collect(Collectors.toList()),
+                    nonMatching.stream().map(HakemusWrapper::getOid).collect(Collectors.toList()),
                     hakemusOids
             ));
         }
@@ -89,13 +90,13 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
+    public Observable<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
         return Observable.just(resultReference.get());
     }
 
     @Override
-    public Observable<List<Hakemus>> putApplicationPrototypes(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(
+    public Observable<List<HakemusWrapper>> putApplicationPrototypes(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final Collection<HakemusPrototyyppi> hakemusPrototyypit) {
+        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(
                 () -> {
                     results.add(new Result(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit));
                     return Futures.immediateFuture(hakemusPrototyypit.stream()
@@ -107,7 +108,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
+    public Observable<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
         return getApplicationsByOids(hakuOid, Arrays.asList(hakukohdeOid));
     }
 
@@ -117,20 +118,20 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
-        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(() -> {
+    public Observable<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
+        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
             if (resultReference.get() != null) {
                 return Futures.immediateFuture(resultReference.get());
             } else {
-                Hakemus hakemus = getHakemus();
+                HakemusWrapper hakemus = getHakemus();
                 return Futures.immediateFuture(Arrays.asList(hakemus));
             }
         }));
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
-        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(() -> {
+    public Observable<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
+        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
             if (resultReference.get() != null) {
                 return Futures.immediateFuture(resultReference.get());
             } else {
@@ -146,13 +147,13 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
                 hakemus.setAnswers(answers);
                 Eligibility e = new Eligibility(MockData.kohdeOid, null, null, MockData.maksuvelvollisuus);
                 hakemus.getPreferenceEligibilities().add(e);
-                return Futures.immediateFuture(Arrays.asList(hakemus));
+                return Futures.immediateFuture(Arrays.asList(new HakuappHakemusWrapper(hakemus)));
             }
         }));
     }
 
     @Override
-    public Observable<Hakemus> getApplication(String hakuOid) {
+    public Observable<HakemusWrapper> getApplication(String hakuOid) {
         return Observable.just(resultByOidReference.get().iterator().next());
     }
 
@@ -162,12 +163,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {
+    public Observable<List<HakemusWrapper>> getApplicationsByOids(final Collection<String> hakemusOids) {
         return Observable.just(resultByOidReference.get());
     }
 
-
-    private Hakemus getHakemus() {
+    private HakemusWrapper getHakemus() {
         Hakemus hakemus = new Hakemus();
         hakemus.setOid(MockData.hakemusOid);
         hakemus.setPersonOid(MockData.hakijaOid);
@@ -178,10 +178,10 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
         answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
         hakemus.setAnswers(answers);
-        return hakemus;
+        return new HakuappHakemusWrapper(hakemus);
     }
 
-    private Hakemus toHakemus(HakemusPrototyyppi prototyyppi) {
+    private HakemusWrapper toHakemus(HakemusPrototyyppi prototyyppi) {
         final Hakemus hakemus = new Hakemus();
         hakemus.setAnswers(new Answers());
         final Map<String, String> henkilotiedot = hakemus.getAnswers().getHenkilotiedot();
@@ -192,6 +192,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         henkilotiedot.put("syntymaaika", prototyyppi.getSyntymaAika());
         hakemus.setOid(MockData.hakemusOid);
         hakemus.setPersonOid(prototyyppi.getHakijaOid());
-        return hakemus;
+        return new HakuappHakemusWrapper(hakemus);
     }
 }

@@ -1,35 +1,29 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.*;
-import fi.vm.sade.valinta.kooste.excel.*;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
-import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
-import fi.vm.sade.valinta.kooste.excel.arvo.BooleanArvo;
-import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
-import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
-import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
+import fi.vm.sade.valinta.kooste.excel.*;
+import fi.vm.sade.valinta.kooste.excel.arvo.*;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.ApplicationAdditionalDataComparator;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static java.util.Comparator.*;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 public class PistesyottoExcel {
     private static final Logger LOG = LoggerFactory.getLogger(PistesyottoExcel.class);
@@ -114,13 +108,6 @@ public class PistesyottoExcel {
         return tunnisteOid;
     }
 
-    public static String additionalDataToNimi(ApplicationAdditionalDataDTO data) {
-        if (data == null) {
-            return "'Hakemuksella ei ole nimeä'";
-        }
-        return data.getLastName() + ", " + data.getFirstNames();
-    }
-
     public Optional<String> getAikaleima() {
         return aikaleimaRivi.getCurrentAikaleima();
     }
@@ -132,7 +119,7 @@ public class PistesyottoExcel {
                             String hakukohdeNimi,
                             String tarjoajaNimi,
                             Optional<String> aikaleima,
-                            Collection<Hakemus> hakemukset,
+                            Collection<HakemusWrapper> hakemukset,
                             Set<String> kaikkiKutsutaanTunnisteet,
                             Collection<String> valintakoeTunnisteet,
                             List<ValintakoeOsallistuminenDTO> osallistumistiedot,
@@ -190,7 +177,7 @@ public class PistesyottoExcel {
         Collection<PistesyottoDataArvo> dataArvot = getPistesyotonDataArvot(valintaperusteet);
         Predicate<ValintakoeDTO> osallistuuValintakokeeseen = valintakoe ->
                 (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()));
-        Map<String, HakemusWrapper> oidToWrapper = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> new HakemusWrapper(h)));
+        Map<String, HakemusWrapper> oidToWrapper = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
         List<ApplicationAdditionalDataDTO> pistetiedotHakuAppistaLoytyvilleHakemuksille =
             filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(hakemukset, kaikkiPistetiedot);
         for (ApplicationAdditionalDataDTO data : pistetiedotHakuAppistaLoytyvilleHakemuksille) {
@@ -199,9 +186,9 @@ public class PistesyottoExcel {
             // Hakemuksen <tunniste, valintakoeDTO> tiedot
             Map<String, ValintakoeDTO> tunnisteDTO = Optional.ofNullable(tunnisteValintakoe.get(data.getOid())).orElse(Collections.emptyMap());
             Collection<Arvo> s = Lists.newArrayList();
-            s.add(new TekstiArvo(data.getOid()));
-            s.add(new TekstiArvo(additionalDataToNimi(data)));
             HakemusWrapper wrapper = oidToWrapper.get(data.getOid());
+            s.add(new TekstiArvo(data.getOid()));
+            s.add(new TekstiArvo(wrapper.getSukunimi() + ", " + wrapper.getEtunimet()));
             s.add(new TekstiArvo(null == wrapper || null == wrapper.getHenkilotunnus() ? "" : wrapper.getHenkilotunnus()));
             s.add(new TekstiArvo(null == wrapper || null == wrapper.getSyntymaaika() ? "" : wrapper.getSyntymaaika()));
             boolean syote = false;
@@ -257,8 +244,8 @@ public class PistesyottoExcel {
         this.excel = new Excel("Pistesyöttö", rivit, new int[]{}, new int[]{4});
     }
 
-    private List<ApplicationAdditionalDataDTO> filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(Collection<Hakemus> hakemukset, List<ApplicationAdditionalDataDTO> pistetiedot) {
-        Set<String> hakuAppistaLoytyvatHakemusOidit = hakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet());
+    private List<ApplicationAdditionalDataDTO> filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(Collection<HakemusWrapper> hakemukset, List<ApplicationAdditionalDataDTO> pistetiedot) {
+        Set<String> hakuAppistaLoytyvatHakemusOidit = hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
         return pistetiedot.stream().filter(a -> {
             boolean loytyyHakuAppista = hakuAppistaLoytyvatHakemusOidit.contains(a.getOid());
             if (!loytyyHakuAppista) {

@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -8,6 +11,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -16,16 +20,16 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Optional.ofNullable;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 public class HyvaksymiskirjeetKomponenttiTest {
@@ -113,7 +117,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
         assertEquals(1, batch.getLetters().size());
         Letter letter = batch.getLetters().get(0);
 
-        assertEquals("null, null null", letter.getAddressLabel().toString());
+        assertEquals("Lähiosoite 1, 00000 00000", letter.getAddressLabel().toString());
         assertNull(letter.getLanguageCode());
         assertEquals(13, letter.getTemplateReplacements().size());
         assertEquals(PALAUTUS_PVM, letter.getTemplateReplacements().get("palautusPvm"));
@@ -227,12 +231,12 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 setHenkilotiedot(ImmutableMap.of(
                         "Postinumero", "00000",
                         "lahiosoite", "Lähiosoite 1",
-                        "asuinmaa", "Suomi"));
+                        "asuinmaa", "FIN"));
             } else {
                 setHenkilotiedot(ImmutableMap.of(
                         "Postinumero", "00000",
                         "lahiosoite", "Lähiosoite 1",
-                        "asuinmaa", "Suomi",
+                        "asuinmaa", "FIN",
                         "Sähköposti", "testi@testi.fi"));
             }
             setLisatiedot(ImmutableMap.of("lupatiedot-sahkoinen-viestinta", "" + sahkoinenAsiointi));
@@ -256,8 +260,9 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 ImmutableMap.of(ORGANIZATION_OID, ofNullable(osoite)),
                 ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(ORGANIZATION_OID, new Teksti(), new Teksti())),
                 ImmutableList.of(hakija),
-                ImmutableList.of(new Hakemus("type", "applicationSystemId", answers, ImmutableMap.of(),
-                                             ImmutableList.of(), HAKEMUS_OID, "state", "personOid")),
+                ImmutableList.of(new HakuappHakemusWrapper(
+                        new Hakemus("type", "applicationSystemId", answers, ImmutableMap.of(),
+                                ImmutableList.of(), HAKEMUS_OID, "state", "personOid"))),
                 FETCH_TARGET,
                 APPLICATION_PERIOD,
                 ofNullable(LANGUAGE_CODE),

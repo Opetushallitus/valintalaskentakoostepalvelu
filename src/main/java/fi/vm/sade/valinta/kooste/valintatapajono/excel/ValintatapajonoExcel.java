@@ -1,25 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-
-
-import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
-import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-import org.apache.commons.collections.comparators.ComparatorChain;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.RiviBuilder;
@@ -27,12 +9,18 @@ import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.util.HakemusComparator;
-import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
-import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
+import fi.vm.sade.valinta.kooste.util.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import org.apache.commons.collections.comparators.ComparatorChain;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.util.*;
 
 public class ValintatapajonoExcel {
     private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoExcel.class);
@@ -64,13 +52,13 @@ public class ValintatapajonoExcel {
     private final Excel excel;
 
     public ValintatapajonoExcel(String hakuOid, String hakukohdeOid, String valintatapajonoOid, String hakuNimi, String hakukohdeNimi,
-                                List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<Hakemus> hakemukset) {
+                                List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<HakemusWrapper> hakemukset) {
         this(hakuOid, hakukohdeOid, valintatapajonoOid, hakuNimi, hakukohdeNimi, valinnanvaihe, hakemukset, Collections.<ValintatapajonoDataRiviKuuntelija>emptyList());
     }
 
     @SuppressWarnings("unchecked")
     public ValintatapajonoExcel(String hakuOid, String hakukohdeOid, String valintatapajonoOid, String hakuNimi, String hakukohdeNimi,
-                                List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<Hakemus> hakemukset,
+                                List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<HakemusWrapper> hakemukset,
                                 Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
         // Jonosija (13) Hakija Valintatieto Kuvaus (FI) Kuvaus (SV) Kuvaus (EN)
         List<Rivi> rivit = Lists.newArrayList();
@@ -112,27 +100,23 @@ public class ValintatapajonoExcel {
             }
         }
         ComparatorChain jonosijaAndHakijaNameComparator = new ComparatorChain(
-                // compare by jonosija
-                new Comparator<Hakemus>() {
-                    @Override
-                    public int compare(Hakemus o1, Hakemus o2) {
-                        Integer i1 = jonosijat.get(o1.getOid());
-                        Integer i2 = jonosijat.get(o2.getOid());
-                        if (i1 == null) {
-                            i1 = Integer.MAX_VALUE;
-                        }
-                        if (i2 == null) {
-                            i2 = Integer.MAX_VALUE;
-                        }
-                        return i1.compareTo(i2);
+                (Comparator<HakemusWrapper>) (o1, o2) -> {
+                    Integer i1 = jonosijat.get(o1.getOid());
+                    Integer i2 = jonosijat.get(o2.getOid());
+                    if (i1 == null) {
+                        i1 = Integer.MAX_VALUE;
                     }
+                    if (i2 == null) {
+                        i2 = Integer.MAX_VALUE;
+                    }
+                    return i1.compareTo(i2);
                 });
         jonosijaAndHakijaNameComparator.addComparator(HakemusComparator.DEFAULT);
-        Collections.sort(hakemukset, jonosijaAndHakijaNameComparator);
+        hakemukset.sort(jonosijaAndHakijaNameComparator);
 
         Collection<Collection<Arvo>> sx = Lists.newArrayList();
-        for (Hakemus data : hakemukset) {
-            String hakemusOid = data.getOid();
+        for (HakemusWrapper hakemus : hakemukset) {
+            String hakemusOid = hakemus.getOid();
             Collection<Arvo> s = Lists.newArrayList();
             s.add(new TekstiArvo(hakemusOid));
 
@@ -141,7 +125,7 @@ public class ValintatapajonoExcel {
             } else {
                 s.add(new NumeroArvo(null, 0, hakemukset.size()));
             }
-            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(data, null, null, new NimiPaattelyStrategy());
+            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
             s.add(new TekstiArvo(osoite.getLastName() + " " + osoite.getFirstName()));
             s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))), VAIHTOEHDOT));
             if(kokonaispisteet.containsKey(hakemusOid) && null != kokonaispisteet.get(hakemusOid)) {

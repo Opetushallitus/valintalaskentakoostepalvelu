@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetK
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import rx.Observable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Service
@@ -37,6 +37,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
@@ -48,6 +49,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private HyvaksymiskirjeetKokoHaulleService(
             HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
             ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             ViestintapalveluAsyncResource viestintapalveluAsyncResource,
@@ -55,6 +57,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
             TarjontaAsyncResource hakuV1AsyncResource) {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
@@ -66,7 +69,10 @@ public class HyvaksymiskirjeetKokoHaulleService {
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         muodostaHyvaksymiskirjeetKokoHaulle(() ->
                         ViestintapalveluObservables.haunResurssit(asiointikieli, valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid),
-                                (oids) -> applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)),
+                                (oids) -> hakuV1AsyncResource.haeHaku(hakuOid)
+                                        .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                                ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)
+                                                : ataruAsyncResource.getApplicationsByOids(oids))),
                 hakuOid, asiointikieli, prosessi, defaultValue);
     }
 

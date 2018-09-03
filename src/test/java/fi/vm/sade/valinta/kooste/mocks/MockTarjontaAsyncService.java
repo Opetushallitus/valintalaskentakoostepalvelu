@@ -67,4 +67,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     public static void setMockHaku(HakuV1RDTO mockHaku) {
         MockTarjontaAsyncService.mockHaku.put(mockHaku.getOid(), mockHaku);
     }
+
+    public static void clear() {
+        mockHaku = new HashMap<>();
+    }
 }

@@ -1,10 +1,12 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.service;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
@@ -12,7 +14,9 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -20,23 +24,19 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -47,6 +47,7 @@ public class OsoitetarratService {
 
     private final static Logger LOG = LoggerFactory.getLogger(OsoitetarratService.class);
     private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final HaeOsoiteKomponentti osoiteKomponentti;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
@@ -57,7 +58,7 @@ public class OsoitetarratService {
 
     @Autowired
     public OsoitetarratService(ApplicationAsyncResource applicationAsyncResource,
-                               KoodistoCachedAsyncResource koodistoCachedAsyncResource,
+                               AtaruAsyncResource ataruAsyncResource, KoodistoCachedAsyncResource koodistoCachedAsyncResource,
                                DokumenttiAsyncResource dokumenttiAsyncResource,
                                ViestintapalveluAsyncResource viestintapalveluAsyncResource,
                                ValintaperusteetAsyncResource valintaperusteetValintakoeResource,
@@ -65,6 +66,7 @@ public class OsoitetarratService {
                                ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource,
                                HaeOsoiteKomponentti osoiteKomponentti) {
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
@@ -74,41 +76,37 @@ public class OsoitetarratService {
         this.osoiteKomponentti = osoiteKomponentti;
     }
 
-    public void osoitetarratSijoittelussaHyvaksytyille(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid) {
+    public void osoitetarratSijoittelussaHyvaksytyille(DokumenttiProsessi prosessi, HakuV1RDTO haku, String hakukohdeOid) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
-            LOG.error("Luodaan osoitetarrat sijoittelussa hyväksytyille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
-            prosessi.setKokonaistyo(
-                    3 // luonti
-                    + 1
-                    // dokumenttipalveluun vienti
-                    + 1);
-            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>();
+            LOG.error("Luodaan osoitetarrat sijoittelussa hyväksytyille (haku={}, hakukohde={})", haku.getOid(), hakukohdeOid);
+            prosessi.setKokonaistyo(5);
+            final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
                     .setLaskurinAlkuarvo(3)
-                    .setSuoritaJokaKerta(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    })
+                    .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
                     .setSynkronoituToiminto(() -> {
                         osoitetarratHakemuksille(haetutHakemuksetRef.get(), maatJaValtiot1Ref.get(), postiRef.get(), prosessi);
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
 
-            valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid)
+            valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(haku.getOid(), hakukohdeOid)
                     .map(hakukohteenTulos -> hakukohteenTulos.getValintatapajonot().stream()
                             .flatMap(valintatapajono -> valintatapajono.getHakemukset().stream())
                             .filter(hakemus -> hakemus.getTila().isHyvaksytty())
                             .map(HakemusDTO::getHakemusOid)
                             .distinct()
                             .collect(Collectors.toList()))
-                    .flatMap(hyvaksytytHakemukset -> {
-                        if (hyvaksytytHakemukset.isEmpty()) {
-                            return rx.Observable.error(new RuntimeException("Sijoittelussa ei ole hyväksyttyjä hakijoita"));
+                    .flatMap(hakemusOids -> {
+                        if (hakemusOids.isEmpty()) {
+                            return Observable.error(new RuntimeException("Sijoittelussa ei ole hyväksyttyjä hakijoita"));
                         } else {
-                            return applicationAsyncResource.getApplicationsByOids(hyvaksytytHakemukset);
+                            return StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                    ? applicationAsyncResource.getApplicationsByOids(hakemusOids)
+                                    : ataruAsyncResource.getApplicationsByOids(hakemusOids);
                         }
                     })
                     .subscribe(hakemukset -> {
@@ -120,41 +118,22 @@ public class OsoitetarratService {
         }
     }
 
-    public void osoitetarratValintakokeeseenOsallistujille(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, Set<String> selvitetytTunnisteet) {
+    public void osoitetarratValintakokeeseenOsallistujille(DokumenttiProsessi prosessi, HakuV1RDTO haku, String hakukohdeOid, Set<String> selvitetytTunnisteet) {
         PoikkeusKasittelijaSovitin poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
-            LOG.error("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
-            prosessi.setKokonaistyo(
-                    5
-                    // luonti
-                    + 1
-                    // dokumenttipalveluun vienti
-                    + 1);
+            LOG.info("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", haku.getOid(), hakukohdeOid);
+            prosessi.setKokonaistyo(5 + 1 + 1 ); // AtomicReferencet + luonti + dokumenttipalveluun vienti
             final AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedotRef = new AtomicReference<>();
-            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>();
+            final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
-                    .setLaskurinAlkuarvo(
-                            2 // maat ja valtiot + posti
-                            +
-                            1 // ulkopuoliset hakijat
-                    )
-                    .setSuoritaJokaKerta(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    })
-                    .setSynkronoituToiminto(() -> {
-                        osoitetarratHakemuksille(haetutHakemuksetRef.get(), maatJaValtiot1Ref.get(), postiRef.get(), prosessi);
-                    }).build();
+                    .setLaskurinAlkuarvo(2 + 1) // maat ja valtiot + posti + ulkopuoliset hakijat
+                    .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
+                    .setSynkronoituToiminto(() -> osoitetarratHakemuksille(haetutHakemuksetRef.get(), maatJaValtiot1Ref.get(), postiRef.get(), prosessi)).build();
             final SynkronoituLaskuri laskuriHakukohteenUlkopuolisilleHakijoille = SynkronoituLaskuri.builder()
-                    .setLaskurinAlkuarvo(
-                            1 // Kaikki hakijat jos kaikki kutsutaan
-                                    +
-                                    1 // Osallistumistiedot mistä selviää hakukohteen ulkopuoliset hakijat
-                    )
-                    .setSuoritaJokaKerta(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    })
+                    .setLaskurinAlkuarvo(1 + 1) // Kaikki hakijat jos kaikki kutsutaan + Osallistumistiedot mistä selviää hakukohteen ulkopuoliset hakijat
+                    .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
                     .setSynkronoituToiminto(() -> {
                         // Haetaan ulkopuoliset hakijat
                         List<ValintakoeOsallistuminenDTO> osallistumistiedot = osallistumistiedotRef.get();
@@ -166,19 +145,21 @@ public class OsoitetarratService {
                                                             v.getValintakokeet().stream()
                                                                     .anyMatch(vk ->
                                                                             selvitetytTunnisteet.contains(vk.getValintakoeTunniste()) && Osallistuminen.OSALLISTUU.equals(vk.getOsallistuminenTulos().getOsallistuminen())))))
-                                .map(o -> o.getHakemusOid()).collect(Collectors.toSet());
-                        Set<String> mahdollisestiHakukohteenHakemusOidit = haetutHakemuksetRef.get().stream().map(h -> h.getOid()).collect(Collectors.toSet());
+                                .map(ValintakoeOsallistuminenDTO::getHakemusOid).collect(Collectors.toSet());
+                        Set<String> mahdollisestiHakukohteenHakemusOidit = haetutHakemuksetRef.get().stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
                         if (mahdollisestiHakukohteenHakemusOidit.containsAll(valintakokeisiinOsallistujienHakemusOidit)) {
                             laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         } else {
                             Set<String> puuttuvatHakemusOidit = Sets.newHashSet(valintakokeisiinOsallistujienHakemusOidit);
                             puuttuvatHakemusOidit.removeAll(mahdollisestiHakukohteenHakemusOidit);
-                            applicationAsyncResource.getApplicationsByOids(puuttuvatHakemusOidit).subscribe(
-                                puuttuvatHakemukset -> {
-                                    haetutHakemuksetRef.set(Stream.concat(haetutHakemuksetRef.get().stream(), puuttuvatHakemukset.stream()).collect(Collectors.toList()));
-                                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                                },
-                                poikkeuskasittelija);
+                            (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                    ? applicationAsyncResource.getApplicationsByOids(puuttuvatHakemusOidit)
+                                    : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(puuttuvatHakemusOidit)))
+                                    .subscribe(puuttuvatHakemukset -> {
+                                                haetutHakemuksetRef.set(Stream.concat(haetutHakemuksetRef.get().stream(), puuttuvatHakemukset.stream()).collect(Collectors.toList()));
+                                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                            },
+                                            poikkeuskasittelija);
                         }
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
@@ -188,10 +169,13 @@ public class OsoitetarratService {
                 valintakokeet -> {
                     boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> selvitetytTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                     if (kutsutaankoJossainKokeessaKaikki) {
-                        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
-                            haetutHakemuksetRef.set(hakemukset);
-                            laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                        }, poikkeuskasittelija);
+                        (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                ? applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid)
+                                : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                                .subscribe(hakemukset -> {
+                                    haetutHakemuksetRef.set(hakemukset);
+                                    laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                }, poikkeuskasittelija);
                     } else {
                         haetutHakemuksetRef.set(Collections.emptyList());
                         laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
@@ -210,42 +194,36 @@ public class OsoitetarratService {
     public void osoitetarratHakemuksille(DokumenttiProsessi prosessi, List<String> hakemusOids) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
-            LOG.error("Luodaan osoitetarrat hakemuksille (size={})", hakemusOids.size());
-            prosessi.setKokonaistyo(
-                    3
-                    // luonti
-                    + 1
-                    // dokumenttipalveluun vienti
-                    + 1);
-            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>();
+            prosessi.setKokonaistyo(5);
+            final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
                     .setLaskurinAlkuarvo(3)
-                    .setSuoritaJokaKerta(() -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                    })
+                    .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
                     .setSynkronoituToiminto(() -> {
                         osoitetarratHakemuksille(haetutHakemuksetRef.get(), maatJaValtiot1Ref.get(), postiRef.get(), prosessi);
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
-            applicationAsyncResource.getApplicationsByOids(hakemusOids).subscribe(
-                hakemukset -> {
-                    haetutHakemuksetRef.set(hakemukset);
-                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                },
-                poikkeuskasittelija::accept);
+            applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)
+                    .flatMap(hakemukset -> hakemukset.isEmpty()
+                        ? ataruAsyncResource.getApplicationsByOids(hakemusOids)
+                        : Observable.just(hakemukset))
+                    .subscribe(hakemukset -> {
+                        haetutHakemuksetRef.set(hakemukset);
+                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    }, poikkeuskasittelija::accept);
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
     }
 
-    private void osoitetarratHakemuksille(List<Hakemus> haetutHakemukset, Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, DokumenttiProsessi prosessi) {
+    private void osoitetarratHakemuksille(List<HakemusWrapper> haetutHakemukset, Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, DokumenttiProsessi prosessi) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             Osoitteet osoitteet = new Osoitteet(haetutHakemukset.stream().map(h ->
-                    HaeOsoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h, new NimiPaattelyStrategy())).collect(Collectors.toList()));
+                    OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, maatJaValtiot1, posti, new NimiPaattelyStrategy())).collect(Collectors.toList()));
             // Aakkosjarjestykseen
             osoitteet.getAddressLabels().sort(
                     (o1, o2) -> {

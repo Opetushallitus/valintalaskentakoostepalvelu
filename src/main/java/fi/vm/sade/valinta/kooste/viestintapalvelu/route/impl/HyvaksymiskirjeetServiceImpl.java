@@ -1,25 +1,21 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static rx.Observable.zip;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.OsoiteHaku;
@@ -48,14 +44,15 @@ import rx.subjects.PublishSubject;
 
 import javax.ws.rs.core.Response;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static rx.Observable.zip;
 
 @Service
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
@@ -64,6 +61,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
+    private AtaruAsyncResource ataruAsyncResource;
+    private TarjontaAsyncResource tarjontaAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final HaeOsoiteKomponentti haeOsoiteKomponentti;
     private final HakuParametritService hakuParametritService;
@@ -78,6 +77,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource,
+            TarjontaAsyncResource tarjontaAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             HaeOsoiteKomponentti haeOsoiteKomponentti,
             HakuParametritService hakuParametritService,
@@ -86,6 +87,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
+        this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.haeOsoiteKomponentti = haeOsoiteKomponentti;
         this.hakuParametritService = hakuParametritService;
@@ -102,12 +105,14 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
-            Observable<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS);
+            Observable<List<HakemusWrapper>> hakemuksetFuture = tarjontaAsyncResource.haeHaku(hakuOid)
+                    .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                            ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS)
+                            : ataruAsyncResource.getApplicationsByOids(hakemusOids));
             Observable<List<HakijaDTO>> hakijatFuture = Observable.from(hakemusOids).concatMap(hakemus -> valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemus)).toList();
             Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
 
-            zip(
-                    hakemuksetFuture,
+            zip(hakemuksetFuture,
                     hakijatFuture,
                     hakutoimistoObservable,
                     (hakemukset, hakijat, hakutoimisto) -> {
@@ -153,7 +158,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
     @Override
     public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-        Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
+        Observable<List<HakemusWrapper>> hakemuksetObservable = tarjontaAsyncResource.haeHaku(hyvaksymiskirjeDTO.getHakuOid())
+                .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                        ? applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Collections.singletonList(hyvaksymiskirjeDTO.getHakukohdeOid()))
+                        : ataruAsyncResource.getApplicationsByHakukohde(hyvaksymiskirjeDTO.getHakukohdeOid()));
         Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKaikkiHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Response> organisaatioObservable = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
         zip(
@@ -210,16 +218,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     @Override
     public void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
         final String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
-        final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
-        final String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
+        String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
+        String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
 
-        Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hyvaksymiskirjeDTO.getHakuOid(), Arrays.asList(hyvaksymiskirjeDTO.getHakukohdeOid()));
-        Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Observable<List<HakemusWrapper>> hakemuksetObservable = tarjontaAsyncResource.haeHaku(hakuOid)
+                .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                        ? applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, Collections.singletonList(hakukohdeOid))
+                        : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
+        Observable<HakijaPaginationObject> hakijatObservable = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid, hakukohdeOid);
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
-        ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hyvaksymiskirjeDTO.getHakuOid());
+        ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
-        zip(
-                hakemuksetObservable,
+        zip(hakemuksetObservable,
                 hakijatObservable,
                 hakutoimistoObservable,
                 (hakemukset, hakijat, hakutoimisto) -> {
@@ -233,13 +243,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     }
 
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
-                    MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
+                    MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            ImmutableMap.of(organisaatioOid, hakutoimisto.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.empty())),
+                            ImmutableMap.of(organisaatioOid, hakutoimisto.flatMap(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli()))),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
-                            hyvaksymiskirjeDTO.getHakuOid(),
+                            hakuOid,
                             Optional.empty(),
                             hyvaksymiskirjeDTO.getSisalto(),
                             hyvaksymiskirjeDTO.getTag(),
@@ -251,7 +261,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
                         letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
-                        throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hakukohdeOid));
+                        throwable -> logErrorAndKeskeyta(prosessi, throwable, hakuOid, hakukohdeOid));
     }
 
     private void logErrorAndKeskeyta(KirjeProsessi prosessi, Throwable throwable, String hakuOid, String hakukohdeOid) {
