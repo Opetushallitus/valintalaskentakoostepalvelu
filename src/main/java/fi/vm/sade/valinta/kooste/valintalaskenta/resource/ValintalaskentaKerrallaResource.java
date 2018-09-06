@@ -39,7 +39,12 @@ import java.util.concurrent.TimeUnit;
 @Api(value = "/valintalaskentakerralla", description = "Valintalaskenta kaikille valinnanvaiheille kerralla")
 public class ValintalaskentaKerrallaResource {
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaResource.class);
-    private static final List<String> valintaperusteetCRUDRoles = asList("ROLE_APP_VALINTAPERUSTEET_CRUD", "ROLE_APP_VALINTAPERUSTEETKK_CRUD");
+    private static final List<String> valintalaskentaAllowedRoles = asList(
+            "ROLE_APP_VALINTAPERUSTEET_CRUD",
+            "ROLE_APP_VALINTAPERUSTEET_READ_UPDATE",
+            "ROLE_APP_VALINTAPERUSTEETKK_CRUD",
+            "ROLE_APP_VALINTAPERUSTEETKK_READ_UPDATE"
+    );
 
     @Autowired
     private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
@@ -64,7 +69,7 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("haunnimi") String haunnimi,
             @QueryParam("nimi") String nimi,
             @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.checkAuthorizationForHaku(hakuOid, valintaperusteetCRUDRoles);
+        authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
@@ -113,7 +118,7 @@ public class ValintalaskentaKerrallaResource {
                     new LaskentaParams(userOID, haunnimi, nimi, laskentatyyppi, valintakoelaskenta,
                             valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)),
                     asyncResponse::resume,
-                    authorityCheckService.getAuthorityCheckForRoles(valintaperusteetCRUDRoles));
+                    authorityCheckService.getAuthorityCheckForRoles(valintalaskentaAllowedRoles));
 
         } catch (ForbiddenException fe) {
             asyncResponse.resume(fe);
@@ -131,7 +136,7 @@ public class ValintalaskentaKerrallaResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.checkAuthorizationForHaku(uuid, valintaperusteetCRUDRoles);
+        authorityCheckService.checkAuthorizationForHaku(uuid, valintalaskentaAllowedRoles);
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
@@ -160,7 +165,7 @@ public class ValintalaskentaKerrallaResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
     public Laskenta status(@PathParam("uuid") String uuid) {
-        authorityCheckService.checkAuthorizationForHaku(uuid, valintaperusteetCRUDRoles);
+        authorityCheckService.checkAuthorizationForHaku(uuid, valintalaskentaAllowedRoles);
         try {
             return valintalaskentaValvomo.fetchLaskenta(uuid);
         } catch (Exception e) {
@@ -174,7 +179,7 @@ public class ValintalaskentaKerrallaResource {
     @Produces("application/vnd.ms-excel")
     @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
     public void statusXls(@PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
-        authorityCheckService.checkAuthorizationForHaku(uuid, valintaperusteetCRUDRoles);
+        authorityCheckService.checkAuthorizationForHaku(uuid, valintalaskentaAllowedRoles);
         asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
         valintalaskentaStatusExcelHandler.getStatusXls(uuid, (Response response) -> asyncResponse.resume(response));
@@ -188,7 +193,7 @@ public class ValintalaskentaKerrallaResource {
             return errorResponse("Uuid on pakollinen");
         }
 
-        authorityCheckService.checkAuthorizationForHaku(uuid, valintaperusteetCRUDRoles);
+        authorityCheckService.checkAuthorizationForHaku(uuid, valintalaskentaAllowedRoles);
 
         if(Boolean.TRUE.equals(lopetaVainJonossaOlevaLaskenta)) {
             boolean onkoLaskentaVielaJonossa = valintalaskentaValvomo.fetchLaskenta(uuid) == null;
