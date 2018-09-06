@@ -136,7 +136,8 @@ public class ValintalaskentaKerrallaResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
-        authorityCheckService.checkAuthorizationForHaku(uuid, valintalaskentaAllowedRoles);
+        Laskenta laskenta = valintalaskentaValvomo.fetchLaskenta(uuid);
+        authorityCheckService.checkAuthorizationForHaku(laskenta.getHakuOid(), valintalaskentaAllowedRoles);
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
