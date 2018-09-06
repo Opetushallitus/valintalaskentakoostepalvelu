@@ -40,10 +40,10 @@ import java.util.concurrent.TimeUnit;
 public class ValintalaskentaKerrallaResource {
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaResource.class);
     private static final List<String> valintalaskentaAllowedRoles = asList(
-            "ROLE_APP_VALINTAPERUSTEET_CRUD",
-            "ROLE_APP_VALINTAPERUSTEET_READ_UPDATE",
-            "ROLE_APP_VALINTAPERUSTEETKK_CRUD",
-            "ROLE_APP_VALINTAPERUSTEETKK_READ_UPDATE"
+            "ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD",
+            "ROLE_APP_VALINTOJENTOTEUTTAMINEN_READ_UPDATE",
+            "ROLE_APP_VALINTOJENTOTEUTTAMINENKK_CRUD",
+            "ROLE_APP_VALINTOJENTOTEUTTAMINENKK_READ_UPDATE"
     );
 
     @Autowired
