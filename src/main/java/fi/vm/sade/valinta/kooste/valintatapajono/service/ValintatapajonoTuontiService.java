@@ -4,7 +4,6 @@ import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.User;
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
@@ -50,8 +49,7 @@ public class ValintatapajonoTuontiService {
     @Autowired
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
-    public void tuo(
-        BiFunction<List<ValintatietoValinnanvaiheDTO>, List<Hakemus>, Collection<ValintatapajonoRivi>> riviFunction,
+    public void tuo (BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
         final String hakuOid,
         final String hakukohdeOid,
         final String tarjoajaOid,

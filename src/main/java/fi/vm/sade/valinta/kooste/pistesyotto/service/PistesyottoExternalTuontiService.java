@@ -286,7 +286,7 @@ public class PistesyottoExternalTuontiService {
                 });
     }
 
-    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, String username, AuditSession auditSession,
+    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, AuditSession auditSession,
                     String hakuOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler,
                     Consumer<Throwable> exceptionHandler) {
         getHakemuksetByHakemusOids(hakemukset.stream().map(HakemusDTO::getHakemusOid).collect(Collectors.toList()))
@@ -345,7 +345,7 @@ public class PistesyottoExternalTuontiService {
                                         osallistumiset.stream().filter(o -> !o.isVirhe()).map(OsallistuminenHakutoiveeseen::asApplicationAdditionalDataDTO).collect(Collectors.toList());
                                 List<VirheDTO> virheet = osallistumiset.stream().filter(OsallistuminenHakutoiveeseen::isVirhe).map(OsallistuminenHakutoiveeseen::asVirheDTO).collect(Collectors.toList());
                                 if (!additionalData.isEmpty()) {
-                                    List<Valintapisteet> vp = additionalData.stream().map(a -> Pair.of(username, a)).map(Valintapisteet::new).collect(Collectors.toList());
+                                    List<Valintapisteet> vp = additionalData.stream().map(a -> Pair.of(auditSession.getPersonOid(), a)).map(Valintapisteet::new).collect(Collectors.toList());
                                     valintapisteAsyncResource.putValintapisteet(Optional.empty(), vp, auditSession).subscribe(conflictingHakemusOids -> {
                                         additionalData.forEach(pistetieto -> {
                                             Map<String, String> additionalAuditInfo = new HashMap<>();

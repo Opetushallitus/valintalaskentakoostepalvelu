@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import static com.codepoetics.protonpack.StreamUtils.zip;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
@@ -60,16 +59,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.codepoetics.protonpack.StreamUtils.zip;
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.*;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.*;
-import static java.util.Optional.ofNullable;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static rx.schedulers.Schedulers.newThread;
 
 @Service
 public class ErillishaunTuontiService extends ErillishaunTuontiValidator {

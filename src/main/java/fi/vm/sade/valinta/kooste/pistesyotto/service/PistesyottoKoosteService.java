@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
@@ -185,7 +184,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
 
     public Observable<Set<TuontiErrorDTO>> tallennaKoostetutPistetiedotHakemukselle(ApplicationAdditionalDataDTO pistetietoDTO,
                                                                      Optional<String> ifUnmodifiedSince,
-                                                                     String username, AuditSession auditSession) {
+                                                                     AuditSession auditSession) {
         return valintalaskentaValintakoeAsyncResource.haeHakemukselle(pistetietoDTO.getOid()).flatMap(vo -> {
             String hakuOid = vo.getHakuOid();
             Map<String, HakutoiveDTO> kh = kielikokeidenHakukohteet(vo);
@@ -195,7 +194,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             if (kielikoePistetiedot.isEmpty()) {
                 return valintapisteAsyncResource.putValintapisteet(
                         ifUnmodifiedSince,
-                        singletonList(new Valintapisteet(Pair.of(username, pistetietoDTO))),
+                        singletonList(new Valintapisteet(Pair.of(auditSession.getPersonOid(), pistetietoDTO))),
                         auditSession
                 ).map(hakemusOids -> hakemusOids.stream()
                         .map(hakemusOid -> new TuontiErrorDTO(
@@ -211,7 +210,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     a.getAdditionalData().put(kielikoetunniste, kielikoePistetiedot.get(kielikoetunniste));
                     return tallennaKoostetutPistetiedot(
                             hakuOid, kh.get(kielikoetunniste).getHakukohdeOid(), ifUnmodifiedSince,
-                            singletonList(a), username, auditSession);
+                            singletonList(a), auditSession);
                 }).collect(Collectors.toList()));
                 return errors;
             }
@@ -221,13 +220,12 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     public Observable<Set<TuontiErrorDTO>> tallennaKoostetutPistetiedot(String hakuOid,
                                                          String hakukohdeOid,
                                                          Optional<String> ifUnmodifiedSince,
-                                                         List<ApplicationAdditionalDataDTO> pistetietoDTOs,
-                                                                        String username, AuditSession auditSession) {
+                                                         List<ApplicationAdditionalDataDTO> pistetietoDTOs, AuditSession auditSession) {
         Map<String, List<AbstractPistesyottoKoosteService.SingleKielikoeTulos>> kielikoetuloksetSureen = new HashMap<>();
         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle;
         try {
             pistetiedotHakemukselle = createAdditionalDataAndPopulateKielikoetulokset(pistetietoDTOs, kielikoetuloksetSureen);
-            return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, auditSession)
+            return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, ValintaperusteetOperation.PISTETIEDOT_KAYTTOLIITTYMA, auditSession)
                     .map(hakemusOids -> pistetiedotHakemukselle.stream()
                             .filter(dto -> hakemusOids.contains(dto.getOid()))
                             .map(dto -> new TuontiErrorDTO(
