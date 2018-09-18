@@ -66,14 +66,8 @@ public class AuthorityCheckServiceTest {
         assertFalse(authorized2);
     }
 
-    @Test
+    @Test(expected = ForbiddenException.class)
     public void testCheckAuthorizationForHaku(){
-        boolean thrown = false;
-        try {
-            authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET);
-        } catch (ForbiddenException e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
+        authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET);
     }
 }
