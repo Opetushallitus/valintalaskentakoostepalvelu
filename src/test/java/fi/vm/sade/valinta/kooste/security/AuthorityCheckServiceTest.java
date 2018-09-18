@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.security;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.GrantedAuthority;
+import rx.Observable;
 
 import javax.ws.rs.ForbiddenException;
 import java.util.Collection;
@@ -36,6 +38,7 @@ public class AuthorityCheckServiceTest {
         Mockito.when(organisaatioResource.parentoids("oid.1")).thenReturn("parent.oid.1/oid.1");
         Mockito.when(organisaatioResource.parentoids("oid.2")).thenReturn("parent.oid.2/oid.2");
         Mockito.when(organisaatioResource.parentoids("oid.3")).thenReturn("parent.oid.3/oid.3");
+        Mockito.when(tarjontaAsyncResource.haeHaku("haku.oid")).thenReturn(Observable.just(new HakuV1RDTO()));
     }
 
     private class TestAuthority implements GrantedAuthority {
