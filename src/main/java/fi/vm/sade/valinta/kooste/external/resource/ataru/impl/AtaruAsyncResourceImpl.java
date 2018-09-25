@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -66,7 +67,9 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                 return getHenkilotObservable(hakemukset)
                         .flatMap(henkilot -> {
                             Stream<String> asuinmaaKoodit = hakemukset.stream().map(h -> h.getKeyValues().get("country-of-residence"));
-                            Stream<String> kansalaisuusKoodit = henkilot.values().stream().flatMap(h -> h.getKansalaisuus().stream().map(KansalaisuusDto::getKansalaisuusKoodi));
+                            Stream<String> kansalaisuusKoodit = henkilot.values().stream()
+                                    .flatMap(h -> Optional.ofNullable(h.getKansalaisuus()).orElse(Collections.emptySet())
+                                            .stream().map(KansalaisuusDto::getKansalaisuusKoodi));
                             return getMaakooditObservable(asuinmaaKoodit, kansalaisuusKoodit)
                                     .map(maakoodit ->
                                             hakemukset.stream()
@@ -87,7 +90,8 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
         return hakemus -> {
             String ISOmaakoodi = maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
             HenkiloPerustietoDto henkilo = henkilot.get(hakemus.getPersonOid());
-            List<String> kansalaisuudet = henkilo.getKansalaisuus().stream()
+            List<String> kansalaisuudet = Optional.ofNullable(henkilo.getKansalaisuus()).orElse(Collections.emptySet())
+                    .stream()
                     .map(k -> maakoodit.get(k.getKansalaisuusKoodi()).getKoodiArvo())
                     .collect(Collectors.toList());
             hakemus.getKeyValues().replace("country-of-residence", ISOmaakoodi);
