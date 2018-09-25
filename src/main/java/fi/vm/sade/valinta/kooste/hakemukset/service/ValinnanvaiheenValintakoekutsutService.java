@@ -81,7 +81,10 @@ public class ValinnanvaiheenValintakoekutsutService {
                         );
                     }
                 },
-                e -> LOG.error("Ongelma haettaessa valintaryhmien perusteella hakukohteita valinnanvaiheelle " + valinnanvaiheOid, e));
+                e -> {
+                    LOG.error("Ongelma haettaessa valintaryhmien perusteella hakukohteita valinnanvaiheelle " + valinnanvaiheOid, e);
+                    exceptionHandler.accept(e);
+                });
     }
 
     private void handleApplicationsResponse(List<HakemusWrapper> hakemukset, HakukohdeOIDAuthorityCheck authorityCheck, Consumer<Collection<HakemusDTO>> successHandler, Consumer<Throwable> exceptionHandler, Set<String> hakukohdeOidit) {
