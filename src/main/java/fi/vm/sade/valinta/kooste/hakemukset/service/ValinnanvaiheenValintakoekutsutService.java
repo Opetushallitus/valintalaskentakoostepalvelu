@@ -6,9 +6,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;
@@ -31,18 +33,24 @@ import java.util.stream.Collectors;
 public class ValinnanvaiheenValintakoekutsutService {
     private static final Logger LOG = LoggerFactory.getLogger(ValinnanvaiheenValintakoekutsutService.class);
 
+    private TarjontaAsyncResource tarjontaAsyncResource;
     private ApplicationAsyncResource applicationAsyncResource;
+    private AtaruAsyncResource ataruAsyncResource;
     private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     private ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource;
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
     @Autowired
     public ValinnanvaiheenValintakoekutsutService(
+            TarjontaAsyncResource tarjontaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
+            AtaruAsyncResource ataruAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
             ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource,
             KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+        this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.valintalaskentaValintakoeAsyncResource = valintalaskentaValintakoeAsyncResource;
         this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
@@ -57,9 +65,20 @@ public class ValinnanvaiheenValintakoekutsutService {
                         exceptionHandler.accept(new ValinnanvaiheelleEiLoydyValintaryhmiaException(
                             String.format("Ei löytynyt yhtään hakukohdeoidia valintaryhmien perusteella haun %s valinnanvaiheelle %s", hakuOid, valinnanvaiheOid)));
                     } else {
-                        applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit).subscribe(
-                            hakemukset -> handleApplicationsResponse(hakemukset, authorityCheck, successHandler, exceptionHandler, hakukohdeOidit),
-                            exceptionHandler::accept);
+                        tarjontaAsyncResource.haeHaku(hakuOid).flatMap(haku -> {
+                            if (haku.getAtaruLomakeAvain() == null) {
+                                return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit);
+                            } else {
+                                return Observable.from(hakukohdeOidit)
+                                        .flatMap(hakukohdeOid -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
+                                                .flatMap(Observable::from))
+                                        .distinct(HakemusWrapper::getOid)
+                                        .toList();
+                            }
+                        }).subscribe(
+                                hakemukset -> handleApplicationsResponse(hakemukset, authorityCheck, successHandler, exceptionHandler, hakukohdeOidit),
+                                exceptionHandler::accept
+                        );
                     }
                 },
                 e -> LOG.error("Ongelma haettaessa valintaryhmien perusteella hakukohteita valinnanvaiheelle " + valinnanvaiheOid, e));
