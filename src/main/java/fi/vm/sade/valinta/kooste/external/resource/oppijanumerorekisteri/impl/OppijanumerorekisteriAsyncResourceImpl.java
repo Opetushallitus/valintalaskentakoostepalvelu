@@ -32,9 +32,16 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
     }
 
     public Observable<List<HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
-        return postAsObservableLazily(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findByPersonOidList"),
-            new GenericType<List<HenkiloPerustietoDto>>() {}.getType(),
-            Entity.entity(personOids, MediaType.APPLICATION_JSON_TYPE),
-            ACCEPT_JSON);
+        String url = getUrl("oppijanumerorekisteri-service.s2s.henkilo.findByPersonOidList");
+        return Observable.from(personOids)
+                .window(5000)
+                .flatMap(Observable::toList)
+                .flatMap(personOidChunk -> this.<List<String>, List<HenkiloPerustietoDto>>postAsObservableLazily(url,
+                        new GenericType<List<HenkiloPerustietoDto>>() {
+                        }.getType(),
+                        Entity.entity(personOidChunk, MediaType.APPLICATION_JSON_TYPE),
+                        ACCEPT_JSON))
+                .flatMap(Observable::from)
+                .toList();
     }
 }
