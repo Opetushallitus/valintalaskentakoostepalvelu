@@ -53,13 +53,13 @@ public class KoodistoCachedAsyncResource {
         }
     }
 
-    public Observable<Koodi> haeRinnasteinenKoodiAsync(String koodiUri) {
+    public Observable<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri) {
         try {
             Koodi koodi = koodiCache.getIfPresent(koodiUri);
             if (koodi != null) {
                 return Observable.just(koodi);
             } else {
-               return koodistoAsyncResource.haeRinnasteinenKoodi(koodiUri)
+               return koodistoAsyncResource.maatjavaltiot2ToMaatjavaltiot1(koodiUri)
                .doOnNext(konvertoituKoodi -> koodiCache.put(koodiUri, konvertoituKoodi));
             }
         } catch (Exception e) {

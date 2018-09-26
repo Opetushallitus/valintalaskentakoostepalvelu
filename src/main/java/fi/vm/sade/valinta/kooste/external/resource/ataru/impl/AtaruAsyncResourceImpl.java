@@ -105,7 +105,7 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
         return Observable.merge(
                 Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
                         .distinct()
-                        .map(koodiArvo -> koodistoCachedAsyncResource.haeRinnasteinenKoodiAsync("maatjavaltiot2_" + koodiArvo)
+                        .map(koodiArvo -> koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + koodiArvo)
                                 .map(koodi -> Pair.of(koodiArvo, koodi)))
                         .collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight);
     }

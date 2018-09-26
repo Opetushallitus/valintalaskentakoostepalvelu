@@ -81,8 +81,8 @@ public class AtaruAsyncResourceTest {
                 any()))
                 .thenAnswer((Answer<Observable<List<AtaruHakemus>>>) invocation -> Observable.just(MockAtaruAsyncResource.getAtaruHakemukset(null)));
 
-        when(mockKoodisto.haeRinnasteinenKoodiAsync(eq("maatjavaltiot2_246"))).thenReturn(Observable.just(suomiKoodi));
-        when(mockKoodisto.haeRinnasteinenKoodiAsync(eq("maatjavaltiot2_663"))).thenReturn(Observable.just(saintMartinKoodi));
+        when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_246"))).thenReturn(Observable.just(suomiKoodi));
+        when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_663"))).thenReturn(Observable.just(saintMartinKoodi));
 
         when(mockOnr.haeHenkilot(Collections.singletonList("1.2.246.562.24.86368188549"))).thenReturn(Observable.just(Collections.singletonList(onrHenkilo)));
 

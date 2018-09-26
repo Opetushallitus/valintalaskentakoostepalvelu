@@ -10,6 +10,7 @@ import rx.Observable;
 
 import javax.ws.rs.core.GenericType;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -28,8 +29,15 @@ public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements 
             ACCEPT_JSON.andThen(client -> client.query("onlyValidKoodis", true)));
     }
 
+    private Observable<Koodi> haeKoodi(String koodiUri) {
+        return this.getAsObservableLazily(
+                getUrl("koodisto-service.koodiuri", koodiUri),
+                Koodi.class
+        );
+    }
+
     @Override
-    public Observable<Koodi> haeRinnasteinenKoodi(String koodiUri) {
+    public Observable<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri) {
         return this.<List<Koodi>>getAsObservableLazily(
                 getUrl("koodisto-service.json.koodi.rinnasteinen", koodiUri),
                 new GenericType<List<Koodi>>() {}.getType(),
@@ -38,11 +46,17 @@ public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements 
                     LOG.info("Calling url {}", client.getCurrentURI());
                     return client;
                 }))
-                .map(koodit -> koodit
-                        .stream()
-                        .filter(k -> k.getKoodistoUri().equals("maatjavaltiot1"))
-                        .findFirst()
-                        .orElseThrow(IllegalArgumentException::new));
+                .flatMap(koodit -> {
+                    Optional<Koodi> koodi = koodit.stream()
+                            .filter(k -> k.getKoodistoUri().equals("maatjavaltiot1"))
+                            .findFirst();
+                    if (koodi.isPresent()) {
+                        return Observable.just(koodi.get());
+                    } else {
+                        LOG.warn(String.format("Could not find related maatjavaltiot1 koodi for %s, returning maatjavaltiot1_xxx instead", koodiUri));
+                        return haeKoodi("maatjavaltiot1_xxx");
+                    }
+                });
     }
 }
 
