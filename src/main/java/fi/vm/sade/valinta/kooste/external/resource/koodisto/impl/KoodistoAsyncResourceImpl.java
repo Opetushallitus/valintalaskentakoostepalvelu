@@ -31,7 +31,7 @@ public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements 
 
     private Observable<Koodi> haeKoodi(String koodiUri) {
         return this.getAsObservableLazily(
-                getUrl("koodisto-service.koodiuri", koodiUri),
+                getUrl("koodisto-service.json.koodi", koodiUri),
                 Koodi.class
         );
     }
