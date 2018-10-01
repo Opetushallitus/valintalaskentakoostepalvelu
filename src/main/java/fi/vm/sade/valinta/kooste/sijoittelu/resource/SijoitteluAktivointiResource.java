@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
 import com.google.gson.Gson;
 
+import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
@@ -118,7 +119,7 @@ public class SijoitteluAktivointiResource {
             LOG.error("Sijoittelua yritettiin käynnistää ilman hakuOidia!");
             throw new RuntimeException("Parametri hakuOid on pakollinen!");
         } else {
-            AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS, ValintaResource.SIJOITTELUAKTIVOINTI, hakuOid, null, null);
+            AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS, ValintaResource.SIJOITTELUAKTIVOINTI, hakuOid, Changes.EMPTY, null);
             sijoitteluAktivointiProxy
                     .aktivoiSijoittelu(new Sijoittelu(hakuOid));
         }
