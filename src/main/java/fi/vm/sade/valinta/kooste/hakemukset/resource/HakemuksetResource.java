@@ -1,13 +1,12 @@
 package fi.vm.sade.valinta.kooste.hakemukset.resource;
 
-import static java.util.Arrays.asList;
 import com.google.common.base.Preconditions;
-
 import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService;
@@ -32,6 +31,8 @@ import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Arrays.asList;
 
 @Controller("HakemuksetResource")
 @Path("hakemukset")
@@ -62,7 +63,8 @@ public class HakemuksetResource {
         Map<String, String> additionalAuditInfo = new HashMap<>();
         additionalAuditInfo.put("hakuOid", hakuOid);
         additionalAuditInfo.put("ValinnanvaiheOid",valinnanvaiheOid);
-        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU, ValintaResource.HAKEMUKSET, valinnanvaiheOid, Changes.EMPTY, additionalAuditInfo);
+
+        AuditLog.log(KoosteAudit.AUDIT, AuthorizationUtil.createAuditSession(request).asAuditUser(), ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU, ValintaResource.HAKEMUKSET, valinnanvaiheOid, Changes.EMPTY, additionalAuditInfo);
 
         LOG.warn("Aloitetaan hakemusten listaaminen valinnanvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
         Long started = System.currentTimeMillis();
