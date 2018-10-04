@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 @Path("valintaperusteet")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintaperusteet", description = "Valintaperusteet")
-public class ValintaperusteetResource {
+public class ValintaperusteetResourceV2 {
     private final ValintaperusteetAsyncResource resource;
-    private final Logger LOG = LoggerFactory.getLogger(ValintaperusteetResource.class);
+    private final Logger LOG = LoggerFactory.getLogger(ValintaperusteetResourceV2.class);
 
     @Autowired
-    public ValintaperusteetResource(ValintaperusteetAsyncResource resource) {
+    public ValintaperusteetResourceV2(ValintaperusteetAsyncResource resource) {
         this.resource = resource;
     }
 
