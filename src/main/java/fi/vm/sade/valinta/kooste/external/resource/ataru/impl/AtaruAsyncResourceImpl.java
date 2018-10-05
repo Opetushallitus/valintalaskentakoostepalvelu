@@ -49,6 +49,9 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
     }
 
     private Observable<List<HakemusWrapper>> getApplications(String hakukohdeOid, List<String> hakemusOids) {
+        if (hakukohdeOid == null && hakemusOids.isEmpty()) {
+            return Observable.just(Collections.emptyList());
+        }
         return this.<String, List<AtaruHakemus>>postAsObservableLazily(
                 getUrl("ataru.applications.by-hakukohde"),
                 new TypeToken<List<AtaruHakemus>>() {
