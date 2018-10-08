@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Controller
-@Path("valintaperusteetOLD")
+@Path("valintaperusteet")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/valintaperusteetOLD", description = "Valintaperusteet")
+@Api(value = "/valintaperusteet", description = "Valintaperusteet")
 public class ValintaperusteetResource {
     private final ValintaperusteetAsyncResource resource;
     private final Logger LOG = LoggerFactory.getLogger(ValintaperusteetResource.class);
