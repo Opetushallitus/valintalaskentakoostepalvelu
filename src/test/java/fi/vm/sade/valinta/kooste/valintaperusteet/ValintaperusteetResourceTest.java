@@ -22,7 +22,7 @@ public class ValintaperusteetResourceTest {
 
     private final String hakukohdeOid = "1.2.246.562.5.28143628072";
 
-    private final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources/valintaperusteetV2";
+    private final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources/V2valintaperusteet";
     private final HttpResourceBuilder.WebClientExposingHttpResource hakukohteenValintaperusteetResource = new HttpResourceBuilder()
             .address(String.format("%s/hakukohde/%s/kayttaaValintalaskentaa", root, hakukohdeOid))
             .buildExposingWebClientDangerously();
