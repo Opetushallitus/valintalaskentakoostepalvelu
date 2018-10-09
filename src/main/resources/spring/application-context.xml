@@ -287,6 +287,8 @@
 		<ctx:component-scan
 				base-package="fi.vm.sade.valinta.kooste.valintatapajono" />
 
+		<bean id="ValintaperusteetResource"
+			  class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource" />
 		<bean id="ValintaperusteetResourceV2"
 			  class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2" />
 
@@ -449,6 +451,7 @@
 				<ref bean="ValintalaskentaKerrallaResource"/>
 				<ref bean="ValintalaskentaExcelResource"/>
 				<ref bean="ValintatapajonoResource"/>
+				<ref bean="ValintaperusteetResource"/>
 				<ref bean="ValintaperusteetResourceV2"/>
 				<ref bean="DokumenttiProsessiResource"/>
 				<ref bean="ViestintapalveluAktivointiResource"/>
