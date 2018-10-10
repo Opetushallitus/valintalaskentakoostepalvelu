@@ -1,27 +1,24 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
 import com.google.gson.Gson;
-
+import fi.vm.sade.auditlog.Changes;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.http.HttpServletRequest;
-
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
+import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
+import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
+import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,24 +27,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
-import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
-import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
-import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
-
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa.
