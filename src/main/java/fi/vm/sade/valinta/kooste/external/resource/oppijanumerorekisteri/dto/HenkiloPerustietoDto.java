@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.json.Lo
 import javax.validation.constraints.AssertTrue;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -116,7 +117,7 @@ public class HenkiloPerustietoDto implements Serializable {
     }
 
     public Set<KansalaisuusDto> getKansalaisuus() {
-        return kansalaisuus;
+        return kansalaisuus == null ? Collections.emptySet() : kansalaisuus;
     }
 
     public void setKansalaisuus(Set<KansalaisuusDto> kansalaisuus) {

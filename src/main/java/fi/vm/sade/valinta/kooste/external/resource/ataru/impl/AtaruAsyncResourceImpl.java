@@ -69,10 +69,9 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
             } else {
                 return getHenkilotObservable(hakemukset)
                         .flatMap(henkilot -> {
+                            ensureKansalaisuus(henkilot);
                             Stream<String> asuinmaaKoodit = hakemukset.stream().map(h -> h.getKeyValues().get("country-of-residence"));
-                            Stream<String> kansalaisuusKoodit = henkilot.values().stream()
-                                    .flatMap(h -> Optional.ofNullable(h.getKansalaisuus()).orElse(Collections.emptySet())
-                                            .stream().map(KansalaisuusDto::getKansalaisuusKoodi));
+                            Stream<String> kansalaisuusKoodit = henkilot.values().stream().flatMap(h -> h.getKansalaisuus().stream().map(KansalaisuusDto::getKansalaisuusKoodi));
                             return getMaakooditObservable(asuinmaaKoodit, kansalaisuusKoodit)
                                     .map(maakoodit ->
                                             hakemukset.stream()
@@ -81,6 +80,18 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                         });
             }
         });
+    }
+
+    private void ensureKansalaisuus(Map<String, HenkiloPerustietoDto> henkilot) {
+        List<String> missingKansalaisuus = henkilot.entrySet().stream()
+                .filter(e -> e.getValue().getKansalaisuus().isEmpty())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        if (!missingKansalaisuus.isEmpty()) {
+            LOG.warn(String.format("Kansalaisuus missing from henkilöt: %s",
+                    String.join(", ", missingKansalaisuus)
+            ));
+        }
     }
 
     private Observable<Map<String, HenkiloPerustietoDto>> getHenkilotObservable(List<AtaruHakemus> hakemukset) {
@@ -93,8 +104,7 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
         return hakemus -> {
             String ISOmaakoodi = maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
             HenkiloPerustietoDto henkilo = henkilot.get(hakemus.getPersonOid());
-            List<String> kansalaisuudet = Optional.ofNullable(henkilo.getKansalaisuus()).orElse(Collections.emptySet())
-                    .stream()
+            List<String> kansalaisuudet = henkilo.getKansalaisuus().stream()
                     .map(k -> maakoodit.get(k.getKansalaisuusKoodi()).getKoodiArvo())
                     .collect(Collectors.toList());
             hakemus.getKeyValues().replace("country-of-residence", ISOmaakoodi);
