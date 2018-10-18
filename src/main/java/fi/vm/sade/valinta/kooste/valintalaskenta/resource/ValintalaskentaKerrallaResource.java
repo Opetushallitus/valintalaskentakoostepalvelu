@@ -4,6 +4,7 @@ import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static java.util.Arrays.asList;
 
+import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import rx.Observable;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
@@ -112,13 +114,22 @@ public class ValintalaskentaKerrallaResource {
             });
 
             Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
-
             final String userOID = AuthorizationUtil.getCurrentUser();
+
+            Observable<HakukohdeOIDAuthorityCheck> authorityCheckObservable;
+            if (LaskentaTyyppi.VALINTARYHMA.equals(laskentatyyppi)) {
+                LOG.warn(String.format("BUG-1873 : Ohitetaan maskin \"%s\" oikeustarkistus käyttäjän %s " +
+                    "laskiessa valintaryhmää \"%s\" haussa %s (\"%s\").", maski, userOID, nimi, hakuOid, haunnimi));
+                authorityCheckObservable = Observable.empty();
+            } else {
+                authorityCheckObservable = authorityCheckService.getAuthorityCheckForRoles(valintalaskentaAllowedRoles);
+            }
+
             valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(
                     new LaskentaParams(userOID, haunnimi, nimi, laskentatyyppi, valintakoelaskenta,
                             valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)),
                     asyncResponse::resume,
-                    authorityCheckService.getAuthorityCheckForRoles(valintalaskentaAllowedRoles));
+                    authorityCheckObservable);
 
         } catch (ForbiddenException fe) {
             asyncResponse.resume(fe);
