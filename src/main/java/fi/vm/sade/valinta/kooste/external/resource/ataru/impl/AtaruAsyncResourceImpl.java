@@ -23,10 +23,7 @@ import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -107,8 +104,16 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
             List<String> kansalaisuudet = henkilo.getKansalaisuus().stream()
                     .map(k -> maakoodit.get(k.getKansalaisuusKoodi()).getKoodiArvo())
                     .collect(Collectors.toList());
-            hakemus.getKeyValues().replace("country-of-residence", ISOmaakoodi);
-            AtaruHakemusWrapper wrapper = new AtaruHakemusWrapper(hakemus, henkilo);
+            Map<String, String> newKeyValues = new HashMap<>(hakemus.getKeyValues());
+            newKeyValues.replace("country-of-residence", ISOmaakoodi);
+            AtaruHakemus h = new AtaruHakemus(
+                    hakemus.getHakemusOid(),
+                    hakemus.getPersonOid(),
+                    hakemus.getHakuOid(),
+                    hakemus.getHakutoiveet(),
+                    newKeyValues
+            );
+            AtaruHakemusWrapper wrapper = new AtaruHakemusWrapper(h, henkilo);
             wrapper.setKansalaisuus(kansalaisuudet);
             return wrapper;
         };
