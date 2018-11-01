@@ -22,7 +22,9 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO.*;
 import static java.util.Comparator.comparing;
 
 public class PistesyottoExcel {
@@ -179,7 +181,8 @@ public class PistesyottoExcel {
                 (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()));
         Map<String, HakemusWrapper> oidToWrapper = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
         List<ApplicationAdditionalDataDTO> pistetiedotHakuAppistaLoytyvilleHakemuksille =
-            filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(hakemukset, kaikkiPistetiedot);
+            filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(hakemukset, kaikkiPistetiedot)
+                .sorted(orderByName()).collect(Collectors.toList());
         for (ApplicationAdditionalDataDTO data : pistetiedotHakuAppistaLoytyvilleHakemuksille) {
             final String hakemusOid = data.getOid();
             final boolean mahdollinenOsallistuja = osallistujat.contains(hakemusOid);
@@ -189,8 +192,8 @@ public class PistesyottoExcel {
             HakemusWrapper wrapper = oidToWrapper.get(data.getOid());
             s.add(new TekstiArvo(data.getOid()));
             s.add(new TekstiArvo(wrapper.getSukunimi() + ", " + wrapper.getEtunimet()));
-            s.add(new TekstiArvo(null == wrapper || null == wrapper.getHenkilotunnus() ? "" : wrapper.getHenkilotunnus()));
-            s.add(new TekstiArvo(null == wrapper || null == wrapper.getSyntymaaika() ? "" : wrapper.getSyntymaaika()));
+            s.add(new TekstiArvo(null == wrapper.getHenkilotunnus() ? "" : wrapper.getHenkilotunnus()));
+            s.add(new TekstiArvo(null == wrapper.getSyntymaaika() ? "" : wrapper.getSyntymaaika()));
             boolean syote = false;
             for (ValintaperusteDTO valintaperuste : valintaperusteet) {
                 ValintakoeDTO valintakoe = Optional.ofNullable(tunnisteDTO.get(valintaperuste.getTunniste())).orElse(new ValintakoeDTO());
@@ -244,7 +247,7 @@ public class PistesyottoExcel {
         this.excel = new Excel("Pistesyöttö", rivit, new int[]{}, new int[]{4});
     }
 
-    private List<ApplicationAdditionalDataDTO> filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(Collection<HakemusWrapper> hakemukset, List<ApplicationAdditionalDataDTO> pistetiedot) {
+    private Stream<ApplicationAdditionalDataDTO> filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(Collection<HakemusWrapper> hakemukset, List<ApplicationAdditionalDataDTO> pistetiedot) {
         Set<String> hakuAppistaLoytyvatHakemusOidit = hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
         return pistetiedot.stream().filter(a -> {
             boolean loytyyHakuAppista = hakuAppistaLoytyvatHakemusOidit.contains(a.getOid());
@@ -253,7 +256,7 @@ public class PistesyottoExcel {
                     "koska sille ei ole löytynyt aktiivista hakemusta.", a.getOid()));
             }
             return loytyyHakuAppista;
-        }).collect(Collectors.toList());
+        });
     }
 
     private Collection<PistesyottoDataArvo> getPistesyotonDataArvot(List<ValintaperusteDTO> valintaperusteet) {

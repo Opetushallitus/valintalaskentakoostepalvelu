@@ -1,12 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.apache.commons.lang.StringUtils;
+
+import static org.apache.commons.lang.StringUtils.*;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class ApplicationAdditionalDataDTO {
@@ -51,7 +55,7 @@ public class ApplicationAdditionalDataDTO {
     }
 
     public String getFirstNames() {
-        return firstNames;
+        return firstNames == null ? "" : firstNames;
     }
 
     public void setFirstNames(String firstNames) {
@@ -59,7 +63,7 @@ public class ApplicationAdditionalDataDTO {
     }
 
     public String getLastName() {
-        return lastName;
+        return lastName == null ? "" : lastName;
     }
 
     public void setLastName(String lastName) {
@@ -72,8 +76,13 @@ public class ApplicationAdditionalDataDTO {
         }
         return additionalData;
     }
-
     public void setAdditionalData(Map<String, String> additionalData) {
         this.additionalData = additionalData;
+    }
+    public static Comparator<ApplicationAdditionalDataDTO> orderByName() {
+        return (a0, a1) -> {
+            int c = a0.getLastName().compareTo(a1.getLastName());
+            return c == 0 ? a0.getFirstNames().compareTo(a1.getFirstNames()) : c;
+        };
     }
 }
