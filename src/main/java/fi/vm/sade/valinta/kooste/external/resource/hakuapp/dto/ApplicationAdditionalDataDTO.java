@@ -79,10 +79,4 @@ public class ApplicationAdditionalDataDTO {
     public void setAdditionalData(Map<String, String> additionalData) {
         this.additionalData = additionalData;
     }
-    public static Comparator<ApplicationAdditionalDataDTO> orderByName() {
-        return (a0, a1) -> {
-            int c = a0.getLastName().compareTo(a1.getLastName());
-            return c == 0 ? a0.getFirstNames().compareTo(a1.getFirstNames()) : c;
-        };
-    }
 }

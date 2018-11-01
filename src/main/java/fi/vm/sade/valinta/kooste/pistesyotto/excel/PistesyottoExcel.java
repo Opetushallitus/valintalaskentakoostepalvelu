@@ -181,8 +181,13 @@ public class PistesyottoExcel {
                 (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()));
         Map<String, HakemusWrapper> oidToWrapper = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
         List<ApplicationAdditionalDataDTO> pistetiedotHakuAppistaLoytyvilleHakemuksille =
-            filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(hakemukset, kaikkiPistetiedot)
-                .sorted(orderByName()).collect(Collectors.toList());
+                filteroiPistetiedoistaPoisNeJoilleEiLoydyAktiivistaHakemustaHakuAppista(hakemukset, kaikkiPistetiedot)
+                        .sorted((a0, a1) -> {
+                            HakemusWrapper w0 = oidToWrapper.get(a0.getOid());
+                            HakemusWrapper w1 = oidToWrapper.get(a1.getOid());
+                            int c = w0.getSukunimi().compareTo(w1.getSukunimi());
+                            return c == 0 ? w0.getEtunimet().compareTo(w1.getEtunimet()) : c;
+                        }).collect(Collectors.toList());
         for (ApplicationAdditionalDataDTO data : pistetiedotHakuAppistaLoytyvilleHakemuksille) {
             final String hakemusOid = data.getOid();
             final boolean mahdollinenOsallistuja = osallistujat.contains(hakemusOid);
