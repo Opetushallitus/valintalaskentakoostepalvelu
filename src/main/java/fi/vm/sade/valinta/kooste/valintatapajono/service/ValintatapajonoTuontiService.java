@@ -1,8 +1,14 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
 import com.google.gson.GsonBuilder;
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+
+import fi.vm.sade.auditlog.Changes;
+import fi.vm.sade.auditlog.User;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
@@ -22,14 +28,13 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
 @Service
 public class ValintatapajonoTuontiService {
@@ -44,14 +49,13 @@ public class ValintatapajonoTuontiService {
     @Autowired
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
-    public void tuo(
-            String username,
-            BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
-            final String hakuOid,
-            final String hakukohdeOid,
-            final String tarjoajaOid,
-            final String valintatapajonoOid,
-            AsyncResponse asyncResponse) {
+    public void tuo (BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
+        final String hakuOid,
+        final String hakukohdeOid,
+        final String tarjoajaOid,
+        final String valintatapajonoOid,
+        AsyncResponse asyncResponse,
+        User user) {
         AtomicReference<String> dokumenttiIdRef = new AtomicReference<>(null);
         AtomicInteger counter = new AtomicInteger(
                 1 // valinnanvaiheet
@@ -83,17 +87,13 @@ public class ValintatapajonoTuontiService {
                                     valinnanvaihe.getValintatapajonot()
                                             .forEach(
                                                     v -> {
-                                                        v.getHakija().forEach(h -> {
-                                                            AUDIT.log(builder()
-                                                                    .id(username)
-                                                                    .hakuOid(hakuOid)
-                                                                    .hakemusOid(h.getHakemusOid())
-                                                                    .valinnanvaiheOid(valinnanvaihe.getValinnanvaiheoid())
-                                                                    .hakukohdeOid(hakukohdeOid)
-                                                                    .valintatapajonoOid(v.getOid())
-                                                                    .add("jonosija", h.getJonosija())
-                                                                    .setOperaatio(ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL)
-                                                                    .build());
+                                                        v.getHakija().forEach(hakija -> {
+                                                            Map<String,String> additionalAuditFields = new HashMap<>();
+                                                            additionalAuditFields.put("hakuOid", hakuOid);
+                                                            additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
+                                                            additionalAuditFields.put("valinnanvaiheOid", valinnanvaihe.getValinnanvaiheoid());
+                                                            additionalAuditFields.put("valintatapajonoOid", v.getValintatapajonooid());
+                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), Changes.addedDto(hakija), additionalAuditFields);
                                                         });
                                                     }
                                             );

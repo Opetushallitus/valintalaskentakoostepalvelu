@@ -29,7 +29,7 @@ public class MockOpintopolkuCasAuthenticationFilter implements Filter {
 
     public static void setRolesToReturnInFakeAuthentication(String... roles) {
         String key = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-key";
-        String principal = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-principal";
+        String principal = "1.2.246.562.24.99999999999";
         String credentials = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-creds";
         casAuthenticationToken = new CasAuthenticationToken(key, principal, credentials,
             Stream.of(roles).map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
@@ -48,7 +48,7 @@ public class MockOpintopolkuCasAuthenticationFilter implements Filter {
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override

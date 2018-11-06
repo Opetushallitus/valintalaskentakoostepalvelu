@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
-
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
+import fi.vm.sade.sharedutils.FakeAuthenticationInitialiser;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  *  Starts valintalaskentakoostepalvelu locally.
@@ -66,6 +66,9 @@ public class ValintaKoosteJetty {
 
     public static void startShared(boolean useMocks) {
         try {
+            if (useMocks) {
+                FakeAuthenticationInitialiser.fakeAuthentication();
+            }
             if (server.isStopped()) {
                 String root =  ProjectRootFinder.findProjectRoot() + "/valintalaskentakoostepalvelu";
                 WebAppContext wac = new WebAppContext();

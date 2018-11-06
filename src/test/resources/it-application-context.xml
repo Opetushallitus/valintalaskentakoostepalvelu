@@ -68,6 +68,8 @@
 
   <bean id="ValintaperusteetResource"
         class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource" />
+  <bean id="ValintaperusteetResourceV2"
+        class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2" />
 
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
@@ -109,6 +111,7 @@
         <ref bean="ValintalaskentaExcelResource"/>
         <ref bean="HakemuksetResource"/>
         <ref bean="ValintaperusteetResource"/>
+        <ref bean="ValintaperusteetResourceV2"/>
       </jaxrs:serviceBeans>
       <jaxrs:providers>
         <ref bean="jsonProvider" />

@@ -1,13 +1,25 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import com.google.common.collect.ImmutableMap;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.ei_osallistunut;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
+import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
+import static org.apache.commons.collections.ListUtils.union;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 import com.google.common.collect.Sets;
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+
+import fi.vm.sade.auditlog.Changes;
+import fi.vm.sade.auditlog.User;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -50,13 +62,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.*;
-import static org.apache.commons.collections.ListUtils.union;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 public abstract class AbstractPistesyottoKoosteService {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
@@ -166,9 +171,7 @@ public abstract class AbstractPistesyottoKoosteService {
 
             return valintapisteAsyncResource.getValintapisteet(puuttuvatLisatiedot, auditSession).map(v ->
                     v.valintapisteet.stream().map(populateNameAndOppijaOID).collect(Collectors.toList())).map(p ->
-                    new PisteetWithLastModified(lisatiedot.lastModified, union(lisatiedot.valintapisteet, p))).doOnCompleted(() -> {
-                prosessi.inkrementoiTehtyjaToita();
-            });
+                    new PisteetWithLastModified(lisatiedot.lastModified, union(lisatiedot.valintapisteet, p))).doOnCompleted(prosessi::inkrementoiTehtyjaToita);
         };
         Func2<List<ValintakoeOsallistuminenDTO>, List<HakemusWrapper>, Observable<List<HakemusWrapper>>> haePuuttuvatHakemukset = (osallistumiset, hakemukset) -> {
             Set<String> puuttuvatHakemukset = osallistumiset.stream().map(ValintakoeOsallistuminenDTO::getHakemusOid).collect(Collectors.toSet());
@@ -248,25 +251,12 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     protected Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
-                                                            String hakukohdeOid,
-                                                            Optional<String> ifUnmodifiedSince,
-                                                            List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                            Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                            String username,
-                                                            ValintaperusteetOperation auditLogOperation, AuditSession auditSession) {
-        return tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, kielikoetuloksetSureen, username, auditLogOperation, auditSession,true);
-    }
-
-
-    protected Observable<Set<String>> tallennaKoostetutPistetiedot(String hakuOid,
-                                                            String hakukohdeOid,
-                                                            Optional<String> ifUnmodifiedSince,
-                                                            List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                            Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                            String username,
-                                                            ValintaperusteetOperation auditLogOperation,
-                                                            AuditSession auditSession,
-                                                            boolean saveApplicationAdditionalInfo) {
+                                                                   String hakukohdeOid,
+                                                                   Optional<String> ifUnmodifiedSince,
+                                                                   List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                                   Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
+                                                                   ValintaperusteetOperation auditLogOperation,
+                                                                   AuditSession auditSession) {
         Observable<Void> kielikoeTallennus = Observable.zip(
                 findSourceOid(hakukohdeOid),
                 haeOppijatSuresta(hakuOid, hakukohdeOid),
@@ -275,24 +265,21 @@ public abstract class AbstractPistesyottoKoosteService {
                     String sourceOid = sourceAndOppijat.getLeft();
                     List<Oppija> oppijatSuresta = sourceAndOppijat.getRight();
                     return tallennaKielikoetulokset(hakuOid, hakukohdeOid, sourceOid, pistetiedotHakemukselle,
-                            kielikoetuloksetSureen, username, auditLogOperation, oppijatSuresta);
+                        kielikoetuloksetSureen, auditSession.getPersonOid(), auditLogOperation, auditSession.asAuditUser(), oppijatSuresta);
                 });
 
-        return kielikoeTallennus.flatMap(a -> {
-            if (saveApplicationAdditionalInfo) {
-                return tallennaPisteetValintaPisteServiceen(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, username, auditLogOperation, auditSession);
-            } else {
-                return Observable.just(null);
-            }
-        }).onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
-                "Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), t)));
+        return kielikoeTallennus.flatMap(a ->
+            tallennaPisteetValintaPisteServiceen(hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedotHakemukselle, auditLogOperation, auditSession))
+            .onErrorResumeNext(t -> Observable.error(
+                new IllegalStateException(String.format("Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s", hakuOid, hakukohdeOid), t)));
     }
 
     private Observable<Void> tallennaKielikoetulokset(String hakuOid, String hakukohdeOid, String sourceOid,
-                                                         List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                         Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
-                                                         String username, ValintaperusteetOperation auditLogOperation,
-                                                         List<Oppija> oppijatSuresta) {
+                                                      List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
+                                                      Map<String, List<SingleKielikoeTulos>> kielikoetuloksetSureen,
+                                                      String username, ValintaperusteetOperation auditLogOperation,
+                                                      User user,
+                                                      List<Oppija> oppijatSuresta) {
         Function<String,String> findPersonOidByHakemusOid = hakemusOid -> pistetiedotHakemukselle.stream().filter(p -> p.getOid().equals(hakemusOid)).findFirst().get().getPersonOid();
         AmmatillisenKielikoetulosOperations operations = new AmmatillisenKielikoetulosOperations(sourceOid, oppijatSuresta, kielikoetuloksetSureen, findPersonOidByHakemusOid);
 
@@ -315,23 +302,29 @@ public abstract class AbstractPistesyottoKoosteService {
                 .onErrorResumeNext(t -> Observable.error(new IllegalStateException(String.format(
                     "Virhe hakemuksen %s tulosten tallentamisessa Suoritusrekisteriin ", hakemusOid), t)));
 
-            return sureOperations.doOnNext(processedArvosana ->
-                AUDIT.log(builder()
-                    .id(username)
-                    .hakuOid(hakuOid)
-                    .hakukohdeOid(hakukohdeOid)
-                    .hakijaOid(personOid)
-                    .hakemusOid(hakemusOid)
-                    .messageJson(ImmutableMap.of(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana()))
-                    .setOperaatio(auditLogOperation)
-                    .build()));
+            return sureOperations.doOnNext(processedArvosana -> {
+                Map<String, String> additionalAuditInfo = new HashMap<>();
+                additionalAuditInfo.put("usernameForAudit", username);
+                additionalAuditInfo.put("hakuOid", hakuOid);
+                additionalAuditInfo.put("hakukohdeOid", hakukohdeOid);
+                additionalAuditInfo.put("hakijaOid", personOid);
+                additionalAuditInfo.put("hakemusOid", hakemusOid);
+                additionalAuditInfo.put(KIELIKOE_KEY_PREFIX + processedArvosana.getLisatieto().toLowerCase(), processedArvosana.getArvio().getArvosana());
+                AuditLog.log(KoosteAudit.AUDIT,
+                    user,
+                    auditLogOperation,
+                    ValintaResource.PISTESYOTTOSERVICE,
+                    processedArvosana.getId(),
+                    Changes.addedDto(processedArvosana),
+                    additionalAuditInfo);
+            });
         }).lastOrDefault(null).<Void>map(x -> null).doOnCompleted(() ->
             LOG.info("Kielikoetietojen tallennus Suoritusrekisteriin onnistui"));
     }
 
 
 
-    public List<Valintapisteet> pistetiedotHakemukselle(String tallettaja, List<ApplicationAdditionalDataDTO> additionalDataDTOS) {
+    private List<Valintapisteet> pistetiedotHakemukselle(String tallettaja, List<ApplicationAdditionalDataDTO> additionalDataDTOS) {
         return additionalDataDTOS.stream().map(a -> Pair.of(tallettaja, a)).map(Valintapisteet::new).collect(Collectors.toList());
     }
 
@@ -339,25 +332,22 @@ public abstract class AbstractPistesyottoKoosteService {
                                                                          String hakukohdeOid,
                                                                          Optional<String> ifUnmodifiedSince,
                                                                          List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
-                                                                         String username,
                                                                          ValintaperusteetOperation auditLogOperation,
                                                                          AuditSession auditSession) {
-        return valintapisteAsyncResource.putValintapisteet(ifUnmodifiedSince, pistetiedotHakemukselle(username, pistetiedotHakemukselle), auditSession)
+        return valintapisteAsyncResource.putValintapisteet(ifUnmodifiedSince, pistetiedotHakemukselle(auditSession.getPersonOid(), pistetiedotHakemukselle), auditSession)
                 //.<Void>map(a -> null)
                 .doOnNext(conflictingHakemusOids ->
-                        pistetiedotHakemukselle.forEach(p -> AUDIT.log(builder()
-                                .id(username)
-                                .hakuOid(hakuOid)
-                                .hakukohdeOid(hakukohdeOid)
-                                .hakijaOid(p.getPersonOid())
-                                .hakemusOid(p.getOid())
-                                .messageJson(conflictingHakemusOids.contains(p.getOid()) ?
-                                        ImmutableMap.of("error", "Uudemman arvon ylikirjoitus estetty!") : p.getAdditionalData())
-                                .setOperaatio(auditLogOperation)
-                                .build()))
-                )
-                .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
-                        "Pistetietojen tallennus valinta-piste-serviceen epäonnistui", t)));
+                        pistetiedotHakemukselle.forEach(pistetieto -> {
+                                    Map <String, String> additionalInfo = new HashMap<>();
+                                    additionalInfo.put("Username from call params", auditSession.getPersonOid());
+                                    additionalInfo.put("hakuOid", hakuOid);
+                                    additionalInfo.put("hakukohdeOid", hakukohdeOid);
+                                    additionalInfo.put("hakijaOid", pistetieto.getPersonOid());
+                                    AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), auditLogOperation, ValintaResource.PISTESYOTTOSERVICE, pistetieto.getOid(), Changes.addedDto(pistetieto), additionalInfo);
+                                }
+                        ))
+                            .onErrorResumeNext(t -> Observable.error(new IllegalStateException(
+                                    "Lisätietojen tallennus hakemukselle epäonnistui", t)));
     }
 
     private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid) {

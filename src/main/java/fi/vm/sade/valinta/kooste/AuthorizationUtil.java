@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.javautils.http.HttpServletRequestUtils;
+import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestAttributes;
@@ -46,7 +46,7 @@ public class AuthorizationUtil {
         AuditSession session = new AuditSession();
         session.setSessionId(httpServletRequest.getSession().getId());
         session.setUid(KoosteAudit.uid().orElse("Unknown user"));
-        session.setPersonOid(KoosteAudit.username());
+        session.setPersonOid(AuditLog.loggedInUserOid());
         session.setInetAddress(HttpServletRequestUtils.getRemoteAddress(httpServletRequest));
         session.setUserAgent(Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
         session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory, httpServletRequestJaxRS));
@@ -74,17 +74,5 @@ public class AuthorizationUtil {
             return new ArrayList<>();
         }
         return authentication.getAuthorities().stream().map(a -> a.getAuthority()).map(r -> r.replace("ROLE_", "")).collect(Collectors.toList());
-    }
-
-    public static String getCurrentUser() {
-        SecurityContext ctx = SecurityContextHolder.getContext();
-        if (ctx == null) {
-            return null;
-        }
-        Authentication authentication = ctx.getAuthentication();
-        if (authentication == null) {
-            return null;
-        }
-        return authentication.getName();
     }
 }

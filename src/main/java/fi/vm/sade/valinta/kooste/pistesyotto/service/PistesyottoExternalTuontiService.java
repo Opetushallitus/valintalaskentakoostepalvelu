@@ -4,13 +4,18 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+
+import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.sharedutils.ValintaResource;
+import fi.vm.sade.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
@@ -36,9 +41,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
 /**
  * Used when importing points from outside, such as
@@ -281,7 +283,7 @@ public class PistesyottoExternalTuontiService {
                 });
     }
 
-    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, String username, AuditSession auditSession,
+    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, AuditSession auditSession,
                     String hakuOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler,
                     Consumer<Throwable> exceptionHandler) {
         getHakemuksetByHakemusOids(hakemukset.stream().map(HakemusDTO::getHakemusOid).collect(Collectors.toList()))
@@ -340,19 +342,15 @@ public class PistesyottoExternalTuontiService {
                                         osallistumiset.stream().filter(o -> !o.isVirhe()).map(OsallistuminenHakutoiveeseen::asApplicationAdditionalDataDTO).collect(Collectors.toList());
                                 List<VirheDTO> virheet = osallistumiset.stream().filter(OsallistuminenHakutoiveeseen::isVirhe).map(OsallistuminenHakutoiveeseen::asVirheDTO).collect(Collectors.toList());
                                 if (!additionalData.isEmpty()) {
-                                    List<Valintapisteet> vp = additionalData.stream().map(a -> Pair.of(username, a)).map(Valintapisteet::new).collect(Collectors.toList());
+                                    List<Valintapisteet> vp = additionalData.stream().map(a -> Pair.of(auditSession.getPersonOid(), a)).map(Valintapisteet::new).collect(Collectors.toList());
                                     valintapisteAsyncResource.putValintapisteet(Optional.empty(), vp, auditSession).subscribe(conflictingHakemusOids -> {
-                                        additionalData.forEach(p ->
-                                                AUDIT.log(builder()
-                                                        .id(username)
-                                                        .hakuOid(hakuOid)
-                                                        .hakijaOid(p.getPersonOid())
-                                                        .hakemusOid(p.getOid())
-                                                        .messageJson(conflictingHakemusOids.contains(p.getOid()) ?
-                                                                ImmutableMap.of("error", "Uudemman arvon ylikirjoitus estetty!") : p.getAdditionalData())
-                                                        .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
-                                                        .build())
-                                        );
+                                        additionalData.forEach(pistetieto -> {
+                                            Map<String, String> additionalAuditInfo = new HashMap<>();
+                                            additionalAuditInfo.put("Username from params", auditSession.getPersonOid());
+                                            additionalAuditInfo.put("hakuOid", hakuOid);
+                                            additionalAuditInfo.put("hakijaOid", pistetieto.getPersonOid());
+                                            AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, ValintaResource.PISTESYOTTOEXTERNALSERVICE, pistetieto.getOid(), Changes.addedDto(pistetieto), additionalAuditInfo);
+                                        });
                                         List<VirheDTO> valintapisteVirheet = conflictingHakemusOids.stream()
                                                 .map(hakemusOid -> {
                                                     VirheDTO virhe = new VirheDTO();

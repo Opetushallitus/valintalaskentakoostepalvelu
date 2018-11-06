@@ -289,6 +289,8 @@
 
 		<bean id="ValintaperusteetResource"
 			  class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource" />
+		<bean id="ValintaperusteetResourceV2"
+			  class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2" />
 
     <!-- Valintakoeosallistumiset -->
     <bean id="AktiivistenHakemustenValintakoeResource"
@@ -450,6 +452,7 @@
 				<ref bean="ValintalaskentaExcelResource"/>
 				<ref bean="ValintatapajonoResource"/>
 				<ref bean="ValintaperusteetResource"/>
+				<ref bean="ValintaperusteetResourceV2"/>
 				<ref bean="DokumenttiProsessiResource"/>
 				<ref bean="ViestintapalveluAktivointiResource"/>
 				<ref bean="ValintaTulosServiceProxyResource"/>

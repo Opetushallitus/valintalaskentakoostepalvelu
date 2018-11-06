@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +48,7 @@ public class ErillishakuResourceTest {
         ValintaKoosteJetty.startShared();
     }
 
-    private void testVientiExcelTiedostoon(Hakutyyppi hakutyyppi) throws IOException {
+    private void testVientiExcelTiedostoon(Hakutyyppi hakutyyppi) {
         MockApplicationAsyncResource.setResult(createVientiHakemus(hakutyyppi));
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
@@ -70,12 +69,12 @@ public class ErillishakuResourceTest {
     }
 
     @Test
-    public void vientiExcelTiedostoonKK() throws IOException {
+    public void vientiExcelTiedostoonKK() {
         testVientiExcelTiedostoon(Hakutyyppi.KORKEAKOULU);
     }
 
     @Test
-    public void vientiExcelTiedostoonToinenAste() throws IOException {
+    public void vientiExcelTiedostoonToinenAste() {
         testVientiExcelTiedostoon(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS);
     }
 

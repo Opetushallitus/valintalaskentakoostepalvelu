@@ -3,12 +3,12 @@ package fi.vm.sade.valinta.kooste;
 import fi.vm.sade.auditlog.ApplicationType;
 import fi.vm.sade.auditlog.Audit;
 import fi.vm.sade.security.SadeUserDetailsWrapper;
+import fi.vm.sade.sharedutils.AuditLogger;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.util.StringUtils;
 
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -16,13 +16,7 @@ import java.util.Optional;
  * @author Jussi Jartamo
  */
 public class KoosteAudit {
-    public static final Audit AUDIT = new Audit("valintalaskentakoostepalvelu", ApplicationType.VIRKAILIJA);
-
-    public static String username() {
-        return Optional.ofNullable((Principal) SecurityContextHolder.getContext().getAuthentication()).orElse(
-                () -> "Kirjautumaton käyttäjä"
-        ).getName();
-    }
+    public static final Audit AUDIT = new Audit(new AuditLogger(), "valintalaskentakoostepalvelu", ApplicationType.VIRKAILIJA);
 
     public static Optional<String> uid() {
         Optional<String> uid = uidFromCasAuthenticationToken();

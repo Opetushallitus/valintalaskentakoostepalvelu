@@ -12,7 +12,7 @@
   <parent>
     <groupId>fi.vm.sade.valintaperusteet</groupId>
     <artifactId>valintaperusteet</artifactId>
-    <version>4.1-SNAPSHOT</version>
+    <version>5.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <properties>
@@ -34,7 +34,6 @@
     <dependency>
       <groupId>fi.vm.sade.java-utils</groupId>
       <artifactId>java-http</artifactId>
-      <version>0.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>fi.vm.sade.java-utils</groupId>
@@ -227,7 +226,7 @@
     <dependency>
       <groupId>fi.vm.sade.sijoittelu</groupId>
       <artifactId>sijoittelu-algoritmi-domain</artifactId>
-      <version>6.0.1-SNAPSHOT</version>
+      <version>6.1-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>org.codehaus.jackson</groupId>
@@ -238,7 +237,7 @@
     <dependency>
       <groupId>fi.vm.sade.sijoittelu</groupId>
       <artifactId>sijoittelu-tulos-api</artifactId>
-      <version>6.0.1-SNAPSHOT</version>
+      <version>6.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -666,7 +665,21 @@
     <dependency>
       <groupId>fi.vm.sade.valintaperusteet</groupId>
       <artifactId>valintalaskenta-domain</artifactId>
-      <version>4.1-SNAPSHOT</version>
+      <version>5.1-SNAPSHOT</version>
+    </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.valintaperusteet</groupId>
+            <artifactId>sharedutils</artifactId>
+        </dependency>
+    <dependency>
+      <groupId>fi.vm.sade.valintaperusteet</groupId>
+      <artifactId>sharedutils</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>fi.vm.sade.valintaperusteet</groupId>
+      <artifactId>sharedutils</artifactId>
     </dependency>
   </dependencies>
   <build>
