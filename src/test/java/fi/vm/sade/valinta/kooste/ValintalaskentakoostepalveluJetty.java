@@ -99,7 +99,7 @@ public class ValintalaskentakoostepalveluJetty {
 
     private static void startServer() throws Exception {
         KoosteTestProfileConfiguration.PROXY_SERVER.set(Integraatiopalvelimet.mockServer.getHost() + ":" + Integraatiopalvelimet.mockServer.getPort());
-        String root =  ProjectRootFinder.findProjectRoot() + "/valintalaskentakoostepalvelu";
+        String root =  ProjectRootFinder.findProjectRoot().toString();
         WebAppContext wac = new WebAppContext();
         wac.addFilter(MockOpintopolkuCasAuthenticationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC, DispatcherType.INCLUDE));
         wac.setResourceBase(root + "/src/main/webapp");

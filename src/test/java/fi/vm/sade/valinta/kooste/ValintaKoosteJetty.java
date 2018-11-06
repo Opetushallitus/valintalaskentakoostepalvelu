@@ -70,7 +70,7 @@ public class ValintaKoosteJetty {
                 FakeAuthenticationInitialiser.fakeAuthentication();
             }
             if (server.isStopped()) {
-                String root =  ProjectRootFinder.findProjectRoot() + "/valintalaskentakoostepalvelu";
+                String root =  ProjectRootFinder.findProjectRoot().toString();
                 WebAppContext wac = new WebAppContext();
                 if (useMocks) {
                     wac.setResourceBase(root);
