@@ -34,6 +34,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
@@ -285,6 +286,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
     private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
         HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder()
+                .timeoutMillis(TimeUnit.SECONDS.toMillis(240L))
                 .address(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet")
                 .buildExposingWebClientDangerously();
         WebClient client = http.getWebClient()

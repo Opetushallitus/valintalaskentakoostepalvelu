@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -307,7 +308,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     }
 
     private HttpResourceBuilder.WebClientExposingHttpResource createHttpResource(String url) {
-        return new HttpResourceBuilder().address(url).buildExposingWebClientDangerously();
+        return new HttpResourceBuilder().address(url).timeoutMillis(TimeUnit.SECONDS.toMillis(240L)).buildExposingWebClientDangerously();
     }
 
     public static class Result<T> {
