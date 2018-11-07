@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import fi.vm.sade.valinta.kooste.cas.CasKoosteInterceptor;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;

@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;

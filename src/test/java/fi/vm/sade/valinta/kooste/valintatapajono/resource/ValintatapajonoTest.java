@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static fi.vm.sade.valinta.http.DateDeserializer.GSON;
+import static fi.vm.sade.valinta.sharedutils.http.DateDeserializer.GSON;
 import static org.junit.Assert.*;
 
 /**

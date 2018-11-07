@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import fi.vm.sade.valinta.http.HttpResourceBuilder;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 

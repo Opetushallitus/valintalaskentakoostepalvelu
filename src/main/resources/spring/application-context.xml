@@ -471,8 +471,8 @@
 				<ref bean="swagger2Feature" />
 			</jaxrs:features>
 		</jaxrs:server>
-		<bean id="cxfExceptionLogger" class="fi.vm.sade.valinta.http.CxfExceptionLogger"/>
-		<bean id="springAccessDeniedExceptionMapper" class="fi.vm.sade.valinta.http.SpringAccessDeniedExceptionMapper"/>
+		<bean id="cxfExceptionLogger" class="fi.vm.sade.valinta.sharedutils.http.CxfExceptionLogger"/>
+		<bean id="springAccessDeniedExceptionMapper" class="fi.vm.sade.valinta.sharedutils.http.SpringAccessDeniedExceptionMapper"/>
 
 		<!-- Tarjonnan ajastettu synkronointi -->
 		<bean id="tarjontaSyncService"

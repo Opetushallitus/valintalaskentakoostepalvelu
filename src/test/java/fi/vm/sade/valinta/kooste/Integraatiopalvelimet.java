@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste;
 
 import com.google.gson.*;
 import fi.vm.sade.integrationtest.util.PortChecker;
-import fi.vm.sade.valinta.http.DateDeserializer;
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;

@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.test;
 import fi.vm.sade.integrationtest.tomcat.EmbeddedTomcat;
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
-import fi.vm.sade.valinta.http.HttpResourceBuilder;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
