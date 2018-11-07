@@ -3,9 +3,9 @@ package fi.vm.sade.valinta.kooste.external.resource;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
-import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.http.HttpResourceBuilder;
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
+import fi.vm.sade.valinta.sharedutils.http.HttpResource;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;

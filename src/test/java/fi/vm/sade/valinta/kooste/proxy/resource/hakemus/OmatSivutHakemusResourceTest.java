@@ -7,7 +7,7 @@ import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startS
 import static javax.ws.rs.HttpMethod.GET;
 import static org.junit.Assert.assertEquals;
 
-import fi.vm.sade.valinta.http.HttpResourceBuilder;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;

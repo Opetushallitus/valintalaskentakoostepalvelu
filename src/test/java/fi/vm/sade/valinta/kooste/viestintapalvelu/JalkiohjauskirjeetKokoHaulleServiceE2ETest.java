@@ -21,7 +21,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.http.HttpResourceBuilder;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;

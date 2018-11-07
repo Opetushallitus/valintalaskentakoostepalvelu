@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import fi.vm.sade.valinta.http.HttpResourceBuilder;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;

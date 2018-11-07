@@ -114,11 +114,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>fi.vm.sade.valintaperusteet</groupId>
-            <artifactId>http</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>io.reactivex</groupId>
             <artifactId>rxjava</artifactId>
             <version>1.0.11</version>
@@ -797,12 +792,12 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
-            <version>5.1-SNAPSHOT</version>
+            <version>5.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
-            <version>5.1-SNAPSHOT</version>
+            <version>5.2-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

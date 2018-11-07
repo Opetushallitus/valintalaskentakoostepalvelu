@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static fi.vm.sade.valinta.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
+import static fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
 
 public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CasKoosteInterceptor.class);

@@ -5,8 +5,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static rx.Observable.range;
 import static rx.Observable.timer;
 
-import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
-import fi.vm.sade.valinta.http.ObservableUtil;
+import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.sharedutils.http.ObservableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;

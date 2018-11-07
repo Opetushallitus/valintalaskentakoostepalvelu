@@ -5,7 +5,7 @@ import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
-import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;

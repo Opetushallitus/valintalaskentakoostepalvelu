@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
-import fi.vm.sade.valinta.http.HttpResourceBuilder;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.*;

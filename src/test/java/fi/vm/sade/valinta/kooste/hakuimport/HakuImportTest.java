@@ -35,7 +35,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeHakutulosV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakutuloksetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
-import fi.vm.sade.valinta.http.DateDeserializer;
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;

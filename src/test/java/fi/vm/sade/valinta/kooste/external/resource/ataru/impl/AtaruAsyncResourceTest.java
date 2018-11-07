@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import fi.vm.sade.valinta.kooste.cas.CasKoosteInterceptor;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;

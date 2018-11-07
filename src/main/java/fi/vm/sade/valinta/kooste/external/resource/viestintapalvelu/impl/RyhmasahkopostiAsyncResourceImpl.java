@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
-import fi.vm.sade.valinta.http.HttpExceptionWithResponse;
+import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;

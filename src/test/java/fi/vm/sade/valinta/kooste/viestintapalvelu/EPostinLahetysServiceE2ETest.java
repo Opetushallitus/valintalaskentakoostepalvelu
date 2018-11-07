@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
-import fi.vm.sade.valinta.http.HttpResourceBuilder;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
