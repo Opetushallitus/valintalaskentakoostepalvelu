@@ -9,8 +9,10 @@ import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -43,7 +45,11 @@ public class ValintatapajonoTuontiService {
     @Autowired
     private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     @Autowired
+    private TarjontaAsyncResource tarjontaAsyncResource;
+    @Autowired
     private ApplicationAsyncResource applicationAsyncResource;
+    @Autowired
+    private AtaruAsyncResource ataruAsyncResource;
     @Autowired
     private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
     @Autowired
@@ -136,15 +142,22 @@ public class ValintatapajonoTuontiService {
                 },
                 poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef)
         );
-        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(
-                hakemukset -> {
+        tarjontaAsyncResource.haeHaku(hakuOid)
+                .flatMap(haku -> {
+                    if (haku.getAtaruLomakeAvain() == null) {
+                        return applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid);
+                    } else {
+                        return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
+                    }
+                })
+                .subscribe(hakemukset -> {
                     if (hakemukset == null || hakemukset.isEmpty()) {
-                            poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef).accept(null);
-                        } else {
-                            hakemuksetRef.set(hakemukset);
-                            mergeSuplier.get();
-                        }
-                    }, poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
+                        poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef).accept(null);
+                    } else {
+                        hakemuksetRef.set(hakemukset);
+                        mergeSuplier.get();
+                    }
+                }, poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
 
         dokumentinSeurantaAsyncResource.luoDokumentti("Valintatapajonon tuonti").subscribe(
                 dokumenttiId -> {
