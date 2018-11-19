@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -31,6 +34,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
     private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoVientiRouteImpl.class);
 
     private final ApplicationResource applicationResource;
+    private final AtaruAsyncResource ataruAsyncResource;
     private final DokumenttiResource dokumenttiResource;
     private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
     private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
@@ -39,11 +43,13 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
     @Autowired
     public ValintatapajonoVientiRouteImpl(
             ApplicationResource applicationResource,
+            AtaruAsyncResource ataruAsyncResource,
             DokumenttiResource dokumenttiResource,
             HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
             HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
             HakukohdeResource hakukohdeResource) {
         this.applicationResource = applicationResource;
+        this.ataruAsyncResource = ataruAsyncResource;
         this.dokumenttiResource = dokumenttiResource;
         this.hakukohdeTarjonnalta = hakukohdeTarjonnalta;
         this.hakuTarjonnalta = hakuTarjonnalta;
@@ -77,7 +83,8 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                                         + 1);
                         String hakuOid = hakuOid(exchange);
                         String hakukohdeOid = hakukohdeOid(exchange);
-                        String hakuNimi = new Teksti(hakuTarjonnalta.getHaku(hakuOid).getNimi()).getTeksti();
+                        HakuV1RDTO haku = hakuTarjonnalta.getHaku(hakuOid);
+                        String hakuNimi = new Teksti(haku.getNimi()).getTeksti();
                         dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         HakukohdeDTO hnimi = hakukohdeTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
                         dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
@@ -90,8 +97,14 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                         }
                         final List<HakemusWrapper> hakemukset;
                         try {
-                            hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid,
-                                    ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX).stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
+                            if (haku.getAtaruLomakeAvain() == null) {
+                                hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid,
+                                        ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX).stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
+                            } else {
+                                hakemukset = ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
+                                        .timeout(1, TimeUnit.MINUTES)
+                                        .toBlocking().first();
+                            }
                             LOG.debug("Saatiin hakemukset {}", hakemukset.size());
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {
