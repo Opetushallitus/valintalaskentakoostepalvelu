@@ -21,7 +21,11 @@ public class ValintatapajonoRiviAsJonosijaConverter {
         j.setHarkinnanvarainen(false);
         Integer prioriteetti = hakemus.getHakutoiveenPrioriteetti(hakukohdeOid);
         if (prioriteetti == null) {
-            throw new RuntimeException("Hakemuspalvelu palautti hakemuksen hakukohteelle vaikka hakija ei ole siihen hakenut!");
+            throw new RuntimeException(String.format(
+                    "Hakemuspalvelu palautti hakemuksen %s hakukohteelle %s vaikka hakija ei ole siihen hakenut!",
+                    hakemus.getOid(),
+                    hakukohdeOid
+            ));
         }
         j.setPrioriteetti(prioriteetti);
         JarjestyskriteeritulosDTO kriteeri = new JarjestyskriteeritulosDTO();

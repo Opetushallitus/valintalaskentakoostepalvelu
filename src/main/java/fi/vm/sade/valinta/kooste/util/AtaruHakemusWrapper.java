@@ -123,7 +123,8 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public Integer getHakutoiveenPrioriteetti(String hakukohdeOid) {
-        return hakemus.getHakutoiveet().indexOf(hakukohdeOid);
+        int i = hakemus.getHakutoiveet().indexOf(hakukohdeOid);
+        return i < 0 ? null : i + 1;
     }
 
     @Override
@@ -161,7 +162,9 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public boolean getLupaSahkoiseenAsiointiin() { return false; }
 
     @Override
-    public Collection<String> getHakutoiveOids() { return hakemus.getHakutoiveet(); }
+    public Collection<String> getHakutoiveOids() {
+        return new HashSet<>(hakemus.getHakutoiveet());
+    }
 
     @Override
     public boolean isMaksuvelvollinen(String hakukohdeOid) { return false; }
