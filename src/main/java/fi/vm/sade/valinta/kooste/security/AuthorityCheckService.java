@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import org.slf4j.Logger;
@@ -27,6 +28,8 @@ public class AuthorityCheckService {
     private TarjontaAsyncResource tarjontaAsyncResource;
     @Autowired
     private OrganisaatioResource organisaatioResource;
+    @Autowired
+    private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 
     public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(Collection<String> roles) {
         final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
@@ -103,5 +106,28 @@ public class AuthorityCheckService {
         }
 
         return false;
+    }
+
+    public void checkAuthorizationForValintaryhma(String valintaryhmaOid, List<String> requiredRoles) {
+        Collection<? extends GrantedAuthority> userRoles = getRoles();
+
+        boolean isOphUser = containsOphRole(userRoles);
+        if (isOphUser) {
+            return;
+        }
+
+        boolean isAuthorized = valintaperusteetAsyncResource.haeValintaryhma(valintaryhmaOid).map((valintaryhma) -> {
+            String vastuuOrgOid = valintaryhma.getVastuuorganisaatioOid();
+            return isAuthorizedForAnyParentOid(new String[]{vastuuOrgOid}, userRoles, requiredRoles);
+        }).toBlocking().first();
+
+        if (!isAuthorized) {
+            String msg = String.format(
+                    "Käyttäjällä ei oikeutta valintaryhmän %s vastuuorganisaatioon tai sen yläorganisaatioihin.",
+                    valintaryhmaOid
+            );
+            LOG.error(msg);
+            throw new ForbiddenException(msg);
+        }
     }
 }

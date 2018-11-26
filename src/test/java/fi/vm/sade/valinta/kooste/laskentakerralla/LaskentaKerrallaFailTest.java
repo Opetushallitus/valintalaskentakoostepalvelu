@@ -73,6 +73,7 @@ public class LaskentaKerrallaFailTest {
                     false,
                     "haun nimi",
                     "nimi",
+                    "valintaryhma.oid",
                     LaskentaTyyppi.HAKUKOHDE,
                     false,
                     new ArrayList(),
