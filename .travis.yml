@@ -26,7 +26,7 @@ install:
 - export ARTIFACT_NAME="valintalaskentakoostepalvelu"
 
 script:
-- mvn clean package -U -B -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER}
+- mvn clean package -B -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER}
 
 - mv target/valintalaskentakoostepalvelu.war $DOCKER_BUILD_DIR/artifact/valintalaskentakoostepalvelu.war
 - cp -vr src/main/resources/oph-configuration $DOCKER_BUILD_DIR/config/
