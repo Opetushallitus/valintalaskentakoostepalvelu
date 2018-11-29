@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -152,11 +153,43 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public boolean getVainSahkoinenViestinta() { return false; }
 
     @Override
-    public boolean hasAsiointikieli() { return henkilo.getAsiointiKieli() != null; }
+    public boolean hasAsiointikieli() {
+        try {
+            this.getAsiointikieli();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     @Override
-    public String getAsiointikieli() { return
-            hasAsiointikieli() ? StringUtils.trimToEmpty(henkilo.getAsiointiKieli().getKieliKoodi()) : ""; }
+    public String getAsiointikieli() {
+        String asiointikieliHenkilolta = StringUtils.trimToEmpty(
+                Optional.ofNullable(henkilo.getAsiointiKieli())
+                        .map(KielisyysDto::getKieliKoodi)
+                        .orElse("")
+        );
+        String asiointikieliHakemukselta = StringUtils.trimToEmpty(hakemus.getKeyValues().get("asiointikieli"));
+        if (!asiointikieliHenkilolta.isEmpty()) {
+            return asiointikieliHenkilolta;
+        } else if (!asiointikieliHakemukselta.isEmpty()) {
+            switch (asiointikieliHakemukselta) {
+                case "1":
+                    return "fi";
+                case "2":
+                    return "sv";
+                case "3":
+                    return "en";
+                default:
+                    throw new RuntimeException(String.format(
+                            "Tuntematon asiointikieli %s hakemuksella %s",
+                            asiointikieliHakemukselta,
+                            hakemus.getHakemusOid()));
+            }
+        } else {
+            throw new RuntimeException(String.format("Ei asiointikieltä hakemuksella %s", hakemus.getHakemusOid()));
+        }
+    }
 
     @Override
     public boolean getLupaSahkoiseenAsiointiin() { return false; }
