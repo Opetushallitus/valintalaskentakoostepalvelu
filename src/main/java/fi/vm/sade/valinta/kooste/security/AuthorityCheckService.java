@@ -116,13 +116,12 @@ public class AuthorityCheckService {
             return;
         }
 
-        boolean isAuthorized = valintaperusteetAsyncResource.haeValintaryhma(valintaryhmaOid).map((valintaryhma) -> {
-            String vastuuOrgOid = valintaryhma.getVastuuorganisaatioOid();
-            if (vastuuOrgOid == null) {
+        boolean isAuthorized = valintaperusteetAsyncResource.haeValintaryhmaVastuuorganisaatio(valintaryhmaOid).map((vastuuorganisaatioOid) -> {
+            if (vastuuorganisaatioOid == null) {
                 LOG.error("Valintaryhmän {} vastuuorganisaatio on null; vain OPH:lla oikeus valintaryhmään.", valintaryhmaOid);
                 return false;
             } else {
-                return isAuthorizedForAnyParentOid(new String[]{vastuuOrgOid}, userRoles, requiredRoles);
+                return isAuthorizedForAnyParentOid(new String[]{vastuuorganisaatioOid}, userRoles, requiredRoles);
             }
         }).toBlocking().first();
 

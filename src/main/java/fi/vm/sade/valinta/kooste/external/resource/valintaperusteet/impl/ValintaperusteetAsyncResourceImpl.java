@@ -144,9 +144,9 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public Observable<ValintaryhmaDTO> haeValintaryhma(String valintaryhmaOid) {
-        String url = getUrl("valintaperusteet-service.valintaperusteet.valintaryhma.byOid", valintaryhmaOid);
+    public Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid) {
+        String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaryhma.vastuuorganisaatio", valintaryhmaOid);
         LOG.info("Calling url {}", url);
-        return getAsObservableLazily(url, new TypeToken<ValintaryhmaDTO>() {}.getType());
+        return getAsObservableLazily(url, new TypeToken<String>() {}.getType());
     }
 }

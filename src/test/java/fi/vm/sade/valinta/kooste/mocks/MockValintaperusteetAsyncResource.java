@@ -121,7 +121,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Observable<ValintaryhmaDTO> haeValintaryhma(String valintaryhmaOid) {
+    public Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid) {
         throw new UnsupportedOperationException();
     }
 }

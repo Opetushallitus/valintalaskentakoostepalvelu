@@ -41,5 +41,5 @@ public interface ValintaperusteetAsyncResource {
     // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
     Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
 
-    Observable<ValintaryhmaDTO> haeValintaryhma(String valintaryhmaOid);
+    Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid);
 }
