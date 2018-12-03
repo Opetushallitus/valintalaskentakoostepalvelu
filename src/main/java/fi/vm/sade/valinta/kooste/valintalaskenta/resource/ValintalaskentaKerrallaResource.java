@@ -101,7 +101,7 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
             @QueryParam("haunnimi") String haunnimi,
             @QueryParam("nimi") String nimi,
-            @QueryParam("nimi") String valintaryhmaOid,
+            @QueryParam("valintaryhma") String valintaryhmaOid,
             @PathParam("tyyppi") LaskentaTyyppi laskentatyyppi,
             @PathParam("whitelist") boolean whitelist,
             List<String> stringMaski,
