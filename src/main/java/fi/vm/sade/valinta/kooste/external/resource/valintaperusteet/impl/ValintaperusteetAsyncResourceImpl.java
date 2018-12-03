@@ -147,6 +147,9 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     public Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid) {
         String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaryhma.vastuuorganisaatio", valintaryhmaOid);
         LOG.info("Calling url {}", url);
-        return getAsObservableLazily(url, new TypeToken<String>() {}.getType());
+        return getAsObservableLazily(url, String.class, client -> {
+            client.accept(MediaType.TEXT_PLAIN_TYPE);
+            return client;
+        });
     }
 }
