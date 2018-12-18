@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -56,6 +55,7 @@ public class LaskentaKerrallaTest {
     private static final String PERSON_OID = "007.007";
     private static final String LASKENTASEURANTA_ID = "laskentaseuranta.id";
     private static final String HAKEMUS_OID = "123.123";
+    private static final String VALINTARYHMA_OID = "valintaryhma.oid";
 
     @Autowired
     ValintalaskentaKerrallaResource valintalaskentaKerralla;
@@ -84,6 +84,7 @@ public class LaskentaKerrallaTest {
                 false,
                 "haun nimi",
                 "nimi",
+                VALINTARYHMA_OID,
                 LaskentaTyyppi.HAKUKOHDE,
                 false,
                 new ArrayList(),

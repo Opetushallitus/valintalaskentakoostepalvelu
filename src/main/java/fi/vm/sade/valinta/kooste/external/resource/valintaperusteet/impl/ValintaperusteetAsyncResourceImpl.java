@@ -3,16 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
+import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import org.slf4j.Logger;
@@ -150,5 +141,15 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
         String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valinnanvaihe.hakukohteet", oid);
         LOG.info("Calling url {}", url);
         return getAsObservableLazily(url, new TypeToken<Set<String>>() {}.getType());
+    }
+
+    @Override
+    public Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid) {
+        String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaryhma.vastuuorganisaatio", valintaryhmaOid);
+        LOG.info("Calling url {}", url);
+        return getAsObservableLazily(url, String.class, client -> {
+            client.accept(MediaType.TEXT_PLAIN_TYPE);
+            return client;
+        });
     }
 }

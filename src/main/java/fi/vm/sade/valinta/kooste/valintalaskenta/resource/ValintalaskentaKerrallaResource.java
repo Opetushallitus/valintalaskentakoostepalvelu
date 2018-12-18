@@ -101,6 +101,7 @@ public class ValintalaskentaKerrallaResource {
             @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
             @QueryParam("haunnimi") String haunnimi,
             @QueryParam("nimi") String nimi,
+            @QueryParam("valintaryhma") String valintaryhmaOid,
             @PathParam("tyyppi") LaskentaTyyppi laskentatyyppi,
             @PathParam("whitelist") boolean whitelist,
             List<String> stringMaski,
@@ -118,8 +119,7 @@ public class ValintalaskentaKerrallaResource {
 
             Observable<HakukohdeOIDAuthorityCheck> authorityCheckObservable;
             if (LaskentaTyyppi.VALINTARYHMA.equals(laskentatyyppi)) {
-                LOG.warn(String.format("BUG-1873 : Ohitetaan maskin \"%s\" oikeustarkistus käyttäjän %s " +
-                    "laskiessa valintaryhmää \"%s\" haussa %s (\"%s\").", maski, userOID, nimi, hakuOid, haunnimi));
+                authorityCheckService.checkAuthorizationForValintaryhma(valintaryhmaOid, valintalaskentaAllowedRoles);
                 authorityCheckObservable = Observable.empty();
             } else {
                 authorityCheckObservable = authorityCheckService.getAuthorityCheckForRoles(valintalaskentaAllowedRoles);

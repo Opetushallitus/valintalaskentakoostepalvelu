@@ -1,15 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
+import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import org.springframework.stereotype.Service;
 import rx.Observable;
@@ -126,6 +117,11 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid) {
         throw new UnsupportedOperationException();
     }
 }
