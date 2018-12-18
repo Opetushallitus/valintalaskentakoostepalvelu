@@ -111,7 +111,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         Observable<HakuV1RDTO> haku = hakuV1AsyncResource.haeHaku(hakuOid);
         Observable<LetterBatch> kirjeet = haku.flatMap( (haettuHaku) ->
             ViestintapalveluObservables.kirjeet(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, osoitteet,
-                    hyvaksymiskirjeetKomponentti, hyvaksymiskirjeetServiceImpl, haunParametrit, isKorkeakouluhaku(haettuHaku))
+                    hyvaksymiskirjeetKomponentti, hyvaksymiskirjeetServiceImpl, haunParametrit, true)
         );
         return ViestintapalveluObservables.batchId(
                 kirjeet,
