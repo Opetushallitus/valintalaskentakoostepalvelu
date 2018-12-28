@@ -7,7 +7,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.ldap.userdetails.LdapAuthority;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -33,8 +32,9 @@ public class MockOpintopolkuCasAuthenticationFilter implements Filter {
         String credentials = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-creds";
         casAuthenticationToken = new CasAuthenticationToken(key, principal, credentials,
             Stream.of(roles).map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
-            new User(MockOpintopolkuCasAuthenticationFilter.class.getSimpleName().toLowerCase(), "salasana", Collections.singletonList(new LdapAuthority("rooli", "dn"))),
+            new User(MockOpintopolkuCasAuthenticationFilter.class.getSimpleName().toLowerCase(), "salasana", Collections.singletonList(new SimpleGrantedAuthority("rooli"))),
             new AssertionImpl(new AttributePrincipalImpl(MockOpintopolkuCasAuthenticationFilter.class.getSimpleName())));
+
     }
 
     @Override
