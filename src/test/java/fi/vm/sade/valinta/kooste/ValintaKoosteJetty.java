@@ -18,7 +18,6 @@ import org.eclipse.jetty.webapp.WebAppContext;
  *        Host bastion.pallero
  *            HostName bastion.testiopintopolku.fi
  *            ...
- *            LocalForward 2389 ldap.ldap.testiopintopolku.fi:389
  *            LocalForward 18888 alb.testiopintopolku.fi:80
  *
  *    * copy oph-configuration directory from the container of valinta to your machine
@@ -29,11 +28,9 @@ import org.eclipse.jetty.webapp.WebAppContext;
  *        14,16c15,19
  *        < host.ilb=https://virkailija.testiopintopolku.fi
  *        < host.alb=http://alb.testiopintopolku.fi
- *        < host.ldap=ldap.ldap.testiopintopolku.fi
  *        ---
  *        > host.ilb=http://localhost:18888
  *        > host.alb=http://localhost:18888
- *        > host.ldap=localhost:2389
  *        84c87,88
  *        < cas.service.valintalaskentakoostepalvelu=https://${host.virkailija}/valintalaskentakoostepalvelu
  *        ---
