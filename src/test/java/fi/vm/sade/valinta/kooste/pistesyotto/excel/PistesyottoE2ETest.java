@@ -195,6 +195,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 .header("Content-Type", "application/octet-stream")
                 .accept(MediaType.APPLICATION_JSON)
                 .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
+        Assert.assertEquals("", r.readEntity(String.class));
         Assert.assertEquals(204, r.getStatus());
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
