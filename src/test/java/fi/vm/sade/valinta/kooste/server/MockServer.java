@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpServer;
 
 import fi.vm.sade.integrationtest.util.PortChecker;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -19,14 +18,10 @@ public class MockServer {
     private final List<String> paths = Lists.newArrayList();
 
     public MockServer() {
-        try {
-            this.httpServer = startServer();
-        } catch(Throwable t) {
-            throw new RuntimeException(t);
-        }
+        this.httpServer = startServer();
     }
 
-    private HttpServer startServer() throws IOException {
+    private HttpServer startServer() {
         boolean succeededToStart = false;
         int maxAttempts = 10;
         int numberOfAttempt = 0;
