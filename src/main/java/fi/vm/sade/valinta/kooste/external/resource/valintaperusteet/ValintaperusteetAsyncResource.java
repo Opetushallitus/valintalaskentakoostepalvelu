@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet;
 
 import fi.vm.sade.service.valintaperusteet.dto.*;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.Collection;

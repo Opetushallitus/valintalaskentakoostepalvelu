@@ -18,7 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valin
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +53,7 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     }
 
     @Override
-    public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
+    public Observable<String> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
         return Observable.empty();
     }
 

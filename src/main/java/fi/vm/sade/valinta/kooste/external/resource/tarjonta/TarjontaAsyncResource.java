@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.Collection;
 import java.util.List;

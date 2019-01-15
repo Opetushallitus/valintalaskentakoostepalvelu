@@ -1,13 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.impl;
 
-import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
+import io.reactivex.Observable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.concurrent.TimeUnit;

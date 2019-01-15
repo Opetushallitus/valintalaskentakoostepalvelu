@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
+
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
@@ -12,6 +13,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KansalaisuusDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import io.reactivex.Observable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
@@ -19,11 +21,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -125,7 +129,7 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                         .distinct()
                         .map(koodiArvo -> koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + koodiArvo)
                                 .map(koodi -> Pair.of(koodiArvo, koodi)))
-                        .collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight);
+                        .collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight).toObservable();
     }
 
     @Override

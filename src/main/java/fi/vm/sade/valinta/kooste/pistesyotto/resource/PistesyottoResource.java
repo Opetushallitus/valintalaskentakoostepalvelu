@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -301,7 +301,7 @@ public class PistesyottoResource {
                 "ROLE_APP_HAKEMUS_LISATIETOCRUD"
         )).flatMap(authorityCheck -> {
             if (authorityCheck.test(hakukohdeOid)) {
-                return Observable.just(null);
+                return Observable.just("OK");
             }
             String msg = String.format(
                     "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
@@ -324,7 +324,7 @@ public class PistesyottoResource {
                             .filter(oid -> !hakukohteenHakemusOidit.contains(oid))
                             .collect(Collectors.toSet());
                     if (eiHakukohteeseenHakeneet.isEmpty()) {
-                        return Observable.just(null);
+                        return Observable.just("OK");
                     }
                     return Observable.error(new ForbiddenException(String.format(
                             "Käyttäjällä %s ei ole oikeuksia käsitellä hakemuksien %s pistetietoja, koska niillä ei ole haettu hakukohteeseen %s",
@@ -423,7 +423,7 @@ public class PistesyottoResource {
                     "ROLE_APP_HAKEMUS_LISATIETOCRUD"
             )).flatMap(authorityCheck -> {
                 if (authorityCheck.test(hakukohdeOid)) {
-                    return Observable.just(null);
+                    return Observable.just("OK");
                 }
                 String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",

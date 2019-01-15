@@ -6,14 +6,15 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
+import io.reactivex.Observable;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -25,6 +26,7 @@ import java.util.function.Function;
  */
 @Service
 public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource implements OrganisaatioAsyncResource {
+    private static final HakutoimistoDTO HAKUTOIMISTO_NULL = new HakutoimistoDTO(null, Collections.emptyMap());
     private final Logger LOG = LoggerFactory.getLogger(getClass());
 
     public OrganisaatioAsyncResourceImpl() {
@@ -63,8 +65,13 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
                 .onErrorReturn(
                         exception -> {
                             LOG.error("Unable to fetch hakutoimisto for organisaatioId={}",organisaatioId);
-                            return null;
+                            return HAKUTOIMISTO_NULL;
                         })
-                .map(m -> Optional.ofNullable(m));
+                .map(m -> {
+                    if (m == null || m == HAKUTOIMISTO_NULL) {
+                        return Optional.empty();
+                    }
+                    return Optional.of(m);
+                });
     }
 }

@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri;
 
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.List;
 

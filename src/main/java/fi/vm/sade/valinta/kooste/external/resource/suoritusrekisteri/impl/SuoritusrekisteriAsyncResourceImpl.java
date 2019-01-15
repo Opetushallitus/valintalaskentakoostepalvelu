@@ -14,10 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -97,7 +98,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         List<List<String>> oidBatches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
         LOG.info("Batched POST: {} oids partitioned into {} batches", opiskelijaOids.size(), oidBatches.size());
 
-        Observable<Observable<List<Oppija>>> obses = Observable.from(oidBatches).map(oidBatch ->
+        Observable<Observable<List<Oppija>>> obses = Observable.fromIterable(oidBatches).map(oidBatch ->
                 postAsObservableLazily(url,
                         new TypeToken<List<Oppija>>() { }.getType(),
                         Entity.entity(oidBatch, MediaType.APPLICATION_JSON_TYPE),
@@ -109,7 +110,9 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         );
 
         // Add the elements returned by each response to one master list
-        Observable<List<Oppija>> allOppijas = Observable.concat(obses).collect(Lists::<Oppija>newArrayList, List::addAll);
+        Observable<List<Oppija>> allOppijas = Observable
+            .concat(obses)
+            .<List<Oppija>>collect(LinkedList::new, (oppijas, collector) -> collector.addAll(oppijas)).toObservable();
 
         allOppijas.subscribe(l -> {
             LOG.info("Finished batched POST with {} results", l.size());
@@ -160,7 +163,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     }
 
     @Override
-    public Observable<Void> deleteSuoritus(String suoritusId) {
+    public Observable<String> deleteSuoritus(String suoritusId) {
         return deleteAsObservableLazily(
                 getUrl("suoritusrekisteri.suoritukset.id", suoritusId),
                 new TypeToken<Suoritus>(){
@@ -173,7 +176,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     }
 
     @Override
-    public Observable<Void> deleteArvosana(String arvosanaId) {
+    public Observable<String> deleteArvosana(String arvosanaId) {
         return deleteAsObservableLazily(
                 getUrl("suoritusrekisteri.arvosanat.id", arvosanaId), new TypeToken<Arvosana>(){}.getType(),
                 client -> {

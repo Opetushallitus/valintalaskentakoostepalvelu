@@ -9,7 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,7 +48,7 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
     }
     @Override
     public Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(final List<HenkiloCreateDTO> hp) {
-        return Observable.from(Optional.ofNullable(MockOppijanumerorekisteriAsyncResource.<List<HenkiloPerustietoDto>>serviceAvailableCheck()).orElseGet(
+        return Observable.fromFuture(Optional.ofNullable(MockOppijanumerorekisteriAsyncResource.<List<HenkiloPerustietoDto>>serviceAvailableCheck()).orElseGet(
                 () -> futureSupplier.apply(hp)));
     }
     @Override

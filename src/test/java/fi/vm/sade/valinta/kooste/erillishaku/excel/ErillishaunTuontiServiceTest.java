@@ -20,7 +20,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static rx.Observable.just;
+import static io.reactivex.Observable.just;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 
@@ -52,8 +52,8 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import rx.Observable;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -265,7 +265,7 @@ public class ErillishaunTuontiServiceTest {
                     failingOppijanumerorekisteriResource,
                     valintaTulosServiceAsyncResource,
                     koodistoCachedAsyncResource,
-                    Schedulers.immediate()
+                    Schedulers.trampoline()
             );
             assertEquals(0, applicationAsyncResource.results.size());
             tuontiService.tuoExcelistä(new AuditSession(PERSON_2_OID, emptyList(), "", ""), prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
@@ -287,7 +287,7 @@ public class ErillishaunTuontiServiceTest {
                     henkiloAsyncResource,
                     failingValintaTuloseServiceAsyncResource,
                     koodistoCachedAsyncResource,
-                    Schedulers.immediate()
+                    Schedulers.trampoline()
             );
             tuontiService.tuoExcelistä(new AuditSession(PERSON_2_OID, emptyList(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
             Mockito.verify(prosessi).keskeyta(Matchers.<Collection<Poikkeus>>any());
@@ -302,7 +302,7 @@ public class ErillishaunTuontiServiceTest {
                     henkiloAsyncResource,
                     valintaTulosServiceAsyncResource,
                     koodistoCachedAsyncResource,
-                    Schedulers.immediate()
+                    Schedulers.trampoline()
             );
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             KirjeProsessi prosessi = new ErillishakuProsessiDTO(1);
@@ -406,7 +406,7 @@ class ErillisHakuTuontiTestCase {
                 henkiloAsyncResource,
                 valintaTulosServiceAsyncResource,
                 koodistoCachedAsyncResource,
-                Schedulers.immediate()
+                Schedulers.trampoline()
         );
         tuontiService.tuoExcelistä(new AuditSession(PERSON_1_OID, new ArrayList<>(), "", ""), prosessi, erillisHaku, data);
         Mockito.verify(prosessi).valmistui("ok");
@@ -418,7 +418,7 @@ class ErillisHakuTuontiTestCase {
                 mockHenkiloAsyncResource,
                 valintaTulosServiceAsyncResource,
                 koodistoCachedAsyncResource,
-                Schedulers.immediate()
+                Schedulers.trampoline()
         );
         tuontiService.tuoJson(new AuditSession(PERSON_1_OID, new ArrayList<>(), "", ""), prosessi, erillisHaku, rivit, false);
         Mockito.verify(prosessi).valmistui("ok");

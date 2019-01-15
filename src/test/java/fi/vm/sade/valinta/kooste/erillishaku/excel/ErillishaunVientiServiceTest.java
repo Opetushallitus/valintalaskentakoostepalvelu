@@ -13,7 +13,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiServi
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import org.mockito.Mockito;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import org.junit.Test;
 
@@ -47,6 +47,8 @@ public class ErillishaunVientiServiceTest {
 
     @Test
     public void suoritaEpaonnistunutVientiTest() {
+        when(mockTilaAsyncResource.getErillishaunValinnantulokset(anyObject(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
+        when(mockTilaAsyncResource.fetchLukuvuosimaksut(anyString(),any())).thenReturn(Observable.just(Lists.newArrayList()));
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
         final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);

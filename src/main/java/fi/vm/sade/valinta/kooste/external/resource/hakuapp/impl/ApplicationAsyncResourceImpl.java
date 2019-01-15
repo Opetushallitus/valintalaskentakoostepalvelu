@@ -13,6 +13,8 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ListFullSearchDTO
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
@@ -20,14 +22,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import rx.Observable;
-import rx.functions.Func1;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -112,7 +111,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     private Observable<List<HakemusWrapper>> getApplicationsByHakemusOids(String hakuOid, Collection<String> hakemusOids, Collection<String> keys) {
-        Func1<List<Hakemus>, List<HakemusWrapper>> filterApplicationsInDefaultStates = hs ->
+        Function<List<Hakemus>, List<HakemusWrapper>> filterApplicationsInDefaultStates = hs ->
                 hs.stream().filter(h ->
                         StringUtils.isEmpty(h.getState()) ||
                                 DEFAULT_STATES.contains(h.getState()))
@@ -135,10 +134,10 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
         LOG.info("Haetaan " + hakemusOids.size() + " hakemusta haku-app:sta");
-        return Observable.from(Lists.partition(hakemusOids, DEFAULT_ROW_LIMIT))
+        return Observable.fromIterable(Lists.partition(hakemusOids, DEFAULT_ROW_LIMIT))
                 .concatMap(oids -> getApplicationsByHakemusOids(hakuOid, oids, keys))
-                .concatMap(Observable::from)
-                .toList();
+                .concatMap(Observable::fromIterable)
+                .toList().toObservable();
     }
 
     @Override

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
+import io.reactivex.internal.operators.observable.ObservableJust;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,7 +28,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class LaskentaKerrallaFailTest {
             if (seurantaCount.getAndIncrement() < 1)
                 return Observable.just(LASKENTASEURANTA_ID);
             else {
-                return Observable.just(null);
+                return new ObservableJust<>(null);
             }
         }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
     }

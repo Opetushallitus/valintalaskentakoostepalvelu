@@ -6,7 +6,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;

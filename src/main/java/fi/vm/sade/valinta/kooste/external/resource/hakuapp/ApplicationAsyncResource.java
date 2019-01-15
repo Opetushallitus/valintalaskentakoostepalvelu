@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;

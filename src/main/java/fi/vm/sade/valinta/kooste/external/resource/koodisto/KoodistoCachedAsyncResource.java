@@ -7,11 +7,11 @@ import com.google.common.cache.CacheBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import io.reactivex.Observable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
 import java.util.List;
 import java.util.Map;
@@ -77,8 +77,7 @@ public class KoodistoCachedAsyncResource {
             return koodistoCache.get(koodistoUri, () -> konversio(koodistoAsyncResource
                 .haeKoodisto(koodistoUri)
                 .timeout(1, MINUTES)
-                .toBlocking()
-                .first()));
+                .blockingFirst()));
         } catch (Exception e) {
             LOG.error("Koodistosta luku epäonnistui:", e);
             throw new RuntimeException(e);

@@ -24,7 +24,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -105,13 +105,13 @@ class TarjontaAsyncResourceImplHelper {
     static Observable<Map<String, List<String>>> resultSearchToHakukohdeRyhmaMap(Observable<ResultSearch> observable) {
         return observable.map(ResultSearch::getResult)
                 .map(ResultTulos::getTulokset)
-                .flatMap(Observable::from)
+                .flatMap(Observable::fromIterable)
                 .map(ResultOrganization::getTulokset)
-                .flatMap(Observable::from)
+                .flatMap(Observable::fromIterable)
                 .map((ResultHakukohde s) -> new ImmutablePair<>(
                         s.getOid(),
                         getRyhmaList(s)))
-                .toMap(Pair::getKey, Pair::getValue);
+                .toMap(Pair::getKey, Pair::getValue).toObservable();
     }
 
     private static List<String> getRyhmaList (ResultHakukohde hk) {

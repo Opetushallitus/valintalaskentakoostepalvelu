@@ -7,7 +7,7 @@ import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.List;

@@ -11,7 +11,7 @@ import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;

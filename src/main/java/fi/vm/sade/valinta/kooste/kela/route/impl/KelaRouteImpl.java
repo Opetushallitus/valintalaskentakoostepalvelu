@@ -1,9 +1,13 @@
 package fi.vm.sade.valinta.kooste.kela.route.impl;
 
+import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import fi.vm.sade.organisaatio.resource.api.KelaResource;
 import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
@@ -20,9 +24,28 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Change;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
-import fi.vm.sade.valinta.kooste.kela.dto.*;
-import fi.vm.sade.valinta.kooste.kela.komponentti.*;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.*;
+import fi.vm.sade.valinta.kooste.kela.dto.Haku;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaAbstraktiHaku;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaHakijaRivi;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaHaku;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaAbstraktitHaut;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaDokumentti;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaHaut;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaRivit;
+import fi.vm.sade.valinta.kooste.kela.dto.TunnistamatonHaku;
+import fi.vm.sade.valinta.kooste.kela.dto.TunnistettuHaku;
+import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.OppilaitosSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.TilaSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.TutkinnontasoSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.HaunTyyppiKomponentti;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaDokumentinLuontiKomponenttiImpl;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponenttiImpl;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.OppilaitosKomponentti;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
@@ -33,19 +56,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import rx.observables.BlockingObservable;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Component
 public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
@@ -197,8 +219,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         log.info("haetaan haku:" + haku.getOid());
                         try {
                             Collection<ValintaTulosServiceDto> hakijat =
-                                    BlockingObservable.from(valintaTulosServiceAsyncResource.getHaunValintatulokset(haku.getOid()).timeout(30, MINUTES))
-                                            .first()
+                                valintaTulosServiceAsyncResource.getHaunValintatulokset(haku.getOid())
+                                            .timeout(30, MINUTES)
+                                            .blockingFirst()
                                             .stream()
                                             .filter(vts -> vts.getHakutoiveet().stream()
                                                     .filter(h -> h != null && h.getValintatila() != null && h.getVastaanottotila() != null)
@@ -343,9 +366,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         for(int tries = 0; tries < maxTries; ++tries) {
                             try {
                                 List<Muutoshistoria> muutoshistoriat =
-                                        BlockingObservable.from(valintaTulosServiceAsyncResource.getMuutoshistoria(hakemusOid, valintatapajonoOid)
-                                            .timeout(30, MINUTES))
-                                            .first();
+                                    valintaTulosServiceAsyncResource.getMuutoshistoria(hakemusOid, valintatapajonoOid)
+                                        .timeout(30, MINUTES)
+                                        .blockingFirst();
 
                                 final Predicate<Change> isVastaanottoChange = (change) -> "vastaanottotila".equals(change.getField());
                                 final Predicate<Map.Entry<String, Date>> isVastaanotto = entry -> asList("VASTAANOTTANUT_SITOVASTI", "VASTAANOTTANUT", "EHDOLLISESTI_VASTAANOTTANUT").contains(entry.getKey());
@@ -476,7 +499,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     private List<HenkiloPerustietoDto> retrieveHenkiloPerustietoDtos(List<String> oidit) {
         return oppijanumerorekisteriAsyncResource.haeHenkilot(oidit)
             .doOnError(throwable -> log.error("Exception when retrieving henkilö data for " + oidit.size() + " oids", throwable))
-            .timeout(30, SECONDS).toBlocking().first();
+            .timeout(30, SECONDS).blockingFirst();
     }
 
     private void updateHaunKohdejoukkoCache(Haku haku, KelaCache cache, Collection<Poikkeus> poikkeuksetUudelleenYrityksessa) {

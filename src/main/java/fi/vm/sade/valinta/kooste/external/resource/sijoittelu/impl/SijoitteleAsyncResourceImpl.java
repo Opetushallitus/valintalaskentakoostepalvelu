@@ -38,8 +38,7 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
         try {
             sijoitteluajoId = this.<Long>getAsObservableLazily(luontiUrl, Long.class, client -> client.accept(MediaType.WILDCARD_TYPE))
                 .timeout(30, SECONDS)
-                .toBlocking()
-                .first();
+                .blockingFirst();
         } catch (Exception e) {
             LOGGER.info(String.format("(Haku %s) sijoittelun rajapintakutsu epäonnistui", hakuOid), e);
         }
@@ -65,8 +64,7 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource implement
             try {
                 status = this.<String>getAsObservableLazily(pollingUrl, String.class, webClient -> webClient.accept(MediaType.WILDCARD_TYPE))
                     .timeout(15, SECONDS)
-                    .toBlocking()
-                    .first();
+                    .blockingFirst();
                 LOGGER.info("Saatiin ajontila-rajapinnalta palautusarvo {}", status);
                 if (SijoitteluajonTila.VALMIS.toString().equals(status)) {
                     LOGGER.info("#### Sijoittelu {} haulle {} on valmistunut", sijoitteluajoId, hakuOid);

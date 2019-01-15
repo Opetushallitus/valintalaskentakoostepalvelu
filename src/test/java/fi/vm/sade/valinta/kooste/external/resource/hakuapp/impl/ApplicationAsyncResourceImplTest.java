@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import java.util.Arrays;
@@ -75,7 +75,7 @@ public class ApplicationAsyncResourceImplTest {
                 Mockito.verifyNoMoreInteractions(webClient);
                 return Observable.just(Arrays.asList(hakemus1, hakemus2));
             });
-        List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByHakemusOids(Arrays.asList("hakemus1Oid", "hakemus2Oid")).timeout(1, SECONDS).toBlocking().first();
+        List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByHakemusOids(Arrays.asList("hakemus1Oid", "hakemus2Oid")).timeout(1, SECONDS).blockingFirst();
 
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1), applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus2), applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
@@ -98,7 +98,7 @@ public class ApplicationAsyncResourceImplTest {
                 return Observable.just(Arrays.asList(hakemus1, hakemus2, hakemus3));
             });
         List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByHakemusOids(
-                Arrays.asList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid")).timeout(1, SECONDS).toBlocking().first();
+                Arrays.asList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid")).timeout(1, SECONDS).blockingFirst();
 
         assertEquals(2, applications.size());
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1), applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
@@ -126,7 +126,7 @@ public class ApplicationAsyncResourceImplTest {
             });
         List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByhakemusOidsInParts("hakuOid",
                 Arrays.asList("hakemus1Oid", "hakemus2Oid"),
-                Collections.singletonList("hakemusOid")).timeout(1, SECONDS).toBlocking().first();
+                Collections.singletonList("hakemusOid")).timeout(1, SECONDS).blockingFirst();
 
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1), applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus2), applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
@@ -152,7 +152,7 @@ public class ApplicationAsyncResourceImplTest {
                 Mockito.verifyNoMoreInteractions(webClient);
                 return Observable.just(Arrays.asList(hakemus1, hakemus2));
             });
-        List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).timeout(1, SECONDS).toBlocking().first();
+        List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).timeout(1, SECONDS).blockingFirst();
 
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1), applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus2), applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));

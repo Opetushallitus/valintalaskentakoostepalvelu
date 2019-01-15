@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru;
 
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.List;
 

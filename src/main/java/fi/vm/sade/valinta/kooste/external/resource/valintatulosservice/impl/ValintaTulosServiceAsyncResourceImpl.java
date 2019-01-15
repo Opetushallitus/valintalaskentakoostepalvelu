@@ -31,7 +31,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoA
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -148,7 +148,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     }
 
     @Override
-    public Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
+    public Observable<String> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
         return postAsObservableLazily(getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "write", hakukohdeOid),
                 Void.class,
                 Entity.json(of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session)));

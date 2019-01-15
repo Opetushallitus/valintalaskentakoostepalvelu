@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.organisaatio;
 
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.Optional;

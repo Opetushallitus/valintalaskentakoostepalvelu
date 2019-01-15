@@ -62,7 +62,7 @@ public class OsoiteHaku {
             if (rdto.getParentOid() != null) {
                 LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
                 return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(organisaatioAsyncResource
-                        .haeOrganisaatio(rdto.getParentOid()).timeout(1, MINUTES).toBlocking().first()), organisaationimi);
+                        .haeOrganisaatio(rdto.getParentOid()).timeout(1, MINUTES).blockingFirst()), organisaationimi);
             } else {
                 LOG.error("Ei saatu hakijapalveluiden osoitetta! Kaytiin lapi organisaatiot {}!", Arrays.toString(oids.toArray()));
                 return null;

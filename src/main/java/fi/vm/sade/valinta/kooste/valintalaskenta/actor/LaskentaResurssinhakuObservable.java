@@ -1,17 +1,16 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import static io.reactivex.Observable.range;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static rx.Observable.range;
-import static rx.Observable.timer;
 
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.sharedutils.http.ObservableUtil;
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func1;
 
 public class LaskentaResurssinhakuObservable<R> {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaResurssinhakuObservable.class);
@@ -30,7 +29,7 @@ public class LaskentaResurssinhakuObservable<R> {
         this.tunniste = tunniste;
     }
 
-    private static Func1<Observable<? extends Throwable>, Observable<?>> createRetryer(PyynnonTunniste tunniste) {
+    private static Function<Observable<? extends Throwable>, Observable<?>> createRetryer(PyynnonTunniste tunniste) {
         int maxRetries = 5;
         int secondsToWaitMultiplier = 10;
         return errors -> errors.zipWith(range(1, maxRetries+1), (n, i) -> {
@@ -44,7 +43,7 @@ public class LaskentaResurssinhakuObservable<R> {
             .flatMap(i -> i);
     }
 
-    private Action1<? super Object> resurssiOK(long startTime, PyynnonTunniste tunniste) {
+    private Consumer<? super Object> resurssiOK(long startTime, PyynnonTunniste tunniste) {
         return r -> {
             long l = System.currentTimeMillis();
             long duration = l - startTime;
@@ -52,7 +51,7 @@ public class LaskentaResurssinhakuObservable<R> {
         };
     }
 
-    private Action1<Throwable> resurssiException(long startTime, PyynnonTunniste tunniste) {
+    private Consumer<Throwable> resurssiException(long startTime, PyynnonTunniste tunniste) {
         return error -> {
             long l = System.currentTimeMillis();
             long duration = l - startTime;

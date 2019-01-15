@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import rx.Observable;
-import rx.functions.Action3;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -40,7 +40,6 @@ import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Viest
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.filtteroiAsiointikielella;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static rx.observables.BlockingObservable.from;
 
 @Service
 public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
@@ -97,7 +96,10 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                 .stream()
                                 .filter(h -> whitelist.contains(h.getHakemusOid()))
                                 .collect(Collectors.toList());
-                        muodostaKirjeet(true).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), whitelistinJalkeen, jalkiohjauskirjeDTO));
+                        muodostaKirjeet(true).accept(new JalkiohjausKirjeProsessiTuple(
+                            prosessi,
+                            jalkiohjauskirjeDTO,
+                            () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), whitelistinJalkeen, jalkiohjauskirjeDTO)));
                     },
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
@@ -115,7 +117,10 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     hakijat -> {
                         //VIALLISET DATA POIS FILTTEROINTI
                         Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
-                        muodostaKirjeet(false).call(prosessi, jalkiohjauskirjeDTO, () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), vainHakeneetJalkiohjattavat, jalkiohjauskirjeDTO));
+                        muodostaKirjeet(false).accept(new JalkiohjausKirjeProsessiTuple(
+                            prosessi,
+                            jalkiohjauskirjeDTO,
+                            () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), vainHakeneetJalkiohjattavat, jalkiohjauskirjeDTO)));
                     },
                     throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
@@ -138,7 +143,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     .flatMap(haku -> (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                             ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
                             : ataruAsyncResource.getApplicationsByOids(hakemusOids)))
-                    .timeout(5, MINUTES).toBlocking().first();
+                    .timeout(5, MINUTES).blockingFirst();
         } catch (Throwable e) {
             LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
             throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
@@ -150,8 +155,11 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         return KieliUtil.normalisoiKielikoodi(Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
     }
 
-    private Action3<KirjeProsessi, JalkiohjauskirjeDTO, Supplier<HaunResurssit>> muodostaKirjeet(boolean tallennaTuloksetDokumenttiPalveluun) {
-        return (prosessi, kirje, haeHaunResurssit) -> {
+    private Consumer<JalkiohjausKirjeProsessiTuple> muodostaKirjeet(boolean tallennaTuloksetDokumenttiPalveluun) {
+        return t -> {
+            KirjeProsessi prosessi = t.prosessi;
+            JalkiohjauskirjeDTO kirje = t.kirje;
+            Supplier<HaunResurssit> haeHaunResurssit = t.haunResurssitSupplier;
             HaunResurssit haunResurssit = haeHaunResurssit.get();
             final Map<String, MetaHakukohde> metaKohteet = getStringMetaHakukohdeMap(haunResurssit.hakijat);
             LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(
@@ -164,7 +172,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 }
                 LOG.info("Aloitetaan jalkiohjauskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
                 //TODO: Muuta aidosti asynkroniseksi
-                LetterResponse batchId = from(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).timeout(viePdfTimeoutMinutes, MINUTES)).first();
+                LetterResponse batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).timeout(viePdfTimeoutMinutes, MINUTES).blockingFirst();
 
                 int timesToPoll = (int) (VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / pollingIntervalMillis);
                 LOG.info(String.format("Saatiin jalkiohjauskirjeen seurantaId %s ja aloitetaan valmistumisen pollaus! " +
@@ -184,20 +192,23 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                             LOG.info("Tehdaan status kutsu seurantaId:lle {}", batchId);
                                             viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId()).subscribe(status -> {
                                                 if (prosessi.isKeskeytetty()) {
-                                                    LOG.warn("Jalkiohjauskirjeiden muodstuksen seuranta on keskeytetty kayttajantoimesta");
-                                                    stop.onNext(null);
+                                                    String message = "Jalkiohjauskirjeiden muodstuksen seuranta on keskeytetty kayttajantoimesta";
+                                                    LOG.warn(message);
+                                                    stop.onNext(message);
                                                     return;
                                                 }
                                                 if ("error".equals(status.getStatus())) {
-                                                    LOG.error("Jalkiohjauskirjeiden muodstuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen: {}", letterBatch);
+                                                    String message = String.format("Jalkiohjauskirjeiden muodstuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen: %s", letterBatch);
+                                                    LOG.error(message);
                                                     prosessi.keskeyta();
-                                                    stop.onNext(null);
+                                                    stop.onNext(message);
                                                 }
                                                 if ("ready".equals(status.getStatus())) {
                                                     prosessi.vaiheValmistui();
-                                                    LOG.info("Jalkiohjauskirjeet valmistui!");
+                                                    String message = "Jalkiohjauskirjeet valmistui!";
+                                                    LOG.info(message);
                                                     prosessi.valmistui(batchId.getBatchId());
-                                                    stop.onNext(null);
+                                                    stop.onNext(message);
                                                 }
                                             }, e -> LOG.error("Statuksen haku epaonnistui", e));
                                         } catch (Throwable e) {
@@ -255,5 +266,17 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                         .anyMatch(hakutoive -> hakutoive.getHakutoiveenValintatapajonot()
                                 .stream().noneMatch(valintatapajono -> valintatapajono.getTila() == HakemuksenTila.PERUNUT)))
                 .collect(Collectors.toList());
+    }
+
+    public static class JalkiohjausKirjeProsessiTuple {
+        public final KirjeProsessi prosessi;
+        public final JalkiohjauskirjeDTO kirje;
+        public final Supplier<HaunResurssit> haunResurssitSupplier;
+
+        public JalkiohjausKirjeProsessiTuple(KirjeProsessi prosessi, JalkiohjauskirjeDTO kirje, Supplier<HaunResurssit> haunResurssitSupplier) {
+            this.prosessi = prosessi;
+            this.kirje = kirje;
+            this.haunResurssitSupplier = haunResurssitSupplier;
+        }
     }
 }

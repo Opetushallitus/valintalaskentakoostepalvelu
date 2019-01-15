@@ -4,7 +4,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.ForbiddenException;
 import java.util.Collection;

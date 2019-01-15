@@ -3,18 +3,18 @@ package fi.vm.sade.valinta.kooste.mocks;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import io.reactivex.Observable;
 import org.apache.commons.io.IOUtils;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

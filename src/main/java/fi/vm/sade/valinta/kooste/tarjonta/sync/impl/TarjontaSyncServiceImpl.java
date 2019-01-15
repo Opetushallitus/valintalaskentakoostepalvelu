@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.tarjonta.sync.impl;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static rx.observables.BlockingObservable.from;
 
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
@@ -25,7 +24,7 @@ public class TarjontaSyncServiceImpl implements TarjontaSyncService {
     HakuImportRoute hakuImportAktivointiRoute;
 
     public void syncHakukohteetFromTarjonta() {
-        Set<String> hakuOids = from(tarjontaAsyncResource.findHakuOidsForAutosyncTarjonta().timeout(1, MINUTES)).first();
+        Set<String> hakuOids = tarjontaAsyncResource.findHakuOidsForAutosyncTarjonta().timeout(1, MINUTES).blockingFirst();
         if (hakuOids != null) {
             for (String hakuOid : hakuOids) {
                 LOG.info("Starting synchronization for haku: " + hakuOid);

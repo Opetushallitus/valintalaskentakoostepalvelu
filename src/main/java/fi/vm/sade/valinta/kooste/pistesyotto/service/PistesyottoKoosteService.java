@@ -1,15 +1,13 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
-import fi.vm.sade.sharedutils.ValintaperusteetOperation;
 import static java.util.Collections.singletonList;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -25,19 +23,23 @@ import fi.vm.sade.valinta.kooste.pistesyotto.dto.HenkiloValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistesyottoValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
-import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import io.reactivex.Observable;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import rx.Observable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -102,7 +104,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                         .map(hakukohdeOid -> valintaperusteetAsyncResource.findAvaimet(hakukohdeOid)
                                 .map(valintaperusteet -> Pair.of(hakukohdeOid, valintaperusteet)))
                         .collect(Collectors.toList())
-        ).toList();
+        ).toList().toObservable();
     }
 
     private Observable<HakemusWrapper> getHakemus(String hakemusOid) {
@@ -212,7 +214,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 }).collect(Collectors.toList()));
                 return errors;
             }
-        }).lastOrDefault(null);
+        }).last(Collections.emptySet()).toObservable();
     }
 
     public Observable<Set<TuontiErrorDTO>> tallennaKoostetutPistetiedot(String hakuOid,

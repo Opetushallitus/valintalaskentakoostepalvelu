@@ -4,7 +4,7 @@ import java.util.List;
 
 import fi.vm.sade.valinta.seuranta.dto.DokumenttiDto;
 import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
-import rx.Observable;
+import io.reactivex.Observable;
 
 public interface DokumentinSeurantaAsyncResource {
 

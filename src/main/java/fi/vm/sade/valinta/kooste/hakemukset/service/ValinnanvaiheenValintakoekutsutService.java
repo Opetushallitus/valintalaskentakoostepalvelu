@@ -24,7 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -69,11 +69,11 @@ public class ValinnanvaiheenValintakoekutsutService {
                             if (haku.getAtaruLomakeAvain() == null) {
                                 return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit);
                             } else {
-                                return Observable.from(hakukohdeOidit)
+                                return Observable.fromIterable(hakukohdeOidit)
                                         .flatMap(hakukohdeOid -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
-                                                .flatMap(Observable::from))
+                                                .flatMap(Observable::fromIterable))
                                         .distinct(HakemusWrapper::getOid)
-                                        .toList();
+                                        .toList().toObservable();
                             }
                         }).subscribe(
                                 hakemukset -> handleApplicationsResponse(hakemukset, authorityCheck, successHandler, exceptionHandler, hakukohdeOidit),

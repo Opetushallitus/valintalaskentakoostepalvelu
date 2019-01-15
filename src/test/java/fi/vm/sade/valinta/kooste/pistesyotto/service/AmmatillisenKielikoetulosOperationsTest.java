@@ -21,13 +21,13 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteSe
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AmmatillisenKielikoetulosOperations.CompositeCommand;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
 import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import rx.Observable;
-import rx.observers.TestSubscriber;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -69,7 +69,7 @@ public class AmmatillisenKielikoetulosOperationsTest {
     private List<Suoritus> postedSuoritukset = new LinkedList<>();
     private SuoritusSavingMockSuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusSavingMockSuoritusrekisteriAsyncResource();
     private String latestPostedSuoritusId;
-    private final TestSubscriber<Arvosana> testSubscriber = new TestSubscriber<Arvosana>() {
+    private final TestObserver<Arvosana> testObserver = new TestObserver<Arvosana>() {
         @Override
         public void onNext(Arvosana o) {
             AmmatillisenKielikoetulosOperationsTest.this.latestPostedSuoritusId = o.getSuoritus();
@@ -99,10 +99,10 @@ public class AmmatillisenKielikoetulosOperationsTest {
         assertThat(source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_2), OptionalMatchers.isPresent());
         Optional<CompositeCommand> personOid2Updates = source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_2);
 
-        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testSubscriber);
+        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testObserver);
 
-        testSubscriber.assertValueCount(2);
-        List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
+        testObserver.assertValueCount(2);
+        List<Arvosana> receivedArvosanas = testObserver.values();
         Assert.assertThat(receivedArvosanas, Matchers.hasSize(2));
 
         assertEquals(receivedArvosanas.get(0), (createArvosana(latestPostedSuoritusId, "kielikoe", "26.10.2016", SOURCE_OID_2, hyvaksytty, "FI")));
@@ -129,10 +129,10 @@ public class AmmatillisenKielikoetulosOperationsTest {
 
         Optional<CompositeCommand> personOid2Updates = source1Updates.getResultsToSendToSure().get(HAKEMUS_OID_2);
 
-        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testSubscriber);
+        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testObserver);
 
-        testSubscriber.assertValueCount(2);
-        List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
+        testObserver.assertValueCount(2);
+        List<Arvosana> receivedArvosanas = testObserver.values();
 
 
         assertEquals(receivedArvosanas.get(0), createArvosana(latestPostedSuoritusId, "kielikoe", "26.10.2016", SOURCE_OID_1, hyvaksytty, "FI"));
@@ -158,10 +158,10 @@ public class AmmatillisenKielikoetulosOperationsTest {
 
         Optional<CompositeCommand> personOid2Updates = source3Updates.getResultsToSendToSure().get(HAKEMUS_OID_2);
 
-        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testSubscriber);
+        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testObserver);
 
-        testSubscriber.assertValueCount(2);
-        List<Arvosana> receivedArvosanas = testSubscriber.getOnNextEvents();
+        testObserver.assertValueCount(2);
+        List<Arvosana> receivedArvosanas = testObserver.values();
 
         assertEquals(receivedArvosanas.get(0), createArvosana(latestPostedSuoritusId, "kielikoe", "26.10.2016", SOURCE_OID_3, hyvaksytty, "FI"));
         assertEquals(receivedArvosanas.get(1), createArvosana(latestPostedSuoritusId, "kielikoe", "1.9.2015", SOURCE_OID_2, hyvaksytty, "SV"));
@@ -185,9 +185,9 @@ public class AmmatillisenKielikoetulosOperationsTest {
         ));
         AmmatillisenKielikoetulosOperations source2Updates = new AmmatillisenKielikoetulosOperations(SOURCE_OID_2, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);
         Optional<CompositeCommand> personOid2Updates = source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_2);
-        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testSubscriber);
+        personOid2Updates.get().createSureOperation(suoritusrekisteriAsyncResource).doOnError(Throwable::printStackTrace).subscribe(testObserver);
 
-        testSubscriber.assertValueCount(1);
+        testObserver.assertValueCount(1);
         assertThat(suoritusrekisteriAsyncResource.deletedResourceIds, hasSize(2));
         assertEquals(suoritusrekisteriAsyncResource.deletedResourceIds.get(0), "123-123-123-4-arvosana");
         assertEquals(suoritusrekisteriAsyncResource.deletedResourceIds.get(1), "123-123-123-4");
@@ -210,13 +210,13 @@ public class AmmatillisenKielikoetulosOperationsTest {
         }
 
         @Override
-        public Observable<Void> deleteSuoritus(String suoritusId) {
+        public Observable<String> deleteSuoritus(String suoritusId) {
             deletedResourceIds.add(suoritusId);
             return super.deleteSuoritus(suoritusId);
         }
 
         @Override
-        public Observable<Void> deleteArvosana(String arvosanaId) {
+        public Observable<String> deleteArvosana(String arvosanaId) {
             deletedResourceIds.add(arvosanaId);
             return super.deleteArvosana(arvosanaId);
         }

@@ -1,7 +1,13 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
+import static io.reactivex.Observable.zip;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -30,6 +36,10 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponent
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
@@ -37,22 +47,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import rx.Observable;
-import rx.functions.Action3;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
 
 import javax.ws.rs.core.Response;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static rx.Observable.zip;
 
 @Service
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
@@ -109,7 +115,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                             ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, applicationAsyncResource.DEFAULT_KEYS)
                             : ataruAsyncResource.getApplicationsByOids(hakemusOids));
-            Observable<List<HakijaDTO>> hakijatFuture = Observable.from(hakemusOids).concatMap(hakemus -> valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemus)).toList();
+            Observable<List<HakijaDTO>> hakijatFuture = Observable
+                .fromIterable(hakemusOids)
+                .concatMap(hakemus -> valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemus))
+                .toList()
+                .toObservable();
             Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
 
             zip(hakemuksetFuture,
@@ -148,7 +158,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     })
                     .subscribeOn(Schedulers.newThread())
                     .subscribe(
-                            letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
+                            letterBatch -> letterBatchToViestintapalvelu().accept(new Object[] { letterBatch, prosessi, hyvaksymiskirjeDTO }),
                             throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()));
         } catch (Throwable t) {
             LOG.error("Hyväksymiskirjeiden luonti hakemuksille haussa {} keskeytyi poikkeukseen: ", hyvaksymiskirjeDTO.getHakuOid(), t);
@@ -202,7 +212,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 })
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
-                        letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
+                        letterBatch -> letterBatchToViestintapalvelu().accept(new Object[] { letterBatch, prosessi, hyvaksymiskirjeDTO }),
                         throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()));
     }
 
@@ -260,7 +270,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 })
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
-                        letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
+                        letterBatch -> letterBatchToViestintapalvelu().accept(new Object[] { letterBatch, prosessi, hyvaksymiskirjeDTO }),
                         throwable -> logErrorAndKeskeyta(prosessi, throwable, hakuOid, hakukohdeOid));
     }
 
@@ -269,8 +279,12 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         keskeytaProsessi(prosessi, throwable);
     }
 
-    private Action3<LetterBatch, KirjeProsessi, HyvaksymiskirjeDTO> letterBatchToViestintapalvelu() {
-        return (letterBatch, prosessi, kirje) -> {
+    // LetterBatch, KirjeProsessi, HyvaksymiskirjeDTO
+    private Consumer<Object[]> letterBatchToViestintapalvelu() {
+        return arr -> {
+            LetterBatch letterBatch = (LetterBatch) arr[0];
+            KirjeProsessi prosessi = (KirjeProsessi) arr[1];
+            HyvaksymiskirjeDTO kirje = (HyvaksymiskirjeDTO) arr[2];
             try {
                 if (prosessi.isKeskeytetty()) {
                     LOG.warn("Hyväksymiskirjeiden luonti on keskeytetty kayttajantoimesta ennen niiden siirtoa viestintäpalveluun!");
@@ -281,7 +295,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 try {
                     batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)
                         .timeout(164, SECONDS)
-                        .toBlocking()
                         .toFuture()
                         .get(165L, SECONDS);
                 } catch (Exception e) {
@@ -307,7 +320,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                             LOG.info("Tehdaan status kutsu seurantaId:lle {}", batchId);
                                             LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())
                                                 .timeout(899, MILLISECONDS)
-                                                .toBlocking()
                                                 .toFuture()
                                                 .get(900L, TimeUnit.MILLISECONDS);
                                             if (prosessi.isKeskeytetty()) {

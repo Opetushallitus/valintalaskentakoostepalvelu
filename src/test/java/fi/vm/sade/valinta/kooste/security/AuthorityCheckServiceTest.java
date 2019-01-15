@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.GrantedAuthority;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.ForbiddenException;
 import java.util.Collection;

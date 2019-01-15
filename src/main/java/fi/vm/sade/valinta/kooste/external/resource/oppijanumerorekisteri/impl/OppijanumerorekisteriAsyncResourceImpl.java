@@ -4,11 +4,11 @@ import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import io.reactivex.Observable;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -33,15 +33,15 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
 
     public Observable<List<HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
         String url = getUrl("oppijanumerorekisteri-service.s2s.henkilo.findByPersonOidList");
-        return Observable.from(personOids)
+        return Observable.fromIterable(personOids)
                 .window(5000)
-                .flatMap(Observable::toList)
+                .flatMap(stringObservable -> stringObservable.toList().toObservable())
                 .flatMap(personOidChunk -> this.<List<String>, List<HenkiloPerustietoDto>>postAsObservableLazily(url,
                         new GenericType<List<HenkiloPerustietoDto>>() {
                         }.getType(),
                         Entity.entity(personOidChunk, MediaType.APPLICATION_JSON_TYPE),
                         ACCEPT_JSON))
-                .flatMap(Observable::from)
-                .toList();
+                .flatMap(Observable::fromIterable)
+                .toList().toObservable();
     }
 }

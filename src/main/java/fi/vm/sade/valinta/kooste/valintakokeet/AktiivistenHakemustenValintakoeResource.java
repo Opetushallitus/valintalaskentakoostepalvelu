@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

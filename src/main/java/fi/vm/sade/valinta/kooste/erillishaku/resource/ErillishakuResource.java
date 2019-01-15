@@ -4,7 +4,6 @@ import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.oidHaustaJaHakukohteesta;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static rx.observables.BlockingObservable.from;
 
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.sharedutils.AuditLog;
@@ -191,6 +190,6 @@ public class ErillishakuResource {
     }
 
     private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
-        return HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid).timeout(30, SECONDS)).first());
+        return HakukohdeHelper.tarjoajaOid(tarjontaResource.haeHakukohde(hakukohdeOid).timeout(30, SECONDS).blockingFirst());
     }
 }

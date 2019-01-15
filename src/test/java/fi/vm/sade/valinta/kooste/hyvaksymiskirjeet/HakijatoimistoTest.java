@@ -14,7 +14,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluOb
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.*;
 import java.util.concurrent.Semaphore;

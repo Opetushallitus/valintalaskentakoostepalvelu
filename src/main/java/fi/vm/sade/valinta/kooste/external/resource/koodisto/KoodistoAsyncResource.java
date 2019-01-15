@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.koodisto;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.List;
 

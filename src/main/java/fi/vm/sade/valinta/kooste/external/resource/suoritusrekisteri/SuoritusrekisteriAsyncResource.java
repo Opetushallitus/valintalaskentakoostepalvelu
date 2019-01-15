@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public interface SuoritusrekisteriAsyncResource {
 
     Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues);
 
-    Observable<Void> deleteSuoritus(String suoritusId);
+    Observable<String> deleteSuoritus(String suoritusId);
 
-    Observable<Void> deleteArvosana(String arvosanaId);
+    Observable<String> deleteArvosana(String arvosanaId);
 }

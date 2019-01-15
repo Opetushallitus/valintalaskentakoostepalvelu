@@ -16,8 +16,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.functions.Func2;
+import io.reactivex.Observable;
+import io.reactivex.functions.BiFunction;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -98,33 +98,33 @@ public class ViestintapalveluObservables {
 
     public static <T> Observable<T> resurssit(Observable<HakijaPaginationObject> koulutusPaikalliset,
                                               Function<List<String>, Observable<List<HakemusWrapper>>> haeHakemukset,
-                                              Func2<List<HakemusWrapper>, HakijaPaginationObject, T> zipper) {
+                                              BiFunction<List<HakemusWrapper>, HakijaPaginationObject, T> zipper) {
         return Observable.zip(
                 koulutusPaikalliset.flatMap(hakijat -> haeHakemukset.apply(hakijat.getResults().stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList()))),
                 koulutusPaikalliset,
                 (hakemukset, hakijat) -> {
                     LOG.info("Saatiin haulle hyväksyttyjä {} kpl", hakijat.getResults().size());
                     LOG.info("Saatiin haulle hakemuksia {} kpl", hakemukset.size());
-                    return zipper.call(hakemukset, hakijat);
+                    return zipper.apply(hakemukset, hakijat);
                 }
         );
     }
 
     public static Observable<Map<String, Optional<Osoite>>> haunOsoitteet(String asiointikieli, Map<String, MetaHakukohde> hakukohteet, Function<String, Observable<Optional<HakutoimistoDTO>>> hakutoimisto) {
-        return Observable.from(hakukohteet.values())
-                .flatMap(hakukohde -> {
-                    String tarjoajaOid = hakukohde.getTarjoajaOid();
-                    return hakutoimisto.apply(tarjoajaOid)
-                            .map(toimisto -> {
-                                Optional<Osoite> o = toimisto.map(t ->Hakijapalvelu.osoite(t, asiointikieli)).orElse(Optional.empty());
-                                if (!o.isPresent()) {
-                                    LOG.error("Tarjoajalla {} ei osoitetta", tarjoajaOid);
-                                }
-                                return o;
-                            })
-                            .map(osoite -> new TarjoajaWithOsoite(tarjoajaOid, osoite));
-                })
-                .collect(HashMap::new, (map, pair) -> map.put(pair.tarjoajaOid, pair.hakutoimisto));
+        return Observable.fromIterable(hakukohteet.values())
+            .flatMap(hakukohde -> {
+                String tarjoajaOid = hakukohde.getTarjoajaOid();
+                return hakutoimisto.apply(tarjoajaOid)
+                    .map(toimisto -> {
+                        Optional<Osoite> o = toimisto.map(t -> Hakijapalvelu.osoite(t, asiointikieli)).orElse(Optional.empty());
+                        if (!o.isPresent()) {
+                            LOG.error("Tarjoajalla {} ei osoitetta", tarjoajaOid);
+                        }
+                        return o;
+                    })
+                    .map(osoite -> new TarjoajaWithOsoite(tarjoajaOid, osoite));
+            })
+            .<Map<String, Optional<Osoite>>>collect(HashMap::new, (map, pair) -> map.put(pair.tarjoajaOid, pair.hakutoimisto)).toObservable();
     }
 
     public static Observable<Map<String, Optional<Osoite>>> hakukohteenOsoite(String hakukohdeOid, String tarjoajaOid,

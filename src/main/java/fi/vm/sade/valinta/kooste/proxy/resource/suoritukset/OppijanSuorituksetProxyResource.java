@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -352,8 +352,8 @@ public class OppijanSuorituksetProxyResource {
         Observable<ParametritDTO> parametritObservable     = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
 
         // Fetch Oppija (suoritusdata) for each personOid in hakemukset
-        Observable<List<String>>  opiskelijaOidsObservable = hakemuksetObservable.flatMap(Observable::from).map(HakemusWrapper::getPersonOid).toList();
-        Observable<List<Oppija>>  suorituksetObservable    = opiskelijaOidsObservable.flatMap(Observable::from)
+        Observable<List<String>>  opiskelijaOidsObservable = hakemuksetObservable.flatMap(Observable::fromIterable).map(HakemusWrapper::getPersonOid).toList().toObservable();
+        Observable<List<Oppija>>  suorituksetObservable    = opiskelijaOidsObservable.flatMap(Observable::fromIterable)
                 .flatMap(o -> {
                             if (fetchEnsikertalaisuus) {
                                 return suoritusrekisteriAsyncResource.getSuorituksetByOppija(o, hakuOid);
@@ -361,7 +361,7 @@ public class OppijanSuorituksetProxyResource {
                                 return suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(o);
                             }
                         })
-                .toList();
+                .toList().toObservable();
 
         /**
          * Combine observables using zip
@@ -405,8 +405,7 @@ public class OppijanSuorituksetProxyResource {
         Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource
                 .hakukohdeRyhmasForHakukohdes(haku.getOid())
                 .timeout(1, MINUTES)
-                .toBlocking()
-                .first();
+                .blockingFirst();
         return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
     }
 }

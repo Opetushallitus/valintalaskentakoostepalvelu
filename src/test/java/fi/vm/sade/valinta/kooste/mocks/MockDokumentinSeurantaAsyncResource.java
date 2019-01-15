@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.DokumenttiDto;
 import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * @author Jussi Jartamo

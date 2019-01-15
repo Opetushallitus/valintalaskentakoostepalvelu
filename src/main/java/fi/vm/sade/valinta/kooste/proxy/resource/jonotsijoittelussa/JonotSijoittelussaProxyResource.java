@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa;
 
+import com.google.gson.Gson;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -7,16 +9,15 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.HakukohdePair;
 import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.Jono;
-import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.JonoPair;
 import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.util.JonoUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import rx.Observable;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,16 +26,11 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Collections.emptyList;
-
-import com.google.gson.Gson;
 
 @Controller("JonotSijoittelussaProxyResource")
 @Path("/proxy/jonotsijoittelussa")

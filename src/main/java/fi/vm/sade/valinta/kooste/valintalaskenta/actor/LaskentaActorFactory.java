@@ -1,11 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import static fi.vm.sade.valinta.sharedutils.http.ObservableUtil.wrapAsRunOnlyOnceObservable;
+import static io.reactivex.Observable.combineLatest;
+import static io.reactivex.Observable.just;
+import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.tuple.Pair.of;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
@@ -20,7 +24,10 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuObservable.PyynnonTunniste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
+import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -30,23 +37,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func1;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fi.vm.sade.valinta.sharedutils.http.ObservableUtil.wrapAsRunOnlyOnceObservable;
-import static java.util.Collections.emptyList;
-import static org.apache.commons.lang3.tuple.Pair.of;
-import static rx.Observable.combineLatest;
-import static rx.Observable.just;
 
 @Service
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
@@ -157,7 +159,7 @@ public class LaskentaActorFactory {
         );
     }
 
-    private <A, T> Func1<A, Observable<T>> timedSwitchMap(BiConsumer<Long, Optional<Throwable>> log, Function<A, Observable<T>> f) {//Function<A,Observable<T>> switchMap) {
+    private <A, T> io.reactivex.functions.Function<A, Observable<T>> timedSwitchMap(BiConsumer<Long, Optional<Throwable>> log, Function<A, Observable<T>> f) {//Function<A,Observable<T>> switchMap) {
         return (A a) -> {
             long start = System.currentTimeMillis();
             Observable<T> t = wrapAsRunOnlyOnceObservable(f.apply(a));
@@ -193,8 +195,8 @@ public class LaskentaActorFactory {
         );
     }
 
-    private static final BiFunction<String, String, Action1<? super Object>> laskentaOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Laskenta onnistui hakukohteelle {}", uuid, hakukohde);
-    private static final BiFunction<String, String, Action1<Throwable>> laskentaException = (uuid, hakukohde) -> error -> {
+    private static final BiFunction<String, String, Consumer<? super Object>> laskentaOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Laskenta onnistui hakukohteelle {}", uuid, hakukohde);
+    private static final BiFunction<String, String, Consumer<Throwable>> laskentaException = (uuid, hakukohde) -> error -> {
         String message = HttpExceptionWithResponse.appendWrappedResponse(String.format("(Uuid=%s) Laskenta epäonnistui hakukohteelle %s", uuid, hakukohde), error);
         LOG.error(message, error);
     };
@@ -235,7 +237,9 @@ public class LaskentaActorFactory {
         return createValintalaskentaJaValintakoelaskentaActor(auditSession, laskentaSupervisor, haku, actorParams);
     }
 
-    private LaskentaActor laskentaHakukohteittainActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams, Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> r) {
+    private LaskentaActor laskentaHakukohteittainActor(LaskentaSupervisor laskentaSupervisor,
+                                                       LaskentaActorParams actorParams,
+                                                       io.reactivex.functions.Function<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> r) {
         return new LaskentaActorForSingleHakukohde(actorParams, r, laskentaSupervisor, laskentaSeurantaAsyncResource, splittaus);
     }
 

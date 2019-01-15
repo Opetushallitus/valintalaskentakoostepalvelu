@@ -103,7 +103,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             } else {
                                 hakemukset = ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
                                         .timeout(1, TimeUnit.MINUTES)
-                                        .toBlocking().first();
+                                        .blockingFirst();
                             }
                             LOG.debug("Saatiin hakemukset {}", hakemukset.size());
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();

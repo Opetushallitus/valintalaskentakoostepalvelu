@@ -20,15 +20,15 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import io.reactivex.functions.Consumer;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.*;
-import static rx.Observable.zip;
+import static io.reactivex.Observable.zip;
 
 @Service
 public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
@@ -142,15 +142,14 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                     ? applicationAsyncResource.getApplicationsByHakemusOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat))
                     : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat)))
                     .timeout(30, SECONDS)
-                    .toBlocking()
-                    .first()
+                    .blockingFirst()
                     .stream();
         } else {
             return Stream.empty();
         }
     }
 
-    private Action1<List<HakemusWrapper>> koekutsukirjeiksi(final KirjeProsessi prosessi, final KoekutsuDTO koekutsu) {
+    private Consumer<List<HakemusWrapper>> koekutsukirjeiksi(final KirjeProsessi prosessi, final KoekutsuDTO koekutsu) {
         return hakemukset -> {
             if (hakemukset.isEmpty()) {
                 LOG.error("Hakutoiveeseen {} ei ole hakijoita. Yritettiin muodostaa koekutsukirjetta!", koekutsu.getHakukohdeOid());
@@ -168,8 +167,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                     valintakoeOidsHakutoiveille = valintakoeResource
                             .haeValintakokeetHakukohteille(hakutoiveetKaikistaHakemuksista)
                             .timeout(1, HOURS)
-                            .toBlocking()
-                            .first()
+                            .blockingFirst()
                             .stream()
                             .filter(h -> h.getValintakoeDTO() != null && !h.getValintakoeDTO().isEmpty())
                             .collect(Collectors.toMap(HakukohdeJaValintakoeDTO::getHakukohdeOid, h -> h));
@@ -220,7 +218,6 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                 LetterResponse batchId = viestintapalveluAsyncResource
                     .viePdfJaOdotaReferenssiObservable(letterBatch)
                     .timeout(1, MINUTES)
-                    .toBlocking()
                     .toFuture()
                     .get(35L, SECONDS);
                 LOG.info("### BATCHID: {} {} {} ###", batchId.getBatchId(), batchId.getStatus(), batchId.getErrors());
@@ -238,7 +235,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                             LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
                                             LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())
                                                 .timeout(899, MILLISECONDS)
-                                                .toBlocking().toFuture().get(900L, TimeUnit.MILLISECONDS);
+                                                .toFuture().get(900L, TimeUnit.MILLISECONDS);
                                             if ("error".equals(status.getStatus())) {
                                                 LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
                                                 prosessi.keskeyta();

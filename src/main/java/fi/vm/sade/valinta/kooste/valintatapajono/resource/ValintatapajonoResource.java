@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static rx.observables.BlockingObservable.from;
 
 import fi.vm.sade.auditlog.User;
 import fi.vm.sade.authentication.business.service.Authorizer;
@@ -160,6 +159,6 @@ public class ValintatapajonoResource {
     }
 
     private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
-        return HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid).timeout(1, MINUTES)).first());
+        return HakukohdeHelper.tarjoajaOid(tarjontaResource.haeHakukohde(hakukohdeOid).timeout(1, MINUTES).blockingFirst());
     }
 }

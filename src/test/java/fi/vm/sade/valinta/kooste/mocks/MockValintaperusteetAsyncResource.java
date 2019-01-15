@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.Collection;

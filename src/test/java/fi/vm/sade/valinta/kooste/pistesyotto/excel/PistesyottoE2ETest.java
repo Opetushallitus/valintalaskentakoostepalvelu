@@ -1,18 +1,35 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.gson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static java.util.Collections.singletonList;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
@@ -20,12 +37,12 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -43,13 +60,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static java.util.Collections.singletonList;
-import static javax.ws.rs.HttpMethod.*;
-import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 
 public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     private List<Valintapisteet> pisteetFromValintaPisteService;
@@ -137,27 +147,30 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
         mockForward(PUT,
             fakeValintaPisteService.addHandler("/valintapiste-service/api/pisteet-with-hakemusoids", exchange -> {
-                List<Valintapisteet> valintapisteList = new Gson().fromJson(
-                    IOUtils.toString(exchange.getRequestBody(), "UTF-8"), new TypeToken<List<Valintapisteet>>() {
-                    }.getType()
-                );
-                Assert.assertEquals("209 hakijalle löytyy pistetiedot", 209, valintapisteList.size());
-                long count = valintapisteList.stream()
-                    .mapToLong(a -> valintapisteList.size())
-                    .sum();
+                try {
+                    List<Valintapisteet> valintapisteList = new Gson().fromJson(
+                        IOUtils.toString(exchange.getRequestBody(), "UTF-8"), new TypeToken<List<Valintapisteet>>() {
+                        }.getType()
+                    );
+                    Assert.assertEquals("209 hakijalle löytyy pistetiedot", 209, valintapisteList.size());
+                    long count = valintapisteList.stream()
+                        .mapToLong(a -> valintapisteList.size())
+                        .sum();
 
-                Assert.assertEquals("Pisteitä tallennetaan ilmeisesti paljon.", 43681, count);
-                exchange.sendResponseHeaders(200, 0);
-                exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
-                exchange.close();
-                counter.release();
+                    Assert.assertEquals("Pisteitä tallennetaan ilmeisesti paljon.", 43681, count);
+                    exchange.sendResponseHeaders(200, 0);
+                    exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
+                    exchange.close();
+                } finally {
+                    counter.release();
+                }
             }));
         Response r = http.getWebClient()
                 .query("hakuOid", "testioidi1")
                 .query("hakukohdeOid", "1.2.246.562.5.85532589612")
                 .header("Content-Type", "application/octet-stream")
                 .accept(MediaType.APPLICATION_JSON)
-                .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
+                .post(IOUtils.toByteArray(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream()));
         Assert.assertEquals(204, r.getStatus());
         try {
             Assert.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));

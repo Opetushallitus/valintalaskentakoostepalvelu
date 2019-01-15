@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
@@ -64,7 +64,7 @@ public class ValintalaskentaKerrallaService {
                 (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                     Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
 
-                    authCheck.toBlocking().forEach(
+                    authCheck.blockingNext().forEach(
                             authorityCheck -> haunHakukohteetOids
                                     .forEach(hk -> {
                                         if (!authorityCheck.test(hk.getHakukohdeOid())) {

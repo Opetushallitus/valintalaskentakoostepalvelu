@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -136,7 +136,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
 
                     if (uudetPistetiedot.isEmpty()) {
                         LOG.info("Pistesyötössä hakukohteeseen {} ei yhtäkään muuttunutta tietoa tallennettavaksi", hakukohdeOid);
-                        return Observable.just(null);
+                        return Observable.just(Collections.emptySet());
                     } else {
                         LOG.info("Pistesyötössä hakukohteeseen {} muuttunutta {} tietoa tallennettavaksi", hakukohdeOid, uudetPistetiedot.size());
                         Observable<Set<String>> failedPisteet = tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, uudetPistetiedot,

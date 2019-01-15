@@ -1,24 +1,35 @@
 package fi.vm.sade.valinta.kooste.security;
 
+import static fi.vm.sade.valinta.kooste.util.SecurityUtil.containsOphRole;
+import static fi.vm.sade.valinta.kooste.util.SecurityUtil.getAuthoritiesFromAuthenticationStartingWith;
+import static fi.vm.sade.valinta.kooste.util.SecurityUtil.getRoles;
+import static fi.vm.sade.valinta.kooste.util.SecurityUtil.isRootOrganizationOID;
+import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationGroupOidsFromSecurityRoles;
+import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationOidsFromSecurityRoles;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
+import io.reactivex.Observable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
 import javax.ws.rs.ForbiddenException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.util.SecurityUtil.*;
 
 @Service
 public class AuthorityCheckService {
@@ -70,7 +81,7 @@ public class AuthorityCheckService {
         boolean isAuthorized = tarjontaAsyncResource.haeHaku(hakuOid).map(haku -> {
             String[] organisaatioOids = haku.getTarjoajaOids();
             return isAuthorizedForAnyParentOid(organisaatioOids, userRoles, requiredRoles);
-        }).toBlocking().first();
+        }).timeout(2, MINUTES).blockingFirst();
 
         if (!isAuthorized) {
             String msg = String.format(
@@ -123,7 +134,7 @@ public class AuthorityCheckService {
             } else {
                 return isAuthorizedForAnyParentOid(new String[]{vastuuorganisaatioOid}, userRoles, requiredRoles);
             }
-        }).toBlocking().first();
+        }).timeout(2, MINUTES).blockingFirst();
 
         if (!isAuthorized) {
             String msg = String.format(

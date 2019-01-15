@@ -19,6 +19,7 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import io.reactivex.internal.operators.observable.ObservableJust;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -33,7 +34,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ public class LaskentaKerrallaTest {
                 VALINTARYHMA_OID,
                 LaskentaTyyppi.HAKUKOHDE,
                 false,
-                new ArrayList(),
+                new ArrayList<>(),
                 asyncResponse);
         synchronized (signal) {
             signal.wait(10000);
@@ -122,13 +123,13 @@ public class LaskentaKerrallaTest {
         when(Mocks.valintaperusteetAsyncResource.haeValintaperusteet(any(), any()))
                 .thenAnswer(
                         invocation -> Observable
-                            .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID))))
+                            .fromIterable(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID))))
                 );
 
         when(Mocks.valintaperusteetAsyncResource.haeHakijaryhmat(any()))
                 .thenAnswer(
                         invocation -> Observable
-                                .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)))
+                                .fromIterable(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)))
                                 ));
 
         when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any())).thenReturn(Observable.just(LaskentaKerrallaTestData.ohjausparametrit()));
@@ -136,22 +137,22 @@ public class LaskentaKerrallaTest {
         when(Mocks.applicationAsyncResource.getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID)))
                 .thenAnswer(
                         invocation -> Observable
-                                .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.hakemus(HAKEMUS_OID, PERSON_OID)))
+                                .fromIterable(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.hakemus(HAKEMUS_OID, PERSON_OID)))
                                 ));
 
         when(Mocks.suoritusrekisteriAsyncResource.getOppijatByHakukohde(eq(HAKUKOHDE_OID), any()))
                 .thenAnswer(
                         invocation ->
                             Observable
-                                    .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.oppija()))
+                                    .fromIterable(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.oppija()))
                 ));
         when(Mocks.valintalaskentaAsyncResource.laske(any()))
                 .thenAnswer(
                         invocation -> Observable
-                                .from(Arrays.asList("string"))
+                                .fromIterable(Arrays.asList("string"))
                 );
         when(Mocks.tarjontaAsyncResource.haeHaku(any()))
-                .thenAnswer(invocation -> rx.Observable.just(buildHakuDto()));
+                .thenAnswer(invocation -> Observable.just(buildHakuDto()));
         when(Mocks.laskentaSeurantaAsyncResource.laskenta(LASKENTASEURANTA_ID)).thenReturn(Observable.just(
             (new LaskentaDto(LASKENTASEURANTA_ID, "","","", HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, null, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false, null, true))));
 
@@ -160,7 +161,7 @@ public class LaskentaKerrallaTest {
             if (seurantaCount.getAndIncrement() < 1) {
                 return Observable.just(LASKENTASEURANTA_ID);
             } else {
-                return Observable.just(null);
+                return new ObservableJust<>(null);
             }
         }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
     }

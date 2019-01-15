@@ -12,26 +12,11 @@ import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuon
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.riviWithHenkiloData;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toErillishaunHakijaDTO;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toPoistettavaErillishaunHakijaDTO;
+import static io.reactivex.schedulers.Schedulers.newThread;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static rx.schedulers.Schedulers.newThread;
 
 import fi.vm.sade.auditlog.Changes;
-import static com.codepoetics.protonpack.StreamUtils.zip;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.HenkilonRivinPaattelyEpaonnistuiException;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.ainoastaanHakemuksenTilaPaivitys;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.autoTaytto;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.createHakemusprototyyppi;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.isKesken;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.riviWithHenkiloData;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toErillishaunHakijaDTO;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toPoistettavaErillishaunHakijaDTO;
-import static java.util.Optional.ofNullable;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static rx.schedulers.Schedulers.newThread;
 import fi.vm.sade.sharedutils.AuditLog;
 import fi.vm.sade.sharedutils.ValintaResource;
 import fi.vm.sade.sharedutils.ValintaperusteetOperation;
@@ -58,19 +43,24 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rx.Observable;
-import rx.Scheduler;
-
-import static java.util.concurrent.TimeUnit.MINUTES;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -155,7 +145,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         List<ErillishakuRivi> poistettavat = rivit.stream().filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
         passivoiHakemukset(poistettavat);
 
-        Observable<Void> maksuntilojenTallennus = maksutilojenTallennus(auditSession, haku, lisattavatTaiKeskeneraiset);
+        Observable<String> maksuntilojenTallennus = maksutilojenTallennus(auditSession, haku, lisattavatTaiKeskeneraiset);
 
         Observable<List<Poikkeus>> vastaanotonJaValinnantuloksenTallennus = vastaanotonJaValinnantuloksenTallennus(auditSession, haku, lisattavatTaiKeskeneraiset, poistettavat);
 
@@ -210,12 +200,11 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             applicationAsyncResource
                 .changeStateOfApplicationsToPassive(hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä")
                 .timeout(1, MINUTES)
-                .toBlocking()
-                .first();
+                .blockingFirst();
         }
     }
 
-    private Observable<Void> maksutilojenTallennus(final AuditSession auditSession, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset) {
+    private Observable<String> maksutilojenTallennus(final AuditSession auditSession, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset) {
         final Map<String, Maksuntila> maksuntilat = lisattavatTaiKeskeneraiset.stream().filter(l -> l.getMaksuntila() != null)
                 .filter(l -> Maksuvelvollisuus.REQUIRED.equals(l.getMaksuvelvollisuus())).collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
 
@@ -227,7 +216,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 return !e.getValue().equals(vanhaMaksuntila);
             }).map(e -> new LukuvuosimaksuMuutos(e.getKey(), e.getValue())).collect(Collectors.toList());
             if(muuttuneetLukuvuosimaksut.isEmpty()) {
-                return Observable.just(null);
+                return Observable.just("OK");
             } else {
                 return valintaTulosServiceAsyncResource.saveLukuvuosimaksut(haku.getHakukohdeOid(), auditSession, muuttuneetLukuvuosimaksut);
             }
@@ -243,7 +232,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                     .map(rivi -> rivi.toHenkiloCreateDTO(convertKansalaisuusKoodi(rivi.getKansalaisuus())))
                     .collect(Collectors.toList());
             try {
-                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(henkiloCreateDTOS).timeout(1, MINUTES).toBlocking().first();
+                henkilot = oppijanumerorekisteriAsyncResource.haeTaiLuoHenkilot(henkiloCreateDTOS).timeout(1, MINUTES).blockingFirst();
                 LOG.info("Luotiin henkilot=" + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
             } catch (Exception e) {
                 if(e.getCause() != null && e.getCause() instanceof WebApplicationException){
@@ -278,8 +267,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         if(kesken.size() > 0) {
             vanhatValinnantulokset.putAll(valintaTulosServiceAsyncResource.getErillishaunValinnantulokset(auditSession, haku.getValintatapajonoOid())
                 .timeout(5, MINUTES)
-                .toBlocking()
-                .first()
+                .blockingFirst()
                 .stream()
                 .collect(Collectors.toMap(Valinnantulos::getHakemusOid, v -> v)));
         }
@@ -330,7 +318,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                         s.message,
                         new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)
                 )).collect(Collectors.toList()))
-                .onErrorResumeNext(t -> Observable.error(new RuntimeException(String.format(
+                .onErrorResumeNext((Throwable t) -> Observable.error(new RuntimeException(String.format(
                         "Erillishaun %s valinnantulosten tallennus valinta-tulos-serviceen epäonnistui",
                         haku.getHakuOid()
                 ), t)));
@@ -346,7 +334,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 try {
                     hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit)
                         .timeout(1, MINUTES)
-                        .toBlocking().first();
+                        .blockingFirst();
                 } catch (Exception e) {
                     LOG.error("Error updating application prototypes {}", Arrays.toString(hakemusPrototyypit.toArray()), e);
                     LOG.error("Rivi with henkilodata={}", Arrays.toString(rivitWithHenkiloData.toArray()));

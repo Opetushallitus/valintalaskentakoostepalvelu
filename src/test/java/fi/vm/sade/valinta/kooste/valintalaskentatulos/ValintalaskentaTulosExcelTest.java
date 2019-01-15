@@ -18,13 +18,14 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import io.reactivex.internal.operators.observable.ObservableJust;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -103,7 +104,7 @@ public class ValintalaskentaTulosExcelTest {
                     Mockito.anyList(),
                     Mockito.anyString(),
                     inputStreamArgumentCaptor.capture()
-            )).thenReturn(Observable.just(null));
+            )).thenReturn(new ObservableJust<Response>(null));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
@@ -213,7 +214,7 @@ public class ValintalaskentaTulosExcelTest {
                     Mockito.anyList(),
                     Mockito.anyString(),
                     inputStreamArgumentCaptor.capture()
-            )).thenReturn(Observable.just(null));
+            )).thenReturn(Observable.just("OK"));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
@@ -340,7 +341,7 @@ public class ValintalaskentaTulosExcelTest {
                     Mockito.anyList(),
                     Mockito.anyString(),
                     inputStreamArgumentCaptor.capture()
-            )).thenReturn(Observable.just(null));
+            )).thenReturn(Observable.just("OK"));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();

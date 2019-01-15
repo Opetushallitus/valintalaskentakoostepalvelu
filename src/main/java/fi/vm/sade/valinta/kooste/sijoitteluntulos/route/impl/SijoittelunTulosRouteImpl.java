@@ -1,7 +1,11 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl;
 
+import static fi.vm.sade.valinta.kooste.security.SecurityPreprocessor.SECURITY;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.apache.camel.LoggingLevel.ERROR;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -27,7 +31,11 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukko
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.util.*;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -40,6 +48,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetK
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import io.reactivex.Observable;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.collections.ListUtils;
@@ -54,21 +63,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
-import rx.Observable;
-import rx.observables.BlockingObservable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.security.SecurityPreprocessor.SECURITY;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.apache.camel.LoggingLevel.ERROR;
 
 @Component
 public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
@@ -211,10 +217,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                             ? Observable.just(applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX)
                                             .stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
-                                            : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)).timeout(5, MINUTES).toBlocking().first();
-                            hk = toBlocking(valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid), 5, MINUTES).toFuture().get();
-                            lukuvuosimaksus = toBlocking(valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession), 5, MINUTES).toFuture().get();
-                            valinnanvaiheet = toBlocking(valintalaskentaResource.laskennantulokset(hakukohdeOid), 1, MINUTES).toFuture().get();
+                                            : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)).timeout(5, MINUTES).blockingFirst();
+                            hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).timeout(5, MINUTES).toFuture().get();
+                            lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).timeout(5, MINUTES).toFuture().get();
+                            valinnanvaiheet = valintalaskentaResource.laskennantulokset(hakukohdeOid).timeout(1, MINUTES).toFuture().get();
                             hakuDTO = haeHakuTarjonnaltaKomponentti.getHaku(hakuOid);
 
                         } catch (Exception e) {
@@ -297,13 +303,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
                             stopWatch.stop();
                             stopWatch.start("Tiedot valintarekisteristä");
-                            fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hakukohteenTulos = toBlocking(
-                                    valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(
-                                            hakuOid(exchange),
-                                            hakukohdeOid
-                                    ),
-                                    5, MINUTES
-                            ).toFuture().get();
+                            fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hakukohteenTulos =
+                                valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid(exchange),hakukohdeOid)
+                                    .timeout(5, MINUTES)
+                                    .toFuture()
+                                    .get();
                             stopWatch.stop();
                             List<String> hyvaksytytHakemukset = hakukohteenTulos.getValintatapajonot().stream()
                                     .flatMap(valintatapajono -> valintatapajono.getHakemukset().stream())
@@ -319,7 +323,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             List<HakemusWrapper> hakemukset = tarjontaAsyncResource.haeHaku(hakuOid(exchange))
                                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                             ? Observable.just(applicationResource.getApplicationsByOids(hyvaksytytHakemukset).stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
-                                            : ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset)).timeout(5, MINUTES).toBlocking().first();
+                                            : ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset)).timeout(5, MINUTES).blockingFirst();
                             stopWatch.stop();
                             List<Osoite> addressLabels = Lists.newArrayList();
 
@@ -543,9 +547,5 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 "&waitForTaskToComplete=Never" +
                 // tyojonossa on yksi tyostaja
                 "&concurrentConsumers=6";
-    }
-
-    private static <T> BlockingObservable<T> toBlocking(Observable<T> observable, long time, TimeUnit timeUnit) {
-        return observable.timeout(time, timeUnit).toBlocking();
     }
 }

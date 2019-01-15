@@ -34,7 +34,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.Arrays;
 import java.util.Collection;

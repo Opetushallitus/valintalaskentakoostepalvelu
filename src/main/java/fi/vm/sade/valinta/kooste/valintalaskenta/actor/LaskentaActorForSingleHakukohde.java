@@ -12,8 +12,8 @@ import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.functions.Func1;
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private final AtomicInteger retryTotal = new AtomicInteger(0);
     private final AtomicInteger failedTotal = new AtomicInteger(0);
     private final LaskentaActorParams actorParams;
-    private final Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta;
+    private final Function<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta;
     private final LaskentaSupervisor laskentaSupervisor;
     private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private final int splittaus;
@@ -42,7 +42,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private final boolean isValintaryhmalaskenta;
 
     public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams,
-                                           Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta,
+                                           Function<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta,
                                            LaskentaSupervisor laskentaSupervisor,
                                            LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
                                            int splittaus) {
@@ -75,14 +75,18 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         }
 
         if (hkJaOrg.isPresent()) {
-            HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio = hkJaOrg.get();
-            String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
-            Observable.amb(
-                hakukohteenLaskenta.call(hakukohdeJaOrganisaatio),
-                Observable.timer(90L, TimeUnit.MINUTES).switchMap(t -> Observable.error(new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin"))))
-                .subscribe(
-                    s -> handleSuccessfulLaskentaResult(fromRetryQueue, hakukohdeOid),
-                    e -> handleFailedLaskentaResult(fromRetryQueue, hakukohdeJaOrganisaatio, e));
+            try {
+                HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio = hkJaOrg.get();
+                String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
+                Observable<Object> laskentaTimer = Observable.timer(90L, TimeUnit.MINUTES)
+                    .switchMap(t -> Observable.error(new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin")));
+                Observable.amb(Arrays.asList(hakukohteenLaskenta.apply(hakukohdeJaOrganisaatio), laskentaTimer))
+                    .subscribe(
+                        s -> handleSuccessfulLaskentaResult(fromRetryQueue, hakukohdeOid),
+                        e -> handleFailedLaskentaResult(fromRetryQueue, hakukohdeJaOrganisaatio, e));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         } else {
             handleEmptyWorkQueueResult();
         }

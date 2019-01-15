@@ -6,7 +6,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -96,7 +96,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Observable<List<HakemusWrapper>> putApplicationPrototypes(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(
+        return Observable.fromFuture(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(
                 () -> {
                     results.add(new Result(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit));
                     return Futures.immediateFuture(hakemusPrototyypit.stream()
@@ -119,7 +119,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
-        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
+        return Observable.fromFuture(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
             if (resultReference.get() != null) {
                 return Futures.immediateFuture(resultReference.get());
             } else {
@@ -131,7 +131,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Observable<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
-        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
+        return Observable.fromFuture(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
             if (resultReference.get() != null) {
                 return Futures.immediateFuture(resultReference.get());
             } else {

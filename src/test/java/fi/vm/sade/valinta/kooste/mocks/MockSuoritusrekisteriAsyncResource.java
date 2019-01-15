@@ -7,7 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import org.springframework.stereotype.Service;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,24 +131,24 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public Observable<Void> deleteSuoritus(String suoritusId) {
+    public Observable<String> deleteSuoritus(String suoritusId) {
         deletedSuorituksetRef.getAndUpdate((List<String> suoritusIdt) -> {
             suoritusIdt.add(suoritusId);
             return suoritusIdt;
         });
         Suoritus suoritus = new Suoritus();
         suoritus.setId(suoritusId);
-        return Observable.just(null);
+        return Observable.just("OK");
     }
 
     @Override
-    public Observable<Void> deleteArvosana(String arvosanaId) {
+    public Observable<String> deleteArvosana(String arvosanaId) {
         deletedArvosanatRef.getAndUpdate((List<String> arvosanaIdt) -> {
             arvosanaIdt.add(arvosanaId);
             return arvosanaIdt;
         });
         Arvosana arvosana = new Arvosana();
         arvosana.setId(arvosanaId);
-        return Observable.just(null);
+        return Observable.just("OK");
     }
 }

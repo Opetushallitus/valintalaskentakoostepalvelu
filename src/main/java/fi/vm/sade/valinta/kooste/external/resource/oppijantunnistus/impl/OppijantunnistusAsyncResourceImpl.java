@@ -1,15 +1,14 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.impl;
 
 import com.google.common.reflect.TypeToken;
+
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.OppijantunnistusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensRequest;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import io.reactivex.Observable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;

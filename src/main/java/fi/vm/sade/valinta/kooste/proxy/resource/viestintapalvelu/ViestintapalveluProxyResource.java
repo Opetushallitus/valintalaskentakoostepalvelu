@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static rx.Observable.combineLatest;
+import static io.reactivex.Observable.combineLatest;
 import com.google.common.collect.ImmutableMap;
 
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
@@ -12,8 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import rx.Observable;
-import rx.observables.BlockingObservable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -69,8 +68,7 @@ public class ViestintapalveluProxyResource {
         if (countDto.letterBatchId == null) {
             return countDto;
         }
-        Optional<Long> groupEmailId = BlockingObservable.from(
-            ryhmasahkopostiAsyncResource.haeRyhmasahkopostiIdByLetterObservable(countDto.letterBatchId).timeout(5, MINUTES)).first();
+        Optional<Long> groupEmailId = ryhmasahkopostiAsyncResource.haeRyhmasahkopostiIdByLetterObservable(countDto.letterBatchId).timeout(5, MINUTES).blockingFirst();
         return groupEmailId.map(aLong ->
             new LetterBatchCountDto(
                 countDto.letterBatchId,

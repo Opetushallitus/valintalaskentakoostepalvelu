@@ -15,7 +15,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijall
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.List;
 import java.util.Set;
@@ -33,7 +33,7 @@ public interface ValintaTulosServiceAsyncResource {
 
     Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, AuditSession session);
 
-    Observable<Void> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset);
+    Observable<String> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset);
 
     Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid);
 

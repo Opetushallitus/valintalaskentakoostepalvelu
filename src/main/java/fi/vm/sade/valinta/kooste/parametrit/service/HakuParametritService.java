@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,11 +37,10 @@ public class HakuParametritService {
     public ParametritParser getParametritForHaku(String hakuOid) {
         try {
             Observable<ParametritDTO> parametritDTOObservable = haunOhjausParametritCache.get(hakuOid,
-                    () -> ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).single());
+                    () -> ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).singleElement().toObservable());
             ParametritDTO paramDto = parametritDTOObservable
                 .timeout(30, SECONDS)
-                .toBlocking()
-                .single();
+                .blockingSingle();
             return new ParametritParser(paramDto, rootOrganisaatioOid);
         } catch (Exception e) {
             LOG.error(String.format("Error querying ParametritDTO for haku %s", hakuOid), e);

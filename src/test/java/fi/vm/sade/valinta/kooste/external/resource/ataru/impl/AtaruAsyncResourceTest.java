@@ -18,7 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
-import rx.Observable;
+import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import java.util.Collections;
@@ -87,7 +87,7 @@ public class AtaruAsyncResourceTest {
         when(mockOnr.haeHenkilot(Collections.singletonList("1.2.246.562.24.86368188549"))).thenReturn(Observable.just(Collections.singletonList(onrHenkilo)));
 
         List<HakemusWrapper> applications = ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOid1, hakemusOid2, hakemusOid3))
-                .timeout(1, SECONDS).toBlocking().first();
+                .timeout(1, SECONDS).blockingFirst();
         assertEquals(3, applications.size());
         assertEquals("FIN", applications.get(0).getAsuinmaa());
         assertEquals("MAF", applications.get(1).getAsuinmaa());
