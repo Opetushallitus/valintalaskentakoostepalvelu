@@ -207,7 +207,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                 .query("hakukohdeOid", hakukohdeOidFromUiRequest)
                 .header("Content-Type", "application/octet-stream")
                 .accept(MediaType.APPLICATION_JSON)
-                .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
+                .post(IOUtils.toByteArray(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream()));
         Assert.assertEquals("", r.readEntity(String.class));
         Assert.assertEquals(204, r.getStatus());
         try {
