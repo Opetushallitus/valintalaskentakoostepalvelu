@@ -22,12 +22,19 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteSe
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import rx.plugins.DebugHook;
+import rx.plugins.DebugNotification;
+import rx.plugins.RxJavaPlugins;
+import rx.plugins.SimpleContext;
+import rx.plugins.SimpleDebugNotificationListener;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,11 +59,44 @@ import static javax.ws.rs.HttpMethod.*;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 
 public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
+    private static final Logger LOG = LoggerFactory.getLogger(PistesyottoE2ETest.class);
+
     private List<Valintapisteet> pisteetFromValintaPisteService;
     private final MockServer fakeValintaPisteService = new MockServer();
+    private final static boolean DEBUG_RXJAVA = false;
 
     @Before
     public void init() throws Throwable {
+        if (DEBUG_RXJAVA) {
+            final String prefix = "PISTESYOTTO_TEST_DEBUG : ";
+
+            RxJavaPlugins.getInstance().registerObservableExecutionHook(new DebugHook(new SimpleDebugNotificationListener() {
+                public Object onNext(DebugNotification n) {
+                    LOG.info(prefix + "onNext on " + ToStringBuilder.reflectionToString(n));
+                    return super.onNext(n);
+                }
+
+
+                public SimpleContext start(DebugNotification n) {
+                    LOG.info(prefix + "start on " + ToStringBuilder.reflectionToString(n));
+                    return super.start(n);
+                }
+
+                @Override
+                public void complete(SimpleContext<?> context) {
+                    LOG.info(prefix + "complete on " + (context == null ? "nullz" : ToStringBuilder.reflectionToString(context)));
+                    super.complete(context);
+                }
+
+                @Override
+                public void error(SimpleContext<?> context, Throwable e) {
+                    LOG.error(prefix + "error " + e.getMessage() + " on " + (context == null ? "nullz" : ToStringBuilder.reflectionToString(context)));
+                    e.printStackTrace();
+                    super.error(context, e);
+                }
+            }));
+
+        }
         Type valintapisteetListType = new TypeToken<List<ValintakoeOsallistuminenDTO>>() {}.getType();
         String valintakoeOstallistuminenDtosJson = IOUtils.toString(new ClassPathResource("pistesyotto/List_ValintakoeOsallistuminenDTO.json").getInputStream(), "UTF-8");
         pisteetFromValintaPisteService = gson().<List<ValintakoeOsallistuminenDTO>>fromJson(valintakoeOstallistuminenDtosJson, valintapisteetListType).stream()
