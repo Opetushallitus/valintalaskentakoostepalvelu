@@ -132,7 +132,7 @@ public class ErillishaunTuontiHelper {
         String sukupuoli = henkilo.getSukupuoli();
         return ErillishakuRiviBuilder.fromRivi(rivi)
                 .sukunimi(henkilo.getSukunimi())
-                .etunimi(henkilo.getKutsumanimi())
+                .etunimi(henkilo.getEtunimet())
                 .henkilotunnus(henkilo.getHetu())
                 .sahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()))
                 .syntymaAika(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
