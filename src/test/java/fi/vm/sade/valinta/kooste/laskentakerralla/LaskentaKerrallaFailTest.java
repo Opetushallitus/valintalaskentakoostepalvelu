@@ -32,6 +32,7 @@ import io.reactivex.Observable;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -58,7 +59,7 @@ public class LaskentaKerrallaFailTest {
             if (seurantaCount.getAndIncrement() < 1)
                 return Observable.just(LASKENTASEURANTA_ID);
             else {
-                return new ObservableJust<>(null);
+                return Observable.just(Optional.empty());
             }
         }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
     }

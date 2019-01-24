@@ -161,7 +161,7 @@ public class LaskentaKerrallaTest {
             if (seurantaCount.getAndIncrement() < 1) {
                 return Observable.just(LASKENTASEURANTA_ID);
             } else {
-                return new ObservableJust<>(null);
+                return Observable.just(Optional.empty());
             }
         }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
     }

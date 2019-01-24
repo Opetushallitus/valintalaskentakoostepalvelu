@@ -36,6 +36,7 @@ import scala.concurrent.duration.FiniteDuration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -135,15 +136,15 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             });
     }
 
-    private void startLaskentaIfWorkAvailable(String uuid) {
-        if (uuid == null) {
+    private void startLaskentaIfWorkAvailable(Optional<String> uuid) {
+        if (!uuid.isPresent()) {
             LOG.trace("Ei laskettavaa");
             laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
         } else {
-            LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid);
+            LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid.get());
             laskentaStarter.fetchLaskentaParams(
                     laskennanKaynnistajaActor,
-                    uuid,
+                    uuid.get(),
                     (haku, params) -> startLaskentaActor(params.getLaskentaStartParams(),
                             laskentaActorFactory.createLaskentaActor(params.getLaskentaStartParams().getAuditSession(), this, haku, params))
             );

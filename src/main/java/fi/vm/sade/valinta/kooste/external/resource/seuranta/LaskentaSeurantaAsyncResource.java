@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface LaskentaSeurantaAsyncResource {
 
-    Observable<String> otaSeuraavaLaskentaTyonAlle();
+    Observable<Optional<String>> otaSeuraavaLaskentaTyonAlle();
 
     Observable<LaskentaDto> laskenta(String uuid);
 

@@ -39,10 +39,10 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public Observable<String> otaSeuraavaLaskentaTyonAlle() {
+    public Observable<Optional<String>> otaSeuraavaLaskentaTyonAlle() {
         return getAsObservableLazily(
             getUrl("seuranta-service.seuranta.laskenta.otaseuraavalaskentatyonalle"),
-            String.class,
+            Optional.class,
             webClient -> webClient.accept(MediaType.TEXT_PLAIN_TYPE));
     }
 
