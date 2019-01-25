@@ -11,13 +11,14 @@ import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
+import io.reactivex.Observable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 
 @Service
@@ -40,9 +42,12 @@ public class LaskentaSeurantaAsyncResourceImpl extends UrlConfiguredResource imp
 
     @Override
     public Observable<Optional<String>> otaSeuraavaLaskentaTyonAlle() {
-        return getAsObservableLazily(
-            getUrl("seuranta-service.seuranta.laskenta.otaseuraavalaskentatyonalle"),
-            Optional.class,
+        Function<String, Optional<String>> extractor = response ->
+            StringUtils.isBlank(response) ?
+                Optional.empty() :
+                Optional.of(response);
+        return getAsObservableLazily(getUrl("seuranta-service.seuranta.laskenta.otaseuraavalaskentatyonalle"),
+            extractor,
             webClient -> webClient.accept(MediaType.TEXT_PLAIN_TYPE));
     }
 
