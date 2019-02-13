@@ -29,6 +29,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
             .put("eligible", "ELIGIBLE")
             .put("uneligible", "INELIGIBLE")
             .put("unreviewed", "NOT_CHECKED")
+            .put("conditionally-eligible", "CONDITIONALLY_ELIGIBLE")
             .build();
 
     public AtaruHakemusWrapper(AtaruHakemus ataruHakemus, HenkiloPerustietoDto onrHenkilo) {
