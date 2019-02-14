@@ -24,7 +24,7 @@ public class DokumenttiProsessiPoller {
             }
             sleepOneInterval();
         }
-        throw new RuntimeException("Did not complete within " + TIME_TO_WAIT_IN_TOTAL.toMillis() + " ms.");
+        throw new RuntimeException("Did not complete within " + TIME_TO_WAIT_IN_TOTAL.toMillis() + " ms (" + TIME_TO_WAIT_IN_TOTAL + ").");
     }
 
     private static void sleepOneInterval() {
