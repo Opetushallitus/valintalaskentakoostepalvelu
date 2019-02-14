@@ -43,7 +43,7 @@ public class KoodistoAsyncResourceImpl extends UrlConfiguredResource implements 
                 new GenericType<List<Koodi>>() {}.getType(),
                 ACCEPT_JSON.andThen(client -> {
                     client.query("koodiVersio", 1);
-                    LOG.info("Calling url {}", client.getCurrentURI());
+                    LOG.debug("Calling url {}", client.getCurrentURI());
                     return client;
                 }))
                 .flatMap(koodit -> {
