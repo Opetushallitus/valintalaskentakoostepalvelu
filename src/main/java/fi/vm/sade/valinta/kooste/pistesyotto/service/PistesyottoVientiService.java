@@ -57,7 +57,8 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
 
     public void vie(String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
         PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
-            LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
+            LOG.error(String.format("Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
+                auditSession.getPersonOid(), hakuOid, hakukohdeOid), poikkeus);
             prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
         });
         prosessi.inkrementoiKokonaistyota();
