@@ -43,6 +43,7 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import org.slf4j.Logger;
@@ -122,11 +123,11 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 LOG.warn("excel ei validi", validointiPoikkeus);
                 prosessi.keskeyta(validointiPoikkeus.getMessage());
             } catch(Exception e) {
-                LOG.error("unexpected tuoData exception!", e);
+                errorLogIncludingHttpResponse("unexpected tuoData exception!", e);
                 prosessi.keskeyta();
             }
         }, poikkeus -> {
-            LOG.error("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
+            errorLogIncludingHttpResponse("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
             prosessi.keskeyta();
         }, () -> LOG.info("Tuonti lopetettiin"));
     }
@@ -188,7 +189,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                     }
                 },
                 t -> {
-                    LOG.error("Erillishaun tallennus epäonnistui", t);
+                    errorLogIncludingHttpResponse("Erillishaun tallennus epäonnistui", t);
                     prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, "", t.getMessage()));
                 }
         );
@@ -336,7 +337,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                         .timeout(1, MINUTES)
                         .blockingFirst();
                 } catch (Exception e) {
-                    LOG.error("Error updating application prototypes {}", Arrays.toString(hakemusPrototyypit.toArray()), e);
+                    errorLogIncludingHttpResponse(String.format("Error updating application prototypes %s", Arrays.toString(hakemusPrototyypit.toArray())), e);
                     LOG.error("Rivi with henkilodata={}", Arrays.toString(rivitWithHenkiloData.toArray()));
                     throw e;
                 }
@@ -350,14 +351,18 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 return rivitWithHenkiloData;
             }
         } catch (HenkilonRivinPaattelyEpaonnistuiException e) {
-            LOG.error(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE, e);
+            errorLogIncludingHttpResponse(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE, e);
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE + " " + e.getMessage()));
             throw e;
         } catch (Throwable e) { // temporary catch to avoid missing service dependencies
-            LOG.error(POIKKEUS_HAKEMUSPALVELUN_VIRHE, e);
+            errorLogIncludingHttpResponse(POIKKEUS_HAKEMUSPALVELUN_VIRHE, e);
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE));
             throw e;
         }
+    }
+
+    private void errorLogIncludingHttpResponse(String message, Throwable exception) {
+        LOG.error(HttpExceptionWithResponse.appendWrappedResponse(message, exception), exception);
     }
 }
 
