@@ -56,7 +56,7 @@ public class ArvosanaToAvainArvoDTOConverter {
         Map<String, Integer> vapaaOppiainenumero = new HashMap<>();
 
         return arvosanat.map(a -> {
-            if (a.lisatieto != null && a.aine.endsWith(a.lisatieto)) {
+            if (a.lisatieto != null && (a.aine.endsWith(a.lisatieto) || a.aine.equals("AI"))) {
                 String aine = a.aine.substring(0, 2);
                 if (!oppiainenumero.containsKey(a.aine)) {
                     int numero = vapaaOppiainenumero.getOrDefault(aine, 1);
@@ -184,7 +184,7 @@ public class ArvosanaToAvainArvoDTOConverter {
         }
 
         public OppiaineArvosana(Arvosana arvosana) {
-            if (arvosana.getAine().matches("[AB]\\d+")) {
+            if (arvosana.getAine().matches("[AB]\\d+") || (arvosana.getAine().equals("AI") && arvosana.getLisatieto() != null)) {
                 this.aine = arvosana.getAine().substring(0, 2) + arvosana.getLisatieto();
             } else {
                 this.aine = arvosana.getAine();
