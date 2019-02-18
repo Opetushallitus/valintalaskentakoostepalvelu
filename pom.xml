@@ -26,6 +26,7 @@
         <hibernate.version>4.2.7.Final</hibernate.version>
         <hibernate-validator.version>4.1.0.Final</hibernate-validator.version>
         <swagger.version>1.5.16</swagger.version>
+        <mockito.version>2.24.0</mockito.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -323,14 +324,9 @@
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.aspectj</groupId>
@@ -1294,9 +1290,7 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <scope>test</scope>
+            <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -1317,9 +1311,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.kubek2k.mockito.spring</groupId>
+            <groupId>org.kubek2k</groupId>
             <artifactId>springockito</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.9</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

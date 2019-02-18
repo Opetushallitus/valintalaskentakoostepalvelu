@@ -14,10 +14,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static io.reactivex.Observable.just;
@@ -50,7 +50,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
@@ -276,8 +276,8 @@ public class ErillishaunTuontiServiceTest {
         public void tilojenTuontiEpaonnistuu() {
             final ValintaTulosServiceAsyncResource failingValintaTuloseServiceAsyncResource = mock(ValintaTulosServiceAsyncResource.class);
             when(failingValintaTuloseServiceAsyncResource.postErillishaunValinnantulokset(anyObject(), anyString(), anyList())).thenAnswer(i -> {
-                String valintatapajonoOid = i.getArgumentAt(1, String.class);
-                return Observable.just(((List<Valinnantulos>)i.getArgumentAt(2, List.class)).stream().map(v ->
+                String valintatapajonoOid = i.getArgument(1);
+                return Observable.just(((List<Valinnantulos>)i.getArgument(2)).stream().map(v ->
                         new ValintatulosUpdateStatus(500, "Something wrong", valintatapajonoOid, v.getHakemusOid())).collect(Collectors.toList()));
             });
             when(failingValintaTuloseServiceAsyncResource.fetchLukuvuosimaksut(anyString(), any())).thenReturn(just(emptyList()));
@@ -290,7 +290,7 @@ public class ErillishaunTuontiServiceTest {
                     Schedulers.trampoline()
             );
             tuontiService.tuoExcelistä(new AuditSession(PERSON_2_OID, emptyList(), "", ""),prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
-            Mockito.verify(prosessi).keskeyta(Matchers.<Collection<Poikkeus>>any());
+            Mockito.verify(prosessi).keskeyta(ArgumentMatchers.<Collection<Poikkeus>>any());
         }
 
         @Test

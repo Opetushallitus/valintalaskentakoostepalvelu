@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyListOf;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,8 +40,6 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import io.reactivex.Observable;
-import io.reactivex.internal.operators.observable.ObservableJust;
-import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -274,21 +272,21 @@ public class ValintalaskentaTest {
 
     private Optional<IlmoitusDto> getIlmoitusDtoOptional(String hakukohdeOid) {
         return argThat(new ArgumentMatcher<Optional<IlmoitusDto>>() {
+            @Override
+            public boolean matches(Optional<IlmoitusDto> argument) {
+                if (argument == null || !argument.isPresent()) {
+                    return false;
+                }
+                IlmoitusDto ilmoitusDto = argument.get();
+                return odotettuIlmoitustyyppi.equals(ilmoitusDto.getTyyppi()) && ilmoitusDto.getOtsikko().contains(odotettuOtsikonSisalto);
+            }
+
             private final IlmoitusTyyppi odotettuIlmoitustyyppi = IlmoitusTyyppi.VIRHE;
             private final String odotettuOtsikonSisalto = "Ei saatu haettua hakemuksia kohteelle " + hakukohdeOid;
 
             @Override
-            public boolean matches(Object argument) {
-                if (!(argument instanceof Optional)) {
-                    return false;
-                }
-                IlmoitusDto ilmoitusDto = ((Optional<IlmoitusDto>) argument).get();
-                return odotettuIlmoitustyyppi.equals(ilmoitusDto.getTyyppi()) && ilmoitusDto.getOtsikko().contains(odotettuOtsikonSisalto);
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText(IlmoitusDto.class.getSimpleName() + ", jossa " + odotettuIlmoitustyyppi + " ja otsikossa \"" + odotettuOtsikonSisalto + "\"");
+            public String toString() {
+                return IlmoitusDto.class.getSimpleName() + ", jossa " + odotettuIlmoitustyyppi + " ja otsikossa \"" + odotettuOtsikonSisalto + "\"";
             }
         });
     }
