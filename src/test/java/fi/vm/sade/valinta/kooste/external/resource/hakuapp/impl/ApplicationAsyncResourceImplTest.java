@@ -28,9 +28,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyVararg;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyVararg;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class ApplicationAsyncResourceImplTest {
@@ -67,7 +67,7 @@ public class ApplicationAsyncResourceImplTest {
             eq(Entity.entity(Lists.newArrayList("hakemus1Oid", "hakemus2Oid"), APPLICATION_JSON_TYPE)),
             Mockito.any()))
             .thenAnswer((Answer<Observable<List<Hakemus>>>) invocation -> {
-                Function<WebClient,WebClient> webClientModifier = invocation.getArgumentAt(3, Function.class);
+                Function<WebClient,WebClient> webClientModifier = invocation.getArgument(3);
                 WebClient webClient = mock(WebClient.class);
                 webClientModifier.apply(webClient);
                 verify(webClient).accept(APPLICATION_JSON_TYPE);
@@ -89,7 +89,7 @@ public class ApplicationAsyncResourceImplTest {
             eq(Entity.entity(Lists.newArrayList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid"), APPLICATION_JSON_TYPE)),
             Mockito.any()))
             .thenAnswer((Answer<Observable<List<Hakemus>>>) invocation -> {
-                Function<WebClient,WebClient> webClientModifier = invocation.getArgumentAt(3, Function.class);
+                Function<WebClient,WebClient> webClientModifier = invocation.getArgument(3);
                 WebClient webClient = mock(WebClient.class);
                 webClientModifier.apply(webClient);
                 verify(webClient).accept(APPLICATION_JSON_TYPE);
@@ -113,7 +113,7 @@ public class ApplicationAsyncResourceImplTest {
             eq(Entity.entity(Lists.newArrayList("hakemus1Oid", "hakemus2Oid"), APPLICATION_JSON_TYPE)),
             Mockito.any()))
             .thenAnswer((Answer<Observable<List<Hakemus>>>) invocation -> {
-                Function<WebClient,WebClient> webClientModifier = invocation.getArgumentAt(3, Function.class);
+                Function<WebClient,WebClient> webClientModifier = invocation.getArgument(3);
                 WebClient webClient = mock(WebClient.class);
                 webClientModifier.apply(webClient);
                 verify(webClient).accept(APPLICATION_JSON_TYPE);
@@ -142,7 +142,7 @@ public class ApplicationAsyncResourceImplTest {
             eq(new TypeToken<List<Hakemus>>() {}.getType()),
             Mockito.any(Function.class)))
             .thenAnswer((Answer<Observable<List<Hakemus>>>) invocation -> {
-                Function<WebClient,WebClient> webClientModifier = invocation.getArgumentAt(2, Function.class);
+                Function<WebClient,WebClient> webClientModifier = invocation.getArgument(2);
                 webClientModifier.apply(webClient);
                 verify(webClient).query("appState", ApplicationAsyncResource.DEFAULT_STATES.get(0), ApplicationAsyncResource.DEFAULT_STATES.get(1));
                 verify(webClient).query("rows", ApplicationAsyncResource.DEFAULT_ROW_LIMIT);

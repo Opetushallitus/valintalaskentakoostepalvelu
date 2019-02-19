@@ -1,10 +1,11 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -79,9 +80,9 @@ public class HaeHaunHakemuksetKomponenttiTest {
 		final String hakuOid = "hakuOid1";
 
 		when(
-				applicationResourceMock.findApplications(anyString(),
-						anyList(), anyString(), anyString(), eq(hakuOid),
-						anyString(), anyInt(), anyInt())).thenReturn(
+				applicationResourceMock.findApplications(eq(null),
+						anyList(), eq(null), eq(null), eq(hakuOid),
+						eq(null), anyInt(), anyInt())).thenReturn(
 				new Gson().fromJson(HAKEMUKSET_JSON, HakemusList.class));
 
 		List<SuppeaHakemus> hakemukset = haeHaunHakemuksetKomponentti

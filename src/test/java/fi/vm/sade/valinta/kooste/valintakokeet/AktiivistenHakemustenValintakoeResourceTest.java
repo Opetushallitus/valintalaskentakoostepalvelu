@@ -5,8 +5,8 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -88,7 +88,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
             .thenReturn(Observable.just(hakuDTOHakuApp));
 
         when(asyncResponse.resume(any(Response.class))).thenAnswer((Answer<Boolean>) invocation -> {
-            responseReceivedInAsyncResponse = invocation.getArgumentAt(0, Response.class);
+            responseReceivedInAsyncResponse = invocation.getArgument(0);
             return true;
         });
 
@@ -124,7 +124,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
                 .thenReturn(Observable.just(hakuDTOEditori));
 
         when(asyncResponse.resume(any(Response.class))).thenAnswer((Answer<Boolean>) invocation -> {
-            responseReceivedInAsyncResponse = invocation.getArgumentAt(0, Response.class);
+            responseReceivedInAsyncResponse = invocation.getArgument(0);
             return true;
         });
 
@@ -160,7 +160,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         when(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)).thenThrow(applicationFetchException);
 
         when(asyncResponse.resume(any(Response.class))).thenAnswer((Answer<Boolean>) invocation -> {
-            responseReceivedInAsyncResponse = invocation.getArgumentAt(0, Response.class);
+            responseReceivedInAsyncResponse = invocation.getArgument(0);
             return true;
         });
 

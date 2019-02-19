@@ -617,7 +617,7 @@ public class PistesyottoResourceTest {
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
                 Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                     .thenAnswer((Answer<Observable<Set<String>>>) invocation -> {
-                        tuodutPisteet = invocation.getArgumentAt(1, List.class);
+                        tuodutPisteet = invocation.getArgument(1);
                         return Observable.just(Collections.emptySet());
                     })
                     .thenReturn(Observable.just(Collections.emptySet()));
@@ -756,7 +756,7 @@ public class PistesyottoResourceTest {
             .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
             Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                 .thenAnswer((Answer<Observable<Set<String>>>) invocation -> {
-                    tuodutPisteet = invocation.getArgumentAt(1, List.class);
+                    tuodutPisteet = invocation.getArgument(1);
                     return Observable.just(Collections.emptySet());
                 })
                 .thenReturn(Observable.just(Collections.emptySet()));
@@ -873,7 +873,7 @@ public class PistesyottoResourceTest {
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
                 Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                     .thenAnswer((Answer<Observable<Set<String>>>) invocation -> {
-                        tuodutPisteet = invocation.getArgumentAt(1, List.class);
+                        tuodutPisteet = invocation.getArgument(1);
                         return Observable.just(Collections.emptySet());
                     })
                     .thenReturn(Observable.just(Collections.emptySet()));
@@ -1216,7 +1216,7 @@ public class PistesyottoResourceTest {
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
                 Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                     .thenAnswer((Answer<Observable<Set<String>>>) invocation -> {
-                        tuodutPisteet = invocation.getArgumentAt(1, List.class);
+                        tuodutPisteet = invocation.getArgument(1);
                         return Observable.just(Collections.emptySet());
                     })
                     .thenReturn(Observable.just(Collections.emptySet()));
@@ -1336,7 +1336,7 @@ public class PistesyottoResourceTest {
 
             Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                 .thenAnswer((Answer<Observable<Set<String>>>) invocation -> {
-                    tuodutPisteet = invocation.getArgumentAt(1, List.class);
+                    tuodutPisteet = invocation.getArgument(1);
                     return Observable.just(Collections.emptySet());
                 })
                 .thenReturn(Observable.just(Collections.emptySet()));

@@ -1,23 +1,35 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.hakemusOsallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import com.google.common.reflect.TypeToken;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpResource;
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
-import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
+import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
+import fi.vm.sade.valinta.sharedutils.http.HttpResource;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import io.reactivex.Observable;
 import io.reactivex.internal.operators.observable.ObservableJust;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -25,7 +37,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -38,13 +49,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.hakemusOsallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Jussi Jartamo
@@ -214,7 +218,7 @@ public class ValintalaskentaTulosExcelTest {
                     Mockito.anyList(),
                     Mockito.anyString(),
                     inputStreamArgumentCaptor.capture()
-            )).thenReturn(Observable.just("OK"));
+            )).thenReturn(Observable.just(Response.ok("OK").build()));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
@@ -341,7 +345,7 @@ public class ValintalaskentaTulosExcelTest {
                     Mockito.anyList(),
                     Mockito.anyString(),
                     inputStreamArgumentCaptor.capture()
-            )).thenReturn(Observable.just("OK"));
+            )).thenReturn(Observable.just(Response.ok("OK").build()));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
