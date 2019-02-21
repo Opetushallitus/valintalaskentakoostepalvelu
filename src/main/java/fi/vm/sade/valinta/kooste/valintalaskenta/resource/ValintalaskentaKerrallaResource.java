@@ -4,11 +4,11 @@ import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static java.util.Arrays.asList;
 
+import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-import fi.vm.sade.security.service.authz.util.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;

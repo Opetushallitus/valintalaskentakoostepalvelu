@@ -69,10 +69,26 @@ public class AuthorizationUtil {
     }
 
     private static List<String> getRoles() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = getAuthentication();
         if(null == authentication) {
             return new ArrayList<>();
         }
         return authentication.getAuthorities().stream().map(a -> a.getAuthority()).map(r -> r.replace("ROLE_", "")).collect(Collectors.toList());
+    }
+
+    public static String getCurrentUser() {
+        if (getSecurityContext() == null || getAuthentication() == null) {
+            return null;
+        }
+        return getAuthentication().getName();
+
+    }
+
+    public static Authentication getAuthentication() {
+        return getSecurityContext().getAuthentication();
+    }
+
+    private static SecurityContext getSecurityContext() {
+        return SecurityContextHolder.getContext();
     }
 }
