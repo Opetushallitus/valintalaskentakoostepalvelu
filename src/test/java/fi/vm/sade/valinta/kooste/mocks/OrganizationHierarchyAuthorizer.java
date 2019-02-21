@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import fi.vm.sade.generic.service.exception.NotAuthorizedException;
+import fi.vm.sade.authorization.NotAuthorizedException;
 import org.springframework.security.core.Authentication;
 
 /**
