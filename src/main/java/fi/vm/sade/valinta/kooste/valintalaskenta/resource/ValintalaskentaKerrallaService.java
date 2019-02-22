@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -64,14 +65,16 @@ public class ValintalaskentaKerrallaService {
                 (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                     Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
 
-                    authCheck.blockingNext().forEach(
-                            authorityCheck -> haunHakukohteetOids
-                                    .forEach(hk -> {
-                                        if (!authorityCheck.test(hk.getHakukohdeOid())) {
-                                            LOG.error(String.format("Ei oikeutta aloittaa laskentaa hakukohteelle %s haussa %s", hk.getHakukohdeOid(), hakuOid));
-                                            throw new ForbiddenException("Ei oikeutta aloittaa laskentaa");
-                                        }
-                                    }));
+                    if (!LaskentaTyyppi.VALINTARYHMA.equals(laskentaParams.getLaskentatyyppi())) {
+                        authCheck.blockingNext().forEach(
+                                authorityCheck -> haunHakukohteetOids
+                                        .forEach(hk -> {
+                                            if (!authorityCheck.test(hk.getHakukohdeOid())) {
+                                                LOG.error(String.format("Ei oikeutta aloittaa laskentaa hakukohteelle %s haussa %s", hk.getHakukohdeOid(), hakuOid));
+                                                throw new ForbiddenException("Ei oikeutta aloittaa laskentaa");
+                                            }
+                                        }));
+                    }
 
                     createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                 },
