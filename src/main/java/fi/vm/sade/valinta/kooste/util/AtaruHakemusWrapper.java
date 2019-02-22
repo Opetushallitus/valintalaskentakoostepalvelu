@@ -66,7 +66,11 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public String getAidinkieli() {
-        return henkilo.getAidinkieli() != null ? StringUtils.trimToEmpty(henkilo.getAidinkieli().getKieliKoodi()) : ""; }
+        if (null == henkilo.getAidinkieli() || StringUtils.isBlank(henkilo.getAidinkieli().getKieliKoodi())) {
+            throw new IllegalStateException(String.format("Henkilöllä %s ei ole äidinkieltä", henkilo.getOidHenkilo()));
+        }
+        return henkilo.getAidinkieli().getKieliKoodi();
+    }
 
     @Override
     public String getKaupunkiUlkomaa() { return StringUtils.trimToEmpty(keyvalues.get("home-town")); }
@@ -252,16 +256,20 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
         if (hakemus.getKeyValues() != null) {
             hakemus.getKeyValues().forEach((key, value) -> {
-                AvainArvoDTO aa = new AvainArvoDTO();
-                aa.setAvain(key);
-                if (key.matches(PREFERENCE_REGEX)) {
-                    setPreferenceValue(value, aa);
-                } else {
-                    aa.setArvo(value);
+                if (!"language".equals(key)) { // FIXME Hakemuspalvelun ei tulisi palauttaa ONR dataa
+                    AvainArvoDTO aa = new AvainArvoDTO();
+                    aa.setAvain(key);
+                    if (key.matches(PREFERENCE_REGEX)) {
+                        setPreferenceValue(value, aa);
+                    } else {
+                        aa.setArvo(value);
+                    }
+                    hakemusDto.getAvaimet().add(aa);
                 }
-                hakemusDto.getAvaimet().add(aa);
             });
         }
+
+        hakemusDto.getAvaimet().add(new AvainArvoDTO("language", getAidinkieli()));
 
         IntStream.range(0, hakemus.getHakutoiveet().size())
                 .forEach(i -> {
