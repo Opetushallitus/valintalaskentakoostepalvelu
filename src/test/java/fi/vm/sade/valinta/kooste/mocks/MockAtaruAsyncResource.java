@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import io.reactivex.Observable;
@@ -73,6 +74,7 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
         henkilo.setEtunimet("Zl2A5");
         henkilo.setOidHenkilo("1.2.246.562.24.86368188549");
         henkilo.setHetu("020202A0202");
+        henkilo.setAidinkieli(new KielisyysDto("fi", "suomi"));
         return henkilo;
     }
 
