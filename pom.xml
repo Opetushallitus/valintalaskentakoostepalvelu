@@ -876,12 +876,12 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>valintalaskenta-tulos-api</artifactId>
-            <version>5.1-SNAPSHOT</version>
+            <version>5.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>valintalaskenta-laskenta-api</artifactId>
-            <version>5.1-SNAPSHOT</version>
+            <version>5.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
@@ -1320,7 +1320,7 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>valintalaskenta-domain</artifactId>
-            <version>5.1-SNAPSHOT</version>
+            <version>5.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
