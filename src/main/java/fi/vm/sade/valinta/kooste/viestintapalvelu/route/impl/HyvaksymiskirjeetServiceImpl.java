@@ -323,20 +323,23 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                 .toFuture()
                                                 .get(900L, TimeUnit.MILLISECONDS);
                                             if (prosessi.isKeskeytetty()) {
-                                                LOG.warn("Hyvaksymiskirjeiden muodostuksen seuranta on keskeytetty kayttajantoimesta!");
-                                                stop.onNext(null);
+                                                String msg = "Hyvaksymiskirjeiden muodostuksen seuranta on keskeytetty kayttajantoimesta!";
+                                                LOG.warn(msg);
+                                                stop.onNext(msg);
                                                 return;
                                             }
                                             if ("error".equals(status.getStatus())) {
-                                                LOG.error("Hyvaksymiskirjeiden muodostuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen!");
+                                                String msg = "Hyvaksymiskirjeiden muodostuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen!";
+                                                LOG.error(msg);
                                                 prosessi.keskeyta();
-                                                stop.onNext(null);
+                                                stop.onNext(msg);
                                             }
                                             if ("ready".equals(status.getStatus())) {
                                                 prosessi.vaiheValmistui();
-                                                LOG.info("Hyvaksymiskirjeet valmistui!");
+                                                String msg = "Hyvaksymiskirjeet valmistui!";
+                                                LOG.info(msg);
                                                 prosessi.valmistui(batchId.getBatchId());
-                                                stop.onNext(null);
+                                                stop.onNext(msg);
                                             }
                                         } catch (Exception e) {
                                             LOG.error("Statuksen haku epaonnistui", e);

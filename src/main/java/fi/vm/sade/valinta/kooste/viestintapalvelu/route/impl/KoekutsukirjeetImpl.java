@@ -237,15 +237,17 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                                 .timeout(899, MILLISECONDS)
                                                 .toFuture().get(900L, TimeUnit.MILLISECONDS);
                                             if ("error".equals(status.getStatus())) {
-                                                LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
+                                                String msg = "Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!";
+                                                LOG.error(msg);
                                                 prosessi.keskeyta();
-                                                stop.onNext(null);
+                                                stop.onNext(msg);
                                             }
                                             if ("ready".equals(status.getStatus())) {
                                                 prosessi.vaiheValmistui();
-                                                LOG.info("Koekutsukirjeet valmistui!");
+                                                String msg = "Koekutsukirjeet valmistui!";
+                                                LOG.info(msg);
                                                 prosessi.valmistui(batchId.getBatchId());
-                                                stop.onNext(null);
+                                                stop.onNext(msg);
                                             }
                                         } catch (Exception e) {
                                             LOG.error("Statuksen haku epaonnistui", e);
