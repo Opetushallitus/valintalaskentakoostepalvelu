@@ -54,6 +54,7 @@ public class ErillishaunVientiServiceTest {
         final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
         final ErillishaunVientiService erillishaunVientiService =
                 new ErillishaunVientiService(mockTilaAsyncResource, failingResource, mockAtaruAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource, mockKoodistoCachedAsyncResource);
+        when(failingResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid())).thenReturn(Observable.error(new RuntimeException("Vienti epäonnistuu tarkoituksella")));
 
         erillishaunVientiService.vie(new AuditSession(), prosessi, erillishaku);
         verify(prosessi, timeout(10000).times(1)).keskeyta();
