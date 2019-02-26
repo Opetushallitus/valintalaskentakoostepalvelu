@@ -45,7 +45,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public String getUlkomainenLahiosoite() {
-        return StringUtils.trimToEmpty(keyvalues.get("address"));
+        return getIfUlkomainenOsoiteOrEmpty("address");
     }
 
     @Override
@@ -73,19 +73,19 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     }
 
     @Override
-    public String getKaupunkiUlkomaa() { return StringUtils.trimToEmpty(keyvalues.get("home-town")); }
+    public String getKaupunkiUlkomaa() { return getIfUlkomainenOsoiteOrEmpty("city"); }
 
     @Override
-    public String getUlkomainenPostinumero() { return StringUtils.trimToEmpty(keyvalues.get("postal-code")); }
+    public String getUlkomainenPostinumero() { return getIfUlkomainenOsoiteOrEmpty("postal-code"); }
 
     @Override
-    public String getUlkomainenPostitoimipaikka() { return StringUtils.trimToEmpty(keyvalues.get("postal-office")); }
+    public String getUlkomainenPostitoimipaikka() { return getIfUlkomainenOsoiteOrEmpty("city"); }
 
     @Override
-    public String getSuomalainenLahiosoite() { return StringUtils.trimToEmpty(keyvalues.get("address")); }
+    public String getSuomalainenLahiosoite() { return getIfSuomalainenOsoiteOrEmpty("address"); }
 
     @Override
-    public String getSuomalainenPostinumero() { return StringUtils.trimToEmpty(keyvalues.get("postal-code")); }
+    public String getSuomalainenPostinumero() { return getIfSuomalainenOsoiteOrEmpty("postal-code"); }
 
     @Override
     public String getAsuinmaa() { return StringUtils.trimToEmpty(keyvalues.get("country-of-residence")); }
@@ -285,5 +285,15 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
         setHakemusDTOvalintapisteet(valintapisteet, hakemusDto);
 
         return hakemusDto;
+    }
+
+    private String getIfSuomalainenOsoiteOrEmpty(String key) {
+        if(keyvalues.get("home-town") == null) return "";
+        return StringUtils.trimToEmpty(keyvalues.get(key));
+    }
+
+    private String getIfUlkomainenOsoiteOrEmpty(String key) {
+        if(keyvalues.get("home-town") != null) return "";
+        return StringUtils.trimToEmpty(keyvalues.get(key));
     }
 }
