@@ -79,10 +79,19 @@ public class ValintakoeKutsuExcelKomponentti {
                             continue;
                         }
                         Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
-                        ValintakoeRivi v = new ValintakoeRivi(hakemus.getSukunimi(), hakemus.getEtunimi(),
+                        ValintakoeRivi v = new ValintakoeRivi(
+                                hakemus.getSukunimi(),
+                                hakemus.getEtunimet(),
                                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(hakemus.getSuomalainenPostinumero()), KieliUtil.SUOMI, hakemus.getSuomalainenPostinumero()),
                                 KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(hakemus.getAsuinmaa()), KieliUtil.ENGLANTI, hakemus.getAsuinmaa()),
-                                hakemus, hakemus.getOid(), null, nivelvaiheenKoekutsut, osoite, Yhteystiedot.yhteystiedotHakemukselta(hakemus), true);
+                                hakemus,
+                                hakemus.getOid(),
+                                null,
+                                nivelvaiheenKoekutsut,
+                                osoite,
+                                Yhteystiedot.yhteystiedotHakemukselta(hakemus),
+                                true
+                        );
                         hakemusJaRivi.merge(hakemus.getOid(), v, remappingFunction);
                     }
                 }
@@ -97,7 +106,9 @@ public class ValintakoeKutsuExcelKomponentti {
 
             LOG.debug("Creating rows for Excel file!");
             ArrayList<String> otsikot = new ArrayList<String>();
-            otsikot.addAll(Arrays.asList("Sukunimi", "Etunimi",
+            otsikot.addAll(Arrays.asList(
+                    "Sukunimi",
+                    "Etunimet",
                     "Henkilötunnus",
                     "Syntymäaika",
                     "Sukupuoli",
@@ -112,7 +123,10 @@ public class ValintakoeKutsuExcelKomponentti {
                     "Kansallinen ID",
                     "Passin numero",
                     "Sähköpostiosoite",
-                    "Puhelinnumero", "Hakemus", "Laskettu pvm"));
+                    "Puhelinnumero",
+                    "Hakemus",
+                    "Laskettu pvm"
+            ));
             List<String> oids = Lists.newArrayList();
             for (ValintakoeNimi n : tunnisteet) {
                 otsikot.add(n.getNimi());
@@ -166,9 +180,18 @@ public class ValintakoeKutsuExcelKomponentti {
             }
         }
         Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
-        return new ValintakoeRivi(h.getSukunimi(), h.getEtunimi(),
+        return new ValintakoeRivi(
+                h.getSukunimi(),
+                h.getEtunimet(),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(h.getSuomalainenPostinumero()), KieliUtil.SUOMI, h.getSuomalainenPostinumero()),
                 KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(h.getAsuinmaa()), KieliUtil.ENGLANTI, h.getAsuinmaa()),
-                h, h.getOid(), date, osallistumistiedot, osoite, Yhteystiedot.yhteystiedotHakemukselta(h), osallistuuEdesYhteen);
+                h,
+                h.getOid(),
+                date,
+                osallistumistiedot,
+                osoite,
+                Yhteystiedot.yhteystiedotHakemukselta(h),
+                osallistuuEdesYhteen
+        );
     }
 }
