@@ -4,6 +4,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class OsoiteHakemukseltaUtil {
         String maa = SUOMI.equalsIgnoreCase(hakemus.getAsuinmaa())
                 ? "Suomi" : KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(hakemus.getAsuinmaa()), KieliUtil.ENGLANTI, hakemus.getAsuinmaa());
         String maakoodi = hakemus.getAsuinmaa();
-        if (postitoimipaikka == null) {
+        if(StringUtils.isEmpty(postitoimipaikka)) {
             postitoimipaikka = SUOMI.equalsIgnoreCase(maakoodi) ? "" : hakemus.getUlkomainenPostitoimipaikka();
         }
         String postinumero = SUOMI.equalsIgnoreCase(maakoodi) ? hakemus.getSuomalainenPostinumero() : hakemus.getUlkomainenPostinumero();
