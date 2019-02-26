@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Kan
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
@@ -22,7 +23,9 @@ import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -84,7 +87,9 @@ public class AtaruAsyncResourceTest {
         when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_246"))).thenReturn(Observable.just(suomiKoodi));
         when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_663"))).thenReturn(Observable.just(saintMartinKoodi));
 
-        when(mockOnr.haeHenkilot(Collections.singletonList("1.2.246.562.24.86368188549"))).thenReturn(Observable.just(Collections.singletonList(onrHenkilo)));
+        Map<String, HenkiloPerustietoDto> henkiloResponse = new HashMap<>();
+        henkiloResponse.put("1.2.246.562.24.86368188549", onrHenkilo);
+        when(mockOnr.haeHenkilot(Collections.singletonList("1.2.246.562.24.86368188549"))).thenReturn(Single.just(henkiloResponse));
 
         List<HakemusWrapper> applications = ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOid1, hakemusOid2, hakemusOid3))
                 .timeout(1, SECONDS).blockingFirst();

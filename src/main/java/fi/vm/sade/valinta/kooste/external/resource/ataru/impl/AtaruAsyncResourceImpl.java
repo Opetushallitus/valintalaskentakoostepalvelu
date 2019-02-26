@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Kan
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
             if (hakemukset.isEmpty()) {
                 return Observable.just(Collections.emptyList());
             } else {
-                return getHenkilotObservable(hakemukset)
+                return getHenkilotObservable(hakemukset).toObservable()
                         .flatMap(henkilot -> {
                             ensureKansalaisuus(henkilot);
                             Stream<String> asuinmaaKoodit = hakemukset.stream().map(h -> h.getKeyValues().get("country-of-residence"));
@@ -95,10 +96,9 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
         }
     }
 
-    private Observable<Map<String, HenkiloPerustietoDto>> getHenkilotObservable(List<AtaruHakemus> hakemukset) {
+    private Single<Map<String, HenkiloPerustietoDto>> getHenkilotObservable(List<AtaruHakemus> hakemukset) {
         List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).distinct().collect(Collectors.toList());
-        return oppijanumerorekisteriAsyncResource.haeHenkilot(Lists.newArrayList(personOids))
-                .map(henkiloDtot -> henkiloDtot.stream().collect(Collectors.toMap(HenkiloPerustietoDto::getOidHenkilo, h -> h)));
+        return oppijanumerorekisteriAsyncResource.haeHenkilot(personOids);
     }
 
     private Function<AtaruHakemus, AtaruHakemusWrapper> hakemusToHakemusWrapper(Map<String, HenkiloPerustietoDto> henkilot, Map<String, Koodi> maakoodit) {

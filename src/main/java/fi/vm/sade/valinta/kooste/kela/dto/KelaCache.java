@@ -107,7 +107,8 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
         hakukohteet.put(hakukohde.getOid(), hakukohde);
     }
 
-    public void put(HenkiloPerustietoDto tieto) {
+    public void put(String oid, HenkiloPerustietoDto tieto) {
+        henkilotiedot.put(oid, tieto);
         henkilotiedot.put(tieto.getOidHenkilo(), tieto);
     }
 

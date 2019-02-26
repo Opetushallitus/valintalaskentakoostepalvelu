@@ -104,7 +104,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         ));
 
         // Sorry..
-        mockToReturnString(POST, "/oppijanumerorekisteri-service/henkilo/henkiloPerustietosByHenkiloOidList", "[{\"oidHenkilo\":\"person1\",\"hetu\":\"020202A0202\",\"etunimet\":\"Josefina Testi\",\"kutsumanimi\":\"Josefina\",\"sukunimi\":\"Andersson-Testi\",\"syntymaaika\":\"1990-01-01\",\"turvakielto\": false,\"aidinkieli\": null,\"asiointiKieli\": {\"kieliKoodi\":\"sv\"},\"kansalaisuus\": [{\"kansalaisuusKoodi\":\"246\"}],\"sukupuoli\":\"2\"}]");
+        mockToReturnString(POST, "/oppijanumerorekisteri-service/henkilo/masterHenkilosByOidList", "{\"person1\": {\"oidHenkilo\":\"person1\",\"hetu\":\"020202A0202\",\"etunimet\":\"Josefina Testi\",\"kutsumanimi\":\"Josefina\",\"sukunimi\":\"Andersson-Testi\",\"syntymaaika\":\"1990-01-01\",\"turvakielto\": false,\"aidinkieli\": null,\"asiointiKieli\": {\"kieliKoodi\":\"sv\"},\"kansalaisuus\": [{\"kansalaisuusKoodi\":\"246\"}],\"sukupuoli\":\"2\"}}");
 
         mockKoodisto();
 

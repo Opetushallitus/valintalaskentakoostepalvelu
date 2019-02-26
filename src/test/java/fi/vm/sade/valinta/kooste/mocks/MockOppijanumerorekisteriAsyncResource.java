@@ -6,13 +6,16 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
+import io.reactivex.Single;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,8 +55,8 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
                 () -> futureSupplier.apply(hp)));
     }
     @Override
-    public Observable<List<HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
-        return Observable.just(Lists.newArrayList());
+    public Single<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
+        return Single.just(new HashMap<>());
     }
 
     public static HenkiloPerustietoDto toHenkiloPerustietoDto(HenkiloCreateDTO proto) {

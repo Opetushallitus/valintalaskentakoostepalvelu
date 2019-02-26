@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.kela.route.impl;
 
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -19,7 +19,6 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Change;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
@@ -254,34 +253,13 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                             .distinct()
                             .collect(Collectors.toList());
                     try {
-                        int n = 0;
-                        Collection<List<String>> oiditSivutettuna = Lists
-                                .newArrayList();
-                        do {
-                            List<String> osajoukkoOideista = henkiloOidit.stream().skip(n).limit(MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_OPPIJANUMEROREKISTERISTA).collect(Collectors.toList());
-                            oiditSivutettuna.add(osajoukkoOideista);
-                            n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_OPPIJANUMEROREKISTERISTA;
-                        } while (n < henkiloOidit.size());
-                        List<HenkiloPerustietoDto> henkilot = Lists.newArrayList();
-                        LOG.warn("Haetaan {} henkiloa, {} erässä", henkiloOidit.size(), oiditSivutettuna.size());
-                        for (List<String> oidit : oiditSivutettuna) {
-                            try {
-                                List<HenkiloPerustietoDto> henkiloPerustietoDtos = retrieveHenkiloPerustietoDtos(oidit);
-                                henkilot.addAll(henkiloPerustietoDtos);
-                            } catch (Exception e) {
-                                LOG.error("Oppijanumerorekisteri haku epäonnistui. Yritetään vielä uudestaan.", e);
-                                Thread.sleep(50L);
-                                henkilot.addAll(retrieveHenkiloPerustietoDtos(oidit));
-                            }
-                        }
-                        henkilot.forEach(luonti.getLuonti().getCache()::put);
+                        oppijanumerorekisteriAsyncResource.haeHenkilot(henkiloOidit).blockingGet()
+                                .forEach((oid, h) -> luonti.getLuonti().getCache().put(oid, h));
                     } catch (Exception e) {
-                        String virhe = "Ei saatu henkiloita oppijanumerorekisteristä!";
-                        luonti.getLuonti()
-                                .getProsessi()
-                                .getPoikkeuksetUudelleenYrityksessa()
-                                .add(new Poikkeus(Poikkeus.HAKU, virhe));
-                        throw new RuntimeException(virhe);
+                        String msg = "Henkilöiden haku oppijanumerorekisteristä epäonnistui";
+                        luonti.getLuonti().getProsessi().getPoikkeukset()
+                                .add(Poikkeus.oppijanumerorekisteripoikkeus(msg));
+                        throw new RuntimeException(msg, e);
                     }
                 }))
                 .process(Reititys.<KelaLuontiJaAbstraktitHaut, KelaLuontiJaRivit>funktio(luontiJaRivit -> {
@@ -494,12 +472,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         log.error("Virhetilanne", e);
                     }
                 }));
-    }
-
-    private List<HenkiloPerustietoDto> retrieveHenkiloPerustietoDtos(List<String> oidit) {
-        return oppijanumerorekisteriAsyncResource.haeHenkilot(oidit)
-            .doOnError(throwable -> log.error("Exception when retrieving henkilö data for " + oidit.size() + " oids", throwable))
-            .timeout(30, SECONDS).blockingFirst();
     }
 
     private void updateHaunKohdejoukkoCache(Haku haku, KelaCache cache, Collection<Poikkeus> poikkeuksetUudelleenYrityksessa) {
