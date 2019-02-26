@@ -21,8 +21,8 @@
         <kela.version>12.0-SNAPSHOT</kela.version>
         <organisaatio.api.version>2015-13</organisaatio.api.version>
         <slf4j.version>1.7.5</slf4j.version>
-        <spring.security.version>4.1.2.RELEASE</spring.security.version>
-        <spring.version>4.3.2.RELEASE</spring.version>
+        <spring.security.version>5.1.4.RELEASE</spring.security.version>
+        <spring.version>5.1.5.RELEASE</spring.version>
         <hibernate.version>4.2.7.Final</hibernate.version>
         <hibernate-validator.version>4.1.0.Final</hibernate-validator.version>
         <swagger.version>1.5.16</swagger.version>
@@ -40,7 +40,7 @@
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>opintopolku-cas-servlet-filter</artifactId>
-                <version>0.1.0-SNAPSHOT</version>
+                <version>0.1.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
