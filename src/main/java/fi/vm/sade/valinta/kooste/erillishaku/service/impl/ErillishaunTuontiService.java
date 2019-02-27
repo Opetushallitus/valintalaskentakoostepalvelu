@@ -241,7 +241,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 } else {
                     LOG.error(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE + ". lisattavatTaiKeskeneraiset: {}", henkiloCreateDTOS, e);
                 }
-                prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE));
+                prosessi.keskeyta(Poikkeus.oppijanumerorekisteripoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE));
                 throw e;
             }
             LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());

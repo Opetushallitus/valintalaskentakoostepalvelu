@@ -23,7 +23,7 @@ public class Poikkeus {
     public static final String DOKUMENTTIPALVELU = "Dokumenttipalvelu";
     public static final String HAKU = "Hakupalvelu";
     public static final String HAKEMUSPALVELU = "Hakemuspalvelu";
-    public static final String HENKILOPALVELU = "Henkilöpalvelu";
+    public static final String OPPIJANUMEROREKISTERI = "Oppijanumerorekisteri";
     public static final String KOODISTO = "Koodistopalvelu";
     public static final String TARJONTA = "Tarjontapalvelu";
     public static final String VALINTALASKENTA = "Valintalaskentapalvelu";
@@ -88,8 +88,8 @@ public class Poikkeus {
         return new Poikkeus(HAKEMUSPALVELU, StringUtils.EMPTY, syy);
     }
 
-    public static Poikkeus henkilopalvelupoikkeus(String syy) {
-        return new Poikkeus(HENKILOPALVELU, StringUtils.EMPTY, syy);
+    public static Poikkeus oppijanumerorekisteripoikkeus(String syy) {
+        return new Poikkeus(OPPIJANUMEROREKISTERI, StringUtils.EMPTY, syy);
     }
 
     public Collection<Tunniste> getTunnisteet() {

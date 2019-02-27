@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -124,7 +123,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
 
             assertThat(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
                     // Odotetaan hakemuspalvelun epäonnistumisesta johtuvaa palautetta!
-                    .poikkeukset, equalTo(asList(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE))));
+                    .poikkeukset, equalTo(asList(Poikkeus.oppijanumerorekisteripoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE))));
         } finally {
             MockOppijanumerorekisteriAsyncResource.serviceIsAvailable.set(true);
         }
