@@ -28,12 +28,12 @@ install:
 script:
 - mvn clean package -B -Dbranch=${TRAVIS_BRANCH} -Drevision=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER}
 
-- mv target/valintalaskentakoostepalvelu.war $DOCKER_BUILD_DIR/artifact/valintalaskentakoostepalvelu.war
+- mv target/valintalaskentakoostepalvelu-*allinone.jar $DOCKER_BUILD_DIR/artifact/${ARTIFACT_NAME}.jar
 - cp -vr src/main/resources/oph-configuration $DOCKER_BUILD_DIR/config/
 
-- export BASE_IMAGE="baseimage-war:jdk11"
+- export BASE_IMAGE="baseimage-fatjar:jdk11"
 - ./ci-tools/common/pull-image.sh
-- ./ci-tools/build/build-war.sh $ARTIFACT_NAME
+- ./ci-tools/build/build-fatjar.sh $ARTIFACT_NAME
 
 deploy:
 - provider: script

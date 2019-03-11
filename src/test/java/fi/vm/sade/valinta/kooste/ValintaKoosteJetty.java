@@ -75,12 +75,7 @@ public class ValintaKoosteJetty {
                 } else {
                     wac.setResourceBase(root + "/src/main/webapp");
                 }
-
-                wac.setContextPath("/valintalaskentakoostepalvelu");
-                wac.setParentLoaderPriority(true);
-                server.setHandler(wac);
-                server.setStopAtShutdown(true);
-                server.start();
+                KoosteProductionJetty.start(wac, server);
             }
         } catch (Throwable t) {
             throw new RuntimeException(t);
