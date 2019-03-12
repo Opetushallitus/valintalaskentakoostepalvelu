@@ -103,6 +103,6 @@ public class ValintalaskentakoostepalveluJetty {
         WebAppContext wac = new WebAppContext();
         wac.addFilter(MockOpintopolkuCasAuthenticationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC, DispatcherType.INCLUDE));
         wac.setResourceBase(root + "/src/main/resources/webapp");
-        KoosteProductionJetty.start(wac, server);
+        KoosteProductionJetty.JETTY.start(wac, server, KoosteProductionJetty.contextPath);
     }
 }

@@ -75,7 +75,7 @@ public class ValintaKoosteJetty {
                 } else {
                     wac.setResourceBase(root + "/src/main/webapp");
                 }
-                KoosteProductionJetty.start(wac, server);
+                KoosteProductionJetty.JETTY.start(wac, server, KoosteProductionJetty.contextPath);
             }
         } catch (Throwable t) {
             throw new RuntimeException(t);
