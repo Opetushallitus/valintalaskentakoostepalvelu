@@ -186,10 +186,14 @@ public class OppijanSuorituksetProxyResource {
             respondWithError(handler,"Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
         resolveHakemusDTO(auditSession, hakuOid, opiskelijaOid, hakemus.getOid(), Observable.just(new HakuappHakemusWrapper(hakemus)), fetchEnsikertalaisuus).subscribe(hakemusDTO -> {
+            Map<String, String> avainArvoMap = getAvainArvoMap(hakemusDTO);
+            if (avainArvoMap.containsKey("perusopetuksen_kieli")) {
+                LOG.info("hakijaOid: " + opiskelijaOid + ", perusopetuksen_kieli: " + avainArvoMap.get("perusopetuksen_kieli"));
+            }
             asyncResponse.resume(Response
                     .ok()
                     .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(getAvainArvoMap(hakemusDTO))
+                    .entity(avainArvoMap)
                     .build());
         }, poikkeus -> {
             LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
@@ -238,6 +242,11 @@ public class OppijanSuorituksetProxyResource {
                 return m0;
             }));
             LOG.info("Haettiin {} hakemukselle {} suoritustietoa", allHakemus.size(), allData.size());
+            allData.forEach((k,v) -> {
+                if (v.containsKey("perusopetuksen_kieli")) {
+                    LOG.info("hakijaOid: " + k + ", perusopetuksen_kieli: " + v.get("perusopetuksen_kieli"));
+                }
+            });
             asyncResponse.resume(Response
                     .ok()
                     .type(MediaType.APPLICATION_JSON_TYPE)
