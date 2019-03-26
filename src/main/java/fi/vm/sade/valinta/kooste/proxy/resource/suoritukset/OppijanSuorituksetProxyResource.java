@@ -324,23 +324,19 @@ public class OppijanSuorituksetProxyResource {
 
     private Observable<HakemusDTO> resolveHakemusDTO(AuditSession auditSession, String hakuOid, String opiskelijaOid, String hakemusOid, Observable<HakemusWrapper> hakemusObservable, Boolean fetchEnsikertalaisuus) {
         Observable<HakuV1RDTO> hakuObservable = tarjontaAsyncResource.haeHaku(hakuOid);
-        Observable<Oppija> suorituksetByOppija = fetchEnsikertalaisuus ?
+        Observable<Oppija> suorituksetObservable = fetchEnsikertalaisuus ?
                 suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskelijaOid, hakuOid) :
                 suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOid);
-        Observable<ParametritDTO> parametritDTOObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
-        Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesObservable = tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid);
-        Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession);
+        Observable<ParametritDTO> parametritObservable = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+        Observable<PisteetWithLastModified> valintapisteetObservable = valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession);
 
-        return Observable.combineLatest(valintapisteet, hakuObservable, suorituksetByOppija, hakemusObservable, parametritDTOObservable, hakukohdeRyhmasForHakukohdesObservable,
-                (v, haku, suoritukset, hakemus, ohjausparametrit, hakukohdeRyhmasForHakukohdes) -> HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
-                        haku,
-                        "",
-                        hakukohdeRyhmasForHakukohdes,
-                        Collections.singletonList(hakemus),
-                        v.valintapisteet,
-                        Collections.singletonList(suoritukset),
-                        ohjausparametrit,
-                        fetchEnsikertalaisuus).get(0)
+        return Observable.combineLatest(valintapisteetObservable, hakuObservable, suorituksetObservable, hakemusObservable, parametritObservable,
+                (v, haku, oppijanSuoritukset, hakemus, parametrit) -> {
+                    List<Valintapisteet> valintapisteet = v.valintapisteet;
+                    List<HakemusWrapper> hakemukset = Collections.singletonList(hakemus);
+                    List<Oppija> suoritukset = Collections.singletonList(oppijanSuoritukset);
+                    return createHakemusDTOs(haku, suoritukset, hakemukset, valintapisteet, parametrit, fetchEnsikertalaisuus).get(0);
+                }
         );
     }
 
