@@ -110,9 +110,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         );
 
         // Add the elements returned by each response to one master list
-        return Observable
-            .concat(obses)
-            .<List<Oppija>>collect(LinkedList::new, (oppijas, collector) -> collector.addAll(oppijas)).toObservable();
+        return Observable.concat(obses);
     }
 
     @Override
