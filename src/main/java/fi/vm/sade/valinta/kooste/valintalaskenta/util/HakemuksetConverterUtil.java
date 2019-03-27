@@ -93,7 +93,7 @@ public class HakemuksetConverterUtil {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
         Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         if (hakemuksenArvot.containsKey(PERUSOPETUS_KIELI)) {
-            LOG.info("Perusopetuksen kieli hakijalle " + hakemusDTO.getHakijaOid() + " hakemukselta: " + hakemuksenArvot.get(PERUSOPETUS_KIELI));
+            LOG.info("Perusopetuksen kieli hakijalle " + hakemusDTO.getHakijaOid() + " hakemukselta: " + hakemuksenArvot.get(PERUSOPETUS_KIELI).getArvo());
         }
         Map<String, AvainArvoDTO> surenArvosanat = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta = toAvainMap(AmmatillisenKielikoetuloksetSurestaConverter.convert(oppija.getSuoritukset(), parametritDTO, hakemusDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
