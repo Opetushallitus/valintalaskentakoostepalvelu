@@ -92,6 +92,9 @@ public class HakemuksetConverterUtil {
                                                    HakemusDTO hakemusDTO, Boolean fetchEnsikertalaisuus) {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
         Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+        if (hakemuksenArvot.containsKey(PERUSOPETUS_KIELI)) {
+            LOG.info("Perusopetuksen kieli hakijalle " + hakemusDTO.getHakijaOid() + " hakemukselta: " + hakemuksenArvot.get(PERUSOPETUS_KIELI));
+        }
         Map<String, AvainArvoDTO> surenArvosanat = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta = toAvainMap(AmmatillisenKielikoetuloksetSurestaConverter.convert(oppija.getSuoritukset(), parametritDTO, hakemusDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
 
@@ -306,7 +309,11 @@ public class HakemuksetConverterUtil {
         Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemus, suoritukset);
         pohjakoulutus.ifPresent(pk -> tiedot.put(POHJAKOULUTUS, pk));
         pkPaattotodistusvuosi(hakemus, suoritukset).ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
-        pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
+        Optional<String> pkOpetuskieli = pkOpetuskieli(hakemus, suoritukset);
+        pkOpetuskieli.ifPresent(kieli -> {
+            LOG.info("Perusopetuksen kieli hakijalle " + hakemus.getHakijaOid() + " suorituksilta: " + kieli);
+            tiedot.put(PERUSOPETUS_KIELI, kieli);
+        });
         lukioOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
         pohjakoulutus.ifPresent(pk -> tiedot.putAll(automaticDiscretionaryOptions(pk, haku, hakemus)));
         suoritustilat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
