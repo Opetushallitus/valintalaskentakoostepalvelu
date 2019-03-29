@@ -99,8 +99,12 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockYksiHyvaksyttyKutsu();
 
         mockToReturnJson(POST, "/lomake-editori/api/external/valintalaskenta", Arrays.asList(
-                new HakemusSpec.AtaruHakemusBuilder().setOid(HAKEMUS1).setHakemusPersonOid("person1").setCountryOfResidence("246").getHakemus(),
-                new HakemusSpec.AtaruHakemusBuilder().setOid(HAKEMUS2).setHakemusPersonOid("person1").setCountryOfResidence("246").getHakemus()
+                new HakemusSpec.AtaruHakemusBuilder().setOid(HAKEMUS1)
+                        .setAsiointikieli("sv")
+                        .setHakemusPersonOid("person1").setCountryOfResidence("246").getHakemus(),
+                new HakemusSpec.AtaruHakemusBuilder()
+                        .setAsiointikieli("sv")
+                        .setOid(HAKEMUS2).setHakemusPersonOid("person1").setCountryOfResidence("246").getHakemus()
         ));
 
         // Sorry..
