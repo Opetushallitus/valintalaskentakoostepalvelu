@@ -115,6 +115,11 @@ public class HakemusSpec extends ConstantsSpec {
             henkilo = null;
         }
 
+        public AtaruHakemusBuilder setAsiointikieli(String asiointikieli) {
+            hakemus.setAsiointikieli(asiointikieli);
+            return this;
+        }
+
         public AtaruHakemusBuilder(String oid, String personOid, String hetu) {
             hakemus = new AtaruHakemus();
             hakemus.setKeyValues(Maps.newHashMap());

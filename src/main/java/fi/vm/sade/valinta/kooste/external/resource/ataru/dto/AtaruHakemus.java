@@ -15,17 +15,27 @@ public class AtaruHakemus {
     private String hakemusOid;
     private String personOid;
     private String hakuOid;
+    private String asiointikieli;
     private List<String> hakutoiveet;
     private Map<String,String> keyValues;
 
     public AtaruHakemus() {}
 
-    public AtaruHakemus(String hakemusOid, String personOid, String hakuOid, List<String> hakutoiveet, Map<String, String> keyValues) {
+    public AtaruHakemus(String hakemusOid, String personOid, String hakuOid, List<String> hakutoiveet, String asiointikieli, Map<String, String> keyValues) {
         this.hakemusOid = hakemusOid;
         this.personOid = personOid;
         this.hakuOid = hakuOid;
+        this.asiointikieli = asiointikieli;
         this.hakutoiveet = hakutoiveet;
         this.keyValues = keyValues;
+    }
+
+    public String getAsiointikieli() {
+        return asiointikieli;
+    }
+
+    public void setAsiointikieli(String asiointikieli) {
+        this.asiointikieli = asiointikieli;
     }
 
     public String getHakemusOid() {

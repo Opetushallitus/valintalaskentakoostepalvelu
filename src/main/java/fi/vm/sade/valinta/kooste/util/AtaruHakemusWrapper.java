@@ -169,31 +169,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public String getAsiointikieli() {
-        String asiointikieliHenkilolta = StringUtils.trimToEmpty(
-                Optional.ofNullable(henkilo.getAsiointiKieli())
-                        .map(KielisyysDto::getKieliKoodi)
-                        .orElse("")
-        );
-        String asiointikieliHakemukselta = StringUtils.trimToEmpty(hakemus.getKeyValues().get("asiointikieli"));
-        if (!asiointikieliHenkilolta.isEmpty()) {
-            return asiointikieliHenkilolta;
-        } else if (!asiointikieliHakemukselta.isEmpty()) {
-            switch (asiointikieliHakemukselta) {
-                case "1":
-                    return "fi";
-                case "2":
-                    return "sv";
-                case "3":
-                    return "en";
-                default:
-                    throw new RuntimeException(String.format(
-                            "Tuntematon asiointikieli %s hakemuksella %s",
-                            asiointikieliHakemukselta,
-                            hakemus.getHakemusOid()));
-            }
-        } else {
-            throw new RuntimeException(String.format("Ei asiointikieltä hakemuksella %s", hakemus.getHakemusOid()));
-        }
+        return hakemus.getAsiointikieli();
     }
 
     @Override
