@@ -573,7 +573,7 @@
         <dependency>
             <groupId>fi.vm.sade.sijoittelu</groupId>
             <artifactId>sijoittelu-algoritmi-domain</artifactId>
-            <version>6.1.4-SNAPSHOT</version>
+            <version>7.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.jackson</groupId>
@@ -584,7 +584,7 @@
         <dependency>
             <groupId>fi.vm.sade.sijoittelu</groupId>
             <artifactId>sijoittelu-tulos-api</artifactId>
-            <version>6.1.4-SNAPSHOT</version>
+            <version>7.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
