@@ -5,7 +5,6 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyn
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.ws.rs.core.Response;
 import java.util.Optional;
@@ -26,7 +25,7 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
 
     @Override
     public Observable<Response> haeOrganisaatio(String organisaatioOid) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -36,6 +35,6 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
 
     @Override
     public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 }

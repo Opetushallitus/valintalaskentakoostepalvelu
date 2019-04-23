@@ -97,17 +97,12 @@ public class ValintalaskentakoostepalveluJetty {
                 .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
     }
 
-    private static void startServer() throws Exception {
+    private static void startServer() {
         KoosteTestProfileConfiguration.PROXY_SERVER.set(Integraatiopalvelimet.mockServer.getHost() + ":" + Integraatiopalvelimet.mockServer.getPort());
         String root =  ProjectRootFinder.findProjectRoot().toString();
         WebAppContext wac = new WebAppContext();
         wac.addFilter(MockOpintopolkuCasAuthenticationFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC, DispatcherType.INCLUDE));
-        wac.setResourceBase(root + "/src/main/webapp");
-        wac.setContextPath("/valintalaskentakoostepalvelu");
-        wac.setParentLoaderPriority(true);
-        server.setHandler(wac);
-        server.setStopAtShutdown(true);
-        server.start();
+        wac.setResourceBase(root + "/src/main/resources/webapp");
+        KoosteProductionJetty.JETTY.start(wac, server, KoosteProductionJetty.contextPath);
     }
-
 }
