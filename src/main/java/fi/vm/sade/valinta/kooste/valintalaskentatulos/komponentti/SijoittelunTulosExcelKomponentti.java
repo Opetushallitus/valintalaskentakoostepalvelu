@@ -91,6 +91,7 @@ public class SijoittelunTulosExcelKomponentti {
         otsikkoRivi.addAll(Arrays.asList(
                 "Hakemus",
                 "Hakija",
+                "Oppijanumero",
                 "Henkilötunnus",
                 "Syntymäaika",
                 "Sukupuoli",
@@ -167,6 +168,7 @@ public class SijoittelunTulosExcelKomponentti {
             hakemusRivi.addAll(Arrays.asList(
                     hDto.getHakemusOid(),
                     nimi,
+                    wrapper.getPersonOid(),
                     wrapper.getHenkilotunnus(),
                     wrapper.getSyntymaaika(),
                     wrapper.getSukupuoli(),
