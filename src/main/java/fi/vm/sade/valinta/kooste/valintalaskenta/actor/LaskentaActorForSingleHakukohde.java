@@ -78,7 +78,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
             try {
                 HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio = hkJaOrg.get();
                 String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
-                Observable<Object> laskentaTimer = Observable.timer(90L, TimeUnit.MINUTES)
+                Observable<Object> laskentaTimer = Observable.timer(3L, TimeUnit.HOURS)
                     .switchMap(t -> Observable.error(new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin")));
                 Observable.amb(Arrays.asList(hakukohteenLaskenta.apply(hakukohdeJaOrganisaatio), laskentaTimer))
                     .subscribe(
