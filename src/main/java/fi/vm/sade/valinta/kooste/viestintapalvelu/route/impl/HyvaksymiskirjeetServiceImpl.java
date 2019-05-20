@@ -134,6 +134,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                 .filter(h -> kohdeHakijat.contains(h.getHakemusOid()))
                                 .collect(Collectors.toList());
 
+                        if (hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()) {
+                            //Filtteröidään muut hakijat paitsi sellaiset, joilla on hakemusWrapper.getLupaTulosEmail() == false
+                        }
+
                         if (kohdeHakukohteessaHyvaksytyt.isEmpty()) {
                             throw new RuntimeException(String.format("Haun %s hakukohteen %s annetuissa hakemuksista yksikään ei ollut hyväksytty. Kirjeitä ei voitu muodostaa.", hakuOid, hakukohdeOid));
                         }
@@ -180,6 +184,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 organisaatioObservable,
                 (hakemukset, hakijat, organisaatioResponse) -> {
                     LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
+                    LOG.info("vainTulosEmailinKieltaneet: " + hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet());
                     Collection<HakijaDTO> hylatyt = hakijat.getResults().stream()
                             .filter(HyvaksymiskirjeetServiceImpl::haussaHylatty)
                             .collect(Collectors.toList());
@@ -244,10 +249,21 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 hakutoimistoObservable,
                 (hakemukset, hakijat, hakutoimisto) -> {
                     LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi. {}", hakutoimisto);
+                    Set<String> tulosEmailinKieltaneet;
+                    if (hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()) {
+                        tulosEmailinKieltaneet = hakemukset.stream()
+                                .filter(hw -> !hw.getLupaTulosEmail())
+                                .map(HakemusWrapper::getPersonOid)
+                                .collect(Collectors.toSet());
+                    }
+
+                    else tulosEmailinKieltaneet = Collections.emptySet();
+                    LOG.info("vainTulosEmailinKieltaneet: " + hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet() + ", oids: " + tulosEmailinKieltaneet.toString());
                     Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
                             .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
+                            .filter(h -> !hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet() || tulosEmailinKieltaneet.contains(h.getHakijaOid()))
                             .collect(Collectors.toList());
-
+                    LOG.info("Filtteröinnin jälkeen jäljellä: " + kohdeHakukohteessaHyvaksytyt.size());
                     if (kohdeHakukohteessaHyvaksytyt.isEmpty()) {
                         throw new RuntimeException(String.format("Yhtään hyväksyttyä hakemusta ei löytynyt haun %s hakukohteessa %s. Kirjeitä ei voitu muodostaa.", hakuOid, hakukohdeOid));
                     }

@@ -198,7 +198,9 @@ public class ViestintapalveluAktivointiResource {
             @QueryParam("palautusPvm") String palautusPvm,
             @QueryParam("tag") String tag,
             @QueryParam("hakuOid") String hakuOid,
-            @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+            @QueryParam("sijoitteluajoId") Long sijoitteluajoId,
+            @QueryParam("vainTulosEmailinKieltaneet") boolean vainTulosEmailinKieltaneet)
+    {
         try {
             if (templateName == null) {
                 templateName = "jalkiohjauskirje";
@@ -206,11 +208,13 @@ public class ViestintapalveluAktivointiResource {
             if (hakemuksillaRajaus == null) {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
+            LOG.info("Hylkäyskirjeiden luonti aktivoitu hakukohteelle "+ hakukohdeOid + ", vainTulosEmailinKieltaneet: " + vainTulosEmailinKieltaneet);
+
             tag = hakemuksillaRajaus.getTag();
             KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika);
+                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika, vainTulosEmailinKieltaneet);
             hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(prosessi, hyvaksymiskirjeDTO);
             return prosessi.toProsessiId();
         } catch (Exception e) {
@@ -233,7 +237,8 @@ public class ViestintapalveluAktivointiResource {
             @QueryParam("palautusPvm") String palautusPvm,
             @QueryParam("templateName") String templateName,
             @QueryParam("hakuOid") String hakuOid,
-            @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+            @QueryParam("sijoitteluajoId") Long sijoitteluajoId,
+            @QueryParam("vainTulosEmailinKieltaneet") boolean vainTulosEmailinKieltaneet) {
         try {
             if (templateName == null) {
                 templateName = "hyvaksymiskirje";
@@ -241,11 +246,13 @@ public class ViestintapalveluAktivointiResource {
             if (hakemuksillaRajaus == null) {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
+            LOG.info("Hyväksymiskirjeiden luonti aktivoitu hakukohteelle "+ hakukohdeOid + ", vainTulosEmailinKieltaneet: " + vainTulosEmailinKieltaneet);
+
             String tag = hakemuksillaRajaus.getTag();
             KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika);
+                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika, vainTulosEmailinKieltaneet);
             if (hakemuksillaRajaus.getHakemusOids() == null) {
                 hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(prosessi, hyvaksymiskirjeDTO);
             } else {
