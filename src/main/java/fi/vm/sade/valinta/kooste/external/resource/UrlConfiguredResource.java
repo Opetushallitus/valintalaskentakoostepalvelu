@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class UrlConfiguredResource implements HttpResource{
+public abstract class UrlConfiguredResource implements HttpResource {
     private final HttpResource wrappedHttpResource;
     private final UrlConfiguration urlConfiguration;
 
