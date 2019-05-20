@@ -264,7 +264,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             .filter(h -> !hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet() || tulosEmailinKieltaneet.contains(h.getHakijaOid()))
                             .collect(Collectors.toList());
                     LOG.info("Filtteröinnin jälkeen jäljellä: " + kohdeHakukohteessaHyvaksytyt.size());
-                    if (kohdeHakukohteessaHyvaksytyt.isEmpty()) {
+                    if (kohdeHakukohteessaHyvaksytyt.isEmpty() && hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()) {
+                        throw new RuntimeException(String.format("Yhtään hyväksyttyä ja tulos-emailit kieltänyttä hakemusta ei löytynyt haun %s hakukohteessa %s. Kirjeitä ei voitu muodostaa.", hakuOid, hakukohdeOid));
+                    } else if (kohdeHakukohteessaHyvaksytyt.isEmpty()) {
                         throw new RuntimeException(String.format("Yhtään hyväksyttyä hakemusta ei löytynyt haun %s hakukohteessa %s. Kirjeitä ei voitu muodostaa.", hakuOid, hakukohdeOid));
                     }
 
