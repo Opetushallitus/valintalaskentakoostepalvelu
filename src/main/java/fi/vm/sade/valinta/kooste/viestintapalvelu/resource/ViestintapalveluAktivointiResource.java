@@ -208,7 +208,6 @@ public class ViestintapalveluAktivointiResource {
             if (hakemuksillaRajaus == null) {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
-            LOG.info("Hylkäyskirjeiden luonti aktivoitu hakukohteelle "+ hakukohdeOid + ", vainTulosEmailinKieltaneet: " + vainTulosEmailinKieltaneet);
 
             tag = hakemuksillaRajaus.getTag();
             KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
