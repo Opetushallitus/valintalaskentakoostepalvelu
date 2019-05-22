@@ -152,7 +152,12 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public String getSukunimi() { return StringUtils.trimToEmpty(henkilo.getSukunimi()); }
 
     @Override
-    public boolean getLupaJulkaisuun() { return false; }
+    public boolean getLupaJulkaisuun() {
+        if (keyvalues.get("valintatuloksen-julkaisulupa").equals("Kyllä")) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean getVainSahkoinenViestinta() { return false; }
@@ -178,7 +183,12 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     }
 
     @Override
-    public boolean getLupaSahkoiseenAsiointiin() { return false; }
+    public boolean getLupaSahkoiseenAsiointiin() {
+        if (keyvalues.get("lupa-sahkoiseen-asiointiin").equals("Kyllä")) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public Collection<String> getHakutoiveOids() {
@@ -186,7 +196,9 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     }
 
     @Override
-    public boolean isMaksuvelvollinen(String hakukohdeOid) { return false; }
+    public boolean isMaksuvelvollinen(String hakukohdeOid) {
+        //TODO!
+        return false; }
 
     @Override
     public String getMaksuvelvollisuus(String hakukohdeOid) { return null; }
