@@ -153,8 +153,10 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public boolean getLupaJulkaisuun() {
-        if (keyvalues.get("valintatuloksen-julkaisulupa").equals("Kyllä")) {
-            return true;
+        if (keyvalues.containsKey("valintatuloksen-julkaisulupa")) {
+            if (keyvalues.get("valintatuloksen-julkaisulupa").equals("Kyllä")) {
+                return true;
+            }
         }
         return false;
     }
@@ -184,8 +186,10 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public boolean getLupaSahkoiseenAsiointiin() {
-        if (keyvalues.get("lupa-sahkoiseen-asiointiin").equals("Kyllä")) {
-            return true;
+        if (keyvalues.containsKey("lupa-sahkoiseen-asiointiin")) {
+            if (keyvalues.get("lupa-sahkoiseen-asiointiin").equals("Kyllä")) {
+                return true;
+            }
         }
         return false;
     }
