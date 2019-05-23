@@ -186,8 +186,8 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public boolean getLupaSahkoiseenAsiointiin() {
-        if (keyvalues.containsKey("lupa-sahkoiseen-asiointiin")) {
-            if (keyvalues.get("lupa-sahkoiseen-asiointiin").equals("Kyllä")) {
+        if (keyvalues.containsKey("sahkoisen-asioinnin-lupa")) {
+            if (keyvalues.get("sahkoisen-asioinnin-lupa").equals("Kyllä")) {
                 return true;
             }
         }
