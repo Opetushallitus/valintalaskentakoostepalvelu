@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -22,6 +21,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensRe
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiResponse;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
@@ -108,7 +108,7 @@ public class EPostinLahetysServiceE2ETest {
     }
 
     private Response sendEPosti(String kirjeenTyyppi, String asiointikieli) {
-        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder()
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder(getClass().getName())
                 .address(resourcesAddress + "/viestintapalvelu/securelinkit/aktivoi")
                 .buildExposingWebClientDangerously();
         EPostiRequest request = new EPostiRequest();

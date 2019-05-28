@@ -1,10 +1,14 @@
 package fi.vm.sade.valinta.kooste.server;
 
+import static fi.vm.sade.valinta.sharedutils.http.HttpResource.CALLER_ID;
 import com.google.common.collect.Lists;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import fi.vm.sade.integrationtest.util.PortChecker;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -48,10 +52,25 @@ public class MockServer {
         return httpServer.getAddress().getPort();
     }
 
-    public MockServer addHandler(String path, HttpHandler exchange) {
+    public MockServer addHandler(String path, HttpHandler handler) {
         paths.add(path);
-        this.httpServer.createContext(path, exchange);
+        this.httpServer.createContext(path, wrapWithCallerIdAssertion(handler));
         return this;
+    }
+
+    private HttpHandler wrapWithCallerIdAssertion(HttpHandler handler) {
+        return exchange -> {
+            try {
+                Headers requestHeaders = exchange.getRequestHeaders();
+                List<String> callerIdHeader = requestHeaders.get(CALLER_ID);
+                Assert.assertThat("Expected '" + CALLER_ID + "' header in " + requestHeaders.entrySet(),
+                    callerIdHeader, Matchers.contains("1.2.246.562.10.00000000001.valintalaskentakoostepalvelu"));
+                handler.handle(exchange);
+            } catch (Throwable t) {
+                t.printStackTrace();
+                throw t;
+            }
+        };
     }
 
     public List<String> getPaths() {

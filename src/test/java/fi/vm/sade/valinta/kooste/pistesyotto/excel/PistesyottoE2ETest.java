@@ -343,7 +343,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     }
 
     private HttpResourceBuilder.WebClientExposingHttpResource createHttpResource(String url) {
-        return new HttpResourceBuilder().address(url).timeoutMillis(TimeUnit.SECONDS.toMillis(240L)).buildExposingWebClientDangerously();
+        return new HttpResourceBuilder(getClass().getName()).address(url).timeoutMillis(TimeUnit.SECONDS.toMillis(240L)).buildExposingWebClientDangerously();
     }
 
     public static class Result<T> {

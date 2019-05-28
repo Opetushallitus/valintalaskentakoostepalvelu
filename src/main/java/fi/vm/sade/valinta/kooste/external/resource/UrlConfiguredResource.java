@@ -3,16 +3,16 @@ package fi.vm.sade.valinta.kooste.external.resource;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import io.reactivex.Observable;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.function.Function;
 
 public abstract class UrlConfiguredResource implements HttpResource {
-    private final HttpResource wrappedHttpResource;
+    public static final String VALINTALASKENTAKOOSTEPALVELU_CALLER_ID = "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
+    public final HttpResource wrappedHttpResource;
     private final UrlConfiguration urlConfiguration;
 
     public UrlConfiguredResource() {
@@ -36,7 +37,7 @@ public abstract class UrlConfiguredResource implements HttpResource {
                                  AbstractPhaseInterceptor casInterceptor) {
         this.urlConfiguration = UrlConfiguration.getInstance();
 
-        HttpResourceBuilder builder = new HttpResourceBuilder().gson(createGson()).timeoutMillis(timeoutMillis);
+        HttpResourceBuilder builder = new HttpResourceBuilder(VALINTALASKENTAKOOSTEPALVELU_CALLER_ID).gson(createGson()).timeoutMillis(timeoutMillis);
         if (casInterceptor != null) {
             builder.jaxrsClientFactoryBean(installCasFilter(casInterceptor, HttpResource.getJaxrsClientFactoryBean()));
         }

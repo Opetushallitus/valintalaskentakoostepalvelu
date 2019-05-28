@@ -7,10 +7,10 @@ import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startS
 import static javax.ws.rs.HttpMethod.GET;
 import static org.junit.Assert.assertEquals;
 
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -40,7 +40,7 @@ public class OmatSivutHakemusResourceTest {
     public void hakemusResourceTest() throws Exception {
         final String valintatulos = classpathResourceAsString(PROXY_VALINTA_TULOS_SERVICE_JSON);
         mockToReturnString(GET, "/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid, valintatulos);
-        final HttpResourceBuilder.WebClientExposingHttpResource proxyResource = new HttpResourceBuilder()
+        final HttpResourceBuilder.WebClientExposingHttpResource proxyResource = new HttpResourceBuilder(getClass().getName())
                 .address(resourcesAddress + "/proxy/valintatulos/haku/" + hakuOid + "/hakemusOid/" + hakemusOid)
                 .buildExposingWebClientDangerously();
         Response response = proxyResource.getWebClient().get();

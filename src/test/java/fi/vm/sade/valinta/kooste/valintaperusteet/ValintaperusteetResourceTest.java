@@ -1,13 +1,17 @@
 package fi.vm.sade.valinta.kooste.valintaperusteet;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2.ValintaperusteetResourceResult;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,14 +20,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 public class ValintaperusteetResourceTest {
 
     private final String hakukohdeOid = "1.2.246.562.5.28143628072";
 
     private final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources/V2valintaperusteet";
-    private final HttpResourceBuilder.WebClientExposingHttpResource hakukohteenValintaperusteetResource = new HttpResourceBuilder()
+    private final HttpResourceBuilder.WebClientExposingHttpResource hakukohteenValintaperusteetResource = new HttpResourceBuilder(getClass().getName())
             .address(String.format("%s/hakukohde/%s/kayttaaValintalaskentaa", root, hakukohdeOid))
             .buildExposingWebClientDangerously();
 

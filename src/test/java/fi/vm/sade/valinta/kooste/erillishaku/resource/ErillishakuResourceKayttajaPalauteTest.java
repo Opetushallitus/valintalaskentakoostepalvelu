@@ -14,7 +14,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import com.google.gson.GsonBuilder;
 
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
@@ -25,6 +24,7 @@ import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,8 +46,8 @@ public class ErillishakuResourceKayttajaPalauteTest {
     String hakukohdeOid = "1.2.246.562.5.72607738902";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
-    final HttpResourceBuilder.WebClientExposingHttpResource jsonResource = new HttpResourceBuilder().address(root + "/erillishaku/tuonti/ui").buildExposingWebClientDangerously();
-    final HttpResourceBuilder.WebClientExposingHttpResource excelResource = new HttpResourceBuilder().address(root + "/erillishaku/tuonti").buildExposingWebClientDangerously();
+    final HttpResourceBuilder.WebClientExposingHttpResource jsonResource = new HttpResourceBuilder(getClass().getName()).address(root + "/erillishaku/tuonti/ui").buildExposingWebClientDangerously();
+    final HttpResourceBuilder.WebClientExposingHttpResource excelResource = new HttpResourceBuilder(getClass().getName()).address(root + "/erillishaku/tuonti").buildExposingWebClientDangerously();
     @Before
     public void startServer() {
         ValintaKoosteJetty.startShared();
