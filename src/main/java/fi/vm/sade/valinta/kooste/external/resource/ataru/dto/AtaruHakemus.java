@@ -17,18 +17,18 @@ public class AtaruHakemus {
     private String hakuOid;
     private String asiointikieli;
     private List<String> hakutoiveet;
-    private Map<String,String> maksunTila;
+    private Map<String,String> maksuvelvollisuus;
     private Map<String,String> keyValues;
 
     public AtaruHakemus() {}
 
-    public AtaruHakemus(String hakemusOid, String personOid, String hakuOid, List<String> hakutoiveet, Map<String, String> maksunTila, String asiointikieli, Map<String, String> keyValues) {
+    public AtaruHakemus(String hakemusOid, String personOid, String hakuOid, List<String> hakutoiveet, Map<String, String> maksuvelvollisuus, String asiointikieli, Map<String, String> keyValues) {
         this.hakemusOid = hakemusOid;
         this.personOid = personOid;
         this.hakuOid = hakuOid;
         this.asiointikieli = asiointikieli;
         this.hakutoiveet = hakutoiveet;
-        this.maksunTila = maksunTila;
+        this.maksuvelvollisuus = maksuvelvollisuus;
         this.keyValues = keyValues;
     }
 
@@ -72,12 +72,12 @@ public class AtaruHakemus {
         this.hakutoiveet = hakutoiveet;
     }
 
-    public Map<String, String> getMaksunTila() {
-        return maksunTila;
+    public Map<String, String> getMaksuvelvollisuus() {
+        return maksuvelvollisuus;
     }
 
-    public void setMaksunTila(Map<String, String> maksunTila) {
-        this.maksunTila = maksunTila;
+    public void setMaksuvelvollisuus(Map<String, String> maksuvelvollisuus) {
+        this.maksuvelvollisuus = maksuvelvollisuus;
     }
 
     public Map<String, String> getKeyValues() {

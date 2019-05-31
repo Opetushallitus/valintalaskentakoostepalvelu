@@ -200,8 +200,8 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public boolean isMaksuvelvollinen(String hakukohdeOid) {
-        if (hakemus.getMaksunTila().containsKey(hakukohdeOid)) {
-                if (hakemus.getMaksunTila().get(hakukohdeOid).equals("obligated")){
+        if (hakemus.getMaksuvelvollisuus().containsKey(hakukohdeOid)) {
+                if (hakemus.getMaksuvelvollisuus().get(hakukohdeOid).equals("obligated")){
                     return true;
             }
         }

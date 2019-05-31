@@ -54,7 +54,7 @@ public class HakemusSpec extends ConstantsSpec {
             this.hakemus = new Hakemus();
             this.hakemus.setAnswers(new Answers());
             this.hakemus.getAnswers().setHakutoiveet(Maps.newHashMap());
-            this.hakemus.getAnswers().setMaksunTila(Maps.newHashMap());
+            this.hakemus.getAnswers().setMaksuvelvollisuus(Maps.newHashMap());
             this.hakemus.getAnswers().setHenkilotiedot(Maps.newHashMap());
         }
         public HakemusBuilder setEtunimiJaSukunimi(String etunimi, String sukunimi) {
@@ -140,8 +140,8 @@ public class HakemusSpec extends ConstantsSpec {
             hakemus.setHakutoiveet(oids);
             return this;
         }
-        public AtaruHakemusBuilder setMaksunTila(Map<String, String> maksunTila) {
-            hakemus.setMaksunTila(maksunTila);
+        public AtaruHakemusBuilder setMaksuvelvollisuus(Map<String, String> maksuvelvollisuus) {
+            hakemus.setMaksuvelvollisuus(maksuvelvollisuus);
             return this;
         }
         public AtaruHakemusBuilder setSuomalainenPostinumero(String postinumero) {
