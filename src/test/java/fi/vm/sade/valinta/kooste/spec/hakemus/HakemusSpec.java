@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jussi Jartamo
@@ -53,6 +54,7 @@ public class HakemusSpec extends ConstantsSpec {
             this.hakemus = new Hakemus();
             this.hakemus.setAnswers(new Answers());
             this.hakemus.getAnswers().setHakutoiveet(Maps.newHashMap());
+            this.hakemus.getAnswers().setMaksunTila(Maps.newHashMap());
             this.hakemus.getAnswers().setHenkilotiedot(Maps.newHashMap());
         }
         public HakemusBuilder setEtunimiJaSukunimi(String etunimi, String sukunimi) {
@@ -136,6 +138,10 @@ public class HakemusSpec extends ConstantsSpec {
 
         public AtaruHakemusBuilder setHakutoiveet(List<String> oids) {
             hakemus.setHakutoiveet(oids);
+            return this;
+        }
+        public AtaruHakemusBuilder setMaksunTila(Map<String, String> maksunTila) {
+            hakemus.setMaksunTila(maksunTila);
             return this;
         }
         public AtaruHakemusBuilder setSuomalainenPostinumero(String postinumero) {

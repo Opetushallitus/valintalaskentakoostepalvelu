@@ -132,6 +132,7 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                     hakemus.getPersonOid(),
                     hakemus.getHakuOid(),
                     hakemus.getHakutoiveet(),
+                    hakemus.getMaksunTila(),
                     hakemus.getAsiointikieli(),
                     newKeyValues
             );

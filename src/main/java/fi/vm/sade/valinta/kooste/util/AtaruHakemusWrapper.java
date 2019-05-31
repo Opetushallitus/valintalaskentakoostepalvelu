@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -201,8 +200,12 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public boolean isMaksuvelvollinen(String hakukohdeOid) {
-        //TODO!
-        return false; }
+        if (hakemus.getMaksunTila().containsKey(hakukohdeOid)) {
+                if (hakemus.getMaksunTila().get(hakukohdeOid).equals("obligated")){
+            }
+        }
+        return false;
+    }
 
     @Override
     public String getMaksuvelvollisuus(String hakukohdeOid) { return null; }
