@@ -243,22 +243,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 hakijatObservable,
                 hakutoimistoObservable,
                 (hakemukset, hakijat, hakutoimisto) -> {
-                    LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi. {}", hakutoimisto);
-                    Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
-                            .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
-                            .collect(Collectors.toList());
-
-                    if (kohdeHakukohteessaHyvaksytyt.isEmpty()) {
-                        throw new RuntimeException(String.format("Yhtään hyväksyttyä hakemusta ei löytynyt haun %s hakukohteessa %s. Kirjeitä ei voitu muodostaa.", hakuOid, hakukohdeOid));
-                    }
-
-                    Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
+                    List<HakijaDTO> hakijatJoilleMuodostetaanKirjeet = paatteleTarpeellisetKirjeet(hakijat.getResults(), hakemukset, hyvaksymiskirjeDTO);
+                    LOG.info("Haetaan kiinnostavat hakukohteet ja muodostetaan kirjeet {} hakijalle.", hakijatJoilleMuodostetaanKirjeet.size());
+                    Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hakijatJoilleMuodostetaanKirjeet);
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             ImmutableMap.of(organisaatioOid, hakutoimisto.flatMap(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli()))),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
-                            kohdeHakukohteessaHyvaksytyt, hakemukset,
+                            hakijatJoilleMuodostetaanKirjeet, hakemukset,
                             hakuOid,
                             Optional.empty(),
                             hyvaksymiskirjeDTO.getSisalto(),
@@ -272,6 +265,35 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .subscribe(
                         letterBatch -> letterBatchToViestintapalvelu().accept(new Object[] { letterBatch, prosessi, hyvaksymiskirjeDTO }),
                         throwable -> logErrorAndKeskeyta(prosessi, throwable, hakuOid, hakukohdeOid));
+    }
+
+    private List<HakijaDTO> paatteleTarpeellisetKirjeet(List<HakijaDTO> hakijat, List<HakemusWrapper> hakemukset, HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
+        String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
+        List<HakijaDTO> hakijatJoilleMuodostetaanKirjeet;
+        List<HakijaDTO> hyvaksytytHakijat = hakijat.stream()
+                .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
+                .collect(Collectors.toList());
+        if (hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()) {
+            LOG.info("Muodostetaan kirjeet vain niille hyväksytyille, joiden hakemuksilta puuttuu annettu lupa tulossähköpostille.");
+            List<String> antanutLuvan = hakemukset.stream()
+                    .filter(HakemusWrapper::getLupaTulosEmail)
+                    .map(HakemusWrapper::getPersonOid)
+                    .collect(Collectors.toList());
+            hakijatJoilleMuodostetaanKirjeet = hyvaksytytHakijat.stream()
+                    .filter(hDTO -> !antanutLuvan.contains(hDTO.getHakijaOid()))
+                    .collect(Collectors.toList());
+            LOG.info("Hakukohteessa {} yhteensä {} hyväksyttyä, joista {} ei antanut lupaa tulossähköpostille.", hakukohdeOid, hyvaksytytHakijat.size(), hakijatJoilleMuodostetaanKirjeet.size());
+        } else {
+            hakijatJoilleMuodostetaanKirjeet = hyvaksytytHakijat;
+            LOG.info("Hakukohteessa {} yhteensä {} hyväksyttyä.", hakukohdeOid, hyvaksytytHakijat.size());
+        }
+
+        if (hakijatJoilleMuodostetaanKirjeet.isEmpty() && hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()) {
+            throw new RuntimeException(String.format("Yhtään hyväksyttyä ja tulos-emailille lupaa-antamatonta hakemusta ei löytynyt haun %s hakukohteessa %s. Kirjeitä ei voitu muodostaa.", hyvaksymiskirjeDTO.getHakuOid(), hakukohdeOid));
+        } else if (hakijatJoilleMuodostetaanKirjeet.isEmpty()) {
+            throw new RuntimeException(String.format("Yhtään hyväksyttyä hakemusta ei löytynyt haun %s hakukohteessa %s. Kirjeitä ei voitu muodostaa.", hyvaksymiskirjeDTO.getHakuOid(), hakukohdeOid));
+        }
+        return hakijatJoilleMuodostetaanKirjeet;
     }
 
     private void logErrorAndKeskeyta(KirjeProsessi prosessi, Throwable throwable, String hakuOid, String hakukohdeOid) {

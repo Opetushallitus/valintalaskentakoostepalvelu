@@ -158,6 +158,11 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public boolean getVainSahkoinenViestinta() { return false; }
 
     @Override
+    public boolean getLupaTulosEmail() {
+        return "Kyllä".equals(StringUtils.trimToEmpty(keyvalues.get("sahkoisen-asioinnin-lupa")));
+    }
+
+    @Override
     public boolean hasAsiointikieli() {
         try {
             this.getAsiointikieli();

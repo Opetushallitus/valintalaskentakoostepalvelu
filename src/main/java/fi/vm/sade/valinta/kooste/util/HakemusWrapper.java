@@ -81,6 +81,8 @@ public abstract class HakemusWrapper {
 
     public abstract boolean getLupaSahkoiseenAsiointiin();
 
+    public abstract boolean getLupaTulosEmail();
+
     public abstract Collection<String> getHakutoiveOids();
 
     public abstract String getMaksuvelvollisuus(String hakukohdeOid);
