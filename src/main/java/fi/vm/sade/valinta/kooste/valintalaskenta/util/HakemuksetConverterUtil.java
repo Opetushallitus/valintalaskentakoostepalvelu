@@ -38,6 +38,7 @@ import static java.util.stream.Collectors.*;
 public class HakemuksetConverterUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
     public static final String PK_PAATTOTODISTUSVUOSI = "PK_PAATTOTODISTUSVUOSI";
+    public static final String LK_PAATTOTODISTUSVUOSI = "lukioPaattotodistusVuosi";
     public static final String PERUSOPETUS_KIELI = "perusopetuksen_kieli";
     public static final String LUKIO_KIELI = "lukion_kieli";
     public static final String POHJAKOULUTUS = "POHJAKOULUTUS";
@@ -227,7 +228,9 @@ public class HakemuksetConverterUtil {
 
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
             boolean suressaValmisJaVahvistettuLukiosuoritus = suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isVahvistettu() && s.isValmis());
-            if (suressaValmisJaVahvistettuLukiosuoritus) {
+            String hakuVuosi = Integer.toString(haku.getHakukausiVuosi());
+            Optional<AvainArvoDTO> abiturientti = h.getAvaimet().stream().filter(dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain()) && hakuVuosi.equals(dto.getArvo())).findFirst();
+            if (suressaValmisJaVahvistettuLukiosuoritus || abiturientti.isEmpty()) {
                 return of(PohjakoulutusToinenAste.YLIOPPILAS);
             } else {
                 LOG.warn("Hakemuksella {} pohjakoulutus lukio, mutta valmista ja vahvistettua lukiosuoritusta ei löydy suoritusrekisteristä. Palautetaan pohjakoulutus PERUSKOULU.", h.getHakemusoid());
