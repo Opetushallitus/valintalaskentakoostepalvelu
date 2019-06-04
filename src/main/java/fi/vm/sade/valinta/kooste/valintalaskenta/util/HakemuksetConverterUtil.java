@@ -224,8 +224,15 @@ public class HakemuksetConverterUtil {
             suorituksetRekisterista.stream().filter(SuoritusJaArvosanatWrapper::isPerusopetus).allMatch(vahvistettuKeskeytynytPerusopetus)) {
             return of(PohjakoulutusToinenAste.KESKEYTYNYT);
         }
+
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
-            return of(PohjakoulutusToinenAste.YLIOPPILAS);
+            boolean suressaValmisJaVahvistettuLukiosuoritus = suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isVahvistettu() && s.isValmis());
+            if (suressaValmisJaVahvistettuLukiosuoritus) {
+                return of(PohjakoulutusToinenAste.YLIOPPILAS);
+            } else {
+                LOG.warn("Hakemuksella {} pohjakoulutus lukio, mutta valmista ja vahvistettua lukiosuoritusta ei löydy suoritusrekisteristä. Palautetaan pohjakoulutus PERUSKOULU.", h.getHakemusoid());
+                return of(PohjakoulutusToinenAste.PERUSKOULU);
+            }
         }
         Optional<SuoritusJaArvosanatWrapper> perusopetus = suorituksetRekisterista.stream()
                 .filter(s -> s.isPerusopetus() && s.isVahvistettu() && !s.isKeskeytynyt())

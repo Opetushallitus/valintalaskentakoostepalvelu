@@ -75,6 +75,11 @@ public class HakemuksetConverterUtilTest {
                     .setYksilollistaminen("Ei")
                     .setValmistuminen(HAKUKAUDELLA).setValmis()
                     .done();
+    private static final SuoritusJaArvosanat vahvistettuLukioValmisHakukaudella =
+            new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setLukio().setVahvistettu(true)
+                    .setValmistuminen(HAKUKAUDELLA).setValmis()
+                    .done();
     private static final SuoritusJaArvosanat vahvistamatonPerusopetusValmisHakukaudella =
             new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setPerusopetus().setVahvistettu(false)
@@ -341,7 +346,7 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void pohjakoulutusHakemukseltaJosLukioSuoritusKeskeytynytHakukaudella() {
+    public void pohjakoulutusPeruskouluJosHakemuksellaLukioJaLukioSuoritusKeskeytynytHakukaudella() {
         HakemusDTO h = new HakemusDTO();
         h.setHakijaOid("1.2.3.4.5.6");
         h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
@@ -350,7 +355,7 @@ public class HakemuksetConverterUtilTest {
         List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
             add(vahvistamatonLukioKeskeytynytHakukaudella);
         }};
-        Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+        Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
 
     @Test
@@ -433,13 +438,14 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void pohjakoulutusLukioJosHakemuksellaLukioJaEiLukioSuoritusKeskeytynytHakukaudella() {
+    public void pohjakoulutusLukioJosHakemuksellaLukioJaLoytyyValmisLukiosuoritus() {
         HakemusDTO h = new HakemusDTO();
         h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
             this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.YLIOPPILAS));
         }});
         List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
             add(vahvistettuPerusopetusValmisHakukaudella);
+            add(vahvistettuLukioValmisHakukaudella);
         }};
         Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
