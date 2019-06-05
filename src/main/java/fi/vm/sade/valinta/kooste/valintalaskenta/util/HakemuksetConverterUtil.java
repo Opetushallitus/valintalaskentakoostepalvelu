@@ -229,8 +229,8 @@ public class HakemuksetConverterUtil {
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
             boolean suressaValmisJaVahvistettuLukiosuoritus = suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isVahvistettu() && s.isValmis());
             String hakuVuosi = Integer.toString(haku.getHakukausiVuosi());
-            Optional<AvainArvoDTO> abiturientti = h.getAvaimet().stream().filter(dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain()) && hakuVuosi.equals(dto.getArvo())).findFirst();
-            if (suressaValmisJaVahvistettuLukiosuoritus || abiturientti.isEmpty()) {
+            boolean isAbiturientti = h.getAvaimet().stream().anyMatch(dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain()) && hakuVuosi.equals(dto.getArvo()));
+            if (suressaValmisJaVahvistettuLukiosuoritus || !isAbiturientti) {
                 return of(PohjakoulutusToinenAste.YLIOPPILAS);
             } else {
                 LOG.warn("Hakemuksella {} pohjakoulutus lukio, mutta valmista ja vahvistettua lukiosuoritusta ei löydy suoritusrekisteristä. Palautetaan pohjakoulutus PERUSKOULU.", h.getHakemusoid());
