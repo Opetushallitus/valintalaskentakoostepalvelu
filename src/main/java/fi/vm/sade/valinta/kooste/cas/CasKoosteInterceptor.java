@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.cas;
 
+import static fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
+
 import fi.vm.sade.authentication.cas.CasClient;
+import fi.vm.sade.javautils.cxf.OphCxfMessageUtil;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -11,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +23,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
 
 public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CasKoosteInterceptor.class);
@@ -93,11 +93,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     }
 
     private void addCookie(Message message, String cookieValue) {
-        Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
-        if (!headers.containsKey("Cookie")) {
-            headers.put("Cookie", new ArrayList<>());
-        }
-        headers.get("Cookie").add(this.cookieName + "=" + cookieValue);
+        OphCxfMessageUtil.appendToHeader(message, "Cookie", this.cookieName + "=" + cookieValue, ";");
     }
 
     @Override
