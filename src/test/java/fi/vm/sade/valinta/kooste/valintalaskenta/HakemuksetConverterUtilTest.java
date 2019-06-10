@@ -7,20 +7,21 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec.laskennanalkamisparametri;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import com.github.npathai.hamcrestopt.OptionalMatchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import fi.vm.sade.service.valintaperusteet.dto.model.Osallistuminen;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
-import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
@@ -29,12 +30,15 @@ import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
 import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
+import org.hamcrest.collection.IsMapContaining;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -708,6 +712,37 @@ public class HakemuksetConverterUtilTest {
         oletettu.put("PK_SUORITUSVUOSI", "2015");
         oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
         Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+    }
+
+    @Test
+    public void negatiivinenValmaTulosSuoritusrekisteristaAjaaYliHakemuksenTiedot() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+            this.add(new AvainArvoDTO("LISAKOULUTUS_VALMA", "true"));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>() {{
+            add(new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setValma().setVahvistettu(true)
+                    .setValmistuminen(HAKUKAUDELLA).setKeskeytynyt()
+                    .done());
+        }};
+        assertThat(HakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset), new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("false")));
+    }
+
+    @Test
+    public void positiivinenValmaTulosSuoritusrekisteristaHuomioidaan() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>() {{
+            add(new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setValma().setVahvistettu(true)
+                    .setValmistuminen(HAKUKAUDELLA).setKesken()
+                    .done());
+        }};
+        assertThat(HakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset), new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("true")));
     }
 
     @Test
@@ -2463,7 +2498,7 @@ public class HakemuksetConverterUtilTest {
 
         ParametritDTO parametritJoissLaskentaAlkoiEnnenSuoritusta = SuoritusrekisteriSpec.laskennanalkamisparametri(new LocalDate(2016, 5, 16).toDateTimeAtStartOfDay());
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", parametritJoissLaskentaAlkoiEnnenSuoritusta, new HashMap<>(), oppija, h, true);
-        Assert.assertThat(firstHakemusArvo(h, "kielikoe_fi"), OptionalMatchers.isEmpty());
+        assertThat(firstHakemusArvo(h, "kielikoe_fi"), OptionalMatchers.isEmpty());
     }
 
     private static String getFirstHakemusArvo(HakemusDTO hakemusDTO, String avain) {
