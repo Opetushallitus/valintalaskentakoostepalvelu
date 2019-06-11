@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import com.github.npathai.hamcrestopt.OptionalMatchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -37,8 +36,6 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -731,7 +728,26 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void positiivinenValmaTulosSuoritusrekisteristaHuomioidaan() {
+    public void negatiivinenValmaTulosSuoritusrekisteristaEdelliseltaVuodeltaEiAjaYliHakemuksenTietoja() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+            this.add(new AvainArvoDTO("LISAKOULUTUS_VALMA", "true"));
+        }});
+        String edellisenaVuonna = "1.1.2014";
+        Assert.assertEquals("1.1.2015", HAKUKAUDELLA); // edellisenaVuonna needs to be fixed if HAKUKAUDELLA changes
+
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>() {{
+            add(new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setValma().setVahvistettu(true)
+                    .setValmistuminen(edellisenaVuonna).setKeskeytynyt()
+                    .done());
+        }};
+        assertThat(HakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset), new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("true")));
+    }
+
+    @Test
+    public void positiivinenValmaTulosSuoritusrekisteristaHuomioidaanHakukaudelta() {
         HakemusDTO h = new HakemusDTO();
         h.setAvaimet(new ArrayList<>() {{
             this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
@@ -743,6 +759,23 @@ public class HakemuksetConverterUtilTest {
                     .done());
         }};
         assertThat(HakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset), new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("true")));
+    }
+
+    @Test
+    public void positiivistaValmaTulostaSuoritusrekisteristaEiHuomioidaEdelliseltaVuodelta() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+        }});
+        String edellisenaVuonna = "1.1.2014";
+        Assert.assertEquals("1.1.2015", HAKUKAUDELLA); // edellisenaVuonna needs to be fixed if HAKUKAUDELLA changes
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>() {{
+            add(new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setValma().setVahvistettu(true)
+                    .setValmistuminen(edellisenaVuonna).setKesken()
+                    .done());
+        }};
+        assertThat(HakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset), new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("false")));
     }
 
     @Test
