@@ -11,7 +11,6 @@ import org.apache.cxf.phase.Phase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -115,7 +114,8 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
             Message request = message.getExchange().getOutMessage();
             String session = getRequestCookie(request);
             if (session == null) {
-                String serviceTicket = ((HttpURLConnection) request.get("http.connection")).getRequestProperty("CasSecurityTicket");
+                List<String> serviceTicketHeaders = OphCxfMessageUtil.getHeader(message, "CasSecurityTicket");
+                String serviceTicket = serviceTicketHeaders.isEmpty() ? null : serviceTicketHeaders.get(0);
                 LOGGER.warn(String.format("Authentication to %s failed using service ticket %s", this.targetService, serviceTicket));
             } else {
                 LOGGER.info(String.format("Authentication to %s failed using session %s", this.targetService, session));
@@ -167,7 +167,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         if (!f.isDone()) {
             String serviceTicket = getServiceTicket();
             if (this.legacySpringFilter) {
-                ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
+                OphCxfMessageUtil.addHeader(message, "CasSecurityTicket", serviceTicket);
             } else {
                 String session = CasClient.initServiceSession(this.targetService, serviceTicket, this.cookieName).getValue();
                 if (f.complete(session)) {
