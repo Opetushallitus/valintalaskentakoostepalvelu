@@ -115,7 +115,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
             String session = getRequestCookie(request);
             if (session == null) {
                 List<String> serviceTicketHeaders = OphCxfMessageUtil.getHeader(message, "CasSecurityTicket");
-                String serviceTicket = serviceTicketHeaders.isEmpty() ? null : serviceTicketHeaders.get(0);
+                String serviceTicket = serviceTicketHeaders == null || serviceTicketHeaders.isEmpty() ? null : serviceTicketHeaders.get(0);
                 LOGGER.warn(String.format("Authentication to %s failed using service ticket %s", this.targetService, serviceTicket));
             } else {
                 LOGGER.info(String.format("Authentication to %s failed using session %s", this.targetService, session));
