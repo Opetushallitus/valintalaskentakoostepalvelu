@@ -73,7 +73,7 @@ public class ValintaKoosteJetty {
                     wac.setResourceBase(root);
                     wac.setDescriptor(root + "/src/test/resources/it-profile-web.xml");
                 } else {
-                    wac.setResourceBase(root + "/src/main/webapp");
+                    wac.setResourceBase(root + "/target/classes/webapp");
                 }
                 KoosteProductionJetty.JETTY.start(wac, server, KoosteProductionJetty.contextPath);
             }
