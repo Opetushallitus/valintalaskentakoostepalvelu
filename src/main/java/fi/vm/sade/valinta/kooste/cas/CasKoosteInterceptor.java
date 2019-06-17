@@ -83,9 +83,11 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         if (!headers.containsKey("Cookie")) {
             return null;
         }
-        for (String cookie : headers.get("Cookie")) {
-            if (cookie.startsWith(this.cookieName)) {
-                return cookie.split(";")[0].split("=")[1];
+        for (String cookieHeaderLineValue : headers.get("Cookie")) {
+            for (String singleCookie : cookieHeaderLineValue.split(";")) {
+                if (singleCookie.startsWith(this.cookieName)) {
+                    return singleCookie.split("=")[1];
+                }
             }
         }
         return null;
