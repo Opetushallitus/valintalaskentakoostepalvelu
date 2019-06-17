@@ -115,6 +115,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
             String session = getRequestCookie(request);
             if (session == null) {
                 List<String> serviceTicketHeaders = OphCxfMessageUtil.getHeader(message, "CasSecurityTicket");
+                LOGGER.debug("Read 'CasSecurityTicket' headers from " + message + " with value '" + serviceTicketHeaders + "'");
                 String serviceTicket = serviceTicketHeaders == null || serviceTicketHeaders.isEmpty() ? null : serviceTicketHeaders.get(0);
                 LOGGER.warn(String.format("Authentication to %s failed using service ticket %s", this.targetService, serviceTicket));
             } else {
@@ -167,6 +168,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         if (!f.isDone()) {
             String serviceTicket = getServiceTicket();
             if (this.legacySpringFilter) {
+                LOGGER.debug("Adding 'CasSecurityTicket' header to " + message + " with value '" + serviceTicket + "'");
                 OphCxfMessageUtil.addHeader(message, "CasSecurityTicket", serviceTicket);
             } else {
                 String session = CasClient.initServiceSession(this.targetService, serviceTicket, this.cookieName).getValue();
