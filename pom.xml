@@ -37,7 +37,7 @@
             <dependency>
                 <groupId>fi.vm.sade.organisaatio</groupId>
                 <artifactId>organisaatio-api</artifactId>
-                <version>2015-13</version>
+                <version>2018-7-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>jsr311-api</artifactId>
@@ -83,7 +83,7 @@
             <dependency>
                 <groupId>fi.vm.sade.koodisto</groupId>
                 <artifactId>koodisto-api</artifactId>
-                <version>6.3-SNAPSHOT</version>
+                <version>2019-01-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>javax.ws.rs</groupId>
@@ -92,6 +92,10 @@
                     <exclusion>
                         <groupId>com.sun.jersey</groupId>
                         <artifactId>jersey-server</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpclient</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>

@@ -26,7 +26,7 @@ import java.util.function.Function;
  */
 @Service
 public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource implements OrganisaatioAsyncResource {
-    private static final HakutoimistoDTO HAKUTOIMISTO_NULL = new HakutoimistoDTO(null, Collections.emptyMap());
+    private static final HakutoimistoDTO HAKUTOIMISTO_NULL = new HakutoimistoDTO(Collections.emptyMap(), Collections.emptyMap());
     private final Logger LOG = LoggerFactory.getLogger(getClass());
 
     public OrganisaatioAsyncResourceImpl() {
