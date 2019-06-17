@@ -140,7 +140,7 @@ public class ValintalaskennanTulosExcel {
     private static List<Column> fixedColumns = Arrays.asList(
             new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
             new Column("Sukunimi", 20, rivi -> rivi.hakemus.getSukunimi()),
-            new Column("Etunimi", 20, rivi -> rivi.hakemus.getEtunimi()),
+            new Column("Etunimi", 20, rivi -> rivi.hakemus.getEtunimet()),
             new Column("Henkilötunnus", 20, rivi -> rivi.hakemus.getHenkilotunnus()),
             new Column("Sähköpostiosoite", 20, rivi -> rivi.hakemus.getSahkopostiOsoite()),
             new Column("Hakemus OID", 20, rivi -> rivi.hakemus.getOid()),
