@@ -2,16 +2,6 @@ package fi.vm.sade.valinta.kooste.test.komponentti;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.stereotype.Component;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -23,9 +13,14 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.KoodistoUrheilija;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * User: wuoti Date: 20.11.2013 Time: 12.59
@@ -41,7 +36,6 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 	private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
 
 	private HakukohdeV1ResourceWrapper hakukohdeResourceMock;
-	private KoodistoJsonRESTResource koodistoJsonRESTResourceMock;
 
 	@Before
 	public void setUp() {
