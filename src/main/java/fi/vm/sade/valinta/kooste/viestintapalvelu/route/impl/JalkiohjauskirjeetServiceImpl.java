@@ -143,7 +143,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     .flatMap(haku -> (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                             ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
                             : ataruAsyncResource.getApplicationsByOids(hakemusOids)))
-                    .timeout(5, MINUTES).blockingFirst();
+                    .timeout(25, MINUTES).blockingFirst();
         } catch (Throwable e) {
             LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
             throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
