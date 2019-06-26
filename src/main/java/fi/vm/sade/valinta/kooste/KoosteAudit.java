@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.auditlog.ApplicationType;
 import fi.vm.sade.auditlog.Audit;
-import fi.vm.sade.sharedutils.AuditLogger;
+import fi.vm.sade.valinta.sharedutils.AuditLogger;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;

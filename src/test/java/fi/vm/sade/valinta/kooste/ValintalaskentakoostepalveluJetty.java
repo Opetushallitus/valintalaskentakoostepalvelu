@@ -4,7 +4,7 @@ import com.google.common.io.Files;
 
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
-import fi.vm.sade.sharedutils.FakeAuthenticationInitialiser;
+import fi.vm.sade.valinta.sharedutils.FakeAuthenticationInitialiser;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;

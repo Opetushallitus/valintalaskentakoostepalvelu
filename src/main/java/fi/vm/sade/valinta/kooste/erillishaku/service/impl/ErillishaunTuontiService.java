@@ -17,9 +17,9 @@ import static java.util.Optional.ofNullable;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import fi.vm.sade.auditlog.Changes;
-import fi.vm.sade.sharedutils.AuditLog;
-import fi.vm.sade.sharedutils.ValintaResource;
-import fi.vm.sade.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.ValintaResource;
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;

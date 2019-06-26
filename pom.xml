@@ -30,9 +30,25 @@
         <dependencies>
             <!-- SADE -->
             <dependency>
+                <groupId>fi.vm.sade.valintaperusteet</groupId>
+                <artifactId>sharedutils</artifactId>
+                <version>5.5-SNAPSHOT</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.reactivex</groupId>
+                        <artifactId>rxjava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>opintopolku-cas-servlet-filter</artifactId>
                 <version>0.1.2-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>0.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.organisaatio</groupId>
@@ -747,13 +763,6 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
-            <version>5.3-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.reactivex</groupId>
-                    <artifactId>rxjava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
@@ -786,7 +795,7 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
-            <version>5.3-SNAPSHOT</version>
+            <version>5.5-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
