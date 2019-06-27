@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import java.util.stream.Stream;
 
 @Service
 public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements AtaruAsyncResource {
+    private static final int SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE = 1000;
     private final Logger LOG = LoggerFactory.getLogger(getClass());
     private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
@@ -54,18 +56,7 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
         if (hakukohdeOid == null && hakemusOids.isEmpty()) {
             return Observable.just(Collections.emptyList());
         }
-        return this.<String, List<AtaruHakemus>>postAsObservableLazily(
-                getUrl("ataru.applications.by-hakukohde"),
-                new TypeToken<List<AtaruHakemus>>() {
-                }.getType(),
-                Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON),
-                client -> {
-                    if (hakukohdeOid != null) {
-                        client.query("hakukohdeOid", hakukohdeOid);
-                    }
-                    LOG.info("Calling url {}", client.getCurrentURI());
-                    return client;
-                }).flatMap(hakemukset -> {
+        return getApplicationsInChunks(hakukohdeOid, hakemusOids).flatMap(hakemukset -> {
             if (hakemukset.isEmpty()) {
                 return Observable.just(Collections.emptyList());
             } else {
@@ -82,6 +73,32 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
                         });
             }
         });
+    }
+
+    private Observable<List<AtaruHakemus>> getApplicationChunk(String hakukohdeOid, List<String> hakemusOids) {
+        return this.postAsObservableLazily(
+                getUrl("ataru.applications.by-hakukohde"),
+                new TypeToken<List<AtaruHakemus>>() {
+                }.getType(),
+                Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON),
+                client -> {
+                    if (hakukohdeOid != null) {
+                        client.query("hakukohdeOid", hakukohdeOid);
+                    }
+                    return client;
+                });
+    }
+
+    private Observable<List<AtaruHakemus>> getApplicationsInChunks(String hakukohdeOid, List<String> hakemusOids) {
+        if (hakemusOids.isEmpty()) {
+            return getApplicationChunk(hakukohdeOid, hakemusOids);
+        } else {
+            return Observable.fromIterable(hakemusOids)
+                    .window(SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE)
+                    .flatMap(chunk -> chunk.toList().flatMapObservable(oids -> getApplicationChunk(hakukohdeOid, oids)))
+                    .<List<AtaruHakemus>>collectInto(new ArrayList<>(hakemusOids.size()), List::addAll)
+                    .toObservable();
+        }
     }
 
     private void ensureKansalaisuus(Map<String, HenkiloPerustietoDto> henkilot) {
