@@ -91,7 +91,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid) {
-        return getAsObservableLazily(getUrl("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
+        return getAsObservableLazilyWithInputStream(getUrl("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
                 new GenericType<HakijaPaginationObject>(){}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -126,7 +126,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
 
     @Override
     public Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
-        return getAsObservableLazily(
+        return getAsObservableLazilyWithInputStream(
                 getUrl("valinta-tulos-service.haku.ilmanhyvaksyntaa", hakuOid),
                 new GenericType<HakijaPaginationObject>(){}.getType(),
                 client -> {

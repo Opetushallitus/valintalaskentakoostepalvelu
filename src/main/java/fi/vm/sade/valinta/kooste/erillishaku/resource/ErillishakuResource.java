@@ -6,7 +6,7 @@ import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSa
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;

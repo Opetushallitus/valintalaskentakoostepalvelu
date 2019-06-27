@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.javautils.http.HttpServletRequestUtils;
-import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;

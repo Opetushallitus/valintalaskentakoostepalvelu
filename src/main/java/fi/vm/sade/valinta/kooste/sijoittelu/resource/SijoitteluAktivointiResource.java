@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
 import com.google.gson.Gson;
 import fi.vm.sade.auditlog.Changes;
-import fi.vm.sade.sharedutils.AuditLog;
-import fi.vm.sade.sharedutils.ValintaResource;
-import fi.vm.sade.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.ValintaResource;
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;

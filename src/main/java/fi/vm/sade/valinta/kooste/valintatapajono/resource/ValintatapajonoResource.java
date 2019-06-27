@@ -4,7 +4,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 import fi.vm.sade.auditlog.User;
 import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;

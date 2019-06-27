@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
-import fi.vm.sade.sharedutils.FakeAuthenticationInitialiser;
+import fi.vm.sade.valinta.sharedutils.FakeAuthenticationInitialiser;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
