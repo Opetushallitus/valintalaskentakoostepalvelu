@@ -24,6 +24,7 @@
         <mockito.version>2.24.0</mockito.version>
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
+        <sijoittelu.version>7.3.0-SNAPSHOT</sijoittelu.version>
     </properties>
 
     <dependencyManagement>
@@ -626,7 +627,7 @@
         <dependency>
             <groupId>fi.vm.sade.sijoittelu</groupId>
             <artifactId>sijoittelu-algoritmi-domain</artifactId>
-            <version>7.0-SNAPSHOT</version>
+            <version>${sijoittelu.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.jackson</groupId>
@@ -637,7 +638,7 @@
         <dependency>
             <groupId>fi.vm.sade.sijoittelu</groupId>
             <artifactId>sijoittelu-tulos-api</artifactId>
-            <version>7.0-SNAPSHOT</version>
+            <version>${sijoittelu.version}</version>
         </dependency>
 
         <dependency>
