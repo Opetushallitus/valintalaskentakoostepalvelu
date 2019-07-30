@@ -53,6 +53,7 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
     public final static String TOISEN_ASTEEN_SUORITUS           = "toisen_asteen_suoritus";
     public final static String TOISEN_ASTEEN_SUORITUSMAA        = "toisen_asteen_suoritusmaa";
     public final static String LUPA_SAHKOISEEN_VIESTINTAAN      = "lupatiedot-sahkoinen-viestinta";
+    public final static String LUPA_SAHKOISEEN_ASIOINTIIN       = "lupatiedot-sahkoinen-asiointi";
     public final static String LUPA_TULOS_EMAIL                 = "lupaTulosEmail";
     private final static String ULKOMAA_POSTITOIMIPAIKKA        = "kaupunkiUlkomaa";
     private final static String POHJAKOULUTUS                   = "POHJAKOULUTUS";
@@ -338,11 +339,23 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
         }
     }
 
+    /*
     @Override
     public boolean getLupaSahkoiseenAsiointiin() {
         getLisatiedot(); // lazy load lisatiedot
         if (lisatiedot.containsKey(LUPA_SAHKOISEEN_VIESTINTAAN)) {
             String lupa = lisatiedot.get(LUPA_SAHKOISEEN_VIESTINTAAN);
+            return Boolean.TRUE.equals(Boolean.valueOf(lupa));
+        }
+        return false;
+    }
+     */
+
+    @Override
+    public boolean getLupaSahkoiseenAsiointiin() {
+        getHenkilotiedot(); // lazy load henkilotiedot
+        if (henkilotiedot.containsKey(LUPA_SAHKOISEEN_ASIOINTIIN)) {
+            String lupa = henkilotiedot.get(LUPA_SAHKOISEEN_ASIOINTIIN);
             return Boolean.TRUE.equals(Boolean.valueOf(lupa));
         }
         return false;
