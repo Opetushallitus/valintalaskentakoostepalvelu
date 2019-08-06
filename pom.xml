@@ -25,6 +25,9 @@
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>7.3.0-SNAPSHOT</sijoittelu.version>
+        <valinta-sharedutils.version>5.6-SNAPSHOT</valinta-sharedutils.version>
+        <valintaperusteet.version>5.6-SNAPSHOT</valintaperusteet.version>
+        <valintalaskenta.version>5.6-SNAPSHOT</valintalaskenta.version>
     </properties>
 
     <dependencyManagement>
@@ -33,7 +36,7 @@
             <dependency>
                 <groupId>fi.vm.sade.valintaperusteet</groupId>
                 <artifactId>sharedutils</artifactId>
-                <version>5.6-SNAPSHOT</version>
+                <version>${valinta-sharedutils.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>io.reactivex</groupId>
@@ -617,12 +620,12 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>valintalaskenta-tulos-api</artifactId>
-            <version>5.3-SNAPSHOT</version>
+            <version>${valintalaskenta.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>valintaperusteet-api</artifactId>
-            <version>5.3-SNAPSHOT</version>
+            <version>${valintaperusteet.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.sijoittelu</groupId>
@@ -788,7 +791,7 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>valintalaskenta-domain</artifactId>
-            <version>5.3-SNAPSHOT</version>
+            <version>${valintalaskenta.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
@@ -825,7 +828,7 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
-            <version>5.6-SNAPSHOT</version>
+            <version>${valinta-sharedutils.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
