@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -152,7 +151,14 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     public String getSukunimi() { return StringUtils.trimToEmpty(henkilo.getSukunimi()); }
 
     @Override
-    public boolean getLupaJulkaisuun() { return false; }
+    public boolean getLupaJulkaisuun() {
+        if (keyvalues.containsKey("valintatuloksen-julkaisulupa")) {
+            if (keyvalues.get("valintatuloksen-julkaisulupa").equals("Kyllä")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public boolean getVainSahkoinenViestinta() { return false; }
@@ -178,7 +184,14 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     }
 
     @Override
-    public boolean getLupaSahkoiseenAsiointiin() { return false; }
+    public boolean getLupaSahkoiseenAsiointiin() {
+        if (keyvalues.containsKey("sahkoisen-asioinnin-lupa")) {
+            if (keyvalues.get("sahkoisen-asioinnin-lupa").equals("Kyllä")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public Collection<String> getHakutoiveOids() {
@@ -186,7 +199,14 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     }
 
     @Override
-    public boolean isMaksuvelvollinen(String hakukohdeOid) { return false; }
+    public boolean isMaksuvelvollinen(String hakukohdeOid) {
+        if (hakemus.getMaksuvelvollisuus().containsKey(hakukohdeOid)) {
+                if (hakemus.getMaksuvelvollisuus().get(hakukohdeOid).equals("obligated")){
+                    return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public String getMaksuvelvollisuus(String hakukohdeOid) { return null; }

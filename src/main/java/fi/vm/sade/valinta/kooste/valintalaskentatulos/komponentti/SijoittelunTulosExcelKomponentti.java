@@ -162,6 +162,12 @@ public class SijoittelunTulosExcelKomponentti {
         Map<String, IlmoittautumisTila> hakemusJaJonoMappaus = valintatapajononTilat(valintatulokset);
         for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
             HakemusWrapper wrapper = hakemukset.get(hDto.getHakemusOid());
+            if (wrapper == null) {
+                throw new NullPointerException(String.format("Hakijan %s hakemuksen %s tietoja ei löydy! " +
+                    "Haku = %s , hakukohde = %s , valintatapajono = %s , hakemukset.size() = %d , distinctHakemuksetFromAllQueues.size() = %d",
+                    hDto.getHakijaOid(), hDto.getHakemusOid(),
+                    hakuDTO.getOid(), hakukohdeOid, hDto.getValintatapajonoOid(), hakemukset.size(), distinctHakemuksetFromAllQueues.size()));
+            }
             String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimet();
             List<Object> hakemusRivi = Lists.newArrayList();
             Maksuntila maksuntila = ofNullable(personOidToLukuvuosimaksu.get(hDto.getHakijaOid())).map(Lukuvuosimaksu::getMaksuntila).orElse(Maksuntila.MAKSAMATTA);

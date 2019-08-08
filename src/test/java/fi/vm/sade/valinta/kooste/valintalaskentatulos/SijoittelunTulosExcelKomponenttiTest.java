@@ -209,9 +209,12 @@ public class SijoittelunTulosExcelKomponenttiTest {
         jono.setHakemukset(Collections.singletonList(hakemusDTO));
         hakukohde.setValintatapajonot(Collections.singletonList(createValintatapajonot("jono1", Collections.singletonList(HAKEMUS1))));
         Answers answers = new Answers();
-        HashMap<String, String> lisatiedot = new HashMap<>();
-        lisatiedot.put("lupatiedot-sahkoinen-viestinta", "true");
-        answers.setLisatiedot(lisatiedot);
+        //HashMap<String, String> lisatiedot = new HashMap<>();
+        //lisatiedot.put("lupatiedot-sahkoinen-viestinta", "true");
+        //answers.setLisatiedot(lisatiedot);
+        HashMap<String, String> henkilotiedot = new HashMap<>();
+        henkilotiedot.put("lupatiedot-sahkoinen-asiointi", "true");
+        answers.setHenkilotiedot(henkilotiedot);
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
         HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
         InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Collections.singletonList(wrapper),emptyList(), hakukohde, getKkHaku(), emptyList());

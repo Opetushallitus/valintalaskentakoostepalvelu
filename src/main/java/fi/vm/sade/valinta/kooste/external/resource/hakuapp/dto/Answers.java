@@ -10,6 +10,7 @@ public class Answers {
     private Map<String, String> henkilotiedot = new HashMap<String, String>();
     private Map<String, String> lisatiedot = new HashMap<String, String>();
     private Map<String, String> hakutoiveet = new HashMap<String, String>();
+    private Map<String, String> maksuvelvollisuus = new HashMap<String, String>();
     private Map<String, String> koulutustausta = new HashMap<String, String>();
     private Map<String, String> osaaminen = new HashMap<String, String>();
 
@@ -35,6 +36,14 @@ public class Answers {
 
     public void setHakutoiveet(Map<String, String> hakutoiveet) {
         this.hakutoiveet = hakutoiveet;
+    }
+
+    public Map<String, String> getMaksuvelvollisuus() {
+        return maksuvelvollisuus;
+    }
+
+    public void setMaksuvelvollisuus(Map<String, String> maksuvelvollisuus) {
+        this.maksuvelvollisuus = maksuvelvollisuus;
     }
 
     public Map<String, String> getKoulutustausta() {
