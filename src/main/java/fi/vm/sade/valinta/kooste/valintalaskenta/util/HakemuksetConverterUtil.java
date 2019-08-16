@@ -51,9 +51,17 @@ public class HakemuksetConverterUtil {
     private static void tryToMergeKeysOfOppijaAndHakemus(HakuV1RDTO haku, String hakukohdeOid, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, Map<String, Exception> errors, Map<String, Oppija> personOidToOppija, Map<String, Boolean> hasHetu, HakemusDTO h) {
         try {
             String personOid = h.getHakijaOid();
+            LOG.info(String.format("BUG-2034 : tryToMergeKeysOfOppijaAndHakemus : käsitellään hakemus %s , hakijaOid == %s", h.getHakemusoid(), personOid));
+            LOG.info(String.format("BUG-2034 : personOidToOppija.size() == %d", personOidToOppija.size()));
+            LOG.info(String.format("BUG-2034 : personOidToOppija.get(personOid) == %s", personOidToOppija.get(personOid)));
             if (personOidToOppija.containsKey(personOid)) {
                 Oppija oppija = personOidToOppija.get(personOid);
                 mergeKeysOfOppijaAndHakemus(hasHetu.get(h.getHakemusoid()), haku, hakukohdeOid, parametritDTO, errors, oppija, h, fetchEnsikertalaisuus);
+            } else {
+                LOG.info(String.format("BUG-2034 : Ei löytynyt oppijanumerolla %s. Mapin sisältö:", personOid));
+                personOidToOppija.forEach((avain, oppija) -> {
+                    LOG.info(String.format("\tBUG-2034 personOidToOppija.forEach: %s - >%s", avain, oppija));
+                });
             }
         } catch (Exception e) {
             errors.put(h.getHakemusoid(), e);
@@ -74,8 +82,13 @@ public class HakemuksetConverterUtil {
     private static List<HakemusDTO> getHakemusDTOS(HakuV1RDTO haku, String hakukohdeOid, List<Oppija> oppijat, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, List<HakemusDTO> hakemusDtot, Map<String, Boolean> hasHetu, Map<String, Exception> errors) {
         try {
             if (oppijat != null) {
+                LOG.info(String.format("Got %d oppijat is in getHakemusDTOS for haku %s (\"%s\"), hakukohde %s for %d applications.",
+                        oppijat.size(), haku.getOid(), haku.getNimi(), hakukohdeOid, hakemusDtot.size()));
                 Map<String, Oppija> personOidToOppija = oppijat.stream().collect(toMap(Oppija::getOppijanumero, Function.identity()));
                 hakemusDtot.forEach(h -> tryToMergeKeysOfOppijaAndHakemus(haku, hakukohdeOid, parametritDTO, fetchEnsikertalaisuus, errors, personOidToOppija, hasHetu, h));
+            } else {
+                LOG.warn(String.format("oppijat is null when calling getHakemusDTOS for haku %s (\"%s\"), hakukohde %s for %d applications.",
+                        haku.getOid(), haku.getNimi(), hakukohdeOid, hakemusDtot.size()));
             }
         } catch (Exception e) {
             LOG.error("SURE arvosanojen konversiossa (hakukohde=" + hakukohdeOid + ") odottamaton virhe", e);
