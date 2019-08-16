@@ -112,11 +112,6 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         // Add the elements returned by each response to one master list
         Observable<List<Oppija>> allOppijas = Observable
             .concat(obses);
-
-        allOppijas.subscribe(l -> {
-            LOG.info("Finished batched POST with {} results", l.size());
-        });
-
         return allOppijas;
     }
 
