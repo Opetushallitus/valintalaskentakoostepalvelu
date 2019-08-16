@@ -133,6 +133,8 @@ public class ValintalaskentaTest {
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid2, ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
         when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), hakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
         when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), ataruHakuOid)).thenReturn(Observable.just(Collections.emptyList()));
         when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), hakuOid)).thenReturn(Observable.just(Collections.emptyList()));
 

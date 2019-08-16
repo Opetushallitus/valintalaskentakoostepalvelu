@@ -302,16 +302,12 @@ public class LaskentaActorFactory {
         }
 
         Observable<List<Oppija>> oppijasForOidsFromHakemukses = hakemukset.switchMap(hws -> {
-            List<String> goo = hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
-            LOG.info("Got personOids from hakemukses and getting oppijas for these: {} for haku {}", goo.toString(), hakuOid);
-            Observable<List<Oppija>> o = suoritusrekisteriAsyncResource.getSuorituksetByOppijas(goo, hakuOid);
-            if (o != null) {
-                return o;
-            } else {
-                //todo cleanup needed. Maybe only really relevant for tests. Still, needs some love.
-                LOG.error("A null observable was returned. Not cool. Defaulting to an empty one.");
-                return Observable.just(Collections.emptyList());
-            }
+            List<String> oppijaOids = hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
+            LOG.info("Got personOids from hakemukses and getting Oppijas for these: {} for haku {}", oppijaOids.toString(), hakuOid);
+            return createResurssiObservable(tunniste,
+                    "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
+                    suoritusrekisteriAsyncResource.getSuorituksetByOppijas(oppijaOids, hakuOid),
+                    retryHakemuksetAndOppijat);
         });
 
         Observable<List<ValintaperusteetDTO>> valintaperusteet = createResurssiObservable(tunniste,
