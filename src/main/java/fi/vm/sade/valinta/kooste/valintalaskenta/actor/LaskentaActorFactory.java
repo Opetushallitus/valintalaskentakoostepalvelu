@@ -313,10 +313,6 @@ public class LaskentaActorFactory {
         Observable<List<ValintaperusteetDTO>> valintaperusteet = createResurssiObservable(tunniste,
             "valintaperusteetAsyncResource.haeValintaperusteet",
             valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()));
-        /*Observable<List<Oppija>> oppijat = createResurssiObservable(tunniste,
-            "suoritusrekisteriAsyncResource.getOppijatByHakukohde",
-            suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid),
-            retryHakemuksetAndOppijat);*/
         Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = createResurssiObservable(tunniste,
             "tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",
             tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
