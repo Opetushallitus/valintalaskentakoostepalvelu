@@ -450,11 +450,6 @@
             <artifactId>java-cxf</artifactId>
         </dependency>
         <dependency>
-            <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>java-tracing</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
         </dependency>
