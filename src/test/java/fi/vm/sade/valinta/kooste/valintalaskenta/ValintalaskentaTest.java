@@ -85,6 +85,7 @@ public class ValintalaskentaTest {
     private final HakuV1RDTO hakuDTO = new HakuV1RDTO();
     private final HakuV1RDTO ataruHakuDTO = new HakuV1RDTO();
     private final Oppija oppijaFromSure1 = new Oppija();
+    private final Oppija anonOppijaFromSure = new Oppija();
     private final List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(
         new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
         new HakukohdeJaOrganisaatio(hakukohde2Oid, "o2"),
@@ -104,6 +105,7 @@ public class ValintalaskentaTest {
         ataruHakuDTO.setAtaruLomakeAvain("ataru-lomake-avain");
         ataruHakemus.setPersonOid(personOid1);
         oppijaFromSure1.setOppijanumero(personOid1);
+        anonOppijaFromSure.setOppijanumero("personOid");
         pisteet = new PisteetWithLastModified(Optional.empty(), Collections.singletonList
             (new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "Frank", "Tester", Collections.emptyList())));
 
@@ -133,8 +135,8 @@ public class ValintalaskentaTest {
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid2, ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
         when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
-        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
-        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), hakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(anonOppijaFromSure)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), hakuOid)).thenReturn(Observable.just(Collections.singletonList(anonOppijaFromSure)));
         when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), ataruHakuOid)).thenReturn(Observable.just(Collections.emptyList()));
         when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), hakuOid)).thenReturn(Observable.just(Collections.emptyList()));
 
