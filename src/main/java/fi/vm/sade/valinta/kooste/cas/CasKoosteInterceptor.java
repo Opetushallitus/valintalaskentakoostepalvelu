@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.cas;
 
+import static fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
+
 import fi.vm.sade.authentication.cas.CasClient;
+import fi.vm.sade.javautils.cxf.OphCxfMessageUtil;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -8,10 +11,8 @@ import org.apache.cxf.phase.Phase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +22,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
 
 public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CasKoosteInterceptor.class);
@@ -84,20 +83,18 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         if (!headers.containsKey("Cookie")) {
             return null;
         }
-        for (String cookie : headers.get("Cookie")) {
-            if (cookie.startsWith(this.cookieName)) {
-                return cookie.split(";")[0].split("=")[1];
+        for (String cookieHeaderLineValue : headers.get("Cookie")) {
+            for (String singleCookie : cookieHeaderLineValue.split(";")) {
+                if (singleCookie.startsWith(this.cookieName)) {
+                    return singleCookie.split("=")[1];
+                }
             }
         }
         return null;
     }
 
     private void addCookie(Message message, String cookieValue) {
-        Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
-        if (!headers.containsKey("Cookie")) {
-            headers.put("Cookie", new ArrayList<>());
-        }
-        headers.get("Cookie").add(this.cookieName + "=" + cookieValue);
+        OphCxfMessageUtil.appendToHeader(message, "Cookie", this.cookieName + "=" + cookieValue, ";");
     }
 
     @Override
@@ -119,7 +116,9 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
             Message request = message.getExchange().getOutMessage();
             String session = getRequestCookie(request);
             if (session == null) {
-                String serviceTicket = ((HttpURLConnection) request.get("http.connection")).getRequestProperty("CasSecurityTicket");
+                List<String> serviceTicketHeaders = OphCxfMessageUtil.getHeader(message, "CasSecurityTicket");
+                LOGGER.debug("Read 'CasSecurityTicket' headers from " + message + " with value '" + serviceTicketHeaders + "'");
+                String serviceTicket = serviceTicketHeaders == null || serviceTicketHeaders.isEmpty() ? null : serviceTicketHeaders.get(0);
                 LOGGER.warn(String.format("Authentication to %s failed using service ticket %s", this.targetService, serviceTicket));
             } else {
                 LOGGER.info(String.format("Authentication to %s failed using session %s", this.targetService, session));
@@ -171,7 +170,8 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
         if (!f.isDone()) {
             String serviceTicket = getServiceTicket();
             if (this.legacySpringFilter) {
-                ((HttpURLConnection) message.get("http.connection")).setRequestProperty("CasSecurityTicket", serviceTicket);
+                LOGGER.debug("Adding 'CasSecurityTicket' header to " + message + " with value '" + serviceTicket + "'");
+                OphCxfMessageUtil.addHeader(message, "CasSecurityTicket", serviceTicket);
             } else {
                 String session = CasClient.initServiceSession(this.targetService, serviceTicket, this.cookieName).getValue();
                 if (f.complete(session)) {

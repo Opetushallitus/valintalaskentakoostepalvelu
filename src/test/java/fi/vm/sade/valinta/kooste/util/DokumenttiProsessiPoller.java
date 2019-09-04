@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ public class DokumenttiProsessiPoller {
     private static Logger LOG = LoggerFactory.getLogger(DokumenttiProsessiPoller.class);
 
     public static Prosessi pollDokumenttiProsessi(String rootUrl, ProsessiId prosessiId, Function<Prosessi,Boolean> responseProcessor) {
-        final HttpResourceBuilder.WebClientExposingHttpResource dokumenttiProsessiResource = new HttpResourceBuilder()
+        final HttpResourceBuilder.WebClientExposingHttpResource dokumenttiProsessiResource = new HttpResourceBuilder(DokumenttiProsessiPoller.class.getName())
             .address(rootUrl + "/dokumenttiprosessi/" + prosessiId.getId())
             .buildExposingWebClientDangerously();
         long pollStarted = System.currentTimeMillis();

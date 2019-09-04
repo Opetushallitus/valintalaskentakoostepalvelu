@@ -22,6 +22,10 @@
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
+	<bean id="ophRequestHeaders" class="fi.vm.sade.javautils.cxf.OphRequestHeadersCxfInterceptor">
+		<constructor-arg index="0" value="1.2.246.562.10.00000000001.valintalaskentakoostepalvelu"/>
+	</bean>
+
 	<beans  profile="test">
 		<bean class="fi.vm.sade.valinta.kooste.KoosteTestProfileConfiguration"/>
 	</beans>
@@ -63,12 +67,21 @@
 		<bean class="fi.vm.sade.valinta.kooste.CasInterceptors" />
 		<bean class="fi.vm.sade.valinta.kooste.KoostepalveluContext" />
 
+		<bean id="cxf" class="org.apache.cxf.bus.spring.SpringBus">
+		    <property name="outInterceptors">
+		        <list>
+		            <ref bean="ophRequestHeaders"/>
+		        </list>
+		    </property>
+		</bean>
+
 		<!-- CAS-palvelukutsut -->
 		<jaxws:client id="koodiService"
 					  serviceClass="fi.vm.sade.koodisto.service.KoodiService"
 					  address="${valintalaskentakoostepalvelu.koodiService.url}">
 			<jaxws:outInterceptors>
 				<ref bean="koodiServiceCasInterceptor"/>
+				<ref bean="ophRequestHeaders"/>
 			</jaxws:outInterceptors>
 			<jaxws:inInterceptors>
 				<ref bean="koodiServiceCasInterceptor"/>
@@ -81,6 +94,7 @@
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
 				<ref bean="viestintapalveluClientCasInterceptor"/>
+				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
 				<ref bean="viestintapalveluClientCasInterceptor"/>
@@ -96,6 +110,7 @@
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
 				<ref bean="HakemusServiceRestClientAsAdminCasInterceptor"/>
+				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
 				<ref bean="HakemusServiceRestClientAsAdminCasInterceptor"/>
@@ -111,6 +126,7 @@
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
 				<ref bean="adminDokumenttipalveluRestClientCasInterceptor"/>
+				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
 				<ref bean="adminDokumenttipalveluRestClientCasInterceptor"/>
@@ -126,6 +142,7 @@
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
 				<ref bean="ValintalaskentaHakukohdeRestClientCasInterceptor"/>
+				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
 				<ref bean="ValintalaskentaHakukohdeRestClientCasInterceptor"/>
@@ -141,6 +158,7 @@
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
 				<ref bean="SijoittelunSeurantaRestClientCasInterceptor"/>
+				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
 				<ref bean="SijoittelunSeurantaRestClientCasInterceptor"/>
@@ -156,6 +174,7 @@
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
 				<ref bean="ValintatietoRestClientCasInterceptor"/>
+				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
 				<ref bean="ValintatietoRestClientCasInterceptor"/>
@@ -165,6 +184,8 @@
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
+
+		<!-- CAS:ittomat palvelukutsut -->
 		<jaxrs-client:client id="OrganisaatioResourceClient"
 							 address="${valintalaskentakoostepalvelu.organisaatioService.rest.url}"
 							 serviceClass="fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource"
@@ -173,9 +194,10 @@
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
+			<jaxrs-client:outInterceptors>
+				<ref bean="ophRequestHeaders"/>
+			</jaxrs-client:outInterceptors>
 		</jaxrs-client:client>
-
-		<!-- CAS:ittomat palvelukutsut -->
 		<jaxrs-client:client id="KelaServiceRestClient"
 							 address="${valintalaskentakoostepalvelu.rajapinnat.kela-service.rest.url:not_defined}"
 							 serviceClass="fi.vm.sade.organisaatio.resource.api.KelaResource"
@@ -184,6 +206,9 @@
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
+			<jaxrs-client:outInterceptors>
+				<ref bean="ophRequestHeaders"/>
+			</jaxrs-client:outInterceptors>
 		</jaxrs-client:client>
 		<jaxrs-client:client id="TarjontaServiceRestClient"
 							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
@@ -193,6 +218,9 @@
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
+			<jaxrs-client:outInterceptors>
+				<ref bean="ophRequestHeaders"/>
+			</jaxrs-client:outInterceptors>
 		</jaxrs-client:client>
         <jaxrs-client:client id="TarjontaServiceKomotoRestClient"
 							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
@@ -202,6 +230,9 @@
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
+			<jaxrs-client:outInterceptors>
+				<ref bean="ophRequestHeaders"/>
+			</jaxrs-client:outInterceptors>
 		</jaxrs-client:client>
 		<jaxrs-client:client id="TarjontaHakuResourceRestClient"
 							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
@@ -211,15 +242,9 @@
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
-		</jaxrs-client:client>
-		<jaxrs-client:client id="KoodistoServiceRestClient"
-							 address="${valintalaskentakoostepalvelu.koodisto.rest.url}"
-							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource"
-							 inheritHeaders="true">
-			<jaxrs-client:providers>
-				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-			</jaxrs-client:providers>
+			<jaxrs-client:outInterceptors>
+				<ref bean="ophRequestHeaders"/>
+			</jaxrs-client:outInterceptors>
 		</jaxrs-client:client>
 		<jaxrs-client:client id="HakukohdeV1ResourceClient"
 							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
@@ -229,10 +254,16 @@
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
+			<jaxrs-client:outInterceptors>
+				<ref bean="ophRequestHeaders"/>
+			</jaxrs-client:outInterceptors>
 		</jaxrs-client:client>
 		<jaxws:client id="tarjontaServiceClient"
 					  serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
 					  address="${valintalaskentakoostepalvelu.tarjontaService.url}">
+			<jaxws:outInterceptors>
+				<ref bean="ophRequestHeaders"/>
+			</jaxws:outInterceptors>
 		</jaxws:client>
 
 		<bean id="redeliveryPolicy" class="org.apache.camel.processor.RedeliveryPolicy">

@@ -1,10 +1,13 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -18,6 +21,9 @@ import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
+import io.reactivex.Observable;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -27,17 +33,19 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
-import io.reactivex.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.*;
 
 public class OppijanSuorituksetProxyResourceTest {
     private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResourceTest.class);
@@ -45,7 +53,7 @@ public class OppijanSuorituksetProxyResourceTest {
     private static final String opiskelijaOid = "1.2.246.562.24.71943835646";
     private static final String hakemusOid = "1.2.246.562.11.00000000615";
     private static final String hakuOid = "1.2.246.562.29.90697286251";
-    final HttpResourceBuilder.WebClientExposingHttpResource proxyResource = new HttpResourceBuilder()
+    final HttpResourceBuilder.WebClientExposingHttpResource proxyResource = new HttpResourceBuilder(getClass().getName())
             .address(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid + "/opiskeljaOid/" + opiskelijaOid + "/hakemusOid/" + hakemusOid)
             .buildExposingWebClientDangerously();
 
@@ -166,7 +174,7 @@ public class OppijanSuorituksetProxyResourceTest {
         }
 
 
-        final HttpResourceBuilder.WebClientExposingHttpResource proxyBatchResource = new HttpResourceBuilder()
+        final HttpResourceBuilder.WebClientExposingHttpResource proxyBatchResource = new HttpResourceBuilder(getClass().getName())
                 .address(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid)
                 .timeoutMillis(1000*100)
                 .buildExposingWebClientDangerously();

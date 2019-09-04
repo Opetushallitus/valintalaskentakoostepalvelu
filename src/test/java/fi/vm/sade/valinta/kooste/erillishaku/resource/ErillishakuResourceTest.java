@@ -1,9 +1,16 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.*;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -20,6 +27,7 @@ import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,10 +37,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 public class ErillishakuResourceTest {
     private String hakuOid = "1.2.246.562.5.2013080813081926341928";
@@ -199,7 +203,7 @@ public class ErillishakuResourceTest {
     }
 
     private WebClient createClient(String url) {
-        return new HttpResourceBuilder().address(url).buildExposingWebClientDangerously().getWebClient();
+        return new HttpResourceBuilder(getClass().getName()).address(url).buildExposingWebClientDangerously().getWebClient();
     }
 
 }

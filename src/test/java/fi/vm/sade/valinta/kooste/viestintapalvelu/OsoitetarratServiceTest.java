@@ -1,18 +1,27 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
+
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
+import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import io.reactivex.Observable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -21,19 +30,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
-
 /**
  * @author Jussi Jartamo
  */
 public class OsoitetarratServiceTest {
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource = new HttpResourceBuilder()
+    final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource = new HttpResourceBuilder(getClass().getName())
             .address(root + "/viestintapalvelu/osoitetarrat/aktivoi")
             .buildExposingWebClientDangerously();
-    final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResourceBuilder()
+    final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResourceBuilder(getClass().getName())
             .address(root + "/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
             .buildExposingWebClientDangerously();
     final String HAKU1 = "HAKU1";

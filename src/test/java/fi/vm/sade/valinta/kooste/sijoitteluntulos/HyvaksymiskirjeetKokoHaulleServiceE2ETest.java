@@ -1,7 +1,21 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS2;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE1;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE2;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.HAKEMUS1;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
@@ -9,7 +23,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -22,6 +35,7 @@ import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Assert;
@@ -35,15 +49,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.HAKEMUS1;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.POST;
 
 public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
@@ -289,7 +294,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
-        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder()
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder(getClass().getName())
                 .timeoutMillis(TimeUnit.SECONDS.toMillis(240L))
                 .address(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet")
                 .buildExposingWebClientDangerously();

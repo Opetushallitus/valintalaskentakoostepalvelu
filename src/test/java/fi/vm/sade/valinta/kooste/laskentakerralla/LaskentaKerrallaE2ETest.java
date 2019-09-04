@@ -11,10 +11,10 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 import static javax.ws.rs.HttpMethod.GET;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
+import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -39,7 +39,7 @@ public class LaskentaKerrallaE2ETest {
     @Test
     public void testaaLaskentaa() {
         mockForward(seurantaServerMock);
-        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder()
+        HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder(getClass().getName())
                 .address(resourcesAddress + "/valintalaskentakerralla/haku/HAKUOID1/tyyppi/HAKU/whitelist/true")
                 .buildExposingWebClientDangerously();
         mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/.*",
