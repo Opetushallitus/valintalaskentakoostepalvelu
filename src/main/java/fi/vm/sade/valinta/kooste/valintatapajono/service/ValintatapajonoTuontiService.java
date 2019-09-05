@@ -93,13 +93,13 @@ public class ValintatapajonoTuontiService {
                                     valinnanvaihe.getValintatapajonot()
                                             .forEach(
                                                     v -> {
-                                                        v.getHakija().forEach(hakija -> {
+                                                        v.getJonosijat().forEach(jonosija -> {
                                                             Map<String,String> additionalAuditFields = new HashMap<>();
                                                             additionalAuditFields.put("hakuOid", hakuOid);
                                                             additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
                                                             additionalAuditFields.put("valinnanvaiheOid", valinnanvaihe.getValinnanvaiheoid());
                                                             additionalAuditFields.put("valintatapajonoOid", v.getValintatapajonooid());
-                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, hakija.getOid(), Changes.addedDto(hakija), additionalAuditFields);
+                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, jonosija.getHakijaOid(), Changes.addedDto(jonosija), additionalAuditFields);
                                                         });
                                                     }
                                             );
