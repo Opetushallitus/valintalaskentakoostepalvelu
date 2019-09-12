@@ -8,6 +8,8 @@ import static org.apache.commons.lang3.tuple.Pair.of;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -43,6 +45,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -258,6 +261,7 @@ public class LaskentaActorFactory {
                 oppijat,
                 hakukohdeRyhmasForHakukohdes,
                 (vp, hr, v, h, o, r) -> {
+                    verifyJonokriteeritOrThrowError(uuid, hakukohdeOid, v);
                     LOG.info("(Uuid: {}) Kaikki resurssit hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
                     if(!withHakijaRyhmat) {
                         return new LaskeDTO(
@@ -275,6 +279,32 @@ public class LaskentaActorFactory {
                                 hakukohdeOid,
                                 HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
                     }}));
+    }
+
+    private void verifyJonokriteeritOrThrowError(String uuid, String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteetList) {
+        Predicate<? super ValintatapajonoJarjestyskriteereillaDTO> valintatapajonoHasPuuttuvaJonokriteeri = new Predicate<>() {
+            @Override
+            public boolean test(ValintatapajonoJarjestyskriteereillaDTO valintatapajono) {
+                boolean kaytetaanValintalaskentaa = valintatapajono.getKaytetaanValintalaskentaa();
+                boolean hasJarjestyskriteerit = !valintatapajono.getJarjestyskriteerit().isEmpty();
+
+                return (kaytetaanValintalaskentaa && !hasJarjestyskriteerit)
+                        || (!kaytetaanValintalaskentaa && hasJarjestyskriteerit);
+            }
+        };
+        Optional<ValintatapajonoJarjestyskriteereillaDTO> valintatapajonoPuutteellisellaJonokriteerilla = valintaperusteetList
+                .stream()
+                .map(ValintaperusteetDTO::getValinnanVaihe)
+                .flatMap(v -> v.getValintatapajono().stream())
+                .filter(valintatapajonoHasPuuttuvaJonokriteeri)
+                .findFirst();
+
+        if (valintatapajonoPuutteellisellaJonokriteerilla.isPresent()) {
+            ValintatapajonoJarjestyskriteereillaDTO valintatapajono = valintatapajonoPuutteellisellaJonokriteerilla.get();
+            String errorMessage = String.format("(Uuid: %s) Hakukohteen %s valintatapajonolla %s on joko valintalaskenta ilman jonokriteereitä tai jonokriteereitä ilman valintalaskentaa, joten valintalaskentaa ei voida jatkaa ja se keskeytetään", uuid, hakukohdeOid, valintatapajono.getOid());
+            LOG.error(errorMessage);
+            throw new RuntimeException(errorMessage);
+        }
     }
 
     private Observable<LaskeDTO> fetchResourcesForOneLaskenta(final AuditSession auditSession,
