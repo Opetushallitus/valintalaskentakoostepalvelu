@@ -51,17 +51,11 @@ public class HakemuksetConverterUtil {
     private static void tryToMergeKeysOfOppijaAndHakemus(HakuV1RDTO haku, String hakukohdeOid, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, Map<String, Exception> errors, Map<String, Oppija> personOidToOppija, Map<String, Boolean> hasHetu, HakemusDTO h) {
         try {
             String personOid = h.getHakijaOid();
-            LOG.info(String.format("BUG-2034 : tryToMergeKeysOfOppijaAndHakemus : käsitellään hakemus %s , hakijaOid == %s", h.getHakemusoid(), personOid));
-            LOG.info(String.format("BUG-2034 : personOidToOppija.size() == %d", personOidToOppija.size()));
-            LOG.info(String.format("BUG-2034 : personOidToOppija.get(personOid) == %s", personOidToOppija.get(personOid)));
             if (personOidToOppija.containsKey(personOid)) {
                 Oppija oppija = personOidToOppija.get(personOid);
                 mergeKeysOfOppijaAndHakemus(hasHetu.get(h.getHakemusoid()), haku, hakukohdeOid, parametritDTO, errors, oppija, h, fetchEnsikertalaisuus);
             } else {
-                LOG.info(String.format("BUG-2034 : Ei löytynyt oppijanumerolla %s. Mapin sisältö:", personOid));
-                personOidToOppija.forEach((avain, oppija) -> {
-                    LOG.info(String.format("\tBUG-2034 personOidToOppija.forEach: %s - >%s", avain, oppija));
-                });
+                LOG.warn(String.format("BUG-2034 : Oppijatietoa ei löytynyt oppijanumerolla %s.", personOid));
             }
         } catch (Exception e) {
             errors.put(h.getHakemusoid(), e);
