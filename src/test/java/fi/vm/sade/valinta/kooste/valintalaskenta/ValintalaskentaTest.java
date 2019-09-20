@@ -81,8 +81,11 @@ public class ValintalaskentaTest {
     private final String uuid = "uuid";
     private final String hakuOid = "hakuOid";
     private final String ataruHakuOid = "1.2.246.562.29.805206009510";
+    private final String personOid1 = "1.2.246.562.24.86368188549";
     private final HakuV1RDTO hakuDTO = new HakuV1RDTO();
     private final HakuV1RDTO ataruHakuDTO = new HakuV1RDTO();
+    private final Oppija oppijaFromSure1 = new Oppija();
+    private final Oppija anonOppijaFromSure = new Oppija();
     private final List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(
         new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
         new HakukohdeJaOrganisaatio(hakukohde2Oid, "o2"),
@@ -100,7 +103,9 @@ public class ValintalaskentaTest {
         hakuDTO.setOid(hakuOid);
         ataruHakuDTO.setOid(ataruHakuOid);
         ataruHakuDTO.setAtaruLomakeAvain("ataru-lomake-avain");
-        ataruHakemus.setPersonOid("1.2.246.562.24.86368188549");
+        ataruHakemus.setPersonOid(personOid1);
+        oppijaFromSure1.setOppijanumero(personOid1);
+        anonOppijaFromSure.setOppijanumero("personOid");
         pisteet = new PisteetWithLastModified(Optional.empty(), Collections.singletonList
             (new Valintapisteet(hakemus.getOid(), hakemus.getPersonOid(), "Frank", "Tester", Collections.emptyList())));
 
@@ -128,6 +133,12 @@ public class ValintalaskentaTest {
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde3Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid, ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid2, ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(anonOppijaFromSure)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), hakuOid)).thenReturn(Observable.just(Collections.singletonList(anonOppijaFromSure)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), ataruHakuOid)).thenReturn(Observable.just(Collections.emptyList()));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), hakuOid)).thenReturn(Observable.just(Collections.emptyList()));
 
         when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid)).thenReturn(Observable.just(Collections.emptyMap()));
         when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(ataruHakuOid)).thenReturn(Observable.just(Collections.emptyMap()));
@@ -165,6 +176,7 @@ public class ValintalaskentaTest {
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid2, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle()).thenReturn(Observable.just(Optional.empty()));
+
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, ataruHakuOid, false, null, null, ataruHakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 

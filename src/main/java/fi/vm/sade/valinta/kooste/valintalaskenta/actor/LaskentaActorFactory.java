@@ -39,11 +39,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -291,13 +287,32 @@ public class LaskentaActorFactory {
         final String hakuOid = haku.getOid();
 
         PyynnonTunniste tunniste = new PyynnonTunniste("Please put individual resource source identifier here!", uuid, hakukohdeOid);
+
+        Observable<List<HakemusWrapper>> hakemukset;
+        if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
+            hakemukset = createResurssiObservable(tunniste,
+                    "applicationAsyncResource.getApplications",
+                    ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
+                    retryHakemuksetAndOppijat);
+        } else {
+            hakemukset = createResurssiObservable(tunniste,
+                    "applicationAsyncResource.getApplicationsByOid",
+                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
+                    retryHakemuksetAndOppijat);
+        }
+
+        Observable<List<Oppija>> oppijasForOidsFromHakemukses = hakemukset.switchMap(hws -> {
+            List<String> oppijaOids = hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
+            LOG.info("Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}", oppijaOids.toString(), hakukohdeOid);
+            return createResurssiObservable(tunniste,
+                    "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
+                    suoritusrekisteriAsyncResource.getSuorituksetByOppijas(oppijaOids, hakuOid),
+                    retryHakemuksetAndOppijat);
+        });
+
         Observable<List<ValintaperusteetDTO>> valintaperusteet = createResurssiObservable(tunniste,
             "valintaperusteetAsyncResource.haeValintaperusteet",
             valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()));
-        Observable<List<Oppija>> oppijat = createResurssiObservable(tunniste,
-            "suoritusrekisteriAsyncResource.getOppijatByHakukohde",
-            suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeOid, hakuOid),
-            retryHakemuksetAndOppijat);
         Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = createResurssiObservable(tunniste,
             "tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",
             tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
@@ -308,21 +323,8 @@ public class LaskentaActorFactory {
             "valintaperusteetAsyncResource.haeHakijaryhmat",
             valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : just(emptyList());
 
-        if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
-            Observable<List<HakemusWrapper>> hakemukset = createResurssiObservable(tunniste,
-                    "applicationAsyncResource.getApplications",
-                    ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
-                    retryHakemuksetAndOppijat);
-            LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
-            return getLaskeDTOObservable(uuid, haku, hakukohdeOid, actorParams, withHakijaRyhmat, valintaperusteet, oppijat, hakukohdeRyhmasForHakukohdes, valintapisteetForHakukohdes, hakijaryhmat, hakemukset);
-        } else {
-            Observable<List<HakemusWrapper>> hakemukset = createResurssiObservable(tunniste,
-                "applicationAsyncResource.getApplicationsByOid",
-                applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
-                retryHakemuksetAndOppijat);
-            LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
-            return getLaskeDTOObservable(uuid, haku, hakukohdeOid, actorParams, withHakijaRyhmat, valintaperusteet, oppijat, hakukohdeRyhmasForHakukohdes, valintapisteetForHakukohdes, hakijaryhmat, hakemukset);
-        }
+        LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
+        return getLaskeDTOObservable(uuid, haku, hakukohdeOid, actorParams, withHakijaRyhmat, valintaperusteet, oppijasForOidsFromHakemukses, hakukohdeRyhmasForHakukohdes, valintapisteetForHakukohdes, hakijaryhmat, hakemukset);
     }
 
     private <T> Observable<T> createResurssiObservable(PyynnonTunniste tunniste, String resurssi, Observable<T> sourceObservable, boolean retry) {
