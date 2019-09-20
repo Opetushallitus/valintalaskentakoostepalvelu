@@ -303,7 +303,7 @@ public class LaskentaActorFactory {
 
         Observable<List<Oppija>> oppijasForOidsFromHakemukses = hakemukset.switchMap(hws -> {
             List<String> oppijaOids = hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
-            LOG.info("Got personOids from hakemukses and getting Oppijas for these: {} for haku {}", oppijaOids.toString(), hakuOid);
+            LOG.info("Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}", oppijaOids.toString(), hakukohdeOid);
             return createResurssiObservable(tunniste,
                     "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
                     suoritusrekisteriAsyncResource.getSuorituksetByOppijas(oppijaOids, hakuOid),
