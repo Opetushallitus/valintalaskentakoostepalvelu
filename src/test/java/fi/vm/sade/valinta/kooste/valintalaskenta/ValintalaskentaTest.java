@@ -10,6 +10,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetJarjestyskriteeriDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
@@ -76,6 +79,9 @@ public class ValintalaskentaTest {
     private final String hakukohde1Oid = "h1";
     private final String hakukohde2Oid = "h2";
     private final String hakukohde3Oid = "h3";
+    private final String valintatapajono1Oid = "vj1";
+    private final String valintatapajono2Oid = "vj2";
+    private final String valintatapajono3Oid = "vj3";
     private final String ataruHakukohdeOid = "1.2.246.562.20.90242725084";
     private final String ataruHakukohdeOid2 = "1.2.246.562.20.38103650677";
     private final String uuid = "uuid";
@@ -113,7 +119,7 @@ public class ValintalaskentaTest {
                 (new Valintapisteet(ataruHakemus.getHakemusOid(), ataruHakemus.getPersonOid(), "Zl2A5", "TAUsuL4BQc", Collections.emptyList())));
 
         when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
-            Observable.just(Collections.singletonList(new ValintaperusteetDTO())));
+                Observable.just(Collections.singletonList(valintaperusteetWithValintatapajonoUsingValintalaskenta(false, false, valintatapajono1Oid))));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde1Oid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde2Oid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde3Oid)).thenReturn(Observable.just(Collections.emptyList()));
@@ -235,6 +241,53 @@ public class ValintalaskentaTest {
     }
 
     @Test
+    public void puuttuvaJonokriteeriAiheuttaaLaskennanEpaonnistumisen() throws InterruptedException {
+        int vaiheenNumero = 1;
+
+        when(valintaperusteetAsyncResource.haeValintaperusteet(hakukohde1Oid, vaiheenNumero)).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid),
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(true, false, valintatapajono2Oid),
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(false, true, valintatapajono3Oid)
+        )));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(
+                auditSession,
+                uuid,
+                hakuOid,
+                false,
+                vaiheenNumero,
+                null,
+                Collections.singletonList(new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1")),
+                LaskentaTyyppi.HAKUKOHDE
+        );
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
+        Thread.sleep(500);
+
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional("Hakukohteen h1 valintatapajonolla vj2 on joko valintalaskenta ilman jonokriteereitä"));
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
+
+    private ValintaperusteetDTO valintaperusteetWithValintatapajonoUsingValintalaskenta(boolean kaytetaanValintalaskentaa, boolean hasJonokriteeri, String valintatapajonoOid) {
+        ValintaperusteetDTO valintaperusteet = new ValintaperusteetDTO();
+
+        ValintaperusteetValinnanVaiheDTO valinnanvaihe = new ValintaperusteetValinnanVaiheDTO();
+        valintaperusteet.setValinnanVaihe(valinnanvaihe);
+
+        ValintatapajonoJarjestyskriteereillaDTO valintatapajono = new ValintatapajonoJarjestyskriteereillaDTO();
+        valintatapajono.setOid(valintatapajonoOid);
+        valintatapajono.setKaytetaanValintalaskentaa(kaytetaanValintalaskentaa);
+        valinnanvaihe.setValintatapajono(Collections.singletonList(valintatapajono));
+
+        if (hasJonokriteeri) {
+            valintatapajono.setJarjestyskriteerit(Collections.singletonList(new ValintaperusteetJarjestyskriteeriDTO()));
+        }
+
+        return valintaperusteet;
+    }
+
+    @Test
     public void epaonnistuneetLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(
             Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid)));
@@ -254,7 +307,7 @@ public class ValintalaskentaTest {
         verify(valintapisteAsyncResource).getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class));
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
-        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional(hakukohde1Oid));
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional("Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid));
         verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }
@@ -277,12 +330,12 @@ public class ValintalaskentaTest {
         verify(valintapisteAsyncResource, times(2)).getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid), any(AuditSession.class));
         verify(valintapisteAsyncResource).getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid2), any(AuditSession.class));
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, ataruHakukohdeOid2, HakukohdeTila.VALMIS, Optional.empty());
-        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(ataruHakukohdeOid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional(ataruHakukohdeOid));
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(ataruHakukohdeOid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional("Ei saatu haettua hakemuksia kohteelle " + ataruHakukohdeOid));
         verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }
 
-    private Optional<IlmoitusDto> getIlmoitusDtoOptional(String hakukohdeOid) {
+    private Optional<IlmoitusDto> getIlmoitusDtoOptional(String odotettuOtsikonSisalto) {
         return argThat(new ArgumentMatcher<Optional<IlmoitusDto>>() {
             @Override
             public boolean matches(Optional<IlmoitusDto> argument) {
@@ -294,7 +347,6 @@ public class ValintalaskentaTest {
             }
 
             private final IlmoitusTyyppi odotettuIlmoitustyyppi = IlmoitusTyyppi.VIRHE;
-            private final String odotettuOtsikonSisalto = "Ei saatu haettua hakemuksia kohteelle " + hakukohdeOid;
 
             @Override
             public String toString() {
