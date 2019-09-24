@@ -136,28 +136,6 @@ public class ViestintapalveluObservables {
                             hakutoimistoDTO.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.<Osoite>empty())));
     }
 
-    public static Observable<LetterBatch> kirjeet(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat,
-                                                  Collection<HakemusWrapper> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-                                                  Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti, HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl,
-                                                  ParametritParser haunParametrit, boolean sahkoinenKorkeakoulunMassaposti) {
-        return addresses.map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
-                .teeHyvaksymiskirjeet(
-                        hakijapalveluidenOsoite,
-                        hyvaksymiskirjeessaKaytetytHakukohteet,
-                        hyvaksytytHakijat,
-                        hakemukset,
-                        hakuOid,
-                        asiointikieli,
-                        //
-                        defaultValue,
-                        hakuOid, // nimiUriToTag(h.getHakukohteenNimiUri(), hakukohdeOid.get());
-                        "hyvaksymiskirje",
-                        hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
-                        hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
-                        asiointikieli.isPresent(),
-                        sahkoinenKorkeakoulunMassaposti));
-    }
-
     public static Observable<String> batchId(Observable<LetterBatch> hyvaksymiskirje,
                                              Function<LetterBatch, Observable<LetterResponse>> vieDokumentti,
                                              Function<String, Observable<LetterBatchStatusDto>> haeStatusFn, Long delay,

@@ -107,12 +107,23 @@ public class HyvaksymiskirjeetKokoHaulleService {
         Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(resurssit.hakijat);
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
-        Observable<Map<String, Optional<Osoite>>> osoitteet = ViestintapalveluObservables.haunOsoitteet(asiointikieli, hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
-        Observable<HakuV1RDTO> haku = hakuV1AsyncResource.haeHaku(hakuOid);
-        Observable<LetterBatch> kirjeet = haku.flatMap( (haettuHaku) ->
-            ViestintapalveluObservables.kirjeet(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, osoitteet,
-                    hyvaksymiskirjeetKomponentti, hyvaksymiskirjeetServiceImpl, haunParametrit, true)
-        );
+        Observable<LetterBatch> kirjeet = ViestintapalveluObservables.haunOsoitteet(asiointikieli, hakukohteet, organisaatioAsyncResource::haeHakutoimisto)
+                .map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
+                        .teeHyvaksymiskirjeet(
+                                hakijapalveluidenOsoite,
+                                hakukohteet,
+                                resurssit.hakijat,
+                                resurssit.hakemukset,
+                                hakuOid,
+                                Optional.of(asiointikieli),
+                                defaultValue,
+                                hakuOid,
+                                "hyvaksymiskirje",
+                                hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
+                                hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
+                                true,
+                                true
+                        ));
         return ViestintapalveluObservables.batchId(
                 kirjeet,
                 viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,

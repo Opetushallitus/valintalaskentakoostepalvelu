@@ -173,22 +173,23 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
-            Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(
-                    hakuOid,
-                    asiointikieli,
-                    hyvaksytytHakijat,
-                    hakemukset,
-                    defaultValue,
-                    hyvaksymiskirjeessaKaytetytHakukohteet,
-                    ViestintapalveluObservables.hakukohteenOsoite(
-                            hakukohdeOid,
-                            tarjoajaOid,
-                            hyvaksymiskirjeessaKaytetytHakukohteet,
-                            organisaatioAsyncResource::haeHakutoimisto),
-                    hyvaksymiskirjeetKomponentti,
-                    hyvaksymiskirjeetServiceImpl,
-                    haunParametrit,
-                    false);
+            Observable<LetterBatch> kirjeet = ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto)
+                    .map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
+                            .teeHyvaksymiskirjeet(
+                                    hakijapalveluidenOsoite,
+                                    hyvaksymiskirjeessaKaytetytHakukohteet,
+                                    hyvaksytytHakijat,
+                                    hakemukset,
+                                    hakuOid,
+                                    asiointikieli,
+                                    defaultValue,
+                                    hakuOid,
+                                    "hyvaksymiskirje",
+                                    hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
+                                    hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
+                                    asiointikieli.isPresent(),
+                                    false
+                            ));
 
             return ViestintapalveluObservables.batchId(
                     kirjeet,
