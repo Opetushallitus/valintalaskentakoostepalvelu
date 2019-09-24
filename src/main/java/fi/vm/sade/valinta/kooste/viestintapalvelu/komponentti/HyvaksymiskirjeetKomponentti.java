@@ -41,107 +41,10 @@ public class HyvaksymiskirjeetKomponentti {
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
 
     private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
-    private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
     @Autowired
-    public HyvaksymiskirjeetKomponentti(KoodistoCachedAsyncResource koodistoCachedAsyncResource, KirjeetHakukohdeCache kirjeetHakukohdeCache) {
-        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
+    public HyvaksymiskirjeetKomponentti(KirjeetHakukohdeCache kirjeetHakukohdeCache) {
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
-    }
-
-    public LetterBatch teeHyvaksymiskirjeet(
-            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
-            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-            Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<HakemusWrapper> hakemukset,
-            String hakuOid,
-            Optional<String> asiointikieli,
-            String sisalto,
-            String tag,
-            String templateName,
-            String palautusPvm,
-            String palautusAika,
-            boolean iPosti) {
-        return teeHyvaksymiskirjeet(
-                koodistoCachedAsyncResource::haeKoodisto,
-                hakukohdeJaHakijapalveluidenOsoite,
-                hyvaksymiskirjeessaKaytetytHakukohteet,
-                hakukohteenHakijat,
-                hakemukset,
-                null,
-                hakuOid,
-                asiointikieli,
-                sisalto,
-                tag,
-                templateName,
-                palautusPvm,
-                palautusAika,
-                iPosti,
-                false);
-    }
-
-    public LetterBatch teeHyvaksymiskirjeet(
-            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
-            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-            Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<HakemusWrapper> hakemukset,
-            String hakuOid,
-            Optional<String> asiointikieli,
-            String sisalto,
-            String tag,
-            String templateName,
-            String palautusPvm,
-            String palautusAika,
-            boolean iPosti,
-            boolean sahkoinenKorkeakoulunMassaposti) {
-        return teeHyvaksymiskirjeet(
-                koodistoCachedAsyncResource::haeKoodisto,
-                hakukohdeJaHakijapalveluidenOsoite,
-                hyvaksymiskirjeessaKaytetytHakukohteet,
-                hakukohteenHakijat,
-                hakemukset,
-                null,
-                hakuOid,
-                asiointikieli,
-                sisalto,
-                tag,
-                templateName,
-                palautusPvm,
-                palautusAika,
-                iPosti,
-                sahkoinenKorkeakoulunMassaposti);
-    }
-
-    public LetterBatch teeJalkiohjauskirjeet(
-            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
-            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-            Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<HakemusWrapper> hakemukset,
-            String hakukohdeOid,
-            String hakuOid,
-            Optional<String> asiointikieli,
-            String sisalto,
-            String tag,
-            String templateName,
-            String palautusPvm,
-            String palautusAika,
-            boolean iPosti) {
-        return teeHyvaksymiskirjeet(
-                koodistoCachedAsyncResource::haeKoodisto,
-                hakukohdeJaHakijapalveluidenOsoite,
-                hyvaksymiskirjeessaKaytetytHakukohteet,
-                hakukohteenHakijat,
-                hakemukset,
-                hakukohdeOid,
-                hakuOid,
-                asiointikieli,
-                sisalto,
-                tag,
-                templateName,
-                palautusPvm,
-                palautusAika,
-                iPosti,
-                false);
     }
 
     public static LetterBatch teeHyvaksymiskirjeet(
@@ -153,7 +56,8 @@ public class HyvaksymiskirjeetKomponentti {
             String hakukohdeOidFromRequest,
             String hakuOid,
             Optional<String> asiointikieli,
-            String sisalto, String tag,
+            String sisalto,
+            String tag,
             String templateName,
             String palautusPvm,
             String palautusAika,

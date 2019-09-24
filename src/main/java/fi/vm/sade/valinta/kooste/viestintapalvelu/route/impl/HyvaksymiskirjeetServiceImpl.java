@@ -15,6 +15,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -67,11 +68,12 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
-    private AtaruAsyncResource ataruAsyncResource;
-    private TarjontaAsyncResource tarjontaAsyncResource;
+    private final AtaruAsyncResource ataruAsyncResource;
+    private final TarjontaAsyncResource tarjontaAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final HaeOsoiteKomponentti haeOsoiteKomponentti;
     private final HakuParametritService hakuParametritService;
+    private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final int pollingIntervalMillis;
 
     private SimpleDateFormat pvmMuoto = new SimpleDateFormat("dd.MM.yyyy");
@@ -88,6 +90,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             OrganisaatioAsyncResource organisaatioAsyncResource,
             HaeOsoiteKomponentti haeOsoiteKomponentti,
             HakuParametritService hakuParametritService,
+            KoodistoCachedAsyncResource koodistoCachedAsyncResource,
             @Value("${valintalaskentakoostepalvelu.hyvaksymiskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
@@ -98,6 +101,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.haeOsoiteKomponentti = haeOsoiteKomponentti;
         this.hakuParametritService = hakuParametritService;
+        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.pollingIntervalMillis = pollingIntervalMillis;
     }
 
@@ -142,10 +146,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
                         final boolean iPosti = false;
 
-                        return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                        return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                                koodistoCachedAsyncResource::haeKoodisto,
                                 ImmutableMap.of(organisaatioOid, hakutoimisto.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.empty())),
                                 hyvaksymiskirjeessaKaytetytHakukohteet,
-                                kohdeHakukohteessaHyvaksytyt, hakemukset,
+                                kohdeHakukohteessaHyvaksytyt,
+                                hakemukset,
+                                null,
                                 hyvaksymiskirjeDTO.getHakuOid(),
                                 Optional.empty(),
                                 hyvaksymiskirjeDTO.getSisalto(),
@@ -153,8 +160,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                 hyvaksymiskirjeDTO.getTemplateName(),
                                 parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
                                 parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
-                                iPosti
-                        );
+                                iPosti,
+                                false);
                     })
                     .subscribeOn(Schedulers.newThread())
                     .subscribe(
@@ -195,10 +202,12 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     Osoite hakijapalveluidenOsoite = OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
                             kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
                     final boolean iPosti = false;
-                    return hyvaksymiskirjeetKomponentti.teeJalkiohjauskirjeet(
+                    return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                            koodistoCachedAsyncResource::haeKoodisto,
                             ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),Optional.ofNullable(hakijapalveluidenOsoite)),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
-                            hylatyt, hakemukset,
+                            hylatyt,
+                            hakemukset,
                             hyvaksymiskirjeDTO.getHakukohdeOid(),
                             hyvaksymiskirjeDTO.getHakuOid(),
                             Optional.empty(),
@@ -207,7 +216,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hyvaksymiskirjeDTO.getTemplateName(),
                             hyvaksymiskirjeDTO.getPalautusPvm(),
                             hyvaksymiskirjeDTO.getPalautusAika(),
-                            iPosti
+                            iPosti,
+                            false
                     );
                 })
                 .subscribeOn(Schedulers.newThread())
@@ -248,10 +258,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hakijatJoilleMuodostetaanKirjeet);
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
                     final boolean iPosti = false;
-                    return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                    return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                            koodistoCachedAsyncResource::haeKoodisto,
                             ImmutableMap.of(organisaatioOid, hakutoimisto.flatMap(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli()))),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
-                            hakijatJoilleMuodostetaanKirjeet, hakemukset,
+                            hakijatJoilleMuodostetaanKirjeet,
+                            hakemukset,
+                            null,
                             hakuOid,
                             Optional.empty(),
                             hyvaksymiskirjeDTO.getSisalto(),
@@ -259,7 +272,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hyvaksymiskirjeDTO.getTemplateName(),
                             parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
                             parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
-                            iPosti);
+                            iPosti,
+                            false);
                 })
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
