@@ -133,27 +133,17 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     }
 
     private Observable<String> prosessoiHakukohde(String hakuOid, Optional<String> defaultValue, HakukohdeJaResurssit resurssit) {
-        return getHakukohteenHyvaksymiskirjeObservable(
-                hakuOid,
-                resurssit.hakukohdeOid,
-                defaultValue,
-                resurssit.hakijat,
-                resurssit.hakemukset)
-                .timeout(3, TimeUnit.MINUTES, Observable.just("timeout"));
-    }
-
-    private Observable<String> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<String> defaultValue,
-                                                                       List<HakijaDTO> hyvaksytytHakijat, Collection<HakemusWrapper> hakemukset) {
-        return tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
+        return tarjontaAsyncResource.haeHakukohde(resurssit.hakukohdeOid)
                 .flatMap(h -> defaultValue.map(Observable::just).orElseGet(() -> haeHakukohteenVakiosisalto(h))
                         .flatMap(vakiosisalto -> luoKirjeJaLahetaMuodostettavaksi(
                                 hakuOid,
-                                hakukohdeOid,
+                                resurssit.hakukohdeOid,
                                 h.getTarjoajaOids().iterator().next(),
-                                hyvaksytytHakijat,
-                                hakemukset,
+                                resurssit.hakijat,
+                                resurssit.hakemukset,
                                 vakiosisalto
-                        )));
+                        )))
+                .timeout(3, TimeUnit.MINUTES, Observable.just("timeout"));
     }
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, String tarjoajaOid,
