@@ -145,8 +145,4 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 780L,
                 status -> Observable.just(status.batchId));
     }
-
-    private boolean isKorkeakouluhaku(HakuV1RDTO haku) {
-        return haku.getKohdejoukkoUri().startsWith("haunkohdejoukko_12"); //"kohdejoukkoUri": "haunkohdejoukko_12#1"
-    }
 }
