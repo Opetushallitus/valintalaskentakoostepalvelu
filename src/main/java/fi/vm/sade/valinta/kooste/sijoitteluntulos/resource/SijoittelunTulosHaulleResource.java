@@ -91,7 +91,7 @@ public class SijoittelunTulosHaulleResource {
                 }
                 hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, asiointikieli, prosessi, letterBodyText);
             } else {
-                hyvaksymiskirjeetHakukohteittain.muodostaKirjeet(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
+                hyvaksymiskirjeetHakukohteittain.hyvaksymiskirjeetHaulleHakukohteittain(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
             }
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();

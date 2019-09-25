@@ -77,7 +77,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
-    public void muodostaKirjeet(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
+    public void hyvaksymiskirjeetHaulleHakukohteittain(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
                 .flatMap(valintatulokset -> tarjontaAsyncResource.haeHaku(hakuOid)
                         .flatMap(haku -> {
