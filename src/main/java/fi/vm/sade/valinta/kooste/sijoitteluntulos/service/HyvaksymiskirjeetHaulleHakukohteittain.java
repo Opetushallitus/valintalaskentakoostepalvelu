@@ -113,37 +113,33 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                 resurssit -> {
                     LOG.info("Aloitetaan hakukohteen {} hyväksymiskirjeiden luonti, jäljellä {} hakukohdetta", resurssit.hakukohdeOid, hakukohdeQueue.size());
 
-                    prosessoiHakukohde(hakuOid, defaultValue, resurssit).subscribe(
-                            s -> {
-                                LOG.info("Hakukohde {} valmis", resurssit.hakukohdeOid);
-                                prosessi.inkrementoi();
-                                hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
-                            },
-                            e -> {
-                                LOG.info("Hakukohde ohitettu virhe?" + resurssit.hakukohdeOid, e);
-                                prosessi.inkrementoiOhitettujaToita();
-                                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + e.getMessage()));
-                                hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
-                            }
-                    );
+                    tarjontaAsyncResource.haeHakukohde(resurssit.hakukohdeOid)
+                            .flatMap(h -> defaultValue.map(Observable::just).orElseGet(() -> haeHakukohteenVakiosisalto(h))
+                                    .flatMap(vakiosisalto -> luoKirjeJaLahetaMuodostettavaksi(
+                                            hakuOid,
+                                            resurssit.hakukohdeOid,
+                                            h.getTarjoajaOids().iterator().next(),
+                                            resurssit.hakijat,
+                                            resurssit.hakemukset,
+                                            vakiosisalto
+                                    )))
+                            .timeout(3, TimeUnit.MINUTES, Observable.just("timeout"))
+                            .subscribe(s -> {
+                                        LOG.info("Hakukohde {} valmis", resurssit.hakukohdeOid);
+                                        prosessi.inkrementoi();
+                                        hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
+                                    },
+                                    e -> {
+                                        LOG.info("Hakukohde ohitettu virhe?" + resurssit.hakukohdeOid, e);
+                                        prosessi.inkrementoiOhitettujaToita();
+                                        prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + e.getMessage()));
+                                        hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
+                                    }
+                            );
                 });
         if (!hakukohdeJaResurssit.isPresent()) {
             LOG.info("### Hyväksymiskirjeiden generointi haulle {} on valmis", hakuOid);
         }
-    }
-
-    private Observable<String> prosessoiHakukohde(String hakuOid, Optional<String> defaultValue, HakukohdeJaResurssit resurssit) {
-        return tarjontaAsyncResource.haeHakukohde(resurssit.hakukohdeOid)
-                .flatMap(h -> defaultValue.map(Observable::just).orElseGet(() -> haeHakukohteenVakiosisalto(h))
-                        .flatMap(vakiosisalto -> luoKirjeJaLahetaMuodostettavaksi(
-                                hakuOid,
-                                resurssit.hakukohdeOid,
-                                h.getTarjoajaOids().iterator().next(),
-                                resurssit.hakijat,
-                                resurssit.hakemukset,
-                                vakiosisalto
-                        )))
-                .timeout(3, TimeUnit.MINUTES, Observable.just("timeout"));
     }
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, String tarjoajaOid,
