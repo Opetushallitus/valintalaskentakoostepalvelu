@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
+import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
@@ -14,10 +15,8 @@ import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
@@ -25,12 +24,12 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluOb
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HakukohdeJaResurssit;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
+import io.reactivex.Observable;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +37,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 @Service
@@ -179,7 +177,9 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
         Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
-        return ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto)
+        MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
+        return organisaatioAsyncResource.haeHakutoimisto(kohdeHakukohde.getTarjoajaOid())
+                .map(toimisto -> ImmutableMap.of(tarjoajaOid, toimisto.flatMap(t -> Hakijapalvelu.osoite(t, kohdeHakukohde.getHakukohteenKieli()))))
                 .map(hakijapalveluidenOsoite -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                         koodistoCachedAsyncResource::haeKoodisto,
                         hakijapalveluidenOsoite,

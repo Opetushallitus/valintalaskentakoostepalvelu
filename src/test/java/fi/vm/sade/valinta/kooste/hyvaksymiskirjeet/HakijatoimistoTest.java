@@ -7,17 +7,16 @@ import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
+import io.reactivex.Observable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import io.reactivex.Observable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -92,8 +91,6 @@ public class HakijatoimistoTest {
         final AtomicReference<Optional<HakutoimistoDTO>> foundWasPresent = new AtomicReference<>();
         final AtomicBoolean foundHadErrors = new AtomicBoolean(false);
 
-        final AtomicReference<Map<String, Optional<Osoite>>> osoitePresent = new AtomicReference<>();
-        final AtomicBoolean osoiteHadErrors = new AtomicBoolean(false);
         Observable<Optional<HakutoimistoDTO>> hakutoimistoNotFound= o.haeHakutoimisto(EI_LOYDY_ORGANISAATIO_ID);
         hakutoimistoNotFound
                 .subscribe(
@@ -113,21 +110,8 @@ public class HakijatoimistoTest {
                         e -> foundHadErrors.set(true)
                 );
 
-        ViestintapalveluObservables.hakukohteenOsoite(
-                HAKUKOHDE_OID,
-                EI_LOYDY_ORGANISAATIO_ID,
-                ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(EI_LOYDY_ORGANISAATIO_ID, new Teksti(HAKUKOHDE_OID),new Teksti(EI_LOYDY_ORGANISAATIO_ID))),
-                o::haeHakutoimisto)
-                .subscribe(
-                        h -> {
-                            counter.release();
-                            osoitePresent.set(h);
-                        },
-                        e -> osoiteHadErrors.set(true)
-                );
-
         try {
-            Assert.assertTrue(counter.tryAcquire(3, 20, TimeUnit.SECONDS));
+            Assert.assertTrue(counter.tryAcquire(2, 20, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             Assert.fail();
         }
@@ -139,12 +123,5 @@ public class HakijatoimistoTest {
         Assert.assertTrue("Should be empty with 404", !notFoundWasPresent.get().isPresent());
         Assert.assertEquals("Should be empty with 404", Optional.empty(),
                 notFoundWasPresent.get().map(p -> Optional.ofNullable("WRONG")).orElse(Optional.empty()));
-
-        Assert.assertTrue("Should not throw", !osoiteHadErrors.get());
-        Assert.assertTrue("Should not have 'Osoite'", !osoitePresent.get().get(EI_LOYDY_ORGANISAATIO_ID).isPresent());
-
-
     }
-
-
 }

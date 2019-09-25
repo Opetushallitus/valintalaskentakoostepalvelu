@@ -101,15 +101,6 @@ public class ViestintapalveluObservables {
         );
     }
 
-    public static Observable<Map<String, Optional<Osoite>>> hakukohteenOsoite(String hakukohdeOid, String tarjoajaOid,
-                                                                              Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-                                                                              Function<String, Observable<Optional<HakutoimistoDTO>>> hakutoimistoFn) {
-        MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-        return hakutoimistoFn.apply(kohdeHakukohde.getTarjoajaOid())
-                .map(hakutoimistoDTO -> ImmutableMap.of(tarjoajaOid,
-                            hakutoimistoDTO.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.<Osoite>empty())));
-    }
-
     /*
      * Helper functions
      */
