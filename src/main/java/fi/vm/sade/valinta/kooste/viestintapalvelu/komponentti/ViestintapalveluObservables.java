@@ -84,13 +84,6 @@ public class ViestintapalveluObservables {
         }
     }
 
-    public static Observable<HaunResurssit> haunResurssit(String asiointikieli,
-                                                          Observable<HakijaPaginationObject> koulutuspaikalliset,
-                                                          Function<List<String>, Observable<List<HakemusWrapper>>> haeHakemukset) {
-        return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) ->
-                filtteroiAsiointikielella(asiointikieli, new HaunResurssit(hakijat.getResults(), hakemukset)));
-    }
-
     public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Observable<HakijaPaginationObject> koulutuspaikalliset,
                                                                                 Function<List<String>, Observable<List<HakemusWrapper>>> haeHakemukset) {
         return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) -> hakukohteetOpetuskielella(hakijat, hakemukset));

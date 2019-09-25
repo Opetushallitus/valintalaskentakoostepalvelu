@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -11,6 +13,7 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Viestintapal
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
@@ -25,9 +28,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class HyvaksymiskirjeetKokoHaulleService {
@@ -71,13 +77,24 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
-        ViestintapalveluObservables.haunResurssit(
-                asiointikieli,
-                valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid),
-                (oids) -> hakuV1AsyncResource.haeHaku(hakuOid)
-                        .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                                ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)
-                                : ataruAsyncResource.getApplicationsByOids(oids)))
+        valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
+                .flatMap(valintatulokset -> hakuV1AsyncResource.haeHaku(hakuOid)
+                        .flatMap(haku -> {
+                            List<String> hakemusOids = valintatulokset.getResults().stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
+                            return StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                    ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
+                                    : ataruAsyncResource.getApplicationsByOids(hakemusOids);
+                        })
+                        .map(hakemukset -> {
+                            List<HakemusWrapper> asiointikielisetHakemukset = hakemukset.stream()
+                                    .filter(h -> asiointikieli.equalsIgnoreCase(h.getAsiointikieli()))
+                                    .collect(Collectors.toList());
+                            Set<String> asiointikielisetHakemusOids = asiointikielisetHakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
+                            List<HakijaDTO> asiointikielisetValintatulokset = valintatulokset.getResults().stream()
+                                    .filter(v -> asiointikielisetHakemusOids.contains(v.getHakemusOid()))
+                                    .collect(Collectors.toList());
+                            return new HaunResurssit(asiointikielisetValintatulokset, asiointikielisetHakemukset);
+                        }))
                 .doOnError(error -> LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error))
                 .doOnNext(list -> prosessi.setKokonaistyo(1))
                 .doOnNext(n -> LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti", hakuOid))
