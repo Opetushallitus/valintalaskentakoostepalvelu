@@ -18,17 +18,16 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetK
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
+import io.reactivex.Observable;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 @Service
 public class HyvaksymiskirjeetKokoHaulleService {
@@ -71,22 +70,15 @@ public class HyvaksymiskirjeetKokoHaulleService {
     }
 
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
-        muodostaHyvaksymiskirjeetKokoHaulle(() ->
-                        ViestintapalveluObservables.haunResurssit(asiointikieli, valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid),
-                                (oids) -> hakuV1AsyncResource.haeHaku(hakuOid)
-                                        .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                                                ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)
-                                                : ataruAsyncResource.getApplicationsByOids(oids))),
-                hakuOid, asiointikieli, prosessi, defaultValue);
-    }
-
-    private void muodostaHyvaksymiskirjeetKokoHaulle(Supplier<Observable<HaunResurssit>> haeHaunResurssit, String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
-
-        haeHaunResurssit.get()
-                .doOnError(error -> {
-                    LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
-                })
+        ViestintapalveluObservables.haunResurssit(
+                asiointikieli,
+                valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid),
+                (oids) -> hakuV1AsyncResource.haeHaku(hakuOid)
+                        .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)
+                                : ataruAsyncResource.getApplicationsByOids(oids)))
+                .doOnError(error -> LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error))
                 .doOnNext(list -> prosessi.setKokonaistyo(1))
                 .doOnNext(n -> LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti", hakuOid))
                 .flatMap(resurssit -> luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue.get())
