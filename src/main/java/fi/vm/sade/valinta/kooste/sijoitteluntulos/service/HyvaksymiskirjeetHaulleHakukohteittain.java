@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -143,32 +144,16 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
 
     private Observable<String> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<String> defaultValue,
                                                                        List<HakijaDTO> hyvaksytytHakijat, Collection<HakemusWrapper> hakemukset) {
-        return
-                tarjontaAsyncResource.haeHakukohde(hakukohdeOid).switchMap(
-                        h -> {
-                            try {
-                                String tarjoajaOid = h.getTarjoajaOids().iterator().next();
-                                String kieli = KirjeetHakukohdeCache.getOpetuskieli(h.getOpetusKielet());
-                                if (defaultValue.isPresent()) {
-                                    return luoKirjeJaLahetaMuodostettavaksi(hakuOid, hakukohdeOid, tarjoajaOid,
-                                            hyvaksytytHakijat, hakemukset, defaultValue.get());
-                                } else {
-                                    return viestintapalveluAsyncResource.haeKirjepohja(hakuOid, tarjoajaOid, "hyvaksymiskirje", kieli, hakukohdeOid).switchMap(
-                                            (t) -> {
-                                                Optional<TemplateDetail> td = etsiVakioDetail(t);
-                                                if (!td.isPresent()) {
-                                                    return Observable.error(new RuntimeException("Ei " + VAKIOTEMPLATE + " tai " + VAKIODETAIL + " templateDetailia hakukohteelle " + hakukohdeOid));
-                                                } else {
-                                                    return luoKirjeJaLahetaMuodostettavaksi(hakuOid, hakukohdeOid, tarjoajaOid,
-                                                            hyvaksytytHakijat, hakemukset, td.get().getDefaultValue());
-                                                }
-                                            });
-                                }
-                            } catch (Throwable e) {
-                                return Observable.error(e);
-                            }
-                        });
-
+        return tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
+                .flatMap(h -> defaultValue.map(Observable::just).orElseGet(() -> haeHakukohteenVakiosisalto(h))
+                        .flatMap(vakiosisalto -> luoKirjeJaLahetaMuodostettavaksi(
+                                hakuOid,
+                                hakukohdeOid,
+                                h.getTarjoajaOids().iterator().next(),
+                                hyvaksytytHakijat,
+                                hakemukset,
+                                vakiosisalto
+                        )));
     }
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, String tarjoajaOid,
@@ -212,6 +197,19 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                 .flatMap(batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
                         .onErrorReturn(error -> batchId)
                         .map(name -> batchId));
+    }
+
+    private Observable<String> haeHakukohteenVakiosisalto(HakukohdeV1RDTO hakukohde) {
+        return viestintapalveluAsyncResource.haeKirjepohja(
+                hakukohde.getHakuOid(),
+                hakukohde.getTarjoajaOids().iterator().next(),
+                "hyvaksymiskirje",
+                KirjeetHakukohdeCache.getOpetuskieli(hakukohde.getOpetusKielet()),
+                hakukohde.getOid()
+        ).flatMap(kirjepohjat -> etsiVakioDetail(kirjepohjat)
+                .map(TemplateDetail::getDefaultValue)
+                .map(Observable::just)
+                .orElse(Observable.error(new RuntimeException(String.format("Ei %s tai %s templateDetailia hakukohteelle %s", VAKIOTEMPLATE, VAKIODETAIL, hakukohde.getOid())))));
     }
 
     private static Optional<TemplateDetail> etsiVakioDetail(List<TemplateHistory> t) {
