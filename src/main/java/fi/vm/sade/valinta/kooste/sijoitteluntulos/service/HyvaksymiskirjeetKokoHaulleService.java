@@ -91,7 +91,34 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             List<HakijaDTO> asiointikielisetValintatulokset = valintatulokset.getResults().stream()
                                     .filter(v -> asiointikielisetHakemusOids.contains(v.getHakemusOid()))
                                     .collect(Collectors.toList());
-                            return luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, defaultValue, asiointikielisetValintatulokset, asiointikielisetHakemukset);
+
+                            Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(asiointikielisetValintatulokset);
+                            ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
+
+                            Observable<LetterBatch> kirjeet = ViestintapalveluObservables.haunOsoitteet(asiointikieli, hakukohteet, organisaatioAsyncResource::haeHakutoimisto)
+                                    .map(hakijapalveluidenOsoite -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                                            koodistoCachedAsyncResource::haeKoodisto,
+                                            hakijapalveluidenOsoite,
+                                            hakukohteet,
+                                            asiointikielisetValintatulokset,
+                                            asiointikielisetHakemukset,
+                                            null,
+                                            hakuOid,
+                                            Optional.of(asiointikieli),
+                                            defaultValue,
+                                            hakuOid,
+                                            "hyvaksymiskirje",
+                                            hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
+                                            hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
+                                            true,
+                                            true
+                                    ));
+                            return ViestintapalveluObservables.batchId(
+                                    kirjeet,
+                                    viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
+                                    viestintapalveluAsyncResource::haeStatusObservable,
+                                    780L,
+                                    status -> Observable.just(status.batchId));
                         }))
                 .timeout(780, TimeUnit.MINUTES, Observable.just("timeout"))
                 .subscribe(
@@ -109,34 +136,4 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 );
     }
 
-    private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String asiointikieli, String defaultValue, List<HakijaDTO> valintatulokset, List<HakemusWrapper> hakemukset) {
-
-        Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(valintatulokset);
-        ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
-
-        Observable<LetterBatch> kirjeet = ViestintapalveluObservables.haunOsoitteet(asiointikieli, hakukohteet, organisaatioAsyncResource::haeHakutoimisto)
-                .map(hakijapalveluidenOsoite -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                        koodistoCachedAsyncResource::haeKoodisto,
-                        hakijapalveluidenOsoite,
-                        hakukohteet,
-                        valintatulokset,
-                        hakemukset,
-                        null,
-                        hakuOid,
-                        Optional.of(asiointikieli),
-                        defaultValue,
-                        hakuOid,
-                        "hyvaksymiskirje",
-                        hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
-                        hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
-                        true,
-                        true
-                ));
-        return ViestintapalveluObservables.batchId(
-                kirjeet,
-                viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
-                viestintapalveluAsyncResource::haeStatusObservable,
-                780L,
-                status -> Observable.just(status.batchId));
-    }
 }
