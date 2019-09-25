@@ -89,7 +89,7 @@ public class SijoittelunTulosHaulleResource {
                 if (letterBodyText == null) {
                     throw new IllegalArgumentException("Parametri letterBodyText on pakollinen");
                 }
-                hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, asiointikieli, prosessi, letterBodyText);
+                hyvaksymiskirjeetKokoHaulleService.hyvaksymiskirjeetHaulle(hakuOid, asiointikieli, prosessi, letterBodyText);
             } else {
                 hyvaksymiskirjeetHakukohteittain.hyvaksymiskirjeetHaulleHakukohteittain(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
             }

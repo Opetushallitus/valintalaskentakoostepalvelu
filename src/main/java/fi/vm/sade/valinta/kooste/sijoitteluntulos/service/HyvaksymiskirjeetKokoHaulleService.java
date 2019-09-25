@@ -74,7 +74,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
-    public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, String defaultValue) {
+    public void hyvaksymiskirjeetHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, String defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
         prosessi.setKokonaistyo(1);
         valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
