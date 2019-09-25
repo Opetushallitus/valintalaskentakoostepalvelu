@@ -307,7 +307,6 @@
 		<!-- Sijoitteluntulokset haulle -->
 		<bean id="SijoittelunTulosHaulleResource"
 			  class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource" />
-		<bean class="fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetKokoHaulleService" />
 		<bean class="fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetHaulleHakukohteittain" />
 		<ctx:component-scan
 				base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl" />

@@ -5,10 +5,10 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetHaulleHakukohteittain;
-import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetKokoHaulleService;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -19,7 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
@@ -42,7 +46,7 @@ public class SijoittelunTulosHaulleResource {
     @Autowired(required = false)
     private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
     @Autowired
-    private HyvaksymiskirjeetKokoHaulleService hyvaksymiskirjeetKokoHaulleService;
+    private HyvaksymiskirjeetService hyvaksymiskirjeetService;
     @Autowired
     private HyvaksymiskirjeetHaulleHakukohteittain hyvaksymiskirjeetHakukohteittain;
 
@@ -89,7 +93,7 @@ public class SijoittelunTulosHaulleResource {
                 if (letterBodyText == null) {
                     throw new IllegalArgumentException("Parametri letterBodyText on pakollinen");
                 }
-                hyvaksymiskirjeetKokoHaulleService.hyvaksymiskirjeetHaulle(hakuOid, asiointikieli, prosessi, letterBodyText);
+                hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hakuOid, asiointikieli, prosessi, letterBodyText);
             } else {
                 hyvaksymiskirjeetHakukohteittain.hyvaksymiskirjeetHaulleHakukohteittain(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
             }
