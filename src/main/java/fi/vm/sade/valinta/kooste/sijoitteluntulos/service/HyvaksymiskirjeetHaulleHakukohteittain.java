@@ -175,48 +175,43 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, String tarjoajaOid,
                                                                 List<HakijaDTO> hyvaksytytHakijat, Collection<HakemusWrapper> hakemukset, String defaultValue) {
-        try {
-            LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
-            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
-            ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
+        LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
+        Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
+        ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
-            return ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto)
-                    .map(hakijapalveluidenOsoite -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            koodistoCachedAsyncResource::haeKoodisto,
-                            hakijapalveluidenOsoite,
-                            hyvaksymiskirjeessaKaytetytHakukohteet,
-                            hyvaksytytHakijat,
-                            hakemukset,
-                                    null,
-                            hakuOid,
-                            Optional.empty(),
-                            defaultValue,
-                            hakuOid,
-                            "hyvaksymiskirje",
-                            hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
-                            hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
-                            false,
-                            false))
-                    .flatMap(viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable)
-                    .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
-                            .flatMap(i -> viestintapalveluAsyncResource.haeStatusObservable(letterResponse.getBatchId())
-                                    .flatMap(letterBatchStatus -> {
-                                        if ("error".equals(letterBatchStatus.getStatus())) {
-                                            return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
-                                        }
-                                        if ("ready".equals(letterBatchStatus.getStatus())) {
-                                            return Observable.just(letterResponse.getBatchId());
-                                        }
-                                        return Observable.empty();
-                                    }))
-                            .take(1))
-                    .flatMap(batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
-                            .onErrorReturn(error -> batchId)
-                            .map(name -> batchId));
-        } catch (Throwable error) {
-            LOG.error("Viestintäpalveluviestin muodostus epäonnistui hakukohteelle {}", hakukohdeOid, error);
-            return Observable.error(error);
-        }
+        return ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto)
+                .map(hakijapalveluidenOsoite -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                        koodistoCachedAsyncResource::haeKoodisto,
+                        hakijapalveluidenOsoite,
+                        hyvaksymiskirjeessaKaytetytHakukohteet,
+                        hyvaksytytHakijat,
+                        hakemukset,
+                        null,
+                        hakuOid,
+                        Optional.empty(),
+                        defaultValue,
+                        hakuOid,
+                        "hyvaksymiskirje",
+                        hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
+                        hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
+                        false,
+                        false))
+                .flatMap(viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable)
+                .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
+                        .flatMap(i -> viestintapalveluAsyncResource.haeStatusObservable(letterResponse.getBatchId())
+                                .flatMap(letterBatchStatus -> {
+                                    if ("error".equals(letterBatchStatus.getStatus())) {
+                                        return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
+                                    }
+                                    if ("ready".equals(letterBatchStatus.getStatus())) {
+                                        return Observable.just(letterResponse.getBatchId());
+                                    }
+                                    return Observable.empty();
+                                }))
+                        .take(1))
+                .flatMap(batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                        .onErrorReturn(error -> batchId)
+                        .map(name -> batchId));
     }
 
     private static Optional<TemplateDetail> etsiVakioDetail(List<TemplateHistory> t) {
