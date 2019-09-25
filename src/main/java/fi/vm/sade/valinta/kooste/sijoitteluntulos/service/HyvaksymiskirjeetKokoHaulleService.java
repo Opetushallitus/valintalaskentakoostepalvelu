@@ -17,7 +17,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HaunResurssit;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import io.reactivex.Observable;
 import org.apache.commons.lang.StringUtils;
@@ -75,6 +74,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, String defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
+        prosessi.setKokonaistyo(1);
         valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
                 .flatMap(valintatulokset -> hakuV1AsyncResource.haeHaku(hakuOid)
                         .flatMap(haku -> {
@@ -83,7 +83,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                     ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
                                     : ataruAsyncResource.getApplicationsByOids(hakemusOids);
                         })
-                        .map(hakemukset -> {
+                        .flatMap(hakemukset -> {
                             List<HakemusWrapper> asiointikielisetHakemukset = hakemukset.stream()
                                     .filter(h -> asiointikieli.equalsIgnoreCase(h.getAsiointikieli()))
                                     .collect(Collectors.toList());
@@ -91,13 +91,9 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             List<HakijaDTO> asiointikielisetValintatulokset = valintatulokset.getResults().stream()
                                     .filter(v -> asiointikielisetHakemusOids.contains(v.getHakemusOid()))
                                     .collect(Collectors.toList());
-                            return new HaunResurssit(asiointikielisetValintatulokset, asiointikielisetHakemukset);
+                            return luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, defaultValue, asiointikielisetValintatulokset, asiointikielisetHakemukset);
                         }))
-                .doOnError(error -> LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error))
-                .doOnNext(list -> prosessi.setKokonaistyo(1))
-                .doOnNext(n -> LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti", hakuOid))
-                .flatMap(resurssit -> luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue)
-                        .timeout(780, TimeUnit.MINUTES, Observable.just("timeout")))
+                .timeout(780, TimeUnit.MINUTES, Observable.just("timeout"))
                 .subscribe(
                         batchId -> {
                             // TODO timeout handling
@@ -113,9 +109,9 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 );
     }
 
-    private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String asiointikieli, HaunResurssit resurssit, String defaultValue) {
+    private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String asiointikieli, String defaultValue, List<HakijaDTO> valintatulokset, List<HakemusWrapper> hakemukset) {
 
-        Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(resurssit.hakijat);
+        Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(valintatulokset);
         ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
         Observable<LetterBatch> kirjeet = ViestintapalveluObservables.haunOsoitteet(asiointikieli, hakukohteet, organisaatioAsyncResource::haeHakutoimisto)
@@ -123,8 +119,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
                         koodistoCachedAsyncResource::haeKoodisto,
                         hakijapalveluidenOsoite,
                         hakukohteet,
-                        resurssit.hakijat,
-                        resurssit.hakemukset,
+                        valintatulokset,
+                        hakemukset,
                         null,
                         hakuOid,
                         Optional.of(asiointikieli),
