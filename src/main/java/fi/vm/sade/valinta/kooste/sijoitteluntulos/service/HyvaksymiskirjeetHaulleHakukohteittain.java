@@ -19,7 +19,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
@@ -172,17 +171,13 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                 "hyvaksymiskirje",
                 KirjeetHakukohdeCache.getOpetuskieli(hakukohde.getOpetusKielet()),
                 hakukohde.getOid()
-        ).flatMap(kirjepohjat -> etsiVakioDetail(kirjepohjat)
+        ).flatMap(kirjepohjat -> kirjepohjat.stream()
+                .filter(kirjepohja -> VAKIOTEMPLATE.equals(kirjepohja.getName()))
+                .flatMap(kirjepohja -> kirjepohja.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
                 .map(TemplateDetail::getDefaultValue)
                 .map(Observable::just)
+                .findAny()
                 .orElse(Observable.error(new RuntimeException(String.format("Ei %s tai %s templateDetailia hakukohteelle %s", VAKIOTEMPLATE, VAKIODETAIL, hakukohde.getOid())))));
-    }
-
-    private static Optional<TemplateDetail> etsiVakioDetail(List<TemplateHistory> t) {
-        return t.stream()
-                .filter(th -> VAKIOTEMPLATE.equals(th.getName()))
-                .flatMap(td -> td.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
-                .findAny();
     }
 
     private static final String VAKIOTEMPLATE = "default";
