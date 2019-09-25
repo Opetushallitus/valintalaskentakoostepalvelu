@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -75,7 +73,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
-    public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
+    public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, String defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
         valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
                 .flatMap(valintatulokset -> hakuV1AsyncResource.haeHaku(hakuOid)
@@ -98,7 +96,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 .doOnError(error -> LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error))
                 .doOnNext(list -> prosessi.setKokonaistyo(1))
                 .doOnNext(n -> LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti", hakuOid))
-                .flatMap(resurssit -> luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue.get())
+                .flatMap(resurssit -> luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue)
                         .timeout(780, TimeUnit.MINUTES, Observable.just("timeout")))
                 .subscribe(
                         batchId -> {
