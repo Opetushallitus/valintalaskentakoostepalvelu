@@ -1,24 +1,16 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import com.google.common.collect.ImmutableMap;
-import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.reactivex.Observable;
-import io.reactivex.functions.BiFunction;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -82,34 +74,9 @@ public class ViestintapalveluObservables {
         }
     }
 
-    public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Observable<HakijaPaginationObject> koulutuspaikalliset,
-                                                                                Function<List<String>, Observable<List<HakemusWrapper>>> haeHakemukset) {
-        return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) -> hakukohteetOpetuskielella(hakijat, hakemukset));
-    }
-
-    public static <T> Observable<T> resurssit(Observable<HakijaPaginationObject> koulutusPaikalliset,
-                                              Function<List<String>, Observable<List<HakemusWrapper>>> haeHakemukset,
-                                              BiFunction<List<HakemusWrapper>, HakijaPaginationObject, T> zipper) {
-        return Observable.zip(
-                koulutusPaikalliset.flatMap(hakijat -> haeHakemukset.apply(hakijat.getResults().stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList()))),
-                koulutusPaikalliset,
-                (hakemukset, hakijat) -> {
-                    LOG.info("Saatiin haulle hyväksyttyjä {} kpl", hakijat.getResults().size());
-                    LOG.info("Saatiin haulle hakemuksia {} kpl", hakemukset.size());
-                    return zipper.apply(hakemukset, hakijat);
-                }
-        );
-    }
-
     /*
      * Helper functions
      */
-
-    private static List<HakukohdeJaResurssit> hakukohteetOpetuskielella(HakijaPaginationObject hakijat, List<HakemusWrapper> hakemukset) {
-        return getHakukohteenResurssitHakemuksistaJaHakijoista(
-                hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h0 -> h0)),
-                hakijat.getResults().stream().collect(Collectors.groupingBy(ViestintapalveluObservables::hakutoiveMissaHakijaOnHyvaksyttyna)));
-    }
 
     public static HaunResurssit filtteroiAsiointikielella(String asiointkieli, HaunResurssit haunResurssit) {
         HaunResurssit filteroidytResurssit = filtteroiHakemuksetJaHakijat(haunResurssit, hakemus -> asiointkieli.equalsIgnoreCase(hakemus.getAsiointikieli()));
@@ -131,28 +98,4 @@ public class ViestintapalveluObservables {
         return new HaunResurssit(hakijatFiltteroituna, hakemuksetFiltteroituna.values());
     }
 
-    private static List<HakukohdeJaResurssit> getHakukohteenResurssitHakemuksistaJaHakijoista(Map<String, HakemusWrapper> hakemuksetAsiointikielellaFiltteroituna, Map<String, List<HakijaDTO>> hyvaksytytHakutoiveittain) {
-        return hyvaksytytHakutoiveittain.entrySet()
-                .stream()
-                .map(e -> new HakukohdeJaResurssit(
-                                e.getKey(),
-                                e.getValue(),
-                                e.getValue()
-                                        .stream()
-                                        .map(v -> Objects.requireNonNull(
-                                                hakemuksetAsiointikielellaFiltteroituna.get(v.getHakemusOid()),
-                                                "Hakemusta " + v.getHakemusOid() + " ei löydy"
-                                        ))
-                                        .collect(Collectors.toList()))
-                ).collect(Collectors.toList());
-    }
-
-    private static String hakutoiveMissaHakijaOnHyvaksyttyna(HakijaDTO hakija) {
-        return hakija.getHakutoiveet().stream()
-                .flatMap(h -> h.getHakutoiveenValintatapajonot().stream().map(j -> new HakutoiveJaJono(h.getHakukohdeOid(), j)))
-                .filter(hjj -> hjj.jono.getTila() != null && hjj.jono.getTila().isHyvaksytty())
-                .findAny()
-                .map(hjj -> hjj.hakukohdeOid)
-                .get(); // jos heittää npe:n niin sijoittelu palauttaa hyväksymättömiä rajapinnan läpi
-    }
 }

@@ -21,12 +21,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HakukohdeJaResurssit;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import io.reactivex.Observable;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +35,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 
 @Service
 public class HyvaksymiskirjeetHaulleHakukohteittain {
@@ -82,64 +80,61 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     }
 
     public void muodostaKirjeet(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
-        Observable<List<HakukohdeJaResurssit>> hakukohdeJaResurssitObs =
-                ViestintapalveluObservables.hakukohteetJaResurssit(valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid), (oids) ->
-                    tarjontaAsyncResource.haeHaku(hakuOid)
-                        .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                                ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, oids, ApplicationAsyncResource.DEFAULT_KEYS)
-                                : ataruAsyncResource.getApplicationsByOids(oids)))
-                        .doOnNext(list -> prosessi.setKokonaistyo(list.size()));
-
-        hakukohdeJaResurssitObs.subscribe(
-                list -> {
-                    LOG.info("Hyväksyttyjä yhteensä {} hakukohteessa", list.size());
-                    final ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue = new ConcurrentLinkedQueue<>(list);
-                    final boolean onkoTarveSplitata = list.size() > 20;
-                    IntStream.range(0, onkoTarveSplitata ? 6 : 1).forEach(i -> hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue));
-                },
-                error -> {
-                    LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun " + hakuOid, error);
-                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun"
-                            + hakuOid + "\n" + error.getMessage()));
-                    throw new RuntimeException(error);
-                });
-
-    }
-
-
-    private void hakukohdeKerralla(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue, ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue) {
-        Optional<HakukohdeJaResurssit> hakukohdeJaResurssit = Optional.ofNullable(hakukohdeQueue.poll());
-        hakukohdeJaResurssit.ifPresent(
-                resurssit -> {
-                    LOG.info("Aloitetaan hakukohteen {} hyväksymiskirjeiden luonti, jäljellä {} hakukohdetta", resurssit.hakukohdeOid, hakukohdeQueue.size());
-
-                    tarjontaAsyncResource.haeHakukohde(resurssit.hakukohdeOid)
-                            .flatMap(h -> defaultValue.map(Observable::just).orElseGet(() -> haeHakukohteenVakiosisalto(h))
-                                    .flatMap(vakiosisalto -> luoKirjeJaLahetaMuodostettavaksi(
-                                            hakuOid,
-                                            resurssit.hakukohdeOid,
-                                            h.getTarjoajaOids().iterator().next(),
-                                            resurssit.hakijat,
-                                            resurssit.hakemukset,
-                                            vakiosisalto
-                                    )))
-                            .timeout(3, TimeUnit.MINUTES, Observable.just("timeout"))
-                            .subscribe(s -> {
-                                        LOG.info("Hakukohde {} valmis", resurssit.hakukohdeOid);
-                                        prosessi.inkrementoi();
-                                        hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
-                                    },
-                                    e -> {
-                                        LOG.info("Hakukohde ohitettu virhe?" + resurssit.hakukohdeOid, e);
-                                        prosessi.inkrementoiOhitettujaToita();
-                                        prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + e.getMessage()));
-                                        hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
-                                    }
-                            );
-                });
-        if (!hakukohdeJaResurssit.isPresent()) {
-            LOG.info("### Hyväksymiskirjeiden generointi haulle {} on valmis", hakuOid);
-        }
+        valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
+                .flatMap(valintatulokset -> tarjontaAsyncResource.haeHaku(hakuOid)
+                        .flatMap(haku -> {
+                            List<String> hakemusOids = valintatulokset.getResults().stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
+                            return StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                                    ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
+                                    : ataruAsyncResource.getApplicationsByOids(hakemusOids);
+                        })
+                        .flatMap(hakemukset -> {
+                            Map<String, HakemusWrapper> hakemuksetByOid = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
+                            Map<String, List<HakijaDTO>> valintatuloksetByHakukohdeOid = valintatulokset.getResults().stream()
+                                    .collect(Collectors.groupingBy(hakija -> hakija.getHakutoiveet().stream()
+                                            .filter(h -> h.getHakutoiveenValintatapajonot().stream().anyMatch(j -> j.getTila().isHyvaksytty()))
+                                            .findAny()
+                                            .get()
+                                            .getHakukohdeOid()));
+                            prosessi.setKokonaistyo(valintatuloksetByHakukohdeOid.size());
+                            return Observable.fromIterable(valintatuloksetByHakukohdeOid.entrySet())
+                                    .flatMap(hakukohteenValintatulokset -> {
+                                        String hakukohdeOid = hakukohteenValintatulokset.getKey();
+                                        List<HakijaDTO> hakukohteenHakijat = hakukohteenValintatulokset.getValue();
+                                        List<HakemusWrapper> hakukohteenHakemukset = hakukohteenHakijat.stream().map(hakija -> hakemuksetByOid.get(hakija.getHakemusOid())).collect(Collectors.toList());
+                                        return tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
+                                                .flatMap(h -> defaultValue.map(Observable::just).orElseGet(() -> haeHakukohteenVakiosisalto(h))
+                                                        .flatMap(vakiosisalto -> luoKirjeJaLahetaMuodostettavaksi(
+                                                                hakuOid,
+                                                                hakukohdeOid,
+                                                                h.getTarjoajaOids().iterator().next(),
+                                                                hakukohteenHakijat,
+                                                                hakukohteenHakemukset,
+                                                                vakiosisalto
+                                                        )))
+                                                .map(v -> Pair.of(hakukohdeOid, Optional.<Throwable>empty()))
+                                                .timeout(3, TimeUnit.MINUTES)
+                                                .onErrorReturn(e -> Pair.of(hakukohdeOid, Optional.of(e)));
+                                    }, 6);
+                        }))
+                .subscribe(
+                        result -> {
+                            result.getRight().ifPresentOrElse(e -> {
+                                String msg = String.format("Hakukohteen %s kirjeen muodostaminen epäonnistui", result.getLeft());
+                                LOG.error(msg, e);
+                                prosessi.inkrementoiOhitettujaToita();
+                                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(msg + "\n" + e.getMessage()));
+                            }, () -> {
+                                LOG.info(String.format("Hakukohteen %s kirjeen muodostaminen onnistui", result.getLeft()));
+                                prosessi.inkrementoi();
+                            });
+                        },
+                        error -> {
+                            String msg = String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid);
+                            LOG.error(msg, error);
+                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(msg + "\n" + error.getMessage()));
+                        },
+                        () -> LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain onnistui", hakuOid)));
     }
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, String tarjoajaOid,
