@@ -138,7 +138,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                 prosessi.getAsiointikieli(),
                 resurssit.hakijat,
                 resurssit.hakemukset)
-                .timeout(ViestintapalveluObservables.getDelay(Optional.of(resurssit.hakukohdeOid)), TimeUnit.MINUTES, Observable.just("timeout"));
+                .timeout(3, TimeUnit.MINUTES, Observable.just("timeout"));
     }
 
     private Observable<String> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<String> defaultValue, Optional<String> asiointikieli,
@@ -205,7 +205,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                     kirjeet,
                     viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
                     viestintapalveluAsyncResource::haeStatusObservable,
-                    ViestintapalveluObservables.getDelay(Optional.of(hakukohdeOid)),
+                    3L,
                     status -> dokumenttiAsyncResource.uudelleenNimea(status.batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
                             .doOnNext(str -> LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid))
                             .doOnError(error -> LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid, error))

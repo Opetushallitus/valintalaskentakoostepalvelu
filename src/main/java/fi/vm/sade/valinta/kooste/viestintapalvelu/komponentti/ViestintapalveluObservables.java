@@ -168,10 +168,6 @@ public class ViestintapalveluObservables {
      * Helper functions
      */
 
-    public static Long getDelay(Optional<String> hakukohdeOid) {
-        return hakukohdeOid.map(h -> 3L).orElse(780L);
-    }
-
     private static List<HakukohdeJaResurssit> hakukohteetOpetuskielella(HakijaPaginationObject hakijat, List<HakemusWrapper> hakemukset) {
         return getHakukohteenResurssitHakemuksistaJaHakijoista(
                 hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h0 -> h0)),

@@ -90,7 +90,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 .doOnNext(list -> prosessi.setKokonaistyo(1))
                 .doOnNext(n -> LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti", hakuOid))
                 .flatMap(resurssit -> luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue.get())
-                        .timeout(ViestintapalveluObservables.getDelay(Optional.empty()), TimeUnit.MINUTES, Observable.just("")))
+                        .timeout(780, TimeUnit.MINUTES, Observable.just("timeout")))
                 .subscribe(
                         batchId -> {
                             // TODO timeout handling
@@ -133,7 +133,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 kirjeet,
                 viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
                 viestintapalveluAsyncResource::haeStatusObservable,
-                ViestintapalveluObservables.getDelay(Optional.empty()),
+                780L,
                 status -> Observable.just(status.batchId));
     }
 
