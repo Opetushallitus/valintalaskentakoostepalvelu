@@ -16,6 +16,8 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
@@ -36,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 @Service
@@ -177,7 +180,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
-            Observable<LetterBatch> kirjeet = ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto)
+            return ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto)
                     .map(hakijapalveluidenOsoite -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             koodistoCachedAsyncResource::haeKoodisto,
                             hakijapalveluidenOsoite,
@@ -193,18 +196,23 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                             hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
                             hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
                             false,
-                            false));
-
-            return ViestintapalveluObservables.batchId(
-                    kirjeet,
-                    viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
-                    viestintapalveluAsyncResource::haeStatusObservable,
-                    3L,
-                    status -> dokumenttiAsyncResource.uudelleenNimea(status.batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
-                            .doOnNext(str -> LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid))
-                            .doOnError(error -> LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid, error))
-                            .onErrorReturn(error -> status.batchId)
-                            .map(name -> status.batchId));
+                            false))
+                    .flatMap(viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable)
+                    .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
+                            .flatMap(i -> viestintapalveluAsyncResource.haeStatusObservable(letterResponse.getBatchId())
+                                    .flatMap(letterBatchStatus -> {
+                                        if ("error".equals(letterBatchStatus.getStatus())) {
+                                            return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
+                                        }
+                                        if ("ready".equals(letterBatchStatus.getStatus())) {
+                                            return Observable.just(letterResponse.getBatchId());
+                                        }
+                                        return Observable.empty();
+                                    }))
+                            .take(1))
+                    .flatMap(batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                            .onErrorReturn(error -> batchId)
+                            .map(name -> batchId));
         } catch (Throwable error) {
             LOG.error("Viestintäpalveluviestin muodostus epäonnistui hakukohteelle {}", hakukohdeOid, error);
             return Observable.error(error);

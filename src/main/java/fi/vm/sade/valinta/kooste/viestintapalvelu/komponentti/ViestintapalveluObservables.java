@@ -5,7 +5,6 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
@@ -13,7 +12,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.reactivex.Observable;
@@ -110,34 +108,6 @@ public class ViestintapalveluObservables {
         return hakutoimistoFn.apply(kohdeHakukohde.getTarjoajaOid())
                 .map(hakutoimistoDTO -> ImmutableMap.of(tarjoajaOid,
                             hakutoimistoDTO.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.<Osoite>empty())));
-    }
-
-    public static Observable<String> batchId(Observable<LetterBatch> hyvaksymiskirje,
-                                             Function<LetterBatch, Observable<LetterResponse>> vieDokumentti,
-                                             Function<String, Observable<LetterBatchStatusDto>> haeStatusFn, Long delay,
-                                             Function<ResponseWithBatchId, Observable<String>> statusHandler) {
-
-        return hyvaksymiskirje
-                .doOnNext(batch -> LOG.info("##### Viedään dokumentti viestintäpalveluun"))
-                .flatMap(vieDokumentti::apply)
-                .doOnNext(letterResponse -> {
-                    LOG.info("##### Dokumentin vietin onnistui");
-                    LOG.info("##### Odotetaan statusta, batchid={}", letterResponse.getBatchId());
-                })
-                .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
-                        .take((int) TimeUnit.MINUTES.toSeconds(delay))
-                        .flatMap(i -> haeStatusFn.apply(letterResponse.getBatchId())
-                                .zipWith(Observable.just(letterResponse.getBatchId()), ResponseWithBatchId::new))
-                        .skipWhile(status -> !VALMIS_STATUS.equals(status.resp.getStatus()) && !KESKEYTETTY_STATUS.equals(status.resp.getStatus())))
-                .take(1)
-                .flatMap(status -> {
-                    if (KESKEYTETTY_STATUS.equals(status.resp.getStatus())) {
-                        return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
-                    } else {
-                        LOG.info("Viestintäpalvelun status on valmis");
-                        return statusHandler.apply(status);
-                    }
-                });
     }
 
     /*

@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
-import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -17,9 +16,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import io.reactivex.Observable;
 import org.apache.commons.lang.StringUtils;
@@ -35,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,7 +97,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(asiointikielisetValintatulokset);
                             ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
-                            Observable<LetterBatch> kirjeet = Observable.fromIterable(hakukohteet.values().stream().map(MetaHakukohde::getTarjoajaOid).distinct()::iterator)
+                            return Observable.fromIterable(hakukohteet.values().stream().map(MetaHakukohde::getTarjoajaOid).distinct()::iterator)
                                     .flatMap(tarjoajaOid -> organisaatioAsyncResource.haeHakutoimisto(tarjoajaOid)
                                             .map(toimisto -> Pair.of(tarjoajaOid, toimisto.flatMap(t -> Hakijapalvelu.osoite(t, asiointikieli)))),
                                             1)
@@ -124,13 +120,20 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                             true,
                                             true
                                     ));
-                            return ViestintapalveluObservables.batchId(
-                                    kirjeet,
-                                    viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
-                                    viestintapalveluAsyncResource::haeStatusObservable,
-                                    780L,
-                                    status -> Observable.just(status.batchId));
                         }))
+                .flatMap(viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable)
+                .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
+                        .flatMap(i -> viestintapalveluAsyncResource.haeStatusObservable(letterResponse.getBatchId())
+                                .flatMap(letterBatchStatus -> {
+                                    if ("error".equals(letterBatchStatus.getStatus())) {
+                                        return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
+                                    }
+                                    if ("ready".equals(letterBatchStatus.getStatus())) {
+                                        return Observable.just(letterResponse.getBatchId());
+                                    }
+                                    return Observable.empty();
+                                }))
+                        .take(1))
                 .timeout(780, TimeUnit.MINUTES, Observable.just("timeout"))
                 .subscribe(
                         batchId -> {
