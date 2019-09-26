@@ -209,13 +209,19 @@ public class ViestintapalveluAktivointiResource {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
 
-            tag = hakemuksillaRajaus.getTag();
-            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika, vainTulosEmailinKieltaneet);
-            hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(prosessi, hyvaksymiskirjeDTO);
-            return prosessi.toProsessiId();
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
+                    tarjoajaOid,
+                    hakemuksillaRajaus.getLetterBodyText(),
+                    templateName,
+                    hakemuksillaRajaus.getTag(),
+                    hakukohdeOid,
+                    hakuOid,
+                    sijoitteluajoId,
+                    palautusPvm,
+                    palautusAika,
+                    vainTulosEmailinKieltaneet
+            );
+            return hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(hyvaksymiskirjeDTO);
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
             throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui!", e);
@@ -247,17 +253,23 @@ public class ViestintapalveluAktivointiResource {
             }
             LOG.info("Hyväksymiskirjeiden luonti aktivoitu hakukohteelle "+ hakukohdeOid + ", vainTulosEmailinKieltaneet: " + vainTulosEmailinKieltaneet);
 
-            String tag = hakemuksillaRajaus.getTag();
-            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika, vainTulosEmailinKieltaneet);
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
+                    tarjoajaOid,
+                    hakemuksillaRajaus.getLetterBodyText(),
+                    templateName,
+                    hakemuksillaRajaus.getTag(),
+                    hakukohdeOid,
+                    hakuOid,
+                    sijoitteluajoId,
+                    palautusPvm,
+                    palautusAika,
+                    vainTulosEmailinKieltaneet
+            );
             if (hakemuksillaRajaus.getHakemusOids() == null) {
-                hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(prosessi, hyvaksymiskirjeDTO);
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(hyvaksymiskirjeDTO);
             } else {
-                hyvaksymiskirjeetService.hyvaksymiskirjeetHakemuksille(prosessi, hyvaksymiskirjeDTO, hakemuksillaRajaus.getHakemusOids());
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHakemuksille(hyvaksymiskirjeDTO, hakemuksillaRajaus.getHakemusOids());
             }
-            return prosessi.toProsessiId();
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
             throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui!", e);

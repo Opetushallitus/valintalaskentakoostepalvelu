@@ -1,20 +1,19 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route;
 
-import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface HyvaksymiskirjeetService {
-    void hyvaksymiskirjeetHakemuksille(KirjeProsessi prosessi, HyvaksymiskirjeDTO hyvaksymiskirjeDTO, List<String> hakemusOids);
+    ProsessiId hyvaksymiskirjeetHakemuksille(HyvaksymiskirjeDTO hyvaksymiskirjeDTO, List<String> hakemusOids);
 
-    void jalkiohjauskirjeHakukohteelle(KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
+    ProsessiId jalkiohjauskirjeHakukohteelle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
 
-    void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi, HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
+    ProsessiId hyvaksymiskirjeetHakukohteelle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
 
-    void hyvaksymiskirjeetHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, String defaultValue);
+    ProsessiId hyvaksymiskirjeetHaulle(String hakuOid, String asiointikieli, String defaultValue);
 
-    void hyvaksymiskirjeetHaulleHakukohteittain(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue);
+    ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(String hakuOid, Optional<String> defaultValue);
 }

@@ -82,20 +82,14 @@ public class SijoittelunTulosHaulleResource {
                                                   @QueryParam("letterBodyText") String letterBodyText,
                                                   @QueryParam("asiointikieli") String asiointikieli) {
         try {
-            SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
-                    Optional.ofNullable(asiointikieli).map(KieliUtil::normalisoiKielikoodi),
-                    "hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null, Arrays.asList("hyvaksymiskirjeet", "haulle"));
-
             if (asiointikieli != null ) {
                 if (letterBodyText == null) {
                     throw new IllegalArgumentException("Parametri letterBodyText on pakollinen");
                 }
-                hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hakuOid, asiointikieli, prosessi, letterBodyText);
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hakuOid, asiointikieli, letterBodyText);
             } else {
-                hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hakuOid, Optional.ofNullable(letterBodyText));
             }
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            return prosessi.toProsessiId();
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
