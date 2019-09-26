@@ -4,7 +4,6 @@ import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
-import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetHaulleHakukohteittain;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -47,8 +46,6 @@ public class SijoittelunTulosHaulleResource {
     private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
     @Autowired
     private HyvaksymiskirjeetService hyvaksymiskirjeetService;
-    @Autowired
-    private HyvaksymiskirjeetHaulleHakukohteittain hyvaksymiskirjeetHakukohteittain;
 
     @Context
     private HttpServletRequest httpServletRequestJaxRS;
@@ -95,7 +92,7 @@ public class SijoittelunTulosHaulleResource {
                 }
                 hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hakuOid, asiointikieli, prosessi, letterBodyText);
             } else {
-                hyvaksymiskirjeetHakukohteittain.hyvaksymiskirjeetHaulleHakukohteittain(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
+                hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
             }
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
