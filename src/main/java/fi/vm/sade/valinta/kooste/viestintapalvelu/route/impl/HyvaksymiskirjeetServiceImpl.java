@@ -351,6 +351,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         DokumenttiProsessi prosessi = new DokumenttiProsessi("hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", hakuOid, Arrays.asList("hyvaksymiskirjeet", "haulle"));
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         prosessi.setKokonaistyo(1);
+        ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
         valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
                 .flatMap(valintatulokset -> tarjontaAsyncResource.haeHaku(hakuOid)
                         .flatMap(haku -> {
@@ -369,7 +370,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                     .collect(Collectors.toList());
 
                             Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(asiointikielisetValintatulokset);
-                            ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
                             return hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, asiointikieli)
                                     .map(hakijapalveluidenOsoite -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
@@ -419,6 +419,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         LOG.info(String.format("Aloitetaan haun %s hyväksymiskirjeiden muodostaminen hakukohteittain", hakuOid));
         DokumenttiProsessi prosessi = new DokumenttiProsessi("hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", hakuOid, Arrays.asList("hyvaksymiskirjeet", "haulle"));
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+        ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
         valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
                 .flatMap(valintatulokset -> tarjontaAsyncResource.haeHaku(hakuOid)
                         .flatMap(haku -> {
@@ -445,7 +446,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                 .flatMap(h -> defaultValue.map(Observable::just).orElseGet(() -> haeHakukohteenVakiosisalto(h))
                                                         .flatMap(vakiosisalto -> {
                                                             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hakukohteenHakijat);
-                                                            ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
                                                             return hakukohteidenHakutoimistojenOsoitteet(prosessi, hyvaksymiskirjeessaKaytetytHakukohteet, null)
                                                                     .map(hakijapalveluidenOsoite -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                                                                             koodistoCachedAsyncResource::haeKoodisto,
