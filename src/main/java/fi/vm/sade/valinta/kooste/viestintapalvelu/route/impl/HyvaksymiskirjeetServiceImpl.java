@@ -29,7 +29,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -38,10 +37,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetK
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,14 +55,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
 import static io.reactivex.Observable.zip;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Service
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
@@ -182,10 +176,29 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                 iPosti,
                                 false);
                     })
-                    .subscribeOn(Schedulers.newThread())
+                    .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
                     .subscribe(
-                            letterBatch -> letterBatchToViestintapalvelu(letterBatch, prosessi, hyvaksymiskirjeDTO),
-                            throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()));
+                            result -> result.getLeft().ifPresentOrElse(
+                                    batchId -> {
+                                        LOG.info(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle valmistui", hyvaksymiskirjeDTO.getHakukohdeOid(), hakemusOids.size()));
+                                        prosessi.inkrementoiTehtyjaToita();
+                                        prosessi.setDokumenttiId(batchId);
+                                    },
+                                    () -> {
+                                        LOG.error(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid(), hakemusOids.size()));
+                                        prosessi.inkrementoiOhitettujaToita();
+                                        result.getRight().forEach(e -> {
+                                            LOG.error(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid(), hakemusOids.size()), e);
+                                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                                        });
+                                    }
+                            ),
+                            e -> {
+                                LOG.error(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid(), hakemusOids.size()), e);
+                                prosessi.inkrementoiOhitettujaToita();
+                                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                            }
+                    );
         } catch (Throwable t) {
             LOG.error("Hyväksymiskirjeiden luonti hakemuksille haussa {} keskeytyi poikkeukseen: ", hyvaksymiskirjeDTO.getHakuOid(), t);
             prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(t.getMessage()));
@@ -245,10 +258,29 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             false
                     );
                 })
-                .subscribeOn(Schedulers.newThread())
+                .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
                 .subscribe(
-                        letterBatch -> letterBatchToViestintapalvelu(letterBatch, prosessi, hyvaksymiskirjeDTO),
-                        throwable -> logErrorAndKeskeyta(prosessi, throwable, hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()));
+                        result -> result.getLeft().ifPresentOrElse(
+                                batchId -> {
+                                    LOG.info(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen valmistui", hyvaksymiskirjeDTO.getHakukohdeOid()));
+                                    prosessi.inkrementoiTehtyjaToita();
+                                    prosessi.setDokumenttiId(batchId);
+                                },
+                                () -> {
+                                    LOG.error(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()));
+                                    prosessi.inkrementoiOhitettujaToita();
+                                    result.getRight().forEach(e -> {
+                                        LOG.error(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()), e);
+                                        prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                                    });
+                                }
+                        ),
+                        e -> {
+                            LOG.error(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()), e);
+                            prosessi.inkrementoiOhitettujaToita();
+                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                        }
+                );
         return prosessi.toProsessiId();
     }
 
@@ -305,10 +337,29 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             iPosti,
                             false);
                 })
-                .subscribeOn(Schedulers.newThread())
+                .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
                 .subscribe(
-                        letterBatch -> letterBatchToViestintapalvelu(letterBatch, prosessi, hyvaksymiskirjeDTO),
-                        throwable -> logErrorAndKeskeyta(prosessi, throwable, hakuOid, hakukohdeOid));
+                        result -> result.getLeft().ifPresentOrElse(
+                                batchId -> {
+                                    LOG.info(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hyvaksymiskirjeDTO.getHakukohdeOid()));
+                                    prosessi.inkrementoiTehtyjaToita();
+                                    prosessi.setDokumenttiId(batchId);
+                                },
+                                () -> {
+                                    LOG.error(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()));
+                                    prosessi.inkrementoiOhitettujaToita();
+                                    result.getRight().forEach(e -> {
+                                        LOG.error(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()), e);
+                                        prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                                    });
+                                }
+                        ),
+                        e -> {
+                            LOG.error(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()), e);
+                            prosessi.inkrementoiOhitettujaToita();
+                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                        }
+                );
         return prosessi.toProsessiId();
     }
 
@@ -362,31 +413,27 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                             true
                                     ));
                         }))
-                .flatMap(viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable)
-                .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
-                        .flatMap(i -> viestintapalveluAsyncResource.haeStatusObservable(letterResponse.getBatchId())
-                                .flatMap(letterBatchStatus -> {
-                                    if ("error".equals(letterBatchStatus.getStatus())) {
-                                        return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
-                                    }
-                                    if ("ready".equals(letterBatchStatus.getStatus())) {
-                                        return Observable.just(letterResponse.getBatchId());
-                                    }
-                                    return Observable.empty();
-                                }))
-                        .take(1))
-                .timeout(780, TimeUnit.MINUTES, Observable.just("timeout"))
+                .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
                 .subscribe(
-                        batchId -> {
-                            // TODO timeout handling
-                            prosessi.setDokumenttiId(batchId);
-                            prosessi.inkrementoiTehtyjaToita();
-                            LOG.info("Haun hyväksymiskirjeet valmiit");
-                        },
-                        error -> {
-                            LOG.error("Haun hyväksymiskirjeiden muodostaminen ei onnistunut", error);
+                        result -> result.getLeft().ifPresentOrElse(
+                                batchId -> {
+                                    LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s valmistui", hakuOid, asiointikieli));
+                                    prosessi.inkrementoiTehtyjaToita();
+                                    prosessi.setDokumenttiId(batchId);
+                                },
+                                () -> {
+                                    LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s epäonnistui", hakuOid, asiointikieli));
+                                    prosessi.inkrementoiOhitettujaToita();
+                                    result.getRight().forEach(e -> {
+                                        LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s epäonnistui", hakuOid, asiointikieli), e);
+                                        prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                                    });
+                                }
+                        ),
+                        e -> {
+                            LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s epäonnistui", hakuOid, asiointikieli), e);
                             prosessi.inkrementoiOhitettujaToita();
-                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + error.getMessage()));
+                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
                         }
                 );
         return prosessi.toProsessiId();
@@ -441,43 +488,35 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                                             parsePalautusPvm(null, haunParametrit),
                                                                             parsePalautusAika(null, haunParametrit),
                                                                             false,
-                                                                            false));
+                                                                            false))
+                                                                    .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
+                                                                    .flatMap(result -> {
+                                                                        if (result.getLeft().isPresent()) {
+                                                                            return renameHakukohteenHyvaksymiskirjeet(prosessi, hakukohdeOid, result.getLeft().get());
+                                                                        }
+                                                                        return Observable.just(Pair.of(hakukohdeOid, result.getRight()));
+                                                                    });
                                                         }))
-                                                .flatMap(viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable)
-                                                .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
-                                                        .flatMap(i -> viestintapalveluAsyncResource.haeStatusObservable(letterResponse.getBatchId())
-                                                                .flatMap(letterBatchStatus -> {
-                                                                    if ("error".equals(letterBatchStatus.getStatus())) {
-                                                                        return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
-                                                                    }
-                                                                    if ("ready".equals(letterBatchStatus.getStatus())) {
-                                                                        return Observable.just(letterResponse.getBatchId());
-                                                                    }
-                                                                    return Observable.empty();
-                                                                }))
-                                                        .take(1))
-                                                .flatMap(batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf"))
-                                                .map(v -> Pair.of(hakukohdeOid, Optional.<Throwable>empty()))
-                                                .timeout(3, TimeUnit.MINUTES)
-                                                .onErrorReturn(e -> Pair.of(hakukohdeOid, Optional.of(e)));
+                                                .onErrorReturn(e -> Pair.of(hakukohdeOid, Collections.singletonList(e)));
                                     }, 6);
                         }))
                 .subscribe(
                         result -> {
-                            result.getRight().ifPresentOrElse(e -> {
-                                String msg = String.format("Hakukohteen %s kirjeen muodostaminen epäonnistui", result.getLeft());
-                                LOG.error(msg, e);
-                                prosessi.inkrementoiOhitettujaToita();
-                                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(msg + "\n" + e.getMessage()));
-                            }, () -> {
-                                LOG.info(String.format("Hakukohteen %s kirjeen muodostaminen onnistui", result.getLeft()));
+                            if (result.getRight().isEmpty()) {
+                                LOG.info(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakuOid, result.getLeft()));
                                 prosessi.inkrementoiTehtyjaToita();
-                            });
+                            } else {
+                                LOG.error(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, result.getLeft()));
+                                prosessi.inkrementoiOhitettujaToita();
+                                result.getRight().forEach(e -> {
+                                    LOG.error(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, result.getLeft()), e);
+                                    prosessi.getVaroitukset().add(new Varoitus(result.getLeft(), e.getMessage()));
+                                });
+                            }
                         },
-                        error -> {
-                            String msg = String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid);
-                            LOG.error(msg, error);
-                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(msg + "\n" + error.getMessage()));
+                        e -> {
+                            LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid), e);
+                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
                         },
                         () -> LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain onnistui", hakuOid)));
         return prosessi.toProsessiId();
@@ -528,86 +567,61 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         return hakijatJoilleMuodostetaanKirjeet;
     }
 
-    private void logErrorAndKeskeyta(DokumenttiProsessi prosessi, Throwable throwable, String hakuOid, String hakukohdeOid) {
-        LOG.error(String.format("Sijoittelu tai hakemuspalvelukutsu epaonnistui (haku %s, hakukohde %s)", hakuOid, hakukohdeOid), throwable);
-        keskeytaProsessi(prosessi, throwable);
+    private Observable<Pair<Optional<String>, List<Throwable>>> letterBatchToViestintapalvelu(DokumenttiProsessi prosessi, LetterBatch letterBatch) {
+        return vieLetterBatch(prosessi, letterBatch)
+                .flatMap(result -> result.getLeft()
+                        .map(batchId -> Observable.interval(pollingIntervalMillis, MILLISECONDS)
+                                .flatMap(i -> letterBatchProcessingStatus(prosessi, batchId))
+                                .take(1)
+                                .timeout(VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis(),
+                                        MILLISECONDS,
+                                        Observable.just(Pair.of(Optional.empty(), Collections.singletonList(new RuntimeException("Kirjeiden vienti viestintäpalveluun aikakatkaistu"))))))
+                        .orElse(Observable.just(result)));
     }
 
-    // LetterBatch, KirjeProsessi, HyvaksymiskirjeDTO
-    private void letterBatchToViestintapalvelu(LetterBatch letterBatch, DokumenttiProsessi prosessi, HyvaksymiskirjeDTO kirje) {
-        try {
-            if (prosessi.isKeskeytetty()) {
-                LOG.warn("Hyväksymiskirjeiden luonti on keskeytetty kayttajantoimesta ennen niiden siirtoa viestintäpalveluun!");
-                return;
-            }
-            LOG.info("Aloitetaan hyvaksymiskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
-            final LetterResponse batchId;
-            try {
-                batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)
-                        .timeout(164, SECONDS)
-                        .toFuture()
-                        .get(165L, SECONDS);
-            } catch (Exception e) {
-                LOG.error("Viestintapalvelukutsu epaonnistui virheeseen", e);
-                throw new RuntimeException(e);
-            }
-
-            int timesToPoll = (int) (VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / pollingIntervalMillis);
-            LOG.info(String.format("Saatiin hyvaksymiskirjeiden seurantaId %s ja aloitetaan valmistumisen pollaus! " +
-                            "(Timeout %s, pollausväli %s ms, pollataan %s kertaa)"
-                    , batchId.getBatchId(), DurationFormatUtils.formatDurationHMS(VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis()), pollingIntervalMillis, timesToPoll));
-
-            prosessi.inkrementoiTehtyjaToita();
-            if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
-                PublishSubject<String> stop = PublishSubject.create();
-                Observable
-                        .interval(pollingIntervalMillis, TimeUnit.MILLISECONDS)
-                        .take(timesToPoll)
-                        .takeUntil(stop)
-                        .subscribe(
-                                pulse -> {
-                                    try {
-                                        LOG.info("Tehdaan status kutsu seurantaId:lle {}", batchId);
-                                        LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())
-                                                .timeout(899, MILLISECONDS)
-                                                .toFuture()
-                                                .get(900L, TimeUnit.MILLISECONDS);
-                                        if (prosessi.isKeskeytetty()) {
-                                            String msg = "Hyvaksymiskirjeiden muodostuksen seuranta on keskeytetty kayttajantoimesta!";
-                                            LOG.warn(msg);
-                                            stop.onNext(msg);
-                                            return;
-                                        }
-                                        if ("error".equals(status.getStatus())) {
-                                            String msg = "Hyvaksymiskirjeiden muodostuksen seuranta paattyi viestintapalvelun sisaiseen virheeseen!";
-                                            LOG.error(msg);
-                                            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, StringUtils.EMPTY));
-                                            stop.onNext(msg);
-                                        }
-                                        if ("ready".equals(status.getStatus())) {
-                                            prosessi.inkrementoiTehtyjaToita();
-                                            String msg = "Hyvaksymiskirjeet valmistui!";
-                                            LOG.info(msg);
-                                            prosessi.setDokumenttiId(batchId.getBatchId());
-                                            stop.onNext(msg);
-                                        }
-                                    } catch (Exception e) {
-                                        LOG.error("Statuksen haku epaonnistui", e);
-                                    }
-
-                                }, throwable -> {
-                                    keskeytaProsessi(prosessi, throwable);
-                                }, () -> {
-                                    prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, StringUtils.EMPTY));
-                                });
-            } else {
-                prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Hakemuksissa oli virheitä"));
-                batchId.getErrors().forEach((key, value) -> prosessi.getVaroitukset().add(new Varoitus(key, value)));
-            }
-        } catch (Exception e) {
-            LOG.error("Virhe hakukohteelle " + kirje.getHakukohdeOid(), e);
-            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, StringUtils.EMPTY));
+    private Observable<Pair<Optional<String>, List<Throwable>>> vieLetterBatch(DokumenttiProsessi prosessi, LetterBatch letterBatch) {
+        if (prosessi.isKeskeytetty()) {
+            return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
         }
+        return viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)
+                .<Pair<Optional<String>, List<Throwable>>>map(response -> {
+                    if (response.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
+                        return Pair.of(Optional.of(response.getBatchId()), Collections.emptyList());
+                    }
+                    return Pair.of(
+                            Optional.empty(),
+                            response.getErrors().entrySet().stream()
+                                    .map(e1 -> new RuntimeException(e1.getKey() + ": " + e1.getValue()))
+                                    .collect(Collectors.toList())
+                    );
+                })
+                .onErrorReturn(e -> Pair.of(Optional.empty(), Collections.singletonList(e)));
+    }
+
+    private Observable<Pair<Optional<String>, List<Throwable>>> letterBatchProcessingStatus(DokumenttiProsessi prosessi, String batchId) {
+        if (prosessi.isKeskeytetty()) {
+            return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
+        }
+        return viestintapalveluAsyncResource.haeStatusObservable(batchId)
+                .<Pair<Optional<String>, List<Throwable>>>flatMap(response -> {
+                    if ("ready".equals(response.getStatus())) {
+                        return Observable.just(Pair.of(Optional.of(batchId), Collections.emptyList()));
+                    }
+                    if ("error".equals(response.getStatus())) {
+                        return Observable.error(new RuntimeException("Kirjeiden vienti viestintäpalveluun epäonnistui"));
+                    }
+                    return Observable.empty();
+                })
+                .onErrorReturn(e -> Pair.of(Optional.empty(), Collections.singletonList(e)));
+    }
+
+    private Observable<Pair<String, List<Throwable>>> renameHakukohteenHyvaksymiskirjeet(DokumenttiProsessi prosessi, String hakukohdeOid, String batchId) {
+        if (prosessi.isKeskeytetty()) {
+            return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
+        }
+        return dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                .<Pair<String, List<Throwable>>>map(response -> Pair.of(hakukohdeOid, Collections.emptyList()))
+                .onErrorReturn(e -> Pair.of(hakukohdeOid, Collections.singletonList(e)));
     }
 
     public String parsePalautusPvm(String specifiedPvm, ParametritParser haunParametrit) {
@@ -622,14 +636,5 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             return kelloMuoto.format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
         }
         return specifiedAika;
-    }
-
-    private void keskeytaProsessi(DokumenttiProsessi prosessi, Throwable t) {
-        String syy = t.getMessage();
-        if (StringUtils.isNotBlank(syy)) {
-            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(syy));
-        } else {
-            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, StringUtils.EMPTY));
-        }
     }
 }
