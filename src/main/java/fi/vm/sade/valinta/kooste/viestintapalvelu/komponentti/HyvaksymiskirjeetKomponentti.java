@@ -116,7 +116,7 @@ public class HyvaksymiskirjeetKomponentti {
                 replacements.put("palautusPvm", StringUtils.trimToNull(palautusPvm));
                 replacements.put("tulokset", tulosList);
                 replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)));
-                Optional<Osoite> hakijapalveluidenOsoite = hakukohdeJaHakijapalveluidenOsoite.get(tarjoajaOid);
+                Optional<Osoite> hakijapalveluidenOsoite = hakukohdeJaHakijapalveluidenOsoite.get(hakukohdeOid);
                 if (hakijapalveluidenOsoite != null) {
                     hakijapalveluidenOsoite.ifPresent(h -> replacements.put("hakijapalveluidenOsoite", h));
                 } else {

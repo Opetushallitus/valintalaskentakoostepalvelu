@@ -255,7 +255,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
 
         return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                 (String x) -> new HashMap<>(),
-                ImmutableMap.of(ORGANIZATION_OID, ofNullable(osoite)),
+                ImmutableMap.of(HAKUKOHDE_OID, ofNullable(osoite)),
                 ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(ORGANIZATION_OID, new Teksti(), new Teksti())),
                 ImmutableList.of(hakija),
                 ImmutableList.of(new HakuappHakemusWrapper(
