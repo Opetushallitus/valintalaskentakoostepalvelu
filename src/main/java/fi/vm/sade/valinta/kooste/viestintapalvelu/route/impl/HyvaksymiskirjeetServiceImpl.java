@@ -157,7 +157,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
                         Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
                         MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-                        final boolean iPosti = false;
 
                         return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                                 koodistoCachedAsyncResource::haeKoodisto,
@@ -173,7 +172,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                 hyvaksymiskirjeDTO.getTemplateName(),
                                 parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
                                 parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
-                                iPosti,
                                 false);
                     })
                     .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
@@ -239,7 +237,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
                     Osoite hakijapalveluidenOsoite = OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
                             kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
-                    final boolean iPosti = false;
+
                     return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             koodistoCachedAsyncResource::haeKoodisto,
                             ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),Optional.ofNullable(hakijapalveluidenOsoite)),
@@ -254,7 +252,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hyvaksymiskirjeDTO.getTemplateName(),
                             hyvaksymiskirjeDTO.getPalautusPvm(),
                             hyvaksymiskirjeDTO.getPalautusAika(),
-                            iPosti,
                             false
                     );
                 })
@@ -319,7 +316,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     LOG.info("Haetaan kiinnostavat hakukohteet ja muodostetaan kirjeet {} hakijalle.", hakijatJoilleMuodostetaanKirjeet.size());
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hakijatJoilleMuodostetaanKirjeet);
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-                    final boolean iPosti = false;
+
                     return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             koodistoCachedAsyncResource::haeKoodisto,
                             ImmutableMap.of(organisaatioOid, hakutoimisto.flatMap(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli()))),
@@ -334,7 +331,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hyvaksymiskirjeDTO.getTemplateName(),
                             parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
                             parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
-                            iPosti,
                             false);
                 })
                 .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
@@ -409,7 +405,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                             "hyvaksymiskirje",
                                             parsePalautusPvm(null, haunParametrit),
                                             parsePalautusAika(null, haunParametrit),
-                                            true,
                                             true
                                     ));
                         }))
@@ -487,7 +482,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                                             "hyvaksymiskirje",
                                                                             parsePalautusPvm(null, haunParametrit),
                                                                             parsePalautusAika(null, haunParametrit),
-                                                                            false,
                                                                             false))
                                                                     .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
                                                                     .flatMap(result -> {

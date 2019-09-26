@@ -39,7 +39,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
     private final String APPLICATION_PERIOD = "hakuOid";
     private final String FETCH_TARGET = null;
     private final String TAG = "tag";
-    private final boolean IPOSTI = false;
 
     private final String HAKUKOHDE_OID = "hakukohdeOid";
     private final String HAKEMUS_OID = "hakemusOid";
@@ -111,7 +110,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
         assertEquals(APPLICATION_PERIOD, batch.getApplicationPeriod());
         assertEquals("FetchTarget was null, the default is used", HAKUKOHDE_OID, batch.getFetchTarget());
         assertEquals(TAG, batch.getTag());
-        assertEquals(IPOSTI, batch.isIposti());
         assertEquals(skipDokumenttipalvelu, batch.isSkipDokumenttipalvelu());
 
         assertEquals(1, batch.getLetters().size());
@@ -271,7 +269,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 TEMPLATE_NAME,
                 PALAUTUS_PVM,
                 PALAUTUS_AIKA,
-                IPOSTI,
                 korkeakouluMassapostitus
         );
     }

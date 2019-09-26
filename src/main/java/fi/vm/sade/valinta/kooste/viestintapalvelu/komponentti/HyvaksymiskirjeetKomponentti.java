@@ -61,8 +61,7 @@ public class HyvaksymiskirjeetKomponentti {
             String templateName,
             String palautusPvm,
             String palautusAika,
-            boolean iPosti,
-            boolean sahkoinenKorkeakoulunMassaposti ) {
+            boolean sahkoinenKorkeakoulunMassaposti) {
         try {
             assert (hakuOid != null);
             int kaikkiHyvaksytyt = hakukohteenHakijat.size();
