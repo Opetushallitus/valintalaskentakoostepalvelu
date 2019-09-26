@@ -52,7 +52,7 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<HakemusWrapper> hakemukset,
+            Map<String, HakemusWrapper> hakemukset,
             String hakukohdeOidFromRequest,
             String hakuOid,
             Optional<String> asiointikieli,
@@ -66,7 +66,6 @@ public class HyvaksymiskirjeetKomponentti {
             assert (hakuOid != null);
             int kaikkiHyvaksytyt = hakukohteenHakijat.size();
             LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true.", kaikkiHyvaksytyt);
-            Map<String, HakemusWrapper> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
             final List<Letter> kirjeet = new ArrayList<>();
             Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
             Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);
@@ -83,7 +82,7 @@ public class HyvaksymiskirjeetKomponentti {
                 String preferoituKielikoodi = asiointikieli.orElse(hyvaksyttyMeta.getOpetuskieli());
                 String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
                 final String hakemusOid = hakija.getHakemusOid();
-                final HakemusWrapper hakemus = Objects.requireNonNull(hakukohteenHakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
+                final HakemusWrapper hakemus = Objects.requireNonNull(hakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
                 final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maajavaltio, posti, new TuloskirjeNimiPaattelyStrategy());
                 final List<Map<String, Object>> tulosList = new ArrayList<>();
 

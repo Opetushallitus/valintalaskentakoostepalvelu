@@ -258,9 +258,21 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 ImmutableMap.of(HAKUKOHDE_OID, ofNullable(osoite)),
                 ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(ORGANIZATION_OID, new Teksti(), new Teksti())),
                 ImmutableList.of(hakija),
-                ImmutableList.of(new HakuappHakemusWrapper(
-                        new Hakemus("type", "applicationSystemId", answers, ImmutableMap.of(),
-                                ImmutableList.of(), HAKEMUS_OID, "state", "personOid"))),
+                ImmutableMap.of(
+                        HAKEMUS_OID,
+                        new HakuappHakemusWrapper(
+                                new Hakemus(
+                                        "type",
+                                        "applicationSystemId",
+                                        answers,
+                                        ImmutableMap.of(),
+                                        ImmutableList.of(),
+                                        HAKEMUS_OID,
+                                        "state",
+                                        "personOid"
+                                )
+                        )
+                ),
                 FETCH_TARGET,
                 APPLICATION_PERIOD,
                 ofNullable(LANGUAGE_CODE),
