@@ -261,6 +261,7 @@ public class LaskentaActorFactory {
                 oppijat,
                 hakukohdeRyhmasForHakukohdes,
                 (vp, hr, v, h, o, r) -> {
+                    verifyValintalaskentaKaytossaOrThrowError(uuid, hakukohdeOid, v);
                     verifyJonokriteeritOrThrowError(uuid, hakukohdeOid, v);
                     LOG.info("(Uuid: {}) Kaikki resurssit hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
                     if(!withHakijaRyhmat) {
@@ -279,6 +280,26 @@ public class LaskentaActorFactory {
                                 hakukohdeOid,
                                 HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, hakukohdeOid, r, h, vp.valintapisteet, o, actorParams.getParametritDTO(), true), v, hr);
                     }}));
+    }
+
+    private void verifyValintalaskentaKaytossaOrThrowError(String uuid, String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteetList) {
+        Predicate<? super ValintatapajonoJarjestyskriteereillaDTO> kayttaaValintalaskentaa = new Predicate<>() {
+            @Override
+            public boolean test(ValintatapajonoJarjestyskriteereillaDTO valintatapajono) {
+                return valintatapajono.getKaytetaanValintalaskentaa();
+            }
+        };
+        boolean jokinValintatapajonoKayttaaValintalaskentaa = valintaperusteetList
+                .stream()
+                .map(ValintaperusteetDTO::getValinnanVaihe)
+                .flatMap(v -> v.getValintatapajono().stream())
+                .anyMatch(kayttaaValintalaskentaa);
+
+        if (!jokinValintatapajonoKayttaaValintalaskentaa) {
+            String errorMessage = String.format("(Uuid: %s) Hakukohteen %s valintatapajonoissa ei käytetä valintalaskentaa, joten valintalaskentaa ei voida jatkaa ja se keskeytetään", uuid, hakukohdeOid);
+            LOG.error(errorMessage);
+            throw new RuntimeException(errorMessage);
+        }
     }
 
     private void verifyJonokriteeritOrThrowError(String uuid, String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteetList) {
