@@ -186,22 +186,21 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                     hyvaksymiskirjeDTO.getPalautusPvm(),
                                     hyvaksymiskirjeDTO.getPalautusAika(),
                                     false
-                            ));
-                })
-                .flatMap(x -> x)
-                .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
-                .subscribe(
-                        batchId -> {
-                            LOG.info(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen valmistui", hyvaksymiskirjeDTO.getHakukohdeOid()));
-                            prosessi.inkrementoiTehtyjaToita();
-                            prosessi.setDokumenttiId(batchId);
-                        },
-                        e -> {
-                            LOG.error(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()), e);
-                            prosessi.inkrementoiOhitettujaToita();
-                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
-                        }
-                );
+                            ))
+                            .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
+                }
+        ).flatMap(x -> x).subscribe(
+                batchId -> {
+                    LOG.info(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen valmistui", hyvaksymiskirjeDTO.getHakukohdeOid()));
+                    prosessi.inkrementoiTehtyjaToita();
+                    prosessi.setDokumenttiId(batchId);
+                },
+                e -> {
+                    LOG.error(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()), e);
+                    prosessi.inkrementoiOhitettujaToita();
+                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                }
+        );
         return prosessi.toProsessiId();
     }
 
