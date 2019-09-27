@@ -18,8 +18,8 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Viestintapal
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
@@ -336,23 +336,32 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                             .onErrorReturn(e -> Pair.of(hakukohdeOid, Optional.of(e))),
                                     6);
                 }
-        ).flatMap(x -> x).subscribe(
-                result -> result.getRight().ifPresentOrElse(
-                        e -> {
-                            LOG.error(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, result.getLeft(), e));
-                            prosessi.inkrementoiOhitettujaToita();
-                            prosessi.getVaroitukset().add(new Varoitus(result.getLeft(), e.getMessage()));
-                        },
-                        () -> {
-                            LOG.info(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakuOid, result.getLeft()));
-                            prosessi.inkrementoiTehtyjaToita();
-                        }
-                ),
+        ).flatMap(x -> x).toList().subscribe(
+                result -> result.forEach(r -> {
+                    String hakukohdeOid = r.getLeft();
+                    r.getRight().ifPresentOrElse(
+                            e -> {
+                                LOG.error(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, hakukohdeOid), e);
+                                prosessi.inkrementoiOhitettujaToita();
+                                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(
+                                        e.getMessage(),
+                                        Collections.singletonList(new Tunniste(hakukohdeOid, Poikkeus.HAKUKOHDEOID))
+                                ));
+                            },
+                            () -> {
+                                LOG.info(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakuOid, hakukohdeOid));
+                                prosessi.inkrementoiTehtyjaToita();
+                            }
+                    );
+                    LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain valmistui", hakuOid));
+                    if (prosessi.getPoikkeukset().isEmpty()) {
+                        prosessi.setDokumenttiId("valmistumisen-ilmaiseva-tunniste");
+                    }
+                }),
                 e -> {
                     LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid), e);
                     prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
-                },
-                () -> LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain valmistui", hakuOid)));
+                });
         return prosessi.toProsessiId();
     }
 
