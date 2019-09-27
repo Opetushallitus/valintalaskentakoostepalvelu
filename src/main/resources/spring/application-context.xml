@@ -64,6 +64,7 @@
 	</beans>
 	<beans>
 		<bean id="jacksonMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
+		<bean class="fi.vm.sade.valinta.kooste.external.resource.HttpClients" />
 		<bean class="fi.vm.sade.valinta.kooste.CasInterceptors" />
 		<bean class="fi.vm.sade.valinta.kooste.KoostepalveluContext" />
 
@@ -141,11 +142,11 @@
 							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource"
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
-				<ref bean="ValintalaskentaHakukohdeRestClientCasInterceptor"/>
+				<ref bean="ValintalaskentaCasInterceptor"/>
 				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
-				<ref bean="ValintalaskentaHakukohdeRestClientCasInterceptor"/>
+				<ref bean="ValintalaskentaCasInterceptor"/>
 			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
@@ -157,11 +158,11 @@
 							 serviceClass="fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource"
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
-				<ref bean="SijoittelunSeurantaRestClientCasInterceptor"/>
+				<ref bean="SeurantaRestClientCasInterceptor"/>
 				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
-				<ref bean="SijoittelunSeurantaRestClientCasInterceptor"/>
+				<ref bean="SeurantaRestClientCasInterceptor"/>
 			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
@@ -173,11 +174,11 @@
 							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource"
 							 inheritHeaders="true">
 			<jaxrs-client:outInterceptors>
-				<ref bean="ValintatietoRestClientCasInterceptor"/>
+				<ref bean="ValintalaskentaCasInterceptor"/>
 				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 			<jaxrs-client:inInterceptors>
-				<ref bean="ValintatietoRestClientCasInterceptor"/>
+				<ref bean="ValintalaskentaCasInterceptor"/>
 			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />

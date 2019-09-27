@@ -7,7 +7,6 @@ import org.apache.cxf.phase.Phase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -161,18 +160,8 @@ public class KoosteTestProfileConfiguration {
         return INTERCEPTOR;
     }
 
-    @Bean(name = "ValintalaskentaHakukohdeRestClientCasInterceptor")
-    public AbstractPhaseInterceptor<Message> getValintalaskentaHakukohdeRestClientCasInterceptor() {
-        return INTERCEPTOR;
-    }
-
-    @Bean(name = "SijoittelunSeurantaRestClientCasInterceptor")
-    public AbstractPhaseInterceptor<Message> getSijoittelunSeurantaRestClientCasInterceptor() {
-        return INTERCEPTOR;
-    }
-
-    @Bean(name = "ValintatietoRestClientCasInterceptor")
-    public AbstractPhaseInterceptor<Message> getValintatietoRestClientCasInterceptor() {
+    @Bean(name = "ValintalaskentaCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getValintalaskentaCasInterceptor() {
         return INTERCEPTOR;
     }
 
