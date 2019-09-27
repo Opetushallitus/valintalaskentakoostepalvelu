@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste;
 
+import fi.vm.sade.javautils.cas.ApplicationSession;
+import fi.vm.sade.javautils.cas.ServiceTicket;
+import fi.vm.sade.javautils.cas.SessionToken;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -15,8 +18,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.net.HttpCookie;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -105,6 +110,22 @@ public class KoosteTestProfileConfiguration {
 
     };
 
+    @Bean(name = "AtaruApplicationSession")
+    public ApplicationSession getAtaruApplicationSession() {
+        return new ApplicationSession(null, null, null, null, null, null, null) {
+            @Override
+            public CompletableFuture<SessionToken> getSessionToken() {
+                return CompletableFuture.completedFuture(new SessionToken(
+                        new ServiceTicket("http://localhost/service", "service-ticket"),
+                        new HttpCookie("session", "session-uuid")
+                        )
+                );
+            }
+            @Override
+            public void invalidateSession(SessionToken session) { }
+        };
+    }
+
     @Bean(name = "springSecurityFilterChain")
     public static Filter getFilter() {
         return new Filter() {
@@ -147,11 +168,6 @@ public class KoosteTestProfileConfiguration {
 
     @Bean(name = "HakemusServiceRestClientAsAdminCasInterceptor")
     public AbstractPhaseInterceptor<Message> getHakemusServiceRestClientAsAdminCasInterceptor() {
-        return INTERCEPTOR;
-    }
-
-    @Bean(name = "AtaruRestClientAsAdminCasInterceptor")
-    public AbstractPhaseInterceptor<Message> getAtaruRestClientAsAdminCasInterceptor() {
         return INTERCEPTOR;
     }
 

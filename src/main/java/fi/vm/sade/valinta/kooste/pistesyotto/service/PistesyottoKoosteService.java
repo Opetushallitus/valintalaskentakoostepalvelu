@@ -108,7 +108,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     }
 
     private Observable<HakemusWrapper> getHakemus(String hakemusOid) {
-        return ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid))
+        return Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid)))
                 .flatMap(hakemukset -> {
                     if (hakemukset.isEmpty()) {
                         return applicationAsyncResource.getApplication(hakemusOid);

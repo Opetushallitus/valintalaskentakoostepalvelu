@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,13 +28,13 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
     private static List<HakemusWrapper> byOidsResult = Lists.newArrayList();
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
-        return Observable.just(byHakukohdeRes);
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
+        return CompletableFuture.completedFuture(byHakukohdeRes);
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
-        return Observable.just(byOidsResult);
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
+        return CompletableFuture.completedFuture(byOidsResult);
     }
 
     public static void setByHakukohdeResult(List<HakemusWrapper> hakemukset) {

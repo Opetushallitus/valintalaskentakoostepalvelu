@@ -124,7 +124,7 @@ public class ValintalaskentaExcelResource {
                     .flatMap(haku -> {
                                 Observable<List<HakemusWrapper>> hakemuksetO = ((StringUtils.isEmpty(haku.getAtaruLomakeAvain()))
                                         ? applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid)
-                                        : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
+                                        : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)));
                         return Observable.zip(
                                         tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
                                         valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
@@ -185,7 +185,7 @@ public class ValintalaskentaExcelResource {
             if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
                 return applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid);
             } else {
-                return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
+                return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
             }
         });
         final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakuObservable, hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel::luoExcel);

@@ -21,6 +21,7 @@ import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import io.reactivex.Observable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,7 +148,7 @@ public class ValintatapajonoTuontiService {
                     if (haku.getAtaruLomakeAvain() == null) {
                         return applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid);
                     } else {
-                        return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
+                        return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
                     }
                 })
                 .subscribe(hakemukset -> {

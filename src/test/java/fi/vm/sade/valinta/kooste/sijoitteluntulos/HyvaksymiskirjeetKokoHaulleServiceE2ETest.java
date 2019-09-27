@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.sijoitteluntulos;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithCookie;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
@@ -100,11 +101,12 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     }
 
     @Test
-    public void ataruTestaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws InterruptedException, IOException {
+    public void ataruTestaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws IOException {
         mockHakukohde1Kutsu();
         mockAtaruHakuKutsu();
         mockYksiHyvaksyttyKutsu();
 
+        mockToReturnJsonWithCookie(GET, "/lomake-editori/auth/cas", Collections.emptyMap(), "ring-session", "session-uuid");
         mockToReturnJson(POST, "/lomake-editori/api/external/valintalaskenta", Arrays.asList(
                 new HakemusSpec.AtaruHakemusBuilder().setOid(HAKEMUS1)
                         .setAsiointikieli("sv")
@@ -122,7 +124,6 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockLetterKutsut("^(?!.*HAKEMUS2).*HAKEMUS1.*$");
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
         pollAndAssertDokumenttiProsessi(dokumenttiId);
-
     }
 
     @Test

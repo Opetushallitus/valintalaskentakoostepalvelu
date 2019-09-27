@@ -70,7 +70,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                                 return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit);
                             } else {
                                 return Observable.fromIterable(hakukohdeOidit)
-                                        .flatMap(hakukohdeOid -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
+                                        .flatMap(hakukohdeOid -> Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
                                                 .flatMap(Observable::fromIterable))
                                         .distinct(HakemusWrapper::getOid)
                                         .toList().toObservable();

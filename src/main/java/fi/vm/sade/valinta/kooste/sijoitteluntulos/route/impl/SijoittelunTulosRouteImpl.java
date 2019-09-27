@@ -206,7 +206,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                             ? Observable.just(applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX)
                                             .stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
-                                            : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)).timeout(5, MINUTES).blockingFirst();
+                                            : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))).timeout(5, MINUTES).blockingFirst();
                             hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).timeout(5, MINUTES).toFuture().get();
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).timeout(5, MINUTES).toFuture().get();
                             valinnanvaiheet = valintalaskentaResource.laskennantulokset(hakukohdeOid).timeout(1, MINUTES).toFuture().get();
@@ -312,7 +312,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             List<HakemusWrapper> hakemukset = tarjontaAsyncResource.haeHaku(hakuOid(exchange))
                                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                             ? Observable.just(applicationResource.getApplicationsByOids(hyvaksytytHakemukset).stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
-                                            : ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset)).timeout(5, MINUTES).blockingFirst();
+                                            : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset))).timeout(5, MINUTES).blockingFirst();
                             stopWatch.stop();
                             List<Osoite> addressLabels = Lists.newArrayList();
 

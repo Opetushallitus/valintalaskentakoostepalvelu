@@ -1,9 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
-
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -11,93 +10,91 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KansalaisuusDto;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements AtaruAsyncResource {
+public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
     private static final int SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE = 1000;
     private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final HttpClient client;
     private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
+    private final UrlConfiguration urlConfiguration;
 
     @Autowired
     public AtaruAsyncResourceImpl(
-            @Qualifier("AtaruRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource1,
+            @Qualifier("AtaruHttpClient") HttpClient client,
+            OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
             KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
-        super(TimeUnit.HOURS.toMillis(1), casInterceptor);
-        this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource1;
+        this.client = client;
+        this.urlConfiguration = UrlConfiguration.getInstance();
+        this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
-    private Observable<List<HakemusWrapper>> getApplications(String hakukohdeOid, List<String> hakemusOids) {
+    private CompletableFuture<List<HakemusWrapper>> getApplications(String hakukohdeOid, List<String> hakemusOids) {
         if (hakukohdeOid == null && hakemusOids.isEmpty()) {
-            return Observable.just(Collections.emptyList());
+            return CompletableFuture.completedFuture(Collections.emptyList());
         }
-        return getApplicationsInChunks(hakukohdeOid, hakemusOids).flatMap(hakemukset -> {
+        return getApplicationsInChunks(hakukohdeOid, hakemusOids).thenCompose(hakemukset -> {
             if (hakemukset.isEmpty()) {
-                return Observable.just(Collections.emptyList());
+                return CompletableFuture.completedFuture(Collections.emptyList());
             } else {
-                return getHenkilotObservable(hakemukset).toObservable()
-                        .flatMap(henkilot -> {
+                return getHenkilotObservable(hakemukset).thenCompose(henkilot -> {
                             ensureKansalaisuus(henkilot);
                             Stream<String> asuinmaaKoodit = hakemukset.stream().map(h -> h.getKeyValues().get("country-of-residence"));
                             Stream<String> kansalaisuusKoodit = henkilot.values().stream().flatMap(h -> h.getKansalaisuus().stream().map(KansalaisuusDto::getKansalaisuusKoodi));
-                            return getMaakooditObservable(asuinmaaKoodit, kansalaisuusKoodit)
-                                    .map(maakoodit ->
-                                            hakemukset.stream()
-                                                    .map(hakemusToHakemusWrapper(henkilot, maakoodit))
-                                                    .collect(Collectors.toList()));
+                            return getMaakoodit(asuinmaaKoodit, kansalaisuusKoodit).thenApply(maakoodit ->
+                                    hakemukset.stream()
+                                            .map(hakemusToHakemusWrapper(henkilot, maakoodit))
+                                            .collect(Collectors.toList()));
                         });
             }
         });
     }
 
-    private Observable<List<AtaruHakemus>> getApplicationChunk(String hakukohdeOid, List<String> hakemusOids) {
-        return this.postAsObservableLazily(
-                getUrl("ataru.applications.by-hakukohde"),
-                new TypeToken<List<AtaruHakemus>>() {
-                }.getType(),
-                Entity.entity(gson().toJson(hakemusOids), MediaType.APPLICATION_JSON),
-                client -> {
-                    if (hakukohdeOid != null) {
-                        client.query("hakukohdeOid", hakukohdeOid);
-                    }
-                    return client;
-                });
+    private CompletableFuture<List<AtaruHakemus>> getApplicationChunk(String hakukohdeOid, List<String> hakemusOids) {
+        Map<String, String> query = new HashMap<>();
+        if (hakukohdeOid != null) {
+            query.put("hakukohdeOid", hakukohdeOid);
+        }
+        return this.client.postJson(
+                this.urlConfiguration.url("ataru.applications.by-hakukohde", query),
+                Duration.ofMinutes(1),
+                hakemusOids,
+                new TypeToken<List<String>>() {}.getType(),
+                new TypeToken<List<AtaruHakemus>>() {}.getType()
+        );
     }
 
-    private Observable<List<AtaruHakemus>> getApplicationsInChunks(String hakukohdeOid, List<String> hakemusOids) {
+    private CompletableFuture<List<AtaruHakemus>> getApplicationsInChunks(String hakukohdeOid, List<String> hakemusOids) {
         if (hakemusOids.isEmpty()) {
             return getApplicationChunk(hakukohdeOid, hakemusOids);
         } else {
-            return Observable.fromIterable(hakemusOids)
-                    .window(SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE)
-                    .flatMap(chunk -> chunk.toList().flatMapObservable(oids -> getApplicationChunk(hakukohdeOid, oids)))
-                    .<List<AtaruHakemus>>collectInto(new ArrayList<>(hakemusOids.size()), List::addAll)
-                    .toObservable();
+            List<List<String>> chunks = Lists.partition(hakemusOids, SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE);
+            return chunks.stream().reduce(
+                    CompletableFuture.completedFuture(new LinkedList<>()),
+                    (f, chunk) -> f.thenCompose(l -> getApplicationChunk(hakukohdeOid, chunk).thenApply(ll -> { l.addAll(ll); return l; })),
+                    (f, ff) -> f.thenCompose(l -> ff.thenApply(ll -> { l.addAll(ll); return l; }))
+            );
         }
     }
 
@@ -113,9 +110,11 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
         }
     }
 
-    private Single<Map<String, HenkiloPerustietoDto>> getHenkilotObservable(List<AtaruHakemus> hakemukset) {
+    private CompletableFuture<Map<String, HenkiloPerustietoDto>> getHenkilotObservable(List<AtaruHakemus> hakemukset) {
         List<String> personOids = hakemukset.stream().map(AtaruHakemus::getPersonOid).distinct().collect(Collectors.toList());
-        return oppijanumerorekisteriAsyncResource.haeHenkilot(personOids);
+        CompletableFuture<Map<String, HenkiloPerustietoDto>> f = new CompletableFuture<>();
+        oppijanumerorekisteriAsyncResource.haeHenkilot(personOids).subscribe(f::complete, f::completeExceptionally);
+        return f;
     }
 
     private Function<AtaruHakemus, AtaruHakemusWrapper> hakemusToHakemusWrapper(Map<String, HenkiloPerustietoDto> henkilot, Map<String, Koodi> maakoodit) {
@@ -142,22 +141,30 @@ public class AtaruAsyncResourceImpl extends UrlConfiguredResource implements Ata
         };
     }
 
-    private Observable<Map<String, Koodi>> getMaakooditObservable(Stream<String> asuinmaaKoodit, Stream<String> kansalaisuusKoodit) {
-        return Observable.merge(
-                Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
-                        .distinct()
-                        .map(koodiArvo -> koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + koodiArvo)
-                                .map(koodi -> Pair.of(koodiArvo, koodi)))
-                        .collect(Collectors.toList())).toMap(Pair::getLeft, Pair::getRight).toObservable();
+    private CompletableFuture<Map<String, Koodi>> getMaakoodit(Stream<String> asuinmaaKoodit, Stream<String> kansalaisuusKoodit) {
+        return Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
+                .distinct()
+                .reduce(
+                        CompletableFuture.completedFuture(new HashMap<>()),
+                        (f, koodiArvo) -> f.thenCompose(acc -> getMaatjavaltiot1(koodiArvo).thenApply(koodi -> { acc.put(koodiArvo, koodi); return acc; })),
+                        (f, ff) -> f.thenCompose(acc -> ff.thenApply(acc2 -> { acc.putAll(acc2); return acc; }))
+                );
+    }
+
+    private CompletableFuture<Koodi> getMaatjavaltiot1(String maatjavaltiot2) {
+        CompletableFuture<Koodi> f = new CompletableFuture<>();
+        koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + maatjavaltiot2)
+                .subscribe(f::complete, f::completeExceptionally);
+        return f;
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
         return getApplications(hakukohdeOid, Lists.newArrayList());
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
         return getApplications(null, oids);
     }
 }

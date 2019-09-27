@@ -399,7 +399,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         return tarjontaAsyncResource.haeHaku(hakuOid)
                 .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                         ? applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, Collections.singletonList(hakukohdeOid))
-                        : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                        : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)))
                 .map(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
     }
 
@@ -407,7 +407,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         return tarjontaAsyncResource.haeHaku(hakuOid)
                 .flatMap(haku -> haku.getAtaruLomakeAvain() == null
                         ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
-                        : ataruAsyncResource.getApplicationsByOids(hakemusOids))
+                        : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids)))
                 .map(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
     }
 

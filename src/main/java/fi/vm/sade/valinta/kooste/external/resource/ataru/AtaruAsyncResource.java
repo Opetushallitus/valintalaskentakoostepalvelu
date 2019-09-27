@@ -1,12 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru;
 
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import io.reactivex.Observable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface AtaruAsyncResource {
-    Observable<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid);
+    CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid);
 
-    Observable<List<HakemusWrapper>> getApplicationsByOids(List<String> oids);
+    CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(List<String> oids);
 }

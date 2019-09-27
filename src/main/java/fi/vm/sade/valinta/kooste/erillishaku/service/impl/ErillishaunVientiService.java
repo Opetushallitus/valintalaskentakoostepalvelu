@@ -75,7 +75,7 @@ public class ErillishaunVientiService {
             if (haku.getAtaruLomakeAvain() == null) {
                 return applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
             } else {
-                return ataruAsyncResource.getApplicationsByHakukohde(erillishaku.getHakukohdeOid());
+                return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(erillishaku.getHakukohdeOid()));
             }
         });
         Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());

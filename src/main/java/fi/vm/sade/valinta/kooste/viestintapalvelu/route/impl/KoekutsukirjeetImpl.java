@@ -68,7 +68,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
     public void koekutsukirjeetHakemuksille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, Collection<String> hakemusOids) {
         ((StringUtils.isEmpty(koekutsu.getHaku().getAtaruLomakeAvain()))
                 ? applicationAsyncResource.getApplicationsByHakemusOids(Lists.newArrayList(hakemusOids))
-                : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids)))
+                : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids))))
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(koekutsukirjeiksi(prosessi, koekutsu),
                         t1 -> {
@@ -84,7 +84,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
         final Observable<List<ValintakoeDTO>> valintakokeetObservable = valintakoeResource.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
         final Observable<List<HakemusWrapper>> hakemuksetObservable = ((StringUtils.isEmpty(koekutsu.getHaku().getAtaruLomakeAvain()))
                 ? applicationAsyncResource.getApplicationsByOid(koekutsu.getHaku().getOid(), koekutsu.getHakukohdeOid())
-                : ataruAsyncResource.getApplicationsByHakukohde(koekutsu.getHakukohdeOid()));
+                : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(koekutsu.getHakukohdeOid())));
 
         zip(valintakokeetObservable, hakemuksetObservable,
                 (valintakoes, hakemukset) -> {
@@ -140,7 +140,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
         if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
             return ((StringUtils.isEmpty(haku.getAtaruLomakeAvain()))
                     ? applicationAsyncResource.getApplicationsByHakemusOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat))
-                    : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat)))
+                    : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat))))
                     .timeout(30, SECONDS)
                     .blockingFirst()
                     .stream();

@@ -141,7 +141,7 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     protected Observable<List<HakemusWrapper>> getHakemuksetByOids(List<String> hakemusOids) {
-        return ataruAsyncResource.getApplicationsByOids(hakemusOids)
+        return Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids))
                 .flatMap(hakemukset -> {
                     if (hakemukset.isEmpty()) {
                         return applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids);
@@ -155,7 +155,7 @@ public abstract class AbstractPistesyottoKoosteService {
         if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
             return applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid);
         } else {
-            return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
+            return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
         }
     }
 

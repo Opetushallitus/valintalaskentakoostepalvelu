@@ -94,7 +94,7 @@ public class AktiivistenHakemustenValintakoeResource {
                                 .map(hakemukset -> hakemukset.stream()
                                         .map(HakemusWrapper::getOid).collect(Collectors.toSet()));
                     } else {
-                        return ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit)
+                        return Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit))
                                 .map(hakemukset -> hakemukset.stream()
                                         .map(HakemusWrapper::getOid).collect(Collectors.toSet()));
                     }

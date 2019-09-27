@@ -273,7 +273,7 @@ public class PistesyottoExternalTuontiService {
     }
 
     private Observable<List<HakemusWrapper>> getHakemuksetByHakemusOids(List<String> hakemusOids) {
-        return ataruAsyncResource.getApplicationsByOids(hakemusOids)
+        return Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids))
                 .flatMap(hakemukset -> {
                     if (hakemukset.isEmpty()) {
                         return applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids);

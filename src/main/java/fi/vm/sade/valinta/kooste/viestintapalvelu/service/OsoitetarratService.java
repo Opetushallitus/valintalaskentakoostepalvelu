@@ -106,7 +106,7 @@ public class OsoitetarratService {
                         } else {
                             return StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                     ? applicationAsyncResource.getApplicationsByOids(hakemusOids)
-                                    : ataruAsyncResource.getApplicationsByOids(hakemusOids);
+                                    : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids));
                         }
                     })
                     .subscribe(hakemukset -> {
@@ -154,7 +154,7 @@ public class OsoitetarratService {
                             puuttuvatHakemusOidit.removeAll(mahdollisestiHakukohteenHakemusOidit);
                             (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                     ? applicationAsyncResource.getApplicationsByOids(puuttuvatHakemusOidit)
-                                    : ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(puuttuvatHakemusOidit)))
+                                    : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(puuttuvatHakemusOidit))))
                                     .subscribe(puuttuvatHakemukset -> {
                                                 haetutHakemuksetRef.set(Stream.concat(haetutHakemuksetRef.get().stream(), puuttuvatHakemukset.stream()).collect(Collectors.toList()));
                                                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
@@ -171,7 +171,7 @@ public class OsoitetarratService {
                     if (kutsutaankoJossainKokeessaKaikki) {
                         (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                 ? applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid)
-                                : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                                : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)))
                                 .subscribe(hakemukset -> {
                                     haetutHakemuksetRef.set(hakemukset);
                                     laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
@@ -208,7 +208,7 @@ public class OsoitetarratService {
             posti(laskuri, postiRef, poikkeuskasittelija);
             applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)
                     .flatMap(hakemukset -> hakemukset.isEmpty()
-                        ? ataruAsyncResource.getApplicationsByOids(hakemusOids)
+                        ? Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids))
                         : Observable.just(hakemukset))
                     .subscribe(hakemukset -> {
                         haetutHakemuksetRef.set(hakemukset);

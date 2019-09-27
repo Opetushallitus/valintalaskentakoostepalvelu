@@ -274,7 +274,7 @@ public class OppijanSuorituksetProxyResource {
 
         //final Map<String, Map<String, String>> allData = new HashMap<>();
         Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakemusOids, auditSession);
-        Observable<List<HakemusWrapper>> ataruHakemukset = ataruAsyncResource.getApplicationsByOids(hakemusOids);
+        Observable<List<HakemusWrapper>> ataruHakemukset = Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids));
         Observable<HakuV1RDTO> hakuV1RDTOObservable = tarjontaAsyncResource.haeHaku(hakuOid);
         Observable.combineLatest(hakuV1RDTOObservable, valintapisteet, ataruHakemukset, (haku, pisteet, hakemukset) -> {
             if (hakemukset == null || hakemukset.isEmpty()) {
