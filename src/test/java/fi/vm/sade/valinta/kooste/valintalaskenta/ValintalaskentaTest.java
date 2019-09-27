@@ -119,7 +119,7 @@ public class ValintalaskentaTest {
                 (new Valintapisteet(ataruHakemus.getHakemusOid(), ataruHakemus.getPersonOid(), "Zl2A5", "TAUsuL4BQc", Collections.emptyList())));
 
         when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
-                Observable.just(Collections.singletonList(valintaperusteetWithValintatapajonoUsingValintalaskenta(false, false, valintatapajono1Oid))));
+                Observable.just(Collections.singletonList(valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid))));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde1Oid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde2Oid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde3Oid)).thenReturn(Observable.just(Collections.emptyList()));
@@ -206,9 +206,15 @@ public class ValintalaskentaTest {
 
         Integer vaiheenNumero = 1;
 
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde1Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde2Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde3Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde1Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid)
+        )));
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde2Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono2Oid)
+        )));
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde3Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono3Oid)
+        )));
 
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde1Oid))).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde2Oid))).thenReturn(Observable.just(Collections.emptyList()));
