@@ -288,6 +288,33 @@ public class ValintalaskentaTest {
     }
 
     @Test
+    public void valintalaskentaEiKaytossaAiheuttaaLaskennanEpaonnistumisen() throws InterruptedException {
+        int vaiheenNumero = 1;
+
+        when(valintaperusteetAsyncResource.haeValintaperusteet(hakukohde1Oid, vaiheenNumero)).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(false, false, valintatapajono1Oid)
+        )));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(
+                auditSession,
+                uuid,
+                hakuOid,
+                false,
+                vaiheenNumero,
+                null,
+                Collections.singletonList(new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1")),
+                LaskentaTyyppi.HAKUKOHDE
+        );
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
+        Thread.sleep(500);
+
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional(String.format("Hakukohteen %s valintatapajonoissa ei käytetä valintalaskentaa", hakukohde1Oid)));
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
+
+    @Test
     public void epaonnistuneetLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(
             Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid)));
