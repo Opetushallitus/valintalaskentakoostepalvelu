@@ -72,6 +72,48 @@ public class HttpClients {
         );
     }
 
+    @Bean(name = "HakuAppInternalHttpClient")
+    @Autowired
+    public java.net.http.HttpClient getHakuAppInternalHttpClient(CookieManager cookieManager) {
+        return defaultHttpClientBuilder(cookieManager).build();
+    }
+
+    @Profile("default")
+    @Bean(name = "HakuAppApplicationSession")
+    @Autowired
+    public ApplicationSession getHakuAppApplicationSession(
+            @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+            @Qualifier("HakuAppInternalHttpClient") java.net.http.HttpClient applicationHttpClient,
+            CookieManager cookieManager,
+            @Value("${cas.service.haku-service}") String service,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String username,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String password
+    ) {
+        String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+        return new ApplicationSession(
+                applicationHttpClient,
+                cookieManager,
+                CALLER_ID,
+                Duration.ofSeconds(10),
+                new CasSession(casHttpClient, Duration.ofSeconds(10), CALLER_ID, URI.create(ticketsUrl), username, password),
+                service,
+                "JSESSIONID"
+        );
+    }
+
+    @Bean(name = "HakuAppHttpClient")
+    @Autowired
+    public HttpClient getHakuAppHttpClient(
+            @Qualifier("HakuAppInternalHttpClient") java.net.http.HttpClient client,
+            @Qualifier("HakuAppApplicationSession") ApplicationSession applicationSession
+    ) {
+        return new HttpClient(
+                client,
+                applicationSession,
+                DateDeserializer.gsonBuilder().create()
+        );
+    }
+
     public static java.net.http.HttpClient.Builder defaultHttpClientBuilder(CookieManager cookieManager) {
         return java.net.http.HttpClient.newBuilder()
                 .version(java.net.http.HttpClient.Version.HTTP_1_1)

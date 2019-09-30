@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public interface ApplicationAsyncResource {
 
@@ -22,10 +23,11 @@ public interface ApplicationAsyncResource {
 
     Observable<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
 
-    Observable<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids);
+    CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, List<String> hakukohdeOids);
 
     Observable<List<HakemusWrapper>> getApplicationsByHakemusOids(List<String> hakemusOids);
-    Observable<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys);
+
+    CompletableFuture<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, List<String> keys);
 
     Observable<List<HakemusWrapper>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);
 

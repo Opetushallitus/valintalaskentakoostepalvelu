@@ -398,7 +398,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private Observable<Map<String, HakemusWrapper>> hakemuksetByHakukohde(String hakuOid, String hakukohdeOid) {
         return tarjontaAsyncResource.haeHaku(hakuOid)
                 .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                        ? applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, Collections.singletonList(hakukohdeOid))
+                        ? Observable.fromFuture(applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, Collections.singletonList(hakukohdeOid)))
                         : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)))
                 .map(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
     }
@@ -406,7 +406,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private Observable<Map<String, HakemusWrapper>> hakemuksetByOids(String hakuOid, List<String> hakemusOids) {
         return tarjontaAsyncResource.haeHaku(hakuOid)
                 .flatMap(haku -> haku.getAtaruLomakeAvain() == null
-                        ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
+                        ? Observable.fromFuture(applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS))
                         : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids)))
                 .map(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
     }

@@ -110,20 +110,27 @@ public class KoosteTestProfileConfiguration {
 
     };
 
+    private static ApplicationSession APPLICATION_SESSION = new ApplicationSession(null, null, null, null, null, null, null) {
+        @Override
+        public CompletableFuture<SessionToken> getSessionToken() {
+            return CompletableFuture.completedFuture(new SessionToken(
+                    new ServiceTicket("http://localhost/service", "service-ticket"),
+                    new HttpCookie("session", "session-uuid")
+                    )
+            );
+        }
+        @Override
+        public void invalidateSession(SessionToken session) { }
+    };
+
     @Bean(name = "AtaruApplicationSession")
     public ApplicationSession getAtaruApplicationSession() {
-        return new ApplicationSession(null, null, null, null, null, null, null) {
-            @Override
-            public CompletableFuture<SessionToken> getSessionToken() {
-                return CompletableFuture.completedFuture(new SessionToken(
-                        new ServiceTicket("http://localhost/service", "service-ticket"),
-                        new HttpCookie("session", "session-uuid")
-                        )
-                );
-            }
-            @Override
-            public void invalidateSession(SessionToken session) { }
-        };
+        return APPLICATION_SESSION;
+    }
+
+    @Bean(name = "HakuAppApplicationSession")
+    public ApplicationSession getHakuAppApplicationSession() {
+        return APPLICATION_SESSION;
     }
 
     @Bean(name = "springSecurityFilterChain")

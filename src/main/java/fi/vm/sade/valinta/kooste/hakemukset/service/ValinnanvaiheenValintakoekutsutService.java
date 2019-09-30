@@ -67,7 +67,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                     } else {
                         tarjontaAsyncResource.haeHaku(hakuOid).flatMap(haku -> {
                             if (haku.getAtaruLomakeAvain() == null) {
-                                return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit);
+                                return Observable.fromFuture(applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, new ArrayList<>(hakukohdeOidit)));
                             } else {
                                 return Observable.fromIterable(hakukohdeOidit)
                                         .flatMap(hakukohdeOid -> Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))

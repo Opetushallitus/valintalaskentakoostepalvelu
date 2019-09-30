@@ -46,7 +46,7 @@ public class HakijatoimistoTest {
 
         OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl();
         final String host= Integraatiopalvelimet.mockServer.getUrl();
-        ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(null);
+        ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(null, null);
         Observable<List<HakemusWrapper>> hakemuksetObservable = a.getApplicationsByOid(hakuOid, hakukohdeOid);
         //Observable<HakijaPaginationObject> hakijatFuture = s.getKoulutuspaikkalliset(hakuOid, hakukohdeOid);
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = o.haeHakutoimisto(tarjoajaOid);

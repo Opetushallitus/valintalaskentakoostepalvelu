@@ -50,13 +50,11 @@ public class CasInterceptors {
     @Bean(name = "HakemusServiceRestClientAsAdminCasInterceptor")
     @Autowired
     public AbstractPhaseInterceptor<Message> getHakemusServiceRestClientAsAdminCasInterceptor(
-            @Qualifier("CasHttpClient") HttpClient casHttpClient,
-            CookieManager cookieManager,
-            @Value("${cas.service.haku-service}") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword) {
-        return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+            @Qualifier("HakuAppApplicationSession") ApplicationSession applicationSession
+    ) {
+        return new CasKoosteInterceptor(applicationSession, true);
     }
+
     @Bean(name = "AuthenticationServiceRestClientCasInterceptor")
     @Autowired
     public AbstractPhaseInterceptor<Message> getAuthenticationServiceRestClientCasInterceptor(

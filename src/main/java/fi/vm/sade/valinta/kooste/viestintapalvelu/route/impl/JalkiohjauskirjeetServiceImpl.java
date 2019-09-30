@@ -141,7 +141,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         try {
             return tarjontaAsyncResource.haeHaku(hakuOid)
                     .flatMap(haku -> (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                            ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
+                            ? Observable.fromFuture(applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS))
                             : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids))))
                     .timeout(25, MINUTES).blockingFirst();
         } catch (Throwable e) {
