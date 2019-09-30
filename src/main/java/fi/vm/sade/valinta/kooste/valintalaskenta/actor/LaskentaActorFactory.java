@@ -283,20 +283,14 @@ public class LaskentaActorFactory {
     }
 
     private void verifyValintalaskentaKaytossaOrThrowError(String uuid, String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteetList) {
-        Predicate<? super ValintatapajonoJarjestyskriteereillaDTO> kayttaaValintalaskentaa = new Predicate<>() {
-            @Override
-            public boolean test(ValintatapajonoJarjestyskriteereillaDTO valintatapajono) {
-                return valintatapajono.getKaytetaanValintalaskentaa();
-            }
-        };
         boolean jokinValintatapajonoKayttaaValintalaskentaa = valintaperusteetList
                 .stream()
                 .map(ValintaperusteetDTO::getValinnanVaihe)
                 .flatMap(v -> v.getValintatapajono().stream())
-                .anyMatch(kayttaaValintalaskentaa);
+                .anyMatch(ValintatapajonoJarjestyskriteereillaDTO::getKaytetaanValintalaskentaa);
 
         if (!jokinValintatapajonoKayttaaValintalaskentaa) {
-            String errorMessage = String.format("(Uuid: %s) Hakukohteen %s valintatapajonoissa ei käytetä valintalaskentaa, joten valintalaskentaa ei voida jatkaa ja se keskeytetään", uuid, hakukohdeOid);
+            String errorMessage = String.format("(Uuid: %s) Hakukohteen %s valittujen valinnanvaiheiden valintatapajonoissa ei käytetä valintalaskentaa, joten valintalaskentaa ei voida jatkaa ja se keskeytetään", uuid, hakukohdeOid);
             LOG.error(errorMessage);
             throw new RuntimeException(errorMessage);
         }
