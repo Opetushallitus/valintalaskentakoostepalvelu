@@ -300,7 +300,8 @@ public class ValintalaskentaTest {
         when(valintaperusteetAsyncResource.haeValintaperusteet(hakukohde1Oid, vaiheenNumero)).thenReturn(Observable.just(Arrays.asList(
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(false, false, valintatapajono1Oid)
         )));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(
+                new HakuappHakemusWrapper(hakemus))));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(
                 auditSession,
@@ -315,7 +316,13 @@ public class ValintalaskentaTest {
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
 
-        verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional(String.format("Hakukohteen %s valintatapajonoissa ei käytetä valintalaskentaa", hakukohde1Oid)));
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(
+                eq(uuid),
+                eq(hakukohde1Oid),
+                eq(HakukohdeTila.KESKEYTETTY),
+                getIlmoitusDtoOptional(
+                        String.format("Hakukohteen %s valittujen valinnanvaiheiden valintatapajonoissa ei käytetä valintalaskentaa",
+                                hakukohde1Oid)));
         verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
         Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }
