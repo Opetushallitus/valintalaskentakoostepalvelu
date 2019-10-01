@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +74,7 @@ public class ViestintapalveluAktivointiResource {
             DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Luo osoitetarrat", null, tags("osoitetarrat", lisatiedot.getTag()));
             dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
 
-            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+            Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).subscribe(haku -> {
                 if (lisatiedot.getHakemusOids() != null) {
                     osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, lisatiedot.getHakemusOids());
                 } else {
@@ -108,7 +109,7 @@ public class ViestintapalveluAktivointiResource {
             DokumentinLisatiedot lisatiedot = hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
             DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Sijoittelussa hyväksytyille", hakuOid, tags("osoitetarrat", lisatiedot.getTag()));
             dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+            Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).subscribe(haku -> {
                 if (lisatiedot.getHakemusOids() != null) {
                     osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, lisatiedot.getHakemusOids());
                 } else {
@@ -299,7 +300,7 @@ public class ViestintapalveluAktivointiResource {
             String template = templateName == null ? "koekutsukirje" : templateName;
             DokumentinLisatiedot lisatiedot = hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
             String tag = lisatiedot.getTag();
-            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+            Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).subscribe(haku -> {
                 if (lisatiedot.getHakemusOids() != null) {
                     LOG.info("Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}", lisatiedot.getHakemusOids());
                     koekutsukirjeetService.koekutsukirjeetHakemuksille(prosessi,

@@ -231,7 +231,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     ).collect(Collectors.toList()));
                 }
         );
-        Observable<HakuV1RDTO> hakuO = tarjontaAsyncResource.haeHaku(hakuOid);
+        Observable<HakuV1RDTO> hakuO = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
         Observable<List<HakemusWrapper>> hakemuksetO = Observable.merge(Observable.zip(
                 osallistumistiedotO,
                 hakuO.flatMap(haku -> getHakemukset(haku, hakukohdeOid)),

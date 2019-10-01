@@ -143,7 +143,7 @@ public class ValintatapajonoTuontiService {
                 },
                 poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef)
         );
-        tarjontaAsyncResource.haeHaku(hakuOid)
+        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                 .flatMap(haku -> {
                     if (haku.getAtaruLomakeAvain() == null) {
                         return applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid);

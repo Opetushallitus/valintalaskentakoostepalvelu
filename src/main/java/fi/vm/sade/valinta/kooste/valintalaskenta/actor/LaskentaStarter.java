@@ -19,6 +19,7 @@ import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
+import io.reactivex.Observable;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +101,7 @@ public class LaskentaStarter {
                 .setSynkronoituToiminto(
                         () -> startActor.accept(hakuRef.get(), parametritRef.get()))
                 .build();
-        tarjontaAsyncResource.haeHaku(hakuOid).subscribe(
+        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).subscribe(
                 haku -> {
                     hakuRef.set(haku);
                     counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

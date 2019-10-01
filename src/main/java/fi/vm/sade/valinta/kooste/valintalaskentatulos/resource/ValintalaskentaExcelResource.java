@@ -88,7 +88,7 @@ public class ValintalaskentaExcelResource {
         try {
             DokumenttiProsessi p = new DokumenttiProsessi("Valintalaskentaexcel", "Valintakoekutsut taulukkolaskenta tiedosto", "", Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
             dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
-            tarjontaAsyncResource.haeHaku(hakuOid)
+            Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                     .subscribe(haku -> valintakoekutsutExcelService.luoExcel(p, haku, hakukohdeOid, lisatiedot.getValintakoeTunnisteet(), Sets.newHashSet(Optional.ofNullable(lisatiedot.getHakemusOids()).orElse(Collections.emptyList()))));
             return p.toProsessiId();
         } catch (Exception e) {
@@ -120,7 +120,7 @@ public class ValintalaskentaExcelResource {
             String id = UUID.randomUUID().toString();
             AuditSession auditSession = AuthorizationUtil.createAuditSession(httpServletRequestJaxRS);
             p.setKokonaistyo(1);
-            tarjontaAsyncResource.haeHaku(hakuOid)
+            Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                     .flatMap(haku -> {
                                 Observable<List<HakemusWrapper>> hakemuksetO = ((StringUtils.isEmpty(haku.getAtaruLomakeAvain()))
                                         ? applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid)
@@ -179,7 +179,7 @@ public class ValintalaskentaExcelResource {
     @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
     public void haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
         Observable<HakukohdeV1RDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
-        final Observable<HakuV1RDTO> hakuObservable = hakukohdeObservable.flatMap(hakukohde -> tarjontaResource.haeHaku(hakukohde.getHakuOid()));
+        final Observable<HakuV1RDTO> hakuObservable = hakukohdeObservable.flatMap(hakukohde -> Observable.fromFuture(tarjontaResource.haeHaku(hakukohde.getHakuOid())));
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
         final Observable<List<HakemusWrapper>> hakemuksetObservable = hakuObservable.flatMap(haku -> {
             if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {

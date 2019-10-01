@@ -139,7 +139,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
         List<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
         try {
-            return tarjontaAsyncResource.haeHaku(hakuOid)
+            return Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                     .flatMap(haku -> (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                             ? Observable.fromFuture(applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS))
                             : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids))))

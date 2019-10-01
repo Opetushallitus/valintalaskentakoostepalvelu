@@ -70,7 +70,7 @@ public class ErillishaunVientiService {
     }
 
     public void vie(final AuditSession auditSession, KirjeProsessi prosessi, ErillishakuDTO erillishaku) {
-        Observable<HakuV1RDTO> hakuFuture = hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid());
+        Observable<HakuV1RDTO> hakuFuture = Observable.fromFuture(hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid()));
         Observable<List<HakemusWrapper>> hakemusObservable = hakuFuture.flatMap(haku -> {
             if (haku.getAtaruLomakeAvain() == null) {
                 return applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());

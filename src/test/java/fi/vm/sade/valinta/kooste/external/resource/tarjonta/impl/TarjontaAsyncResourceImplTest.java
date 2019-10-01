@@ -18,8 +18,8 @@ public class TarjontaAsyncResourceImplTest {
     public void testHakukohdeRyhmasForHakukohdesParsesCorrectly(){
         String json = "{\"result\": {\"tulokset\": [{\"tulokset\": [{\"oid\": \"oid1\",\"ryhmaliitokset\": [{\"ryhmaOid\": \"ryhmaoid1\"},{\"ryhmaOid\": \"ryhmaoid2\"},{\"ryhmaOid\": \"ryhmaoid3\"}]},{\"oid\": \"oid2\",\"ryhmaliitokset\": []}]}],\"tuloksia\": 1}}";
 
-        Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImplHelper.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
-        Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap(a);
+        Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImpl.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
+        Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImpl.resultSearchToHakukohdeRyhmaMap(a);
         Map<String, List<String>> res = observable.timeout(10, SECONDS).blockingSingle();
         assertEquals(2, res.size());
         assertEquals(3, res.get("oid1").size());
@@ -30,8 +30,8 @@ public class TarjontaAsyncResourceImplTest {
     public void testMissingRyhma(){
         String json = "{\"result\": {\"tulokset\": [{\"tulokset\": [{\"oid\": \"oid1\"}, {\"oid\": \"oid2\"}]}]}}";
 
-        Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImplHelper.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
-        Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap(a);
+        Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImpl.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
+        Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImpl.resultSearchToHakukohdeRyhmaMap(a);
         Map<String, List<String>> res = observable.timeout(10, SECONDS).blockingSingle();
         assertEquals(2, res.size());
         assertEquals(0, res.get("oid1").size());
@@ -42,8 +42,8 @@ public class TarjontaAsyncResourceImplTest {
     public void testError(){
         String json = "{\"accessRights\":{},\"result\":{\"tulokset\":[],\"tuloksia\":0},\"status\":\"OK\"}";
 
-        Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImplHelper.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
-        Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImplHelper.resultSearchToHakukohdeRyhmaMap(a);
+        Observable<ResultSearch> a = Observable.just(TarjontaAsyncResourceImpl.getGson().fromJson(json, new TypeToken<ResultSearch>() {}.getType()));
+        Observable<Map<String, List<String>>> observable = TarjontaAsyncResourceImpl.resultSearchToHakukohdeRyhmaMap(a);
         Map<String, List<String>> res = observable.timeout(10, SECONDS).blockingSingle();
         assertEquals(0, res.size());
     }

@@ -87,7 +87,7 @@ public class AktiivistenHakemustenValintakoeResource {
                 .map(ValintakoeOsallistuminenDTO::getHakemusOid).distinct().collect(Collectors.toList());
 
         return tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
-                .flatMap(hakukohde -> tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid()))
+                .flatMap(hakukohde -> Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid())))
                 .flatMap(haku -> {
                     if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
                         return applicationAsyncResource.getApplicationsByHakemusOids(kaikkiOsallistumistenHakemusOidit)

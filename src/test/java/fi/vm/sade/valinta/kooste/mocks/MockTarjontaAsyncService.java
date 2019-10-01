@@ -17,19 +17,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     private static Map<String, HakuV1RDTO> mockHaku= new HashMap<>();
 
     @Override
-    public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
+    public CompletableFuture<HakuV1RDTO> haeHaku(String hakuOid) {
         if(mockHaku.containsKey(hakuOid)) {
-            return Observable.just(mockHaku.get(hakuOid));
+            return CompletableFuture.completedFuture(mockHaku.get(hakuOid));
         }
         HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
         hakuV1RDTO.setOid(hakuOid);
-        return Observable.just(hakuV1RDTO);
+        return CompletableFuture.completedFuture(hakuV1RDTO);
     }
 
     @Override

@@ -65,7 +65,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                         exceptionHandler.accept(new ValinnanvaiheelleEiLoydyValintaryhmiaException(
                             String.format("Ei löytynyt yhtään hakukohdeoidia valintaryhmien perusteella haun %s valinnanvaiheelle %s", hakuOid, valinnanvaiheOid)));
                     } else {
-                        tarjontaAsyncResource.haeHaku(hakuOid).flatMap(haku -> {
+                        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).flatMap(haku -> {
                             if (haku.getAtaruLomakeAvain() == null) {
                                 return Observable.fromFuture(applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, new ArrayList<>(hakukohdeOidit)));
                             } else {

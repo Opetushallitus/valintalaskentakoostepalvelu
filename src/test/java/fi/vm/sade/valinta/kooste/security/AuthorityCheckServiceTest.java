@@ -19,6 +19,7 @@ import io.reactivex.Observable;
 import javax.ws.rs.ForbiddenException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 
 public class AuthorityCheckServiceTest {
 
@@ -38,7 +39,7 @@ public class AuthorityCheckServiceTest {
         Mockito.when(organisaatioResource.parentoids("oid.1")).thenReturn("parent.oid.1/oid.1");
         Mockito.when(organisaatioResource.parentoids("oid.2")).thenReturn("parent.oid.2/oid.2");
         Mockito.when(organisaatioResource.parentoids("oid.3")).thenReturn("parent.oid.3/oid.3");
-        Mockito.when(tarjontaAsyncResource.haeHaku("haku.oid")).thenReturn(Observable.just(new HakuV1RDTO()));
+        Mockito.when(tarjontaAsyncResource.haeHaku("haku.oid")).thenReturn(CompletableFuture.completedFuture(new HakuV1RDTO()));
     }
 
     private class TestAuthority implements GrantedAuthority {

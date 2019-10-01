@@ -202,7 +202,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
                         try {
                             // TODO here it would make more sense to parallelise the asynchronous calls and bundle the results together after they all complete.
-                            hakemukset = tarjontaAsyncResource.haeHaku(hakuOid)
+                            hakemukset = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                             ? Observable.just(applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX)
                                             .stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
@@ -309,7 +309,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 return;
                             }
                             stopWatch.start("Tiedot hakemuksilta");
-                            List<HakemusWrapper> hakemukset = tarjontaAsyncResource.haeHaku(hakuOid(exchange))
+                            List<HakemusWrapper> hakemukset = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid(exchange)))
                                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                             ? Observable.just(applicationResource.getApplicationsByOids(hyvaksytytHakemukset).stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
                                             : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset))).timeout(5, MINUTES).blockingFirst();

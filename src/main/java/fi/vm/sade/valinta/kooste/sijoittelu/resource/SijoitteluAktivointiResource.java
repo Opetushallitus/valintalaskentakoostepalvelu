@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
@@ -187,7 +188,7 @@ public class SijoitteluAktivointiResource {
 
         Collection<? extends GrantedAuthority> userRoles = SecurityUtil.getRoles();
 
-        tarjontaResource.haeHaku(hakuOid).subscribe(haku -> {
+        Observable.fromFuture(tarjontaResource.haeHaku(hakuOid)).subscribe(haku -> {
             String[] organisaatioOids = haku.getTarjoajaOids();
 
             boolean isAuthorizedForHaku =

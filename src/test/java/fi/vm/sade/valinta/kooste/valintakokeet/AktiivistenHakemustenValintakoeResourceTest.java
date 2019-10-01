@@ -86,7 +86,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
             .thenReturn(Observable.just(hakukohdeDTO));
         when(tarjontaAsyncResource.haeHaku(hakuOid))
-            .thenReturn(Observable.just(hakuDTOHakuApp));
+            .thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
 
         when(asyncResponse.resume(any(Response.class))).thenAnswer((Answer<Boolean>) invocation -> {
             responseReceivedInAsyncResponse = invocation.getArgument(0);
@@ -122,7 +122,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
                 .thenReturn(Observable.just(hakukohdeDTO));
         when(tarjontaAsyncResource.haeHaku(hakuOid))
-                .thenReturn(Observable.just(hakuDTOEditori));
+                .thenReturn(CompletableFuture.completedFuture(hakuDTOEditori));
 
         when(asyncResponse.resume(any(Response.class))).thenAnswer((Answer<Boolean>) invocation -> {
             responseReceivedInAsyncResponse = invocation.getArgument(0);
@@ -154,7 +154,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
                 .thenReturn(Observable.just(hakukohdeDTO));
         when(tarjontaAsyncResource.haeHaku(hakuOid))
-                .thenReturn(Observable.just(hakuDTOHakuApp));
+                .thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
         when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
             .thenReturn(Observable.just(Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
         RuntimeException applicationFetchException = new RuntimeException("Hakemusten haku kaatui!");

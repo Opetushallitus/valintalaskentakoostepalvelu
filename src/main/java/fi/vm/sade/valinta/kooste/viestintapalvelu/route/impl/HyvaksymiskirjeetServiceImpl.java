@@ -396,19 +396,23 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     private Observable<Map<String, HakemusWrapper>> hakemuksetByHakukohde(String hakuOid, String hakukohdeOid) {
-        return tarjontaAsyncResource.haeHaku(hakuOid)
-                .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                        ? Observable.fromFuture(applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, Collections.singletonList(hakukohdeOid)))
-                        : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)))
-                .map(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
+        return Observable.fromFuture(
+                tarjontaAsyncResource.haeHaku(hakuOid)
+                        .thenCompose(haku -> haku.getAtaruLomakeAvain() == null
+                                ? applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, Collections.singletonList(hakukohdeOid))
+                                : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                        .thenApply(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)))
+        );
     }
 
     private Observable<Map<String, HakemusWrapper>> hakemuksetByOids(String hakuOid, List<String> hakemusOids) {
-        return tarjontaAsyncResource.haeHaku(hakuOid)
-                .flatMap(haku -> haku.getAtaruLomakeAvain() == null
-                        ? Observable.fromFuture(applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS))
-                        : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids)))
-                .map(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
+        return Observable.fromFuture(
+                tarjontaAsyncResource.haeHaku(hakuOid)
+                        .thenCompose(haku -> haku.getAtaruLomakeAvain() == null
+                                ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
+                                : ataruAsyncResource.getApplicationsByOids(hakemusOids))
+                        .thenApply(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)))
+        );
     }
 
     private Observable<String> muodostaHyvaksymiskirjeet(DokumenttiProsessi prosessi,
