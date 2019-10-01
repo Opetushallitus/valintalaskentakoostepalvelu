@@ -15,6 +15,7 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
@@ -30,6 +31,8 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijall
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
 
@@ -37,27 +40,37 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource implements ValintaTulosServiceAsyncResource {
-    public ValintaTulosServiceAsyncResourceImpl() {
+    private final HttpClient client;
+
+    @Autowired
+    public ValintaTulosServiceAsyncResourceImpl(@Qualifier("ValintaTulosServiceHttpClient") HttpClient client) {
         super(TimeUnit.MINUTES.toMillis(30));
+        this.client = client;
     }
 
-    @Override
-    protected Gson createGson() {
+    public static Gson getGson() {
         return DateDeserializer.gsonBuilder()
                 .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonSerializer())
                 .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonDeserializer())
                 .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonDeserializer())
                 .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonSerializer())
                 .create();
+    }
+
+    @Override
+    protected Gson createGson() {
+        return getGson();
     }
 
     @Override
@@ -79,49 +92,39 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
-        return getAsObservableLazily(getUrl("valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
-                new GenericType<HakijaPaginationObject>(){}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+    public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
+        return this.client.<HakijaPaginationObject>getJson(
+                getUrl("valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
+                Duration.ofMinutes(30),
+                new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType()
+        ).thenApply(HakijaPaginationObject::getResults);
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid) {
-        return getAsObservableLazilyWithInputStream(getUrl("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
-                new GenericType<HakijaPaginationObject>(){}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+    public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid) {
+        return this.client.<HakijaPaginationObject>getJson(
+                getUrl("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
+                Duration.ofMinutes(30),
+                new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType()
+        ).thenApply(HakijaPaginationObject::getResults);
     }
 
     @Override
-    public Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
-        return getAsObservableLazily(
+    public CompletableFuture<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
+        return this.client.getJson(
                 getUrl("valinta-tulos-service.haku.sijoitteluajo.latest.hakemus", hakuOid, hakemusOid),
-                new TypeToken<fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO>() {}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
+                Duration.ofMinutes(30),
+                new com.google.gson.reflect.TypeToken<HakijaDTO>() {}.getType()
         );
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
-        return getAsObservableLazily(
+    public CompletableFuture<List<HakijaDTO>> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
+        return this.client.<HakijaPaginationObject>getJson(
                 getUrl("valinta-tulos-service.haku.hakukohde.hakijat", hakuOid, hakukohdeOid),
-                new GenericType<HakijaPaginationObject>(){}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+                Duration.ofMinutes(30),
+                new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType()
+        ).thenApply(HakijaPaginationObject::getResults);
     }
 
     @Override

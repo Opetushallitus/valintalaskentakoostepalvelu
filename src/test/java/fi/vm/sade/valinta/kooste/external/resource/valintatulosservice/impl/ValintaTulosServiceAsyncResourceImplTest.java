@@ -12,7 +12,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ValintaTulosServiceAsyncResourceImplTest {
 
-    private final HttpResource vtsHttpResource = new ValintaTulosServiceAsyncResourceImpl();
+    private final HttpResource vtsHttpResource = new ValintaTulosServiceAsyncResourceImpl(null);
 
     @Test
     public void vastaanottoAikarajaMennytDTOsCanBeParsed() {

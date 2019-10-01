@@ -4,6 +4,7 @@ import fi.vm.sade.javautils.cas.ApplicationSession;
 import fi.vm.sade.javautils.cas.CasSession;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -122,6 +123,16 @@ public class HttpClients {
                 defaultHttpClientBuilder(cookieManager).build(),
                 null,
                 TarjontaAsyncResourceImpl.getGson()
+        );
+    }
+
+    @Bean(name = "ValintaTulosServiceHttpClient")
+    @Autowired
+    public HttpClient getValintaTulosServiceHttpClient(CookieManager cookieManager) {
+        return new HttpClient(
+                defaultHttpClientBuilder(cookieManager).build(),
+                null,
+                ValintaTulosServiceAsyncResourceImpl.getGson()
         );
     }
 

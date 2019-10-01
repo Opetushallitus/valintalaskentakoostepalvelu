@@ -81,7 +81,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         final boolean onlyOne = hakemusOids.size() == 1;
         Observable<List<HakijaDTO>> hakijatObs;
         if(onlyOne) {
-            hakijatObs = valintaTulosServiceAsyncResource.getHakijaByHakemus(jalkiohjauskirjeDTO.getHakuOid(), hakemusOids.iterator().next()).map(Collections::singletonList);
+            hakijatObs = Observable.fromFuture(valintaTulosServiceAsyncResource.getHakijaByHakemus(jalkiohjauskirjeDTO.getHakuOid(), hakemusOids.iterator().next()).thenApply(Collections::singletonList));
         } else {
             hakijatObs = valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid()).map(h -> h.getResults());
         }

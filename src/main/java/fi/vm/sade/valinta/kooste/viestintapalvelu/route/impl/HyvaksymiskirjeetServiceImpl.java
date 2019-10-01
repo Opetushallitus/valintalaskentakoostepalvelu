@@ -374,23 +374,20 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     private Observable<List<HakijaDTO>> hyvaksytytByHaku(String hakuOid) {
-        return valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid)
-                .map(HakijaPaginationObject::getResults);
+        return Observable.fromFuture(valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid));
     }
 
     private Observable<List<HakijaDTO>> hyvaksytytByHakukohde(String hakuOid, String hakukohdeOid) {
-        return valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid, hakukohdeOid)
-                .map(HakijaPaginationObject::getResults);
+        return Observable.fromFuture(valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid, hakukohdeOid));
     }
 
     private Observable<List<HakijaDTO>> hakijatByHakukohde(String hakuOid, String hakukohdeOid) {
-        return valintaTulosServiceAsyncResource.getKaikkiHakijat(hakuOid, hakukohdeOid)
-                .map(HakijaPaginationObject::getResults);
+        return Observable.fromFuture(valintaTulosServiceAsyncResource.getKaikkiHakijat(hakuOid, hakukohdeOid));
     }
 
     private Observable<List<HakijaDTO>> hakijatByHakemusOids(String hakuOid, List<String> hakemusOids) {
         return Observable.fromIterable(hakemusOids)
-                .flatMap(hakemusOid -> valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemusOid))
+                .flatMap(hakemusOid -> Observable.fromFuture(valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemusOid)))
                 .toList()
                 .toObservable();
     }

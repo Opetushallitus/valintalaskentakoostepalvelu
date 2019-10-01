@@ -19,6 +19,7 @@ import io.reactivex.Observable;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public interface ValintaTulosServiceAsyncResource {
     DateTimeFormatter valintaTulosServiceCompatibleFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZoneUTC();
@@ -49,13 +50,13 @@ public interface ValintaTulosServiceAsyncResource {
 
     Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);
 
-    Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid);
+    CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid);
 
-    Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid);
+    CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid);
 
-    Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid);
+    CompletableFuture<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid);
 
-    Observable<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid);
+    CompletableFuture<List<HakijaDTO>> getKaikkiHakijat(String hakuOid, String hakukohdeOid);
 
     Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 }
