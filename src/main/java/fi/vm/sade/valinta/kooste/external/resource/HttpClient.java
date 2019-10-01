@@ -29,6 +29,17 @@ public class HttpClient {
         this.gson = gson;
     }
 
+    public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+                .header("Caller-Id", CALLER_ID)
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json")
+                .GET()
+                .timeout(timeout)
+                .build();
+        return this.makeRequest(request).thenCompose(response -> this.parseJson(response, outputType));
+    }
+
     public <I, O> CompletableFuture<O> postJson(String url, Duration timeout, I body, Type inputType, Type outputType) {
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .header("Caller-Id", CALLER_ID)
@@ -37,27 +48,13 @@ public class HttpClient {
                 .POST(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), Charset.forName("UTF-8")))
                 .timeout(timeout)
                 .build();
-        return (this.session == null
-                ? this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
-                : this.authenticatedRequest(request))
-                .thenCompose(response -> {
-                    if (299 < response.statusCode()) {
-                        try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.body(), Charset.forName("UTF-8")))) {
-                            String errorBody = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-                            return CompletableFuture.failedFuture(new IllegalStateException(String.format("URL %s responded %d %s", url, response.statusCode(), errorBody)));
-                        } catch (IOException e) {
-                            return CompletableFuture.failedFuture(new RuntimeException("Failed to read response body", e));
-                        }
-                    }
-                    if (response.headers().allValues("Content-Type").stream().noneMatch(contentType -> contentType.contains("application/json"))) {
-                        String contentType = String.join(", ", response.headers().allValues("Content-Type"));
-                        return CompletableFuture.failedFuture(new IllegalStateException(String.format("Unexpected Content-Type %s", contentType)));
-                    }
-                    return CompletableFuture.completedFuture(this.gson.fromJson(new InputStreamReader(response.body()), outputType));
-                });
+        return this.makeRequest(request).thenCompose(response -> this.parseJson(response, outputType));
     }
 
-    private CompletableFuture<HttpResponse<InputStream>> authenticatedRequest(HttpRequest request) {
+    private CompletableFuture<HttpResponse<InputStream>> makeRequest(HttpRequest request) {
+        if (this.session == null) {
+            return this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+        }
         return this.session.getSessionToken()
                 .thenCompose(sessionToken -> this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
                         .thenCompose(response -> {
@@ -68,6 +65,22 @@ public class HttpClient {
                             }
                             return CompletableFuture.completedFuture(response);
                         }));
+    }
+
+    private <O> CompletableFuture<O> parseJson(HttpResponse<InputStream> response, Type outputType) {
+        if (299 < response.statusCode()) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.body(), Charset.forName("UTF-8")))) {
+                String errorBody = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+                return CompletableFuture.failedFuture(new IllegalStateException(String.format("URL %s responded %d %s", response.uri(), response.statusCode(), errorBody)));
+            } catch (IOException e) {
+                return CompletableFuture.failedFuture(new RuntimeException("Failed to read response body", e));
+            }
+        }
+        if (response.headers().allValues("Content-Type").stream().noneMatch(contentType -> contentType.contains("application/json"))) {
+            String contentType = String.join(", ", response.headers().allValues("Content-Type"));
+            return CompletableFuture.failedFuture(new IllegalStateException(String.format("Unexpected Content-Type %s", contentType)));
+        }
+        return CompletableFuture.completedFuture(this.gson.fromJson(new InputStreamReader(response.body()), outputType));
     }
 
     private static boolean isRedirectToCas(HttpResponse<?> response) {
