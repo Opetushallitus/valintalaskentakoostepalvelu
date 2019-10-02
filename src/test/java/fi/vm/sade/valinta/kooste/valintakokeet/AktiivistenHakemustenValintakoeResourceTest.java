@@ -84,7 +84,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         when(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids))
             .thenReturn(Observable.just(Arrays.asList(hakemus1, hakemus3)));
         when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
-            .thenReturn(Observable.just(hakukohdeDTO));
+            .thenReturn(CompletableFuture.completedFuture(hakukohdeDTO));
         when(tarjontaAsyncResource.haeHaku(hakuOid))
             .thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
 
@@ -120,7 +120,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         when(ataruAsyncResource.getApplicationsByOids(ataruHakemusOids))
                 .thenReturn(CompletableFuture.completedFuture(Arrays.asList(ataruHakemus1, ataruHakemus3)));
         when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
-                .thenReturn(Observable.just(hakukohdeDTO));
+                .thenReturn(CompletableFuture.completedFuture(hakukohdeDTO));
         when(tarjontaAsyncResource.haeHaku(hakuOid))
                 .thenReturn(CompletableFuture.completedFuture(hakuDTOEditori));
 
@@ -152,7 +152,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     public void kutsuttavanPalvelunVirhePalautetaanVastaukseen() {
         AsyncResponse asyncResponse = mock(AsyncResponse.class);
         when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
-                .thenReturn(Observable.just(hakukohdeDTO));
+                .thenReturn(CompletableFuture.completedFuture(hakukohdeDTO));
         when(tarjontaAsyncResource.haeHaku(hakuOid))
                 .thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
         when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))

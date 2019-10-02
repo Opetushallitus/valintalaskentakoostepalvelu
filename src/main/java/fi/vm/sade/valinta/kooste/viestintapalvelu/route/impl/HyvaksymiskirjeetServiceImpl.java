@@ -431,7 +431,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .collect(Collectors.toList());
         Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kasiteltavatHakijat);
         return Observable.zip(
-                vakiosisalto == null ? tarjontaAsyncResource.haeHakukohde(hakukohdeJossaHyvaksytty).flatMap(this::haeHakukohteenVakiosisalto) : Observable.just(vakiosisalto),
+                vakiosisalto == null ? Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeJossaHyvaksytty)).flatMap(this::haeHakukohteenVakiosisalto) : Observable.just(vakiosisalto),
                 hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, asiointikieli),
                 (sisalto, osoitteet) -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                         koodistoCachedAsyncResource::haeKoodisto,

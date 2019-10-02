@@ -78,7 +78,7 @@ public class ErillishaunVientiService {
                 return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(erillishaku.getHakukohdeOid()));
             }
         });
-        Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());
+        Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = Observable.fromFuture(hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid()));
         Observable<List<Lukuvuosimaksu>> lukuvuosimaksutObs = tilaAsyncResource.fetchLukuvuosimaksut(erillishaku.getHakukohdeOid(), auditSession);
 
         Observable<ErillishakuExcel> erillishakuExcel =

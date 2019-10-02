@@ -126,7 +126,7 @@ public class ValintalaskentaExcelResource {
                                         ? applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid)
                                         : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)));
                         return Observable.zip(
-                                        tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
+                                        Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)),
                                         valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
                                         valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession),
                                         hakemuksetO,
@@ -178,7 +178,7 @@ public class ValintalaskentaExcelResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
     public void haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
-        Observable<HakukohdeV1RDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
+        Observable<HakukohdeV1RDTO> hakukohdeObservable = Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
         final Observable<HakuV1RDTO> hakuObservable = hakukohdeObservable.flatMap(hakukohde -> Observable.fromFuture(tarjontaResource.haeHaku(hakukohde.getHakuOid())));
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
         final Observable<List<HakemusWrapper>> hakemuksetObservable = hakuObservable.flatMap(haku -> {

@@ -82,11 +82,12 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
     }
 
     @Override
-    public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
-        return this.<ResultV1RDTO<HakukohdeV1RDTO>>getAsObservableLazily(
+    public CompletableFuture<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
+        return this.client.<ResultV1RDTO<HakukohdeV1RDTO>>getJson(
                 getUrl("tarjonta-service.hakukohde.hakukohdeoid", hakukohdeOid),
-                new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {
-        }.getType()).map(result -> result.getResult());
+                Duration.ofMinutes(5),
+                new com.google.gson.reflect.TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {}.getType()
+        ).thenApply(ResultV1RDTO::getResult);
     }
 
     @Override

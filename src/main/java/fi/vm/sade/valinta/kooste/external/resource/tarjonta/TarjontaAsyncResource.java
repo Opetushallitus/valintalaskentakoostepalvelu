@@ -17,7 +17,7 @@ public interface TarjontaAsyncResource {
     Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(Collection<String> organizationGroupOids);
     Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(Collection<String> organizationOids);
 
-    Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid);
+    CompletableFuture<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid);
 
     /**
      * Fetch from tarjonta-service the hakuOids that should be synchronized.

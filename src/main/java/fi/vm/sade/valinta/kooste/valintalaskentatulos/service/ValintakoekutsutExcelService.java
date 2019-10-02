@@ -184,7 +184,7 @@ public class ValintakoekutsutExcelService {
                 },
                 poikkeuskasittelija
             );
-            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
+            Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)).subscribe(hakukohde -> {
                 hakukohdeRef.set(hakukohde);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);

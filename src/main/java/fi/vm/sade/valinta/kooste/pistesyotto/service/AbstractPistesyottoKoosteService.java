@@ -247,7 +247,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 hakemuksetO,
                 kokeetO,
                 valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)),
-                tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
+                Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)),
                 hakuO,
                 (osallistumistiedot, lisatiedot, hakemukset, kokeet, valintakoeosallistumiset, hakukohde, haku) -> Triple.of(
                         muodostoPistesyottoExcel(hakuOid, hakukohdeOid, lisatiedot.getKey(), osallistumistiedot, hakemukset, kokeet,
@@ -367,7 +367,7 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     private Observable<String> findSourceOid(String hakukohdeOid) {
-        return tarjontaAsyncResource.haeHakukohde(hakukohdeOid).flatMap(hakukohde -> {
+        return Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)).flatMap(hakukohde -> {
             Optional<String> tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst();
             if (tarjoajaOid.isPresent()) {
                 return organisaatioAsyncResource.haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid.get()).flatMap(hierarkia -> {

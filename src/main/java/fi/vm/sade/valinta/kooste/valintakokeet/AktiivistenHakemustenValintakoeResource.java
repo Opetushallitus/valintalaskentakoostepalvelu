@@ -86,7 +86,7 @@ public class AktiivistenHakemustenValintakoeResource {
         List<String> kaikkiOsallistumistenHakemusOidit = osallistumiset.stream()
                 .map(ValintakoeOsallistuminenDTO::getHakemusOid).distinct().collect(Collectors.toList());
 
-        return tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
+        return Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
                 .flatMap(hakukohde -> Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid())))
                 .flatMap(haku -> {
                     if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {

@@ -44,12 +44,12 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     }
 
     @Override
-    public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
+    public CompletableFuture<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
         HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
         hakukohdeDTO.setHakuOid(hakuOid);
         hakukohdeDTO.setOid(hakukohdeOid);
         hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
-        return Observable.just(hakukohdeDTO);
+        return CompletableFuture.completedFuture(hakukohdeDTO);
     }
 
     @Override
