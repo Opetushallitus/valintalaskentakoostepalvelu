@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * OLETTAA ETTA KAIKILLE VALINTATAPAJONOILLE TEHDAAN HYVAKSYMISKIRJE JOS
@@ -42,7 +40,8 @@ public class HyvaksymiskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
 
     public static LetterBatch teeHyvaksymiskirjeet(
-            Function<String, Map<String, Koodi>> haeKoodisto,
+            Map<String, Koodi> maatjavaltiot1,
+            Map<String, Koodi> postinumerot,
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
@@ -61,8 +60,6 @@ public class HyvaksymiskirjeetKomponentti {
             int kaikkiHyvaksytyt = hakukohteenHakijat.size();
             LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true.", kaikkiHyvaksytyt);
             final List<Letter> kirjeet = new ArrayList<>();
-            Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-            Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);
             LetterBatch viesti = new LetterBatch(kirjeet);
             if(asiointikieli.isPresent()) {
                 viesti.setLanguageCode(asiointikieli.get());
@@ -77,7 +74,7 @@ public class HyvaksymiskirjeetKomponentti {
                 String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
                 final String hakemusOid = hakija.getHakemusOid();
                 final HakemusWrapper hakemus = Objects.requireNonNull(hakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
-                final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maajavaltio, posti, new TuloskirjeNimiPaattelyStrategy());
+                final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maatjavaltiot1, postinumerot, new TuloskirjeNimiPaattelyStrategy());
                 final List<Map<String, Object>> tulosList = new ArrayList<>();
 
                 for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {

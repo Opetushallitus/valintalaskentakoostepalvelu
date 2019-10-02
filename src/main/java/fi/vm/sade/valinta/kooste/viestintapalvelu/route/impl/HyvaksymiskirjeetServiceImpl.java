@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -156,6 +157,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         prosessi.setKokonaistyo(1);
 
+        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable.zip(
                 hakemuksetByHakukohde(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()),
                 hakijatByHakukohde(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()),
@@ -173,7 +176,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     return this.kiinnostavatHakukohteet(hylatyt)
                             .flatMap(hakukohteet -> hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, null)
                                     .map(hakutoimistojenOsoitteet -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                                            koodistoCachedAsyncResource::haeKoodisto,
+                                            maatjavaltiot1,
+                                            postinumerot,
                                             hakutoimistojenOsoitteet,
                                             hakukohteet,
                                             hylatyt,
@@ -431,12 +435,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         .anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
                 .collect(Collectors.toList());
         Observable<Map<String, MetaHakukohde>> hakukohteetO = this.kiinnostavatHakukohteet(kasiteltavatHakijat);
+        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         return Observable.zip(
                 hakukohteetO,
                 vakiosisalto == null ? Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeJossaHyvaksytty)).flatMap(this::haeHakukohteenVakiosisalto) : Observable.just(vakiosisalto),
                 hakukohteetO.flatMap(hakukohteet -> hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, asiointikieli)),
                 (hakukohteet, sisalto, osoitteet) -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                        koodistoCachedAsyncResource::haeKoodisto,
+                        maatjavaltiot1,
+                        postinumerot,
                         osoitteet,
                         hakukohteet,
                         kasiteltavatHakijat,

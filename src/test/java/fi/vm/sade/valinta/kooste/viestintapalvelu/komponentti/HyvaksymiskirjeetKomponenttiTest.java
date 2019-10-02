@@ -254,7 +254,8 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 .createOsoite();
 
         return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                (String x) -> new HashMap<>(),
+                new HashMap<>(),
+                new HashMap<>(),
                 ImmutableMap.of(HAKUKOHDE_OID, ofNullable(osoite)),
                 ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(ORGANIZATION_OID, new Teksti(), new Teksti())),
                 ImmutableList.of(hakija),
