@@ -1,0 +1,46 @@
+{
+  "hakemusOid": "1.2.246.562.11.00000000000000196362",
+  "personOid": "1.2.246.562.24.30338561184",
+  "hakuOid": "1.2.246.562.29.70000333388",
+  "asiointikieli": "fi",
+  "hakutoiveet": [
+    {
+      "processingState": "unprocessed",
+      "eligibilityState": "eligible",
+      "paymentObligation": "unreviewed",
+      "hakukohdeOid": "1.2.246.562.20.755368276710",
+      "languageRequirement": "unfulfilled",
+      "degreeRequirement": "fulfilled"
+    }
+  ],
+  "maksuvelvollisuus": {},
+  "keyValues": {
+    "birth-date": "17.06.1957",
+    "f923ea56-d082-4de6-857d-0159aa2bee3c": "0",
+    "first-name": "Aarne Testi",
+    "pohjakoulutus_yo--yes-year-of-completion": "2013",
+    "c6290d99-fdd6-45ff-88f0-71a0656a17ce": "0",
+    "ssn": "170657-9516",
+    "preferred-name": "Aarne",
+    "home-town": "091",
+    "higher-completed-base-education_pohjakoulutus_yo": "pohjakoulutus_yo",
+    "postal-code": "00100",
+    "nationality_group0": "246",
+    "gender": "1",
+    "email": "hakija-51312595@oph.fi",
+    "pohjakoulutus_yo": "Yes",
+    "sahkoisen-asioinnin-lupa": "Kyllä",
+    "last-name": "Aaltonen-Testi",
+    "address": "Palatkannotko 745",
+    "valintatuloksen-julkaisulupa": "Kyllä",
+    "asiointikieli": "1",
+    "koulutusmarkkinointilupa": "Ei",
+    "0bc965a3-fc4a-4b86-a1cb-25b55b414258": "0",
+    "phone": "050 92066451",
+    "finnish-vocational-before-1995": "1",
+    "postal-office": "Helsinki",
+    "language": "FI",
+    "893ede6f-998e-4e66-9ca5-b10bc602c944": "246",
+    "country-of-residence": "246"
+  }
+}

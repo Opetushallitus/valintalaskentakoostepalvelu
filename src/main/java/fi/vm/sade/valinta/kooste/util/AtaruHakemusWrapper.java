@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.util;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakutoive;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
@@ -12,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -195,7 +197,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public Collection<String> getHakutoiveOids() {
-        return new HashSet<>(hakemus.getHakutoiveet());
+        return hakemus.getHakutoiveet().stream().map(AtaruHakutoive::getHakukohdeOid).collect(Collectors.toSet());
     }
 
     @Override
@@ -240,14 +242,6 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
         }
     }
 
-    private static void setPreferenceValue(String value, AvainArvoDTO aa) {
-        if (ELIGIBILITIES.containsKey(value)) {
-            aa.setArvo(ELIGIBILITIES.get(value));
-        } else {
-            throw new IllegalArgumentException(String.format("Could not parse hakemus preference value: %s", value));
-        }
-    }
-
     @Override
     public HakemusDTO toHakemusDto(Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         HakemusDTO hakemusDto = new HakemusDTO();
@@ -260,11 +254,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
                 if (!"language".equals(key)) { // FIXME Hakemuspalvelun ei tulisi palauttaa ONR dataa
                     AvainArvoDTO aa = new AvainArvoDTO();
                     aa.setAvain(key);
-                    if (key.matches(PREFERENCE_REGEX)) {
-                        setPreferenceValue(value, aa);
-                    } else {
-                        aa.setArvo(value);
-                    }
+                    aa.setArvo(value);
                     hakemusDto.getAvaimet().add(aa);
                 }
             });
@@ -275,17 +265,41 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
         IntStream.range(0, hakemus.getHakutoiveet().size())
                 .forEach(i -> {
                     HakukohdeDTO hk = new HakukohdeDTO();
-                    String oid = hakemus.getHakutoiveet().get(i);
+                    final AtaruHakutoive ataruHakutoive = hakemus.getHakutoiveet().get(i);
+                    String oid = ataruHakutoive.getHakukohdeOid();
                     hk.setOid(oid);
+                    hk.setHakuoid(hakemus.getHakuOid());
                     hk.setPrioriteetti(i + 1);
                     hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(oid));
                     hk.setHarkinnanvaraisuus(false);
                     hakemusDto.getHakukohteet().add(hk);
+
+                    final String eligibilityState = ataruHakutoive.getEligibilityState();
+                    if (!ELIGIBILITIES.containsKey(eligibilityState)) {
+                        throw new IllegalArgumentException(String.format("Could not parse hakemus preference value: %s", eligibilityState));
+                    }
+
+                    addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id", oid);
+                    addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-eligibility", ELIGIBILITIES.get(eligibilityState));
+                    addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-processingState", upperCase(ataruHakutoive.getProcessingState()));
+                    addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-paymentObligation", upperCase(ataruHakutoive.getPaymentObligation()));
+                    addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-languageRequirement", upperCase(ataruHakutoive.getLanguageRequirement()));
+                    addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-degreeRequirement", upperCase(ataruHakutoive.getDegreeRequirement()));
                 });
 
         setHakemusDTOvalintapisteet(valintapisteet, hakemusDto);
 
         return hakemusDto;
+    }
+
+    private static String upperCase(String str) {
+        return str != null
+                ? str.toUpperCase()
+                : null;
+    }
+
+    private static void addAvainArvo(HakemusDTO hakemusDto, String avain, String arvo) {
+        hakemusDto.getAvaimet().add(new AvainArvoDTO(avain, arvo));
     }
 
     private String getIfSuomalainenOsoiteOrEmpty(String key) {
