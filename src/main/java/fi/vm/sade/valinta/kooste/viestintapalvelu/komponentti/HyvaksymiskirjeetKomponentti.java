@@ -16,17 +16,20 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * OLETTAA ETTA KAIKILLE VALINTATAPAJONOILLE TEHDAAN HYVAKSYMISKIRJE JOS
@@ -37,15 +40,6 @@ import java.util.stream.Collectors;
 @Component
 public class HyvaksymiskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
-
-    private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
-
-    private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
-
-    @Autowired
-    public HyvaksymiskirjeetKomponentti(KirjeetHakukohdeCache kirjeetHakukohdeCache) {
-        this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
-    }
 
     public static LetterBatch teeHyvaksymiskirjeet(
             Function<String, Map<String, Koodi>> haeKoodisto,
@@ -182,31 +176,5 @@ public class HyvaksymiskirjeetKomponentti {
                         .filter(j -> j.getTila().isHyvaksytty())
                         .findAny().isPresent())
                 .findAny().get().getHakukohdeOid();
-    }
-
-    //
-    // Hakee kaikki hyvaksymiskirjeen kohteena olevan hakukohteen hakijat ja
-    // niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
-    // Metahakukohteille haetaan muun muassa tarjoajanimi!
-    //
-    public Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(Collection<HakijaDTO> hakukohteenHakijat) {
-        Map<String, MetaHakukohde> metaKohteet = new HashMap<>();
-        for (HakijaDTO hakija : hakukohteenHakijat) {
-            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                String hakukohdeOid = hakutoive.getHakukohdeOid();
-                if (!metaKohteet.containsKey(hakukohdeOid)) {
-                    try {
-                        metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
-                    } catch (Exception e) {
-                        LOG.error("Tarjonnasta ei saatu hakukohdetta " + hakukohdeOid, e);
-                        metaKohteet.put(hakukohdeOid, new MetaHakukohde(
-                                "",
-                                new Teksti("Hakukohde " + hakukohdeOid + " ei löydy tarjonnasta!"),
-                                new Teksti(TYHJA_TARJOAJANIMI)));
-                    }
-                }
-            }
-        }
-        return metaKohteet;
     }
 }
