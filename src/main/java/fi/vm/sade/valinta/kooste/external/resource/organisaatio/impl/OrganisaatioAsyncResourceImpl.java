@@ -3,19 +3,25 @@ package fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import io.reactivex.Observable;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -26,11 +32,14 @@ import java.util.function.Function;
  */
 @Service
 public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource implements OrganisaatioAsyncResource {
-    private static final HakutoimistoDTO HAKUTOIMISTO_NULL = new HakutoimistoDTO(Collections.emptyMap(), Collections.emptyMap());
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final HttpClient client;
 
-    public OrganisaatioAsyncResourceImpl() {
+    @Autowired
+    public OrganisaatioAsyncResourceImpl(
+            @Qualifier("OrganisaatioHttpClient") HttpClient client
+    ) {
         super(TimeUnit.MINUTES.toMillis(1));
+        this.client = client;
     }
 
     @Override
@@ -58,20 +67,15 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
-        return this.<HakutoimistoDTO>getAsObservableLazily(
+    public CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
+        return this.client.getResponse(
                 getUrl("organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
-                HakutoimistoDTO.class)
-                .onErrorReturn(
-                        exception -> {
-                            LOG.error("Unable to fetch hakutoimisto for organisaatioId={}",organisaatioId);
-                            return HAKUTOIMISTO_NULL;
-                        })
-                .map(m -> {
-                    if (m == null || m == HAKUTOIMISTO_NULL) {
-                        return Optional.empty();
-                    }
-                    return Optional.of(m);
-                });
+                Duration.ofMinutes(1)
+        ).thenApply(response -> {
+            if (response.statusCode() == 404) {
+                return Optional.empty();
+            }
+            return Optional.of(this.client.parseJson(response, new com.google.gson.reflect.TypeToken<HakutoimistoDTO>() {}.getType()));
+        });
     }
 }

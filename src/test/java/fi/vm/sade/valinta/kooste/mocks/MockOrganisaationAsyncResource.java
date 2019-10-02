@@ -8,6 +8,7 @@ import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -34,7 +35,7 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
     }
 
     @Override
-    public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
-        throw new UnsupportedOperationException();
+    public CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
+        return CompletableFuture.failedFuture(new UnsupportedOperationException());
     }
 }

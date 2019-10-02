@@ -6,6 +6,7 @@ import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface OrganisaatioAsyncResource {
     /**
@@ -15,6 +16,6 @@ public interface OrganisaatioAsyncResource {
 
     Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid);
 
-    Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId);
+    CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId);
 
 }

@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
@@ -45,10 +44,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
@@ -471,19 +470,28 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         if (prosessi.isKeskeytetty()) {
             return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
         }
-        return Observable.fromIterable(hakukohteet.values().stream().map(MetaHakukohde::getTarjoajaOid).distinct()::iterator)
-                .flatMap(tarjoajaOid -> organisaatioAsyncResource.haeHakutoimisto(tarjoajaOid).map(t -> Pair.of(tarjoajaOid, t)))
-                .collectInto(new HashMap<String, Optional<HakutoimistoDTO>>(), (m, p) -> m.put(p.getLeft(), p.getRight()))
-                .map(hakutoimistot -> hakukohteet.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                e -> {
-                                    MetaHakukohde hakukohde = e.getValue();
-                                    return hakutoimistot.getOrDefault(hakukohde.getTarjoajaOid(), Optional.empty())
-                                            .flatMap(t -> Hakijapalvelu.osoite(t, asiointikieli == null ? hakukohde.getHakukohteenKieli() : asiointikieli));
-                                }
-                        )))
-                .toObservable();
+        List<CompletableFuture<Pair<String, Optional<HakutoimistoDTO>>>> hakutoimistoFs = hakukohteet.values().stream().map(MetaHakukohde::getTarjoajaOid).distinct()
+                .map(tarjoajaOid -> organisaatioAsyncResource.haeHakutoimisto(tarjoajaOid).thenApply(t -> Pair.of(tarjoajaOid, t)))
+                .collect(Collectors.toList());
+        return Observable.fromFuture(
+                CompletableFuture.allOf(hakutoimistoFs.toArray(new CompletableFuture[] {}))
+                        .thenApply(v -> {
+                            Map<String, Optional<HakutoimistoDTO>> hakutoimistot = hakutoimistoFs.stream()
+                                    .map(CompletableFuture::join)
+                                    .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+                            return hakukohteet.entrySet().stream()
+                                    .map(e -> {
+                                        MetaHakukohde hakukohde = e.getValue();
+                                        String kieli = asiointikieli == null ? hakukohde.getHakukohteenKieli() : asiointikieli;
+                                        return Pair.of(
+                                                e.getKey(),
+                                                hakutoimistot.getOrDefault(hakukohde.getTarjoajaOid(), Optional.empty())
+                                                        .flatMap(t -> Hakijapalvelu.osoite(t, kieli))
+                                        );
+                                    })
+                                    .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+                        })
+        );
     }
 
     private Observable<String> letterBatchToViestintapalvelu(DokumenttiProsessi prosessi, LetterBatch letterBatch) {
