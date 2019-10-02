@@ -28,12 +28,9 @@ public class CasInterceptors {
     @Bean(name = "viestintapalveluClientCasInterceptor")
     @Autowired
     public AbstractPhaseInterceptor<Message> getViestintapalveluClientCasInterceptor(
-            @Qualifier("CasHttpClient") HttpClient casHttpClient,
-            CookieManager cookieManager,
-            @Value("${cas.service.viestintapalvelu}") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
-        return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+            @Qualifier("ViestintapalveluApplicationSession") ApplicationSession applicationSession
+    ) {
+        return new CasKoosteInterceptor(applicationSession, true);
     }
 
     @Bean(name = "ryhmasahkopostiClientCasInterceptor")

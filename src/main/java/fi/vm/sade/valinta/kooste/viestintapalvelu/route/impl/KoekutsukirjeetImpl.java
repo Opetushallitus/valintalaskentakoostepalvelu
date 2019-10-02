@@ -31,7 +31,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -215,11 +214,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                         koekutsu.getHakukohdeOid(), hakemusOidJaHakijanMuutHakutoiveOids, koekutsu.getLetterBodyText(),
                         koekutsu.getTarjoajaOid(), koekutsu.getTag(), koekutsu.getTemplateName());
                 LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
-                LetterResponse batchId = viestintapalveluAsyncResource
-                    .viePdfJaOdotaReferenssiObservable(letterBatch)
-                    .timeout(1, MINUTES)
-                    .toFuture()
-                    .get(35L, SECONDS);
+                LetterResponse batchId = viestintapalveluAsyncResource.vieLetterBatch(letterBatch).get(35, SECONDS);
                 LOG.info("### BATCHID: {} {} {} ###", batchId.getBatchId(), batchId.getStatus(), batchId.getErrors());
                 LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
                 prosessi.vaiheValmistui();
@@ -233,9 +228,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                     pulse -> {
                                         try {
                                             LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
-                                            LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId())
-                                                .timeout(899, MILLISECONDS)
-                                                .toFuture().get(900L, TimeUnit.MILLISECONDS);
+                                            LetterBatchStatusDto status = viestintapalveluAsyncResource.haeLetterBatchStatus(batchId.getBatchId()).get(900, MILLISECONDS);
                                             if ("error".equals(status.getStatus())) {
                                                 String msg = "Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!";
                                                 LOG.error(msg);

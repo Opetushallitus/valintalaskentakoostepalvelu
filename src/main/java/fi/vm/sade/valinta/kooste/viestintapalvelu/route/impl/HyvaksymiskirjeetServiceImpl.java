@@ -451,19 +451,21 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     private Observable<String> haeHakukohteenVakiosisalto(HakukohdeV1RDTO hakukohde) {
-        return viestintapalveluAsyncResource.haeKirjepohja(
-                hakukohde.getHakuOid(),
-                hakukohde.getTarjoajaOids().iterator().next(),
-                "hyvaksymiskirje",
-                KirjeetHakukohdeCache.getOpetuskieli(hakukohde.getOpetusKielet()),
-                hakukohde.getOid()
-        ).flatMap(kirjepohjat -> kirjepohjat.stream()
-                .filter(kirjepohja -> VAKIOTEMPLATE.equals(kirjepohja.getName()))
-                .flatMap(kirjepohja -> kirjepohja.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
-                .map(TemplateDetail::getDefaultValue)
-                .map(Observable::just)
-                .findAny()
-                .orElse(Observable.error(new RuntimeException(String.format("Ei %s tai %s templateDetailia hakukohteelle %s", VAKIOTEMPLATE, VAKIODETAIL, hakukohde.getOid())))));
+        return Observable.fromFuture(
+                viestintapalveluAsyncResource.haeKirjepohja(
+                        hakukohde.getHakuOid(),
+                        hakukohde.getTarjoajaOids().iterator().next(),
+                        "hyvaksymiskirje",
+                        KirjeetHakukohdeCache.getOpetuskieli(hakukohde.getOpetusKielet()),
+                        hakukohde.getOid()
+                ).thenCompose(kirjepohjat -> kirjepohjat.stream()
+                        .filter(kirjepohja -> VAKIOTEMPLATE.equals(kirjepohja.getName()))
+                        .flatMap(kirjepohja -> kirjepohja.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
+                        .map(TemplateDetail::getDefaultValue)
+                        .map(CompletableFuture::completedFuture)
+                        .findAny()
+                        .orElse(CompletableFuture.failedFuture(new RuntimeException(String.format("Ei %s tai %s templateDetailia hakukohteelle %s", VAKIOTEMPLATE, VAKIODETAIL, hakukohde.getOid())))))
+        );
     }
 
     private Observable<Map<String, Optional<Osoite>>> hakukohteidenHakutoimistojenOsoitteet(DokumenttiProsessi prosessi, Map<String, MetaHakukohde> hakukohteet, String asiointikieli) {
@@ -508,7 +510,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         if (prosessi.isKeskeytetty()) {
             return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
         }
-        return viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch)
+        return Observable.fromFuture(viestintapalveluAsyncResource.vieLetterBatch(letterBatch))
                 .flatMap(response -> {
                     if (response.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                         return Observable.just(response.getBatchId());
@@ -527,7 +529,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         if (prosessi.isKeskeytetty()) {
             return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
         }
-        return viestintapalveluAsyncResource.haeStatusObservable(batchId)
+        return Observable.fromFuture(viestintapalveluAsyncResource.haeLetterBatchStatus(batchId))
                 .flatMap(response -> {
                     if ("ready".equals(response.getStatus())) {
                         return Observable.just(batchId);

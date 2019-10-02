@@ -120,6 +120,9 @@ public class Integraatiopalvelimet {
                 .respond(
                         response()
                                 .withStatusCode(200)
+                                .withHeaders(
+                                        new org.mockserver.model.Header("Content-Type", "application/json; charset=utf-8")
+                                )
                                 .withBody(r)
 
                 );

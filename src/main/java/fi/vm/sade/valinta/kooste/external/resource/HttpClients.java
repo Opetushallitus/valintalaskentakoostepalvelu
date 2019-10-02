@@ -166,6 +166,48 @@ public class HttpClients {
         );
     }
 
+    @Bean(name = "ViestintapalveluInternalHttpClient")
+    @Autowired
+    public java.net.http.HttpClient getViestintapalveluInternalHttpClient(CookieManager cookieManager) {
+        return defaultHttpClientBuilder(cookieManager).build();
+    }
+
+    @Profile("default")
+    @Bean(name = "ViestintapalveluApplicationSession")
+    @Autowired
+    public ApplicationSession getViestintapalveluApplicationSession(
+            @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+            @Qualifier("ViestintapalveluInternalHttpClient") java.net.http.HttpClient applicationHttpClient,
+            CookieManager cookieManager,
+            @Value("${cas.service.viestintapalvelu}") String service,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password
+    ) {
+        String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+        return new ApplicationSession(
+                applicationHttpClient,
+                cookieManager,
+                CALLER_ID,
+                Duration.ofSeconds(10),
+                new CasSession(casHttpClient, Duration.ofSeconds(10), CALLER_ID, URI.create(ticketsUrl), username, password),
+                service,
+                "JSESSIONID"
+        );
+    }
+
+    @Bean(name = "ViestintapalveluHttpClient")
+    @Autowired
+    public HttpClient getViestintapalveluHttpClient(
+            @Qualifier("ViestintapalveluInternalHttpClient") java.net.http.HttpClient client,
+            @Qualifier("ViestintapalveluApplicationSession") ApplicationSession applicationSession
+    ) {
+        return new HttpClient(
+                client,
+                applicationSession,
+                DateDeserializer.gsonBuilder().create()
+        );
+    }
+
     public static java.net.http.HttpClient.Builder defaultHttpClientBuilder(CookieManager cookieManager) {
         return java.net.http.HttpClient.newBuilder()
                 .version(java.net.http.HttpClient.Version.HTTP_1_1)

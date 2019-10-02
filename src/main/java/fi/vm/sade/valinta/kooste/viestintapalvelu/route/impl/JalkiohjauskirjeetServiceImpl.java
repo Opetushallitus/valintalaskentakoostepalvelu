@@ -172,7 +172,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 }
                 LOG.info("Aloitetaan jalkiohjauskirjeiden vienti viestintäpalveluun! Kirjeita {} kpl", letterBatch.getLetters().size());
                 //TODO: Muuta aidosti asynkroniseksi
-                LetterResponse batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(letterBatch).timeout(viePdfTimeoutMinutes, MINUTES).blockingFirst();
+                LetterResponse batchId = viestintapalveluAsyncResource.vieLetterBatch(letterBatch).get(viePdfTimeoutMinutes, MINUTES);
 
                 int timesToPoll = (int) (VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis() / pollingIntervalMillis);
                 LOG.info(String.format("Saatiin jalkiohjauskirjeen seurantaId %s ja aloitetaan valmistumisen pollaus! " +
@@ -190,7 +190,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                     pulse -> {
                                         try {
                                             LOG.info("Tehdaan status kutsu seurantaId:lle {}", batchId);
-                                            viestintapalveluAsyncResource.haeStatusObservable(batchId.getBatchId()).subscribe(status -> {
+                                            Observable.fromFuture(viestintapalveluAsyncResource.haeLetterBatchStatus(batchId.getBatchId())).subscribe(status -> {
                                                 if (prosessi.isKeskeytetty()) {
                                                     String message = "Jalkiohjauskirjeiden muodstuksen seuranta on keskeytetty kayttajantoimesta";
                                                     LOG.warn(message);
