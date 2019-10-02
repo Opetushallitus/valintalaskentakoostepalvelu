@@ -156,6 +156,16 @@ public class HttpClients {
         );
     }
 
+    @Bean(name = "DokumenttiHttpClient")
+    @Autowired
+    public HttpClient getDokumenttiHttpClient(CookieManager cookieManager) {
+        return new HttpClient(
+                defaultHttpClientBuilder(cookieManager).build(),
+                null,
+                DateDeserializer.gsonBuilder().create()
+        );
+    }
+
     public static java.net.http.HttpClient.Builder defaultHttpClientBuilder(CookieManager cookieManager) {
         return java.net.http.HttpClient.newBuilder()
                 .version(java.net.http.HttpClient.Version.HTTP_1_1)

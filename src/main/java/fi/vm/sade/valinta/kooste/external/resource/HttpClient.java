@@ -60,6 +60,17 @@ public class HttpClient {
         return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
     }
 
+    public CompletableFuture<HttpResponse<InputStream>> putResponse(String url, Duration timeout, byte[] body, String contentType) {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+                .header("Caller-Id", CALLER_ID)
+                .header("Accept", "*/*")
+                .header("Content-Type", contentType)
+                .PUT(HttpRequest.BodyPublishers.ofByteArray(body))
+                .timeout(timeout)
+                .build();
+        return this.makeRequest(request);
+    }
+
     private CompletableFuture<HttpResponse<InputStream>> makeRequest(HttpRequest request) {
         if (this.session == null) {
             return this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());

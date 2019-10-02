@@ -543,8 +543,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         if (prosessi.isKeskeytetty()) {
             return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
         }
-        return dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
-                .map(response -> batchId);
+        return Observable.fromFuture(
+                dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                        .thenApply(response -> batchId)
+        );
     }
 
     public String parsePalautusPvm(String specifiedPvm, ParametritParser haunParametrit) {
