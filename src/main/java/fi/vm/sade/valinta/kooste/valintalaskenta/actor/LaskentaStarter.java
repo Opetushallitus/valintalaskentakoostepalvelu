@@ -109,7 +109,7 @@ public class LaskentaStarter {
                 (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Tarjontatietojen haku epäonnistui: ", Optional.of(t), laskenta.getUuid())
         );
 
-        ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid).subscribe(
+        Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)).subscribe(
             parametrit -> {
                 parametritRef.set(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
                 counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

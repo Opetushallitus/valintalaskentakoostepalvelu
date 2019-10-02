@@ -366,11 +366,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     private Observable<ParametritParser> haunParametrit(String hakuOid) {
-        try {
-            return Observable.just(hakuParametritService.getParametritForHaku(hakuOid));
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
+        return Observable.fromFuture(hakuParametritService.getParametritForHakuAsync(hakuOid));
     }
 
     private Observable<List<HakijaDTO>> hyvaksytytByHaku(String hakuOid) {

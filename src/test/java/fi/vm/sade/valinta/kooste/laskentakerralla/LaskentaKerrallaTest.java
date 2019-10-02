@@ -133,7 +133,7 @@ public class LaskentaKerrallaTest {
                                 .fromIterable(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)))
                                 ));
 
-        when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any())).thenReturn(Observable.just(LaskentaKerrallaTestData.ohjausparametrit()));
+        when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any())).thenReturn(CompletableFuture.completedFuture(LaskentaKerrallaTestData.ohjausparametrit()));
 
         when(Mocks.applicationAsyncResource.getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID)))
                 .thenAnswer(

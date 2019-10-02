@@ -214,7 +214,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 kokeetO,
                 osallistumistiedotO,
                 kokeetO.flatMap(haeKielikoetulokset),
-                ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
+                Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)),
                 (lisatiedot, kokeet, osallistumistiedot, kielikoetulokset, ohjausparametrit) -> {
                     Map<String, ValintakoeOsallistuminenDTO> osallistumistiedotByHakemusOid = osallistumistiedot.stream()
                             .collect(Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, o -> o));
