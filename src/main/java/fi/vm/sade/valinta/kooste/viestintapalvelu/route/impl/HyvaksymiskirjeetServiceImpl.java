@@ -43,7 +43,6 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +60,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private static final String VAKIODETAIL = "sisalto";
 
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
-    private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final AtaruAsyncResource ataruAsyncResource;
@@ -80,7 +78,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     @Autowired
     public HyvaksymiskirjeetServiceImpl(
             ViestintapalveluAsyncResource viestintapalveluAsyncResource,
-            HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             AtaruAsyncResource ataruAsyncResource,
@@ -93,7 +90,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             KirjeetHakukohdeCache kirjeetHakukohdeCache,
             @Value("${valintalaskentakoostepalvelu.hyvaksymiskirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
-        this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.ataruAsyncResource = ataruAsyncResource;
@@ -116,6 +112,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         prosessi.setKokonaistyo(1);
 
+        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable.zip(
                 haunParametrit(hakuOid),
                 hakijatByHakemusOids(hakuOid, hakemusOids),
@@ -124,6 +122,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         prosessi,
                         hakijat,
                         hakemukset,
+                        maatjavaltiot1,
+                        postinumerot,
                         hakuOid,
                         hakukohdeOid,
                         null,
@@ -227,6 +227,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         prosessi.setKokonaistyo(1);
 
+        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable.zip(
                 haunParametrit(hakuOid),
                 hyvaksytytByHakukohde(hakuOid, hakukohdeOid),
@@ -235,6 +237,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         prosessi,
                         hakijat,
                         hakemukset,
+                        maatjavaltiot1,
+                        postinumerot,
                         hakuOid,
                         hakukohdeOid,
                         null,
@@ -268,6 +272,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 
         prosessi.setKokonaistyo(1);
+        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable<List<HakijaDTO>> hakijatF = hyvaksytytByHaku(hakuOid);
         Observable.zip(
                 haunParametrit(hakuOid),
@@ -277,6 +283,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         prosessi,
                         hakijat,
                         hakemukset,
+                        maatjavaltiot1,
+                        postinumerot,
                         hakuOid,
                         null,
                         asiointikieli,
@@ -308,6 +316,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         DokumenttiProsessi prosessi = new DokumenttiProsessi("hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", hakuOid, Arrays.asList("hyvaksymiskirjeet", "haulle"));
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 
+        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable<List<HakijaDTO>> hakijatF = hyvaksytytByHaku(hakuOid);
         Observable.zip(
                 haunParametrit(hakuOid),
@@ -326,6 +336,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                     prosessi,
                                     hakijat,
                                     hakemukset,
+                                    maatjavaltiot1,
+                                    postinumerot,
                                     hakuOid,
                                     hakukohdeOid,
                                     null,
@@ -416,6 +428,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private Observable<String> muodostaHyvaksymiskirjeet(DokumenttiProsessi prosessi,
                                                          List<HakijaDTO> hakijat,
                                                          Map<String, HakemusWrapper> hakemukset,
+                                                         Map<String, Koodi> maatjavaltiot1,
+                                                         Map<String, Koodi> postinumerot,
                                                          String hakuOid,
                                                          String hakukohdeJossaHyvaksytty,
                                                          String asiointikieli,
@@ -435,8 +449,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         .anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
                 .collect(Collectors.toList());
         Observable<Map<String, MetaHakukohde>> hakukohteetO = this.kiinnostavatHakukohteet(kasiteltavatHakijat);
-        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         return Observable.zip(
                 hakukohteetO,
                 vakiosisalto == null ? Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeJossaHyvaksytty)).flatMap(this::haeHakukohteenVakiosisalto) : Observable.just(vakiosisalto),
