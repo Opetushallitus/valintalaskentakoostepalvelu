@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -94,7 +95,7 @@ public class ValintalaskentaTulosExcelTest {
         Mocks.reset();
         try {
             List<ValintakoeOsallistuminenDTO> osallistumistiedot = Collections.emptyList();
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(osallistuminenDTOs);
             MockValintaperusteetAsyncResource.setValintakokeetResult(valintakoeDTOs);
             MockApplicationAsyncResource.setResult(hakemusWrappers);
@@ -131,7 +132,7 @@ public class ValintalaskentaTulosExcelTest {
         Mocks.reset();
         try {
             List<ValintakoeOsallistuminenDTO> osallistumistiedot = Collections.emptyList();
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             MockTarjontaAsyncService.setMockHaku(haku);
             MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(
                     Arrays.asList(
@@ -274,7 +275,7 @@ public class ValintalaskentaTulosExcelTest {
                             .build()
                             .build()
                             .build());
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(
                     Arrays.asList(
                             hakemusOsallistuminen()

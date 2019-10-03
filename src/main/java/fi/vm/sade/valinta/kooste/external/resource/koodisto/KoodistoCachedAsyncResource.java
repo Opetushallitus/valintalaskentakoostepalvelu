@@ -1,23 +1,23 @@
 package fi.vm.sade.valinta.kooste.external.resource.koodisto;
 
-import static java.util.concurrent.TimeUnit.MINUTES;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import io.reactivex.Observable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Service
 public class KoodistoCachedAsyncResource {
@@ -28,63 +28,54 @@ public class KoodistoCachedAsyncResource {
     public static final String KUNTA = "kunta";
     public static final String HYVAKSYNNAN_EHDOT = "hyvaksynnanehdot";
 
-    private final Logger LOG = LoggerFactory.getLogger(KoodistoCachedAsyncResource.class);
     private final KoodistoAsyncResource koodistoAsyncResource;
-    private final Cache<String, Map<String, Koodi>> koodistoCache = CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
-    private final Cache<String, Koodi> koodiCache = CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
+    private final Cache<String, CompletableFuture<Map<String, Koodi>>> koodistoCache = CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
+    private final Cache<String, CompletableFuture<Koodi>> koodiCache = CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
 
     @Autowired
     public KoodistoCachedAsyncResource(KoodistoAsyncResource koodistoAsyncResource) {
         this.koodistoAsyncResource = koodistoAsyncResource;
     }
 
-    public Observable<Map<String, Koodi>> haeKoodistoAsync(String koodistoUri) {
+    public CompletableFuture<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri) {
         try {
-            Map<String, Koodi> koodisto = koodistoCache.getIfPresent(koodistoUri);
-            if (koodisto != null) {
-                return Observable.just(koodisto);
-            } else {
-                return koodistoAsyncResource.haeKoodisto(koodistoUri)
-                    .map(this::konversio)
-                    .doOnNext(konvertoituKoodisto -> koodistoCache.put(koodistoUri, konvertoituKoodisto));
+            CompletableFuture<Koodi> f = this.koodiCache.get(koodiUri, () -> this.koodistoAsyncResource.maatjavaltiot2ToMaatjavaltiot1(koodiUri));
+            if (f.isCompletedExceptionally()) {
+                this.koodiCache.invalidate(koodiUri);
+                return this.koodiCache.get(koodiUri, () -> this.koodistoAsyncResource.maatjavaltiot2ToMaatjavaltiot1(koodiUri));
             }
-        } catch (Exception e) {
-            return Observable.error(e);
-        }
-    }
-
-    public Observable<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri) {
-        try {
-            Koodi koodi = koodiCache.getIfPresent(koodiUri);
-            if (koodi != null) {
-                return Observable.just(koodi);
-            } else {
-               return koodistoAsyncResource.maatjavaltiot2ToMaatjavaltiot1(koodiUri)
-               .doOnNext(konvertoituKoodi -> koodiCache.put(koodiUri, konvertoituKoodi));
-            }
-        } catch (Exception e) {
-            return Observable.error(e);
+            return f;
+        } catch (ExecutionException e) {
+            return CompletableFuture.failedFuture(e);
         }
     }
 
     public Map<String, Koodi> haeKoodisto(String koodistoUri) {
-        Map<String, Koodi> koodisto = koodistoCache.getIfPresent(koodistoUri);
-        return koodisto != null ? koodisto : loadKoodistoToCache(koodistoUri);
-    }
-
-    private Map<String, Koodi> loadKoodistoToCache(String koodistoUri) {
         try {
-            return koodistoCache.get(koodistoUri, () -> konversio(koodistoAsyncResource
-                .haeKoodisto(koodistoUri)
-                .timeout(1, MINUTES)
-                .blockingFirst()));
-        } catch (Exception e) {
-            LOG.error("Koodistosta luku epäonnistui:", e);
+            return this.haeKoodistoAsync(koodistoUri).get(1, MINUTES);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Map<String, Koodi> konversio(List<Koodi> koodit) {
+    public CompletableFuture<Map<String, Koodi>> haeKoodistoAsync(String koodistoUri) {
+        try {
+            CompletableFuture<Map<String, Koodi>> f = this.koodistoCache.get(koodistoUri, () -> fetchKoodisto(koodistoUri));
+            if (f.isCompletedExceptionally()) {
+                this.koodistoCache.invalidate(koodistoUri);
+                return this.koodistoCache.get(koodistoUri, () -> fetchKoodisto(koodistoUri));
+            }
+            return f;
+        } catch (ExecutionException e) {
+            return CompletableFuture.failedFuture(e);
+        }
+    }
+
+    private CompletableFuture<Map<String, Koodi>> fetchKoodisto(String koodistoUri) {
+        return this.koodistoAsyncResource.haeKoodisto(koodistoUri).thenApply(KoodistoCachedAsyncResource::konversio);
+    }
+
+    private static Map<String, Koodi> konversio(List<Koodi> koodit) {
         return koodit.stream().collect(
                 Collectors.toMap(Koodi::getKoodiArvo, a -> a, (a, b) -> a.getVersio() > b.getVersio() ? a : b)
         );

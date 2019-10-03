@@ -63,7 +63,7 @@ public class KoekutsukirjeetTest {
             final String HAKEMUS2 = "HAKEMUS2";
             HakukohdeDTO HAKUKOHDEDTO1 = new HakukohdeDTO();
             HAKUKOHDEDTO1.setOpetuskielet(Arrays.asList("FI", "SV"));
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             ViestintapalveluAsyncResource viestintapalveluAsyncResource = Mocks.getViestintapalveluAsyncResource();
             ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);
             Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class))).thenReturn(new CompletableFuture<>());
@@ -156,7 +156,7 @@ public class KoekutsukirjeetTest {
             final String HAKEMUS2 = "HAKEMUS2";
             HakukohdeDTO HAKUKOHDEDTO1 = new HakukohdeDTO();
             HAKUKOHDEDTO1.setOpetuskielet(Arrays.asList("FI", "SV"));
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             ViestintapalveluAsyncResource viestintapalveluAsyncResource =
                     Mocks.getViestintapalveluAsyncResource();
             ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);

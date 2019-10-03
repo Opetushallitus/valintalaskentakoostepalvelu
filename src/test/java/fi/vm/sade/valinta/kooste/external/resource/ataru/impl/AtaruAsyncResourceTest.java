@@ -82,8 +82,8 @@ public class AtaruAsyncResourceTest {
                 eq(new TypeToken<List<AtaruHakemus>>() {}.getType())
         )).thenReturn(CompletableFuture.completedFuture(MockAtaruAsyncResource.getAtaruHakemukset(null)));
 
-        when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_246"))).thenReturn(Observable.just(suomiKoodi));
-        when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_663"))).thenReturn(Observable.just(saintMartinKoodi));
+        when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_246"))).thenReturn(CompletableFuture.completedFuture(suomiKoodi));
+        when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_663"))).thenReturn(CompletableFuture.completedFuture(saintMartinKoodi));
 
         Map<String, HenkiloPerustietoDto> henkiloResponse = new HashMap<>();
         henkiloResponse.put("1.2.246.562.24.86368188549", onrHenkilo);

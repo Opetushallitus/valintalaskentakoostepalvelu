@@ -146,16 +146,9 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
                 .distinct()
                 .reduce(
                         CompletableFuture.completedFuture(new HashMap<>()),
-                        (f, koodiArvo) -> f.thenCompose(acc -> getMaatjavaltiot1(koodiArvo).thenApply(koodi -> { acc.put(koodiArvo, koodi); return acc; })),
+                        (f, koodiArvo) -> f.thenCompose(acc -> koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + koodiArvo).thenApply(koodi -> { acc.put(koodiArvo, koodi); return acc; })),
                         (f, ff) -> f.thenCompose(acc -> ff.thenApply(acc2 -> { acc.putAll(acc2); return acc; }))
                 );
-    }
-
-    private CompletableFuture<Koodi> getMaatjavaltiot1(String maatjavaltiot2) {
-        CompletableFuture<Koodi> f = new CompletableFuture<>();
-        koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + maatjavaltiot2)
-                .subscribe(f::complete, f::completeExceptionally);
-        return f;
     }
 
     @Override

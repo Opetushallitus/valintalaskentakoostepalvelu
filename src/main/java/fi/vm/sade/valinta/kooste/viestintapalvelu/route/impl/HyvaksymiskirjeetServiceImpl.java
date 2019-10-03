@@ -112,13 +112,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         prosessi.setKokonaistyo(1);
 
-        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable.zip(
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
                 haunParametrit(hakuOid),
                 hakijatByHakemusOids(hakuOid, hakemusOids),
                 hakemuksetByOids(hakuOid, hakemusOids),
-                (haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
+                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
                         prosessi,
                         hakijat,
                         hakemukset,
@@ -157,12 +157,12 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         prosessi.setKokonaistyo(1);
 
-        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable.zip(
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
                 hakemuksetByHakukohde(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()),
                 hakijatByHakukohde(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()),
-                (hakemukset, hakijat) -> {
+                (maatjavaltiot1, postinumerot, hakemukset, hakijat) -> {
                     LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.size());
                     List<HakijaDTO> hylatyt = hakijat.stream()
                             .filter(HyvaksymiskirjeetServiceImpl::haussaHylatty)
@@ -227,13 +227,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         prosessi.setKokonaistyo(1);
 
-        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable.zip(
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
                 haunParametrit(hakuOid),
                 hyvaksytytByHakukohde(hakuOid, hakukohdeOid),
                 hakemuksetByHakukohde(hakuOid, hakukohdeOid),
-                (haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
+                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
                         prosessi,
                         hakijat,
                         hakemukset,
@@ -272,14 +272,14 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 
         prosessi.setKokonaistyo(1);
-        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable<List<HakijaDTO>> hakijatF = hyvaksytytByHaku(hakuOid);
         Observable.zip(
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
                 haunParametrit(hakuOid),
                 hakijatF,
                 hakijatF.flatMap(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList()))),
-                (haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
+                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
                         prosessi,
                         hakijat,
                         hakemukset,
@@ -316,14 +316,14 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         DokumenttiProsessi prosessi = new DokumenttiProsessi("hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", hakuOid, Arrays.asList("hyvaksymiskirjeet", "haulle"));
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 
-        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> postinumerot = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Observable<List<HakijaDTO>> hakijatF = hyvaksytytByHaku(hakuOid);
         Observable.zip(
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
                 haunParametrit(hakuOid),
                 hakijatF,
                 hakijatF.flatMap(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList()))),
-                (haunParametrit, hakijat, hakemukset) -> {
+                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> {
                     List<String> hakukohteetJoissaHyvaksyttyja = hakijat.stream()
                             .flatMap(hakija -> hakija.getHakutoiveet().stream())
                             .filter(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))

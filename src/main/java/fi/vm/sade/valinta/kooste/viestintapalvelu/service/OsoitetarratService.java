@@ -279,7 +279,7 @@ public class OsoitetarratService {
     }
 
     private void maatJaValtiot1(final SynkronoituLaskuri laskuri, AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref, Consumer<Throwable> poikkeuskasittelija) {
-        koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1).subscribe(
+        Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)).subscribe(
             maatJaValtiot1 -> {
                 maatJaValtiot1Ref.set(maatJaValtiot1);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
@@ -288,7 +288,7 @@ public class OsoitetarratService {
     }
 
     private void posti(final SynkronoituLaskuri laskuri, AtomicReference<Map<String, Koodi>> postiRef, Consumer<Throwable> poikkeuskasittelija) {
-        koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI).subscribe(
+        Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)).subscribe(
             posti -> {
                 postiRef.set(posti);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

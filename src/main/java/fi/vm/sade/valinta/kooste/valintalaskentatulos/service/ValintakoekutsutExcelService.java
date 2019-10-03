@@ -115,13 +115,13 @@ public class ValintakoekutsutExcelService {
                             poikkeuskasittelija.accept(t);
                         }
                     }).build();
-            koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1).subscribe(
+            Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)).subscribe(
                 maatJaValtiot1 -> {
                     maatJaValtiot1Ref.set(maatJaValtiot1);
                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 },
                 poikkeuskasittelija);
-            koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI).subscribe(
+            Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)).subscribe(
                 posti -> {
                     postiRef.set(posti);
                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
