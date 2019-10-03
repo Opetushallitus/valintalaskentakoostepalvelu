@@ -5,7 +5,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -451,7 +450,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         Observable<Map<String, MetaHakukohde>> hakukohteetO = this.kiinnostavatHakukohteet(kasiteltavatHakijat);
         return Observable.zip(
                 hakukohteetO,
-                vakiosisalto == null ? Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeJossaHyvaksytty)).flatMap(this::haeHakukohteenVakiosisalto) : Observable.just(vakiosisalto),
+                vakiosisalto == null ? Observable.fromFuture(this.haeHakukohteenVakiosisalto(hakukohdeJossaHyvaksytty)) : Observable.just(vakiosisalto),
                 hakukohteetO.flatMap(hakukohteet -> hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, asiointikieli)),
                 (hakukohteet, sisalto, osoitteet) -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                         maatjavaltiot1,
@@ -487,22 +486,28 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         );
     }
 
-    private Observable<String> haeHakukohteenVakiosisalto(HakukohdeV1RDTO hakukohde) {
-        return Observable.fromFuture(
-                viestintapalveluAsyncResource.haeKirjepohja(
+    private CompletableFuture<String> haeHakukohteenVakiosisalto(String hakukohdeOid) {
+        return this.tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
+                .thenComposeAsync(hakukohde -> viestintapalveluAsyncResource.haeKirjepohja(
                         hakukohde.getHakuOid(),
                         hakukohde.getTarjoajaOids().iterator().next(),
                         "hyvaksymiskirje",
                         KirjeetHakukohdeCache.getOpetuskieli(hakukohde.getOpetusKielet()),
                         hakukohde.getOid()
-                ).thenCompose(kirjepohjat -> kirjepohjat.stream()
+                ))
+                .thenComposeAsync(kirjepohjat -> kirjepohjat.stream()
                         .filter(kirjepohja -> VAKIOTEMPLATE.equals(kirjepohja.getName()))
-                        .flatMap(kirjepohja -> kirjepohja.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
+                        .flatMap(kirjepohja -> kirjepohja.getTemplateReplacements().stream())
+                        .filter(tdd -> VAKIODETAIL.equals(tdd.getName()))
                         .map(TemplateDetail::getDefaultValue)
                         .map(CompletableFuture::completedFuture)
                         .findAny()
-                        .orElse(CompletableFuture.failedFuture(new RuntimeException(String.format("Ei %s tai %s templateDetailia hakukohteelle %s", VAKIOTEMPLATE, VAKIODETAIL, hakukohde.getOid())))))
-        );
+                        .orElse(CompletableFuture.failedFuture(new RuntimeException(String.format(
+                                "Ei %s tai %s templateDetailia hakukohteelle %s",
+                                VAKIOTEMPLATE,
+                                VAKIODETAIL,
+                                hakukohdeOid
+                        )))));
     }
 
     private Observable<Map<String, Optional<Osoite>>> hakukohteidenHakutoimistojenOsoitteet(DokumenttiProsessi prosessi, Map<String, MetaHakukohde> hakukohteet, String asiointikieli) {
