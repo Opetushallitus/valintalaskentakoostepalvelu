@@ -71,9 +71,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
     private final int pollingIntervalMillis;
 
-    private SimpleDateFormat pvmMuoto = new SimpleDateFormat("dd.MM.yyyy");
-    private SimpleDateFormat kelloMuoto = new SimpleDateFormat("HH.mm");
-
     @Autowired
     public HyvaksymiskirjeetServiceImpl(
             ViestintapalveluAsyncResource viestintapalveluAsyncResource,
@@ -518,16 +515,16 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         );
     }
 
-    public String parsePalautusPvm(String specifiedPvm, ParametritParser haunParametrit) {
+    private static String parsePalautusPvm(String specifiedPvm, ParametritParser haunParametrit) {
         if (StringUtils.trimToNull(specifiedPvm) == null && haunParametrit.opiskelijanPaikanVastaanottoPaattyy() != null) {
-            return pvmMuoto.format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
+            return new SimpleDateFormat("dd.MM.yyyy").format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
         }
         return specifiedPvm;
     }
 
-    public String parsePalautusAika(String specifiedAika, ParametritParser haunParametrit) {
+    private static String parsePalautusAika(String specifiedAika, ParametritParser haunParametrit) {
         if (StringUtils.trimToNull(specifiedAika) == null && haunParametrit.opiskelijanPaikanVastaanottoPaattyy() != null) {
-            return kelloMuoto.format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
+            return new SimpleDateFormat("HH.mm").format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
         }
         return specifiedAika;
     }
