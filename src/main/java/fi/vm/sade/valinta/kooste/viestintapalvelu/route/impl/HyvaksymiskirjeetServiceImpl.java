@@ -117,16 +117,16 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 haunParametrit(hakuOid),
                 hakijatByHakemusOids(hakuOid, hakemusOids),
                 hakemuksetByOids(hakuOid, hakemusOids),
-                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
+                Observable.fromFuture(this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hakukohdeOid)),
+                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset, vakiosisalto) -> muodostaHyvaksymiskirjeet(
                         prosessi,
                         hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, false),
                         hakemukset,
                         maatjavaltiot1,
                         postinumerot,
                         hakuOid,
-                        hakukohdeOid,
                         null,
-                        hyvaksymiskirjeDTO.getSisalto(),
+                        vakiosisalto,
                         hyvaksymiskirjeDTO.getTag(),
                         hyvaksymiskirjeDTO.getTemplateName(),
                         parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
@@ -231,16 +231,16 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 haunParametrit(hakuOid),
                 hyvaksytytByHakukohde(hakuOid, hakukohdeOid),
                 hakemuksetByHakukohde(hakuOid, hakukohdeOid),
-                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
+                Observable.fromFuture(this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hakukohdeOid)),
+                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset, vakiosisalto) -> muodostaHyvaksymiskirjeet(
                         prosessi,
                         hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()),
                         hakemukset,
                         maatjavaltiot1,
                         postinumerot,
                         hakuOid,
-                        hakukohdeOid,
                         null,
-                        hyvaksymiskirjeDTO.getSisalto(),
+                        vakiosisalto,
                         hyvaksymiskirjeDTO.getTag(),
                         hyvaksymiskirjeDTO.getTemplateName(),
                         parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
@@ -283,7 +283,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         maatjavaltiot1,
                         postinumerot,
                         hakuOid,
-                        null,
                         asiointikieli,
                         defaultValue,
                         hakuOid,
@@ -328,21 +327,21 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             .collect(Collectors.toList());
                     prosessi.setKokonaistyo(hakukohteetJoissaHyvaksyttyja.size());
                     return Observable.fromIterable(hakukohteetJoissaHyvaksyttyja)
-                            .flatMap(hakukohdeOid -> muodostaHyvaksymiskirjeet(
-                                    prosessi,
-                                    hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, false),
-                                    hakemukset,
-                                    maatjavaltiot1,
-                                    postinumerot,
-                                    hakuOid,
-                                    hakukohdeOid,
-                                    null,
-                                    defaultValue.orElse(null),
-                                    hakuOid,
-                                    "hyvaksymiskirje",
-                                    parsePalautusPvm(null, haunParametrit),
-                                    parsePalautusAika(null, haunParametrit),
-                                    false)
+                            .flatMap(hakukohdeOid -> Observable.fromFuture(this.haeHakukohteenVakiosisalto(defaultValue.orElse(null), hakukohdeOid))
+                                            .flatMap(vakiosisalto -> muodostaHyvaksymiskirjeet(
+                                                    prosessi,
+                                                    hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, false),
+                                                    hakemukset,
+                                                    maatjavaltiot1,
+                                                    postinumerot,
+                                                    hakuOid,
+                                                    null,
+                                                    vakiosisalto,
+                                                    hakuOid,
+                                                    "hyvaksymiskirje",
+                                                    parsePalautusPvm(null, haunParametrit),
+                                                    parsePalautusAika(null, haunParametrit),
+                                                    false))
                                             .flatMap(batchId -> renameHakukohteenHyvaksymiskirjeet(prosessi, hakukohdeOid, batchId))
                                             .map(r -> Pair.of(hakukohdeOid, Optional.<Throwable>empty()))
                                             .onErrorReturn(e -> Pair.of(hakukohdeOid, Optional.of(e))),
@@ -426,7 +425,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                          Map<String, Koodi> maatjavaltiot1,
                                                          Map<String, Koodi> postinumerot,
                                                          String hakuOid,
-                                                         String hakukohdeJossaHyvaksytty,
                                                          String asiointikieli,
                                                          String vakiosisalto,
                                                          String tag,
@@ -437,9 +435,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         Observable<Map<String, MetaHakukohde>> hakukohteetO = this.kiinnostavatHakukohteet(hakijat);
         return Observable.zip(
                 hakukohteetO,
-                vakiosisalto == null ? Observable.fromFuture(this.haeHakukohteenVakiosisalto(hakukohdeJossaHyvaksytty)) : Observable.just(vakiosisalto),
                 hakukohteetO.flatMap(hakukohteet -> hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, asiointikieli)),
-                (hakukohteet, sisalto, osoitteet) -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                (hakukohteet, osoitteet) -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                         maatjavaltiot1,
                         postinumerot,
                         osoitteet,
@@ -449,7 +446,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         null,
                         hakuOid,
                         Optional.ofNullable(asiointikieli),
-                        sisalto,
+                        vakiosisalto,
                         tag,
                         templateName,
                         palautusPvm,
@@ -485,7 +482,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         );
     }
 
-    private CompletableFuture<String> haeHakukohteenVakiosisalto(String hakukohdeOid) {
+    private CompletableFuture<String> haeHakukohteenVakiosisalto(String annettuVakiosisalto, String hakukohdeOid) {
+        if (annettuVakiosisalto != null) {
+            return CompletableFuture.completedFuture(annettuVakiosisalto);
+        }
         return this.tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
                 .thenComposeAsync(hakukohde -> viestintapalveluAsyncResource.haeKirjepohja(
                         hakukohde.getHakuOid(),
