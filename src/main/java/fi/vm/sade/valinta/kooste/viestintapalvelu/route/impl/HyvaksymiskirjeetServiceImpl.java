@@ -119,14 +119,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 hakemuksetByOids(hakuOid, hakemusOids),
                 (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
                         prosessi,
-                        hakijat,
+                        hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, false),
                         hakemukset,
                         maatjavaltiot1,
                         postinumerot,
                         hakuOid,
                         hakukohdeOid,
                         null,
-                        false,
                         hyvaksymiskirjeDTO.getSisalto(),
                         hyvaksymiskirjeDTO.getTag(),
                         hyvaksymiskirjeDTO.getTemplateName(),
@@ -234,14 +233,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 hakemuksetByHakukohde(hakuOid, hakukohdeOid),
                 (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
                         prosessi,
-                        hakijat,
+                        hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()),
                         hakemukset,
                         maatjavaltiot1,
                         postinumerot,
                         hakuOid,
                         hakukohdeOid,
                         null,
-                        hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet(),
                         hyvaksymiskirjeDTO.getSisalto(),
                         hyvaksymiskirjeDTO.getTag(),
                         hyvaksymiskirjeDTO.getTemplateName(),
@@ -280,14 +278,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 hakijatF.flatMap(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList()))),
                 (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
                         prosessi,
-                        hakijat,
+                        hyvaksytytHakijat(hakijat, hakemukset, null, asiointikieli, false),
                         hakemukset,
                         maatjavaltiot1,
                         postinumerot,
                         hakuOid,
                         null,
                         asiointikieli,
-                        false,
                         defaultValue,
                         hakuOid,
                         "hyvaksymiskirje",
@@ -333,14 +330,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     return Observable.fromIterable(hakukohteetJoissaHyvaksyttyja)
                             .flatMap(hakukohdeOid -> muodostaHyvaksymiskirjeet(
                                     prosessi,
-                                    hakijat,
+                                    hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, false),
                                     hakemukset,
                                     maatjavaltiot1,
                                     postinumerot,
                                     hakuOid,
                                     hakukohdeOid,
                                     null,
-                                    false,
                                     defaultValue.orElse(null),
                                     hakuOid,
                                     "hyvaksymiskirje",
@@ -432,22 +428,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                          String hakuOid,
                                                          String hakukohdeJossaHyvaksytty,
                                                          String asiointikieli,
-                                                         boolean vainTulosEmailinKieltaneet,
                                                          String vakiosisalto,
                                                          String tag,
                                                          String templateName,
                                                          String palautusPvm,
                                                          String palautusAika,
                                                          boolean sahkoinenKorkeakoulunMassaposti) {
-        List<HakijaDTO> kasiteltavatHakijat = hakijat.stream()
-                .filter(hakija -> !vainTulosEmailinKieltaneet || !hakemukset.get(hakija.getHakemusOid()).getLupaTulosEmail())
-                .filter(hakija -> asiointikieli == null || asiointikieli.equalsIgnoreCase(hakemukset.get(hakija.getHakemusOid()).getAsiointikieli()))
-                .filter(hakija -> hakija.getHakutoiveet().stream()
-                        .filter(hakutoive -> hakukohdeJossaHyvaksytty == null || hakukohdeJossaHyvaksytty.equals(hakutoive.getHakukohdeOid()))
-                        .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
-                        .anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
-                .collect(Collectors.toList());
-        Observable<Map<String, MetaHakukohde>> hakukohteetO = this.kiinnostavatHakukohteet(kasiteltavatHakijat);
+        Observable<Map<String, MetaHakukohde>> hakukohteetO = this.kiinnostavatHakukohteet(hakijat);
         return Observable.zip(
                 hakukohteetO,
                 vakiosisalto == null ? Observable.fromFuture(this.haeHakukohteenVakiosisalto(hakukohdeJossaHyvaksytty)) : Observable.just(vakiosisalto),
@@ -457,7 +444,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         postinumerot,
                         osoitteet,
                         hakukohteet,
-                        kasiteltavatHakijat,
+                        hakijat,
                         hakemukset,
                         null,
                         hakuOid,
@@ -469,6 +456,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         palautusAika,
                         sahkoinenKorkeakoulunMassaposti)
         ).flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
+    }
+
+    private static List<HakijaDTO> hyvaksytytHakijat(List<HakijaDTO> hakijat, Map<String, HakemusWrapper> hakemukset, String hakukohdeJossaHyvaksytty, String asiointikieli, boolean vainTulosEmailinKieltaneet) {
+        return hakijat.stream()
+                .filter(hakija -> hakemukset.containsKey(hakija.getHakemusOid()))
+                .filter(hakija -> !vainTulosEmailinKieltaneet || !hakemukset.get(hakija.getHakemusOid()).getLupaTulosEmail())
+                .filter(hakija -> asiointikieli == null || asiointikieli.equalsIgnoreCase(hakemukset.get(hakija.getHakemusOid()).getAsiointikieli()))
+                .filter(hakija -> hakija.getHakutoiveet().stream()
+                        .filter(hakutoive -> hakukohdeJossaHyvaksytty == null || hakukohdeJossaHyvaksytty.equals(hakutoive.getHakukohdeOid()))
+                        .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
+                        .anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
+                .collect(Collectors.toList());
     }
 
     private Observable<Map<String, MetaHakukohde>> kiinnostavatHakukohteet(List<HakijaDTO> hakijat) {
