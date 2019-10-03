@@ -9,7 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -107,113 +107,43 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
         String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
         LOG.info(String.format("Aloitetaan hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle", hakukohdeOid, hakemusOids.size()));
-        DokumenttiProsessi prosessi = new DokumenttiProsessi("", "", "", Collections.emptyList());
-        dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-        prosessi.setKokonaistyo(1);
 
-        Observable.zip(
-                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
-                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
-                haunParametrit(hakuOid),
-                hakijatByHakemusOids(hakuOid, hakemusOids),
-                hakemuksetByOids(hakuOid, hakemusOids),
-                Observable.fromFuture(this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hakukohdeOid)),
-                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset, vakiosisalto) -> muodostaHyvaksymiskirjeet(
-                        prosessi,
-                        hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, false),
+        Observable<Map<String, HakemusWrapper>> hakemuksetF = hakemuksetByOids(hakuOid, hakemusOids);
+        Observable<List<HakijaDTO>> hakijatF = hakijatByHakemusOids(hakuOid, hakemusOids)
+                .flatMap(hakijat -> hakemuksetF.map(hakemukset -> hyvaksytytHakijat(
+                        hakijat,
                         hakemukset,
-                        maatjavaltiot1,
-                        postinumerot,
-                        hakuOid,
+                        hakukohdeOid,
                         null,
-                        vakiosisalto,
-                        hyvaksymiskirjeDTO.getTag(),
-                        hyvaksymiskirjeDTO.getTemplateName(),
-                        parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
-                        parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
-                        false
-                )
-        ).flatMap(x -> x).subscribe(
-                batchId -> {
-                    LOG.info(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle valmistui", hakukohdeOid, hakemusOids.size()));
-                    prosessi.inkrementoiTehtyjaToita();
-                    prosessi.setDokumenttiId(batchId);
-                },
-                e -> {
-                    LOG.error(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle epäonnistui", hakukohdeOid, hakemusOids.size()), e);
-                    prosessi.inkrementoiOhitettujaToita();
-                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
-                }
-        );
-        return prosessi.toProsessiId();
+                        hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()
+                )));
+        return muodostaKirjeet(haunParametrit(hakuOid), hakijatF, hakemuksetF, hyvaksymiskirjeDTO, null, false,
+                String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle valmistui", hakukohdeOid, hakemusOids.size()),
+                String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle epäonnistui", hakukohdeOid, hakemusOids.size()));
     }
 
     @Override
     public ProsessiId jalkiohjauskirjeHakukohteelle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-        LOG.info(String.format("Aloitetaan hakukohteen %s jälkiohjauskirjeiden muodostaminen", hyvaksymiskirjeDTO.getHakukohdeOid()));
-        DokumenttiProsessi prosessi = new DokumenttiProsessi("", "", "", Collections.emptyList());
-        dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-        prosessi.setKokonaistyo(1);
+        String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
+        String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
+        LOG.info(String.format("Aloitetaan hakukohteen %s jälkiohjauskirjeiden muodostaminen", hakukohdeOid));
 
-        Observable.zip(
-                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
-                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
-                hakemuksetByHakukohde(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()),
-                hakijatByHakukohde(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid()),
-                (maatjavaltiot1, postinumerot, hakemukset, hakijat) -> {
-                    LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.size());
+        Observable<Map<String, HakemusWrapper>> hakemuksetF = hakemuksetByHakukohde(hakuOid, hakukohdeOid);
+        Observable<List<HakijaDTO>> hakijatF = hakijatByHakukohde(hakuOid, hakukohdeOid)
+                .map(hakijat -> {
                     List<HakijaDTO> hylatyt = hakijat.stream()
                             .filter(HyvaksymiskirjeetServiceImpl::haussaHylatty)
                             .collect(Collectors.toList());
-
                     if (hylatyt.isEmpty()) {
-                        LOG.error("Hakukohteessa {} ei ole jälkiohjattavia hakijoita!", hyvaksymiskirjeDTO.getHakukohdeOid());
-                        throw new RuntimeException("Hakukohteessa " + hyvaksymiskirjeDTO.getHakukohdeOid() + " ei ole jälkiohjattavia hakijoita!");
+                        LOG.error("Hakukohteessa {} ei ole jälkiohjattavia hakijoita!", hakukohdeOid);
+                        throw new RuntimeException("Hakukohteessa " + hakukohdeOid + " ei ole jälkiohjattavia hakijoita!");
                     }
-
-                    return this.kiinnostavatHakukohteet(hylatyt)
-                            .flatMap(hakukohteet -> hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, null)
-                                    .map(hakutoimistojenOsoitteet -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                                            maatjavaltiot1,
-                                            postinumerot,
-                                            hakutoimistojenOsoitteet,
-                                            hakukohteet,
-                                            hylatyt,
-                                            hakemukset,
-                                            hyvaksymiskirjeDTO.getHakukohdeOid(),
-                                            hyvaksymiskirjeDTO.getHakuOid(),
-                                            Optional.empty(),
-                                            hyvaksymiskirjeDTO.getSisalto(),
-                                            hyvaksymiskirjeDTO.getTag(),
-                                            hyvaksymiskirjeDTO.getTemplateName(),
-                                            hyvaksymiskirjeDTO.getPalautusPvm(),
-                                            hyvaksymiskirjeDTO.getPalautusAika(),
-                                            false
-                                    )))
-                            .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
-                }
-        ).flatMap(x -> x).subscribe(
-                batchId -> {
-                    LOG.info(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen valmistui", hyvaksymiskirjeDTO.getHakukohdeOid()));
-                    prosessi.inkrementoiTehtyjaToita();
-                    prosessi.setDokumenttiId(batchId);
-                },
-                e -> {
-                    LOG.error(String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen epäonnistui", hyvaksymiskirjeDTO.getHakukohdeOid()), e);
-                    prosessi.inkrementoiOhitettujaToita();
-                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
-                }
-        );
-        return prosessi.toProsessiId();
-    }
-
-    private static boolean haussaHylatty(HakijaDTO hakija) {
-        return Optional.ofNullable(hakija.getHakutoiveet())
-                .map(hakutoiveet -> hakutoiveet.stream()
-                        .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
-                        .map(HakutoiveenValintatapajonoDTO::getTila)
-                        .noneMatch(HakemuksenTila::isHyvaksytty))
-                .orElse(true);
+                    return hylatyt;
+                });
+        Observable<ParametritParser> haunParametritF = Observable.just(new ParametritParser(new ParametritDTO(), ""));
+        return muodostaKirjeet(haunParametritF, hakijatF, hakemuksetF, hyvaksymiskirjeDTO, null, false,
+                String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen valmistui", hakukohdeOid),
+                String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen epäonnistui", hakukohdeOid));
     }
 
     @Override
@@ -221,89 +151,48 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
         String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
         LOG.info(String.format("Aloitetaan hakukohteen %s hyväksymiskirjeiden muodostaminen", hakukohdeOid));
-        DokumenttiProsessi prosessi = new DokumenttiProsessi("", "", "", Collections.emptyList());
-        dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-        prosessi.setKokonaistyo(1);
 
-        Observable.zip(
-                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
-                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
-                haunParametrit(hakuOid),
-                hyvaksytytByHakukohde(hakuOid, hakukohdeOid),
-                hakemuksetByHakukohde(hakuOid, hakukohdeOid),
-                Observable.fromFuture(this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hakukohdeOid)),
-                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset, vakiosisalto) -> muodostaHyvaksymiskirjeet(
-                        prosessi,
-                        hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()),
-                        hakemukset,
-                        maatjavaltiot1,
-                        postinumerot,
-                        hakuOid,
-                        null,
-                        vakiosisalto,
-                        hyvaksymiskirjeDTO.getTag(),
-                        hyvaksymiskirjeDTO.getTemplateName(),
-                        parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
-                        parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
-                        false
-                )
-        ).flatMap(x -> x).subscribe(
-                batchId -> {
-                    LOG.info(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakukohdeOid));
-                    prosessi.inkrementoiTehtyjaToita();
-                    prosessi.setDokumenttiId(batchId);
-                },
-                e -> {
-                    LOG.error(String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakukohdeOid), e);
-                    prosessi.inkrementoiOhitettujaToita();
-                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
-                }
-        );
-        return prosessi.toProsessiId();
+        Observable<Map<String, HakemusWrapper>> hakemuksetF = hakemuksetByHakukohde(hakuOid, hakukohdeOid);
+        Observable<List<HakijaDTO>> hakijatF = hyvaksytytByHakukohde(hakuOid, hakukohdeOid).flatMap(hakijat -> hakemuksetF.map(hakemukset -> hyvaksytytHakijat(
+                hakijat,
+                hakemukset,
+                hakukohdeOid,
+                null,
+                hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()
+        )));
+        return muodostaKirjeet(haunParametrit(hakuOid), hakijatF, hakemuksetF, hyvaksymiskirjeDTO, null, false,
+                String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakukohdeOid),
+                String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakukohdeOid));
     }
 
     @Override
     public ProsessiId hyvaksymiskirjeetHaulle(String hakuOid, String asiointikieli, String defaultValue) {
         LOG.info(String.format("Aloitetaan haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s", hakuOid, asiointikieli));
-        DokumenttiProsessi prosessi = new DokumenttiProsessi("hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", hakuOid, Arrays.asList("hyvaksymiskirjeet", "haulle"));
-        dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 
-        prosessi.setKokonaistyo(1);
-        Observable<List<HakijaDTO>> hakijatF = hyvaksytytByHaku(hakuOid);
-        Observable.zip(
-                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
-                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
-                haunParametrit(hakuOid),
-                hakijatF,
-                hakijatF.flatMap(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList()))),
-                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> muodostaHyvaksymiskirjeet(
-                        prosessi,
-                        hyvaksytytHakijat(hakijat, hakemukset, null, asiointikieli, false),
-                        hakemukset,
-                        maatjavaltiot1,
-                        postinumerot,
-                        hakuOid,
-                        asiointikieli,
-                        defaultValue,
-                        hakuOid,
-                        "hyvaksymiskirje",
-                        parsePalautusPvm(null, haunParametrit),
-                        parsePalautusAika(null, haunParametrit),
-                        true
-                )
-        ).flatMap(x -> x).subscribe(
-                batchId -> {
-                    LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s valmistui", hakuOid, asiointikieli));
-                    prosessi.inkrementoiTehtyjaToita();
-                    prosessi.setDokumenttiId(batchId);
-                },
-                e -> {
-                    LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s epäonnistui", hakuOid, asiointikieli), e);
-                    prosessi.inkrementoiOhitettujaToita();
-                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
-                }
+        Observable<List<HakijaDTO>> kaikkiHakijatF = hyvaksytytByHaku(hakuOid);
+        Observable<Map<String, HakemusWrapper>> hakemuksetF = kaikkiHakijatF.flatMap(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList())));
+        Observable<List<HakijaDTO>> hakijatF = kaikkiHakijatF.flatMap(hakijat -> hakemuksetF.map(hakemukset -> hyvaksytytHakijat(
+                hakijat,
+                hakemukset,
+                null,
+                asiointikieli,
+                false
+        )));
+        HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
+                null,
+                defaultValue,
+                "hyvaksymiskirje",
+                hakuOid,
+                null,
+                hakuOid,
+                null,
+                null,
+                null,
+                false
         );
-        return prosessi.toProsessiId();
+        return muodostaKirjeet(haunParametrit(hakuOid), hakijatF, hakemuksetF, hyvaksymiskirjeDTO, asiointikieli, true,
+                String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s valmistui", hakuOid, asiointikieli),
+                String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s epäonnistui", hakuOid, asiointikieli));
     }
 
     public ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(String hakuOid, Optional<String> defaultValue) {
@@ -312,13 +201,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 
         Observable<List<HakijaDTO>> hakijatF = hyvaksytytByHaku(hakuOid);
+        Observable<Map<String, HakemusWrapper>> hakemuksetF = hakijatF.flatMap(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList())));
+        Observable<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.flatMap(this::kiinnostavatHakukohteet);
+        Observable<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF.flatMap(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, null));
         Observable.zip(
                 Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
                 Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
                 haunParametrit(hakuOid),
                 hakijatF,
-                hakijatF.flatMap(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList()))),
-                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset) -> {
+                hakemuksetF,
+                hakukohteetF,
+                osoitteetF,
+                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset, hakukohteet, osoitteet) -> {
                     List<String> hakukohteetJoissaHyvaksyttyja = hakijat.stream()
                             .flatMap(hakija -> hakija.getHakutoiveet().stream())
                             .filter(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
@@ -328,47 +222,49 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     prosessi.setKokonaistyo(hakukohteetJoissaHyvaksyttyja.size());
                     return Observable.fromIterable(hakukohteetJoissaHyvaksyttyja)
                             .flatMap(hakukohdeOid -> Observable.fromFuture(this.haeHakukohteenVakiosisalto(defaultValue.orElse(null), hakukohdeOid))
-                                            .flatMap(vakiosisalto -> muodostaHyvaksymiskirjeet(
-                                                    prosessi,
-                                                    hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, false),
-                                                    hakemukset,
+                                            .map(vakiosisalto -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                                                     maatjavaltiot1,
                                                     postinumerot,
+                                                    osoitteet,
+                                                    hakukohteet,
+                                                    hyvaksytytHakijat(hakijat, hakemukset, hakukohdeOid, null, false),
+                                                    hakemukset,
+                                                    hakukohdeOid,
                                                     hakuOid,
-                                                    null,
+                                                    Optional.empty(),
                                                     vakiosisalto,
                                                     hakuOid,
                                                     "hyvaksymiskirje",
                                                     parsePalautusPvm(null, haunParametrit),
                                                     parsePalautusAika(null, haunParametrit),
                                                     false))
+                                            .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
                                             .flatMap(batchId -> renameHakukohteenHyvaksymiskirjeet(prosessi, hakukohdeOid, batchId))
                                             .map(r -> Pair.of(hakukohdeOid, Optional.<Throwable>empty()))
+                                            .doOnNext(p -> {
+                                                LOG.info(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakuOid, hakukohdeOid));
+                                                prosessi.inkrementoiTehtyjaToita();
+                                            })
+                                            .doOnError(e -> {
+                                                LOG.error(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, hakukohdeOid), e);
+                                                prosessi.inkrementoiOhitettujaToita();
+                                            })
                                             .onErrorReturn(e -> Pair.of(hakukohdeOid, Optional.of(e))),
                                     6);
                 }
         ).flatMap(x -> x).toList().subscribe(
-                result -> result.forEach(r -> {
-                    String hakukohdeOid = r.getLeft();
-                    r.getRight().ifPresentOrElse(
-                            e -> {
-                                LOG.error(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, hakukohdeOid), e);
-                                prosessi.inkrementoiOhitettujaToita();
-                                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(
-                                        e.getMessage(),
-                                        Collections.singletonList(new Tunniste(hakukohdeOid, Poikkeus.HAKUKOHDEOID))
-                                ));
-                            },
-                            () -> {
-                                LOG.info(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakuOid, hakukohdeOid));
-                                prosessi.inkrementoiTehtyjaToita();
-                            }
-                    );
-                    LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain valmistui", hakuOid));
-                    if (prosessi.getPoikkeukset().isEmpty()) {
+                result -> {
+                    List<Poikkeus> poikkeukset = result.stream()
+                            .flatMap(r -> r.getRight().map(e -> Poikkeus.koostepalvelupoikkeus(e.getMessage(), Collections.singletonList(new Tunniste(r.getLeft(), Poikkeus.HAKUKOHDEOID)))).stream())
+                            .collect(Collectors.toList());
+                    if (poikkeukset.isEmpty()) {
+                        LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain valmistui", hakuOid));
                         prosessi.setDokumenttiId("valmistumisen-ilmaiseva-tunniste");
+                    } else {
+                        LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid));
+                        prosessi.getPoikkeukset().addAll(poikkeukset);
                     }
-                }),
+                },
                 e -> {
                     LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid), e);
                     prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
@@ -419,40 +315,61 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         );
     }
 
-    private Observable<String> muodostaHyvaksymiskirjeet(DokumenttiProsessi prosessi,
-                                                         List<HakijaDTO> hakijat,
-                                                         Map<String, HakemusWrapper> hakemukset,
-                                                         Map<String, Koodi> maatjavaltiot1,
-                                                         Map<String, Koodi> postinumerot,
-                                                         String hakuOid,
-                                                         String asiointikieli,
-                                                         String vakiosisalto,
-                                                         String tag,
-                                                         String templateName,
-                                                         String palautusPvm,
-                                                         String palautusAika,
-                                                         boolean sahkoinenKorkeakoulunMassaposti) {
-        Observable<Map<String, MetaHakukohde>> hakukohteetO = this.kiinnostavatHakukohteet(hakijat);
-        return Observable.zip(
-                hakukohteetO,
-                hakukohteetO.flatMap(hakukohteet -> hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, asiointikieli)),
-                (hakukohteet, osoitteet) -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+    private ProsessiId muodostaKirjeet(
+            Observable<ParametritParser> haunParametritF,
+            Observable<List<HakijaDTO>> hakijatF,
+            Observable<Map<String, HakemusWrapper>> hakemuksetF,
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
+            String asiointikieli,
+            boolean sahkoinenKorkeakoulunMassaposti,
+            String successMessage,
+            String errorMessage
+    ) {
+        DokumenttiProsessi prosessi = new DokumenttiProsessi("", "", "", Collections.emptyList());
+        dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+        prosessi.setKokonaistyo(1);
+
+        Observable<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.flatMap(this::kiinnostavatHakukohteet);
+        Observable.zip(
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)),
+                Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)),
+                haunParametritF,
+                hakijatF,
+                hakemuksetF,
+                hakukohteetF,
+                hakukohteetF.flatMap(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, asiointikieli)),
+                Observable.fromFuture(this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hyvaksymiskirjeDTO.getHakukohdeOid())),
+                (maatjavaltiot1, postinumerot, haunParametrit, hakijat, hakemukset, hakukohteet, osoitteet, vakiosisalto) -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                         maatjavaltiot1,
                         postinumerot,
                         osoitteet,
                         hakukohteet,
                         hakijat,
                         hakemukset,
-                        null,
-                        hakuOid,
+                        hyvaksymiskirjeDTO.getHakukohdeOid(),
+                        hyvaksymiskirjeDTO.getHakuOid(),
                         Optional.ofNullable(asiointikieli),
                         vakiosisalto,
-                        tag,
-                        templateName,
-                        palautusPvm,
-                        palautusAika,
-                        sahkoinenKorkeakoulunMassaposti)
-        ).flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
+                        hyvaksymiskirjeDTO.getTag(),
+                        hyvaksymiskirjeDTO.getTemplateName(),
+                        parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametrit),
+                        parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametrit),
+                        sahkoinenKorkeakoulunMassaposti))
+                .flatMap(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
+                .subscribe(
+                        batchId -> {
+                            LOG.info(successMessage);
+                            prosessi.inkrementoiTehtyjaToita();
+                            prosessi.setDokumenttiId(batchId);
+                        },
+                        e -> {
+                            LOG.error(errorMessage, e);
+                            prosessi.inkrementoiOhitettujaToita();
+                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                        }
+                );
+
+        return prosessi.toProsessiId();
     }
 
     private static List<HakijaDTO> hyvaksytytHakijat(List<HakijaDTO> hakijat, Map<String, HakemusWrapper> hakemukset, String hakukohdeJossaHyvaksytty, String asiointikieli, boolean vainTulosEmailinKieltaneet) {
@@ -465,6 +382,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
                         .anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
                 .collect(Collectors.toList());
+    }
+
+    private static boolean haussaHylatty(HakijaDTO hakija) {
+        return Optional.ofNullable(hakija.getHakutoiveet())
+                .map(hakutoiveet -> hakutoiveet.stream()
+                        .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
+                        .map(HakutoiveenValintatapajonoDTO::getTila)
+                        .noneMatch(HakemuksenTila::isHyvaksytty))
+                .orElse(true);
     }
 
     private Observable<Map<String, MetaHakukohde>> kiinnostavatHakukohteet(List<HakijaDTO> hakijat) {
@@ -517,7 +443,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .map(tarjoajaOid -> organisaatioAsyncResource.haeHakutoimisto(tarjoajaOid).thenApply(t -> Pair.of(tarjoajaOid, t)))
                 .collect(Collectors.toList());
         return Observable.fromFuture(
-                CompletableFuture.allOf(hakutoimistoFs.toArray(new CompletableFuture[] {}))
+                CompletableFuture.allOf(hakutoimistoFs.toArray(new CompletableFuture[]{}))
                         .thenApply(v -> {
                             Map<String, Optional<HakutoimistoDTO>> hakutoimistot = hakutoimistoFs.stream()
                                     .map(CompletableFuture::join)
@@ -593,14 +519,14 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     public String parsePalautusPvm(String specifiedPvm, ParametritParser haunParametrit) {
-        if(StringUtils.trimToNull(specifiedPvm) == null && haunParametrit.opiskelijanPaikanVastaanottoPaattyy() != null) {
+        if (StringUtils.trimToNull(specifiedPvm) == null && haunParametrit.opiskelijanPaikanVastaanottoPaattyy() != null) {
             return pvmMuoto.format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
         }
         return specifiedPvm;
     }
 
     public String parsePalautusAika(String specifiedAika, ParametritParser haunParametrit) {
-        if(StringUtils.trimToNull(specifiedAika) == null && haunParametrit.opiskelijanPaikanVastaanottoPaattyy() != null) {
+        if (StringUtils.trimToNull(specifiedAika) == null && haunParametrit.opiskelijanPaikanVastaanottoPaattyy() != null) {
             return kelloMuoto.format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
         }
         return specifiedAika;
