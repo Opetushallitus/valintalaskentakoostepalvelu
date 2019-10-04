@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -15,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
@@ -272,11 +272,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     private CompletableFuture<List<HakijaDTO>> hakijatByHakemusOids(String hakuOid, List<String> hakemusOids) {
-        List<CompletableFuture<HakijaDTO>> hakijaFs = hakemusOids.stream()
+        return CompletableFutureUtil.sequence(hakemusOids.stream()
                 .map(hakemusOid -> valintaTulosServiceAsyncResource.getHakijaByHakemus(hakuOid, hakemusOid))
-                .collect(Collectors.toList());
-        return CompletableFuture.allOf(hakijaFs.toArray(new CompletableFuture[] {}))
-                .thenApplyAsync(v -> hakijaFs.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+                .collect(Collectors.toList()));
     }
 
     private CompletableFuture<Map<String, HakemusWrapper>> hakemuksetByHakukohde(String hakuOid, String hakukohdeOid) {
@@ -371,16 +369,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     private CompletableFuture<Map<String, MetaHakukohde>> kiinnostavatHakukohteet(List<HakijaDTO> hakijat) {
-        List<CompletableFuture<Pair<String, MetaHakukohde>>> hakukohdeFs = hakijat.stream()
+        return CompletableFutureUtil.sequence(hakijat.stream()
                 .flatMap(hakija -> hakija.getHakutoiveet().stream())
                 .map(HakutoiveDTO::getHakukohdeOid)
                 .distinct()
-                .map(hakukohdeOid -> kirjeetHakukohdeCache.haeHakukohdeAsync(hakukohdeOid).thenApplyAsync(hakukohde -> Pair.of(hakukohdeOid, hakukohde)))
-                .collect(Collectors.toList());
-        return CompletableFuture.allOf(hakukohdeFs.toArray(new CompletableFuture[] {}))
-                .thenApplyAsync(v -> hakukohdeFs.stream()
-                        .map(CompletableFuture::join)
-                        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
+                .collect(Collectors.toMap(hakukohdeOid -> hakukohdeOid, kirjeetHakukohdeCache::haeHakukohdeAsync)));
     }
 
     private CompletableFuture<String> haeHakukohteenVakiosisalto(String annettuVakiosisalto, String hakukohdeOid) {
@@ -414,26 +407,20 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         if (prosessi.isKeskeytetty()) {
             return CompletableFuture.failedFuture(new RuntimeException("Kirjeiden muodostus keskeytetty"));
         }
-        List<CompletableFuture<Pair<String, Optional<HakutoimistoDTO>>>> hakutoimistoFs = hakukohteet.values().stream().map(MetaHakukohde::getTarjoajaOid).distinct()
-                .map(tarjoajaOid -> organisaatioAsyncResource.haeHakutoimisto(tarjoajaOid).thenApplyAsync(t -> Pair.of(tarjoajaOid, t)))
-                .collect(Collectors.toList());
-        return CompletableFuture.allOf(hakutoimistoFs.toArray(new CompletableFuture[]{}))
-                .thenApplyAsync(v -> {
-                    Map<String, Optional<HakutoimistoDTO>> hakutoimistot = hakutoimistoFs.stream()
-                            .map(CompletableFuture::join)
-                            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
-                    return hakukohteet.entrySet().stream()
-                            .map(e -> {
-                                MetaHakukohde hakukohde = e.getValue();
-                                String kieli = asiointikieli == null ? hakukohde.getHakukohteenKieli() : asiointikieli;
-                                return Pair.of(
-                                        e.getKey(),
-                                        hakutoimistot.getOrDefault(hakukohde.getTarjoajaOid(), Optional.empty())
-                                                .flatMap(t -> Hakijapalvelu.osoite(t, kieli))
-                                );
-                            })
-                            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
-                });
+        return CompletableFutureUtil.sequence(hakukohteet.values().stream()
+                .map(MetaHakukohde::getTarjoajaOid)
+                .distinct()
+                .collect(Collectors.toMap(tarjoajaOid -> tarjoajaOid, organisaatioAsyncResource::haeHakutoimisto)))
+                .thenApplyAsync(hakutoimistot -> hakukohteet.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                e -> {
+                                    MetaHakukohde hakukohde = e.getValue();
+                                    String kieli = asiointikieli == null ? hakukohde.getHakukohteenKieli() : asiointikieli;
+                                    return hakutoimistot.getOrDefault(hakukohde.getTarjoajaOid(), Optional.empty())
+                                            .flatMap(t -> Hakijapalvelu.osoite(t, kieli));
+                                })
+                        ));
     }
 
     private CompletableFuture<String> letterBatchToViestintapalvelu(DokumenttiProsessi prosessi, LetterBatch letterBatch) {

@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KansalaisuusDto;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -89,12 +89,10 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
         if (hakemusOids.isEmpty()) {
             return getApplicationChunk(hakukohdeOid, hakemusOids);
         } else {
-            List<List<String>> chunks = Lists.partition(hakemusOids, SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE);
-            return chunks.stream().reduce(
-                    CompletableFuture.completedFuture(new LinkedList<>()),
-                    (f, chunk) -> f.thenCompose(l -> getApplicationChunk(hakukohdeOid, chunk).thenApply(ll -> { l.addAll(ll); return l; })),
-                    (f, ff) -> f.thenCompose(l -> ff.thenApply(ll -> { l.addAll(ll); return l; }))
-            );
+            return CompletableFutureUtil.sequence(Lists.partition(hakemusOids, SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE).stream()
+                    .map(chunk -> getApplicationChunk(hakukohdeOid, chunk))
+                    .collect(Collectors.toList()))
+                    .thenApplyAsync(chunks -> chunks.stream().flatMap(List::stream).collect(Collectors.toList()));
         }
     }
 
@@ -142,13 +140,12 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
     }
 
     private CompletableFuture<Map<String, Koodi>> getMaakoodit(Stream<String> asuinmaaKoodit, Stream<String> kansalaisuusKoodit) {
-        return Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
+        return CompletableFutureUtil.sequence(Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
                 .distinct()
-                .reduce(
-                        CompletableFuture.completedFuture(new HashMap<>()),
-                        (f, koodiArvo) -> f.thenCompose(acc -> koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + koodiArvo).thenApply(koodi -> { acc.put(koodiArvo, koodi); return acc; })),
-                        (f, ff) -> f.thenCompose(acc -> ff.thenApply(acc2 -> { acc.putAll(acc2); return acc; }))
-                );
+                .collect(Collectors.toMap(
+                        koodiArvo -> koodiArvo,
+                        koodiArvo -> koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + koodiArvo))
+                ));
     }
 
     @Override
