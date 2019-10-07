@@ -155,7 +155,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     @Override
-    public ProsessiId hyvaksymiskirjeetHaulle(String hakuOid, String asiointikieli, String defaultValue) {
+    public ProsessiId hyvaksymiskirjeetHaulle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO, String asiointikieli) {
+        String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
         LOG.info(String.format("Aloitetaan haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s", hakuOid, asiointikieli));
 
         CompletableFuture<List<HakijaDTO>> kaikkiHakijatF = valintaTulosServiceAsyncResource.getKoulutuspaikalliset(hakuOid);
@@ -171,24 +172,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         asiointikieli,
                         false
                 )));
-        HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
-                null,
-                defaultValue,
-                "hyvaksymiskirje",
-                hakuOid,
-                null,
-                hakuOid,
-                null,
-                null,
-                null,
-                false
-        );
         return muodostaKirjeet(hakuParametritService.getParametritForHakuAsync(hakuOid), hakijatF, hakemuksetF, hyvaksymiskirjeDTO, asiointikieli, true,
                 String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s valmistui", hakuOid, asiointikieli),
                 String.format("Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s epäonnistui", hakuOid, asiointikieli));
     }
 
-    public ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(String hakuOid, Optional<String> defaultValue) {
+    public ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
+        String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
         LOG.info(String.format("Aloitetaan haun %s hyväksymiskirjeiden muodostaminen hakukohteittain", hakuOid));
         DokumenttiProsessi prosessi = new DokumenttiProsessi("hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", hakuOid, Arrays.asList("hyvaksymiskirjeet", "haulle"));
         dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
@@ -216,7 +206,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     prosessi.setKokonaistyo(hakukohteetJoissaHyvaksyttyja.size());
                     CompletableFuture<List<Pair<String, Optional<Throwable>>>> f = new CompletableFuture<>();
                     Disposable s = Observable.fromIterable(hakukohteetJoissaHyvaksyttyja)
-                            .flatMap(hakukohdeOid -> Observable.fromFuture(this.haeHakukohteenVakiosisalto(defaultValue.orElse(null), hakukohdeOid))
+                            .flatMap(hakukohdeOid -> Observable.fromFuture(this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hakukohdeOid))
                                             .map(vakiosisalto -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                                                     maatjavaltiot1F.join(),
                                                     postinumerotF.join(),
@@ -229,7 +219,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                     Optional.empty(),
                                                     vakiosisalto,
                                                     hakuOid,
-                                                    "hyvaksymiskirje",
+                                                    hyvaksymiskirjeDTO.getTemplateName(),
                                                     parsePalautusPvm(null, haunParametritF.join()),
                                                     parsePalautusAika(null, haunParametritF.join()),
                                                     false))

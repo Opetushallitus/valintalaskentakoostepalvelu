@@ -5,6 +5,7 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
@@ -82,13 +83,25 @@ public class SijoittelunTulosHaulleResource {
                                                   @QueryParam("letterBodyText") String letterBodyText,
                                                   @QueryParam("asiointikieli") String asiointikieli) {
         try {
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
+                    null,
+                    letterBodyText,
+                    "hyvaksymiskirje",
+                    hakuOid,
+                    null,
+                    hakuOid,
+                    null,
+                    null,
+                    null,
+                    false
+            );
             if (asiointikieli != null ) {
                 if (letterBodyText == null) {
                     throw new IllegalArgumentException("Parametri letterBodyText on pakollinen");
                 }
-                return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hakuOid, asiointikieli, letterBodyText);
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hyvaksymiskirjeDTO, asiointikieli);
             } else {
-                return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hakuOid, Optional.ofNullable(letterBodyText));
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hyvaksymiskirjeDTO);
             }
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);

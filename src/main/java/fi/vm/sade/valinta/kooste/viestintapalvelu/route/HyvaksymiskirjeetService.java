@@ -13,7 +13,7 @@ public interface HyvaksymiskirjeetService {
 
     ProsessiId hyvaksymiskirjeetHakukohteelle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
 
-    ProsessiId hyvaksymiskirjeetHaulle(String hakuOid, String asiointikieli, String defaultValue);
+    ProsessiId hyvaksymiskirjeetHaulle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO, String asiointikieli);
 
-    ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(String hakuOid, Optional<String> defaultValue);
+    ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
 }
