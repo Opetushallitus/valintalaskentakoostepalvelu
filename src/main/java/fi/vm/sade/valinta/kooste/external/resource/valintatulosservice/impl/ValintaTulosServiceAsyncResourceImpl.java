@@ -97,7 +97,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 getUrl("valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
                 Duration.ofMinutes(30),
                 new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType()
-        ).thenApply(HakijaPaginationObject::getResults);
+        ).thenApplyAsync(HakijaPaginationObject::getResults);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 getUrl("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
                 Duration.ofMinutes(30),
                 new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType()
-        ).thenApply(HakijaPaginationObject::getResults);
+        ).thenApplyAsync(HakijaPaginationObject::getResults);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 getUrl("valinta-tulos-service.haku.hakukohde.hakijat", hakuOid, hakukohdeOid),
                 Duration.ofMinutes(30),
                 new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType()
-        ).thenApply(HakijaPaginationObject::getResults);
+        ).thenApplyAsync(HakijaPaginationObject::getResults);
     }
 
     @Override

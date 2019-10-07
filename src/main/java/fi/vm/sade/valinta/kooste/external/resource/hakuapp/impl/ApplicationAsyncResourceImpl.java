@@ -109,7 +109,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                 requestBody,
                 new com.google.gson.reflect.TypeToken<Map<String, List<String>>>() {}.getType(),
                 new com.google.gson.reflect.TypeToken<List<Hakemus>>() {}.getType()
-        ).thenApply(this::toHakemusWrapper);
+        ).thenApplyAsync(this::toHakemusWrapper);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
                 hakemusOids,
                 new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
                 new com.google.gson.reflect.TypeToken<List<Hakemus>>() {}.getType()
-        ).thenApply(hs -> hs.stream()
+        ).thenApplyAsync(hs -> hs.stream()
                 .filter(h -> StringUtils.isEmpty(h.getState()) || DEFAULT_STATES.contains(h.getState()))
                 .map(HakuappHakemusWrapper::new)
                 .collect(Collectors.toList()));
@@ -142,8 +142,8 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
         List<CompletableFuture<List<HakemusWrapper>>> fs = Lists.partition(hakemusOids, DEFAULT_ROW_LIMIT).stream()
                 .map(oids -> getApplicationsByHakemusOids(hakuOid, oids, keys))
                 .collect(Collectors.toList());
-        return CompletableFuture.allOf(fs.toArray(new CompletableFuture[] {}))
-                .thenApply(v -> fs.stream().flatMap(f -> f.join().stream()).collect(Collectors.toList()));
+        return CompletableFuture.allOf(fs.toArray(new CompletableFuture[0]))
+                .thenApplyAsync(v -> fs.stream().flatMap(f -> f.join().stream()).collect(Collectors.toList()));
     }
 
     @Override

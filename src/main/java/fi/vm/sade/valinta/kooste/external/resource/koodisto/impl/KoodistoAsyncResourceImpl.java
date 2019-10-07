@@ -48,7 +48,7 @@ public class KoodistoAsyncResourceImpl implements KoodistoAsyncResource {
                 this.urlConfiguration.url("koodisto-service.json.koodi.rinnasteinen", koodiUri, query),
                 Duration.ofMinutes(1),
                 new TypeToken<List<Koodi>>() {}.getType()
-        ).thenCompose(koodit -> {
+        ).thenComposeAsync(koodit -> {
             Optional<Koodi> koodi = koodit.stream()
                     .filter(k -> k.getKoodistoUri().equals("maatjavaltiot1"))
                     .findFirst();

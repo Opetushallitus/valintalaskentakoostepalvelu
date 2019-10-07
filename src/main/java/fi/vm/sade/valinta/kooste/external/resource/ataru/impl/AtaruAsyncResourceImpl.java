@@ -54,15 +54,15 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
         if (hakukohdeOid == null && hakemusOids.isEmpty()) {
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
-        return getApplicationsInChunks(hakukohdeOid, hakemusOids).thenCompose(hakemukset -> {
+        return getApplicationsInChunks(hakukohdeOid, hakemusOids).thenComposeAsync(hakemukset -> {
             if (hakemukset.isEmpty()) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
             } else {
-                return getHenkilotObservable(hakemukset).thenCompose(henkilot -> {
+                return getHenkilotObservable(hakemukset).thenComposeAsync(henkilot -> {
                             ensureKansalaisuus(henkilot);
                             Stream<String> asuinmaaKoodit = hakemukset.stream().map(h -> h.getKeyValues().get("country-of-residence"));
                             Stream<String> kansalaisuusKoodit = henkilot.values().stream().flatMap(h -> h.getKansalaisuus().stream().map(KansalaisuusDto::getKansalaisuusKoodi));
-                            return getMaakoodit(asuinmaaKoodit, kansalaisuusKoodit).thenApply(maakoodit ->
+                            return getMaakoodit(asuinmaaKoodit, kansalaisuusKoodit).thenApplyAsync(maakoodit ->
                                     hakemukset.stream()
                                             .map(hakemusToHakemusWrapper(henkilot, maakoodit))
                                             .collect(Collectors.toList()));

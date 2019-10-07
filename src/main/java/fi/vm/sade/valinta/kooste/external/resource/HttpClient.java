@@ -76,12 +76,12 @@ public class HttpClient {
             return this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
         }
         return this.session.getSessionToken()
-                .thenCompose(sessionToken -> this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
-                        .thenCompose(response -> {
+                .thenComposeAsync(sessionToken -> this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                        .thenComposeAsync(response -> {
                             if (isUnauthenticated(response) || isRedirectToCas(response)) {
                                 this.session.invalidateSession(sessionToken);
                                 return this.session.getSessionToken()
-                                        .thenCompose(s -> this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()));
+                                        .thenComposeAsync(s -> this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()));
                             }
                             return CompletableFuture.completedFuture(response);
                         }));

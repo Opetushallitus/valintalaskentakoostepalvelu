@@ -68,7 +68,7 @@ public class KirjeetHakukohdeCache {
 
     private CompletableFuture<MetaHakukohde> fetchMetaHakukohde(String hakukohdeOid) {
         return this.tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
-                .thenApply(hakukohde -> {
+                .thenApplyAsync(hakukohde -> {
                     Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
                     return new MetaHakukohde(
                             hakukohde.getTarjoajaOids().iterator().next(),

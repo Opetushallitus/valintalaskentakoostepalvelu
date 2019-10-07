@@ -78,7 +78,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
                 getUrl("tarjonta-service.haku.hakuoid", hakuOid),
                 Duration.ofMinutes(5),
                 new com.google.gson.reflect.TypeToken<ResultV1RDTO<HakuV1RDTO>>() {}.getType()
-        ).thenApply(ResultV1RDTO::getResult);
+        ).thenApplyAsync(ResultV1RDTO::getResult);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
                 getUrl("tarjonta-service.hakukohde.hakukohdeoid", hakukohdeOid),
                 Duration.ofMinutes(5),
                 new com.google.gson.reflect.TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {}.getType()
-        ).thenApply(ResultV1RDTO::getResult);
+        ).thenApplyAsync(ResultV1RDTO::getResult);
     }
 
     @Override

@@ -61,6 +61,6 @@ public class HakuParametritService {
 
     private CompletableFuture<ParametritParser> fetchParametrit(String hakuOid) {
         return ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)
-                .thenApply(parametrit -> new ParametritParser(parametrit, this.rootOrganisaatioOid));
+                .thenApplyAsync(parametrit -> new ParametritParser(parametrit, this.rootOrganisaatioOid));
     }
 }

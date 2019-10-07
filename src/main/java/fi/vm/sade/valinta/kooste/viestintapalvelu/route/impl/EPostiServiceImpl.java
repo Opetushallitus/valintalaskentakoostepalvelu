@@ -130,7 +130,7 @@ public class EPostiServiceImpl implements EPostiService {
     private Observable<Long> haeExpirationTime(String hakuOid) {
         return Observable.fromFuture(
                 ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)
-                        .thenApply(parametritDTO -> parametritDTO.getPH_HKP().getDate().getTime())
+                        .thenApplyAsync(parametritDTO -> parametritDTO.getPH_HKP().getDate().getTime())
         );
     }
 

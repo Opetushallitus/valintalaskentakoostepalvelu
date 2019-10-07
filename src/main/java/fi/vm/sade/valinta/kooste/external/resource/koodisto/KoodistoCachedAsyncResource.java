@@ -72,7 +72,7 @@ public class KoodistoCachedAsyncResource {
     }
 
     private CompletableFuture<Map<String, Koodi>> fetchKoodisto(String koodistoUri) {
-        return this.koodistoAsyncResource.haeKoodisto(koodistoUri).thenApply(KoodistoCachedAsyncResource::konversio);
+        return this.koodistoAsyncResource.haeKoodisto(koodistoUri).thenApplyAsync(KoodistoCachedAsyncResource::konversio);
     }
 
     private static Map<String, Koodi> konversio(List<Koodi> koodit) {
