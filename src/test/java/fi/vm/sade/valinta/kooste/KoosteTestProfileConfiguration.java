@@ -54,7 +54,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.valintaperusteet.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.oppijantunnistus.rest.url", "http://" + proxyServer + "/oppijan-tunnistus");
         p0.setProperty("valintalaskentakoostepalvelu.jalkiohjauskirjeet.polling.interval.millis", "50");
-        p0.setProperty("valintalaskentakoostepalvelu.hyvaksymiskirjeet.polling.interval.millis", "50");
+        p0.setProperty("valintalaskentakoostepalvelu.kirjeet.polling.interval.millis", "50");
         p0.setProperty("root.organisaatio.oid", "");
         p0.setProperty("kela.ftp.protocol", "ftp");
         p0.setProperty("kela.ftp.username", "username");
