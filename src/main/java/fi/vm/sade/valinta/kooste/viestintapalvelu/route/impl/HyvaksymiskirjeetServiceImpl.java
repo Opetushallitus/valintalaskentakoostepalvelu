@@ -204,7 +204,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF
                 .thenComposeAsync(this::kiinnostavatHakukohteet);
         CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF
-                .thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, null));
+                .thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, null));
         CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, hakukohteetF, osoitteetF)
                 .thenComposeAsync(v -> {
                     List<String> hakukohteetJoissaHyvaksyttyja = hakijatF.join().stream()
@@ -234,7 +234,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                     parsePalautusAika(null, haunParametritF.join()),
                                                     false))
                                             .flatMap(letterBatch -> Observable.fromFuture(letterBatchToViestintapalvelu(prosessi, letterBatch)))
-                                            .flatMap(batchId -> renameHakukohteenHyvaksymiskirjeet(prosessi, hakukohdeOid, batchId))
+                                            .flatMap(batchId -> renameHakukohteenHyvaksymiskirjeet(hakukohdeOid, batchId))
                                             .map(r -> Pair.of(hakukohdeOid, Optional.<Throwable>empty()))
                                             .doOnNext(p -> {
                                                 LOG.info(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakuOid, hakukohdeOid));
@@ -310,7 +310,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
         CompletableFuture<Map<String, Koodi>> maatjavaltiot1F = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         CompletableFuture<Map<String, Koodi>> postinumerotF = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
-        CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF.thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(prosessi, hakukohteet, asiointikieli));
+        CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF.thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, asiointikieli));
         CompletableFuture<String> vakiosisaltoF = this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hyvaksymiskirjeDTO.getHakukohdeOid());
         CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, hakukohteetF, osoitteetF, vakiosisaltoF)
                 .thenApplyAsync(v -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
@@ -403,10 +403,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         )))));
     }
 
-    private CompletableFuture<Map<String, Optional<Osoite>>> hakukohteidenHakutoimistojenOsoitteet(DokumenttiProsessi prosessi, Map<String, MetaHakukohde> hakukohteet, String asiointikieli) {
-        if (prosessi.isKeskeytetty()) {
-            return CompletableFuture.failedFuture(new RuntimeException("Kirjeiden muodostus keskeytetty"));
-        }
+    private CompletableFuture<Map<String, Optional<Osoite>>> hakukohteidenHakutoimistojenOsoitteet(Map<String, MetaHakukohde> hakukohteet, String asiointikieli) {
         return CompletableFutureUtil.sequence(hakukohteet.values().stream()
                 .map(MetaHakukohde::getTarjoajaOid)
                 .distinct()
@@ -428,7 +425,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .thenComposeAsync(batchId -> {
                     CompletableFuture<String> f = new CompletableFuture<>();
                     Disposable s = Observable.interval(pollingIntervalMillis, MILLISECONDS)
-                            .flatMap(i -> letterBatchProcessingStatus(prosessi, batchId))
+                            .flatMap(i -> letterBatchProcessingStatus(batchId))
                             .firstOrError()
                             .timeout(VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA.toMillis(), MILLISECONDS)
                             .subscribe(b -> f.complete(batchId), f::completeExceptionally);
@@ -454,10 +451,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 });
     }
 
-    private Observable<String> letterBatchProcessingStatus(DokumenttiProsessi prosessi, String batchId) {
-        if (prosessi.isKeskeytetty()) {
-            return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
-        }
+    private Observable<String> letterBatchProcessingStatus(String batchId) {
         return Observable.fromFuture(viestintapalveluAsyncResource.haeLetterBatchStatus(batchId))
                 .flatMap(response -> {
                     if ("ready".equals(response.getStatus())) {
@@ -470,10 +464,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 });
     }
 
-    private Observable<String> renameHakukohteenHyvaksymiskirjeet(DokumenttiProsessi prosessi, String hakukohdeOid, String batchId) {
-        if (prosessi.isKeskeytetty()) {
-            return Observable.error(new RuntimeException("Kirjeiden muodostus keskeytetty"));
-        }
+    private Observable<String> renameHakukohteenHyvaksymiskirjeet(String hakukohdeOid, String batchId) {
         return Observable.fromFuture(
                 dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
                         .thenApplyAsync(response -> batchId)
