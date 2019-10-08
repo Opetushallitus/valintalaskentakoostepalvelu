@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -73,18 +72,27 @@ public class HttpClient {
 
     private CompletableFuture<HttpResponse<InputStream>> makeRequest(HttpRequest request) {
         if (this.session == null) {
-            return this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream());
+            return this.sendAsync(request);
         }
         return this.session.getSessionToken()
-                .thenComposeAsync(sessionToken -> this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                .thenComposeAsync(sessionToken -> this.sendAsync(request)
                         .thenComposeAsync(response -> {
                             if (isUnauthenticated(response) || isRedirectToCas(response)) {
                                 this.session.invalidateSession(sessionToken);
-                                return this.session.getSessionToken()
-                                        .thenComposeAsync(s -> this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()));
+                                return this.session.getSessionToken().thenComposeAsync(s -> this.sendAsync(request));
                             }
                             return CompletableFuture.completedFuture(response);
                         }));
+    }
+
+    private CompletableFuture<HttpResponse<InputStream>> sendAsync(HttpRequest request) {
+        return this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                .handle((response, e) -> {
+                    if (e != null) {
+                        throw new IllegalStateException(request.uri().toString(), e);
+                    }
+                    return response;
+                });
     }
 
     public <O> O parseJson(HttpResponse<InputStream> response, Type outputType) {
@@ -100,7 +108,11 @@ public class HttpClient {
             try (Reader r = new InputStreamReader(response.body())) {
                 return this.gson.fromJson(r, outputType);
             } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                throw new IllegalStateException(String.format(
+                        "%s %d: Failed to parse JSON response",
+                        response.uri().toString(),
+                        response.statusCode()
+                ), e);
             }
         }
         try (InputStream is = response.body()) {
@@ -111,7 +123,11 @@ public class HttpClient {
                     new String(is.readAllBytes(), Charset.forName("UTF-8"))
             ));
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new IllegalStateException(String.format(
+                    "%s %d: Failed to parse error response",
+                    response.uri().toString(),
+                    response.statusCode()
+            ), e);
         }
     }
 
