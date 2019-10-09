@@ -50,6 +50,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -256,14 +257,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF.thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, null));
 
                 CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, hakukohteetF, osoitteetF).get(1, TimeUnit.HOURS);
-                List<Pair<String, Future<Void>>> fs = hakijatF.join().stream()
+                List<Pair<String, Future<String>>> fs = hakijatF.join().stream()
                         .flatMap(hakija -> hakija.getHakutoiveet().stream())
                         .filter(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
                         .map(HakutoiveDTO::getHakukohdeOid)
                         .distinct()
-                        .map(hakukohdeOid -> Pair.of(hakukohdeOid, this.smallBatchExecutor.<Void>submit(() -> {
+                        .map(hakukohdeOid -> Pair.of(hakukohdeOid, this.smallBatchExecutor.submit(() -> {
                             try {
-                                haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hakukohdeOid)
+                                LOG.info(String.format("Aloitetaan haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen", hakuOid, hakukohdeOid));
+                                return haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hakukohdeOid)
                                         .thenApplyAsync(vakiosisalto -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                                                 maatjavaltiot1F.join(),
                                                 postinumerotF.join(),
@@ -281,22 +283,24 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                 parsePalautusAika(null, haunParametritF.join()),
                                                 false))
                                         .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
-                                        .thenComposeAsync(batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf"))
+                                        .thenComposeAsync(batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                                                .thenApplyAsync(v -> batchId))
                                         .get(1, TimeUnit.HOURS);
-                                return null;
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         })))
                         .collect(Collectors.toList());
                 prosessi.setKokonaistyo(fs.size());
+                AtomicReference<String> exampleBatchId = new AtomicReference<>(null);
                 List<Poikkeus> poikkeukset = fs.stream()
                         .flatMap(p -> {
                             String hakukohdeOid = p.getLeft();
                             try {
-                                p.getRight().get(1, TimeUnit.HOURS);
+                                String batchId = p.getRight().get(1, TimeUnit.HOURS);
                                 LOG.info(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakuOid, hakukohdeOid));
                                 prosessi.inkrementoiTehtyjaToita();
+                                exampleBatchId.compareAndSet(null, batchId);
                                 return Stream.empty();
                             } catch (Exception e) {
                                 LOG.error(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, hakukohdeOid), e);
@@ -307,7 +311,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         .collect(Collectors.toList());
                 if (poikkeukset.isEmpty()) {
                     LOG.info(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain valmistui", hakuOid));
-                    prosessi.setDokumenttiId("valmistumisen-ilmaiseva-tunniste");
+                    prosessi.setDokumenttiId(exampleBatchId.get());
                 } else {
                     LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid));
                     prosessi.getPoikkeukset().addAll(poikkeukset);
