@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.ForbiddenException;
@@ -144,5 +146,35 @@ public class AuthorityCheckService {
             LOG.error(msg);
             throw new ForbiddenException(msg);
         }
+    }
+
+    public static class Context {
+        protected final SecurityContext securityContext;
+
+        protected Context(SecurityContext securityContext) {
+            this.securityContext = securityContext;
+        }
+
+        protected SecurityContext getSecurityContext() {
+            return securityContext;
+        }
+    }
+
+    public Context getContext() {
+        return new Context(SecurityContextHolder.getContext());
+    }
+
+    public void withContext(Context context, Runnable callback) {
+        setContext(context);
+        callback.run();
+        clearContext();
+    }
+
+    private void setContext(Context context) {
+        SecurityContextHolder.setContext(context.getSecurityContext());
+    }
+
+    private void clearContext() {
+        SecurityContextHolder.clearContext();
     }
 }

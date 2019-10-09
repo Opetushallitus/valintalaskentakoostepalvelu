@@ -190,10 +190,17 @@ public class ValintalaskentaKerrallaResource {
     @Produces("application/vnd.ms-excel")
     @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
     public void statusXls(@PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
-        checkAuthorizationForHakuWithLaskentaUuid(uuid);
-        asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
-        asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
-        valintalaskentaStatusExcelHandler.getStatusXls(uuid, (Response response) -> asyncResponse.resume(response));
+        asyncObservableCheckAuthorizationForHakuWithLaskentaUuid(uuid).subscribe(
+                allowed -> {
+                    asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
+                    asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
+                    valintalaskentaStatusExcelHandler.getStatusXls(uuid, (Response response) -> asyncResponse.resume(response));
+                },
+                error -> {
+                    LOG.error("Valintalaskennan tilan haku epäonnistui, koska käyttöoikeudet eivät riittäneet!");
+                    asyncResponse.resume(error);
+                }
+        );
     }
 
 
@@ -249,5 +256,24 @@ public class ValintalaskentaKerrallaResource {
     private void checkAuthorizationForHakuWithLaskentaUuid(String uuid) {
         Laskenta laskenta = valintalaskentaValvomo.fetchLaskenta(uuid);
         authorityCheckService.checkAuthorizationForHaku(laskenta.getHakuOid(), valintalaskentaAllowedRoles);
+    }
+
+    private Observable<Boolean> asyncObservableCheckAuthorizationForHakuWithLaskentaUuid(String uuid) {
+        AuthorityCheckService.Context context = authorityCheckService.getContext();
+        return getObservableHakuForLaskenta(uuid).map(
+                hakuOid -> {
+                    authorityCheckService.withContext(context, () -> {
+                        authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
+                    });
+                    return Boolean.TRUE;
+                }
+        );
+    }
+
+    private Observable<String> getObservableHakuForLaskenta(String uuid) {
+        return seurantaAsyncResource.laskenta(uuid).map(
+                laskenta -> {
+                    return laskenta.getHakuOid();
+                });
     }
 }
