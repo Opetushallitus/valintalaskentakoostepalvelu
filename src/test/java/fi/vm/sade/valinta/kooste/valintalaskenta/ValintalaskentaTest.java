@@ -119,7 +119,7 @@ public class ValintalaskentaTest {
                 (new Valintapisteet(ataruHakemus.getHakemusOid(), ataruHakemus.getPersonOid(), "Zl2A5", "TAUsuL4BQc", Collections.emptyList())));
 
         when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
-                Observable.just(Collections.singletonList(valintaperusteetWithValintatapajonoUsingValintalaskenta(false, false, valintatapajono1Oid))));
+                Observable.just(Collections.singletonList(valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid))));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde1Oid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde2Oid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde3Oid)).thenReturn(Observable.just(Collections.emptyList()));
@@ -206,9 +206,15 @@ public class ValintalaskentaTest {
 
         Integer vaiheenNumero = 1;
 
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde1Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde2Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde3Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde1Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid)
+        )));
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde2Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono2Oid)
+        )));
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde3Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono3Oid)
+        )));
 
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde1Oid))).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde2Oid))).thenReturn(Observable.just(Collections.emptyList()));
@@ -285,6 +291,40 @@ public class ValintalaskentaTest {
         }
 
         return valintaperusteet;
+    }
+
+    @Test
+    public void valintalaskentaEiKaytossaAiheuttaaLaskennanEpaonnistumisen() throws InterruptedException {
+        int vaiheenNumero = 1;
+
+        when(valintaperusteetAsyncResource.haeValintaperusteet(hakukohde1Oid, vaiheenNumero)).thenReturn(Observable.just(Arrays.asList(
+                valintaperusteetWithValintatapajonoUsingValintalaskenta(false, false, valintatapajono1Oid)
+        )));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(
+                new HakuappHakemusWrapper(hakemus))));
+
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(
+                auditSession,
+                uuid,
+                hakuOid,
+                false,
+                vaiheenNumero,
+                null,
+                Collections.singletonList(new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1")),
+                LaskentaTyyppi.HAKUKOHDE
+        );
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
+        Thread.sleep(500);
+
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(
+                eq(uuid),
+                eq(hakukohde1Oid),
+                eq(HakukohdeTila.KESKEYTETTY),
+                getIlmoitusDtoOptional(
+                        String.format("Hakukohteen %s valittujen valinnanvaiheiden valintatapajonoissa ei käytetä valintalaskentaa",
+                                hakukohde1Oid)));
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
     }
 
     @Test
