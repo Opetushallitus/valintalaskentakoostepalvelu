@@ -218,6 +218,48 @@ public class HttpClients {
         );
     }
 
+    @Bean(name = "OppijanumerorekisteriInternalHttpClient")
+    @Autowired
+    public java.net.http.HttpClient getOppijanumerorekisteriInternalHttpClient(CookieManager cookieManager) {
+        return defaultHttpClientBuilder(cookieManager).build();
+    }
+
+    @Profile("default")
+    @Bean(name = "OppijanumerorekisteriApplicationSession")
+    @Autowired
+    public ApplicationSession getOppijanumerorekisteriApplicationSession(
+            @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+            @Qualifier("OppijanumerorekisteriInternalHttpClient") java.net.http.HttpClient applicationHttpClient,
+            CookieManager cookieManager,
+            @Value("${cas.service.oppijanumerorekisteri-service}") String service,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String username,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String password
+    ) {
+        String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+        return new ApplicationSession(
+                applicationHttpClient,
+                cookieManager,
+                CALLER_ID,
+                Duration.ofSeconds(10),
+                new CasSession(casHttpClient, Duration.ofSeconds(10), CALLER_ID, URI.create(ticketsUrl), username, password),
+                service,
+                "JSESSIONID"
+        );
+    }
+
+    @Bean(name = "OppijanumerorekisteriHttpClient")
+    @Autowired
+    public HttpClient getOppijanumerorekisteriHttpClient(
+            @Qualifier("OppijanumerorekisteriInternalHttpClient") java.net.http.HttpClient client,
+            @Qualifier("OppijanumerorekisteriApplicationSession") ApplicationSession applicationSession
+    ) {
+        return new HttpClient(
+                client,
+                applicationSession,
+                DateDeserializer.gsonBuilder().create()
+        );
+    }
+
     public static java.net.http.HttpClient.Builder defaultHttpClientBuilder(CookieManager cookieManager) {
         return java.net.http.HttpClient.newBuilder()
                 .version(java.net.http.HttpClient.Version.HTTP_1_1)

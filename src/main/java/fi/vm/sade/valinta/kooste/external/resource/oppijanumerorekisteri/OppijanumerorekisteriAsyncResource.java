@@ -7,8 +7,9 @@ import io.reactivex.Single;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public interface OppijanumerorekisteriAsyncResource {
     Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit);
-    Single<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids);
+    CompletableFuture<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids);
 }

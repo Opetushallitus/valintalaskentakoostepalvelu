@@ -87,7 +87,7 @@ public class AtaruAsyncResourceTest {
 
         Map<String, HenkiloPerustietoDto> henkiloResponse = new HashMap<>();
         henkiloResponse.put("1.2.246.562.24.86368188549", onrHenkilo);
-        when(mockOnr.haeHenkilot(Collections.singletonList("1.2.246.562.24.86368188549"))).thenReturn(Single.just(henkiloResponse));
+        when(mockOnr.haeHenkilot(Collections.singletonList("1.2.246.562.24.86368188549"))).thenReturn(CompletableFuture.completedFuture(henkiloResponse));
 
         List<HakemusWrapper> applications = ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOid1, hakemusOid2, hakemusOid3))
                 .get(1, SECONDS);

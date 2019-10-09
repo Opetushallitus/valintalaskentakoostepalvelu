@@ -66,12 +66,8 @@ public class CasInterceptors {
     @Bean(name = "OppijanumerorekisteriServiceRestClientCasInterceptor")
     @Autowired
     public AbstractPhaseInterceptor<Message> getOppijanumerorekisteriServiceRestClientCasInterceptor(
-            @Qualifier("CasHttpClient") HttpClient casHttpClient,
-            CookieManager cookieManager,
-            @Value("${cas.service.oppijanumerorekisteri-service}") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword) {
-        return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+            @Qualifier("OppijanumerorekisteriApplicationSession") ApplicationSession applicationSession) {
+        return new CasKoosteInterceptor(applicationSession, false);
     }
 
     @Bean(name = "adminDokumenttipalveluRestClientCasInterceptor")

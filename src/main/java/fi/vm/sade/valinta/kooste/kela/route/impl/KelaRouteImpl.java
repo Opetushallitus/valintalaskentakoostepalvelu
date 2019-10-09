@@ -65,6 +65,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -253,7 +254,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                             .distinct()
                             .collect(Collectors.toList());
                     try {
-                        oppijanumerorekisteriAsyncResource.haeHenkilot(henkiloOidit).blockingGet()
+                        oppijanumerorekisteriAsyncResource.haeHenkilot(henkiloOidit).get(1, TimeUnit.HOURS)
                                 .forEach((oid, h) -> luonti.getLuonti().getCache().put(oid, h));
                     } catch (Exception e) {
                         String msg = "Henkilöiden haku oppijanumerorekisteristä epäonnistui";

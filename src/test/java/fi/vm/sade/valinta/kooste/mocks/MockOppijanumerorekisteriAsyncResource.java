@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -55,8 +56,8 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
                 () -> futureSupplier.apply(hp)));
     }
     @Override
-    public Single<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
-        return Single.just(new HashMap<>());
+    public CompletableFuture<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
+        return CompletableFuture.completedFuture(new HashMap<>());
     }
 
     public static HenkiloPerustietoDto toHenkiloPerustietoDto(HenkiloCreateDTO proto) {
