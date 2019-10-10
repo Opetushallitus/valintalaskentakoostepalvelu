@@ -408,7 +408,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     private static List<HakijaDTO> hyvaksytytHakijat(List<HakijaDTO> hakijat, Map<String, HakemusWrapper> hakemukset, String hakukohdeJossaHyvaksytty, String asiointikieli, boolean vainTulosEmailinKieltaneet) {
-        return hakijat.stream()
+        List<HakijaDTO> l = hakijat.stream()
                 .filter(hakija -> hakemukset.containsKey(hakija.getHakemusOid()))
                 .filter(hakija -> !vainTulosEmailinKieltaneet || !hakemukset.get(hakija.getHakemusOid()).getLupaTulosEmail())
                 .filter(hakija -> asiointikieli == null || asiointikieli.equalsIgnoreCase(hakemukset.get(hakija.getHakemusOid()).getAsiointikieli()))
@@ -417,6 +417,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
                         .anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
                 .collect(Collectors.toList());
+        if (l.isEmpty()) {
+            throw new IllegalStateException("Ei hyväksyttyjä hakijoita");
+        }
+        return l;
     }
 
     private static List<HakijaDTO> hylatytHakijat(List<HakijaDTO> hakijat) {
@@ -426,7 +430,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         .noneMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
                 .collect(Collectors.toList());
         if (l.isEmpty()) {
-            throw new RuntimeException("Ei hylättyjä hakijoita");
+            throw new IllegalStateException("Ei hylättyjä hakijoita");
         }
         return l;
     }
