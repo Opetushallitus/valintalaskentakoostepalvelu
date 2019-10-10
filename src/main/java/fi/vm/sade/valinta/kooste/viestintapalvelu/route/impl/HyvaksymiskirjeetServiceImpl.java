@@ -303,9 +303,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                 exampleBatchId.compareAndSet(null, batchId);
                                 return Stream.empty();
                             } catch (Exception e) {
-                                LOG.error(String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, hakukohdeOid), e);
+                                String msg = String.format("Haun %s hakukohteen %s hyväksymiskirjeiden muodostaminen epäonnistui", hakuOid, hakukohdeOid);
+                                LOG.error(msg, e);
                                 prosessi.inkrementoiOhitettujaToita();
-                                return Stream.of(Poikkeus.koostepalvelupoikkeus(e.getMessage(), Collections.singletonList(new Tunniste(hakukohdeOid, Poikkeus.HAKUKOHDEOID))));
+                                return Stream.of(Poikkeus.koostepalvelupoikkeus(msg, Collections.singletonList(new Tunniste(hakukohdeOid, Poikkeus.HAKUKOHDEOID))));
                             }
                         })
                         .collect(Collectors.toList());
@@ -317,8 +318,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     prosessi.getPoikkeukset().addAll(poikkeukset);
                 }
             } catch (Exception e) {
-                LOG.error(String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid), e);
-                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                String msg = String.format("Haun %s hyväksymiskirjeiden muodostaminen hakukohteittain epäonnistui", hakuOid);
+                LOG.error(msg, e);
+                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(msg));
             }
         });
 
@@ -400,7 +402,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             } catch (Exception e) {
                 LOG.error(errorMessage, e);
                 prosessi.inkrementoiOhitettujaToita();
-                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(errorMessage));
             }
         });
 
