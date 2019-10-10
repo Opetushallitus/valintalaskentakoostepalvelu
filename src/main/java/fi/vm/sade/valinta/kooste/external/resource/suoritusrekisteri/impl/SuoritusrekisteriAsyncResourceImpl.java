@@ -18,6 +18,7 @@ import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -95,24 +96,31 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     }
 
     private Observable<List<Oppija>> batchedPostOppijas(List<String> opiskelijaOids, String url) {
+
         List<List<String>> oidBatches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
-        LOG.info("Batched POST: {} oids partitioned into {} batches", opiskelijaOids.size(), oidBatches.size());
+        if (oidBatches.isEmpty()) {
+            LOG.info("Batched POST: empty list of oids provided. Returning an empty set without api call.");
+            return Observable.just(Collections.emptyList());
+        } else {
+            LOG.info("Batched POST: {} oids partitioned into {} batches", opiskelijaOids.size(), oidBatches.size());
 
-        Observable<Observable<List<Oppija>>> obses = Observable.fromIterable(oidBatches).map(oidBatch ->
-                postAsObservableLazily(url,
-                        new TypeToken<List<Oppija>>() { }.getType(),
-                        Entity.entity(oidBatch, MediaType.APPLICATION_JSON_TYPE),
-                        client -> {
-                            client.accept(MediaType.APPLICATION_JSON_TYPE);
-                            LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), oidBatch.size());
-                            return client;
-                        })
-        );
+            Observable<Observable<List<Oppija>>> obses = Observable.fromIterable(oidBatches).map(oidBatch ->
+                    postAsObservableLazily(url,
+                            new TypeToken<List<Oppija>>() {
+                            }.getType(),
+                            Entity.entity(oidBatch, MediaType.APPLICATION_JSON_TYPE),
+                            client -> {
+                                client.accept(MediaType.APPLICATION_JSON_TYPE);
+                                LOG.info("Calling POST url {} with {} opiskelijaOids", client.getCurrentURI(), oidBatch.size());
+                                return client;
+                            })
+            );
 
-        // Add the elements returned by each response to one master list
-        Observable<List<Oppija>> allOppijas = Observable
-            .concat(obses);
-        return allOppijas;
+            // Add the elements returned by each response to one master list
+            Observable<List<Oppija>> allOppijas = Observable
+                    .concat(obses);
+            return allOppijas;
+        }
     }
 
     @Override
