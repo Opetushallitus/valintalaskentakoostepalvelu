@@ -2,9 +2,16 @@ package fi.vm.sade.valinta.kooste.kela.resource;
 
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.auditlog.Changes;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.ValintaResource;
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +60,7 @@ public class KelaResource {
     @Produces("application/json")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "Kela-reitin aktivointi", response = ProsessiId.class)
-    public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue) {
+    public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue, @Context HttpServletRequest request) {
         if (hakuTietue == null || hakuTietue.getHakuOids() == null || hakuTietue.getAlkupvm() == null || hakuTietue.getLoppupvm() == null
                 || hakuTietue.getHakuOids().isEmpty()) {
             throw new RuntimeException("Vähintään yksi hakuOid ja alku- ja loppupvm on annettava Kela-dokumentin luontia varten.");
@@ -67,6 +74,8 @@ public class KelaResource {
                         aineistonNimi, organisaationNimi, new KelaCache(hakukohdeResource, komotoResource), kelaProsessi, alkuPvm, loppuPvm));
         // SecurityContextHolder.getContext().getAuthentication()
         dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
+        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS,
+                ValintaResource.SIJOITTELUAKTIVOINTI, "petar-oid-aktivoi", Changes.EMPTY);
         return kelaProsessi.toProsessiId();
     }
 
@@ -74,8 +83,10 @@ public class KelaResource {
     @Path("/laheta")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "FTP-siirto", response = Response.class)
-    public Response laheta(String documentId) {
+    public Response laheta(String documentId, @Context HttpServletRequest request) {
         LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
+        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS,
+                ValintaResource.SIJOITTELUAKTIVOINTI, "petar-oid", Changes.EMPTY);
         kelaFtpRoute.aloitaKelaSiirto(documentId);
         return Response.ok().build();
     }
