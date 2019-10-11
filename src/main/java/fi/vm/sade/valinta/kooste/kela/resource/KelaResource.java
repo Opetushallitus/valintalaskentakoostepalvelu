@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.kela.resource;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -74,8 +77,14 @@ public class KelaResource {
                         aineistonNimi, organisaationNimi, new KelaCache(hakukohdeResource, komotoResource), kelaProsessi, alkuPvm, loppuPvm));
         // SecurityContextHolder.getContext().getAuthentication()
         dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
-        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS,
-                ValintaResource.SIJOITTELUAKTIVOINTI, "petar-oid-aktivoi", Changes.EMPTY);
+        Map<String, String> additionalAuditInfo = new HashMap<>();
+        String allHakuOids = hakuTietue.getHakuOids().stream().collect(Collectors.joining(","));
+        additionalAuditInfo.put("hakuOids", allHakuOids);
+        additionalAuditInfo.put("aineisto", aineistonNimi);
+        additionalAuditInfo.put("alkupvm", alkuPvm.toString());
+        additionalAuditInfo.put("loppupvm", loppuPvm.toString());
+        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.KELA_VASTAANOTTO_EXPORT_LUONTI,
+                ValintaResource.DOKUMENTTI, allHakuOids, Changes.EMPTY, additionalAuditInfo);
         return kelaProsessi.toProsessiId();
     }
 
@@ -85,8 +94,8 @@ public class KelaResource {
     @ApiOperation(value = "FTP-siirto", response = Response.class)
     public Response laheta(String documentId, @Context HttpServletRequest request) {
         LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
-        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.SIJOITTELU_KAYNNISTYS,
-                ValintaResource.SIJOITTELUAKTIVOINTI, "petar-oid", Changes.EMPTY);
+        AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.KELA_VASTAANOTTO_EXPORT_LATAUS_FTP,
+                ValintaResource.DOKUMENTTI, documentId, Changes.EMPTY);
         kelaFtpRoute.aloitaKelaSiirto(documentId);
         return Response.ok().build();
     }
