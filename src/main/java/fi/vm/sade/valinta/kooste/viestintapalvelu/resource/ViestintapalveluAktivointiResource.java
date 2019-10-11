@@ -6,11 +6,17 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
 import io.reactivex.Observable;
@@ -23,7 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
@@ -52,8 +63,6 @@ public class ViestintapalveluAktivointiResource {
     private KoekutsukirjeetService koekutsukirjeetService;
     @Autowired
     private HyvaksymiskirjeetService hyvaksymiskirjeetService;
-    @Autowired
-    private JalkiohjauskirjeService jalkiohjauskirjeService;
     @Autowired
     private EPostiService ePostiService;
     @Autowired
@@ -169,7 +178,6 @@ public class ViestintapalveluAktivointiResource {
             if (hakemuksillaRajaus == null) {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
-            LOG.info("Luodaan jälkiohjauskirjeet kielellä {} hakuun {}", hakemuksillaRajaus.getLanguageCode(), hakuOid);
             JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(
                     tarjoajaOid,
                     hakemuksillaRajaus.getLetterBodyText(),
@@ -179,10 +187,7 @@ public class ViestintapalveluAktivointiResource {
                     hakemuksillaRajaus.getLanguageCode() == null ? KieliUtil.SUOMI : hakemuksillaRajaus.getLanguageCode()
             );
             if (hakemuksillaRajaus.getHakemusOids() == null) {
-                KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-                dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-                jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO);
-                return prosessi.toProsessiId();
+                return hyvaksymiskirjeetService.jalkiohjauskirjeetHaulle(jalkiohjauskirjeDTO);
             } else {
                 return hyvaksymiskirjeetService.jalkiohjauskirjeetHakemuksille(jalkiohjauskirjeDTO, hakemuksillaRajaus.getHakemusOids());
             }

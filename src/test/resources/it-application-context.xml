@@ -75,7 +75,6 @@
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
     <mockito:mock id="valintatapajononVientiRoute" class="fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute" />
-    <mockito:mock id="jalkiohjauskirjeService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService" />
     <mockito:mock id="ePostiService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService" />
     <mockito:mock id="hyvaksymiskirjeetService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService" />
     <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />

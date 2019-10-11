@@ -267,6 +267,38 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         );
     }
 
+    @Override
+    public ProsessiId jalkiohjauskirjeetHaulle(JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
+        String hakuOid = jalkiohjauskirjeDTO.getHakuOid();
+        String asiointikieli = jalkiohjauskirjeDTO.getKielikoodi();
+        return this.yhdenKirjeeranProsessi(
+                this.bigBatchExecutor,
+                prosessi -> {
+                    CompletableFuture<List<HakijaDTO>> kaikkiHakijatF = valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(hakuOid);
+                    CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF = kaikkiHakijatF
+                            .thenComposeAsync(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream()
+                                    .map(HakijaDTO::getHakemusOid)
+                                    .collect(Collectors.toList())));
+                    CompletableFuture<List<HakijaDTO>> hakijatF = kaikkiHakijatF
+                            .thenComposeAsync(hakijat -> hakemuksetF.thenApplyAsync(hakemukset -> hylatytHakijat(
+                                    hakijat,
+                                    hakemukset,
+                                    asiointikieli
+                            )));
+                    return muodostaJalkiohjauskirjeet(
+                            prosessi,
+                            hakijatF,
+                            hakemuksetF,
+                            jalkiohjauskirjeDTO,
+                            true
+                    );
+                },
+                String.format("Aloitetaan haun %s jälkiohjauskirjeiden muodostaminen asiointikielelle %s", hakuOid, asiointikieli),
+                String.format("Haun %s jälkiohjauskirjeiden muodostaminen asiointikielelle %s valmistui", hakuOid, asiointikieli),
+                String.format("Haun %s jälkiohjauskirjeiden muodostaminen asiointikielelle %s epäonnistui", hakuOid, asiointikieli)
+        );
+    }
+
     public ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
         String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
         DokumenttiProsessi prosessi = new DokumenttiProsessi("", "", "", Collections.emptyList());
