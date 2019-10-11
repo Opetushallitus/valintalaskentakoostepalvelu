@@ -152,7 +152,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 prosessi -> {
                     CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF = hakemuksetByHakukohde(hakuOid, hakukohdeOid);
                     CompletableFuture<List<HakijaDTO>> hakijatF = valintaTulosServiceAsyncResource.getKaikkiHakijat(hakuOid, hakukohdeOid)
-                            .thenApplyAsync(HyvaksymiskirjeetServiceImpl::hylatytHakijat);
+                            .thenComposeAsync(hakijat -> hakemuksetF.thenApplyAsync(hakemukset -> hylatytHakijat(hakijat, hakemukset, null)));
                     CompletableFuture<ParametritParser> haunParametritF = CompletableFuture.completedFuture(new ParametritParser(new ParametritDTO(), ""));
                     return muodostaKirjeet(
                             prosessi,
@@ -425,8 +425,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         return l;
     }
 
-    private static List<HakijaDTO> hylatytHakijat(List<HakijaDTO> hakijat) {
+    private static List<HakijaDTO> hylatytHakijat(List<HakijaDTO> hakijat, Map<String, HakemusWrapper> hakemukset, String asiointikieli) {
         List<HakijaDTO> l = hakijat.stream()
+                .filter(hakija -> hakemukset.containsKey(hakija.getHakemusOid()))
+                .filter(hakija -> asiointikieli == null || asiointikieli.equalsIgnoreCase(hakemukset.get(hakija.getHakemusOid()).getAsiointikieli()))
                 .filter(hakija -> hakija.getHakutoiveet().stream()
                         .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
                         .noneMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
