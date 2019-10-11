@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -431,7 +432,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .filter(hakija -> asiointikieli == null || asiointikieli.equalsIgnoreCase(hakemukset.get(hakija.getHakemusOid()).getAsiointikieli()))
                 .filter(hakija -> hakija.getHakutoiveet().stream()
                         .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
-                        .noneMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
+                        .noneMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty() || valintatapajono.getTila() == HakemuksenTila.PERUNUT))
                 .collect(Collectors.toList());
         if (l.isEmpty()) {
             throw new IllegalStateException("Ei hylättyjä hakijoita");
