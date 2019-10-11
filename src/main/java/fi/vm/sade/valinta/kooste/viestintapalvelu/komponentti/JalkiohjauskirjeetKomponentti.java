@@ -59,7 +59,7 @@ public class JalkiohjauskirjeetKomponentti {
                 postinumero,
                 ylikirjoitettuPreferoitukielikoodi,
                 hyvaksymattomatHakijat,
-                hakemukset,
+                hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)),
                 jalkiohjauskirjeessaKaytetytHakukohteet,
                 hakuOid,
                 templateName,
@@ -74,7 +74,7 @@ public class JalkiohjauskirjeetKomponentti {
             Map<String, Koodi> postinumerot,
             String ylikirjoitettuPreferoitukielikoodi,
             @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
-            final Collection<HakemusWrapper> hakemukset,
+            Map<String, HakemusWrapper> hakemusOidHakemukset,
             final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
             @Simple("${property.hakuOid}") String hakuOid,
             @Property("templateName") String templateName,
@@ -88,7 +88,6 @@ public class JalkiohjauskirjeetKomponentti {
             throw new SijoittelupalveluException("Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
         }
         LOG.info("Aloitetaan {} kpl jälkiohjauskirjeen luonti", kaikkiHyvaksymattomat);
-        final Map<String, HakemusWrapper> hakemusOidHakemukset = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
         final List<Letter> kirjeet = new ArrayList<>();
         final boolean kaytetaanYlikirjoitettuKielikoodia = StringUtils.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
         String preferoituKielikoodi = kaytetaanYlikirjoitettuKielikoodia ? ylikirjoitettuPreferoitukielikoodi : KieliUtil.SUOMI;
