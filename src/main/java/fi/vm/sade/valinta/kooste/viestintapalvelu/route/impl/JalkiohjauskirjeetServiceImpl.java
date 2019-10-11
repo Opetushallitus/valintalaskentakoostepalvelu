@@ -83,12 +83,12 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     @Override
     public void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
-        valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid())
+        Observable.fromFuture(valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid()))
             .subscribeOn(Schedulers.newThread())
             .subscribe(
                     hakijat -> {
                         //VIALLISET DATA POIS FILTTEROINTI
-                        Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
+                        Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat);
                         muodostaKirjeet(false).accept(new JalkiohjausKirjeProsessiTuple(
                             prosessi,
                             jalkiohjauskirjeDTO,

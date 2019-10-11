@@ -58,5 +58,5 @@ public interface ValintaTulosServiceAsyncResource {
 
     CompletableFuture<List<HakijaDTO>> getKaikkiHakijat(String hakuOid, String hakukohdeOid);
 
-    Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
+    CompletableFuture<List<HakijaDTO>> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 }

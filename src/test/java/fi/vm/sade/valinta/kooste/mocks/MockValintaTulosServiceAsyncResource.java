@@ -124,7 +124,7 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
-        return Observable.just(new HakijaPaginationObject());
+    public CompletableFuture<List<HakijaDTO>> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
+        return CompletableFuture.completedFuture(new ArrayList<>());
     }
 }

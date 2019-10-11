@@ -128,15 +128,12 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
-        return getAsObservableLazilyWithInputStream(
+    public CompletableFuture<List<HakijaDTO>> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
+        return this.client.<HakijaPaginationObject>getJson(
                 getUrl("valinta-tulos-service.haku.ilmanhyvaksyntaa", hakuOid),
-                new GenericType<HakijaPaginationObject>(){}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+                Duration.ofMinutes(30),
+                new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType()
+        ).thenApplyAsync(HakijaPaginationObject::getResults);
     }
 
     @Override
