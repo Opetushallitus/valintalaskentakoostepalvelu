@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
@@ -169,15 +170,22 @@ public class ViestintapalveluAktivointiResource {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
             LOG.info("Luodaan jälkiohjauskirjeet kielellä {} hakuun {}", hakemuksillaRajaus.getLanguageCode(), hakuOid);
-            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(), templateName, tag, hakuOid, hakemuksillaRajaus.getLanguageCode());
+            JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(
+                    tarjoajaOid,
+                    hakemuksillaRajaus.getLetterBodyText(),
+                    templateName,
+                    tag,
+                    hakuOid,
+                    hakemuksillaRajaus.getLanguageCode() == null ? KieliUtil.SUOMI : hakemuksillaRajaus.getLanguageCode()
+            );
             if (hakemuksillaRajaus.getHakemusOids() == null) {
+                KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
+                dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
                 jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO);
+                return prosessi.toProsessiId();
             } else {
-                jalkiohjauskirjeService.jalkiohjauskirjeetHakemuksille(prosessi, jalkiohjauskirjeDTO, hakemuksillaRajaus.getHakemusOids());
+                return hyvaksymiskirjeetService.jalkiohjauskirjeetHakemuksille(jalkiohjauskirjeDTO, hakemuksillaRajaus.getHakemusOids());
             }
-            return prosessi.toProsessiId();
         } catch (Exception e) {
             LOG.error("Jälkiohjauskirjeiden luonnissa virhe!", e);
             throw new RuntimeException("Jälkiohjauskirjeiden luonti epäonnistui!", e);

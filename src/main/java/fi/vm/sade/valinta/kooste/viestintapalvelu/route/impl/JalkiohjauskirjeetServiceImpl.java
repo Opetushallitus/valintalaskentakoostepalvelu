@@ -76,34 +76,6 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         this.viePdfTimeoutMinutes = viePdfTimeoutMinutes;
     }
 
-    @Override
-    public void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids) {
-        final boolean onlyOne = hakemusOids.size() == 1;
-        Observable<List<HakijaDTO>> hakijatObs;
-        if(onlyOne) {
-            hakijatObs = Observable.fromFuture(valintaTulosServiceAsyncResource.getHakijaByHakemus(jalkiohjauskirjeDTO.getHakuOid(), hakemusOids.iterator().next()).thenApplyAsync(Collections::singletonList));
-        } else {
-            hakijatObs = valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid()).map(h -> h.getResults());
-        }
-        hakijatObs.subscribeOn(Schedulers.newThread())
-            .subscribe(
-                    hakijat -> {
-                        // VIALLISET DATA POIS FILTTEROINTI
-                        Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat);
-                        //WHITELIST FILTTEROINTI
-                        Set<String> whitelist = Sets.newHashSet(hakemusOids);
-                        Collection<HakijaDTO> whitelistinJalkeen = vainHakeneetJalkiohjattavat
-                                .stream()
-                                .filter(h -> whitelist.contains(h.getHakemusOid()))
-                                .collect(Collectors.toList());
-                        muodostaKirjeet(true).accept(new JalkiohjausKirjeProsessiTuple(
-                            prosessi,
-                            jalkiohjauskirjeDTO,
-                            () -> haeHaunResurssit(jalkiohjauskirjeDTO.getHakuOid(), whitelistinJalkeen, jalkiohjauskirjeDTO)));
-                    },
-                    throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
-    }
-
     void handleKoulutuspaikattomienHakuError(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, Throwable throwable) {
         LOG.error("Koulutuspaikattomien haku haulle " + jalkiohjauskirjeDTO.getHakuOid() + " epaonnistui!", throwable);
         prosessi.keskeyta();

@@ -22,6 +22,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
@@ -30,6 +31,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -128,7 +130,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                     null,
                                     hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()
                             )));
-                    return muodostaKirjeet(
+                    return muodostaHyvaksymiskirjeet(
                             prosessi,
                             hakuParametritService.getParametritForHakuAsync(hakuOid),
                             hakijatF,
@@ -145,6 +147,33 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     @Override
+    public ProsessiId jalkiohjauskirjeetHakemuksille(JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids) {
+        String hakuOid = jalkiohjauskirjeDTO.getHakuOid();
+        return this.yhdenKirjeeranProsessi(
+                this.smallBatchExecutor,
+                prosessi -> {
+                    CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF = hakemuksetByOids(hakuOid, hakemusOids);
+                    CompletableFuture<List<HakijaDTO>> hakijatF = hakijatByHakemusOids(hakuOid, hakemusOids)
+                            .thenComposeAsync(hakijat -> hakemuksetF.thenApplyAsync(hakemukset -> hylatytHakijat(
+                                    hakijat,
+                                    hakemukset,
+                                    jalkiohjauskirjeDTO.getKielikoodi()
+                            )));
+                    return muodostaJalkiohjauskirjeet(
+                            prosessi,
+                            hakijatF,
+                            hakemuksetF,
+                            jalkiohjauskirjeDTO,
+                            false
+                    );
+                },
+                String.format("Aloitetaan jälkiohjauskirjeiden muodostaminen %d hakemukselle", hakemusOids.size()),
+                String.format("Kälkiohjauskirjeiden muodostaminen %d hakemukselle valmistui", hakemusOids.size()),
+                String.format("Jälkiohjauskirjeiden muodostaminen %d hakemukselle epäonnistui", hakemusOids.size())
+        );
+    }
+
+    @Override
     public ProsessiId jalkiohjauskirjeHakukohteelle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
         String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
         String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
@@ -155,7 +184,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     CompletableFuture<List<HakijaDTO>> hakijatF = valintaTulosServiceAsyncResource.getKaikkiHakijat(hakuOid, hakukohdeOid)
                             .thenComposeAsync(hakijat -> hakemuksetF.thenApplyAsync(hakemukset -> hylatytHakijat(hakijat, hakemukset, null)));
                     CompletableFuture<ParametritParser> haunParametritF = CompletableFuture.completedFuture(new ParametritParser(new ParametritDTO(), ""));
-                    return muodostaKirjeet(
+                    return muodostaHyvaksymiskirjeet(
                             prosessi,
                             haunParametritF,
                             hakijatF,
@@ -187,7 +216,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                     null,
                                     hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet()
                             )));
-                    return muodostaKirjeet(
+                    return muodostaHyvaksymiskirjeet(
                             prosessi,
                             hakuParametritService.getParametritForHakuAsync(hakuOid),
                             hakijatF,
@@ -222,7 +251,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                     asiointikieli,
                                     false
                             )));
-                    return muodostaKirjeet(
+                    return muodostaHyvaksymiskirjeet(
                             prosessi,
                             hakuParametritService.getParametritForHakuAsync(hakuOid),
                             hakijatF,
@@ -350,7 +379,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .thenApplyAsync(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
     }
 
-    private CompletableFuture<String> muodostaKirjeet(
+    private CompletableFuture<String> muodostaHyvaksymiskirjeet(
             DokumenttiProsessi prosessi,
             CompletableFuture<ParametritParser> haunParametritF,
             CompletableFuture<List<HakijaDTO>> hakijatF,
@@ -380,6 +409,32 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         hyvaksymiskirjeDTO.getTemplateName(),
                         parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametritF.join()),
                         parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametritF.join()),
+                        sahkoinenKorkeakoulunMassaposti))
+                .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
+    }
+
+    private CompletableFuture<String> muodostaJalkiohjauskirjeet(
+            DokumenttiProsessi prosessi,
+            CompletableFuture<List<HakijaDTO>> hakijatF,
+            CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF,
+            JalkiohjauskirjeDTO jalkiohjauskirjeDTO,
+            boolean sahkoinenKorkeakoulunMassaposti
+    ) {
+        CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
+        CompletableFuture<Map<String, Koodi>> maatjavaltiot1F = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        CompletableFuture<Map<String, Koodi>> postinumerotF = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
+        return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, hakijatF, hakemuksetF, hakukohteetF)
+                .thenApplyAsync(v -> JalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(
+                        maatjavaltiot1F.join(),
+                        postinumerotF.join(),
+                        jalkiohjauskirjeDTO.getKielikoodi(),
+                        hakijatF.join(),
+                        hakemuksetF.join(),
+                        hakukohteetF.join(),
+                        jalkiohjauskirjeDTO.getHakuOid(),
+                        jalkiohjauskirjeDTO.getTemplateName(),
+                        jalkiohjauskirjeDTO.getSisalto(),
+                        jalkiohjauskirjeDTO.getTag(),
                         sahkoinenKorkeakoulunMassaposti))
                 .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
     }
