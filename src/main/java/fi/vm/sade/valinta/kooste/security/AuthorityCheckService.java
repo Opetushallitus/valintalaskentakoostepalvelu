@@ -7,8 +7,8 @@ import static fi.vm.sade.valinta.kooste.util.SecurityUtil.isRootOrganizationOID;
 import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationGroupOidsFromSecurityRoles;
 import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationOidsFromSecurityRoles;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import com.google.common.collect.Sets;
 
+import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
@@ -23,7 +23,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import javax.ws.rs.ForbiddenException;
 import java.util.Arrays;
 import java.util.Collection;
