@@ -151,7 +151,7 @@ public class ValintalaskentaKerrallaResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
-        asyncObservableCheckAuthorizationForHakuWithLaskentaUuid(uuid).subscribe(
+        checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid).subscribe(
                 allowed -> {
                     kaynnistaLaskentaUudelleen(uuid, asyncResponse);
                 },
@@ -191,7 +191,7 @@ public class ValintalaskentaKerrallaResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
     public Laskenta status(@PathParam("uuid") String uuid) {
-        checkAuthorizationForHakuWithLaskentaUuid(uuid);
+        checkAuthorizationForHakuWithLaskentaInMemory(uuid);
         try {
             return valintalaskentaValvomo.fetchLaskenta(uuid);
         } catch (Exception e) {
@@ -205,7 +205,7 @@ public class ValintalaskentaKerrallaResource {
     @Produces("application/vnd.ms-excel")
     @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
     public void statusXls(@PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
-        asyncObservableCheckAuthorizationForHakuWithLaskentaUuid(uuid).subscribe(
+        checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid).subscribe(
                 allowed -> {
                     asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
                     asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
@@ -225,7 +225,7 @@ public class ValintalaskentaKerrallaResource {
         if (uuid == null) {
             return errorResponse("Uuid on pakollinen");
         }
-        asyncObservableCheckAuthorizationForHakuWithLaskentaUuid(uuid).subscribe(
+        checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid).subscribe(
                 allowed -> {
                     peruutaLaskenta(uuid, lopetaVainJonossaOlevaLaskenta);
                 }
@@ -281,14 +281,14 @@ public class ValintalaskentaKerrallaResource {
         return null;
     }
 
-    private void checkAuthorizationForHakuWithLaskentaUuid(String uuid) {
+    private void checkAuthorizationForHakuWithLaskentaInMemory(String uuid) {
         Laskenta laskenta = valintalaskentaValvomo.fetchLaskenta(uuid);
         authorityCheckService.checkAuthorizationForHaku(laskenta.getHakuOid(), valintalaskentaAllowedRoles);
     }
 
-    private Observable<Boolean> asyncObservableCheckAuthorizationForHakuWithLaskentaUuid(String uuid) {
+    private Observable<Boolean> checkAuthorizationForHakuWithLaskentaFromSeuranta(String uuid) {
         AuthorityCheckService.Context context = authorityCheckService.getContext();
-        return getObservableHakuForLaskenta(uuid).map(
+        return getHakuForLaskentaFromSeuranta(uuid).map(
                 hakuOid -> {
                     authorityCheckService.withContext(context, () -> {
                         authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
@@ -298,7 +298,7 @@ public class ValintalaskentaKerrallaResource {
         );
     }
 
-    private Observable<String> getObservableHakuForLaskenta(String uuid) {
+    private Observable<String> getHakuForLaskentaFromSeuranta(String uuid) {
         return seurantaAsyncResource.laskenta(uuid).map(
                 laskenta -> {
                     return laskenta.getHakuOid();
