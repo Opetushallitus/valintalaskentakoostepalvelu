@@ -151,7 +151,18 @@ public class ValintalaskentaKerrallaResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
-        checkAuthorizationForHakuWithLaskentaUuid(uuid);
+        asyncObservableCheckAuthorizationForHakuWithLaskentaUuid(uuid).subscribe(
+                allowed -> {
+                    kaynnistaLaskentaUudelleen(uuid, asyncResponse);
+                },
+                error -> {
+                    LOG.error("Valintalaskennan uudelleenajo epäonnistui, koska käyttöoikeudet eivät riittäneet!");
+                    asyncResponse.resume(error);
+                }
+        );
+    }
+
+    private void kaynnistaLaskentaUudelleen(String uuid, AsyncResponse asyncResponse) {
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
@@ -214,19 +225,32 @@ public class ValintalaskentaKerrallaResource {
         if (uuid == null) {
             return errorResponse("Uuid on pakollinen");
         }
+        asyncObservableCheckAuthorizationForHakuWithLaskentaUuid(uuid).subscribe(
+                allowed -> {
+                    peruutaLaskenta(uuid, lopetaVainJonossaOlevaLaskenta);
+                }
+        );
+        return Response.ok().build();
+    }
 
-        checkAuthorizationForHakuWithLaskentaUuid(uuid);
-
+    private void peruutaLaskenta(String uuid, Boolean lopetaVainJonossaOlevaLaskenta) {
         if(Boolean.TRUE.equals(lopetaVainJonossaOlevaLaskenta)) {
             boolean onkoLaskentaVielaJonossa = valintalaskentaValvomo.fetchLaskenta(uuid) == null;
             if(!onkoLaskentaVielaJonossa) {
                 // Laskentaa suoritetaan jo joten ei pysayteta
-                return Response.ok().build();
+                return;
             }
         }
         stop(uuid);
-        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Peruutettu käyttäjän toimesta"))).subscribe(ok -> stop(uuid), nok -> stop(uuid));
-        return Response.ok().build();
+        seurantaAsyncResource.merkkaaLaskennanTila(
+                uuid,
+                LaskentaTila.PERUUTETTU,
+                Optional.of(ilmoitus("Peruutettu käyttäjän toimesta"))
+        ).subscribe(
+                ok -> stop(uuid),
+                nok -> stop(uuid)
+        );
+        return;
     }
 
     private void stop(String uuid) {
