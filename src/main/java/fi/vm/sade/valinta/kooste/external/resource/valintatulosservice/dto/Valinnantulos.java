@@ -28,6 +28,9 @@ public class Valinnantulos {
     private String ehdollisenHyvaksymisenEhtoFI;
     private String ehdollisenHyvaksymisenEhtoSV;
     private String ehdollisenHyvaksymisenEhtoEN;
+    private String ehdollisenHyvaksymisenEhtoTekstiFI;
+    private String ehdollisenHyvaksymisenEhtoTekstiSV;
+    private String ehdollisenHyvaksymisenEhtoTekstiEN;
     private OffsetDateTime hyvaksymiskirjeLahetetty;
 
     public String getHakukohdeOid() {
@@ -92,6 +95,30 @@ public class Valinnantulos {
 
     public void setEhdollisenHyvaksymisenEhtoEN(String ehdollisenHyvaksymisenEhtoEN) {
         this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoTekstiFI() {
+        return ehdollisenHyvaksymisenEhtoTekstiFI;
+    }
+
+    public void setEhdollisenHyvaksymisenEhtoTekstiFI(String ehdollisenHyvaksymisenEhtoTekstiFI) {
+        this.ehdollisenHyvaksymisenEhtoTekstiFI = ehdollisenHyvaksymisenEhtoTekstiFI;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoTekstiSV() {
+        return ehdollisenHyvaksymisenEhtoTekstiSV;
+    }
+
+    public void setEhdollisenHyvaksymisenEhtoTekstiSV(String ehdollisenHyvaksymisenEhtoTekstiSV) {
+        this.ehdollisenHyvaksymisenEhtoTekstiSV = ehdollisenHyvaksymisenEhtoTekstiSV;
+    }
+
+    public String getEhdollisenHyvaksymisenEhtoTekstiEN() {
+        return ehdollisenHyvaksymisenEhtoTekstiEN;
+    }
+
+    public void setEhdollisenHyvaksymisenEhtoTekstiEN(String ehdollisenHyvaksymisenEhtoTekstiEN) {
+        this.ehdollisenHyvaksymisenEhtoTekstiEN = ehdollisenHyvaksymisenEhtoTekstiEN;
     }
 
     public boolean getJulkaistavissa() {
@@ -228,6 +255,9 @@ public class Valinnantulos {
                 ", ehdollisenHyvaksymisenEhtoFI=" + ehdollisenHyvaksymisenEhtoFI +
                 ", ehdollisenHyvaksymisenEhtoSV=" + ehdollisenHyvaksymisenEhtoSV +
                 ", ehdollisenHyvaksymisenEhtoEN=" + ehdollisenHyvaksymisenEhtoEN +
+                ", ehdollisenHyvaksymisenEhtoTekstiFI=" + ehdollisenHyvaksymisenEhtoTekstiFI +
+                ", ehdollisenHyvaksymisenEhtoTekstiSV=" + ehdollisenHyvaksymisenEhtoTekstiSV +
+                ", ehdollisenHyvaksymisenEhtoTekstiEN=" + ehdollisenHyvaksymisenEhtoTekstiEN +
                 ", julkaistavissa=" + julkaistavissa +
                 ", hyvaksyttyVarasijalta=" + hyvaksyttyVarasijalta +
                 ", hyvaksyPeruuntunut=" + hyvaksyPeruuntunut +

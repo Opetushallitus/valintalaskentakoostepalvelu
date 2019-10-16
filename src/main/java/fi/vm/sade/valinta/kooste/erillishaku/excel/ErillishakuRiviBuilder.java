@@ -20,6 +20,9 @@ public class ErillishakuRiviBuilder {
     private String ehdollisenHyvaksymisenEhtoFI = "";
     private String ehdollisenHyvaksymisenEhtoSV = "";
     private String ehdollisenHyvaksymisenEhtoEN = "";
+    private String ehdollisenHyvaksymisenEhtoTekstiFI = "";
+    private String ehdollisenHyvaksymisenEhtoTekstiSV = "";
+    private String ehdollisenHyvaksymisenEhtoTekstiEN = "";
     private Date hyvaksymiskirjeLahetetty;
     private String vastaanottoTila = "";
     private String ilmoittautumisTila = "";
@@ -57,6 +60,9 @@ public class ErillishakuRiviBuilder {
                 .ehdollisenHyvaksymisenEhtoFI(rivi.getEhdollisenHyvaksymisenEhtoFI())
                 .ehdollisenHyvaksymisenEhtoSV(rivi.getEhdollisenHyvaksymisenEhtoSV())
                 .ehdollisenHyvaksymisenEhtoEN(rivi.getEhdollisenHyvaksymisenEhtoEN())
+                .ehdollisenHyvaksymisenEhtoTekstiFI(rivi.getEhdollisenHyvaksymisenEhtoTekstiFI())
+                .ehdollisenHyvaksymisenEhtoTekstiSV(rivi.getEhdollisenHyvaksymisenEhtoTekstiSV())
+                .ehdollisenHyvaksymisenEhtoTekstiEN(rivi.getEhdollisenHyvaksymisenEhtoTekstiEN())
                 .hyvaksymiskirjeLahetetty(rivi.getHyvaksymiskirjeLahetetty())
                 .vastaanottoTila(rivi.getVastaanottoTila())
                 .ilmoittautumisTila(rivi.getIlmoittautumisTila())
@@ -148,6 +154,27 @@ public class ErillishakuRiviBuilder {
 
     public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoEN(String ehdollisenHyvaksymisenEhtoEN) {
         this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
+        return this;
+    }
+
+    public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoTekstiFI(String ehdollisenHyvaksymisenEhtoTekstiFI) {
+        if (ehdollisenHyvaksymisenEhtoTekstiFI != null) {
+            this.ehdollisenHyvaksymisenEhtoTekstiFI = ehdollisenHyvaksymisenEhtoTekstiFI;
+        }
+        return this;
+    }
+
+    public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoTekstiSV(String ehdollisenHyvaksymisenEhtoTekstiSV) {
+        if (ehdollisenHyvaksymisenEhtoTekstiSV != null) {
+            this.ehdollisenHyvaksymisenEhtoTekstiSV = ehdollisenHyvaksymisenEhtoTekstiSV;
+        }
+        return this;
+    }
+
+    public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoTekstiEN(String ehdollisenHyvaksymisenEhtoTekstiEN) {
+        if (ehdollisenHyvaksymisenEhtoTekstiEN != null) {
+            this.ehdollisenHyvaksymisenEhtoTekstiEN = ehdollisenHyvaksymisenEhtoTekstiEN;
+        }
         return this;
     }
 
@@ -253,6 +280,9 @@ public class ErillishakuRiviBuilder {
                 ehdollisenHyvaksymisenEhtoFI,
                 ehdollisenHyvaksymisenEhtoSV,
                 ehdollisenHyvaksymisenEhtoEN,
+                ehdollisenHyvaksymisenEhtoTekstiFI,
+                ehdollisenHyvaksymisenEhtoTekstiSV,
+                ehdollisenHyvaksymisenEhtoTekstiEN,
                 hyvaksymiskirjeLahetetty,
                 vastaanottoTila,
                 ilmoittautumisTila,
