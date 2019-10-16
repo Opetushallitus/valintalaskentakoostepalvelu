@@ -147,6 +147,12 @@ public class AuthorityCheckService {
         }
     }
 
+    /**
+     * Käyttöoikeustarkastelun konteksti
+     *
+     * Tämän avulla käyttöoikeustarkastelun voi siirtää käyttäjän
+     * tunnistaneesta säikeestä toiseen säikeeseen.
+     */
     public static class Context {
         protected final SecurityContext securityContext;
 

@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import io.reactivex.Observable;
@@ -287,21 +288,22 @@ public class ValintalaskentaKerrallaResource {
     }
 
     private Observable<Boolean> checkAuthorizationForHakuWithLaskentaFromSeuranta(String uuid) {
+        // Tallenna tätä pyyntöä suorittavan säikeen konteksti, jotta samaan käyttäjätietoon
+        // voidaan viitata tarkastelun suorittavasta säikeestä.
         AuthorityCheckService.Context context = authorityCheckService.getContext();
         return getHakuForLaskentaFromSeuranta(uuid).map(
-                hakuOid -> {
-                    authorityCheckService.withContext(context, () -> {
-                        authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
-                    });
-                    return Boolean.TRUE;
-                }
+                hakuOid -> checkAuthorizationForHakuInContext(context, hakuOid)
         );
     }
 
+    private Boolean checkAuthorizationForHakuInContext(AuthorityCheckService.Context context, String hakuOid) {
+        authorityCheckService.withContext(context, () -> {
+            authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
+        });
+        return Boolean.TRUE;
+    }
+
     private Observable<String> getHakuForLaskentaFromSeuranta(String uuid) {
-        return seurantaAsyncResource.laskenta(uuid).map(
-                laskenta -> {
-                    return laskenta.getHakuOid();
-                });
+        return seurantaAsyncResource.laskenta(uuid).map(LaskentaDto::getHakuOid);
     }
 }
