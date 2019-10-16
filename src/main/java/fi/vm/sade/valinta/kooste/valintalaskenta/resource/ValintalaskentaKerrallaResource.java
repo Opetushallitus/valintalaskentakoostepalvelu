@@ -231,6 +231,7 @@ public class ValintalaskentaKerrallaResource {
                     peruutaLaskenta(uuid, lopetaVainJonossaOlevaLaskenta);
                 }
         );
+        // Palauta OK odottamatta vastausta oikeustarkasteluun ja peruutuspyyntöön
         return Response.ok().build();
     }
 
