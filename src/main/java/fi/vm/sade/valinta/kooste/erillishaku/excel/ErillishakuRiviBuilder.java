@@ -20,9 +20,9 @@ public class ErillishakuRiviBuilder {
     private String ehdollisenHyvaksymisenEhtoFI = "";
     private String ehdollisenHyvaksymisenEhtoSV = "";
     private String ehdollisenHyvaksymisenEhtoEN = "";
-    private String ehdollisenHyvaksymisenEhtoTekstiFI = "";
-    private String ehdollisenHyvaksymisenEhtoTekstiSV = "";
-    private String ehdollisenHyvaksymisenEhtoTekstiEN = "";
+    private String valinnantilanKuvauksenTekstiFI = "";
+    private String valinnantilanKuvauksenTekstiSV = "";
+    private String valinnantilanKuvauksenTekstiEN = "";
     private Date hyvaksymiskirjeLahetetty;
     private String vastaanottoTila = "";
     private String ilmoittautumisTila = "";
@@ -60,9 +60,9 @@ public class ErillishakuRiviBuilder {
                 .ehdollisenHyvaksymisenEhtoFI(rivi.getEhdollisenHyvaksymisenEhtoFI())
                 .ehdollisenHyvaksymisenEhtoSV(rivi.getEhdollisenHyvaksymisenEhtoSV())
                 .ehdollisenHyvaksymisenEhtoEN(rivi.getEhdollisenHyvaksymisenEhtoEN())
-                .ehdollisenHyvaksymisenEhtoTekstiFI(rivi.getEhdollisenHyvaksymisenEhtoTekstiFI())
-                .ehdollisenHyvaksymisenEhtoTekstiSV(rivi.getEhdollisenHyvaksymisenEhtoTekstiSV())
-                .ehdollisenHyvaksymisenEhtoTekstiEN(rivi.getEhdollisenHyvaksymisenEhtoTekstiEN())
+                .valinnantilanKuvauksenTekstiFI(rivi.getValinnantilanKuvauksenTekstiFI())
+                .valinnantilanKuvauksenTekstiSV(rivi.getValinnantilanKuvauksenTekstiSV())
+                .valinnantilanKuvauksenTekstiEN(rivi.getValinnantilanKuvauksenTekstiEN())
                 .hyvaksymiskirjeLahetetty(rivi.getHyvaksymiskirjeLahetetty())
                 .vastaanottoTila(rivi.getVastaanottoTila())
                 .ilmoittautumisTila(rivi.getIlmoittautumisTila())
@@ -157,23 +157,23 @@ public class ErillishakuRiviBuilder {
         return this;
     }
 
-    public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoTekstiFI(String ehdollisenHyvaksymisenEhtoTekstiFI) {
-        if (ehdollisenHyvaksymisenEhtoTekstiFI != null) {
-            this.ehdollisenHyvaksymisenEhtoTekstiFI = ehdollisenHyvaksymisenEhtoTekstiFI;
+    public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiFI(String valinnantilanKuvauksenTekstiFI) {
+        if (valinnantilanKuvauksenTekstiFI != null) {
+            this.valinnantilanKuvauksenTekstiFI = valinnantilanKuvauksenTekstiFI;
         }
         return this;
     }
 
-    public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoTekstiSV(String ehdollisenHyvaksymisenEhtoTekstiSV) {
-        if (ehdollisenHyvaksymisenEhtoTekstiSV != null) {
-            this.ehdollisenHyvaksymisenEhtoTekstiSV = ehdollisenHyvaksymisenEhtoTekstiSV;
+    public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiSV(String valinnantilanKuvauksenTekstiSV) {
+        if (valinnantilanKuvauksenTekstiSV != null) {
+            this.valinnantilanKuvauksenTekstiSV = valinnantilanKuvauksenTekstiSV;
         }
         return this;
     }
 
-    public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoTekstiEN(String ehdollisenHyvaksymisenEhtoTekstiEN) {
-        if (ehdollisenHyvaksymisenEhtoTekstiEN != null) {
-            this.ehdollisenHyvaksymisenEhtoTekstiEN = ehdollisenHyvaksymisenEhtoTekstiEN;
+    public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiEN(String valinnantilanKuvauksenTekstiEN) {
+        if (valinnantilanKuvauksenTekstiEN != null) {
+            this.valinnantilanKuvauksenTekstiEN = valinnantilanKuvauksenTekstiEN;
         }
         return this;
     }
@@ -280,9 +280,9 @@ public class ErillishakuRiviBuilder {
                 ehdollisenHyvaksymisenEhtoFI,
                 ehdollisenHyvaksymisenEhtoSV,
                 ehdollisenHyvaksymisenEhtoEN,
-                ehdollisenHyvaksymisenEhtoTekstiFI,
-                ehdollisenHyvaksymisenEhtoTekstiSV,
-                ehdollisenHyvaksymisenEhtoTekstiEN,
+                valinnantilanKuvauksenTekstiFI,
+                valinnantilanKuvauksenTekstiSV,
+                valinnantilanKuvauksenTekstiEN,
                 hyvaksymiskirjeLahetetty,
                 vastaanottoTila,
                 ilmoittautumisTila,

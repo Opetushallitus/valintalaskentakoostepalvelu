@@ -268,9 +268,9 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                         erillishaunHakijaDto,
                         doAinoastaanHakemuksenTilaPaivitys.apply(erillishaunHakijaDto)
                 );
-                valinnantulos.setEhdollisenHyvaksymisenEhtoTekstiFI(erillishakuRivi.getEhdollisenHyvaksymisenEhtoTekstiFI());
-                valinnantulos.setEhdollisenHyvaksymisenEhtoTekstiSV(erillishakuRivi.getEhdollisenHyvaksymisenEhtoTekstiSV());
-                valinnantulos.setEhdollisenHyvaksymisenEhtoTekstiEN(erillishakuRivi.getEhdollisenHyvaksymisenEhtoTekstiEN());
+                valinnantulos.setValinnantilanKuvauksenTekstiFI(erillishakuRivi.getValinnantilanKuvauksenTekstiFI());
+                valinnantulos.setValinnantilanKuvauksenTekstiSV(erillishakuRivi.getValinnantilanKuvauksenTekstiSV());
+                valinnantulos.setValinnantilanKuvauksenTekstiEN(erillishakuRivi.getValinnantilanKuvauksenTekstiEN());
                 return valinnantulos;
             };
 

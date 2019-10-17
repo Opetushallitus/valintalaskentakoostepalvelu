@@ -162,9 +162,9 @@ public class ErillishaunVientiService {
                                     tulos.getEhdollisenHyvaksymisenEhtoEN()
                             ),
                             tulos.getHakukohdeOid(),
-                            tulos.getEhdollisenHyvaksymisenEhtoTekstiFI(),
-                            tulos.getEhdollisenHyvaksymisenEhtoTekstiSV(),
-                            tulos.getEhdollisenHyvaksymisenEhtoTekstiEN()
+                            tulos.getValinnantilanKuvauksenTekstiFI(),
+                            tulos.getValinnantilanKuvauksenTekstiSV(),
+                            tulos.getValinnantilanKuvauksenTekstiEN()
                     )
             ).orElse(
                     createErillishakuRivi(hakemus.getOid(), hakemus,
@@ -198,9 +198,9 @@ public class ErillishaunVientiService {
             String hakemuksenTila,
             Valintatulos valintatulos,
             String hakukohdeOid,
-            String ehdollisenHyvaksymisenEhtoTekstiFI,
-            String ehdollisenHyvaksymisenEhtoTekstiSV,
-            String ehdollisenHyvaksymisenEhtoTekstiEN
+            String valinnantilanKuvauksenTekstiFI,
+            String valinnantilanKuvauksenTekstiSV,
+            String valinnantilanKuvauksenTekstiEN
     ) {
         ErillishakuRiviBuilder builder = new ErillishakuRiviBuilder()
                 .hakemusOid(oid)
@@ -226,9 +226,9 @@ public class ErillishaunVientiService {
                 .toisenAsteenSuoritusmaa(wrapper.getToisenAsteenSuoritusmaa())
                 .maksuvelvollisuus(wrapper.getMaksuvelvollisuus(hakukohdeOid))
                 .maksuntila(wrapper.isMaksuvelvollinen(hakukohdeOid) ? lukuvuosimaksu.orElse(Maksuntila.MAKSAMATTA) : null)
-                .ehdollisenHyvaksymisenEhtoTekstiFI(ehdollisenHyvaksymisenEhtoTekstiFI)
-                .ehdollisenHyvaksymisenEhtoTekstiSV(ehdollisenHyvaksymisenEhtoTekstiSV)
-                .ehdollisenHyvaksymisenEhtoTekstiEN(ehdollisenHyvaksymisenEhtoTekstiEN);
+                .valinnantilanKuvauksenTekstiFI(valinnantilanKuvauksenTekstiFI)
+                .valinnantilanKuvauksenTekstiSV(valinnantilanKuvauksenTekstiSV)
+                .valinnantilanKuvauksenTekstiEN(valinnantilanKuvauksenTekstiEN);
 
         if (valintatulos != null) {
             builder

@@ -28,9 +28,9 @@ public class Valinnantulos {
     private String ehdollisenHyvaksymisenEhtoFI;
     private String ehdollisenHyvaksymisenEhtoSV;
     private String ehdollisenHyvaksymisenEhtoEN;
-    private String ehdollisenHyvaksymisenEhtoTekstiFI;
-    private String ehdollisenHyvaksymisenEhtoTekstiSV;
-    private String ehdollisenHyvaksymisenEhtoTekstiEN;
+    private String valinnantilanKuvauksenTekstiFI;
+    private String valinnantilanKuvauksenTekstiSV;
+    private String valinnantilanKuvauksenTekstiEN;
     private OffsetDateTime hyvaksymiskirjeLahetetty;
 
     public String getHakukohdeOid() {
@@ -97,28 +97,28 @@ public class Valinnantulos {
         this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
     }
 
-    public String getEhdollisenHyvaksymisenEhtoTekstiFI() {
-        return ehdollisenHyvaksymisenEhtoTekstiFI;
+    public String getValinnantilanKuvauksenTekstiFI() {
+        return valinnantilanKuvauksenTekstiFI;
     }
 
-    public void setEhdollisenHyvaksymisenEhtoTekstiFI(String ehdollisenHyvaksymisenEhtoTekstiFI) {
-        this.ehdollisenHyvaksymisenEhtoTekstiFI = ehdollisenHyvaksymisenEhtoTekstiFI;
+    public void setValinnantilanKuvauksenTekstiFI(String valinnantilanKuvauksenTekstiFI) {
+        this.valinnantilanKuvauksenTekstiFI = valinnantilanKuvauksenTekstiFI;
     }
 
-    public String getEhdollisenHyvaksymisenEhtoTekstiSV() {
-        return ehdollisenHyvaksymisenEhtoTekstiSV;
+    public String getValinnantilanKuvauksenTekstiSV() {
+        return valinnantilanKuvauksenTekstiSV;
     }
 
-    public void setEhdollisenHyvaksymisenEhtoTekstiSV(String ehdollisenHyvaksymisenEhtoTekstiSV) {
-        this.ehdollisenHyvaksymisenEhtoTekstiSV = ehdollisenHyvaksymisenEhtoTekstiSV;
+    public void setValinnantilanKuvauksenTekstiSV(String valinnantilanKuvauksenTekstiSV) {
+        this.valinnantilanKuvauksenTekstiSV = valinnantilanKuvauksenTekstiSV;
     }
 
-    public String getEhdollisenHyvaksymisenEhtoTekstiEN() {
-        return ehdollisenHyvaksymisenEhtoTekstiEN;
+    public String getValinnantilanKuvauksenTekstiEN() {
+        return valinnantilanKuvauksenTekstiEN;
     }
 
-    public void setEhdollisenHyvaksymisenEhtoTekstiEN(String ehdollisenHyvaksymisenEhtoTekstiEN) {
-        this.ehdollisenHyvaksymisenEhtoTekstiEN = ehdollisenHyvaksymisenEhtoTekstiEN;
+    public void setValinnantilanKuvauksenTekstiEN(String valinnantilanKuvauksenTekstiEN) {
+        this.valinnantilanKuvauksenTekstiEN = valinnantilanKuvauksenTekstiEN;
     }
 
     public boolean getJulkaistavissa() {
@@ -255,9 +255,9 @@ public class Valinnantulos {
                 ", ehdollisenHyvaksymisenEhtoFI=" + ehdollisenHyvaksymisenEhtoFI +
                 ", ehdollisenHyvaksymisenEhtoSV=" + ehdollisenHyvaksymisenEhtoSV +
                 ", ehdollisenHyvaksymisenEhtoEN=" + ehdollisenHyvaksymisenEhtoEN +
-                ", ehdollisenHyvaksymisenEhtoTekstiFI=" + ehdollisenHyvaksymisenEhtoTekstiFI +
-                ", ehdollisenHyvaksymisenEhtoTekstiSV=" + ehdollisenHyvaksymisenEhtoTekstiSV +
-                ", ehdollisenHyvaksymisenEhtoTekstiEN=" + ehdollisenHyvaksymisenEhtoTekstiEN +
+                ", valinnantilanKuvauksenTekstiFI=" + valinnantilanKuvauksenTekstiFI +
+                ", valinnantilanKuvauksenTekstiSV=" + valinnantilanKuvauksenTekstiSV +
+                ", valinnantilanKuvauksenTekstiEN=" + valinnantilanKuvauksenTekstiEN +
                 ", julkaistavissa=" + julkaistavissa +
                 ", hyvaksyttyVarasijalta=" + hyvaksyttyVarasijalta +
                 ", hyvaksyPeruuntunut=" + hyvaksyPeruuntunut +
