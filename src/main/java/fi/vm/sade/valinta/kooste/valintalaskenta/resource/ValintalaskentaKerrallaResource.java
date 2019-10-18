@@ -27,6 +27,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -193,12 +194,8 @@ public class ValintalaskentaKerrallaResource {
     @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
     public Laskenta status(@PathParam("uuid") String uuid) {
         checkAuthorizationForHakuWithLaskentaInMemory(uuid);
-        try {
-            return valintalaskentaValvomo.fetchLaskenta(uuid);
-        } catch (Exception e) {
-            LOG.error("Valintalaskennan statuksen luku heitti poikkeuksen!", e);
-            return null;
-        }
+        return valintalaskentaValvomo.fetchLaskenta(uuid).orElseThrow(
+                () -> new NotFoundException("Valintalaskenta ei ole muistissa!"));
     }
 
     @GET
@@ -255,7 +252,7 @@ public class ValintalaskentaKerrallaResource {
     }
 
     private void stop(String uuid) {
-        Optional.ofNullable(valintalaskentaValvomo.fetchLaskenta(uuid)).ifPresent(Laskenta::lopeta);
+        valintalaskentaValvomo.fetchLaskenta(uuid).ifPresent(Laskenta::lopeta);
     }
 
     private Response errorResponse(final String errorMessage) {
@@ -283,8 +280,14 @@ public class ValintalaskentaKerrallaResource {
     }
 
     private void checkAuthorizationForHakuWithLaskentaInMemory(String uuid) {
-        Laskenta laskenta = valintalaskentaValvomo.fetchLaskenta(uuid);
-        authorityCheckService.checkAuthorizationForHaku(laskenta.getHakuOid(), valintalaskentaAllowedRoles);
+        valintalaskentaValvomo.fetchLaskenta(uuid).ifPresentOrElse(
+                laskenta -> {
+                    authorityCheckService.checkAuthorizationForHaku(laskenta.getHakuOid(), valintalaskentaAllowedRoles);
+                },
+                () -> {
+                    throw new RuntimeException("Valintalaskenta ei ole muistissa.");
+                }
+        );
     }
 
     private Observable<Boolean> checkAuthorizationForHakuWithLaskentaFromSeuranta(String uuid) {

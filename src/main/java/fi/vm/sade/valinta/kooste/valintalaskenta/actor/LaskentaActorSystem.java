@@ -33,7 +33,6 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -102,8 +101,8 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     }
 
     @Override
-    public Laskenta fetchLaskenta(String uuid) {
-        return runningLaskentas.get(uuid);
+    public Optional<Laskenta> fetchLaskenta(String uuid) {
+        return Optional.ofNullable(runningLaskentas.get(uuid));
     }
 
     @Override

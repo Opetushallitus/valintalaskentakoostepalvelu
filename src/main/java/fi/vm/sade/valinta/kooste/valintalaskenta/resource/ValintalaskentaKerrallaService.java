@@ -88,11 +88,13 @@ public class ValintalaskentaKerrallaService {
 
     public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponse) {
         try {
-            final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
-            if (l != null && !l.isValmis()) {
-                LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
-                callbackResponse.accept(redirectResponse(new TunnisteDto(uuid, false)));
-            }
+            valintalaskentaValvomo.fetchLaskenta(uuid).ifPresent(
+                    laskenta -> {
+                        if (!laskenta.isValmis()) {
+                            LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
+                            callbackResponse.accept(redirectResponse(new TunnisteDto(uuid, false)));
+                        }
+                    });
             seurantaAsyncResource.resetoiTilat(uuid)
                 .doOnError((Throwable poikkeus) -> {
                     LOG.error("seurantaAsyncResource throws", poikkeus);
