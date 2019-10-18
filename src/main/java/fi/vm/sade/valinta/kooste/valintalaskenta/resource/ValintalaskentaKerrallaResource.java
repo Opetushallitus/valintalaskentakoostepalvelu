@@ -152,6 +152,11 @@ public class ValintalaskentaKerrallaResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
+        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
+            LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
+            asyncResponseTimeout.resume(errorResponse("Uudelleen ajo laskennalle timeouttasi!"));
+        });
         checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid).subscribe(
                 allowed -> {
                     kaynnistaLaskentaUudelleen(uuid, asyncResponse);
@@ -165,11 +170,6 @@ public class ValintalaskentaKerrallaResource {
 
     private void kaynnistaLaskentaUudelleen(String uuid, AsyncResponse asyncResponse) {
         try {
-            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-            asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
-                LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
-                asyncResponseTimeout.resume(errorResponse("Uudelleen ajo laskennalle timeouttasi!"));
-            });
             valintalaskentaKerrallaService.kaynnistaLaskentaUudelleen(uuid, (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", e);
@@ -206,10 +206,10 @@ public class ValintalaskentaKerrallaResource {
     @Produces("application/vnd.ms-excel")
     @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
     public void statusXls(@PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
+        asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
         checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid).subscribe(
                 allowed -> {
-                    asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
-                    asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
                     valintalaskentaStatusExcelHandler.getStatusXls(uuid, (Response response) -> asyncResponse.resume(response));
                 },
                 error -> {
