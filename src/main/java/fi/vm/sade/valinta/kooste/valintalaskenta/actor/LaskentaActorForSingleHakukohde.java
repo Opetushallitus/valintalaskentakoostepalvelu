@@ -9,6 +9,7 @@ import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.virheilmoitus;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue;
     private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue = new ConcurrentLinkedQueue<>();
     private final boolean isValintaryhmalaskenta;
+    private Optional<IlmoitusDto> valintaryhmalaskennanTulos;
 
     public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams,
                                            Function<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta,
@@ -53,6 +55,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         this.splittaus = splittaus;
         hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
         this.isValintaryhmalaskenta = actorParams.isValintaryhmalaskenta();
+        this.valintaryhmalaskennanTulos = Optional.empty();
     }
 
     public void start() {
@@ -152,7 +155,8 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                     LOG.error("(Uuid={}) Hakukohteen ({}) laskenta epäonnistui mutta ei saatu merkattua ", uuid(), hakukohdeOid, e1);
                 }
             } else {
-                LOG.info("Ei merkitä valintaryhmälaskennan hakukohteiden tilaa seurantaan. (Epäonnistunut laskenta)");
+                LOG.error("(Uuid={}) Valintaryhmälaskenta on lopullisesti epäonnistunut: {}.", uuid(), failure.getMessage());
+                this.valintaryhmalaskennanTulos = Optional.of(virheilmoitus("Valintaryhmälaskenta epäonnistui: " + failure.getMessage(), Arrays.toString(failure.getStackTrace())));
             }
         }
         laskeSeuraavaHakukohde();
@@ -184,6 +188,9 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
         if (!COMPLETE.equals(state.get())) {
             LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid());
             tilanmerkkausObservable = laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
+        } else if (valintaryhmalaskennanTulos.isPresent()) {
+            LOG.error("#### (Uuid={}) Valintaryhmälaskenta on epäonnistunut.", uuid());
+            tilanmerkkausObservable = laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.PERUUTETTU, valintaryhmalaskennanTulos);
         } else {
             LOG.info("#### (Uuid={}) Laskenta valmis koska ei enää hakukohteita käsiteltävänä. " +
                 "Onnistuneita {}, Uudelleenyrityksiä {}, Lopullisesti epäonnistuneita {}",
