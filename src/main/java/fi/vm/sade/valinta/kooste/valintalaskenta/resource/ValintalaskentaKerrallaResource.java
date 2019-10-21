@@ -226,12 +226,11 @@ public class ValintalaskentaKerrallaResource {
         if (uuid == null) {
             return errorResponse("Uuid on pakollinen");
         }
-        checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid).subscribe(
-                allowed -> {
-                    peruutaLaskenta(uuid, lopetaVainJonossaOlevaLaskenta);
-                }
-        );
-        // Palauta OK odottamatta vastausta oikeustarkasteluun ja peruutuspyyntöön
+        // Jos käyttöoikeustarkastelu epäonnistuu, tulee poikkeus, tämän suoritus
+        // keskeytyy ja poikkeus muuttuu http-virhekoodiksi.
+        checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid).blockingFirst();
+        peruutaLaskenta(uuid, lopetaVainJonossaOlevaLaskenta);
+        // Palauta OK odottamatta vastausta peruutuspyyntöön
         return Response.ok().build();
     }
 
