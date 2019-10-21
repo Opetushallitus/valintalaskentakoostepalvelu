@@ -110,10 +110,6 @@ public class ValintalaskentaKerrallaService {
 
     private void resetoiTilat(String uuid, Consumer<Response> callbackResponse) {
         seurantaAsyncResource.resetoiTilat(uuid)
-            .doOnError((Throwable poikkeus) -> {
-                LOG.error("seurantaAsyncResource throws", poikkeus);
-                callbackResponse.accept(errorResponse(poikkeus.getMessage()));
-            })
             .flatMap((LaskentaDto laskenta) ->
                 Observable.just(laskenta).zipWith(valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid()), Pair::of))
             .subscribe(
