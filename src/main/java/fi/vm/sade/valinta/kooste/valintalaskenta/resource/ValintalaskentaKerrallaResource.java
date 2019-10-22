@@ -285,7 +285,7 @@ public class ValintalaskentaKerrallaResource {
                     authorityCheckService.checkAuthorizationForHaku(laskenta.getHakuOid(), valintalaskentaAllowedRoles);
                 },
                 () -> {
-                    throw new RuntimeException("Valintalaskenta ei ole muistissa.");
+                    throw new NotFoundException("Valintalaskenta ei ole muistissa.");
                 }
         );
     }
