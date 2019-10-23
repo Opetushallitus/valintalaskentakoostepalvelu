@@ -146,7 +146,6 @@ public class HyvaksymiskirjeetKomponentti {
             viesti.setApplicationPeriod(hakuOid);
             viesti.setTag(tag);
             viesti.setTemplateName(templateName);
-            //viesti.setIposti(iPosti);
             viesti.setIposti(false);
             viesti.setSkipDokumenttipalvelu(sahkoinenKorkeakoulunMassaposti);
             Map<String, Object> templateReplacements = Maps.newHashMap();
@@ -156,13 +155,6 @@ public class HyvaksymiskirjeetKomponentti {
         } catch (Throwable t) {
             throw t;
         }
-    }
-
-
-
-    private static boolean sendIPosti(HakemusWrapper hakemusWrapper) {
-        return org.apache.commons.lang3.StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite()) ||
-           !hakemusWrapper.getVainSahkoinenViestinta();
     }
 
     private static String hyvaksytynHakutoiveenHakukohdeOid(HakijaDTO hakija) {
