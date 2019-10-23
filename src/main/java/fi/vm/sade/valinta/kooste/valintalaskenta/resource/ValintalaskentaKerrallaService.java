@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,34 +88,40 @@ public class ValintalaskentaKerrallaService {
     }
 
     public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponse) {
-        try {
-            final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
-            if (l != null && !l.isValmis()) {
-                LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
-                callbackResponse.accept(redirectResponse(new TunnisteDto(uuid, false)));
-            }
-            seurantaAsyncResource.resetoiTilat(uuid)
-                .doOnError((Throwable poikkeus) -> {
-                    LOG.error("seurantaAsyncResource throws", poikkeus);
-                    callbackResponse.accept(errorResponse(poikkeus.getMessage()));
-                })
-                .flatMap((LaskentaDto laskenta) ->
-                    Observable.just(laskenta).zipWith(valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid()), Pair::of))
-                .subscribe(
-                    (Pair<LaskentaDto, List<HakukohdeViiteDTO>> laskentaJaHakukohdeViitteet) -> {
-                        LaskentaDto laskenta = laskentaJaHakukohdeViitteet.getLeft();
-                        notifyWorkAvailable(new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()), callbackResponse);
-                    },
-                    (Throwable t) -> {
-                        LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
-                        callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
-                    }
-                );
-        } catch (Throwable t) {
-            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", t);
-            callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + t.getMessage()));
-            throw t;
-        }
+        valintalaskentaValvomo.fetchLaskenta(uuid)
+                .filter(ValintalaskentaKerrallaService::ajossaolevaLaskenta)
+                .ifPresentOrElse(
+                        laskenta -> {
+                            palautaAjossaolevaLaskenta(uuid, callbackResponse);
+                        },
+                        () -> {
+                            resetoiTilat(uuid, callbackResponse);
+                        });
+    }
+
+    private static final boolean ajossaolevaLaskenta(Laskenta laskenta) {
+        return !laskenta.isValmis();
+    }
+
+    private void palautaAjossaolevaLaskenta(String uuid, Consumer<Response> callbackResponse) {
+        LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
+        callbackResponse.accept(redirectResponse(new TunnisteDto(uuid, false)));
+    }
+
+    private void resetoiTilat(String uuid, Consumer<Response> callbackResponse) {
+        seurantaAsyncResource.resetoiTilat(uuid)
+            .flatMap((LaskentaDto laskenta) ->
+                Observable.just(laskenta).zipWith(valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid()), Pair::of))
+            .subscribe(
+                (Pair<LaskentaDto, List<HakukohdeViiteDTO>> laskentaJaHakukohdeViitteet) -> {
+                    LaskentaDto laskenta = laskentaJaHakukohdeViitteet.getLeft();
+                    notifyWorkAvailable(new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()), callbackResponse);
+                },
+                (Throwable t) -> {
+                    LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
+                    callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
+                }
+            );
     }
 
     private Optional<Laskenta> haeAjossaOlevaLaskentaHaulle(final String hakuOid) {
