@@ -61,9 +61,7 @@ public class HyvaksymiskirjeetKomponentti {
             LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true.", kaikkiHyvaksytyt);
             final List<Letter> kirjeet = new ArrayList<>();
             LetterBatch viesti = new LetterBatch(kirjeet);
-            if(asiointikieli.isPresent()) {
-                viesti.setLanguageCode(asiointikieli.get());
-            }
+            asiointikieli.ifPresent(viesti::setLanguageCode);
             int count = 0;
             for (HakijaDTO hakija : hakukohteenHakijat) {
                 final String hakukohdeOid = StringUtils.isEmpty(hakukohdeOidFromRequest) ? hyvaksytynHakutoiveenHakukohdeOid(hakija) : hakukohdeOidFromRequest;
@@ -170,8 +168,7 @@ public class HyvaksymiskirjeetKomponentti {
     private static String hyvaksytynHakutoiveenHakukohdeOid(HakijaDTO hakija) {
         return hakija.getHakutoiveet().stream()
                 .filter(h -> h.getHakutoiveenValintatapajonot().stream()
-                        .filter(j -> j.getTila().isHyvaksytty())
-                        .findAny().isPresent())
+                        .anyMatch(j -> j.getTila().isHyvaksytty()))
                 .findAny().get().getHakukohdeOid();
     }
 }
