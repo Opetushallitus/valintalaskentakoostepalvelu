@@ -140,7 +140,7 @@ public class HttpClient {
     }
 
     private static boolean isRedirectToCas(HttpResponse<?> response) {
-        return response.headers().allValues("Location").stream().anyMatch(location -> location.contains("/cas/login"));
+        return response.statusCode() == 302 && response.headers().allValues("Location").stream().anyMatch(location -> location.contains("/cas/login"));
     }
 
     private static boolean isUnauthenticated(HttpResponse<?> response) {
