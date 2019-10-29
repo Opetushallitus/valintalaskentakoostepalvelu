@@ -1,25 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
-import static com.codepoetics.protonpack.StreamUtils.zip;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.HenkilonRivinPaattelyEpaonnistuiException;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.ainoastaanHakemuksenTilaPaivitys;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.autoTaytto;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.createHakemusprototyyppi;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.isKesken;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.riviWithHenkiloData;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toErillishaunHakijaDTO;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toPoistettavaErillishaunHakijaDTO;
-import static io.reactivex.schedulers.Schedulers.newThread;
-import static java.util.Optional.ofNullable;
-import static java.util.concurrent.TimeUnit.MINUTES;
-
 import fi.vm.sade.auditlog.Changes;
-import fi.vm.sade.valinta.sharedutils.AuditLog;
-import fi.vm.sade.valinta.sharedutils.ValintaResource;
-import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
@@ -43,6 +24,9 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.ValintaResource;
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
@@ -62,9 +46,26 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.codepoetics.protonpack.StreamUtils.zip;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.HenkilonRivinPaattelyEpaonnistuiException;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.ainoastaanHakemuksenTilaPaivitys;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.autoTaytto;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.createHakemusprototyyppi;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.isKesken;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.riviWithHenkiloData;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toErillishaunHakijaDTO;
+import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toPoistettavaErillishaunHakijaDTO;
+import static io.reactivex.schedulers.Schedulers.newThread;
+import static java.util.Optional.ofNullable;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Service
 public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
@@ -276,18 +277,28 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         return doValinnantuloksenTallennusValintaTulosServiceen(auditSession, haku, createValinnantuloksetForValintaTulosService(haku, lisattavat, kesken, poistettavat, vanhatValinnantulokset));
     }
 
+    private static final BiFunction<ErillishakuDTO, Function<ErillishaunHakijaDTO, Boolean>, Function<ErillishakuRivi, Valinnantulos>> toValinnantulos =
+            (erillishakuDto, doAinoastaanHakemuksenTilaPaivitys) -> erillishakuRivi -> {
+                final ErillishaunHakijaDTO erillishaunHakijaDto = toErillishaunHakijaDTO(erillishakuDto, erillishakuRivi);
+                final Valinnantulos valinnantulos = Valinnantulos.of(
+                        erillishaunHakijaDto,
+                        doAinoastaanHakemuksenTilaPaivitys.apply(erillishaunHakijaDto)
+                );
+                valinnantulos.setValinnantilanKuvauksenTekstiFI(erillishakuRivi.getValinnantilanKuvauksenTekstiFI());
+                valinnantulos.setValinnantilanKuvauksenTekstiSV(erillishakuRivi.getValinnantilanKuvauksenTekstiSV());
+                valinnantulos.setValinnantilanKuvauksenTekstiEN(erillishakuRivi.getValinnantilanKuvauksenTekstiEN());
+                return valinnantulos;
+            };
+
     private List<Valinnantulos> createValinnantuloksetForValintaTulosService(final ErillishakuDTO haku,
                                                                              final List<ErillishakuRivi> lisattavat,
                                                                              final List<ErillishakuRivi> kesken,
                                                                              final List<ErillishakuRivi> poistettavat,
                                                                              final Map<String, Valinnantulos> vanhatValinnantulokset) {
-        return Stream.concat(Stream.concat(
-                poistettavat.stream()
-                        .map(rivi -> toErillishaunHakijaDTO(haku, rivi))
-                        .map(Valinnantulos::of),
-                lisattavat.stream()
-                        .map(rivi -> toErillishaunHakijaDTO(haku, rivi))
-                        .map(hakijaDTO -> Valinnantulos.of(hakijaDTO, ainoastaanHakemuksenTilaPaivitys(hakijaDTO)))
+        return Stream.concat(
+                Stream.concat(
+                        poistettavat.stream().map(toValinnantulos.apply(haku, ignore -> false)),
+                        lisattavat.stream().map(toValinnantulos.apply(haku, ainoastaanHakemuksenTilaPaivitys))
                 ),
                 kesken.stream()
                         .map(rivi -> toErillishaunHakijaDTO(haku, rivi))

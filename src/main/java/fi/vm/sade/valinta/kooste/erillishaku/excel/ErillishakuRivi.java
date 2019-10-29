@@ -43,6 +43,9 @@ public class ErillishakuRivi {
     private final String ehdollisenHyvaksymisenEhtoFI;
     private final String ehdollisenHyvaksymisenEhtoSV;
     private final String ehdollisenHyvaksymisenEhtoEN;
+    private final String valinnantilanKuvauksenTekstiFI;
+    private final String valinnantilanKuvauksenTekstiSV;
+    private final String valinnantilanKuvauksenTekstiEN;
     private final Date hyvaksymiskirjeLahetetty;
     private final String vastaanottoTila;
     private final String ilmoittautumisTila;
@@ -65,7 +68,7 @@ public class ErillishakuRivi {
 
     // Empty constructor for Jackson JSON library. Deserialization fails without this!
     public ErillishakuRivi() {
-        this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false, null, null, null, null,
+        this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false, null, null, null, null, null, null, null,
                 null, null, null, false, false, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
@@ -74,6 +77,9 @@ public class ErillishakuRivi {
                            String hakemuksenTila, boolean ehdollisestiHyvaksyttavissa,
                            String ehdollisenHyvaksymisenEhtoKoodi, String ehdollisenHyvaksymisenEhtoFI,
                            String ehdollisenHyvaksymisenEhtoSV, String ehdollisenHyvaksymisenEhtoEN,
+                           String valinnantilanKuvauksenTekstiFI,
+                           String valinnantilanKuvauksenTekstiSV,
+                           String valinnantilanKuvauksenTekstiEN,
                            Date hyvaksymiskirjeLahetetty,
                            String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot,
                            boolean poistetaankoRivi, String asiointikieli, String puhelinnumero, String osoite,
@@ -95,6 +101,9 @@ public class ErillishakuRivi {
         this.ehdollisenHyvaksymisenEhtoFI = ehdollisenHyvaksymisenEhtoFI;
         this.ehdollisenHyvaksymisenEhtoSV = ehdollisenHyvaksymisenEhtoSV;
         this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
+        this.valinnantilanKuvauksenTekstiFI = valinnantilanKuvauksenTekstiFI;
+        this.valinnantilanKuvauksenTekstiSV = valinnantilanKuvauksenTekstiSV;
+        this.valinnantilanKuvauksenTekstiEN = valinnantilanKuvauksenTekstiEN;
         this.hyvaksymiskirjeLahetetty = hyvaksymiskirjeLahetetty;
         this.vastaanottoTila = vastaanottoTila;
         this.ilmoittautumisTila = ilmoittautumisTila;
@@ -185,6 +194,12 @@ public class ErillishakuRivi {
     public String getEhdollisenHyvaksymisenEhtoEN() {
         return ehdollisenHyvaksymisenEhtoEN;
     }
+
+    public String getValinnantilanKuvauksenTekstiFI() { return valinnantilanKuvauksenTekstiFI; }
+
+    public String getValinnantilanKuvauksenTekstiSV() { return valinnantilanKuvauksenTekstiSV; }
+
+    public String getValinnantilanKuvauksenTekstiEN() { return valinnantilanKuvauksenTekstiEN; }
 
     public Date getHyvaksymiskirjeLahetetty() {
         return hyvaksymiskirjeLahetetty;

@@ -161,14 +161,20 @@ public class ErillishaunVientiService {
                                     tulos.getEhdollisenHyvaksymisenEhtoSV(),
                                     tulos.getEhdollisenHyvaksymisenEhtoEN()
                             ),
-                            tulos.getHakukohdeOid()
+                            tulos.getHakukohdeOid(),
+                            tulos.getValinnantilanKuvauksenTekstiFI(),
+                            tulos.getValinnantilanKuvauksenTekstiSV(),
+                            tulos.getValinnantilanKuvauksenTekstiEN()
                     )
             ).orElse(
                     createErillishakuRivi(hakemus.getOid(), hakemus,
                             maksuntila,
                             "KESKEN",
                             null,
-                            tarjontaHakukohde.getOid()
+                            tarjontaHakukohde.getOid(),
+                            null,
+                            null,
+                            null
                     )
             );
         }).collect(Collectors.toList());
@@ -180,13 +186,22 @@ public class ErillishaunVientiService {
         LOG.info("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
         Map<String, Maksuntila> personOidToMaksuntila = lukuvuosimaksus.stream().collect(Collectors.toMap(l -> l.getPersonOid(), l -> l.getMaksuntila()));
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus ->
-            createErillishakuRivi(hakemus.getOid(), hakemus, ofNullable(personOidToMaksuntila.get(hakemus.getPersonOid())), "KESKEN", null, tarjontaHakukohde.getOid())
+            createErillishakuRivi(hakemus.getOid(), hakemus, ofNullable(personOidToMaksuntila.get(hakemus.getPersonOid())), "KESKEN", null, tarjontaHakukohde.getOid(), null, null, null)
         ).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), rivit, koodistoCachedAsyncResource);
     }
 
-    private ErillishakuRivi createErillishakuRivi(String oid, HakemusWrapper wrapper, Optional<Maksuntila> lukuvuosimaksu, String hakemuksenTila,
-                                                  Valintatulos valintatulos, String hakukohdeOid) {
+    private ErillishakuRivi createErillishakuRivi(
+            String oid,
+            HakemusWrapper wrapper,
+            Optional<Maksuntila> lukuvuosimaksu,
+            String hakemuksenTila,
+            Valintatulos valintatulos,
+            String hakukohdeOid,
+            String valinnantilanKuvauksenTekstiFI,
+            String valinnantilanKuvauksenTekstiSV,
+            String valinnantilanKuvauksenTekstiEN
+    ) {
         ErillishakuRiviBuilder builder = new ErillishakuRiviBuilder()
                 .hakemusOid(oid)
                 .sukunimi(wrapper.getSukunimi())
@@ -210,7 +225,10 @@ public class ErillishaunVientiService {
                 .toisenAsteenSuoritus(wrapper.getToisenAsteenSuoritus())
                 .toisenAsteenSuoritusmaa(wrapper.getToisenAsteenSuoritusmaa())
                 .maksuvelvollisuus(wrapper.getMaksuvelvollisuus(hakukohdeOid))
-                .maksuntila(wrapper.isMaksuvelvollinen(hakukohdeOid) ? lukuvuosimaksu.orElse(Maksuntila.MAKSAMATTA) : null);
+                .maksuntila(wrapper.isMaksuvelvollinen(hakukohdeOid) ? lukuvuosimaksu.orElse(Maksuntila.MAKSAMATTA) : null)
+                .valinnantilanKuvauksenTekstiFI(valinnantilanKuvauksenTekstiFI)
+                .valinnantilanKuvauksenTekstiSV(valinnantilanKuvauksenTekstiSV)
+                .valinnantilanKuvauksenTekstiEN(valinnantilanKuvauksenTekstiEN);
 
         if (valintatulos != null) {
             builder

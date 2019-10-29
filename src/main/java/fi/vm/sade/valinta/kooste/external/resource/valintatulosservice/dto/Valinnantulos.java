@@ -28,6 +28,9 @@ public class Valinnantulos {
     private String ehdollisenHyvaksymisenEhtoFI;
     private String ehdollisenHyvaksymisenEhtoSV;
     private String ehdollisenHyvaksymisenEhtoEN;
+    private String valinnantilanKuvauksenTekstiFI;
+    private String valinnantilanKuvauksenTekstiSV;
+    private String valinnantilanKuvauksenTekstiEN;
     private OffsetDateTime hyvaksymiskirjeLahetetty;
 
     public String getHakukohdeOid() {
@@ -92,6 +95,30 @@ public class Valinnantulos {
 
     public void setEhdollisenHyvaksymisenEhtoEN(String ehdollisenHyvaksymisenEhtoEN) {
         this.ehdollisenHyvaksymisenEhtoEN = ehdollisenHyvaksymisenEhtoEN;
+    }
+
+    public String getValinnantilanKuvauksenTekstiFI() {
+        return valinnantilanKuvauksenTekstiFI;
+    }
+
+    public void setValinnantilanKuvauksenTekstiFI(String valinnantilanKuvauksenTekstiFI) {
+        this.valinnantilanKuvauksenTekstiFI = valinnantilanKuvauksenTekstiFI;
+    }
+
+    public String getValinnantilanKuvauksenTekstiSV() {
+        return valinnantilanKuvauksenTekstiSV;
+    }
+
+    public void setValinnantilanKuvauksenTekstiSV(String valinnantilanKuvauksenTekstiSV) {
+        this.valinnantilanKuvauksenTekstiSV = valinnantilanKuvauksenTekstiSV;
+    }
+
+    public String getValinnantilanKuvauksenTekstiEN() {
+        return valinnantilanKuvauksenTekstiEN;
+    }
+
+    public void setValinnantilanKuvauksenTekstiEN(String valinnantilanKuvauksenTekstiEN) {
+        this.valinnantilanKuvauksenTekstiEN = valinnantilanKuvauksenTekstiEN;
     }
 
     public boolean getJulkaistavissa() {
@@ -228,6 +255,9 @@ public class Valinnantulos {
                 ", ehdollisenHyvaksymisenEhtoFI=" + ehdollisenHyvaksymisenEhtoFI +
                 ", ehdollisenHyvaksymisenEhtoSV=" + ehdollisenHyvaksymisenEhtoSV +
                 ", ehdollisenHyvaksymisenEhtoEN=" + ehdollisenHyvaksymisenEhtoEN +
+                ", valinnantilanKuvauksenTekstiFI=" + valinnantilanKuvauksenTekstiFI +
+                ", valinnantilanKuvauksenTekstiSV=" + valinnantilanKuvauksenTekstiSV +
+                ", valinnantilanKuvauksenTekstiEN=" + valinnantilanKuvauksenTekstiEN +
                 ", julkaistavissa=" + julkaistavissa +
                 ", hyvaksyttyVarasijalta=" + hyvaksyttyVarasijalta +
                 ", hyvaksyPeruuntunut=" + hyvaksyPeruuntunut +

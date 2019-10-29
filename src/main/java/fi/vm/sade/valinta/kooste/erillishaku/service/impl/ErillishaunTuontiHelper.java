@@ -12,7 +12,6 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -175,9 +175,9 @@ public class ErillishaunTuontiHelper {
         }
     }
 
-    public static boolean ainoastaanHakemuksenTilaPaivitys(ErillishaunHakijaDTO erillishakuRivi) {
-        return erillishakuRivi.getValintatuloksenTila() == null && erillishakuRivi.getIlmoittautumisTila() == null;
-    }
+    public static final Function<ErillishaunHakijaDTO, Boolean> ainoastaanHakemuksenTilaPaivitys = erillishakuRivi ->
+            erillishakuRivi.getValintatuloksenTila() == null
+                    && erillishakuRivi.getIlmoittautumisTila() == null;
 
     public static ErillishaunHakijaDTO toErillishaunHakijaDTO(ErillishakuDTO haku, ErillishakuRivi rivi) {
         return new ErillishaunHakijaDTO(
