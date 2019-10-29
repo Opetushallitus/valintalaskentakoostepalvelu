@@ -3,11 +3,13 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import io.mikael.urlbuilder.UrlBuilder;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,21 +20,25 @@ import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.net.URI;
+import java.time.Duration;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource implements SuoritusrekisteriAsyncResource {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritusrekisteriAsyncResourceImpl.class);
-
+    private final HttpClient httpClient;
     private int maxOppijatPostSize = 5000;
 
     @Autowired
     public SuoritusrekisteriAsyncResourceImpl(
-            @Qualifier("SuoritusrekisteriRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+        @Qualifier("SuoritusrekisteriRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
+        @Qualifier("SuoritusrekisteriHttpClient") HttpClient httpClient) {
         super(TimeUnit.MINUTES.toMillis(10), casInterceptor);
+        this.httpClient = httpClient;
     }
 
     @Override
@@ -50,17 +56,12 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     }
 
     @Override
-    public Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
-        return getAsObservableLazily(
-                getUrl("suoritusrekisteri.oppijat"),
-                new TypeToken<List<Oppija>>() { }.getType(),
-                client -> {
-                    client.query("hakukohde", hakukohdeOid);
-                    client.query("haku", hakuOid);
-                    client.query("ensikertalaisuudet", "false");
-                    return client;
-                }
-        );
+    public CompletableFuture<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
+        URI uri = UrlBuilder.fromString(getUrl("suoritusrekisteri.oppijat"))
+            .addParameter("hakukohde", hakukohdeOid)
+            .addParameter("haku", hakuOid)
+            .addParameter("ensikertalaisuudet", "false").toUri();
+        return httpClient.getJson(uri.toString(), Duration.ofMinutes(5), new com.google.gson.reflect.TypeToken<List<Oppija>>() { }.getType());
     }
 
     @Override

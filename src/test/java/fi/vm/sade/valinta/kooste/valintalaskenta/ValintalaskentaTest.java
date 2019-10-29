@@ -128,11 +128,11 @@ public class ValintalaskentaTest {
         when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid2)).thenReturn(Observable.just(Collections.emptyList()));
 
-        when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde1Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
-        when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde2Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
-        when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class))).thenReturn(Observable.just(pisteet));
-        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid), any(AuditSession.class))).thenReturn(Observable.just(ataruPisteet));
-        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid2), any(AuditSession.class))).thenReturn(Observable.just(ataruPisteet));
+        when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde1Oid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
+        when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde2Oid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
+        when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
+        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(ataruPisteet));
+        when(valintapisteAsyncResource.getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid2), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(ataruPisteet));
 
         when(valintalaskentaAsyncResource.laskeKaikki(any())).thenReturn(Observable.just("OK"));
 

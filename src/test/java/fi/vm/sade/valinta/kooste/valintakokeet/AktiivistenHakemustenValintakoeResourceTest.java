@@ -80,7 +80,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     public void vainApplicationAsyncResourcenPalauttamienHakemustenOsallistumisetPalautetaan() {
         AsyncResponse asyncResponse = mock(AsyncResponse.class);
         when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
-            .thenReturn(Observable.just(Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
+            .thenReturn(CompletableFuture.completedFuture(Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
         when(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids))
             .thenReturn(Observable.just(Arrays.asList(hakemus1, hakemus3)));
         when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
@@ -116,7 +116,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     public void ataruVainApplicationAsyncResourcenPalauttamienHakemustenOsallistumisetPalautetaan() {
         AsyncResponse asyncResponse = mock(AsyncResponse.class);
         when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
-                .thenReturn(Observable.just(Arrays.asList(ataruOsallistuminen1, ataruOsallistuminen2, ataruOsallistuminen3)));
+                .thenReturn(CompletableFuture.completedFuture(Arrays.asList(ataruOsallistuminen1, ataruOsallistuminen2, ataruOsallistuminen3)));
         when(ataruAsyncResource.getApplicationsByOids(ataruHakemusOids))
                 .thenReturn(CompletableFuture.completedFuture(Arrays.asList(ataruHakemus1, ataruHakemus3)));
         when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
@@ -156,7 +156,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
         when(tarjontaAsyncResource.haeHaku(hakuOid))
                 .thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
         when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
-            .thenReturn(Observable.just(Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
+            .thenReturn(CompletableFuture.completedFuture(Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
         RuntimeException applicationFetchException = new RuntimeException("Hakemusten haku kaatui!");
         when(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)).thenThrow(applicationFetchException);
 

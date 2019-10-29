@@ -79,7 +79,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 
     @Override
     public void koekutsukirjeetOsallistujille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, List<String> valintakoeTunnisteet) {
-        final Observable<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource.haeHakutoiveelle(koekutsu.getHakukohdeOid());
+        final Observable<List<ValintakoeOsallistuminenDTO>> osallistumiset = Observable.fromFuture(osallistumisetResource.haeHakutoiveelle(koekutsu.getHakukohdeOid()));
         final Observable<List<ValintakoeDTO>> valintakokeetObservable = valintakoeResource.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
         final Observable<List<HakemusWrapper>> hakemuksetObservable = ((StringUtils.isEmpty(koekutsu.getHaku().getAtaruLomakeAvain()))
                 ? applicationAsyncResource.getApplicationsByOid(koekutsu.getHaku().getOid(), koekutsu.getHakukohdeOid())

@@ -1,15 +1,20 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintapiste;
 
 import com.google.gson.reflect.TypeToken;
+
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
+import io.mikael.urlbuilder.UrlBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
 
@@ -18,19 +23,24 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.net.URI;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource implements ValintapisteAsyncResource {
     public static final String OK = "";
+    private final HttpClient httpClient;
     Logger LOG = LoggerFactory.getLogger(ValintapisteAsyncResource.class);
 
-    public ValintapisteAsyncResourceImpl() {
+    public ValintapisteAsyncResourceImpl(@Qualifier("ValintapisteServiceHttpClient") HttpClient httpClient) {
         super(TimeUnit.MINUTES.toMillis(30));
+        this.httpClient = httpClient;
     }
 
     private String body(Response r) {
@@ -80,18 +90,31 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
         client.query("userAgent", auditSession.getUserAgent());
     }
 
-    @Override
-    public Observable<PisteetWithLastModified> getValintapisteet(String hakuOID, String hakukohdeOID, AuditSession auditSession) {
-        Observable<Response> response = getAsObservableLazily(
-                getUrl("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID),
-                //new GenericType<List<Valintapisteet>>(){}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    setAuditInfo(client, auditSession);
-                    return client;
-                });
+    private String setAuditInfo(String url, AuditSession auditSession) {
+        URI uri = UrlBuilder.fromString(url)
+            .addParameter("sessionId", auditSession.getSessionId())
+            .addParameter("uid", auditSession.getPersonOid())
+            .addParameter("inetAddress", auditSession.getInetAddress())
+            .addParameter("userAgent", auditSession.getUserAgent())
+            .toUri();
+        return uri.toString();
+    }
 
-        return response.switchMap(this::handleResponse);
+    @Override
+    public CompletableFuture<PisteetWithLastModified> getValintapisteet(String hakuOID, String hakukohdeOID, AuditSession auditSession) {
+        String url = getUrl("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID);
+        return httpClient.getJson(
+            setAuditInfo(url, auditSession),
+            Duration.ofSeconds(10),
+            inputStreamHttpResponse -> {
+                List<Valintapisteet> pisteet = httpClient.parseJson(
+                    inputStreamHttpResponse,
+                    new GenericType<List<Valintapisteet>>() {
+                    }.getType());
+                return new PisteetWithLastModified(
+                    Optional.ofNullable(inputStreamHttpResponse.headers().firstValue(LAST_MODIFIED).toString()),
+                    pisteet);
+            });
     }
 
     @Override

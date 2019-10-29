@@ -4,10 +4,13 @@ import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.service.valintaperusteet.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
 
@@ -15,18 +18,23 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource implements ValintaperusteetAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintaperusteetAsyncResourceImpl.class);
+    private final HttpClient httpClient;
 
-    public ValintaperusteetAsyncResourceImpl() {
+    @Autowired
+    public ValintaperusteetAsyncResourceImpl(@Qualifier("ValintaperusteetHttpClient") HttpClient httpClient) {
         super(TimeUnit.HOURS.toMillis(1L));
+        this.httpClient = httpClient;
     }
 
     public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
@@ -76,10 +84,12 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-        return getAsObservableLazily(
-                getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet.oid", hakukohdeOid),
-                new TypeToken<List<ValintaperusteDTO>>() {}.getType());
+    public CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
+        return httpClient.getJson(
+            getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet.oid", hakukohdeOid),
+            Duration.ofHours(1),
+            new com.google.gson.reflect.TypeToken<List<ValintaperusteDTO>>() {}.getType()
+        );
     }
 
     @Override

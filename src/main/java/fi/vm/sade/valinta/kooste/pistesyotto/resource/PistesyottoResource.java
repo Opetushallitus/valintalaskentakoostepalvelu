@@ -242,14 +242,14 @@ public class PistesyottoResource {
                 "ROLE_APP_HAKEMUS_LISATIETOCRUD"
         )).switchMap(authorityCheck -> {
             if (authorityCheck.test(hakukohdeOid)) {
-                return pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid, auditSession)
-                        .map(pistetiedot -> {
+                return Observable.fromFuture(pistesyottoKoosteService.koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid, auditSession)
+                        .thenApplyAsync(pistetiedot -> {
                             LOG.debug("Saatiin pistetiedot {}", pistetiedot);
                             return Response.ok()
                                     .header("Content-Type", "application/json")
                                     .entity(pistetiedot)
                                     .build();
-                        });
+                        }));
             } else {
                 String msg = String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",

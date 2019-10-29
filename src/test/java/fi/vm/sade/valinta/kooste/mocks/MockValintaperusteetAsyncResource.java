@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -86,8 +87,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-        return Observable.just(valintaperusteetResultReference.get());
+    public CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
+        return CompletableFuture.completedFuture(valintaperusteetResultReference.get());
     }
 
     @Override

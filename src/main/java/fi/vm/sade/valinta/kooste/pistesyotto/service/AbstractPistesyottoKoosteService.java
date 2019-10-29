@@ -196,17 +196,17 @@ public abstract class AbstractPistesyottoKoosteService {
         io.reactivex.functions.Function<List<ValintaperusteDTO>, Observable<List<Oppija>>> haeKielikoetulokset = kokeet -> {
             if (kokeet.stream().map(ValintaperusteDTO::getTunniste).anyMatch(t -> t.matches(PistesyottoExcel.KIELIKOE_REGEX))) {
                 prosessi.inkrementoiKokonaistyota();
-                return suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
-                        .doOnComplete(prosessi::inkrementoiTehtyjaToita);
+                return Observable.fromFuture(suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
+                        .whenCompleteAsync((x, y) -> prosessi.inkrementoiTehtyjaToita()));
             } else {
                 return Observable.just(new ArrayList<>());
             }
         };
-        ConnectableObservable<List<ValintaperusteDTO>> kokeetO = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid).replay(1);
-        ConnectableObservable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid).replay(1);
+        ConnectableObservable<List<ValintaperusteDTO>> kokeetO = Observable.fromFuture(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid)).replay(1);
+        ConnectableObservable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = Observable.fromFuture(valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)).replay(1);
         Observable<PisteetWithLastModified> merge = Observable.merge(Observable.zip(
                 osallistumistiedotO,
-                valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession),
+                Observable.fromFuture(valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession)),
                 haePuuttuvatLisatiedot
         ));
         Observable<Pair<Optional<String>, List<ApplicationAdditionalDataDTO>>> lisatiedotO = Observable.zip(
@@ -358,7 +358,7 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     private Observable<List<Oppija>> haeOppijatSuresta(String hakuOid, String hakukohdeOid) {
-        return suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
+        return Observable.fromFuture(suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid))
                 .onErrorResumeNext((Throwable t) -> Observable.error(new IllegalStateException(String.format(
                         "Oppijoiden haku Suoritusrekisteristä haun %s hakukohteelle %s epäonnistui",
                         hakuOid,

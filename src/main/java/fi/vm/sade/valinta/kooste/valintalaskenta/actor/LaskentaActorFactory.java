@@ -383,7 +383,7 @@ public class LaskentaActorFactory {
             tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
         Observable<PisteetWithLastModified> valintapisteetForHakukohdes = createResurssiObservable(tunniste,
             "valintapisteAsyncResource.getValintapisteet",
-            valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession));
+            Observable.fromFuture(valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession)));
         Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? createResurssiObservable(tunniste,
             "valintaperusteetAsyncResource.haeHakijaryhmat",
             valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : just(emptyList());

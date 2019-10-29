@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public interface ValintaperusteetAsyncResource {
 
@@ -26,7 +27,7 @@ public interface ValintaperusteetAsyncResource {
     // @POST /valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
     Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
 
-    Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
+    CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
     Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids);
 
     Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid);

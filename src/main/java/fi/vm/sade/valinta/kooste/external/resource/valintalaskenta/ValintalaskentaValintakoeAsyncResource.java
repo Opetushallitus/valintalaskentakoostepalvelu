@@ -6,9 +6,10 @@ import io.reactivex.Observable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface ValintalaskentaValintakoeAsyncResource {
-    Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid);
+    CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid);
     Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids);
     Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeTunnisteet);
     Observable<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid);

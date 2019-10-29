@@ -143,6 +143,11 @@ public class KoosteTestProfileConfiguration {
         return APPLICATION_SESSION;
     }
 
+    @Bean(name = "SuoritusrekisteriApplicationSession")
+    public ApplicationSession getSuoritusrekisteriApplicationSession() {
+        return APPLICATION_SESSION;
+    }
+
     @Bean(name = "springSecurityFilterChain")
     public static Filter getFilter() {
         return new Filter() {

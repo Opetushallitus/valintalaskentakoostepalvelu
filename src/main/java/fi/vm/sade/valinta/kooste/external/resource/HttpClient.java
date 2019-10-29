@@ -14,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class HttpClient {
     private static final String CALLER_ID = "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
@@ -28,14 +29,21 @@ public class HttpClient {
         this.gson = gson;
     }
 
-    public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
+    public <O> CompletableFuture<O> getJson(String url,
+                                            Duration timeout,
+                                            Function<HttpResponse<InputStream>, O> parseResponse) {
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .header("Caller-Id", CALLER_ID)
                 .header("Accept", "application/json")
                 .GET()
                 .timeout(timeout)
                 .build();
-        return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
+        return this.makeRequest(request).thenApply(parseResponse);
+    }
+
+    public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
+        Function<HttpResponse<InputStream>, O> parseResponse = response -> this.parseJson(response, outputType);
+        return this.getJson(url, timeout, parseResponse);
     }
 
     public CompletableFuture<HttpResponse<InputStream>> getResponse(String url, Duration timeout) {

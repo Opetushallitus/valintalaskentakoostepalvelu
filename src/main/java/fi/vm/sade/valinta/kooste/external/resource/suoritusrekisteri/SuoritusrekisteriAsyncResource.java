@@ -6,14 +6,15 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import io.reactivex.Observable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface SuoritusrekisteriAsyncResource {
 
     Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
                                                    String hakuOid);
 
-    Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid,
-                                                                          String hakuOid);
+    CompletableFuture<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid,
+                                                                                 String hakuOid);
 
     Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid);
 

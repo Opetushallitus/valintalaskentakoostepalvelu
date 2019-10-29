@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import static java.util.Collections.singletonList;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -33,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,41 +71,47 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                 valintalaskentaValintakoeAsyncResource);
     }
 
-    public Observable<PistesyottoValilehtiDTO> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, AuditSession auditSession) {
-
+    public CompletableFuture<PistesyottoValilehtiDTO> koostaOsallistujienPistetiedot(String hakuOid, String hakukohdeOid, AuditSession auditSession) {
         try {
-            Observable<PisteetWithLastModified> valintapisteet = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
-            Observable<Map<String, ValintakoeOsallistuminenDTO>> osallistuminenByHakemus = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
-                    .map(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v)));
-            Observable<Map<String, Oppija>> oppijaByPersonOID = suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
-                    .map(os -> os.stream().collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o)));
-            return Observable.combineLatest(
-                    valintapisteet,
-                    valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
-                    osallistuminenByHakemus,
-                    oppijaByPersonOID,
-                    Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)),
-                    (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) ->
-                            new PistesyottoValilehtiDTO(additionalDatat.lastModified.orElse(null), additionalDatat.valintapisteet.stream().map(vps ->
-                                    new HakemuksenKoetulosYhteenveto(
-                                            vps,
-                                            Pair.of(hakukohdeOid, valintaperusteet),
-                                            valintakokeet.get(vps.getHakemusOID()),
-                                            oppijat.get(vps.getOppijaOID()),
-                                            ohjausparametrit
-                                    )
-                            ).collect(Collectors.toList()))
-            );
+            CompletableFuture<PisteetWithLastModified> valintapisteetF = valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession);
+            CompletableFuture<Map<String, ValintakoeOsallistuminenDTO>> osallistuminenByHakemusF = valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
+                    .thenApplyAsync(vs -> vs.stream().collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v)));
+            CompletableFuture<Map<String, Oppija>> oppijaByPersonOidF = suoritusrekisteriAsyncResource.getOppijatByHakukohdeWithoutEnsikertalaisuus(hakukohdeOid, hakuOid)
+                    .thenApplyAsync(os -> os.stream().collect(Collectors.toMap(o -> o.getOppijanumero(), o -> o)));
+            CompletableFuture<List<ValintaperusteDTO>> valintaperusteetF = valintaperusteetAsyncResource.findAvaimet(hakukohdeOid);
+            CompletableFuture<ParametritDTO> ohjausparametritF = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+            return CompletableFuture.allOf(
+                valintapisteetF,
+                valintaperusteetF,
+                osallistuminenByHakemusF,
+                oppijaByPersonOidF,
+                ohjausparametritF).thenApplyAsync(x -> {
+                PisteetWithLastModified valintapisteet = valintapisteetF.join();
+                List<ValintaperusteDTO> valintaperusteet = valintaperusteetF.join();
+                Map<String, ValintakoeOsallistuminenDTO> valintakokeet = osallistuminenByHakemusF.join();
+                Map<String, Oppija> oppijat = oppijaByPersonOidF.join();
+                ParametritDTO ohjausparametrit = ohjausparametritF.join();
+                return new PistesyottoValilehtiDTO(valintapisteet.lastModified.orElse(null), valintapisteet.valintapisteet.stream().map(vps ->
+                    new HakemuksenKoetulosYhteenveto(
+                        vps,
+                        Pair.of(hakukohdeOid, valintaperusteet),
+                        valintakokeet.get(vps.getHakemusOID()),
+                        oppijat.get(vps.getOppijaOID()),
+                        ohjausparametrit
+                    )
+                ).collect(Collectors.toList()));
+
+            });
         } catch (Exception e) {
             LOG.error(String.format("Ongelma koostettaessa haun %s kohteen %s pistetietoja", hakuOid, hakukohdeOid), e);
-            return Observable.error(e);
+            return CompletableFuture.failedFuture(e);
         }
     }
 
     private Observable<List<Pair<String, List<ValintaperusteDTO>>>> getValintaperusteet(HakemusWrapper hakemus) {
         return Observable.merge(
                 hakemus.getHakutoiveOids().stream()
-                        .map(hakukohdeOid -> valintaperusteetAsyncResource.findAvaimet(hakukohdeOid)
+                        .map(hakukohdeOid -> Observable.fromFuture(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid))
                                 .map(valintaperusteet -> Pair.of(hakukohdeOid, valintaperusteet)))
                         .collect(Collectors.toList())
         ).toList().toObservable();

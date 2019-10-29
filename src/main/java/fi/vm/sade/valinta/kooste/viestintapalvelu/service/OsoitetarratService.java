@@ -182,7 +182,7 @@ public class OsoitetarratService {
                     }
                 },
                 poikkeuskasittelija);
-            valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid).subscribe(osallistumiset -> {
+            Observable.fromFuture(valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)).subscribe(osallistumiset -> {
                 osallistumistiedotRef.set(osallistumiset);
                 laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
