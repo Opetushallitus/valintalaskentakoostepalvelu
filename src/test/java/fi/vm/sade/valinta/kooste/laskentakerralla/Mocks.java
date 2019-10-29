@@ -35,6 +35,7 @@ public class Mocks {
     static ValintapisteAsyncResource valintapisteAsyncResource = mock(ValintapisteAsyncResource.class);
     static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource, tarjontaAsyncResource),new LaskentaActorFactory(
             5,
+            "none",
             valintalaskentaAsyncResource,
             applicationAsyncResource,
             ataruAsyncResource,

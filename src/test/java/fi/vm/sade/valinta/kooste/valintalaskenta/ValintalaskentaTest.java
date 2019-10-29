@@ -69,6 +69,7 @@ public class ValintalaskentaTest {
     private final ValintapisteAsyncResource valintapisteAsyncResource = mock(ValintapisteAsyncResource.class);
     private final LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(seurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource, tarjontaAsyncResource), new LaskentaActorFactory(
         5,
+        "none",
         valintalaskentaAsyncResource,
         applicationAsyncResource,
         ataruAsyncResource,

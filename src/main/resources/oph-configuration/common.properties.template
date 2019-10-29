@@ -127,6 +127,7 @@ valintalaskentakoostepalvelu.parametriservice.rest.url=https://${host.virkailija
 valintalaskentakoostepalvelu.valintaperusteet.ilb.url=${host.ilb}/valintaperusteet-service/resources
 valintalaskentakoostepalvelu.maxWorkerCount={{valintalaskentakoostepalvelu_maxWorkerCount}}
 valintalaskentakoostepalvelu.laskennan.splittaus={{valintalaskentakoostepalvelu_laskennan_splittaus}}
+valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit={{valintalaskentakoostepalvelu_laskenta_koskesta_haettavat_hakukohdeoidit | default("none")}}
 valintalaskentakoostepalvelu.ohjausparametrit.cache.ttl.minutes=30
 valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds=20
 valintalaskentakoostepalvelu.tarjonta.sync.cron={{valintalaskentakoostepalvelu_tarjonta_sync_cron}}

@@ -53,6 +53,8 @@ import java.util.stream.Stream;
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
 public class LaskentaActorFactory {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorFactory.class);
+    private static final Predicate<String> INCLUDE_ALL = s -> true;
+    private static final Predicate<String> EXCLUDE_ALL = s -> false;
 
     private final ValintapisteAsyncResource valintapisteAsyncResource;
     private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
@@ -62,11 +64,13 @@ public class LaskentaActorFactory {
     private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
+    private final Predicate<String> koskiHakukohdeOidFilter;
     private volatile int splittaus;
 
     @Autowired
     public LaskentaActorFactory(
             @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:1}") int splittaus,
+            @Value("${valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit:none}") String koskiHakukohdeOiditString,
             ValintalaskentaAsyncResource valintalaskentaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             AtaruAsyncResource ataruAsyncResource,
@@ -85,7 +89,23 @@ public class LaskentaActorFactory {
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.valintapisteAsyncResource = valintapisteAsyncResource;
+        this.koskiHakukohdeOidFilter = resolveKoskiHakukohdeOidFilter(koskiHakukohdeOiditString);
     }
+
+    private static Predicate<String> resolveKoskiHakukohdeOidFilter(String koskiHakukohdeOiditString) {
+        if (StringUtils.isBlank(koskiHakukohdeOiditString)) {
+            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => ei haeta ollenkaan tietoja Koskesta.");
+            return EXCLUDE_ALL;
+        }
+        if ("ALL".equals(koskiHakukohdeOiditString)) {
+            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan kaikille tiedot Koskesta.");
+            return INCLUDE_ALL;
+        }
+        List<String> hakukohdeOids = Arrays.asList(koskiHakukohdeOiditString.split(","));
+        LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan Koskesta tiedot seuraaville hakukohteille: " + hakukohdeOids);
+        return hakukohdeOids::contains;
+    }
+
     private Pair<String, Collection<String>> headAndTail(Collection<String> c) {
         String head = c.iterator().next();
         Collection<String> tail = c.stream().skip(1L).collect(Collectors.toList());
