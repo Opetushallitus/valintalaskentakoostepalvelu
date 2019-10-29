@@ -20,32 +20,40 @@ import org.eclipse.jetty.webapp.WebAppContext;
  *            ...
  *            LocalForward 18888 alb.testiopintopolku.fi:80
  *
- *    * copy oph-configuration directory from the container of valinta to your machine
+ *    * add a fully qualified domain name to /etc/hosts
+ *        127.0.0.1       testi-devaajan-koneella.testiopintopolku.fi
+ *
+ *    * copy oph-configuration directory from the container of the target environment (pallero) to your machine
+ *        * you need at least common.properties, ehcache.xml and security-context-backend.xml
  *
  *    * tweak your oph-configuration for local usage as follows:
- *        diff -r valinta-pallero-oph-configuration/common.properties local-valinta-pallero-oph-configuration/common.properties
- *        12a13
- *        14,16c15,19
+ *        diff oph-configuration.qa/common.properties oph-configuration/common.properties
+ *        14,15c14,15
  *        < host.ilb=https://virkailija.testiopintopolku.fi
  *        < host.alb=http://alb.testiopintopolku.fi
  *        ---
  *        > host.ilb=http://localhost:18888
- *        > host.alb=http://localhost:18888
- *        84c87,88
+ *        > host.alb=http://testi-devaajan-koneella.testiopintopolku.fi:18888
+ *        82c82
  *        < cas.service.valintalaskentakoostepalvelu=https://${host.virkailija}/valintalaskentakoostepalvelu
  *        ---
  *        > cas.service.valintalaskentakoostepalvelu=http://localhost:56748/valintalaskentakoostepalvelu
- *        115a120
- *        > jatkuvasijoittelu.autostart=false
- *        120c125
+ *        106c106
  *        < valintalaskentakoostepalvelu.valintalaskentaService.url=https://${host.virkailija}/valintalaskenta-laskenta-service/services/valintalaskentaService
  *        ---
  *        > valintalaskentakoostepalvelu.valintalaskentaService.url=${host.ilb}/valintalaskenta-laskenta-service/services/valintalaskentaService
- *        143c148
+ *        128c128
  *        < valintalaskentakoostepalvelu.maxWorkerCount=4
  *        ---
  *        > valintalaskentakoostepalvelu.maxWorkerCount=0
  *
+ *    * Start the service
+ *        VALINTALASKENTAKOOSTEPALVELU_USER_HOME="path to oph-configuration directory" \
+ *        VALINTALASKENTAKOOSTEPALVELU_PORT=56748 \
+ *        mvn exec:java
+ *
+ *    * Now the swagger documentation for this service is running at
+ *        http://localhost:56748/valintalaskentakoostepalvelu/swagger/
  *
  *    * If something does not work as expected, make it work and improve this documentation accordingly ;)
  */
