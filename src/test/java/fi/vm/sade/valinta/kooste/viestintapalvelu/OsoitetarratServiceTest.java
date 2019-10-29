@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Jussi Jartamo
@@ -76,7 +77,7 @@ public class OsoitetarratServiceTest {
     public void testaaOsoitetarratValintakokeeseenOsallistujilleKunKaikkiKutsutaan() {
         Mocks.reset();
         try {
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(
                             valintakoe()
                                     .setTunniste(VALINTAKOE1)
@@ -131,7 +132,7 @@ public class OsoitetarratServiceTest {
     public void ataruHakuTestaaOsoitetarratValintakokeeseenOsallistujilleKunKaikkiKutsutaan() {
         Mocks.reset();
         try {
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(
                     valintakoe()
                             .setTunniste(VALINTAKOE1)
@@ -183,7 +184,7 @@ public class OsoitetarratServiceTest {
     public void testaaOsoitetarratValintakokeeseenOsallistujilleKunYksittainenHakijaKutsutaan() {
         Mocks.reset();
         try {
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(
                             valintakoe()
                                     .setTunniste(VALINTAKOE1)

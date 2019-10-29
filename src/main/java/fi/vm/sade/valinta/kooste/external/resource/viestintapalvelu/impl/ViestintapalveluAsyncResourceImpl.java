@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
@@ -12,53 +10,57 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
+import io.reactivex.Observable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 
 @Service
 public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource implements ViestintapalveluAsyncResource {
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
-
-    private final Gson GSON = new Gson();
+    private final HttpClient client;
 
     @Autowired
     public ViestintapalveluAsyncResourceImpl(
-            @Qualifier("viestintapalveluClientCasInterceptor") AbstractPhaseInterceptor casInterceptor)
-    {
+            @Qualifier("viestintapalveluClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
+            @Qualifier("ViestintapalveluHttpClient") HttpClient client
+    ) {
         super(TimeUnit.HOURS.toMillis(20), casInterceptor);
+        this.client = client;
     }
 
     @Override
-    public Observable<LetterResponse> viePdfJaOdotaReferenssiObservable(LetterBatch letterBatch) {
-        return postAsObservableLazily(
+    public CompletableFuture<LetterResponse> vieLetterBatch(LetterBatch letterBatch) {
+        return this.client.postJson(
                 getUrl("viestintapalvelu.letter.async.letter"),
-                new TypeToken<LetterResponse>() {
-                }.getType(),
-                Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE),
-                ACCEPT_JSON);
+                Duration.ofHours(20),
+                letterBatch,
+                new com.google.gson.reflect.TypeToken<LetterBatch>() {}.getType(),
+                new com.google.gson.reflect.TypeToken<LetterResponse>() {}.getType()
+        );
     }
 
     @Override
-    public Observable<LetterBatchStatusDto> haeStatusObservable(String letterBatchId) {
-        return getAsObservableLazily(
+    public CompletableFuture<LetterBatchStatusDto> haeLetterBatchStatus(String letterBatchId) {
+        return this.client.getJson(
                 getUrl("viestintapalvelu.letter.async.letter.status", letterBatchId),
-                new TypeToken<LetterBatchStatusDto>() {
-                }.getType(),
-                ACCEPT_JSON);
+                Duration.ofMinutes(1),
+                new com.google.gson.reflect.TypeToken<LetterBatchStatusDto>() {}.getType()
+        );
     }
 
     public Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli) {
@@ -69,21 +71,17 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     @Override
-    public Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid) {
-        String url = getUrl("viestintapalvelu.template.gethistory");
-        LOG.info("######## TemplateHistory {}?applicationPeriod={}&oid={}&templateName={}&languageCode={}&tag={}", url, hakuOid, tarjoajaOid, templateName, languageCode, hakukohdeOid);
-        return getAsObservableLazily(
-                url,
-                new TypeToken<List<TemplateHistory>>() {}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    client.query("applicationPeriod", hakuOid);
-                    client.query("oid", tarjoajaOid);
-                    client.query("templateName", templateName);
-                    client.query("languageCode", languageCode);
-                    client.query("tag", hakukohdeOid);
-                    return client;
-                }
+    public CompletableFuture<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid) {
+        HashMap<String, String> query = new HashMap<>();
+        query.put("applicationPeriod", hakuOid);
+        query.put("oid", tarjoajaOid);
+        query.put("templateName", templateName);
+        query.put("languageCode", languageCode);
+        query.put("tag", hakukohdeOid);
+        return this.client.getJson(
+                getUrl("viestintapalvelu.template.gethistory", query),
+                Duration.ofMinutes(1),
+                new com.google.gson.reflect.TypeToken<List<TemplateHistory>>() {}.getType()
         );
     }
 

@@ -5,10 +5,12 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 public class MockOhjausparametritAsyncResource implements OhjausparametritAsyncResource {
     @Override
-    public Observable<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
-        return Observable.just(new ParametritDTO());
+    public CompletableFuture<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
+        return CompletableFuture.completedFuture(new ParametritDTO());
     }
 }

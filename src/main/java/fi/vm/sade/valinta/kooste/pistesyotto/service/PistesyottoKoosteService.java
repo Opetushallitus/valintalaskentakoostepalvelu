@@ -80,7 +80,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     valintaperusteetAsyncResource.findAvaimet(hakukohdeOid),
                     osallistuminenByHakemus,
                     oppijaByPersonOID,
-                    ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
+                    Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)),
                     (additionalDatat, valintaperusteet, valintakokeet, oppijat, ohjausparametrit) ->
                             new PistesyottoValilehtiDTO(additionalDatat.lastModified.orElse(null), additionalDatat.valintapisteet.stream().map(vps ->
                                     new HakemuksenKoetulosYhteenveto(
@@ -108,7 +108,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
     }
 
     private Observable<HakemusWrapper> getHakemus(String hakemusOid) {
-        return ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid))
+        return Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid)))
                 .flatMap(hakemukset -> {
                     if (hakemukset.isEmpty()) {
                         return applicationAsyncResource.getApplication(hakemusOid);
@@ -125,7 +125,7 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                         valintapisteAsyncResource.getValintapisteet(Collections.singletonList(hakemusOid), auditSession),
                         valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid),
                         suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(hakemus.getPersonOid()),
-                        ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakemus.getHakuoid()),
+                        Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakemus.getHakuoid())),
                         (valintaperusteetByHakukohdeOid, valintapisteet, valintakoeOsallistuminen, oppija, ohjausparametrit) ->
                                 new HenkiloValilehtiDTO(
                                         valintapisteet.lastModified.orElse(null),

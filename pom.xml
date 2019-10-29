@@ -52,7 +52,7 @@
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>java-cxf</artifactId>
-                <version>0.3.2-SNAPSHOT</version>
+                <version>0.3.3-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
@@ -128,6 +128,11 @@
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>java-http</artifactId>
                 <version>0.2.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>java-cas</artifactId>
+                <version>0.6.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade</groupId>
@@ -440,6 +445,10 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.java-utils</groupId>
+            <artifactId>java-cas</artifactId>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>

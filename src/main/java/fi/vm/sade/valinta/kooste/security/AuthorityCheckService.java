@@ -79,7 +79,7 @@ public class AuthorityCheckService {
             return;
         }
 
-        boolean isAuthorized = tarjontaAsyncResource.haeHaku(hakuOid).map(haku -> {
+        boolean isAuthorized = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).map(haku -> {
             String[] organisaatioOids = haku.getTarjoajaOids();
             return isAuthorizedForAnyParentOid(organisaatioOids, userRoles, requiredRoles);
         }).timeout(2, MINUTES).blockingFirst();

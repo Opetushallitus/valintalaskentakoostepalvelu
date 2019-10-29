@@ -1,21 +1,23 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route;
 
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+
 import java.util.List;
 
-import org.apache.camel.Property;
-import org.springframework.security.core.Authentication;
-
-import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
-import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
-
 public interface HyvaksymiskirjeetService {
-    void hyvaksymiskirjeetHakemuksille(KirjeProsessi prosessi, HyvaksymiskirjeDTO hyvaksymiskirjeDTO, List<String> hakemusOids);
+    ProsessiId hyvaksymiskirjeetHakemuksille(HyvaksymiskirjeDTO hyvaksymiskirjeDTO, List<String> hakemusOids);
 
-    void jalkiohjauskirjeHakukohteelle(KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
+    ProsessiId jalkiohjauskirjeetHakemuksille(JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids);
 
-    void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi, HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
+    ProsessiId jalkiohjauskirjeHakukohteelle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
+
+    ProsessiId hyvaksymiskirjeetHakukohteelle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
+
+    ProsessiId hyvaksymiskirjeetHaulle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO, String asiointikieli);
+
+    ProsessiId jalkiohjauskirjeetHaulle(JalkiohjauskirjeDTO hyvaksymiskirjeDTO);
+
+    ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
 }

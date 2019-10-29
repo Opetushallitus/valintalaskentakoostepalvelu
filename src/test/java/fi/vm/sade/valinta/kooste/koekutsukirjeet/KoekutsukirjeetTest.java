@@ -33,6 +33,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -62,11 +63,10 @@ public class KoekutsukirjeetTest {
             final String HAKEMUS2 = "HAKEMUS2";
             HakukohdeDTO HAKUKOHDEDTO1 = new HakukohdeDTO();
             HAKUKOHDEDTO1.setOpetuskielet(Arrays.asList("FI", "SV"));
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
-            ViestintapalveluAsyncResource viestintapalveluAsyncResource =
-                    Mocks.getViestintapalveluAsyncResource();
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+            ViestintapalveluAsyncResource viestintapalveluAsyncResource = Mocks.getViestintapalveluAsyncResource();
             ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);
-            Mockito.when(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(Mockito.any(LetterBatch.class))).thenReturn(Observable.empty());
+            Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class))).thenReturn(new CompletableFuture<>());
             Mockito.when(Mocks.getHakukohdeResource().getByOID(Mockito.anyString())).thenReturn(HAKUKOHDEDTO1);
             MockValintaperusteetAsyncResource.setHakukohdeResult(
                     Arrays.asList(
@@ -134,7 +134,7 @@ public class KoekutsukirjeetTest {
             Assert.assertEquals(200, r.getStatus());
 
 
-            Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1)).viePdfJaOdotaReferenssiObservable(letterBatchArgumentCaptor.capture());
+            Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1)).vieLetterBatch(letterBatchArgumentCaptor.capture());
             LetterBatch batch = letterBatchArgumentCaptor.getValue();
             Assert.assertEquals("Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.", 2, batch.getLetters().size());
             LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));
@@ -156,11 +156,11 @@ public class KoekutsukirjeetTest {
             final String HAKEMUS2 = "HAKEMUS2";
             HakukohdeDTO HAKUKOHDEDTO1 = new HakukohdeDTO();
             HAKUKOHDEDTO1.setOpetuskielet(Arrays.asList("FI", "SV"));
-            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Observable.just(Collections.emptyList()));
+            Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
             ViestintapalveluAsyncResource viestintapalveluAsyncResource =
                     Mocks.getViestintapalveluAsyncResource();
             ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);
-            Mockito.when(viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(Mockito.any(LetterBatch.class))).thenReturn(Observable.empty());
+            Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class))).thenReturn(new CompletableFuture<>());
             Mockito.when(Mocks.getHakukohdeResource().getByOID(Mockito.anyString())).thenReturn(HAKUKOHDEDTO1);
             MockValintaperusteetAsyncResource.setHakukohdeResult(
                     Arrays.asList(
@@ -230,7 +230,7 @@ public class KoekutsukirjeetTest {
             Assert.assertEquals(200, r.getStatus());
 
 
-            Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1)).viePdfJaOdotaReferenssiObservable(letterBatchArgumentCaptor.capture());
+            Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1)).vieLetterBatch(letterBatchArgumentCaptor.capture());
             LetterBatch batch = letterBatchArgumentCaptor.getValue();
             Assert.assertEquals("Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.", 2, batch.getLetters().size());
             LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));

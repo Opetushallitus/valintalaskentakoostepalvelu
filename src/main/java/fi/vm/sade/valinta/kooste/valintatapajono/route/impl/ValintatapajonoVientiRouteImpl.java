@@ -101,9 +101,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                                 hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid,
                                         ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX).stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
                             } else {
-                                hakemukset = ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
-                                        .timeout(1, TimeUnit.MINUTES)
-                                        .blockingFirst();
+                                hakemukset = ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid).get(1, TimeUnit.MINUTES);
                             }
                             LOG.debug("Saatiin hakemukset {}", hakemukset.size());
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();

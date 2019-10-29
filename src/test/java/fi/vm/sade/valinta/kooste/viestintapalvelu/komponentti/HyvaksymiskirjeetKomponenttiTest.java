@@ -39,7 +39,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
     private final String APPLICATION_PERIOD = "hakuOid";
     private final String FETCH_TARGET = null;
     private final String TAG = "tag";
-    private final boolean IPOSTI = false;
 
     private final String HAKUKOHDE_OID = "hakukohdeOid";
     private final String HAKEMUS_OID = "hakemusOid";
@@ -111,7 +110,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
         assertEquals(APPLICATION_PERIOD, batch.getApplicationPeriod());
         assertEquals("FetchTarget was null, the default is used", HAKUKOHDE_OID, batch.getFetchTarget());
         assertEquals(TAG, batch.getTag());
-        assertEquals(IPOSTI, batch.isIposti());
         assertEquals(skipDokumenttipalvelu, batch.isSkipDokumenttipalvelu());
 
         assertEquals(1, batch.getLetters().size());
@@ -256,13 +254,26 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 .createOsoite();
 
         return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                (String x) -> new HashMap<>(),
-                ImmutableMap.of(ORGANIZATION_OID, ofNullable(osoite)),
+                new HashMap<>(),
+                new HashMap<>(),
+                ImmutableMap.of(HAKUKOHDE_OID, ofNullable(osoite)),
                 ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(ORGANIZATION_OID, new Teksti(), new Teksti())),
                 ImmutableList.of(hakija),
-                ImmutableList.of(new HakuappHakemusWrapper(
-                        new Hakemus("type", "applicationSystemId", answers, ImmutableMap.of(),
-                                ImmutableList.of(), HAKEMUS_OID, "state", "personOid"))),
+                ImmutableMap.of(
+                        HAKEMUS_OID,
+                        new HakuappHakemusWrapper(
+                                new Hakemus(
+                                        "type",
+                                        "applicationSystemId",
+                                        answers,
+                                        ImmutableMap.of(),
+                                        ImmutableList.of(),
+                                        HAKEMUS_OID,
+                                        "state",
+                                        "personOid"
+                                )
+                        )
+                ),
                 FETCH_TARGET,
                 APPLICATION_PERIOD,
                 ofNullable(LANGUAGE_CODE),
@@ -271,7 +282,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 TEMPLATE_NAME,
                 PALAUTUS_PVM,
                 PALAUTUS_AIKA,
-                IPOSTI,
                 korkeakouluMassapostitus
         );
     }

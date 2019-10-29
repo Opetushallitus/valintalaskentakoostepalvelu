@@ -10,6 +10,8 @@ import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -90,8 +92,8 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, Collection<String> keys) {
-        return Observable.just(resultReference.get());
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid, List<String> hakemusOids, List<String> keys) {
+        return CompletableFuture.completedFuture(resultReference.get());
     }
 
     @Override
@@ -130,10 +132,10 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
-        return Observable.fromFuture(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, List<String> hakukohdeOids) {
+        if (serviceIsAvailable.get()) {
             if (resultReference.get() != null) {
-                return Futures.immediateFuture(resultReference.get());
+                return CompletableFuture.completedFuture(resultReference.get());
             } else {
                 Hakemus hakemus = new Hakemus();
                 hakemus.setOid(MockData.hakemusOid);
@@ -147,9 +149,10 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
                 hakemus.setAnswers(answers);
                 Eligibility e = new Eligibility(MockData.kohdeOid, null, null, MockData.maksuvelvollisuus);
                 hakemus.getPreferenceEligibilities().add(e);
-                return Futures.immediateFuture(Arrays.asList(new HakuappHakemusWrapper(hakemus)));
+                return CompletableFuture.completedFuture(Arrays.asList(new HakuappHakemusWrapper(hakemus)));
             }
-        }));
+        }
+        return CompletableFuture.failedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
     }
 
     @Override

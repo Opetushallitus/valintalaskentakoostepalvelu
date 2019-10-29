@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
@@ -16,17 +15,19 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * OLETTAA ETTA KAIKILLE VALINTATAPAJONOILLE TEHDAAN HYVAKSYMISKIRJE JOS
@@ -38,139 +39,29 @@ import java.util.stream.Collectors;
 public class HyvaksymiskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
 
-    private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
-
-    private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
-    private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-
-    @Autowired
-    public HyvaksymiskirjeetKomponentti(KoodistoCachedAsyncResource koodistoCachedAsyncResource, KirjeetHakukohdeCache kirjeetHakukohdeCache) {
-        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-        this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
-    }
-
-    public LetterBatch teeHyvaksymiskirjeet(
-            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
-            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-            Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<HakemusWrapper> hakemukset,
-            String hakuOid,
-            Optional<String> asiointikieli,
-            String sisalto,
-            String tag,
-            String templateName,
-            String palautusPvm,
-            String palautusAika,
-            boolean iPosti) {
-        return teeHyvaksymiskirjeet(
-                koodistoCachedAsyncResource::haeKoodisto,
-                hakukohdeJaHakijapalveluidenOsoite,
-                hyvaksymiskirjeessaKaytetytHakukohteet,
-                hakukohteenHakijat,
-                hakemukset,
-                null,
-                hakuOid,
-                asiointikieli,
-                sisalto,
-                tag,
-                templateName,
-                palautusPvm,
-                palautusAika,
-                iPosti,
-                false);
-    }
-
-    public LetterBatch teeHyvaksymiskirjeet(
-            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
-            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-            Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<HakemusWrapper> hakemukset,
-            String hakuOid,
-            Optional<String> asiointikieli,
-            String sisalto,
-            String tag,
-            String templateName,
-            String palautusPvm,
-            String palautusAika,
-            boolean iPosti,
-            boolean sahkoinenKorkeakoulunMassaposti) {
-        return teeHyvaksymiskirjeet(
-                koodistoCachedAsyncResource::haeKoodisto,
-                hakukohdeJaHakijapalveluidenOsoite,
-                hyvaksymiskirjeessaKaytetytHakukohteet,
-                hakukohteenHakijat,
-                hakemukset,
-                null,
-                hakuOid,
-                asiointikieli,
-                sisalto,
-                tag,
-                templateName,
-                palautusPvm,
-                palautusAika,
-                iPosti,
-                sahkoinenKorkeakoulunMassaposti);
-    }
-
-    public LetterBatch teeJalkiohjauskirjeet(
-            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
-            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-            Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<HakemusWrapper> hakemukset,
-            String hakukohdeOid,
-            String hakuOid,
-            Optional<String> asiointikieli,
-            String sisalto,
-            String tag,
-            String templateName,
-            String palautusPvm,
-            String palautusAika,
-            boolean iPosti) {
-        return teeHyvaksymiskirjeet(
-                koodistoCachedAsyncResource::haeKoodisto,
-                hakukohdeJaHakijapalveluidenOsoite,
-                hyvaksymiskirjeessaKaytetytHakukohteet,
-                hakukohteenHakijat,
-                hakemukset,
-                hakukohdeOid,
-                hakuOid,
-                asiointikieli,
-                sisalto,
-                tag,
-                templateName,
-                palautusPvm,
-                palautusAika,
-                iPosti,
-                false);
-    }
-
     public static LetterBatch teeHyvaksymiskirjeet(
-            Function<String, Map<String, Koodi>> haeKoodisto,
+            Map<String, Koodi> maatjavaltiot1,
+            Map<String, Koodi> postinumerot,
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
-            Collection<HakemusWrapper> hakemukset,
+            Map<String, HakemusWrapper> hakemukset,
             String hakukohdeOidFromRequest,
             String hakuOid,
             Optional<String> asiointikieli,
-            String sisalto, String tag,
+            String sisalto,
+            String tag,
             String templateName,
             String palautusPvm,
             String palautusAika,
-            boolean iPosti,
-            boolean sahkoinenKorkeakoulunMassaposti ) {
+            boolean sahkoinenKorkeakoulunMassaposti) {
         try {
             assert (hakuOid != null);
             int kaikkiHyvaksytyt = hakukohteenHakijat.size();
             LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true.", kaikkiHyvaksytyt);
-            Map<String, HakemusWrapper> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
             final List<Letter> kirjeet = new ArrayList<>();
-            Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-            Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);
             LetterBatch viesti = new LetterBatch(kirjeet);
-            if(asiointikieli.isPresent()) {
-                viesti.setLanguageCode(asiointikieli.get());
-            }
+            asiointikieli.ifPresent(viesti::setLanguageCode);
             int count = 0;
             for (HakijaDTO hakija : hakukohteenHakijat) {
                 final String hakukohdeOid = StringUtils.isEmpty(hakukohdeOidFromRequest) ? hyvaksytynHakutoiveenHakukohdeOid(hakija) : hakukohdeOidFromRequest;
@@ -180,8 +71,8 @@ public class HyvaksymiskirjeetKomponentti {
                 String preferoituKielikoodi = asiointikieli.orElse(hyvaksyttyMeta.getOpetuskieli());
                 String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
                 final String hakemusOid = hakija.getHakemusOid();
-                final HakemusWrapper hakemus = Objects.requireNonNull(hakukohteenHakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
-                final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maajavaltio, posti, new TuloskirjeNimiPaattelyStrategy());
+                final HakemusWrapper hakemus = Objects.requireNonNull(hakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
+                final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maatjavaltiot1, postinumerot, new TuloskirjeNimiPaattelyStrategy());
                 final List<Map<String, Object>> tulosList = new ArrayList<>();
 
                 for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -213,7 +104,7 @@ public class HyvaksymiskirjeetKomponentti {
                 replacements.put("palautusPvm", StringUtils.trimToNull(palautusPvm));
                 replacements.put("tulokset", tulosList);
                 replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)));
-                Optional<Osoite> hakijapalveluidenOsoite = hakukohdeJaHakijapalveluidenOsoite.get(tarjoajaOid);
+                Optional<Osoite> hakijapalveluidenOsoite = hakukohdeJaHakijapalveluidenOsoite.get(hakukohdeOid);
                 if (hakijapalveluidenOsoite != null) {
                     hakijapalveluidenOsoite.ifPresent(h -> replacements.put("hakijapalveluidenOsoite", h));
                 } else {
@@ -255,7 +146,6 @@ public class HyvaksymiskirjeetKomponentti {
             viesti.setApplicationPeriod(hakuOid);
             viesti.setTag(tag);
             viesti.setTemplateName(templateName);
-            //viesti.setIposti(iPosti);
             viesti.setIposti(false);
             viesti.setSkipDokumenttipalvelu(sahkoinenKorkeakoulunMassaposti);
             Map<String, Object> templateReplacements = Maps.newHashMap();
@@ -267,44 +157,10 @@ public class HyvaksymiskirjeetKomponentti {
         }
     }
 
-
-
-    private static boolean sendIPosti(HakemusWrapper hakemusWrapper) {
-        return org.apache.commons.lang3.StringUtils.isBlank(hakemusWrapper.getSahkopostiOsoite()) ||
-           !hakemusWrapper.getVainSahkoinenViestinta();
-    }
-
     private static String hyvaksytynHakutoiveenHakukohdeOid(HakijaDTO hakija) {
         return hakija.getHakutoiveet().stream()
                 .filter(h -> h.getHakutoiveenValintatapajonot().stream()
-                        .filter(j -> j.getTila().isHyvaksytty())
-                        .findAny().isPresent())
+                        .anyMatch(j -> j.getTila().isHyvaksytty()))
                 .findAny().get().getHakukohdeOid();
-    }
-
-    //
-    // Hakee kaikki hyvaksymiskirjeen kohteena olevan hakukohteen hakijat ja
-    // niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
-    // Metahakukohteille haetaan muun muassa tarjoajanimi!
-    //
-    public Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(Collection<HakijaDTO> hakukohteenHakijat) {
-        Map<String, MetaHakukohde> metaKohteet = new HashMap<>();
-        for (HakijaDTO hakija : hakukohteenHakijat) {
-            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                String hakukohdeOid = hakutoive.getHakukohdeOid();
-                if (!metaKohteet.containsKey(hakukohdeOid)) {
-                    try {
-                        metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
-                    } catch (Exception e) {
-                        LOG.error("Tarjonnasta ei saatu hakukohdetta " + hakukohdeOid, e);
-                        metaKohteet.put(hakukohdeOid, new MetaHakukohde(
-                                "",
-                                new Teksti("Hakukohde " + hakukohdeOid + " ei löydy tarjonnasta!"),
-                                new Teksti(TYHJA_TARJOAJANIMI)));
-                    }
-                }
-            }
-        }
-        return metaKohteet;
     }
 }

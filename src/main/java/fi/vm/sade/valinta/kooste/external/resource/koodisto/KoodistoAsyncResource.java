@@ -4,9 +4,10 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import io.reactivex.Observable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface KoodistoAsyncResource {
-    Observable<List<Koodi>> haeKoodisto(String koodistoUri);
+    CompletableFuture<List<Koodi>> haeKoodisto(String koodistoUri);
 
-    Observable<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri);
+    CompletableFuture<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri);
 }

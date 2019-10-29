@@ -21,6 +21,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import io.reactivex.Observable;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -114,13 +115,13 @@ public class ValintakoekutsutExcelService {
                             poikkeuskasittelija.accept(t);
                         }
                     }).build();
-            koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1).subscribe(
+            Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)).subscribe(
                 maatJaValtiot1 -> {
                     maatJaValtiot1Ref.set(maatJaValtiot1);
                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 },
                 poikkeuskasittelija);
-            koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI).subscribe(
+            Observable.fromFuture(koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI)).subscribe(
                 posti -> {
                     postiRef.set(posti);
                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
@@ -160,7 +161,7 @@ public class ValintakoekutsutExcelService {
                                 voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                             }, poikkeuskasittelija);
                         } else {
-                            ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid).subscribe(hakemukset -> {
+                            Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)).subscribe(hakemukset -> {
                                 lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                                 voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
@@ -183,7 +184,7 @@ public class ValintakoekutsutExcelService {
                 },
                 poikkeuskasittelija
             );
-            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
+            Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)).subscribe(hakukohde -> {
                 hakukohdeRef.set(hakukohde);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
@@ -201,7 +202,7 @@ public class ValintakoekutsutExcelService {
                 },
                 poikkeuskasittelija);
         } else {
-            ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids)).subscribe(
+            Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids))).subscribe(
                     hakemukset -> {
                         lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

@@ -1,40 +1,43 @@
 package fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.impl;
 
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
-import io.reactivex.Observable;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.core.Response;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 
 @Service
-public class OhjausparametritAsyncResourceImpl extends UrlConfiguredResource implements OhjausparametritAsyncResource {
+public class OhjausparametritAsyncResourceImpl implements OhjausparametritAsyncResource {
+    private final HttpClient client;
+    private final UrlConfiguration urlConfiguration;
+    private final Duration requestTimeout;
 
     @Autowired
     public OhjausparametritAsyncResourceImpl(
+            @Qualifier("OhjausparametritHttpClient")HttpClient client,
             @Value("${valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds:20}") int requestTimeoutSeconds) {
-        super(TimeUnit.SECONDS.toMillis(requestTimeoutSeconds));
+        this.client = client;
+        this.urlConfiguration = UrlConfiguration.getInstance();
+        this.requestTimeout = Duration.ofSeconds(requestTimeoutSeconds);
     }
 
     @Override
-    public Observable<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
-        Observable<ParametritDTO> intermediate = getAsObservableLazily(
-                getUrl("ohjausparametrit-service.parametri", hakuOid),
-                ParametritDTO.class
-        );
-        return intermediate.onErrorReturn(error -> {
-            if (HttpExceptionWithResponse.isResponseWithStatus(Response.Status.NOT_FOUND, error)) {
+    public CompletableFuture<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
+        return this.client.getResponse(
+                this.urlConfiguration.url("ohjausparametrit-service.parametri", hakuOid),
+                this.requestTimeout
+        ).thenApply(response -> {
+            if (response.statusCode() == 404) {
                 return new ParametritDTO();
             }
-            if(error instanceof RuntimeException) {
-                throw (RuntimeException) error;
-            }
-            throw new RuntimeException(error);
+            return this.client.parseJson(response, new TypeToken<ParametritDTO>() {}.getType());
         });
     }
 }

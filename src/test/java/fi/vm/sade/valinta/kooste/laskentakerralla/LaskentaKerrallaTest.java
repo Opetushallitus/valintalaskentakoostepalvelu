@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -132,7 +133,7 @@ public class LaskentaKerrallaTest {
                                 .fromIterable(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)))
                                 ));
 
-        when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any())).thenReturn(Observable.just(LaskentaKerrallaTestData.ohjausparametrit()));
+        when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any())).thenReturn(CompletableFuture.completedFuture(LaskentaKerrallaTestData.ohjausparametrit()));
 
         when(Mocks.applicationAsyncResource.getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID)))
                 .thenAnswer(
@@ -152,7 +153,7 @@ public class LaskentaKerrallaTest {
                                 .fromIterable(Arrays.asList("string"))
                 );
         when(Mocks.tarjontaAsyncResource.haeHaku(any()))
-                .thenAnswer(invocation -> Observable.just(buildHakuDto()));
+                .thenAnswer(invocation -> CompletableFuture.completedFuture(buildHakuDto()));
         when(Mocks.laskentaSeurantaAsyncResource.laskenta(LASKENTASEURANTA_ID)).thenReturn(Observable.just(
             (new LaskentaDto(LASKENTASEURANTA_ID, "","","", HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, null, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false, null, true))));
 

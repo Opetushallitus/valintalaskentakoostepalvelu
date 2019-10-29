@@ -20,10 +20,12 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoA
 import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class MockValintaTulosServiceAsyncResource implements ValintaTulosServiceAsyncResource {
@@ -102,27 +104,27 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
-        return Observable.just(new HakijaPaginationObject());
+    public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
+        return CompletableFuture.completedFuture(new ArrayList<>());
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getKoulutuspaikalliset(String hakuOid) {
-        return Observable.just(new HakijaPaginationObject());
+    public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid) {
+        return CompletableFuture.completedFuture(new ArrayList<>());
     }
 
     @Override
-    public Observable<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
-        return Observable.just(new HakijaDTO());
+    public CompletableFuture<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
+        return CompletableFuture.completedFuture(new HakijaDTO());
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
-        return Observable.just(new HakijaPaginationObject());
+    public CompletableFuture<List<HakijaDTO>> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
+        return CompletableFuture.completedFuture(new ArrayList<>());
     }
 
     @Override
-    public Observable<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
-        return Observable.just(new HakijaPaginationObject());
+    public CompletableFuture<List<HakijaDTO>> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
+        return CompletableFuture.completedFuture(new ArrayList<>());
     }
 }

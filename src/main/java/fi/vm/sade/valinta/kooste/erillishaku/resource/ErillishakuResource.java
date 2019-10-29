@@ -38,6 +38,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Controller("ErillishakuResource")
 @Path("erillishaku")
@@ -190,6 +192,10 @@ public class ErillishakuResource {
     }
 
     private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
-        return HakukohdeHelper.tarjoajaOid(tarjontaResource.haeHakukohde(hakukohdeOid).timeout(30, SECONDS).blockingFirst());
+        try {
+            return HakukohdeHelper.tarjoajaOid(tarjontaResource.haeHakukohde(hakukohdeOid).get(30, SECONDS));
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

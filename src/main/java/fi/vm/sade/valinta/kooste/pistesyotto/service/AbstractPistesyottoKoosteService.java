@@ -141,7 +141,7 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     protected Observable<List<HakemusWrapper>> getHakemuksetByOids(List<String> hakemusOids) {
-        return ataruAsyncResource.getApplicationsByOids(hakemusOids)
+        return Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids))
                 .flatMap(hakemukset -> {
                     if (hakemukset.isEmpty()) {
                         return applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids);
@@ -155,7 +155,7 @@ public abstract class AbstractPistesyottoKoosteService {
         if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
             return applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid);
         } else {
-            return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
+            return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
         }
     }
 
@@ -214,7 +214,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 kokeetO,
                 osallistumistiedotO,
                 kokeetO.flatMap(haeKielikoetulokset),
-                ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
+                Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)),
                 (lisatiedot, kokeet, osallistumistiedot, kielikoetulokset, ohjausparametrit) -> {
                     Map<String, ValintakoeOsallistuminenDTO> osallistumistiedotByHakemusOid = osallistumistiedot.stream()
                             .collect(Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, o -> o));
@@ -231,7 +231,7 @@ public abstract class AbstractPistesyottoKoosteService {
                     ).collect(Collectors.toList()));
                 }
         );
-        Observable<HakuV1RDTO> hakuO = tarjontaAsyncResource.haeHaku(hakuOid);
+        Observable<HakuV1RDTO> hakuO = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
         Observable<List<HakemusWrapper>> hakemuksetO = Observable.merge(Observable.zip(
                 osallistumistiedotO,
                 hakuO.flatMap(haku -> getHakemukset(haku, hakukohdeOid)),
@@ -247,7 +247,7 @@ public abstract class AbstractPistesyottoKoosteService {
                 hakemuksetO,
                 kokeetO,
                 valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(Collections.singletonList(hakukohdeOid)),
-                tarjontaAsyncResource.haeHakukohde(hakukohdeOid),
+                Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)),
                 hakuO,
                 (osallistumistiedot, lisatiedot, hakemukset, kokeet, valintakoeosallistumiset, hakukohde, haku) -> Triple.of(
                         muodostoPistesyottoExcel(hakuOid, hakukohdeOid, lisatiedot.getKey(), osallistumistiedot, hakemukset, kokeet,
@@ -367,7 +367,7 @@ public abstract class AbstractPistesyottoKoosteService {
     }
 
     private Observable<String> findSourceOid(String hakukohdeOid) {
-        return tarjontaAsyncResource.haeHakukohde(hakukohdeOid).flatMap(hakukohde -> {
+        return Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)).flatMap(hakukohde -> {
             Optional<String> tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst();
             if (tarjoajaOid.isPresent()) {
                 return organisaatioAsyncResource.haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid.get()).flatMap(hierarkia -> {

@@ -9,14 +9,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public interface TarjontaAsyncResource {
-    Observable<HakuV1RDTO> haeHaku(String hakuOid);
+    CompletableFuture<HakuV1RDTO> haeHaku(String hakuOid);
 
     Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(Collection<String> organizationGroupOids);
     Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(Collection<String> organizationOids);
 
-    Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid);
+    CompletableFuture<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid);
 
     /**
      * Fetch from tarjonta-service the hakuOids that should be synchronized.

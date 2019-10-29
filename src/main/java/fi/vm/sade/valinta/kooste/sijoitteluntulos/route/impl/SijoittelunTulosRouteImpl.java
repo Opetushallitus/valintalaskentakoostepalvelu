@@ -25,7 +25,6 @@ import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoi
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Tiedosto;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
-import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosHyvaksymiskirjeetRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
@@ -43,8 +42,6 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
@@ -90,12 +87,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
     private final DokumenttiResource dokumenttiResource;
     private final ViestintapalveluResource viestintapalveluResource;
-    private final HaeOsoiteKomponentti osoiteKomponentti;
     private final ApplicationResource applicationResource;
     private final String hakukohteidenHaku;
     private final String luontiEpaonnistui;
     private final String taulukkolaskenta;
-    private final String hyvaksymiskirjeet;
     private final String osoitetarrat;
     private final String dokumenttipalveluUrl;
     private final String muodostaDokumentit;
@@ -111,16 +106,13 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             @Value("${valintalaskentakoostepalvelu.sijoittelunTulosRouteImpl.pakkaaTiedostotTarriin:false}") boolean pakkaaTiedostotTarriin,
             @Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}/dokumentit/lataa/") String dokumenttipalveluUrl,
             @Value(SijoittelunTulosTaulukkolaskentaRoute.SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE) String taulukkolaskenta,
-            @Value(SijoittelunTulosHyvaksymiskirjeetRoute.SEDA_SIJOITTELUNTULOS_HYVAKSYMISKIRJEET_HAULLE) String hyvaksymiskirjeet,
             @Value(SijoittelunTulosOsoitetarratRoute.SEDA_SIJOITTELUNTULOS_OSOITETARRAT_HAULLE) String osoitetarrat,
             KoodistoCachedAsyncResource koodistoCachedAsyncResource,
             HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta,
             SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
             HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta,
-            HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
             TarjontaAsyncResource tarjontaAsyncResource,
             ViestintapalveluResource viestintapalveluResource,
-            HaeOsoiteKomponentti osoiteKomponentti,
             ApplicationResource applicationResource,
             AtaruAsyncResource ataruAsyncResource,
             DokumenttiResource dokumenttiResource,
@@ -134,7 +126,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
         this.applicationResource = applicationResource;
-        this.osoiteKomponentti = osoiteKomponentti;
         this.osoitetarrat = osoitetarrat;
         this.viestintapalveluResource = viestintapalveluResource;
         this.nimiTarjonnalta = nimiTarjonnalta;
@@ -146,7 +137,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.sijoittelunTulosExcel = sijoittelunTulosExcel;
         this.dokumenttiResource = dokumenttiResource;
         this.taulukkolaskenta = taulukkolaskenta;
-        this.hyvaksymiskirjeet = hyvaksymiskirjeet;
         this.haeHakuTarjonnaltaKomponentti = haeHakuTarjonnaltaKomponentti;
         this.valintalaskentaResource = valintalaskentaResource;
     }
@@ -156,7 +146,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         configureDeadLetterChannel();
         configureHakukohteidenHaku();
         configureTaulukkolaskenta();
-        configureHyvaksymiskirjeet();
         configureOsoitetarrat();
     }
 
@@ -213,11 +202,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
                         try {
                             // TODO here it would make more sense to parallelise the asynchronous calls and bundle the results together after they all complete.
-                            hakemukset = tarjontaAsyncResource.haeHaku(hakuOid)
+                            hakemukset = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                             ? Observable.just(applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX)
                                             .stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
-                                            : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)).timeout(5, MINUTES).blockingFirst();
+                                            : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))).timeout(5, MINUTES).blockingFirst();
                             hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).timeout(5, MINUTES).toFuture().get();
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).timeout(5, MINUTES).toFuture().get();
                             valinnanvaiheet = valintalaskentaResource.laskennantulokset(hakukohdeOid).timeout(1, MINUTES).toFuture().get();
@@ -320,10 +309,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 return;
                             }
                             stopWatch.start("Tiedot hakemuksilta");
-                            List<HakemusWrapper> hakemukset = tarjontaAsyncResource.haeHaku(hakuOid(exchange))
+                            List<HakemusWrapper> hakemukset = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid(exchange)))
                                     .flatMap(haku -> StringUtils.isEmpty(haku.getAtaruLomakeAvain())
                                             ? Observable.just(applicationResource.getApplicationsByOids(hyvaksytytHakemukset).stream().<HakemusWrapper>map(HakuappHakemusWrapper::new).collect(Collectors.toList()))
-                                            : ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset)).timeout(5, MINUTES).blockingFirst();
+                                            : Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset))).timeout(5, MINUTES).blockingFirst();
                             stopWatch.stop();
                             List<Osoite> addressLabels = Lists.newArrayList();
 
@@ -354,25 +343,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                     }
                 })
                 .to(muodostaDokumentit);
-    }
-
-    private void configureHyvaksymiskirjeet() {
-        String yksittainenHyvaksymiskirjeTyo = yksittainenTyo("hyvaksymiskirjeet");
-        from(hyvaksymiskirjeet)
-                .errorHandler(
-                        deadLetterChannel(luontiEpaonnistui)
-                                .maximumRedeliveries(0)
-                                .logExhaustedMessageHistory(true)
-                                .logExhausted(true).logStackTrace(true)
-                                // hide retry/handled stacktrace
-                                .logRetryStackTrace(false).logHandled(false))
-                .process(SECURITY)
-                .to(hakukohteidenHaku)
-                .split(body())
-                .stopOnException()
-                .shareUnitOfWork()
-                .to(yksittainenHyvaksymiskirjeTyo)
-                .end();
     }
 
     private void configureDeadLetterChannel() {

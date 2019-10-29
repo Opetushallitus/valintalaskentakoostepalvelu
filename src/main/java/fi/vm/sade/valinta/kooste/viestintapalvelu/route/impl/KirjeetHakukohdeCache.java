@@ -1,48 +1,54 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import java.util.Collection;
-import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
-
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
-
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Component
 public class KirjeetHakukohdeCache {
-    private final Logger LOG = LoggerFactory.getLogger(KirjeetHakukohdeCache.class);
-    private final Cache<String, MetaHakukohde> metaHakukohdeCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
+    private final Cache<String, CompletableFuture<MetaHakukohde>> metaHakukohdeCache;
+    private final TarjontaAsyncResource tarjontaAsyncResource;
 
     @Autowired
-    private TarjontaAsyncResource hakuV1AsyncResource;
+    public KirjeetHakukohdeCache(TarjontaAsyncResource tarjontaAsyncResource) {
+        metaHakukohdeCache = CacheBuilder.newBuilder().expireAfterWrite(15,TimeUnit.MINUTES).build();
+        this.tarjontaAsyncResource = tarjontaAsyncResource;
+    }
 
-    public MetaHakukohde haeHakukohde(final String hakukohdeOid) throws Exception {
+    public MetaHakukohde haeHakukohde(String hakukohdeOid) {
+        try {
+            return haeHakukohdeAsync(hakukohdeOid).get(30, SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        return metaHakukohdeCache.get(hakukohdeOid,
-                () -> {
-                    //TODO Tee tästä aidosti asynkroninen!
-                    HakukohdeV1RDTO hakukohde = hakuV1AsyncResource.haeHakukohde(hakukohdeOid).timeout(30, SECONDS).blockingFirst();
-                    Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
-                    String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
-                    LOG.debug("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
-                    Teksti tarjoajaNimi = new Teksti(hakukohde.getTarjoajaNimet());
-                    return new MetaHakukohde(
-                            hakukohde.getTarjoajaOids().iterator().next(),
-                            hakukohdeNimi, tarjoajaNimi, hakukohdeNimi.getKieli(), opetuskieli, hakukohde.getOhjeetUudelleOpiskelijalle());
-                });
+    public CompletableFuture<MetaHakukohde> haeHakukohdeAsync(String hakukohdeOid) {
+        try {
+            CompletableFuture<MetaHakukohde> f = this.metaHakukohdeCache.get(hakukohdeOid, () -> fetchMetaHakukohde(hakukohdeOid));
+            if (f.isCompletedExceptionally()) {
+                this.metaHakukohdeCache.invalidate(hakukohdeOid);
+                return this.metaHakukohdeCache.get(hakukohdeOid, () -> fetchMetaHakukohde(hakukohdeOid));
+            }
+            return f;
+        } catch (ExecutionException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     public static String getOpetuskieli(Collection<String> opetuskielet) {
@@ -58,5 +64,20 @@ public class KirjeetHakukohdeCache {
             return KieliUtil.ENGLANTI;
         }
         return KieliUtil.SUOMI;
+    }
+
+    private CompletableFuture<MetaHakukohde> fetchMetaHakukohde(String hakukohdeOid) {
+        return this.tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
+                .thenApplyAsync(hakukohde -> {
+                    Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
+                    return new MetaHakukohde(
+                            hakukohde.getTarjoajaOids().iterator().next(),
+                            hakukohdeNimi,
+                            new Teksti(hakukohde.getTarjoajaNimet()),
+                            hakukohdeNimi.getKieli(),
+                            getOpetuskieli(hakukohde.getOpetusKielet()),
+                            hakukohde.getOhjeetUudelleOpiskelijalle()
+                    );
+                });
     }
 }

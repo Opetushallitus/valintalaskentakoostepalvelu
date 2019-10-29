@@ -11,7 +11,6 @@ import org.mockserver.model.RegexBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
@@ -78,6 +77,23 @@ public class Integraatiopalvelimet {
 
                 );
     }
+    private static void mockToReturnValueWithCookie(String method, String p, String r, String cookieName, String cookieValue) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeaders(
+                                        new org.mockserver.model.Header("Set-Cookie", cookieName + "=" + cookieValue),
+                                        new org.mockserver.model.Header("Content-Type", "application/json; charset=utf-8")
+                                )
+                                .withBody(r)
+                );
+    }
     private static void mockToReturnValueWithParams(String method, String p, String r, List<Parameter> parameters) {
         mockServer
                 .when(
@@ -104,6 +120,9 @@ public class Integraatiopalvelimet {
                 .respond(
                         response()
                                 .withStatusCode(200)
+                                .withHeaders(
+                                        new org.mockserver.model.Header("Content-Type", "application/json; charset=utf-8")
+                                )
                                 .withBody(r)
 
                 );
@@ -168,6 +187,11 @@ public class Integraatiopalvelimet {
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;
         mockToReturnValue(method, p, s = gson().toJson(r));
+        LOG.debug(s);
+    }
+    public static void mockToReturnJsonWithCookie(String method, String p, Object r, String cookieName, String cookieValue) {
+        String s;
+        mockToReturnValueWithCookie(method, p, s = gson().toJson(r), cookieName, cookieValue);
         LOG.debug(s);
     }
     public static void mockToReturnJsonAndCheckBody(String method, String p, Object r, String regex) {

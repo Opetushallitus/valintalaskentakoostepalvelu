@@ -65,12 +65,12 @@ public class ValinnanvaiheenValintakoekutsutService {
                         exceptionHandler.accept(new ValinnanvaiheelleEiLoydyValintaryhmiaException(
                             String.format("Ei löytynyt yhtään hakukohdeoidia valintaryhmien perusteella haun %s valinnanvaiheelle %s", hakuOid, valinnanvaiheOid)));
                     } else {
-                        tarjontaAsyncResource.haeHaku(hakuOid).flatMap(haku -> {
+                        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).flatMap(haku -> {
                             if (haku.getAtaruLomakeAvain() == null) {
-                                return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit);
+                                return Observable.fromFuture(applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, new ArrayList<>(hakukohdeOidit)));
                             } else {
                                 return Observable.fromIterable(hakukohdeOidit)
-                                        .flatMap(hakukohdeOid -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
+                                        .flatMap(hakukohdeOid -> Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
                                                 .flatMap(Observable::fromIterable))
                                         .distinct(HakemusWrapper::getOid)
                                         .toList().toObservable();

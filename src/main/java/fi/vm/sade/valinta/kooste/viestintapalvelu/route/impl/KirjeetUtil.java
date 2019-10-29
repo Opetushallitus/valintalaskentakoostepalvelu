@@ -109,9 +109,7 @@ public class KirjeetUtil {
     public static void putValinnanTulosHylkausPerusteAndVarasijaData(String preferoituKielikoodi, Map<String, Object> tulokset, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
         if (!hakutoiveenValintatapajonot.isEmpty()) {
             HakutoiveenValintatapajonoDTO firstValintatapajono = hakutoiveenValintatapajonot.get(0);
-            if (VARALLA.equals(firstValintatapajono.getTila()) && firstValintatapajono.getVarasijanNumero() != null) {
-                tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(firstValintatapajono.getVarasijanNumero(), preferoituKielikoodi));
-            }
+            varasijanumeroTeksti(firstValintatapajono, preferoituKielikoodi).ifPresent(varasijaTeksti -> tulokset.put("varasija", varasijaTeksti));
             tulokset.put("hylkaysperuste", StringUtils.trimToNull(hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
             String ehdollinenSyy = "";
             if(firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi() != null && !firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi().equals("")){
@@ -170,15 +168,19 @@ public class KirjeetUtil {
         return tulokset;
     }
 
-    public static Sijoitus asSijoituksetData(boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi, String preferoituKielikoodi, Pisteet pisteet) {
+    private static Sijoitus asSijoituksetData(boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi, String preferoituKielikoodi, Pisteet pisteet) {
         int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
-        Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
-        String varasijaTeksti = null;
-        if(varasijanumero != null) {
-            varasijaTeksti = HakemusUtil.varasijanNumeroConverter(varasijanumero, preferoituKielikoodi);
-        }
+        String varasijaTeksti = valittuHakukohteeseen ? null : varasijanumeroTeksti(valintatapajono, preferoituKielikoodi).orElse(null);
         return new Sijoitus(kkNimi, kkHyvaksytyt, varasijaTeksti, pisteet);
     }
+
+    private static Optional<String> varasijanumeroTeksti(HakutoiveenValintatapajonoDTO valintatapajono, String preferoituKielikoodi) {
+        if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null && !valintatapajono.isEiVarasijatayttoa()) {
+            return Optional.of(HakemusUtil.varasijanNumeroConverter(valintatapajono.getVarasijanNumero(), preferoituKielikoodi));
+        }
+        return Optional.empty();
+    }
+
     private static BigDecimal notNegative(BigDecimal bb) {
         return Optional.ofNullable(bb).filter(b -> b.signum() != -1).orElse(null);
     }

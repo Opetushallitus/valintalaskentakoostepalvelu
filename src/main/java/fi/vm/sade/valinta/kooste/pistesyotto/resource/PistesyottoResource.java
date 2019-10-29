@@ -169,7 +169,7 @@ public class PistesyottoResource {
             return;
         }
 
-        Observable<HakemusWrapper> hakemusO = ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid))
+        Observable<HakemusWrapper> hakemusO = Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(Collections.singletonList(hakemusOid)))
                 .flatMap(hakemukset -> {
                     if (hakemukset.isEmpty()) {
                         return applicationAsyncResource.getApplication(hakemusOid);
@@ -310,7 +310,7 @@ public class PistesyottoResource {
             return Observable.error(new ForbiddenException(
                     msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()
             ));
-        }).flatMap(x -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
+        }).flatMap(x -> Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
                 .flatMap(hakemukset -> {
                     if (hakemukset.isEmpty()) {
                         return applicationAsyncResource.getApplicationOids(hakuOid, hakukohdeOid);

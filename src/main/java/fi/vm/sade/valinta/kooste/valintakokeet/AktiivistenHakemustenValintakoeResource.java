@@ -86,15 +86,15 @@ public class AktiivistenHakemustenValintakoeResource {
         List<String> kaikkiOsallistumistenHakemusOidit = osallistumiset.stream()
                 .map(ValintakoeOsallistuminenDTO::getHakemusOid).distinct().collect(Collectors.toList());
 
-        return tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
-                .flatMap(hakukohde -> tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid()))
+        return Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
+                .flatMap(hakukohde -> Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid())))
                 .flatMap(haku -> {
                     if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
                         return applicationAsyncResource.getApplicationsByHakemusOids(kaikkiOsallistumistenHakemusOidit)
                                 .map(hakemukset -> hakemukset.stream()
                                         .map(HakemusWrapper::getOid).collect(Collectors.toSet()));
                     } else {
-                        return ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit)
+                        return Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit))
                                 .map(hakemukset -> hakemukset.stream()
                                         .map(HakemusWrapper::getOid).collect(Collectors.toSet()));
                     }

@@ -337,7 +337,7 @@ public class LaskentaActorFactory {
         if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
             hakemukset = createResurssiObservable(tunniste,
                     "applicationAsyncResource.getApplications",
-                    ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
+                    Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)),
                     retryHakemuksetAndOppijat);
         } else {
             hakemukset = createResurssiObservable(tunniste,

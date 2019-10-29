@@ -55,7 +55,7 @@ public class JonotSijoittelussaProxyResource {
         asyncResponse.setTimeout(5L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(this::handleTimeout);
         final Observable<List<JonoDto>> laskennanJonot = valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid);
-        final Observable<Map<String, List<ValintatapajonoDTO>>> valintaperusteidenJonot = tarjontaAsyncResource.haeHaku(hakuOid)
+        final Observable<Map<String, List<ValintatapajonoDTO>>> valintaperusteidenJonot = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                 .map(HakuV1RDTO::getHakukohdeOids)
                 .switchMap(valintaperusteetAsyncResource::haeValintatapajonotSijoittelulle);
         Observable.combineLatest(laskennanJonot, valintaperusteidenJonot, (jonotLaskennassa, jonotValintaperusteissa) -> {

@@ -39,6 +39,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @Autowired(required = false) Camelin pois refaktorointi
@@ -159,6 +161,10 @@ public class ValintatapajonoResource {
     }
 
     private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
-        return HakukohdeHelper.tarjoajaOid(tarjontaResource.haeHakukohde(hakukohdeOid).timeout(1, MINUTES).blockingFirst());
+        try {
+            return HakukohdeHelper.tarjoajaOid(tarjontaResource.haeHakukohde(hakukohdeOid).get(1, MINUTES));
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

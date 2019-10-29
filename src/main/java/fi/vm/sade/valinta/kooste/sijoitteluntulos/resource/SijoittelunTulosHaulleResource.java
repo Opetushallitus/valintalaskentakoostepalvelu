@@ -4,11 +4,11 @@ import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
-import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetHaulleHakukohteittain;
-import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetKokoHaulleService;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -19,7 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
@@ -42,9 +46,7 @@ public class SijoittelunTulosHaulleResource {
     @Autowired(required = false)
     private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
     @Autowired
-    private HyvaksymiskirjeetKokoHaulleService hyvaksymiskirjeetKokoHaulleService;
-    @Autowired
-    private HyvaksymiskirjeetHaulleHakukohteittain hyvaksymiskirjeetHakukohteittain;
+    private HyvaksymiskirjeetService hyvaksymiskirjeetService;
 
     @Context
     private HttpServletRequest httpServletRequestJaxRS;
@@ -81,17 +83,26 @@ public class SijoittelunTulosHaulleResource {
                                                   @QueryParam("letterBodyText") String letterBodyText,
                                                   @QueryParam("asiointikieli") String asiointikieli) {
         try {
-            SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
-                    Optional.ofNullable(asiointikieli).map(KieliUtil::normalisoiKielikoodi),
-                    "hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null, Arrays.asList("hyvaksymiskirjeet", "haulle"));
-
-            if(asiointikieli != null ) {
-                hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, asiointikieli, prosessi, Optional.ofNullable(letterBodyText));
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
+                    null,
+                    letterBodyText,
+                    "hyvaksymiskirje",
+                    hakuOid,
+                    null,
+                    hakuOid,
+                    null,
+                    null,
+                    null,
+                    false
+            );
+            if (asiointikieli != null ) {
+                if (letterBodyText == null) {
+                    throw new IllegalArgumentException("Parametri letterBodyText on pakollinen");
+                }
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hyvaksymiskirjeDTO, asiointikieli);
             } else {
-                hyvaksymiskirjeetHakukohteittain.muodostaKirjeet(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hyvaksymiskirjeDTO);
             }
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            return prosessi.toProsessiId();
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!

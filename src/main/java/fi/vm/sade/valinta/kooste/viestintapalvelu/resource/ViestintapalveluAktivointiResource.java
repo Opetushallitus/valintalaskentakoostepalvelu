@@ -5,13 +5,21 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
@@ -51,8 +64,6 @@ public class ViestintapalveluAktivointiResource {
     @Autowired
     private HyvaksymiskirjeetService hyvaksymiskirjeetService;
     @Autowired
-    private JalkiohjauskirjeService jalkiohjauskirjeService;
-    @Autowired
     private EPostiService ePostiService;
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
@@ -73,7 +84,7 @@ public class ViestintapalveluAktivointiResource {
             DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Luo osoitetarrat", null, tags("osoitetarrat", lisatiedot.getTag()));
             dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
 
-            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+            Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).subscribe(haku -> {
                 if (lisatiedot.getHakemusOids() != null) {
                     osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, lisatiedot.getHakemusOids());
                 } else {
@@ -108,7 +119,7 @@ public class ViestintapalveluAktivointiResource {
             DokumentinLisatiedot lisatiedot = hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
             DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Sijoittelussa hyväksytyille", hakuOid, tags("osoitetarrat", lisatiedot.getTag()));
             dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+            Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).subscribe(haku -> {
                 if (lisatiedot.getHakemusOids() != null) {
                     osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, lisatiedot.getHakemusOids());
                 } else {
@@ -167,16 +178,19 @@ public class ViestintapalveluAktivointiResource {
             if (hakemuksillaRajaus == null) {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
-            LOG.info("Luodaan jälkiohjauskirjeet kielellä {} hakuun {}", hakemuksillaRajaus.getLanguageCode(), hakuOid);
-            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(), templateName, tag, hakuOid, hakemuksillaRajaus.getLanguageCode());
+            JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(
+                    tarjoajaOid,
+                    hakemuksillaRajaus.getLetterBodyText(),
+                    templateName,
+                    tag,
+                    hakuOid,
+                    hakemuksillaRajaus.getLanguageCode() == null ? KieliUtil.SUOMI : hakemuksillaRajaus.getLanguageCode()
+            );
             if (hakemuksillaRajaus.getHakemusOids() == null) {
-                jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO);
+                return hyvaksymiskirjeetService.jalkiohjauskirjeetHaulle(jalkiohjauskirjeDTO);
             } else {
-                jalkiohjauskirjeService.jalkiohjauskirjeetHakemuksille(prosessi, jalkiohjauskirjeDTO, hakemuksillaRajaus.getHakemusOids());
+                return hyvaksymiskirjeetService.jalkiohjauskirjeetHakemuksille(jalkiohjauskirjeDTO, hakemuksillaRajaus.getHakemusOids());
             }
-            return prosessi.toProsessiId();
         } catch (Exception e) {
             LOG.error("Jälkiohjauskirjeiden luonnissa virhe!", e);
             throw new RuntimeException("Jälkiohjauskirjeiden luonti epäonnistui!", e);
@@ -209,13 +223,19 @@ public class ViestintapalveluAktivointiResource {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
 
-            tag = hakemuksillaRajaus.getTag();
-            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika, vainTulosEmailinKieltaneet);
-            hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(prosessi, hyvaksymiskirjeDTO);
-            return prosessi.toProsessiId();
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
+                    tarjoajaOid,
+                    hakemuksillaRajaus.getLetterBodyText(),
+                    templateName,
+                    hakemuksillaRajaus.getTag(),
+                    hakukohdeOid,
+                    hakuOid,
+                    sijoitteluajoId,
+                    palautusPvm,
+                    palautusAika,
+                    vainTulosEmailinKieltaneet
+            );
+            return hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(hyvaksymiskirjeDTO);
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
             throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui!", e);
@@ -247,17 +267,23 @@ public class ViestintapalveluAktivointiResource {
             }
             LOG.info("Hyväksymiskirjeiden luonti aktivoitu hakukohteelle "+ hakukohdeOid + ", vainTulosEmailinKieltaneet: " + vainTulosEmailinKieltaneet);
 
-            String tag = hakemuksillaRajaus.getTag();
-            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika, vainTulosEmailinKieltaneet);
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
+                    tarjoajaOid,
+                    hakemuksillaRajaus.getLetterBodyText(),
+                    templateName,
+                    hakemuksillaRajaus.getTag(),
+                    hakukohdeOid,
+                    hakuOid,
+                    sijoitteluajoId,
+                    palautusPvm,
+                    palautusAika,
+                    vainTulosEmailinKieltaneet
+            );
             if (hakemuksillaRajaus.getHakemusOids() == null) {
-                hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(prosessi, hyvaksymiskirjeDTO);
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(hyvaksymiskirjeDTO);
             } else {
-                hyvaksymiskirjeetService.hyvaksymiskirjeetHakemuksille(prosessi, hyvaksymiskirjeDTO, hakemuksillaRajaus.getHakemusOids());
+                return hyvaksymiskirjeetService.hyvaksymiskirjeetHakemuksille(hyvaksymiskirjeDTO, hakemuksillaRajaus.getHakemusOids());
             }
-            return prosessi.toProsessiId();
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
             throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui!", e);
@@ -287,7 +313,7 @@ public class ViestintapalveluAktivointiResource {
             String template = templateName == null ? "koekutsukirje" : templateName;
             DokumentinLisatiedot lisatiedot = hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
             String tag = lisatiedot.getTag();
-            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
+            Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).subscribe(haku -> {
                 if (lisatiedot.getHakemusOids() != null) {
                     LOG.info("Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}", lisatiedot.getHakemusOids());
                     koekutsukirjeetService.koekutsukirjeetHakemuksille(prosessi,

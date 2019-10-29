@@ -48,7 +48,38 @@ public class JalkiohjauskirjeetKomponentti {
             final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
             @Simple("${property.hakuOid}") String hakuOid,
             @Property("templateName") String templateName,
-            @Property("sisalto") String sisalto, @Property("tag") String tag,
+            @Property("sisalto") String sisalto,
+            @Property("tag") String tag,
+            boolean sahkoinenKorkeakoulunMassaposti
+    ) {
+        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> postinumero = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
+        return teeJalkiohjauskirjeet(
+                maatjavaltiot1,
+                postinumero,
+                ylikirjoitettuPreferoitukielikoodi,
+                hyvaksymattomatHakijat,
+                hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)),
+                jalkiohjauskirjeessaKaytetytHakukohteet,
+                hakuOid,
+                templateName,
+                sisalto,
+                tag,
+                sahkoinenKorkeakoulunMassaposti
+        );
+    }
+
+    public static LetterBatch teeJalkiohjauskirjeet(
+            Map<String, Koodi> maatjavaltiot1,
+            Map<String, Koodi> postinumerot,
+            String ylikirjoitettuPreferoitukielikoodi,
+            @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
+            Map<String, HakemusWrapper> hakemusOidHakemukset,
+            final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
+            @Simple("${property.hakuOid}") String hakuOid,
+            @Property("templateName") String templateName,
+            @Property("sisalto") String sisalto,
+            @Property("tag") String tag,
             boolean sahkoinenKorkeakoulunMassaposti
     ) {
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
@@ -57,12 +88,9 @@ public class JalkiohjauskirjeetKomponentti {
             throw new SijoittelupalveluException("Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
         }
         LOG.info("Aloitetaan {} kpl jälkiohjauskirjeen luonti", kaikkiHyvaksymattomat);
-        final Map<String, HakemusWrapper> hakemusOidHakemukset = hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
         final List<Letter> kirjeet = new ArrayList<>();
         final boolean kaytetaanYlikirjoitettuKielikoodia = StringUtils.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
         String preferoituKielikoodi = kaytetaanYlikirjoitettuKielikoodia ? ylikirjoitettuPreferoitukielikoodi : KieliUtil.SUOMI;
-        Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         int count = 0;
         for (HakijaDTO hakija : hyvaksymattomatHakijat) {
             final String hakemusOid = hakija.getHakemusOid();
@@ -70,7 +98,7 @@ public class JalkiohjauskirjeetKomponentti {
                 continue;
             }
             final HakemusWrapper hakemus = hakemusOidHakemukset.get(hakemusOid);
-            final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maajavaltio, posti, new TuloskirjeNimiPaattelyStrategy());
+            final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maatjavaltiot1, postinumerot, new TuloskirjeNimiPaattelyStrategy());
             final List<Map<String, Object>> tulosList = new ArrayList<>();
             if (!kaytetaanYlikirjoitettuKielikoodia) {
                 preferoituKielikoodi = hakemus.getAsiointikieli();

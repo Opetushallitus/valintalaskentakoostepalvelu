@@ -14,18 +14,19 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface ViestintapalveluAsyncResource {
 
     Duration VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA = Duration.of(60, ChronoUnit.MINUTES);
 
-    Observable<LetterResponse> viePdfJaOdotaReferenssiObservable(LetterBatch letterBatch);
+    CompletableFuture<LetterResponse> vieLetterBatch(LetterBatch letterBatch);
 
-    Observable<LetterBatchStatusDto> haeStatusObservable(String batchId);
+    CompletableFuture<LetterBatchStatusDto> haeLetterBatchStatus(String batchId);
 
     Observable<Response> haeOsoitetarrat(Osoitteet osoitteet);
 
-    Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid);
+    CompletableFuture<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid);
 
     Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(String hakuOid, String tyyppi, String kieli);
 
