@@ -425,7 +425,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
             fakeValintaPisteService.addHandler("/valintapiste-service/api/pisteet-with-hakemusoids", exchange -> {
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
-                exchange.getResponseBody().close();
+                exchange.getResponseBody().flush();
                 exchange.close();
                 counter.release();
             }));
@@ -442,7 +442,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 assertEquals("Paljon pisteitä viedään", 1057 - n, count);
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
-                exchange.getResponseBody().close();
+                exchange.getResponseBody().flush();
                 exchange.close();
                 counter.release();
             }));
