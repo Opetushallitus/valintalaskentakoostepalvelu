@@ -230,16 +230,19 @@ public class Integraatiopalvelimet {
     }
 
     public static class ClientAndServerWithHost extends ClientAndServer {
+        private final int port;
+
         ClientAndServerWithHost(int port){
             super(port);
+            this.port = port;
         }
 
         String getHost() {
-            return super.host;
+            return remoteAddress().getHostString();
         }
 
         public String getUrl() {
-            return "http://" + super.host + ":" + port;
+            return "http://" + getHost() + ":" + port;
         }
     }
 
