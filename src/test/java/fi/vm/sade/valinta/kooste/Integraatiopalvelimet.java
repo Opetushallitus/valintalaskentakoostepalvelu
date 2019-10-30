@@ -51,6 +51,7 @@ public class Integraatiopalvelimet {
         );
     }
     public static void mockForward(String method, String path, int port) {
+        LOG.info("mockForward: " + method + " to path '" + path + "' to " + mockServer.getHost() + ":" + port);
         mockServer
                 .when(
                         request()
