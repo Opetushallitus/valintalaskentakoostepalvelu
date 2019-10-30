@@ -24,13 +24,13 @@ public interface SuoritusrekisteriAsyncResource {
 
     Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids);
 
-    Observable<Suoritus> postSuoritus(Suoritus suoritus);
+    CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus);
 
-    Observable<Arvosana> postArvosana(Arvosana arvosana);
+    CompletableFuture<Arvosana> postArvosana(Arvosana arvosana);
 
-    Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues);
+    CompletableFuture<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues);
 
-    Observable<String> deleteSuoritus(String suoritusId);
+    CompletableFuture<String> deleteSuoritus(String suoritusId);
 
-    Observable<String> deleteArvosana(String arvosanaId);
+    CompletableFuture<String> deleteArvosana(String arvosanaId);
 }

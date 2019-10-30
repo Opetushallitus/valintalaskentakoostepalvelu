@@ -14,7 +14,7 @@ public interface OrganisaatioAsyncResource {
      */
     Observable<Response> haeOrganisaatio(String organisaatioOid);
 
-    Observable<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid);
+    CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid);
 
     CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId);
 

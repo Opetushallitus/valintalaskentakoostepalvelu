@@ -192,6 +192,7 @@ public class PistesyotonTuontiTestBase {
                                 }.getType()
                         );
                         suoritus.setId("suoritus" + suoritus.getHenkiloOid());
+                        exchange.getResponseHeaders().add("Content-Type", "application/json");
                         exchange.sendResponseHeaders(200, 0);
                         OutputStream responseBody = exchange.getResponseBody();
                         IOUtils.write(new Gson().toJson(suoritus), responseBody);
@@ -206,6 +207,7 @@ public class PistesyotonTuontiTestBase {
                                 IOUtils.toString(exchange.getRequestBody()), new TypeToken<Arvosana>() {
                                 }.getType()
                         );
+                        exchange.getResponseHeaders().add("Content-Type", "application/json");
                         exchange.sendResponseHeaders(200, 0);
                         OutputStream responseBody = exchange.getResponseBody();
                         IOUtils.write(new Gson().toJson(arvosana), responseBody);

@@ -11,8 +11,8 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService.SingleKielikoeTulos;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
-import io.reactivex.Observable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -173,7 +174,7 @@ public class AmmatillisenKielikoetulosOperations {
     }
 
     public abstract static class CompositeCommand {
-        public abstract Observable<Arvosana> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource);
+        public abstract CompletableFuture<List<Arvosana>> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource);
 
         @Override
         public String toString() {
@@ -182,7 +183,7 @@ public class AmmatillisenKielikoetulosOperations {
     }
 
     public abstract static class ArvosanaCommand {
-        public abstract Observable<Arvosana> createSureOperation(Suoritus savedSuoritus, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource);
+        public abstract CompletableFuture<Arvosana> createSureOperation(Suoritus savedSuoritus, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource);
 
         @Override
         public String toString() {
@@ -200,16 +201,20 @@ public class AmmatillisenKielikoetulosOperations {
         }
 
         @Override
-        public Observable<Arvosana> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
-            List<Observable<Arvosana>> arvosanaObservables = deleteArvosanas.stream().map(arvosanaCommand ->
+        public CompletableFuture<List<Arvosana>> createSureOperation(SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+            List<CompletableFuture<Arvosana>> arvosanaFutures = deleteArvosanas.stream().map(arvosanaCommand ->
                 arvosanaCommand.createSureOperation(existingSuoritus, suoritusrekisteriAsyncResource)).collect(Collectors.toList());
-            Observable<String> suoritusObservable = suoritusrekisteriAsyncResource.deleteSuoritus(existingSuoritus.getId())
-                .onErrorResumeNext((Throwable t) -> Observable.error(new IllegalStateException(String.format(
-                    "Kielikokeen suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", existingSuoritus), t)));
-            return Observable.combineLatest(arvosanaObservables, AmmatillisenKielikoetulosOperations::toArvosanaList)
-                .flatMap(arvosanas ->
-                    suoritusObservable.lastElement().toObservable().flatMap(x ->
-                        Observable.fromIterable(arvosanas)));
+            CompletableFuture<String> suoritusObservable = suoritusrekisteriAsyncResource.deleteSuoritus(existingSuoritus.getId())
+                .whenComplete((r, t) -> {
+                    if (t != null) {
+                        throw new IllegalStateException(String.format(
+                            "Kielikokeen suorituksen %s poistaminen Suoritusrekisteristä epäonnistui", existingSuoritus), t);
+                    }
+                });
+
+            return CompletableFutureUtil.sequence(arvosanaFutures)
+                .thenComposeAsync(arvosanas -> suoritusObservable.thenComposeAsync(x ->
+                    CompletableFutureUtil.sequence(arvosanas.stream().map(CompletableFuture::completedFuture).collect(Collectors.toList()))));
         }
     }
 
@@ -233,14 +238,18 @@ public class AmmatillisenKielikoetulosOperations {
         }
 
         @Override
-        public Observable<Arvosana> createSureOperation(final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+        public CompletableFuture<List<Arvosana>> createSureOperation(final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
             return suoritusrekisteriAsyncResource.postSuoritus(suoritus)
-                .onErrorResumeNext((Throwable t) -> Observable.error(new IllegalStateException(String.format(
-                    "Suorituksen %s tallentaminen suoritusrekisteriin epäonnistui", suoritus), t)))
-                .flatMap(savedSuoritus -> {
-                    List<Observable<Arvosana>> arvosanaOperations = allArvosanaCommandsForHakemus.stream().map(arvosanaCommand ->
+                .whenComplete((r, t) -> {
+                    if (t != null) {
+                        throw new IllegalStateException(String.format(
+                                                "Suorituksen %s tallentaminen suoritusrekisteriin epäonnistui", suoritus), t);
+                    }
+                })
+                .thenComposeAsync(savedSuoritus -> {
+                    List<CompletableFuture<Arvosana>> arvosanaOperations = allArvosanaCommandsForHakemus.stream().map(arvosanaCommand ->
                         arvosanaCommand.createSureOperation(savedSuoritus, suoritusrekisteriAsyncResource)).collect(Collectors.toList());
-                    return Observable.merge(arvosanaOperations);
+                    return CompletableFutureUtil.sequence(arvosanaOperations);
                 });
         }
     }
@@ -253,11 +262,15 @@ public class AmmatillisenKielikoetulosOperations {
         }
 
         @Override
-        public Observable<Arvosana> createSureOperation(Suoritus deletedSuoritus, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+        public CompletableFuture<Arvosana> createSureOperation(Suoritus deletedSuoritus, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
             return suoritusrekisteriAsyncResource.deleteArvosana(existingArvosana.getId())
-                .onErrorResumeNext((Throwable t) -> Observable.error(new IllegalStateException(String.format(
-                    "Kielikokeen arvosanan %s poistaminen Suoritusrekisteristä epäonnistui", existingArvosana), t)))
-                .map(x -> existingArvosana);
+                .whenComplete((r, t) -> {
+                    if (t != null) {
+                        throw new IllegalStateException(String.format(
+                            "Kielikokeen arvosanan %s poistaminen Suoritusrekisteristä epäonnistui", existingArvosana), t);
+                    }
+                })
+                .thenApplyAsync(x -> existingArvosana);
         }
     }
 
@@ -271,12 +284,16 @@ public class AmmatillisenKielikoetulosOperations {
         }
 
         @Override
-        public Observable<Arvosana> createSureOperation(Suoritus savedSuoritus, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+        public CompletableFuture<Arvosana> createSureOperation(Suoritus savedSuoritus, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
             Arvosana newArvosana = createArvosana(sourceOid, savedSuoritus, kielikoeTulos.kieli(), kielikoeTulos.arvioArvosana.name(),
                 new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(kielikoeTulos.valmistuminen));
             return suoritusrekisteriAsyncResource.postArvosana(newArvosana)
-                .onErrorResumeNext((Throwable t) -> Observable.error(new IllegalStateException(String.format(
-                    "Uuden arvosanan %s luominen Suoritusrekisteriin epäonnistui", newArvosana), t)));
+                .whenComplete((r, t) -> {
+                    if (t != null) {
+                        throw new IllegalStateException(String.format(
+                            "Uuden arvosanan %s luominen Suoritusrekisteriin epäonnistui", newArvosana), t);
+                    }
+                });
         }
     }
 
@@ -290,12 +307,16 @@ public class AmmatillisenKielikoetulosOperations {
         }
 
         @Override
-        public Observable<Arvosana> createSureOperation(Suoritus savedSuoritus, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+        public CompletableFuture<Arvosana> createSureOperation(Suoritus savedSuoritus, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
             Arvosana newArvosana = createArvosana(existingArvosana.getSource(), savedSuoritus, kielikoeTulos.kieli(), kielikoeTulos.arvioArvosana.name(),
                 existingArvosana.getMyonnetty());
             return suoritusrekisteriAsyncResource.updateExistingArvosana(existingArvosana.getId(), newArvosana)
-                .onErrorResumeNext((Throwable t) -> Observable.error(new IllegalStateException(String.format(
-                    "Olemassaolevan arvosanan %s päivittäminen Suoritusrekisteriin epäonnistui", newArvosana), t)));
+                .whenComplete((r, t) -> {
+                    if (t != null) {
+                        throw new IllegalStateException(String.format(
+                                                "Olemassaolevan arvosanan %s päivittäminen Suoritusrekisteriin epäonnistui", newArvosana), t);
+                    }
+                });
         }
     }
 }

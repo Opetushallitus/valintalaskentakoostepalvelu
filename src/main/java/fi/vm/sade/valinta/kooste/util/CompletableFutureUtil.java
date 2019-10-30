@@ -13,6 +13,12 @@ public class CompletableFutureUtil {
                         .collect(Collectors.toList()));
     }
 
+    public static CompletableFuture<List<?>> sequenceWildcard(List<CompletableFuture<?>> fs) {
+        return CompletableFuture.allOf(fs.toArray(CompletableFuture[]::new))
+                .thenApplyAsync(v -> fs.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList()));
+    }
     public static <K, V> CompletableFuture<Map<K, V>> sequence(Map<K, CompletableFuture<V>> fs) {
         return CompletableFuture.allOf(fs.values().toArray(new CompletableFuture[0]))
                 .thenApplyAsync(v -> fs.entrySet().stream()

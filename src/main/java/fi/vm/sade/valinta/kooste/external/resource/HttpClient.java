@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource;
 
 import com.google.gson.Gson;
+
 import fi.vm.sade.javautils.cas.ApplicationSession;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +14,7 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -67,15 +70,48 @@ public class HttpClient {
         return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
     }
 
-    public CompletableFuture<HttpResponse<InputStream>> putResponse(String url, Duration timeout, byte[] body, String contentType) {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+    public <I, O> CompletableFuture<O> putJson(String url,
+                                               Duration timeout,
+                                               I body,
+                                               Type inputType,
+                                               Type outputType,
+                                               Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
+        HttpRequest request = requestCustomisation.apply(HttpRequest.newBuilder(URI.create(url))
+                .header("Caller-Id", CALLER_ID)
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), StandardCharsets.UTF_8))
+                .timeout(timeout))
+                .build();
+        return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
+    }
+    public CompletableFuture<HttpResponse<InputStream>> putResponse(String url,
+                                                                    Duration timeout,
+                                                                    byte[] body,
+                                                                    String contentType,
+                                                                    Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
+        HttpRequest request = requestCustomisation.apply(HttpRequest.newBuilder(URI.create(url))
                 .header("Caller-Id", CALLER_ID)
                 .header("Accept", "*/*")
                 .header("Content-Type", contentType)
                 .PUT(HttpRequest.BodyPublishers.ofByteArray(body))
-                .timeout(timeout)
+                .timeout(timeout))
                 .build();
         return this.makeRequest(request);
+    }
+
+    public CompletableFuture<HttpResponse<InputStream>> putResponse(String url, Duration timeout, byte[] body, String contentType) {
+        return putResponse(url, timeout, body, contentType, Function.identity());
+    }
+
+    public CompletableFuture<String> delete(String url, Duration timeout) {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+                .header("Caller-Id", CALLER_ID)
+                .header("Accept", "*/*")
+                .DELETE()
+                .timeout(timeout)
+                .build();
+        return this.makeRequest(request).thenApply(this::parseTxt);
     }
 
     private CompletableFuture<HttpResponse<InputStream>> makeRequest(HttpRequest request) {
@@ -135,6 +171,34 @@ public class HttpClient {
                     "%s %d: Failed to parse error response",
                     response.uri().toString(),
                     response.statusCode()
+            ), e);
+        }
+    }
+
+    public String parseTxt(HttpResponse<InputStream> response) {
+        if (isSuccess(response)) {
+            try (Reader r = new InputStreamReader(response.body())) {
+                return IOUtils.toString(r);
+            } catch (IOException e) {
+                throw new IllegalStateException(String.format(
+                    "%s %d: Failed to parse String response",
+                    response.uri().toString(),
+                    response.statusCode()
+                ), e);
+            }
+        }
+        try (InputStream is = response.body()) {
+            throw new IllegalStateException(String.format(
+                "%s %d: %s",
+                response.uri().toString(),
+                response.statusCode(),
+                new String(is.readAllBytes(), StandardCharsets.UTF_8)
+            ));
+        } catch (IOException e) {
+            throw new IllegalStateException(String.format(
+                "%s %d: Failed to parse error response",
+                response.uri().toString(),
+                response.statusCode()
             ), e);
         }
     }

@@ -423,6 +423,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     private void mockPistetietoNormiTallennus(Semaphore counter) {
         mockForward(PUT,
             fakeValintaPisteService.addHandler("/valintapiste-service/api/pisteet-with-hakemusoids", exchange -> {
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
                 exchange.getResponseBody().flush();
@@ -440,6 +441,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 long count = valintapisteetList.stream().mapToLong(a -> a.getPisteet().size()).sum();
 
                 assertEquals("Paljon pisteitä viedään", 1057 - n, count);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
                 exchange.getResponseBody().flush();

@@ -7,8 +7,8 @@ import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
 import io.mikael.urlbuilder.UrlBuilder;
+import io.reactivex.Observable;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -130,18 +129,19 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
-    public Observable<Set<String>> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
-        return putAsObservableLazily(
-                getUrl("valintapiste-service.put.pisteet"),
-                new TypeToken<Set<String>>() { }.getType(),
-                Entity.entity(DEFAULT_GSON.toJson(pisteet), MediaType.APPLICATION_JSON_TYPE)
-                , client -> {
-                    ifUnmodifiedSince.ifPresent(since -> client.header(IF_UNMODIFIED_SINCE, since));
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    setAuditInfo(client, auditSession);
-                    client.query("save-partially", "true");
-                    return client;
-                }
-        );
+    public CompletableFuture<Set<String>> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
+        URI uri = UrlBuilder.fromString(setAuditInfo(getUrl("valintapiste-service.put.pisteet"), auditSession))
+            .addParameter("save-partially", "true")
+            .toUri();
+        return httpClient.putJson(
+            uri.toString(),
+            Duration.ofMinutes(30),
+            pisteet,
+            new TypeToken<List<Valintapisteet>>() {}.getType(),
+            new TypeToken<Set<String>>() {}.getType(),
+            requestBuilder -> {
+                ifUnmodifiedSince.ifPresent(since -> requestBuilder.header(IF_UNMODIFIED_SINCE, since));
+                return requestBuilder;
+            });
     }
 }

@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.service;
 
-import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
-import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -20,12 +18,13 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
+import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
+import io.reactivex.Observable;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import io.reactivex.Observable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -139,8 +138,8 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                         return Observable.just(Collections.emptySet());
                     } else {
                         LOG.info("Pistesyötössä hakukohteeseen {} muuttunutta {} tietoa tallennettavaksi", hakukohdeOid, uudetPistetiedot.size());
-                        Observable<Set<String>> failedPisteet = tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, uudetPistetiedot,
-                                uudetKielikoetulokset, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, auditSession);
+                        Observable<Set<String>> failedPisteet = Observable.fromFuture(tallennaKoostetutPistetiedot(hakuOid, hakukohdeOid, ifUnmodifiedSince, uudetPistetiedot,
+                                uudetKielikoetulokset, ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL, auditSession));
                         return failedPisteet.map(ids -> uudetPistetiedot.stream()
                                 .filter(u -> ids.contains(u.getOid()))
                                 .map(dto -> new TuontiErrorDTO(dto.getOid(), dto.getFirstNames() + " " + dto.getLastName(),

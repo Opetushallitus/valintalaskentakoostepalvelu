@@ -8,9 +8,7 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import com.google.common.collect.Lists;
 
-import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
-import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -20,12 +18,18 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Audit
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.*;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyotonTuontivirhe;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
@@ -36,10 +40,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import io.reactivex.Observable;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
@@ -49,16 +61,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
-import static fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource.IF_UNMODIFIED_SINCE;
-import static java.util.Arrays.asList;
-import static java.util.Collections.list;
-import static java.util.Collections.singletonList;
-import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Controller("PistesyottoResource")
 @Path("pistesyotto")
@@ -331,8 +341,8 @@ public class PistesyottoResource {
                             auditSession.getPersonOid(), eiHakukohteeseenHakeneet, hakukohdeOid
                     )));
                 })
-        ).flatMap(x -> pistesyottoKoosteService.tallennaKoostetutPistetiedot(
-                hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedot, auditSession)
+        ).flatMap(x -> Observable.fromFuture(pistesyottoKoosteService.tallennaKoostetutPistetiedot(
+                hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedot, auditSession))
         ).subscribe(
                 x -> {
                     if(x.isEmpty()) {

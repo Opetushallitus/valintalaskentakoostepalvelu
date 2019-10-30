@@ -10,16 +10,17 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import io.mikael.urlbuilder.UrlBuilder;
+import io.reactivex.Observable;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Collections;
@@ -123,67 +124,35 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     }
 
     @Override
-    public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
-        return postAsObservableLazily(
-                getUrl("suoritusrekisteri.suoritukset"),
-                new TypeToken<Suoritus>(){
-                }.getType(),
-                Entity.entity(gson().toJson(suoritus), MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+    public CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus) {
+        Type suoritusType = new com.google.gson.reflect.TypeToken<Suoritus>() {}.getType();
+        return httpClient.postJson(getUrl("suoritusrekisteri.suoritukset"), Duration.ofMinutes(10), suoritus, suoritusType, suoritusType);
     }
 
     @Override
-    public Observable<Arvosana> postArvosana(Arvosana arvosana) {
-        return postAsObservableLazily(
-                getUrl("suoritusrekisteri.arvosanat"),
-                new TypeToken<Arvosana>(){
-                }.getType(),
-                Entity.entity(gson().toJson(arvosana), MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+    public CompletableFuture<Arvosana> postArvosana(Arvosana arvosana) {
+        Type arvosanaType = new com.google.gson.reflect.TypeToken<Arvosana>() {}.getType();
+        return httpClient.postJson(getUrl("suoritusrekisteri.arvosanat"), Duration.ofMinutes(10), arvosana, arvosanaType, arvosanaType);
     }
 
     @Override
-    public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
-        return postAsObservableLazily(
-                getUrl("suoritusrekisteri.arvosanat.id",  arvosanaId),
-                new TypeToken<Arvosana>(){}.getType(),
-                Entity.entity(gson().toJson(arvosanaWithUpdatedValues), MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+    public CompletableFuture<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
+        Type arvosanaType = new com.google.gson.reflect.TypeToken<Arvosana>() {}.getType();
+        return httpClient.postJson(
+            getUrl("suoritusrekisteri.arvosanat.id", arvosanaId),
+            Duration.ofMinutes(10),
+            arvosanaWithUpdatedValues,
+            arvosanaType,
+            arvosanaType);
     }
 
     @Override
-    public Observable<String> deleteSuoritus(String suoritusId) {
-        return deleteAsObservableLazily(
-                getUrl("suoritusrekisteri.suoritukset.id", suoritusId),
-                new TypeToken<Suoritus>(){
-                }.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+    public CompletableFuture<String> deleteSuoritus(String suoritusId) {
+        return httpClient.delete(getUrl("suoritusrekisteri.suoritukset.id", suoritusId), Duration.ofMinutes(1));
     }
 
     @Override
-    public Observable<String> deleteArvosana(String arvosanaId) {
-        return deleteAsObservableLazily(
-                getUrl("suoritusrekisteri.arvosanat.id", arvosanaId), new TypeToken<Arvosana>(){}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                }
-        );
+    public CompletableFuture<String> deleteArvosana(String arvosanaId) {
+        return httpClient.delete(getUrl("suoritusrekisteri.arvosanat.id", arvosanaId), Duration.ofMinutes(1));
     }
 }
