@@ -48,6 +48,7 @@ public class KoosteTestProfileConfiguration {
 
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://" + proxyServer + "/organisaatio-service/rest");
+        p0.setProperty("valintalaskentakoostelvelu.organisaatio-service-url", "http://" + proxyServer + "/organisaatio-service");
         p0.setProperty("valintalaskentakoostepalvelu.tarjonta.rest.url", "http://" + proxyServer + "/tarjonta-service/rest");
         p0.setProperty("valintalaskentakoostepalvelu.koodisto.url", "https://itest-virkailija.oph.ware.fi/");
         p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");

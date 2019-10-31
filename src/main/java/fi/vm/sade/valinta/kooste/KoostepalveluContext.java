@@ -1,9 +1,10 @@
 package fi.vm.sade.valinta.kooste;
 
-import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.security.OidProvider;
-import fi.vm.sade.security.OrganisationHierarchyAuthorizer;
-import fi.vm.sade.security.ThreadLocalAuthorizer;
+import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
+import fi.vm.sade.javautils.opintopolku_spring_security.OidProvider;
+import fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer;
+import fi.vm.sade.javautils.opintopolku_spring_security.ThreadLocalAuthorizer;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClients;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.spring.SpringCamelContext;
@@ -24,8 +25,9 @@ public class KoostepalveluContext {
     private static final Logger LOG = LoggerFactory.getLogger(KoostepalveluContext.class);
 
     @Bean
-    public OidProvider getOidProvider(@Value("valintalaskentakoostelvelu.organisaatio-service-url") String organisaatioServiceUrl) {
-        return new OidProvider(organisaatioServiceUrl);
+    public OidProvider getOidProvider(@Value("${valintalaskentakoostelvelu.organisaatio-service-url}") String organisaatioServiceUrl,
+                                      @Value("${root.organisaatio.oid}") String rootOrganisationOid) {
+        return new OidProvider(organisaatioServiceUrl, rootOrganisationOid, HttpClients.CALLER_ID);
     }
 
     @Bean

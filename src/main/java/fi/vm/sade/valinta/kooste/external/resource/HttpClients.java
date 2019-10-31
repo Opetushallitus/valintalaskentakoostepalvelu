@@ -19,7 +19,7 @@ import java.time.Duration;
 
 @Configuration
 public class HttpClients {
-    private static final String CALLER_ID = "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
+    public static final String CALLER_ID = "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
 
     @Bean
     public CookieManager getCookieManager() {
