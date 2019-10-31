@@ -1,20 +1,21 @@
 package fi.vm.sade.valinta.kooste;
 
-import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.security.OidProvider;
-import fi.vm.sade.security.OrganisationHierarchyAuthorizer;
-import fi.vm.sade.security.ThreadLocalAuthorizer;
-
+import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
+import fi.vm.sade.javautils.opintopolku_spring_security.OidProvider;
+import fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer;
+import fi.vm.sade.javautils.opintopolku_spring_security.ThreadLocalAuthorizer;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClients;
+import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.spring.SpringCamelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-
-import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 
 @Configuration
 @Import({KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class, JaxrsConfiguration.class})
@@ -24,8 +25,9 @@ public class KoostepalveluContext {
     private static final Logger LOG = LoggerFactory.getLogger(KoostepalveluContext.class);
 
     @Bean
-    public OidProvider getOidProvider() {
-        return new OidProvider();
+    public OidProvider getOidProvider(@Value("${valintalaskentakoostelvelu.organisaatio-service-url}") String organisaatioServiceUrl,
+                                      @Value("${root.organisaatio.oid}") String rootOrganisationOid) {
+        return new OidProvider(organisaatioServiceUrl, rootOrganisationOid, HttpClients.CALLER_ID);
     }
 
     @Bean

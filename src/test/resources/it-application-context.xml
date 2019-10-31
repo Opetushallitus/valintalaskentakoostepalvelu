@@ -64,7 +64,11 @@
   <bean id="ValinnanvaiheenValintakoekutsutService"
         class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
 
-  <bean class="fi.vm.sade.security.OidProvider" />
+  <bean class="fi.vm.sade.javautils.opintopolku_spring_security.OidProvider">
+    <constructor-arg index="0" value="http://localhost"/>
+    <constructor-arg index="1" value="1.2.246.562.10.00000000001"/>
+    <constructor-arg index="2" value="1.2.246.562.10.00000000001.koostepalvelun-testit"/>
+  </bean>
 
   <bean id="ValintaperusteetResource"
         class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource" />
@@ -77,7 +81,7 @@
     <mockito:mock id="valintatapajononVientiRoute" class="fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute" />
     <mockito:mock id="ePostiService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService" />
     <mockito:mock id="hyvaksymiskirjeetService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService" />
-    <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />
+    <mockito:mock id="authorizer" class="fi.vm.sade.javautils.opintopolku_spring_security.Authorizer" />
     <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource" />
     <mockito:mock id="valintapisteResource" class="fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource" />
     <mockito:mock id="hakuV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource" />
@@ -94,7 +98,7 @@
     <mockito:mock id="ValintalaskentaTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute" />
     <mockito:mock id="kirjeetHakukohdeCache" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache" />
     <mockito:mock id="koodistoAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource" />
-    <mockito:mock id="organisationHierarchyAuthorizer" class="fi.vm.sade.security.OrganisationHierarchyAuthorizer" />
+    <mockito:mock id="organisationHierarchyAuthorizer" class="fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer" />
     <mockito:mock id="OrganisaatioResource" class="fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource" />
 
     <bean id="jaxrsconfig" class="fi.vm.sade.valinta.kooste.JaxrsConfiguration"/>

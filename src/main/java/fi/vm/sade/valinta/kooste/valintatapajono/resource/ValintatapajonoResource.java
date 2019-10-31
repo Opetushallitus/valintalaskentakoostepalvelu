@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import fi.vm.sade.auditlog.User;
-import fi.vm.sade.authentication.business.service.Authorizer;
+import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
