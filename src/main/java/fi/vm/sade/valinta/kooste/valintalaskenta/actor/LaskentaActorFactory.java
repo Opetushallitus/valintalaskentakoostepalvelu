@@ -50,6 +50,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -388,12 +389,12 @@ public class LaskentaActorFactory {
         if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
             hakemukset = createResurssiFuture(tunniste,
                     "applicationAsyncResource.getApplications",
-                     ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
+                    () -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
                     retryHakemuksetAndOppijat);
         } else {
             hakemukset = createResurssiFuture(tunniste,
                     "applicationAsyncResource.getApplicationsByOid",
-                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
+                     () -> applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
                     retryHakemuksetAndOppijat);
         }
 
@@ -402,22 +403,22 @@ public class LaskentaActorFactory {
             LOG.info("Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}", oppijaOids.toString(), hakukohdeOid);
             return createResurssiFuture(tunniste,
                     "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
-                    suoritusrekisteriAsyncResource.getSuorituksetByOppijas(oppijaOids, hakuOid),
+                    () -> suoritusrekisteriAsyncResource.getSuorituksetByOppijas(oppijaOids, hakuOid),
                     retryHakemuksetAndOppijat);
         });
 
         CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet = createResurssiFuture(tunniste,
             "valintaperusteetAsyncResource.haeValintaperusteet",
-            valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()));
+            () -> valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, actorParams.getValinnanvaihe()));
         CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = createResurssiFuture(tunniste,
             "tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",
-            tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
+            () -> tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
         CompletableFuture<PisteetWithLastModified> valintapisteetForHakukohdes = createResurssiFuture(tunniste,
             "valintapisteAsyncResource.getValintapisteet",
-            valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession));
-        CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat ? createResurssiFuture(tunniste,
-            "valintaperusteetAsyncResource.haeHakijaryhmat",
-            valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)) : CompletableFuture.completedFuture(emptyList());
+            () -> valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession));
+        CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat
+            ? createResurssiFuture(tunniste, "valintaperusteetAsyncResource.haeHakijaryhmat", () -> valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid))
+            : CompletableFuture.completedFuture(emptyList());
 
         LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
         return getLaskeDtoFuture(
@@ -434,11 +435,11 @@ public class LaskentaActorFactory {
             hakemukset);
     }
 
-    private <T> CompletableFuture<T> createResurssiFuture(PyynnonTunniste tunniste, String resurssi, CompletableFuture<T> sourceFuture, boolean retry) {
+    private <T> CompletableFuture<T> createResurssiFuture(PyynnonTunniste tunniste, String resurssi, Supplier<CompletableFuture<T>> sourceFuture, boolean retry) {
         return new LaskentaResurssinhakuFuture<>(sourceFuture, tunniste.withNimi(resurssi), retry).getFuture();
     }
 
-    private <T> CompletableFuture<T> createResurssiFuture(PyynnonTunniste tunniste, String resurssi, CompletableFuture<T> sourceFuture) {
+    private <T> CompletableFuture<T> createResurssiFuture(PyynnonTunniste tunniste, String resurssi, Supplier<CompletableFuture<T>> sourceFuture) {
         return createResurssiFuture(tunniste, resurssi, sourceFuture, false);
     }
 }

@@ -1,65 +1,68 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class LaskentaResurssinhakuFuture<R> {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaResurssinhakuFuture.class);
     private static final int MAX_RETRIES = 5;
     private final CompletableFuture<R> future;
-    private final PyynnonTunniste tunniste;
 
-    public LaskentaResurssinhakuFuture(CompletableFuture<R> source, PyynnonTunniste tunniste, boolean retry) {
+    public LaskentaResurssinhakuFuture(Supplier<CompletableFuture<R>> source, PyynnonTunniste tunniste, boolean retry) {
         CompletableFuture<R> f;
         if (retry) {
             f = executeWithRetry(source, tunniste);
         } else {
-            f = source;
+            f = source.get();
         }
 
         long starTimeMillis = System.currentTimeMillis();
-        this.tunniste = tunniste;
 
         this.future = f.whenComplete(lopputuloksenKasittelija(tunniste, starTimeMillis));
     }
 
-    public static <R> CompletableFuture<R> executeWithRetry(CompletableFuture<R> action, PyynnonTunniste tunniste) {
+    public static <R> CompletableFuture<R> executeWithRetry(Supplier<CompletableFuture<R>> action, PyynnonTunniste tunniste) {
         return action
-            .thenApply(CompletableFuture::completedFuture)
-            .exceptionally(t -> retry(action, t, 0, tunniste))
-            .thenCompose(java.util.function.Function.identity())
+            .get()
+            .handleAsync((r, t) -> {
+                if (t != null) {
+                    return retry(action, t, 0, tunniste);
+                } else {
+                    return CompletableFuture.completedFuture(r);
+                }
+            }).thenCompose(java.util.function.Function.identity())
             .whenComplete((r, t) -> {
                 if (t != null) {
                     LOG.info(String.format("%s : Kaikki uudelleenyritykset (%s kpl) on käytetty, ei yritetä enää. Virhe: %s", tunniste, MAX_RETRIES, t.getMessage()));
-                    throw new RuntimeException(t);
                 }
             });
     }
 
-    private static <R> CompletableFuture<R> retry(CompletableFuture<R> action, Throwable throwable, int retry, PyynnonTunniste tunniste) {
+    private static <R> CompletableFuture<R> retry(Supplier<CompletableFuture<R>> action, Throwable throwable, int retry, PyynnonTunniste tunniste) {
         int secondsToWaitMultiplier = 10;
         if (retry >= MAX_RETRIES) return CompletableFuture.failedFuture(throwable);
         return action
-            .thenApply(CompletableFuture::completedFuture)
-            .exceptionally(t -> {
-                throwable.addSuppressed(t);
-                return CompletableFuture.supplyAsync(() -> {
-                    try {
-                        LOG.info(String.format("%s : Resurssin haussa tapahtui virhe %s, uudelleenyritys # %s", tunniste, throwable.getMessage(), retry));
-                        Thread.sleep(retry * secondsToWaitMultiplier * 1000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    return "OK";
-                }).thenComposeAsync(x -> retry(action, throwable, retry + 1, tunniste));
-            })
-            .thenCompose(java.util.function.Function.identity());
+            .get()
+            .handleAsync((r, t) -> {
+                if (t != null) {
+                    throwable.addSuppressed(t);
+                    LOG.info(String.format("%s : Resurssin haussa tapahtui virhe %s, uudelleenyritys # %s", tunniste, t.getMessage(), retry));
+                    Executor delayedExecutor = CompletableFuture.delayedExecutor(retry * secondsToWaitMultiplier, SECONDS);
+                    return CompletableFuture.supplyAsync(() -> "OK", delayedExecutor)
+                        .thenComposeAsync(x -> LaskentaResurssinhakuFuture.retry(action, throwable, retry + 1, tunniste));
+                }
+                return CompletableFuture.completedFuture(r);
+            }).thenCompose(java.util.function.Function.identity());
     }
 
     private BiConsumer<R, Throwable> lopputuloksenKasittelija(PyynnonTunniste tunniste, long starTimeMillis) {
@@ -102,10 +105,5 @@ public class LaskentaResurssinhakuFuture<R> {
         public String toString() {
             return "Resurssinhaku " + resurssi + " : uuid=" + uuid + ", hakukohdeOid=" + hakukohdeOid;
         }
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getName() + ": " + tunniste.toString();
     }
 }
