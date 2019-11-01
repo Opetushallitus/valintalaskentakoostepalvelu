@@ -153,11 +153,11 @@ public abstract class AbstractPistesyottoKoosteService {
                 });
     }
 
-    private Observable<List<HakemusWrapper>> getHakemukset(HakuV1RDTO haku, String hakukohdeOid) {
+    private CompletableFuture<List<HakemusWrapper>> getHakemukset(HakuV1RDTO haku, String hakukohdeOid) {
         if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
             return applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid);
         } else {
-            return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
+            return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
         }
     }
 
@@ -236,7 +236,7 @@ public abstract class AbstractPistesyottoKoosteService {
         Observable<HakuV1RDTO> hakuO = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
         Observable<List<HakemusWrapper>> hakemuksetO = Observable.merge(Observable.zip(
                 osallistumistiedotO,
-                hakuO.flatMap(haku -> getHakemukset(haku, hakukohdeOid)),
+                hakuO.flatMap(haku -> Observable.fromFuture(getHakemukset(haku, hakukohdeOid))),
                 haePuuttuvatHakemukset
         ));
 

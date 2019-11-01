@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
@@ -30,7 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -155,7 +161,7 @@ public class ValintakoekutsutExcelService {
 
                     if (onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
                         if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
-                            applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid).subscribe(hakemukset -> {
+                            Observable.fromFuture(applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid)).subscribe(hakemukset -> {
                                 lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                                 voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

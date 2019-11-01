@@ -15,7 +15,6 @@ import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +64,7 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
         return getApplicationsByOids(hakuOid, Collections.singletonList(hakukohdeOid));
     }
 
@@ -87,13 +85,24 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implemen
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
-        return this.<List<Hakemus>>getAsObservableLazily(getUrl("haku-app.applications.listfull"), new TypeToken<List<Hakemus>>() {}.getType(), client -> {
-            client.query("appState", DEFAULT_STATES.toArray());
-            client.query("rows", DEFAULT_ROW_LIMIT).query("asId", hakuOid).query("aoOid", hakukohdeOids);
-            LOG.info("Calling url {}", client.getCurrentURI());
-            return client;
-        }).map(this::toHakemusWrapper);
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
+        HashMap<String, Object> query = new HashMap<>();
+        query.put("appState", DEFAULT_STATES);
+        query.put("rows", DEFAULT_ROW_LIMIT);
+        query.put("asId", hakuOid);
+        query.put("aoOid", hakukohdeOids);
+        String url = getUrl("haku-app.applications.listfull", query);
+        LOG.info("Calling url {}", url);
+
+        return this.client.<List<Hakemus>>getJson(
+            url,
+            Duration.ofHours(1),
+            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {
+            }.getType()
+        ).thenApplyAsync(hs ->
+            hs.stream()
+                .map(HakuappHakemusWrapper::new)
+                .collect(Collectors.toList()));
     }
 
     @Override

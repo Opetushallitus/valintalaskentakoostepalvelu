@@ -121,12 +121,12 @@ public class ValintalaskentaTest {
                 (new Valintapisteet(ataruHakemus.getHakemusOid(), ataruHakemus.getPersonOid(), "Zl2A5", "TAUsuL4BQc", Collections.emptyList())));
 
         when(valintaperusteetAsyncResource.haeValintaperusteet(any(), any())).thenReturn(
-                Observable.just(Collections.singletonList(valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid))));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde1Oid)).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde2Oid)).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde3Oid)).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid)).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid2)).thenReturn(Observable.just(Collections.emptyList()));
+                CompletableFuture.completedFuture(Collections.singletonList(valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid))));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde1Oid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde2Oid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(hakukohde3Oid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid2)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde1Oid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde2Oid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
@@ -141,22 +141,22 @@ public class ValintalaskentaTest {
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohde3Oid, hakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid, ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
         when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid2, ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(new Oppija())));
-        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
-        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid)).thenReturn(Observable.just(Collections.singletonList(oppijaFromSure1)));
-        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), ataruHakuOid)).thenReturn(Observable.just(Collections.singletonList(anonOppijaFromSure)));
-        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), hakuOid)).thenReturn(Observable.just(Collections.singletonList(anonOppijaFromSure)));
-        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), ataruHakuOid)).thenReturn(Observable.just(Collections.emptyList()));
-        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), hakuOid)).thenReturn(Observable.just(Collections.emptyList()));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), ataruHakuOid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), ataruHakuOid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), hakuOid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), ataruHakuOid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), hakuOid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-        when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid)).thenReturn(Observable.just(Collections.emptyMap()));
-        when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(ataruHakuOid)).thenReturn(Observable.just(Collections.emptyMap()));
+        when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(ataruHakuOid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
     }
 
     @Test
     public void onnistuneestaValintalaskennastaPidetaanKirjaaSeurantapalveluun() throws InterruptedException {
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
@@ -202,25 +202,25 @@ public class ValintalaskentaTest {
 
     @Test
     public void onnistuneestaValintaryhmalaskennastaPidetaanKirjaaSeurantapalveluun() throws InterruptedException {
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
 
         Integer vaiheenNumero = 1;
 
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde1Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde1Oid), eq(vaiheenNumero))).thenReturn(CompletableFuture.completedFuture(Arrays.asList(
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid)
         )));
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde2Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde2Oid), eq(vaiheenNumero))).thenReturn(CompletableFuture.completedFuture(Arrays.asList(
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono2Oid)
         )));
-        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde3Oid), eq(vaiheenNumero))).thenReturn(Observable.just(Arrays.asList(
+        when(valintaperusteetAsyncResource.haeValintaperusteet(eq(hakukohde3Oid), eq(vaiheenNumero))).thenReturn(CompletableFuture.completedFuture(Arrays.asList(
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono3Oid)
         )));
 
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde1Oid))).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde2Oid))).thenReturn(Observable.just(Collections.emptyList()));
-        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde3Oid))).thenReturn(Observable.just(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde1Oid))).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde2Oid))).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+        when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde3Oid))).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, vaiheenNumero, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.VALINTARYHMA);
 
@@ -252,12 +252,12 @@ public class ValintalaskentaTest {
     public void puuttuvaJonokriteeriAiheuttaaLaskennanEpaonnistumisen() throws InterruptedException {
         int vaiheenNumero = 1;
 
-        when(valintaperusteetAsyncResource.haeValintaperusteet(hakukohde1Oid, vaiheenNumero)).thenReturn(Observable.just(Arrays.asList(
+        when(valintaperusteetAsyncResource.haeValintaperusteet(hakukohde1Oid, vaiheenNumero)).thenReturn(CompletableFuture.completedFuture(Arrays.asList(
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(true, true, valintatapajono1Oid),
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(true, false, valintatapajono2Oid),
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(false, true, valintatapajono3Oid)
         )));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(
                 auditSession,
@@ -299,10 +299,10 @@ public class ValintalaskentaTest {
     public void valintalaskentaEiKaytossaAiheuttaaLaskennanEpaonnistumisen() throws InterruptedException {
         int vaiheenNumero = 1;
 
-        when(valintaperusteetAsyncResource.haeValintaperusteet(hakukohde1Oid, vaiheenNumero)).thenReturn(Observable.just(Arrays.asList(
+        when(valintaperusteetAsyncResource.haeValintaperusteet(hakukohde1Oid, vaiheenNumero)).thenReturn(CompletableFuture.completedFuture(Arrays.asList(
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(false, false, valintatapajono1Oid)
         )));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(Observable.just(Collections.singletonList(
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(
                 new HakuappHakemusWrapper(hakemus))));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(
@@ -332,9 +332,9 @@ public class ValintalaskentaTest {
     @Test
     public void epaonnistuneetLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(
-            Observable.error(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid)));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
-        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(Observable.just(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+            CompletableFuture.failedFuture(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid)));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.KESKEYTETTY, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));

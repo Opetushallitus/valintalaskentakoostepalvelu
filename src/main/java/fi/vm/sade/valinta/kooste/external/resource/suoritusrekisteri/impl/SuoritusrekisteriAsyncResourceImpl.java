@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import io.mikael.urlbuilder.UrlBuilder;
 import io.reactivex.Observable;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -27,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource implements SuoritusrekisteriAsyncResource {
@@ -76,9 +78,12 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
     }
 
     @Override
-    public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
-        String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=true" + "&haku=" + hakuOid;
-        return batchedPostOppijas(opiskelijaOids, url);
+    public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
+        URI uri = UrlBuilder.fromString(getUrl("suoritusrekisteri.oppijat"))
+            .addParameter("ensikertalaisuudet", "true")
+            .addParameter("haku", hakuOid)
+            .toUri();
+        return batchedPostOppijasFuture(opiskelijaOids, uri.toString());
     }
 
     @Override
@@ -121,6 +126,27 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
         Observable<List<Oppija>> allOppijas = Observable
                 .concat(obses);
         return allOppijas;
+    }
+
+    private CompletableFuture<List<Oppija>> batchedPostOppijasFuture(List<String> opiskelijaOids, String url) {
+        if (opiskelijaOids.isEmpty()) {
+            LOG.info("Batched POST: empty list of oids provided. Returning an empty set without api call.");
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+        List<List<String>> oidBatches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
+        LOG.info("Batched POST: {} oids partitioned into {} batches", opiskelijaOids.size(), oidBatches.size());
+
+        Type inputType = new com.google.gson.reflect.TypeToken<List<String>>() {}.getType();
+        Type outputType = new com.google.gson.reflect.TypeToken<List<Oppija>>() {}.getType();
+
+        return CompletableFutureUtil.sequence(oidBatches.stream()
+            .map(oidBatch -> {
+                LOG.info("Calling POST url {} with {} opiskelijaOids", url, oidBatch.size());
+                return httpClient.<List<String>, List<Oppija>>postJson(url, Duration.ofMinutes(5), oidBatch, inputType, outputType);
+            })
+            .collect(Collectors.toList()))
+            .thenApplyAsync((List<List<Oppija>> r) -> r.stream().flatMap(List::stream).collect(Collectors.toList()));
+
     }
 
     @Override

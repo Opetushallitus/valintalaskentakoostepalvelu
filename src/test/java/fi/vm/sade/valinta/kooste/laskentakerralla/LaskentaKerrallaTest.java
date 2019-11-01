@@ -19,7 +19,7 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
-import io.reactivex.internal.operators.observable.ObservableJust;
+import io.reactivex.Observable;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -34,7 +34,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import io.reactivex.Observable;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
@@ -123,14 +122,13 @@ public class LaskentaKerrallaTest {
             Observable.just(Collections.singletonList(LaskentaKerrallaTestData.julkaistuHakukohdeViite(HAKUKOHDE_OID, TARJOAJA_OID))));
         when(Mocks.valintaperusteetAsyncResource.haeValintaperusteet(any(), any()))
                 .thenAnswer(
-                        invocation -> Observable
-                            .fromIterable(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID))))
+                        invocation -> CompletableFuture.completedFuture(
+                            Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID))))
                 );
 
         when(Mocks.valintaperusteetAsyncResource.haeHakijaryhmat(any()))
                 .thenAnswer(
-                        invocation -> Observable
-                                .fromIterable(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)))
+                        invocation -> CompletableFuture.completedFuture(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)))
                                 ));
 
         when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any())).thenReturn(CompletableFuture.completedFuture(LaskentaKerrallaTestData.ohjausparametrit()));

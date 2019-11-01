@@ -3,21 +3,32 @@ package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.service.valintaperusteet.dto.*;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import io.mikael.urlbuilder.UrlBuilder;
+import io.reactivex.Observable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -44,27 +55,26 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
                 new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType());
     }
 
-    public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
-        return getAsObservableLazily(
-                getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.hakijaryhma", hakukohdeOid),
-                new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    return client;
-                });
+    public CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
+        return httpClient.getJson(
+            getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.hakijaryhma", hakukohdeOid),
+            Duration.ofHours(1),
+            new com.google.gson.reflect.TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType()
+        );
     }
 
-    public Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
-        return getAsObservableLazily(
-                getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet", hakukohdeOid),
-                new TypeToken<List<ValintaperusteetDTO>>() {}.getType(),
-                client -> {
-                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    if (valinnanVaiheJarjestysluku != null) {
-                        client.query("vaihe", valinnanVaiheJarjestysluku);
-                    }
-                    return client;
-                });
+    public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
+        UrlBuilder urlBuilder = UrlBuilder.fromString(
+            getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet", hakukohdeOid));
+        URI uri = valinnanVaiheJarjestysluku == null ?
+            urlBuilder.toUri() :
+            urlBuilder.addParameter("vaihe", valinnanVaiheJarjestysluku.toString()).toUri();
+
+        return httpClient.getJson(
+            uri.toString(),
+            Duration.ofHours(1),
+            new com.google.gson.reflect.TypeToken<List<ValintaperusteetDTO>>() {}.getType()
+        );
     }
 
     public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {

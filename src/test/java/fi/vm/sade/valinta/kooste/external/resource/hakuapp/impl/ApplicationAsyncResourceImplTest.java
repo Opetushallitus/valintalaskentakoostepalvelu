@@ -1,26 +1,41 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyVararg;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.sharedutils.http.HttpResource;
+
 import fi.vm.sade.valinta.kooste.cas.CasKoosteInterceptor;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
+import fi.vm.sade.valinta.sharedutils.http.HttpResource;
+import io.reactivex.Observable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
-import io.reactivex.Observable;
 
-import javax.ws.rs.client.Entity;
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,16 +46,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyVararg;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 public class ApplicationAsyncResourceImplTest {
     private final HttpResource wrappedHttpResource = mock(HttpResource.class);
@@ -140,29 +145,24 @@ public class ApplicationAsyncResourceImplTest {
     }
 
     @Test
-    public void appStateParameterIsAddedWhenFetchingApplicationsByHakemusAndHakukohdeOids() {
+    public void appStateParameterIsAddedWhenFetchingApplicationsByHakemusAndHakukohdeOids() throws InterruptedException, ExecutionException, TimeoutException {
         String hakuOid = "1.2.3.4.5.6";
         String hakukohdeOid = "7.8.9.0";
+        String eventualUrl = "http://this.would.be.the.real.URL.with.parameters.example.com/?foo=bar";
         when(mockUrlConfiguration.url(
-                eq("haku-app.applications.listfull")
-        )).thenReturn(urlToApplicationsListFull);
-        WebClient webClient = mock(WebClient.class);
-        when(webClient.query(any(), any())).thenReturn(webClient);
-        when(wrappedHttpResource.getAsObservableLazily(eq(urlToApplicationsListFull),
-            eq(new TypeToken<List<Hakemus>>() {}.getType()),
-            Mockito.any(Function.class)))
-            .thenAnswer((Answer<Observable<List<Hakemus>>>) invocation -> {
-                Function<WebClient,WebClient> webClientModifier = invocation.getArgument(2);
-                webClientModifier.apply(webClient);
-                verify(webClient).query("appState", ApplicationAsyncResource.DEFAULT_STATES.get(0), ApplicationAsyncResource.DEFAULT_STATES.get(1));
-                verify(webClient).query("rows", ApplicationAsyncResource.DEFAULT_ROW_LIMIT);
-                verify(webClient).query("asId", hakuOid);
-                verify(webClient).query(eq("aoOid"), anyVararg());
-                verify(webClient).getCurrentURI();
-                Mockito.verifyNoMoreInteractions(webClient);
-                return Observable.just(Arrays.asList(hakemus1, hakemus2));
+                eq("haku-app.applications.listfull"),
+                any(Map.class)
+        )).thenReturn(eventualUrl);
+
+        when(mockClient.getJson(
+                any(String.class),
+                any(Duration.class),
+                any(Type.class)))
+            .thenAnswer((Answer<CompletableFuture<List<Hakemus>>>) invocation -> {
+                assertEquals(eventualUrl, invocation.getArgument(0));
+                return CompletableFuture.completedFuture(Arrays.asList(hakemus1, hakemus2));
             });
-        List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).timeout(1, SECONDS).blockingFirst();
+        List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).get(1L, SECONDS);
 
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1), applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
         assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus2), applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
