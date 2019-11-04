@@ -11,6 +11,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteerei
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -39,7 +40,6 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -58,8 +58,6 @@ import java.util.stream.Stream;
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
 public class LaskentaActorFactory {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorFactory.class);
-    private static final Predicate<String> INCLUDE_ALL = s -> true;
-    private static final Predicate<String> EXCLUDE_ALL = s -> false;
 
     private final ValintapisteAsyncResource valintapisteAsyncResource;
     private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
@@ -69,21 +67,21 @@ public class LaskentaActorFactory {
     private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
-    private final Predicate<String> koskiHakukohdeOidFilter;
+    private final KoskiService koskiService;
     private volatile int splittaus;
 
     @Autowired
     public LaskentaActorFactory(
-            @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:1}") int splittaus,
-            @Value("${valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit:none}") String koskiHakukohdeOiditString,
-            ValintalaskentaAsyncResource valintalaskentaAsyncResource,
-            ApplicationAsyncResource applicationAsyncResource,
-            AtaruAsyncResource ataruAsyncResource,
-            ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-            LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
-            SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
-            TarjontaAsyncResource tarjontaAsyncResource,
-            ValintapisteAsyncResource valintapisteAsyncResource
+        @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:1}") int splittaus,
+        ValintalaskentaAsyncResource valintalaskentaAsyncResource,
+        ApplicationAsyncResource applicationAsyncResource,
+        AtaruAsyncResource ataruAsyncResource,
+        ValintaperusteetAsyncResource valintaperusteetAsyncResource,
+        LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
+        SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
+        TarjontaAsyncResource tarjontaAsyncResource,
+        ValintapisteAsyncResource valintapisteAsyncResource,
+        KoskiService koskiService
     ) {
         this.splittaus = splittaus;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
@@ -94,21 +92,7 @@ public class LaskentaActorFactory {
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.valintapisteAsyncResource = valintapisteAsyncResource;
-        this.koskiHakukohdeOidFilter = resolveKoskiHakukohdeOidFilter(koskiHakukohdeOiditString);
-    }
-
-    private static Predicate<String> resolveKoskiHakukohdeOidFilter(String koskiHakukohdeOiditString) {
-        if (StringUtils.isBlank(koskiHakukohdeOiditString)) {
-            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => ei haeta ollenkaan tietoja Koskesta.");
-            return EXCLUDE_ALL;
-        }
-        if ("ALL".equals(koskiHakukohdeOiditString)) {
-            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan kaikille tiedot Koskesta.");
-            return INCLUDE_ALL;
-        }
-        List<String> hakukohdeOids = Arrays.asList(koskiHakukohdeOiditString.split(","));
-        LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan Koskesta tiedot seuraaville hakukohteille: " + hakukohdeOids);
-        return hakukohdeOids::contains;
+        this.koskiService = koskiService;
     }
 
     private Pair<String, Collection<String>> headAndTail(Collection<String> c) {
@@ -277,14 +261,16 @@ public class LaskentaActorFactory {
                                                           CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesF,
                                                           CompletableFuture<PisteetWithLastModified> valintapisteetForHakukohdesF,
                                                           CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmatF,
-                                                          CompletableFuture<List<HakemusWrapper>> hakemuksetF) {
+                                                          CompletableFuture<List<HakemusWrapper>> hakemuksetF,
+                                                          CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOidF) {
         return CompletableFuture.allOf(
             valintapisteetForHakukohdesF,
             hakijaryhmatF,
             valintaperusteetF,
             hakemuksetF,
             oppijatF,
-            hakukohdeRyhmasForHakukohdesF)
+            hakukohdeRyhmasForHakukohdesF,
+            koskiOppijaByOppijaOidF)
             .thenApplyAsync(x -> {
                 List<ValintaperusteetDTO> valintaperusteet = valintaperusteetF.join();
                 verifyValintalaskentaKaytossaOrThrowError(uuid, hakukohdeOid, valintaperusteet);
@@ -295,6 +281,11 @@ public class LaskentaActorFactory {
                 PisteetWithLastModified pisteetWithLastModified = valintapisteetForHakukohdesF.join();
                 List<HakemusWrapper> hakemukset = hakemuksetF.join();
                 List<Oppija> oppijat = oppijatF.join();
+                Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskiOppijaByOppijaOidF.join();
+                // TODO: Ota koskiOppijatOppijanumeroittain käyttöön
+                koskiOppijatOppijanumeroittain.forEach((k, v) -> {
+                    LOG.debug(String.format("Koskesta löytyi oppijalle %s datat: %s", k, v));
+                });
 
                 if (!withHakijaRyhmat) {
                     return new LaskeDTO(
@@ -419,6 +410,9 @@ public class LaskentaActorFactory {
         CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat
             ? createResurssiFuture(tunniste, "valintaperusteetAsyncResource.haeHakijaryhmat", () -> valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid))
             : CompletableFuture.completedFuture(emptyList());
+        CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOid = createResurssiFuture(tunniste,
+            "koskiService.haeKoskiOppijat",
+            () -> koskiService.haeKoskiOppijat(hakukohdeOid, hakemukset));
 
         LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
         return getLaskeDtoFuture(
@@ -432,7 +426,8 @@ public class LaskentaActorFactory {
             hakukohdeRyhmasForHakukohdes,
             valintapisteetForHakukohdes,
             hakijaryhmat,
-            hakemukset);
+            hakemukset,
+            koskiOppijaByOppijaOid);
     }
 
     private <T> CompletableFuture<T> createResurssiFuture(PyynnonTunniste tunniste, String resurssi, Supplier<CompletableFuture<T>> sourceFuture, boolean retry) {

@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.KoskiService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
@@ -33,16 +34,18 @@ public class Mocks {
     static TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
     static ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler = mock(ValintalaskentaStatusExcelHandler.class);
     static ValintapisteAsyncResource valintapisteAsyncResource = mock(ValintapisteAsyncResource.class);
+    static KoskiService koskiService = mock(KoskiService.class);
     static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource, tarjontaAsyncResource),new LaskentaActorFactory(
             5,
-            "none",
             valintalaskentaAsyncResource,
             applicationAsyncResource,
             ataruAsyncResource,
             valintaperusteetAsyncResource,
             laskentaSeurantaAsyncResource,
             suoritusrekisteriAsyncResource,
-            tarjontaAsyncResource,valintapisteAsyncResource
+            tarjontaAsyncResource,
+            valintapisteAsyncResource,
+            koskiService
     ), 8));
 
     public static void resetMocks() {

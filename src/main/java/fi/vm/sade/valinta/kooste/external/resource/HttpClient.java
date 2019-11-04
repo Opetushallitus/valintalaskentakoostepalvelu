@@ -59,15 +59,24 @@ public class HttpClient {
         return this.makeRequest(request);
     }
 
-    public <I, O> CompletableFuture<O> postJson(String url, Duration timeout, I body, Type inputType, Type outputType) {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+    public <I, O> CompletableFuture<O> postJson(String url,
+                                                Duration timeout,
+                                                I body,
+                                                Type inputType,
+                                                Type outputType,
+                                                Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
+        HttpRequest request = requestCustomisation.apply(HttpRequest.newBuilder(URI.create(url))
                 .header("Caller-Id", CALLER_ID)
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), Charset.forName("UTF-8")))
-                .timeout(timeout)
+                .timeout(timeout))
                 .build();
         return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
+    }
+
+    public <I, O> CompletableFuture<O> postJson(String url, Duration timeout, I body, Type inputType, Type outputType) {
+        return postJson(url, timeout, body, inputType, outputType, Function.identity());
     }
 
     public <I, O> CompletableFuture<O> putJson(String url,

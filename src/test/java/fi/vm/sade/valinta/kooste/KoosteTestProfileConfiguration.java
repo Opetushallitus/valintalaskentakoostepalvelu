@@ -46,6 +46,10 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.valintatulosservice.rest.url",Optional.ofNullable(System.getProperty("vts_server")).orElse("http://" + proxyServer) + "/valinta-tulos-service");
         p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url",Optional.ofNullable(System.getProperty("sijoittelu_server")).orElse("http://" + proxyServer) + "/sijoittelu-service/resources");
 
+        p0.setProperty("valintalaskentakoostepalvelu.koski.username", "koostepalvelu2koski");
+        p0.setProperty("valintalaskentakoostepalvelu.koski.password", "secret");
+        p0.setProperty("valintalaskentakoostepalvelu.koski.max.oppijat.post.size", "5000");
+
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://" + proxyServer + "/organisaatio-service/rest");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatio-service-url", "http://" + proxyServer + "/organisaatio-service");

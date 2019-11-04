@@ -344,4 +344,16 @@ public class HttpClients {
                 .connectTimeout(Duration.ofSeconds(10))
                 .cookieHandler(cookieManager);
     }
+
+    @Bean(name = "KoskiHttpClient")
+    @Autowired
+    public HttpClient getKoskiHttpClient(
+        CookieManager cookieManager
+    ) {
+        return new HttpClient(
+            defaultHttpClientBuilder(cookieManager).build(),
+            null,
+            DateDeserializer.gsonBuilder().create()
+        );
+    }
 }
