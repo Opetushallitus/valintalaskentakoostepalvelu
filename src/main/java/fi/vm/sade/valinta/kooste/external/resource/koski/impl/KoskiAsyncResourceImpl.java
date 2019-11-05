@@ -38,7 +38,8 @@ public class KoskiAsyncResourceImpl implements KoskiAsyncResource {
     private final UrlConfiguration urlConfiguration;
 
     @Autowired
-    public KoskiAsyncResourceImpl(@Qualifier("KoskiHttpClient") HttpClient httpClient,
+    public KoskiAsyncResourceImpl(UrlConfiguration urlConfiguration,
+                                  @Qualifier("KoskiHttpClient") HttpClient httpClient,
                                   @Value("${valintalaskentakoostepalvelu.koski.username}") String koskiUsername,
                                   @Value("${valintalaskentakoostepalvelu.koski.password}") String koskiPassword,
                                   @Value("${valintalaskentakoostepalvelu.koski.max.oppijat.post.size:5000}") int maxOppijatPostSize) {
@@ -48,7 +49,7 @@ public class KoskiAsyncResourceImpl implements KoskiAsyncResource {
             r.header("Authorization", basicAuth(koskiUsername, koskiPassword));
             return r;
         };
-        this.urlConfiguration = UrlConfiguration.getInstance();
+        this.urlConfiguration = urlConfiguration;
     }
 
     private static String basicAuth(String username, String password) {
