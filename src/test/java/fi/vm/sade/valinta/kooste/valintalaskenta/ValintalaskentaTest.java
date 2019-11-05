@@ -181,6 +181,40 @@ public class ValintalaskentaTest {
     }
 
     @Test
+    public void valintaLaskentaHakeeKoskestaTiedot() throws InterruptedException {
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde2Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde3Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
+        when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
+        when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
+        when(seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle()).thenReturn(Observable.just(Optional.empty()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(valintalaskentaAsyncResource.laskeKaikki(any(LaskeDTO.class))).thenAnswer(invocationOnMock -> {
+            LaskeDTO laskeDTO = invocationOnMock.getArgument(0);
+            assertThat(laskeDTO.getHakemus(), hasSize(1));
+            JsonArray opiskeluOikeudet = laskeDTO.getHakemus().get(0).getKoskiOpiskeluoikeudet();
+            assertEquals(opiskeluOikeudet.size(), 0);
+            return Observable.fromFuture(CompletableFuture.completedFuture("OK"));
+        });
+
+        LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
+
+        laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
+        Thread.sleep(500);
+
+        verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde1Oid, HakukohdeTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
+        verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());
+        verify(valintalaskentaAsyncResource, times(3)).laskeKaikki(any(LaskeDTO.class));
+        Mockito.verifyNoMoreInteractions(valintalaskentaAsyncResource);
+        Mockito.verifyNoMoreInteractions(seurantaAsyncResource);
+    }
+
+    @Test
     public void onnistuneestaValintalaskennastaAtaruHaullePidetaanKirjaaSeurantapalveluun() throws InterruptedException {
         when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063"))));
         when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063"))));
