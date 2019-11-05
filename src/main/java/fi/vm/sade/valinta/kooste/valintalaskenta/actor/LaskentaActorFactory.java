@@ -282,7 +282,6 @@ public class LaskentaActorFactory {
                 List<HakemusWrapper> hakemukset = hakemuksetF.join();
                 List<Oppija> oppijat = oppijatF.join();
                 Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskiOppijaByOppijaOidF.join();
-                // TODO: Ota koskiOppijatOppijanumeroittain käyttöön
                 koskiOppijatOppijanumeroittain.forEach((k, v) -> {
                     LOG.debug(String.format("Koskesta löytyi oppijalle %s datat: %s", k, v));
                 });
@@ -300,6 +299,7 @@ public class LaskentaActorFactory {
                             hakemukset,
                             pisteetWithLastModified.valintapisteet,
                             oppijat,
+                            koskiOppijatOppijanumeroittain,
                             actorParams.getParametritDTO(),
                             true),
                         valintaperusteet);
@@ -317,6 +317,7 @@ public class LaskentaActorFactory {
                             hakemukset,
                             pisteetWithLastModified.valintapisteet,
                             oppijat,
+                            koskiOppijatOppijanumeroittain,
                             actorParams.getParametritDTO(),
                             true),
                         valintaperusteet,

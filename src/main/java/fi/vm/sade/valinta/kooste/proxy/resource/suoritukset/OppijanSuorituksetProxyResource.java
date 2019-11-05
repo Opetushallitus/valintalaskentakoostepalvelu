@@ -408,6 +408,15 @@ public class OppijanSuorituksetProxyResource {
                 .hakukohdeRyhmasForHakukohdes(haku.getOid()))
                 .timeout(1, MINUTES)
                 .blockingFirst();
-        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
+        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
+            haku,
+            "",
+            hakukohdeRyhmasForHakukohdes,
+            hakemukset,
+            valintapisteet,
+            suoritukset,
+            Collections.emptyMap(),
+            parametrit,
+            fetchEnsikertalaisuus);
     }
 }

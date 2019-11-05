@@ -1,15 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 
 import com.google.common.collect.Maps;
+import com.google.gson.JsonArray;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
-import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -65,21 +65,31 @@ public class HakemuksetConverterUtil {
     public static List<HakemusDTO> muodostaHakemuksetDTOfromHakemukset(HakuV1RDTO haku, String hakukohdeOid,
                                                                        Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
                                                                        List<HakemusWrapper> hakemukset, List<Valintapisteet> valintapisteet, List<Oppija> oppijat,
+                                                                       Map<String, KoskiOppija> koskiOppijatOppijanumeroittain,
                                                                        ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
         ensurePersonOids(hakemukset, hakukohdeOid);
         List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, ofNullable(valintapisteet).orElse(emptyList()), hakukohdeRyhmasForHakukohdes);
         Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(HakemusWrapper::getOid, HakemusWrapper::hasHenkilotunnus));
         Map<String, Exception> errors = Maps.newHashMap();
-        return getHakemusDTOS(haku, hakukohdeOid, oppijat, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
+        return getHakemusDTOS(haku, hakukohdeOid, oppijat, koskiOppijatOppijanumeroittain, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
     }
 
-    private static List<HakemusDTO> getHakemusDTOS(HakuV1RDTO haku, String hakukohdeOid, List<Oppija> oppijat, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, List<HakemusDTO> hakemusDtot, Map<String, Boolean> hasHetu, Map<String, Exception> errors) {
+    private static List<HakemusDTO> getHakemusDTOS(HakuV1RDTO haku,
+                                                   String hakukohdeOid,
+                                                   List<Oppija> oppijat,
+                                                   Map<String, KoskiOppija> koskiOppijatOppijanumeroittain,
+                                                   ParametritDTO parametritDTO,
+                                                   Boolean fetchEnsikertalaisuus,
+                                                   List<HakemusDTO> hakemusDtot,
+                                                   Map<String, Boolean> hasHetu,
+                                                   Map<String, Exception> errors) {
         try {
             if (oppijat != null) {
                 LOG.info(String.format("Got %d oppijat is in getHakemusDTOS for haku %s (\"%s\"), hakukohde %s for %d applications.",
                         oppijat.size(), haku.getOid(), haku.getNimi(), hakukohdeOid, hakemusDtot.size()));
                 Map<String, Oppija> personOidToOppija = oppijat.stream().collect(toMap(Oppija::getOppijanumero, Function.identity()));
                 hakemusDtot.forEach(h -> tryToMergeKeysOfOppijaAndHakemus(haku, hakukohdeOid, parametritDTO, fetchEnsikertalaisuus, errors, personOidToOppija, hasHetu, h));
+                hakemusDtot.forEach(h -> addKoskiOpiskeluoikeudet(h, koskiOppijatOppijanumeroittain.get(h.getHakijaOid())));
             } else {
                 LOG.warn(String.format("oppijat is null when calling getHakemusDTOS for haku %s (\"%s\"), hakukohde %s for %d applications.",
                         haku.getOid(), haku.getNimi(), hakukohdeOid, hakemusDtot.size()));
@@ -93,6 +103,14 @@ public class HakemuksetConverterUtil {
             throw new RuntimeException(errors.entrySet().iterator().next().getValue());
         }
         return hakemusDtot;
+    }
+
+    private static void addKoskiOpiskeluoikeudet(HakemusDTO h, KoskiOppija koskiOppija) {
+        if (koskiOppija != null) {
+            h.setKoskiOpiskeluoikeudet(koskiOppija.getOpiskeluoikeudet());
+        } else {
+            h.setKoskiOpiskeluoikeudet(new JsonArray());
+        }
     }
 
     public static void mergeKeysOfOppijaAndHakemus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid,
