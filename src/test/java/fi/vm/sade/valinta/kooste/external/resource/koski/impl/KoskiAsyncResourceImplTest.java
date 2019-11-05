@@ -2,7 +2,9 @@ package fi.vm.sade.valinta.kooste.external.resource.koski.impl;
 
 import static fi.vm.sade.valinta.kooste.test.KoostepalveluTestingHttpUtil.createMockJsonResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -12,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
-import fi.vm.sade.valinta.kooste.test.KoostepalveluTestingHttpUtil;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import org.junit.Test;
@@ -56,5 +57,14 @@ public class KoskiAsyncResourceImplTest {
         verifyNoMoreInteractions(httpClient);
 
         assertThat(koskiOppijas, hasSize(1));
+
+        KoskiOppija oppija = koskiOppijas.iterator().next();
+        assertEquals("1.2.246.562.24.32656706483", oppija.getOppijanumero());
+
+        assertThat(oppija.getOpiskeluoikeudet().toString(), containsString("\"oid\":\"1.2.246.562.15.76490187440\""));
+        assertThat(oppija.getOpiskeluoikeudet().toString(), containsString("\"oppilaitosnumero\":{\"koodiarvo\":\"07522\",\"nimi\":{\"fi\":\"Hatsalan klassillinen koulu\"}"));
+        assertThat(oppija.getOpiskeluoikeudet().toString(), containsString("\"tyyppi\":{\"koodiarvo\":\"ammatillinenkoulutus\""));
+
+        assertEquals(oppija.getOpiskeluoikeudet().size(), 10);
     }
 }

@@ -1,13 +1,17 @@
 package fi.vm.sade.valinta.kooste.external.resource.koski;
 
-/**
- * TODO: Lisää opiskeluoikeudet, mielellään JSONina
- */
+import com.google.gson.JsonArray;
+
 public class KoskiOppija {
     private KoskiHenkilö henkilö;
+    private JsonArray opiskeluoikeudet;
 
     public String getOppijanumero() {
         return henkilö.oid;
+    }
+
+    public JsonArray getOpiskeluoikeudet() {
+        return opiskeluoikeudet;
     }
 
     public static class KoskiHenkilö {
