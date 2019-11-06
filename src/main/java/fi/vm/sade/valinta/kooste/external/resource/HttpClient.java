@@ -59,20 +59,36 @@ public class HttpClient {
         return this.makeRequest(request);
     }
 
+    public <O> CompletableFuture<O> post(String url,
+                                         Duration timeout,
+                                         HttpRequest.BodyPublisher bodyPublisher,
+                                         Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation,
+                                         Function<HttpResponse<InputStream>, O> parseResponse) {
+        HttpRequest request = requestCustomisation.apply(HttpRequest.newBuilder(URI.create(url))
+            .header("Caller-Id", CALLER_ID)
+            .POST(bodyPublisher)
+            .timeout(timeout))
+            .build();
+        return this.makeRequest(request).thenApply(parseResponse);
+    }
+
     public <I, O> CompletableFuture<O> postJson(String url,
                                                 Duration timeout,
                                                 I body,
                                                 Type inputType,
                                                 Type outputType,
                                                 Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
-        HttpRequest request = requestCustomisation.apply(HttpRequest.newBuilder(URI.create(url))
-                .header("Caller-Id", CALLER_ID)
-                .header("Accept", "application/json")
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), Charset.forName("UTF-8")))
-                .timeout(timeout))
-                .build();
-        return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
+
+        Function<HttpRequest.Builder, HttpRequest.Builder> addJsonHeaders = builder -> builder
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/json");
+
+        return this.post(
+            url,
+            timeout,
+            createJsonBodyPublisher(body, inputType),
+            addJsonHeaders.andThen(requestCustomisation),
+            response -> this.parseJson(response, outputType));
     }
 
     public <I, O> CompletableFuture<O> postJson(String url, Duration timeout, I body, Type inputType, Type outputType) {
@@ -210,6 +226,10 @@ public class HttpClient {
                 response.statusCode()
             ), e);
         }
+    }
+
+    public <I> HttpRequest.BodyPublisher createJsonBodyPublisher(I body, Type inputType) {
+        return HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), Charset.forName("UTF-8"));
     }
 
     private static boolean isJson(HttpResponse<InputStream> response) {
