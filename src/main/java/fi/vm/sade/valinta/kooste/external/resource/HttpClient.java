@@ -229,7 +229,7 @@ public class HttpClient {
     }
 
     public <I> HttpRequest.BodyPublisher createJsonBodyPublisher(I body, Type inputType) {
-        return HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), Charset.forName("UTF-8"));
+        return HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), StandardCharsets.UTF_8);
     }
 
     private static boolean isJson(HttpResponse<InputStream> response) {
