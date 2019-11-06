@@ -163,7 +163,7 @@ seuranta-service.swagger.basepath=/seuranta-service/resources
 seuranta-service.rest.url=https://${host.virkailija}/seuranta-service/resources
 
 #ORGANISAATIO
-valintalaskentakoostelvelu.organisaatio-service-url=https://${host.virkailija}/organisaatio-service
+valintalaskentakoostepalvelu.organisaatio-service-url=https://${host.virkailija}/organisaatio-service
 organisaatio.api.rest.url=https://${host.virkailija}/organisaatio-service/rest/
 
 

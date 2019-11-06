@@ -25,7 +25,7 @@ public class KoostepalveluContext {
     private static final Logger LOG = LoggerFactory.getLogger(KoostepalveluContext.class);
 
     @Bean
-    public OidProvider getOidProvider(@Value("${valintalaskentakoostelvelu.organisaatio-service-url}") String organisaatioServiceUrl,
+    public OidProvider getOidProvider(@Value("${valintalaskentakoostepalvelu.organisaatio-service-url}") String organisaatioServiceUrl,
                                       @Value("${root.organisaatio.oid}") String rootOrganisationOid) {
         return new OidProvider(organisaatioServiceUrl, rootOrganisationOid, HttpClients.CALLER_ID);
     }
