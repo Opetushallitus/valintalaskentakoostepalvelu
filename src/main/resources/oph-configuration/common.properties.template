@@ -127,6 +127,7 @@ valintalaskentakoostepalvelu.parametriservice.rest.url=https://${host.virkailija
 valintalaskentakoostepalvelu.valintaperusteet.ilb.url=${host.ilb}/valintaperusteet-service/resources
 valintalaskentakoostepalvelu.maxWorkerCount={{valintalaskentakoostepalvelu_maxWorkerCount}}
 valintalaskentakoostepalvelu.laskennan.splittaus={{valintalaskentakoostepalvelu_laskennan_splittaus}}
+valintalaskentakoostepalvelu.koski.baseurl={{valintalaskentakoostepalvelu_koski_baseurl | default("https://${host.virkailija}")}}
 valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit={{valintalaskentakoostepalvelu_laskenta_koskesta_haettavat_hakukohdeoidit | default("none")}}
 valintalaskentakoostepalvelu.koski.username={{valintalaskentakoostepalvelu_koski_username | default("koostepalvelu2koski")}}
 valintalaskentakoostepalvelu.koski.password={{valintalaskentakoostepalvelu_koski_password}}
