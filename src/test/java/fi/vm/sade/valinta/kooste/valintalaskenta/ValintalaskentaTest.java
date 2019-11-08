@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetJarjestyskriteeriDTO;
@@ -186,7 +187,7 @@ public class ValintalaskentaTest {
         when(valintalaskentaAsyncResource.laskeKaikki(any(LaskeDTO.class))).thenAnswer(invocationOnMock -> {
             LaskeDTO laskeDTO = invocationOnMock.getArgument(0);
             assertThat(laskeDTO.getHakemus(), hasSize(1));
-            JsonArray opiskeluOikeudet = laskeDTO.getHakemus().get(0).getKoskiOpiskeluoikeudet();
+            JsonArray opiskeluOikeudet = new Gson().fromJson(laskeDTO.getHakemus().get(0).getKoskiOpiskeluoikeudetJson(), JsonArray.class);
             assertEquals(opiskeluOikeudet.size(), 0);
             return Observable.fromFuture(CompletableFuture.completedFuture("OK"));
         });

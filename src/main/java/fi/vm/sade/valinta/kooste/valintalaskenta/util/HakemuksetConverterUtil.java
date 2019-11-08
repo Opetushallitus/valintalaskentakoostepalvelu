@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
@@ -36,6 +37,7 @@ import static java.util.Optional.*;
 import static java.util.stream.Collectors.*;
 
 public class HakemuksetConverterUtil {
+    private static final Gson GSON = new Gson();
     private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
     public static final String PK_PAATTOTODISTUSVUOSI = "PK_PAATTOTODISTUSVUOSI";
     public static final String LK_PAATTOTODISTUSVUOSI = "lukioPaattotodistusVuosi";
@@ -107,9 +109,9 @@ public class HakemuksetConverterUtil {
 
     private static void addKoskiOpiskeluoikeudet(HakemusDTO h, KoskiOppija koskiOppija) {
         if (koskiOppija != null) {
-            h.setKoskiOpiskeluoikeudet(koskiOppija.getOpiskeluoikeudet());
+            h.setKoskiOpiskeluoikeudetJson(GSON.toJson(koskiOppija.getOpiskeluoikeudet()));
         } else {
-            h.setKoskiOpiskeluoikeudet(new JsonArray());
+            h.setKoskiOpiskeluoikeudetJson("[]");
         }
     }
 
