@@ -21,7 +21,6 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
-import io.mikael.urlbuilder.UrlBuilder;
 import io.reactivex.Observable;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,9 +30,9 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,12 +100,10 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
 
     @Override
     public CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
-        URI uri = UrlBuilder.fromString(getUrl("tarjonta-service.hakukohde.search"))
-            .addParameter("hakuOid", hakuOid)
-            .toUri();
-
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("hakuOid", hakuOid);
         CompletableFuture<ResultSearch> s = this.client.getJson(
-            uri.toString(),
+            getUrl("tarjonta-service.hakukohde.search", parameters),
             Duration.ofMinutes(5),
             new com.google.gson.reflect.TypeToken<ResultSearch>() {
             }.getType());

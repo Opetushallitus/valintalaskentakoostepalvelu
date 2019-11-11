@@ -16,7 +16,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import io.mikael.urlbuilder.UrlBuilder;
 import io.reactivex.Observable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +27,10 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.net.URI;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,14 +64,18 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource imp
     }
 
     public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
-        UrlBuilder urlBuilder = UrlBuilder.fromString(
-            getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet", hakukohdeOid));
-        URI uri = valinnanVaiheJarjestysluku == null ?
-            urlBuilder.toUri() :
-            urlBuilder.addParameter("vaihe", valinnanVaiheJarjestysluku.toString()).toUri();
+        List<Object> parameters = new LinkedList<>();
+        parameters.add(hakukohdeOid);
+        if (valinnanVaiheJarjestysluku != null) {
+            Map<String, String> vaiheParameter = new HashMap<>();
+            vaiheParameter.put("vaihe", valinnanVaiheJarjestysluku.toString());
+            parameters.add(vaiheParameter);
+        }
+
+        String url = getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet", parameters.toArray());
 
         return httpClient.getJson(
-            uri.toString(),
+            url,
             Duration.ofHours(1),
             new com.google.gson.reflect.TypeToken<List<ValintaperusteetDTO>>() {}.getType()
         );

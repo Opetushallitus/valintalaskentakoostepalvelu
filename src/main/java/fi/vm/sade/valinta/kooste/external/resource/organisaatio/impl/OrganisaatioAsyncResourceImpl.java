@@ -5,7 +5,6 @@ import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import io.mikael.urlbuilder.UrlBuilder;
 import io.reactivex.Observable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,8 +12,9 @@ import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.net.URI;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -43,15 +43,15 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid) {
-        URI uri = UrlBuilder.fromString(getUrl("organisaatio-service.organisaatio.hierarkia.tyyppi"))
-            .addParameter("oid", organisaatioOid)
-            .addParameter("aktiiviset", Boolean.toString(true))
-            .addParameter("suunnitellut", Boolean.toString(false))
-            .addParameter("lakkautetut", Boolean.toString(true))
-            .toUri();
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("oid", organisaatioOid);
+        parameters.put("aktiiviset", Boolean.toString(true));
+        parameters.put("suunnitellut", Boolean.toString(false));
+        parameters.put("lakkautetut", Boolean.toString(true));
+        String url = getUrl("organisaatio-service.organisaatio.hierarkia.tyyppi", parameters);
 
         return client.getJson(
-            uri.toString(),
+            url,
             Duration.ofMinutes(1),
             new com.google.gson.reflect.TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType());
     }

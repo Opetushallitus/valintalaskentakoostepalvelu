@@ -10,7 +10,6 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
-import io.mikael.urlbuilder.UrlBuilder;
 import io.reactivex.Observable;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
@@ -22,10 +21,11 @@ import org.springframework.stereotype.Service;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -60,11 +60,12 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public CompletableFuture<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
-        URI uri = UrlBuilder.fromString(getUrl("suoritusrekisteri.oppijat"))
-            .addParameter("hakukohde", hakukohdeOid)
-            .addParameter("haku", hakuOid)
-            .addParameter("ensikertalaisuudet", "false").toUri();
-        return httpClient.getJson(uri.toString(), Duration.ofMinutes(5), new com.google.gson.reflect.TypeToken<List<Oppija>>() { }.getType());
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("hakukohde", hakukohdeOid);
+        parameters.put("haku", hakuOid);
+        parameters.put("ensikertalaisuudet", "false");
+        String url = getUrl("suoritusrekisteri.oppijat", parameters);
+        return httpClient.getJson(url, Duration.ofMinutes(5), new com.google.gson.reflect.TypeToken<List<Oppija>>() { }.getType());
     }
 
     @Override
@@ -79,11 +80,11 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource im
 
     @Override
     public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
-        URI uri = UrlBuilder.fromString(getUrl("suoritusrekisteri.oppijat"))
-            .addParameter("ensikertalaisuudet", "true")
-            .addParameter("haku", hakuOid)
-            .toUri();
-        return batchedPostOppijasFuture(opiskelijaOids, uri.toString());
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("ensikertalaisuudet", "true");
+        parameters.put("haku", hakuOid);
+        String url = getUrl("suoritusrekisteri.oppijat", parameters);
+        return batchedPostOppijasFuture(opiskelijaOids, url);
     }
 
     @Override
