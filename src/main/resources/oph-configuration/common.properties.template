@@ -118,6 +118,7 @@ valintalaskentakoostepalvelu.oppijantunnistus.rest.url=https://${host.virkailija
 valintalaskentakoostepalvelu.hakemus.rest.url=https://${host.virkailija}/haku-app
 valintalaskentakoostepalvelu.authentication.rest.url=https://${host.virkailija}/authentication-service
 valintalaskentakoostepalvelu.sijoittelu.rest.url=https://${host.virkailija}/sijoittelu-service/resources
+valintalaskentakoostepalvelu.valintaperusteet-service.baseurl={{ valintalaskentakoostepalvelu_valintaperusteet_service_baseurl | default(host_ilb)}}
 valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl={{ valintalaskentakoostepalvelu_valintalaskenta_laskenta_service_baseurl | default(host_ilb)}}
 valintalaskentakoostepalvelu.valintalaskenta.rest.url=${valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl}/valintalaskenta-laskenta-service/resources
 valintalaskentakoostepalvelu.koodiService.url=https://${host.virkailija}/koodisto-service/services/koodiService

@@ -64,7 +64,8 @@ public class ValintalaskentakoostepalveluJetty {
             IOUtils.writeLines(
                 Arrays.asList(
                     "web.url.cas=some_cas_url",
-                    "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl=" + Integraatiopalvelimet.mockServer.getUrl()),
+                    "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl=" + Integraatiopalvelimet.mockServer.getUrl(),
+                    "valintalaskentakoostepalvelu.valintaperusteet-service.baseurl=" + Integraatiopalvelimet.mockServer.getUrl()),
                 System.lineSeparator(),
                 output);
         } catch (FileNotFoundException e) {
