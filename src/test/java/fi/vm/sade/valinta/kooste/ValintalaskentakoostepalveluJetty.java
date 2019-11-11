@@ -61,7 +61,12 @@ public class ValintalaskentakoostepalveluJetty {
             final File commonProperties = new File(ophConfiguration, "common.properties");
             final FileOutputStream output = new FileOutputStream(commonProperties);
             System.setProperty("user.home", tempDir.getAbsolutePath());
-            IOUtils.writeLines(Arrays.asList("web.url.cas", "some_cas_url"),System.lineSeparator(),output);
+            IOUtils.writeLines(
+                Arrays.asList(
+                    "web.url.cas=some_cas_url",
+                    "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl=" + Integraatiopalvelimet.mockServer.getUrl()),
+                System.lineSeparator(),
+                output);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }catch (IOException e) {
