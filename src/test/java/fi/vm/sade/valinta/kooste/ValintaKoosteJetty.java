@@ -21,7 +21,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
  *            LocalForward 18888 alb.testiopintopolku.fi:80
  *
  *    * add a fully qualified domain name to /etc/hosts
- *        127.0.0.1       testi-devaajan-koneella.testiopintopolku.fi
+ *        127.0.0.1       kehittajan-oma-kone.testiopintopolku.fi
  *
  *    * copy oph-configuration directory from the container of the target environment (pallero) to your machine
  *        * you need at least common.properties, ehcache.xml and security-context-backend.xml
@@ -33,7 +33,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
  *        < host.alb=http://alb.testiopintopolku.fi
  *        ---
  *        > host.ilb=http://localhost:18888
- *        > host.alb=http://testi-devaajan-koneella.testiopintopolku.fi:18888
+ *        > host.alb=http://kehittajan-oma-kone.testiopintopolku.fi:18888
  *        82c82
  *        < cas.service.valintalaskentakoostepalvelu=https://${host.virkailija}/valintalaskentakoostepalvelu
  *        ---
@@ -46,6 +46,10 @@ import org.eclipse.jetty.webapp.WebAppContext;
  *        < valintalaskentakoostepalvelu.maxWorkerCount=4
  *        ---
  *        > valintalaskentakoostepalvelu.maxWorkerCount=0
+ *
+ *    * If you want to use local valintalaskenta, configure it to common.properties like this:
+ *
+ *       valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl=http://localhost:8080
  *
  *    * Start the service
  *        VALINTALASKENTAKOOSTEPALVELU_USER_HOME="path to oph-configuration directory" \
