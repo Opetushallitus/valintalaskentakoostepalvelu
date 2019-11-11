@@ -22,7 +22,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuFuture.PyynnonTunniste;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuWrapper.PyynnonTunniste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
@@ -432,7 +432,7 @@ public class LaskentaActorFactory {
     }
 
     private <T> CompletableFuture<T> createResurssiFuture(PyynnonTunniste tunniste, String resurssi, Supplier<CompletableFuture<T>> sourceFuture, boolean retry) {
-        return new LaskentaResurssinhakuFuture<>(sourceFuture, tunniste.withNimi(resurssi), retry).getFuture();
+        return LaskentaResurssinhakuWrapper.luoLaskentaResurssinHakuFuture(sourceFuture, tunniste.withNimi(resurssi), retry);
     }
 
     private <T> CompletableFuture<T> createResurssiFuture(PyynnonTunniste tunniste, String resurssi, Supplier<CompletableFuture<T>> sourceFuture) {

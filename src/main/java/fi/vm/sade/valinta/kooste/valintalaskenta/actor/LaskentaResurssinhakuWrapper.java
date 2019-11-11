@@ -9,16 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public class LaskentaResurssinhakuFuture<R> {
-    private static final Logger LOG = LoggerFactory.getLogger(LaskentaResurssinhakuFuture.class);
+public class LaskentaResurssinhakuWrapper {
+    private static final Logger LOG = LoggerFactory.getLogger(LaskentaResurssinhakuWrapper.class);
     private static final int MAX_RETRIES = 5;
-    private final CompletableFuture<R> future;
 
-    public LaskentaResurssinhakuFuture(Supplier<CompletableFuture<R>> source, PyynnonTunniste tunniste, boolean retry) {
+    public static <R> CompletableFuture<R> luoLaskentaResurssinHakuFuture(Supplier<CompletableFuture<R>> source, PyynnonTunniste tunniste, boolean retry) {
         CompletableFuture<R> f;
         if (retry) {
             f = executeWithRetry(source, tunniste);
@@ -28,10 +26,10 @@ public class LaskentaResurssinhakuFuture<R> {
 
         long starTimeMillis = System.currentTimeMillis();
 
-        this.future = f.whenComplete(lopputuloksenKasittelija(tunniste, starTimeMillis));
+        return f.whenComplete(lopputuloksenKasittelija(tunniste, starTimeMillis));
     }
 
-    public static <R> CompletableFuture<R> executeWithRetry(Supplier<CompletableFuture<R>> action, PyynnonTunniste tunniste) {
+    private static <R> CompletableFuture<R> executeWithRetry(Supplier<CompletableFuture<R>> action, PyynnonTunniste tunniste) {
         return action
             .get()
             .handleAsync((r, t) -> {
@@ -59,13 +57,13 @@ public class LaskentaResurssinhakuFuture<R> {
                     LOG.info(String.format("%s : Resurssin haussa tapahtui virhe %s, uudelleenyritys # %s", tunniste, t.getMessage(), retry));
                     Executor delayedExecutor = CompletableFuture.delayedExecutor(retry * secondsToWaitMultiplier, SECONDS);
                     return CompletableFuture.supplyAsync(() -> "OK", delayedExecutor)
-                        .thenComposeAsync(x -> LaskentaResurssinhakuFuture.retry(action, throwable, retry + 1, tunniste));
+                        .thenComposeAsync(x -> LaskentaResurssinhakuWrapper.retry(action, throwable, retry + 1, tunniste));
                 }
                 return CompletableFuture.completedFuture(r);
             }).thenCompose(java.util.function.Function.identity());
     }
 
-    private BiConsumer<R, Throwable> lopputuloksenKasittelija(PyynnonTunniste tunniste, long starTimeMillis) {
+    private static <T> BiConsumer<T, Throwable> lopputuloksenKasittelija(PyynnonTunniste tunniste, long starTimeMillis) {
         return (r, error) -> {
             if (error != null) {
                 long l = System.currentTimeMillis();
@@ -80,10 +78,6 @@ public class LaskentaResurssinhakuFuture<R> {
                 LOG.info(String.format("(Uuid=%s) (Kesto %s s) Saatiin resurssi %s hakukohteelle %s", tunniste.uuid, MILLISECONDS.toSeconds(duration), tunniste.resurssi, tunniste.hakukohdeOid));
             }
         };
-    }
-
-    public CompletableFuture<R> getFuture() {
-        return future;
     }
 
     public static class PyynnonTunniste {
