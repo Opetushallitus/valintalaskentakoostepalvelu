@@ -32,6 +32,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -44,6 +45,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +139,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hakemuksetF,
                             hyvaksymiskirjeDTO,
                             null,
-                            false
+                            false,
+                            Collections.singletonList(ContentStructureType.letter)
                     );
                 },
                 String.format("Aloitetaan hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle", hakukohdeOid, hakemusOids.size()),
@@ -191,7 +194,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hakemuksetF,
                             hyvaksymiskirjeDTO,
                             null,
-                            false
+                            false,
+                            Collections.singletonList(ContentStructureType.letter)
                     );
                 },
                 String.format("Aloitetaan hakukohteen %s jälkiohjauskirjeiden muodostaminen", hakukohdeOid),
@@ -223,7 +227,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hakemuksetF,
                             hyvaksymiskirjeDTO,
                             null,
-                            false
+                            false,
+                            Collections.singletonList(ContentStructureType.letter)
                     );
                 },
                 String.format("Aloitetaan hakukohteen %s hyväksymiskirjeiden muodostaminen", hakukohdeOid),
@@ -258,7 +263,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hakemuksetF,
                             hyvaksymiskirjeDTO,
                             asiointikieli,
-                            true
+                            true,
+                            Arrays.asList(
+                                    ContentStructureType.letter,
+                                    ContentStructureType.accessibleHtml
+                            )
                     );
                 },
                 String.format("Aloitetaan haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s", hakuOid, asiointikieli),
@@ -343,7 +352,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                 hyvaksymiskirjeDTO.getTemplateName(),
                                                 parsePalautusPvm(null, haunParametritF.join()),
                                                 parsePalautusAika(null, haunParametritF.join()),
-                                                false))
+                                                false,
+                                                Collections.singletonList(ContentStructureType.letter)))
                                         .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch))
                                         .thenComposeAsync(batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
                                                 .thenApplyAsync(v -> batchId))
@@ -418,7 +428,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF,
             HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
             String asiointikieli,
-            boolean sahkoinenKorkeakoulunMassaposti
+            boolean sahkoinenKorkeakoulunMassaposti,
+            List<ContentStructureType> sisaltotyypit
     ) {
         CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
         CompletableFuture<Map<String, Koodi>> maatjavaltiot1F = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
@@ -441,7 +452,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         hyvaksymiskirjeDTO.getTemplateName(),
                         parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametritF.join()),
                         parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametritF.join()),
-                        sahkoinenKorkeakoulunMassaposti))
+                        sahkoinenKorkeakoulunMassaposti,
+                        sisaltotyypit))
                 .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
     }
 

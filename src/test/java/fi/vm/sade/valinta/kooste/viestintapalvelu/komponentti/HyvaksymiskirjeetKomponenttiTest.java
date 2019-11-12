@@ -20,9 +20,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -282,7 +284,8 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 TEMPLATE_NAME,
                 PALAUTUS_PVM,
                 PALAUTUS_AIKA,
-                korkeakouluMassapostitus
+                korkeakouluMassapostitus,
+                Collections.singletonList(ContentStructureType.letter)
         );
     }
 }

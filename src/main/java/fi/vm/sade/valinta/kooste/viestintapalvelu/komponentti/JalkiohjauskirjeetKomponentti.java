@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -141,7 +142,10 @@ public class JalkiohjauskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintäpalvelulle jälkiohjauskirje-erä haulle {} asiointikielelä {}, jossa kirjeitä {} kappaletta!", hakuOid, preferoituKielikoodi, kirjeet.size());
-        LetterBatch viesti = new LetterBatch(kirjeet);
+        LetterBatch viesti = new LetterBatch(
+                kirjeet,
+                Collections.singletonList(ContentStructureType.letter)
+        );
         viesti.setApplicationPeriod(hakuOid);
         viesti.setFetchTarget(null);
         viesti.setLanguageCode(preferoituKielikoodi);

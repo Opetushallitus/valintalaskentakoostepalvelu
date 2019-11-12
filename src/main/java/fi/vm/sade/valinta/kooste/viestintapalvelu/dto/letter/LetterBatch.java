@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter;
 
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +19,7 @@ public class LetterBatch {
     private String tag;
     private boolean iposti = false;
     private boolean skipDokumenttipalvelu = false;
+    private final List<ContentStructureType> contentStructureTypes;
 
     public Map<String, Object> getTemplateReplacements() {
         return templateReplacements;
@@ -29,11 +33,9 @@ public class LetterBatch {
         this.letters = letters;
     }
 
-    public LetterBatch() {
-    }
-
-    public LetterBatch(List<Letter> letters) {
+    public LetterBatch(List<Letter> letters, List<ContentStructureType> contentStructureTypes) {
         this.letters = letters;
+        this.contentStructureTypes = contentStructureTypes;
     }
 
     public List<Letter> getLetters() {
@@ -104,6 +106,10 @@ public class LetterBatch {
         this.skipDokumenttipalvelu = skipDokumenttipalvelu;
     }
 
+    public List<ContentStructureType> getContentStructureTypes() {
+        return contentStructureTypes;
+    }
+
     public List<LetterBatch> split(int limit) {
         List<LetterBatch> batches = new ArrayList<LetterBatch>();
         split(letters, batches, limit);
@@ -111,7 +117,10 @@ public class LetterBatch {
     }
 
     private LetterBatch createSubBatch(List<Letter> lettersOfSubBatch) {
-        LetterBatch result = new LetterBatch(lettersOfSubBatch);
+        LetterBatch result = new LetterBatch(
+                lettersOfSubBatch,
+                Collections.singletonList(ContentStructureType.letter)
+        );
         result.setLanguageCode(languageCode);
         result.setApplicationPeriod(applicationPeriod);
         result.setFetchTarget(fetchTarget);
@@ -142,7 +151,7 @@ public class LetterBatch {
                 + storingOid + ", organizationOid=" + organizationOid
                 + ", applicationPeriod=" + applicationPeriod + ", fetchTarget="
                 + fetchTarget + ", tag=" + tag + ", skipDokumenttipalvelu="
-                + skipDokumenttipalvelu + "]";
+                + skipDokumenttipalvelu + ", contentStructureTypes=" + contentStructureTypes + "]";
     }
 
     public boolean isIposti() {
