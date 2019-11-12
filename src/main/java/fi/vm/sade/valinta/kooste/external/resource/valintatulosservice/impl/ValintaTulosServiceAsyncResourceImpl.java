@@ -193,7 +193,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource 
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     if(auditSession.getIfUnmodifiedSince().isPresent()) {
-                        client.header("If-Unmodified-Since", auditSession.getIfUnmodifiedSince().get());
+                        client.header("X-If-Unmodified-Since", auditSession.getIfUnmodifiedSince().get());
                     }
                     return client;
                 });
