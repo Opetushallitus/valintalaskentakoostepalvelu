@@ -38,10 +38,6 @@ import org.eclipse.jetty.webapp.WebAppContext;
  *        < cas.service.valintalaskentakoostepalvelu=https://${host.virkailija}/valintalaskentakoostepalvelu
  *        ---
  *        > cas.service.valintalaskentakoostepalvelu=http://localhost:56748/valintalaskentakoostepalvelu
- *        106c106
- *        < valintalaskentakoostepalvelu.valintalaskentaService.url=https://${host.virkailija}/valintalaskenta-laskenta-service/services/valintalaskentaService
- *        ---
- *        > valintalaskentakoostepalvelu.valintalaskentaService.url=${host.ilb}/valintalaskenta-laskenta-service/services/valintalaskentaService
  *        128c128
  *        < valintalaskentakoostepalvelu.maxWorkerCount=4
  *        ---

@@ -37,14 +37,11 @@ public class KoosteTestProfileConfiguration {
         Properties p0 = new Properties();
         p0.setProperty("valintalaskentakoostepalvelu.jatkuvasijoittelu.timer", "time=2018-12-12 10:12:12&delay=10000000");
         p0.setProperty("valintalaskentakoostepalvelu.valintalaskenta.rest.url", "http://" + proxyServer + "/valintalaskenta-laskenta-service/resources");
-        p0.setProperty("valintalaskentakoostepalvelu.ryhmasahkoposti.url", "http://" + proxyServer + "/ryhmasahkoposti-service");
         p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url", "http://" + proxyServer + "/viestintapalvelu");
         p0.setProperty("valintalaskentakoostepalvelu.hakemus.rest.url", "http://" + proxyServer + "/haku-app");
         p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
         p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.valintatulosservice.rest.url",Optional.ofNullable(System.getProperty("vts_server")).orElse("http://" + proxyServer) + "/valinta-tulos-service");
-        p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url",Optional.ofNullable(System.getProperty("sijoittelu_server")).orElse("http://" + proxyServer) + "/sijoittelu-service/resources");
 
         p0.setProperty("valintalaskentakoostepalvelu.koski.username", "koostepalvelu2koski");
         p0.setProperty("valintalaskentakoostepalvelu.koski.password", "secret");
@@ -56,8 +53,6 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.tarjonta.rest.url", "http://" + proxyServer + "/tarjonta-service/rest");
         p0.setProperty("valintalaskentakoostepalvelu.koodisto.url", "https://itest-virkailija.oph.ware.fi/");
         p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.valintaperusteet.rest.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.oppijantunnistus.rest.url", "http://" + proxyServer + "/oppijan-tunnistus");
         p0.setProperty("valintalaskentakoostepalvelu.kirjeet.polling.interval.millis", "50");
         p0.setProperty("root.organisaatio.oid", "");
         p0.setProperty("kela.ftp.protocol", "ftp");
@@ -83,7 +78,6 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("cas.service.haku-service", "");
         p0.setProperty("cas.service.authentication-service", "");
         p0.setProperty("cas.service.oppijanumerorekisteri-service", "");
-        p0.setProperty("valintalaskentakoostepalvelu.authentication.rest.url", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.username.to.sijoittelu", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.password.to.sijoittelu", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.username.to.valintatieto", "");
