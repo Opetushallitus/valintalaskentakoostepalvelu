@@ -25,10 +25,8 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuWrapper.PyynnonTunniste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
-import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import io.reactivex.Observable;
-import io.reactivex.functions.Consumer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -47,7 +45,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -202,12 +199,6 @@ public class LaskentaActorFactory {
                 }
         );
     }
-
-    private static final BiFunction<String, String, Consumer<? super Object>> laskentaOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Laskenta onnistui hakukohteelle {}", uuid, hakukohde);
-    private static final BiFunction<String, String, Consumer<Throwable>> laskentaException = (uuid, hakukohde) -> error -> {
-        String message = HttpExceptionWithResponse.appendWrappedResponse(String.format("(Uuid=%s) Laskenta epäonnistui hakukohteelle %s", uuid, hakukohde), error);
-        LOG.error(message, error);
-    };
 
     private LaskentaActor createValintalaskentaJaValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
