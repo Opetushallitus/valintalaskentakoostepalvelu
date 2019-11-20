@@ -7,6 +7,8 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -19,7 +21,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.net.HttpCookie;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Profile("test")
 @Configuration
 public class KoosteTestProfileConfiguration {
+    private static final Logger LOG = LoggerFactory.getLogger(KoosteTestProfileConfiguration.class);
 
     public static AtomicReference<String> PROXY_SERVER = new AtomicReference<>();
 
@@ -93,6 +95,8 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("omatsivut.email.application.modify.link.sv", "https://sv.test.domain/token/");
 
         p0.setProperty("valintalaskentakoostepalvelu.tarjonta.sync.cron", "0 0 0 * * SUN-SAT");
+
+        LOG.info(String.format("Lisätään testiajoa varten propertyjä: %s", p0));
 
         org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
         defaultProps.setProperties(p0);
