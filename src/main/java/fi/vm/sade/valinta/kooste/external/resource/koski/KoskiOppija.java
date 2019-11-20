@@ -16,6 +16,10 @@ public class KoskiOppija {
         return opiskeluoikeudet;
     }
 
+    public void setHenkilö(KoskiHenkilö henkilö) {
+        this.henkilö = henkilö;
+    }
+
     public static class KoskiHenkilö {
         public String oid;
 
