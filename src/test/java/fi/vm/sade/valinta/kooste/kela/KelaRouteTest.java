@@ -7,7 +7,7 @@ import fi.vm.sade.tarjonta.service.resources.KomotoResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -51,8 +51,8 @@ public class KelaRouteTest extends CamelTestSupport {
 	private final Logger LOG = LoggerFactory.getLogger(KelaRouteTest.class);
 	private final HakuV1Resource hakuResource = Mockito
 			.mock(HakuV1Resource.class);
-	private final DokumenttiResource dokumenttiResource = Mockito
-			.mock(DokumenttiResource.class);
+	private final DokumenttiAsyncResource dokumenttiAsyncResource = Mockito
+			.mock(DokumenttiAsyncResource.class);
 	private final KelaHakijaRiviKomponenttiImpl hkRivi = Mockito
 			.mock(KelaHakijaRiviKomponenttiImpl.class);
 	private final KelaDokumentinLuontiKomponenttiImpl dkRivi = Mockito
@@ -193,7 +193,7 @@ public class KelaRouteTest extends CamelTestSupport {
 
 	@Override
 	protected RouteBuilder createRouteBuilder() throws Exception {
-		return new KelaRouteImpl(DIRECT_KELA, dokumenttiResource, hkRivi,
+		return new KelaRouteImpl(DIRECT_KELA, dokumenttiAsyncResource, hkRivi,
 				dkRivi, hakuResource,
 				haunTyyppiKomponentti,
 				oppijanumerorekisteriAsyncResource,

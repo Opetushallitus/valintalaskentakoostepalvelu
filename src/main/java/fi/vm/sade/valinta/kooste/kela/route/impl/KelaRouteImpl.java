@@ -15,8 +15,8 @@ import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.Reititys;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -78,7 +78,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti;
     private final KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
-    private final DokumenttiResource dokumenttiResource;
+    private final DokumenttiAsyncResource dokumenttiAsyncResource;
     private final HaunTyyppiKomponentti haunTyyppiKomponentti;
     private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
     private final OppilaitosKomponentti oppilaitosKomponentti;
@@ -91,7 +91,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     @Autowired
     public KelaRouteImpl(
             @Value(KelaRoute.SEDA_KELA_LUONTI) String kelaLuonti,
-            DokumenttiResource dokumenttiResource,
+            DokumenttiAsyncResource dokumenttiAsyncResource,
             KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti,
             KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
             HakuV1Resource hakuResource,
@@ -109,7 +109,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.haunTyyppiKomponentti = haunTyyppiKomponentti;
         this.hakuResource = hakuResource;
         this.kelaLuonti = kelaLuonti;
-        this.dokumenttiResource = dokumenttiResource;
+        this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.kelaHakijaKomponentti = kelaHakijaKomponentti;
         this.kelaDokumentinLuontiKomponentti = kelaDokumentinLuontiKomponentti;
         this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
@@ -454,7 +454,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         Long expirationTime = defaultExpirationDate().getTime();
                         List<String> tags = luontiJaDokumentti.getLuonti().getProsessi().getTags();
 
-                        dokumenttiResource.tallenna(id,
+                        dokumenttiAsyncResource.tallenna(id,
                                 luontiJaDokumentti.getLuonti().isKkHaku() ? KelaUtil.createTiedostoNimiOuhare(new Date()) : KelaUtil.createTiedostoNimiYhva14(new Date()),
                                 expirationTime, tags,
                                 "application/octet-stream", filedata);
