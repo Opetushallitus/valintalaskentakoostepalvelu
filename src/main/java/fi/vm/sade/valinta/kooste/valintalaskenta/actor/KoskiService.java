@@ -44,35 +44,6 @@ public class KoskiService {
         this.koskenFunktionimet = resolveKoskenFunktionimet(koskenFunktionimetString);
     }
 
-    private static Predicate<String> resolveKoskiHakukohdeOidFilter(String koskiHakukohdeOiditString) {
-        if (StringUtils.isBlank(koskiHakukohdeOiditString)) {
-            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => ei haeta ollenkaan tietoja Koskesta.");
-            return EXCLUDE_ALL;
-        }
-        if ("ALL".equals(koskiHakukohdeOiditString)) {
-            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan tiedot Koskesta kaikille hakukohteille, " +
-                "joille löytyy Koski-dataa käyttäviä valintaperusteita.");
-            return INCLUDE_ALL;
-        }
-        List<String> hakukohdeOids = Arrays.asList(koskiHakukohdeOiditString.split(","));
-        LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan Koskesta tiedot seuraaville hakukohteille: " +
-            hakukohdeOids + " , jos niistä löytyy Koski-dataa käyttäviä valintaperusteita.");
-        return hakukohdeOids::contains;
-    }
-
-    private Set<Funktionimi> resolveKoskenFunktionimet(String koskenFunktionimetString) {
-        if (StringUtils.isBlank(koskenFunktionimetString)) {
-            LOG.info("Saatiin '" + koskenFunktionimetString + "' funktionimiksi, joille haetaan dataa Koskesta => ei haeta ollenkaan tietoja Koskesta.");
-            return Collections.emptySet();
-        }
-        Set<Funktionimi> funktionimet = Arrays.stream(koskenFunktionimetString.split(","))
-            .map(Funktionimi::valueOf)
-            .collect(Collectors.toSet());
-        LOG.info("Saatiin '" + koskenFunktionimetString + "' funktionimiksi, joille haetaan dataa Koskesta => haetaan Koskesta tietoja vain hakukohteille, " +
-            "joiden valintaperusteissa käytetään seuraavannimisiä funktioita: " + funktionimet);
-        return funktionimet;
-    }
-
     public CompletableFuture<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid,
                                                                        CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet,
                                                                        CompletableFuture<List<HakemusWrapper>> hakemukset) {
@@ -122,5 +93,34 @@ public class KoskiService {
         return funktiokutsu.getFunktioargumentit().stream()
             .anyMatch(argumentti ->
                 sisaltaaKoskiFunktioita(argumentti.getFunktiokutsu()));
+    }
+
+    private static Predicate<String> resolveKoskiHakukohdeOidFilter(String koskiHakukohdeOiditString) {
+        if (StringUtils.isBlank(koskiHakukohdeOiditString)) {
+            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => ei haeta ollenkaan tietoja Koskesta.");
+            return EXCLUDE_ALL;
+        }
+        if ("ALL".equals(koskiHakukohdeOiditString)) {
+            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan tiedot Koskesta kaikille hakukohteille, " +
+                "joille löytyy Koski-dataa käyttäviä valintaperusteita.");
+            return INCLUDE_ALL;
+        }
+        List<String> hakukohdeOids = Arrays.asList(koskiHakukohdeOiditString.split(","));
+        LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan Koskesta tiedot seuraaville hakukohteille: " +
+            hakukohdeOids + " , jos niistä löytyy Koski-dataa käyttäviä valintaperusteita.");
+        return hakukohdeOids::contains;
+    }
+
+    private static Set<Funktionimi> resolveKoskenFunktionimet(String koskenFunktionimetString) {
+        if (StringUtils.isBlank(koskenFunktionimetString)) {
+            LOG.info("Saatiin '" + koskenFunktionimetString + "' funktionimiksi, joille haetaan dataa Koskesta => ei haeta ollenkaan tietoja Koskesta.");
+            return Collections.emptySet();
+        }
+        Set<Funktionimi> funktionimet = Arrays.stream(koskenFunktionimetString.split(","))
+            .map(Funktionimi::valueOf)
+            .collect(Collectors.toSet());
+        LOG.info("Saatiin '" + koskenFunktionimetString + "' funktionimiksi, joille haetaan dataa Koskesta => haetaan Koskesta tietoja vain hakukohteille, " +
+            "joiden valintaperusteissa käytetään seuraavannimisiä funktioita: " + funktionimet);
+        return funktionimet;
     }
 }
