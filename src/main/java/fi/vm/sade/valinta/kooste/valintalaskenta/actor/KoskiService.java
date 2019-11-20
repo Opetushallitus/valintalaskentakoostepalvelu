@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetFunktiokutsuDTO;
+import fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -11,10 +14,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -27,12 +33,15 @@ public class KoskiService {
     private static final Predicate<String> EXCLUDE_ALL = s -> false;
     private final Predicate<String> koskiHakukohdeOidFilter;
     private final KoskiAsyncResource koskiAsyncResource;
+    private final Set<Funktionimi> koskenFunktionimet;
 
     @Autowired
     public KoskiService(@Value("${valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit:none}") String koskiHakukohdeOiditString,
+                        @Value("${valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta}") String koskenFunktionimetString,
                         KoskiAsyncResource koskiAsyncResource) {
         this.koskiAsyncResource = koskiAsyncResource;
         this.koskiHakukohdeOidFilter = resolveKoskiHakukohdeOidFilter(koskiHakukohdeOiditString);
+        this.koskenFunktionimet = resolveKoskenFunktionimet(koskenFunktionimetString);
     }
 
     private static Predicate<String> resolveKoskiHakukohdeOidFilter(String koskiHakukohdeOiditString) {
@@ -41,30 +50,77 @@ public class KoskiService {
             return EXCLUDE_ALL;
         }
         if ("ALL".equals(koskiHakukohdeOiditString)) {
-            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan kaikille tiedot Koskesta.");
+            LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan tiedot Koskesta kaikille hakukohteille, " +
+                "joille löytyy Koski-dataa käyttäviä valintaperusteita.");
             return INCLUDE_ALL;
         }
         List<String> hakukohdeOids = Arrays.asList(koskiHakukohdeOiditString.split(","));
-        LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan Koskesta tiedot seuraaville hakukohteille: " + hakukohdeOids);
+        LOG.info("Saatiin '" + koskiHakukohdeOiditString + "' Koskesta haettaviksi hakukohdeoideiksi => haetaan Koskesta tiedot seuraaville hakukohteille: " +
+            hakukohdeOids + " , jos niistä löytyy Koski-dataa käyttäviä valintaperusteita.");
         return hakukohdeOids::contains;
     }
 
-    public CompletableFuture<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid, CompletableFuture<List<HakemusWrapper>> hakemukset) {
+    private Set<Funktionimi> resolveKoskenFunktionimet(String koskenFunktionimetString) {
+        if (StringUtils.isBlank(koskenFunktionimetString)) {
+            LOG.info("Saatiin '" + koskenFunktionimetString + "' funktionimiksi, joille haetaan dataa Koskesta => ei haeta ollenkaan tietoja Koskesta.");
+            return Collections.emptySet();
+        }
+        Set<Funktionimi> funktionimet = Arrays.stream(koskenFunktionimetString.split(","))
+            .map(Funktionimi::valueOf)
+            .collect(Collectors.toSet());
+        LOG.info("Saatiin '" + koskenFunktionimetString + "' funktionimiksi, joille haetaan dataa Koskesta => haetaan Koskesta tietoja vain hakukohteille, " +
+            "joiden valintaperusteissa käytetään seuraavannimisiä funktioita: " + funktionimet);
+        return funktionimet;
+    }
+
+    public CompletableFuture<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid,
+                                                                       CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet,
+                                                                       CompletableFuture<List<HakemusWrapper>> hakemukset) {
         if (koskiHakukohdeOidFilter.test(hakukohdeOid)) {
-            return hakemukset.thenComposeAsync(hakemusWrappers -> {
-                LOG.info(String.format("Haetaan Koskesta tiedot %d oppijalle hakukohteen %s laskemista varten.", hakemusWrappers.size(), hakukohdeOid));
-                List<String> oppijanumerot = hakemusWrappers.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
-                return koskiAsyncResource
-                    .findKoskiOppijat(oppijanumerot)
-                    .thenApplyAsync(koskioppijat -> {
-                        LOG.info(String.format("Saatiin Koskesta %s oppijan tiedot, kun haettiin %d oppijalle hakukohteen %s laskemista varten.",
-                            koskioppijat.size(), hakemusWrappers.size(), hakukohdeOid));
-                        return koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
-                    });
+            return CompletableFuture.allOf(valintaperusteet, hakemukset).thenComposeAsync(x -> {
+                Collection<HakemusWrapper> hakemusWrappers = hakemukset.join();
+                if (sisaltaaKoskiFunktioita(valintaperusteet.join())) {
+                    return haeKoskiOppijat(hakukohdeOid, hakemusWrappers);
+                } else {
+                    LOG.info("Ei haeta tietoja Koskesta hakukohteelle " + hakukohdeOid + " , koska siltä ei löydy Koski-tietoja käyttäviä valintaperusteita.");
+                    return CompletableFuture.completedFuture(Collections.emptyMap());
+                }
             });
         } else {
-            LOG.info("Ei haeta tietoja Koskesta hakukohteelle " + hakukohdeOid);
+            LOG.info("Ei haeta tietoja Koskesta hakukohteelle " + hakukohdeOid + " , koska sitä ei ole listattu Koski-hakua varten.");
             return CompletableFuture.completedFuture(Collections.emptyMap());
         }
+    }
+
+    private CompletionStage<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid, Collection<HakemusWrapper> hakemusWrappers) {
+        LOG.info(String.format("Haetaan Koskesta tiedot %d oppijalle hakukohteen %s laskemista varten.", hakemusWrappers.size(), hakukohdeOid));
+        List<String> oppijanumerot = hakemusWrappers.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
+        return koskiAsyncResource
+            .findKoskiOppijat(oppijanumerot)
+            .thenApplyAsync(koskioppijat -> {
+                LOG.info(String.format("Saatiin Koskesta %s oppijan tiedot, kun haettiin %d oppijalle hakukohteen %s laskemista varten.",
+                    koskioppijat.size(), hakemusWrappers.size(), hakukohdeOid));
+                return koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
+            });
+    }
+
+    private boolean sisaltaaKoskiFunktioita(List<ValintaperusteetDTO> valintaperusteet) {
+        if (koskenFunktionimet.isEmpty()) {
+            return false;
+        }
+        return valintaperusteet.stream()
+            .anyMatch(valintaperusteetDTO -> valintaperusteetDTO.getValinnanVaihe().getValintatapajono().stream()
+                .anyMatch(jono -> jono.getJarjestyskriteerit().stream()
+                    .anyMatch(kriteeri ->
+                        sisaltaaKoskiFunktioita(kriteeri.getFunktiokutsu()))));
+    }
+
+    private boolean sisaltaaKoskiFunktioita(ValintaperusteetFunktiokutsuDTO funktiokutsu) {
+        if (koskenFunktionimet.contains(funktiokutsu.getFunktionimi())) {
+            return true;
+        }
+        return funktiokutsu.getFunktioargumentit().stream()
+            .anyMatch(argumentti ->
+                sisaltaaKoskiFunktioita(argumentti.getFunktiokutsu()));
     }
 }

@@ -1,7 +1,19 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetJarjestyskriteeriDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
@@ -30,7 +42,11 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
-import fi.vm.sade.valinta.seuranta.dto.*;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusTyyppi;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import io.reactivex.Observable;
 import org.junit.Before;
@@ -44,12 +60,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 public class ValintalaskentaTest {
     private static final Hakemus hakemus = new Hakemus();
@@ -158,7 +168,7 @@ public class ValintalaskentaTest {
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle()).thenReturn(Observable.just(Optional.empty()));
-        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
@@ -183,7 +193,7 @@ public class ValintalaskentaTest {
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle()).thenReturn(Observable.just(Optional.empty()));
-        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
         when(valintalaskentaAsyncResource.laskeKaikki(any(LaskeDTO.class))).thenAnswer(invocationOnMock -> {
             LaskeDTO laskeDTO = invocationOnMock.getArgument(0);
             assertThat(laskeDTO.getHakemus(), hasSize(1));
@@ -215,7 +225,7 @@ public class ValintalaskentaTest {
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid2, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle()).thenReturn(Observable.just(Optional.empty()));
-        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, ataruHakuOid, false, null, null, ataruHakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
@@ -252,7 +262,7 @@ public class ValintalaskentaTest {
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde1Oid))).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde2Oid))).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(eq(hakukohde3Oid))).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
-        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, vaiheenNumero, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.VALINTARYHMA);
 
@@ -290,7 +300,7 @@ public class ValintalaskentaTest {
                 valintaperusteetWithValintatapajonoUsingValintalaskenta(false, true, valintatapajono3Oid)
         )));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(new HakuappHakemusWrapper(hakemus))));
-        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(
                 auditSession,
@@ -337,7 +347,7 @@ public class ValintalaskentaTest {
         )));
         when(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohde1Oid)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(
                 new HakuappHakemusWrapper(hakemus))));
-        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(
                 auditSession,
@@ -372,7 +382,7 @@ public class ValintalaskentaTest {
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.KESKEYTETTY, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
-        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, null, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 
@@ -396,7 +406,7 @@ public class ValintalaskentaTest {
         when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063"))));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid2, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid, HakukohdeTila.KESKEYTETTY, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
-        when(koskiService.haeKoskiOppijat(any(String.class), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
+        when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, ataruHakuOid, false, null, null, ataruHakukohdeJaOrganisaatios, LaskentaTyyppi.HAKUKOHDE);
 

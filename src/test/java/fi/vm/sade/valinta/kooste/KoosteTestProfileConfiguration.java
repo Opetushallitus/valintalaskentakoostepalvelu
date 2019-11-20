@@ -48,6 +48,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.koski.username", "koostepalvelu2koski");
         p0.setProperty("valintalaskentakoostepalvelu.koski.password", "secret");
         p0.setProperty("valintalaskentakoostepalvelu.koski.max.oppijat.post.size", "5000");
+        p0.setProperty("valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta", "HAEAMMATILLINENYTOARVOSANA,ONKOAMMATILLINENYTOARVIOINTIASTEIKKO,HAEAMMATILLINENYTOARVIOINTIASTEIKKO");
 
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://" + proxyServer + "/organisaatio-service/rest");

@@ -404,7 +404,7 @@ public class LaskentaActorFactory {
             : CompletableFuture.completedFuture(emptyList());
         CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOid = createResurssiFuture(tunniste,
             "koskiService.haeKoskiOppijat",
-            () -> koskiService.haeKoskiOppijat(hakukohdeOid, hakemukset));
+            () -> koskiService.haeKoskiOppijat(hakukohdeOid, valintaperusteet, hakemukset));
 
         LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
         return getLaskeDtoFuture(
