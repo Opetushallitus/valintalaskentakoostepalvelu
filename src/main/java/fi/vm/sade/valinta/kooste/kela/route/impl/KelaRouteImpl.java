@@ -457,11 +457,13 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         dokumenttiAsyncResource.tallenna(id,
                                 luontiJaDokumentti.getLuonti().isKkHaku() ? KelaUtil.createTiedostoNimiOuhare(new Date()) : KelaUtil.createTiedostoNimiYhva14(new Date()),
                                 expirationTime, tags,
-                                "application/octet-stream", filedata);
-
-                        luontiJaDokumentti.getLuonti().getProsessi().setDokumenttiId(id);
-                        luontiJaDokumentti.getLuonti().getProsessi().inkrementoiTehtyjaToita();
-                        LOG.info("DONE");
+                                "application/octet-stream", filedata).subscribe(
+                                        ok -> {
+                                            luontiJaDokumentti.getLuonti().getProsessi().setDokumenttiId(id);
+                                            luontiJaDokumentti.getLuonti().getProsessi().inkrementoiTehtyjaToita();
+                                            LOG.info("DONE");
+                                        }
+                        );
                     } catch (Exception e) {
                         luontiJaDokumentti
                                 .getLuonti()
