@@ -64,10 +64,11 @@ public class HttpClient {
                                          HttpRequest.BodyPublisher bodyPublisher,
                                          Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation,
                                          Function<HttpResponse<InputStream>, O> parseResponse) {
-        HttpRequest request = requestCustomisation.apply(HttpRequest.newBuilder(URI.create(url))
-            .header("Caller-Id", CALLER_ID)
-            .POST(bodyPublisher)
-            .timeout(timeout))
+        HttpRequest request = requestCustomisation.apply(
+            HttpRequest.newBuilder(URI.create(url))
+                .header("Caller-Id", CALLER_ID)
+                .POST(bodyPublisher)
+                .timeout(timeout))
             .build();
         return this.makeRequest(request).thenApply(parseResponse);
     }
@@ -101,13 +102,14 @@ public class HttpClient {
                                                Type inputType,
                                                Type outputType,
                                                Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
-        HttpRequest request = requestCustomisation.apply(HttpRequest.newBuilder(URI.create(url))
+        HttpRequest request = requestCustomisation.apply(
+            HttpRequest.newBuilder(URI.create(url))
                 .header("Caller-Id", CALLER_ID)
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), StandardCharsets.UTF_8))
                 .timeout(timeout))
-                .build();
+            .build();
         return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
     }
     public CompletableFuture<HttpResponse<InputStream>> putResponse(String url,
@@ -115,13 +117,14 @@ public class HttpClient {
                                                                     byte[] body,
                                                                     String contentType,
                                                                     Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
-        HttpRequest request = requestCustomisation.apply(HttpRequest.newBuilder(URI.create(url))
+        HttpRequest request = requestCustomisation.apply(
+            HttpRequest.newBuilder(URI.create(url))
                 .header("Caller-Id", CALLER_ID)
                 .header("Accept", "*/*")
                 .header("Content-Type", contentType)
                 .PUT(HttpRequest.BodyPublishers.ofByteArray(body))
                 .timeout(timeout))
-                .build();
+            .build();
         return this.makeRequest(request);
     }
 
