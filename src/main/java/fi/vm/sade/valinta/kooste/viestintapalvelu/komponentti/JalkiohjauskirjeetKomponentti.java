@@ -51,7 +51,8 @@ public class JalkiohjauskirjeetKomponentti {
             @Property("templateName") String templateName,
             @Property("sisalto") String sisalto,
             @Property("tag") String tag,
-            boolean sahkoinenKorkeakoulunMassaposti
+            boolean sahkoinenKorkeakoulunMassaposti,
+            List<ContentStructureType> sisaltotyypit
     ) {
         Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> postinumero = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
@@ -66,7 +67,8 @@ public class JalkiohjauskirjeetKomponentti {
                 templateName,
                 sisalto,
                 tag,
-                sahkoinenKorkeakoulunMassaposti
+                sahkoinenKorkeakoulunMassaposti,
+                sisaltotyypit
         );
     }
 
@@ -81,7 +83,8 @@ public class JalkiohjauskirjeetKomponentti {
             @Property("templateName") String templateName,
             @Property("sisalto") String sisalto,
             @Property("tag") String tag,
-            boolean sahkoinenKorkeakoulunMassaposti
+            boolean sahkoinenKorkeakoulunMassaposti,
+            List<ContentStructureType> sisaltotyypit
     ) {
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
@@ -144,7 +147,7 @@ public class JalkiohjauskirjeetKomponentti {
         LOG.info("Yritetään luoda viestintäpalvelulle jälkiohjauskirje-erä haulle {} asiointikielelä {}, jossa kirjeitä {} kappaletta!", hakuOid, preferoituKielikoodi, kirjeet.size());
         LetterBatch viesti = new LetterBatch(
                 kirjeet,
-                Collections.singletonList(ContentStructureType.letter)
+                sisaltotyypit
         );
         viesti.setApplicationPeriod(hakuOid);
         viesti.setFetchTarget(null);

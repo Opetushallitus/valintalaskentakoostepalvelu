@@ -167,7 +167,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hakijatF,
                             hakemuksetF,
                             jalkiohjauskirjeDTO,
-                            false
+                            false,
+                            Collections.singletonList(ContentStructureType.letter)
                     );
                 },
                 String.format("Aloitetaan jälkiohjauskirjeiden muodostaminen %d hakemukselle", hakemusOids.size()),
@@ -299,7 +300,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hakijatF,
                             hakemuksetF,
                             jalkiohjauskirjeDTO,
-                            true
+                            true,
+                            Arrays.asList(
+                                    ContentStructureType.letter,
+                                    ContentStructureType.accessibleHtml
+                            )
                     );
                 },
                 String.format("Aloitetaan haun %s jälkiohjauskirjeiden muodostaminen asiointikielelle %s", hakuOid, asiointikieli),
@@ -462,7 +467,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             CompletableFuture<List<HakijaDTO>> hakijatF,
             CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF,
             JalkiohjauskirjeDTO jalkiohjauskirjeDTO,
-            boolean sahkoinenKorkeakoulunMassaposti
+            boolean sahkoinenKorkeakoulunMassaposti,
+            List<ContentStructureType> sisaltotyypit
     ) {
         CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
         CompletableFuture<Map<String, Koodi>> maatjavaltiot1F = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
@@ -479,7 +485,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         jalkiohjauskirjeDTO.getTemplateName(),
                         jalkiohjauskirjeDTO.getSisalto(),
                         jalkiohjauskirjeDTO.getTag(),
-                        sahkoinenKorkeakoulunMassaposti))
+                        sahkoinenKorkeakoulunMassaposti,
+                        sisaltotyypit))
                 .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
     }
 
