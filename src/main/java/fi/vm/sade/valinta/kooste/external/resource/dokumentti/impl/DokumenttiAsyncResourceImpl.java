@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Component
 public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implements DokumenttiAsyncResource {
@@ -63,6 +64,14 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
                     client.accept(MediaType.WILDCARD_TYPE);
                     return client;
                 }
+        );
+    }
+
+    @Override
+    public Observable<Response> lataa(String documentId) {
+        return getAsObservableLazily(
+                getUrl("dokumenttipalvelu-service.dokumentit.lataa", documentId),
+                webClient -> webClient.accept(MediaType.WILDCARD_TYPE)
         );
     }
 }

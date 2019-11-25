@@ -1,12 +1,13 @@
 package fi.vm.sade.valinta.kooste.kela;
 
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaFtpRouteImpl;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
+import io.reactivex.Observable;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.Test;
@@ -43,23 +44,23 @@ public class KelaFtpRouteTest {
 	}
 
 	@Bean
-	public KelaFtpRouteImpl getKelaRouteImpl(DokumenttiResource dokumenttiResource) {
+	public KelaFtpRouteImpl getKelaRouteImpl(DokumenttiAsyncResource dokumenttiAsyncResource) {
 		/**
 		 * Ylikirjoitetaan kela-ftp endpoint logitusreitilla yksikkotestia
 		 * varten!
 		 */
-		return new KelaFtpRouteImpl(KELA_SIIRTO, FTP_MOCK, FTP_CONFIG, dokumenttiResource);
+		return new KelaFtpRouteImpl(KELA_SIIRTO, FTP_MOCK, FTP_CONFIG, dokumenttiAsyncResource);
 	}
 
 	@Bean
-	public DokumenttiResource mockDokumenttiResource() {
-		return mock(DokumenttiResource.class);
+	public DokumenttiAsyncResource mockDokumenttiAsyncResource() {
+		return mock(DokumenttiAsyncResource.class);
 	}
 
 	@Autowired
 	private KelaFtpRoute kelaFtpRoute;
 	@Autowired
-	private DokumenttiResource dokumenttiResource;
+	private DokumenttiAsyncResource dokumenttiAsyncResource;
 	@Autowired
 	private CamelContext context;
 	@Autowired
@@ -68,13 +69,12 @@ public class KelaFtpRouteTest {
 	@Test
 	public void testKelaFtpSiirto() {
 		String dokumenttiId = "dokumenttiId";
-		Mockito.when(dokumenttiResource.lataa(Mockito.anyString()))
-                .thenReturn(Response.ok().entity(new ByteArrayInputStream(dokumenttiId.getBytes())).build());
+		Mockito.when(dokumenttiAsyncResource.lataa(Mockito.anyString())).thenReturn(Observable.just(Response.ok().entity(new ByteArrayInputStream(dokumenttiId.getBytes())).build()));
 
 		kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
 
 		MockEndpoint resultEndpoint = context.getEndpoint(ftpRouteImpl.getFtpKelaSiirto(), MockEndpoint.class);
 		resultEndpoint.assertExchangeReceived(0).getIn(Response.class);
-		Mockito.verify(dokumenttiResource).lataa(Mockito.eq(dokumenttiId));
+		Mockito.verify(dokumenttiAsyncResource).lataa(Mockito.eq(dokumenttiId));
 	}
 }

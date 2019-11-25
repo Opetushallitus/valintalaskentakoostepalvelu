@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.kela.route.impl;
 
 import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_DOKUMENTTI_ID;
 
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
@@ -22,7 +23,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 
     private final String ftpKelaSiirto;
     private final String kelaSiirto;
-    private DokumenttiResource dokumenttiResource;
+    private DokumenttiAsyncResource dokumenttiAsyncResource;
 
     /**
      * @param host   esim ftp://user@host:port
@@ -33,10 +34,10 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
             @Value(KelaRoute.KELA_SIIRTO) String kelaSiirto,
             @Value("${kela.ftp.protocol}://${kela.ftp.username}@${kela.ftp.host}:${kela.ftp.port}${kela.ftp.path}") final String host,
             @Value("password=${kela.ftp.password}${kela.ftp.parameters}") final String params,
-            DokumenttiResource dokumenttiResource) {
+            DokumenttiAsyncResource dokumenttiAsyncResource) {
         this.kelaSiirto = kelaSiirto;
         this.ftpKelaSiirto = host + "?" + params;
-        this.dokumenttiResource = dokumenttiResource;
+        this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     }
 
     private String dokumenttiId(Exchange exchange) {
@@ -52,15 +53,19 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
                 // Hae dokumentti
                 .process(new Processor() {
                     public void process(Exchange exchange) throws Exception {
-                        Response response = dokumenttiResource.lataa(dokumenttiId(exchange));
-                        // Koitetaan parsia tiedostonimi, jolla tallennetaan Kelalle
-                        String headerValue = response.getHeaderString("Content-Disposition");
-                        if (headerValue != null && !headerValue.isEmpty()) {
-                            String fileName = headerValue.substring(headerValue.indexOf("\"") + 1, headerValue.lastIndexOf("\""));
-                            exchange.getOut().setHeader("CamelFileName", fileName);
-                            LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
-                        }
-                        exchange.getOut().setBody(response.getEntity());
+                        dokumenttiAsyncResource.lataa(dokumenttiId(exchange)).subscribe(
+                                response -> {
+                                    // Koitetaan parsia tiedostonimi, jolla tallennetaan Kelalle
+                                    String headerValue = response.getHeaderString("Content-Disposition");
+                                    if (headerValue != null && !headerValue.isEmpty()) {
+                                        String fileName = headerValue.substring(headerValue.indexOf("\"") + 1, headerValue.lastIndexOf("\""));
+                                        exchange.getOut().setHeader("CamelFileName", fileName);
+                                        LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
+                                    }
+                                    exchange.getOut().setBody(response.getEntity());
+                                }
+                        );
+
                     }
                 })
                         // FTP-SIIRTO
