@@ -186,7 +186,7 @@ public class ConverterMappingsTest {
 
         assertEquals(wrapper.getOid(), dto.getHakemusoid());
 
-        assertEquals(20, dto.getAvaimet().size());
+        assertEquals(28, dto.getAvaimet().size());
 
         assertEquals(1, dto.getHakukohteet().stream()
                 .filter(h -> "1.2.246.562.20.90242725084".equals(h.getOid()))
@@ -195,13 +195,34 @@ public class ConverterMappingsTest {
 
         assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
 
-        assertEquals("NOT_CHECKED", dto.getAvaimet().stream()
-                                        .filter(pari -> "preference1-Koulutus-id-eligibility".equals(pari.getAvain()))
-                                        .distinct().iterator().next().getArvo());
-
-        assertEquals("ELIGIBLE", dto.getAvaimet().stream()
-                .filter(pari -> "preference2-Koulutus-id-eligibility".equals(pari.getAvain()))
-                .distinct().iterator().next().getArvo());
+        assertAvainArvo(dto, "preference1-Koulutus-id-eligibility", "NOT_CHECKED");
+        assertAvainArvo(dto, "preference1-Koulutus-id-processingState", "UNPROCESSED");
+        assertAvainArvo(dto, "preference1-Koulutus-id-paymentObligation", "UNREVIEWED");
+        assertAvainArvo(dto, "preference1-Koulutus-id-languageRequirement", "UNREVIEWED");
+        assertAvainArvo(dto, "preference1-Koulutus-id-degreeRequirement", "FULFILLED");
+        assertAvainArvo(dto, "preference2-Koulutus-id-eligibility", "ELIGIBLE");
+        assertAvainArvo(dto, "preference2-Koulutus-id-processingState", "UNPROCESSED");
+        assertAvainArvo(dto, "preference2-Koulutus-id-paymentObligation", "UNREVIEWED");
+        assertAvainArvo(dto, "preference2-Koulutus-id-languageRequirement", "ELIGIBLE");
+        assertAvainArvo(dto, "preference2-Koulutus-id-degreeRequirement", "UNFULFILLED");
     }
 
+    private void assertAvainArvo(HakemusDTO hakemusDto, String expectedAvain, String expectedArvo) {
+        final List<AvainArvoDTO> avainArvoDtos = hakemusDto
+                .getAvaimet()
+                .stream()
+                .filter(avainArvo -> avainArvo.getAvain().equals(expectedAvain))
+                .distinct()
+                .collect(toList());
+        assertTrue("Expected to have AvainArvoDTO with avain " + expectedAvain + " but none found", avainArvoDtos.size() > 0);
+        assertEquals("HakemusDTO contained multiple AvainArvoDTOs with avain " + expectedAvain, 1, avainArvoDtos.size());
+
+        final AvainArvoDTO avainArvoDto = avainArvoDtos.get(0);
+        final String actualArvo = avainArvoDto.getArvo();
+        assertEquals(
+                "AvainArvoDTO with avain " + expectedAvain + " had invalid value, expected: " + expectedArvo + " but was: " + actualArvo,
+                expectedArvo,
+                actualArvo
+        );
+    }
 }

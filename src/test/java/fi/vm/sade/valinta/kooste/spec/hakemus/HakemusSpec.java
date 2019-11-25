@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.spec.hakemus;
 
 import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakutoive;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -14,6 +15,7 @@ import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Jussi Jartamo
@@ -137,7 +139,15 @@ public class HakemusSpec extends ConstantsSpec {
         }
 
         public AtaruHakemusBuilder setHakutoiveet(List<String> oids) {
-            hakemus.setHakutoiveet(oids);
+            hakemus.setHakutoiveet(
+                    oids
+                            .stream()
+                            .map(oid -> {
+                                AtaruHakutoive hakutoive = new AtaruHakutoive();
+                                hakutoive.setHakukohdeOid(oid);
+                                return hakutoive;
+                            })
+                            .collect(Collectors.toList()));
             return this;
         }
         public AtaruHakemusBuilder setMaksuvelvollisuus(Map<String, String> maksuvelvollisuus) {

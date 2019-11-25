@@ -1,12 +1,25 @@
 [
   {
     "hakutoiveet": [
-      "1.2.246.562.20.90242725084",
-      "1.2.246.562.20.38103650677"
+      {
+        "processingState": "unprocessed",
+        "eligibilityState": "unreviewed",
+        "paymentObligation": "unreviewed",
+        "hakukohdeOid": "1.2.246.562.20.90242725084",
+        "languageRequirement": "unreviewed",
+        "degreeRequirement": "fulfilled"
+      },
+      {
+        "processingState": "unprocessed",
+        "eligibilityState": "eligible",
+        "paymentObligation": "unreviewed",
+        "hakukohdeOid": "1.2.246.562.20.38103650677",
+        "languageRequirement": "eligible",
+        "degreeRequirement": "unfulfilled"
+      }
     ],
     "keyValues": {
       "birth-date": "02.02.2002",
-      "preference1-Koulutus-id-eligibility": "unreviewed",
       "first-name": "Zl2A5",
       "ssn": "020202A0202",
       "preferred-name": "Zl2A5",
@@ -14,11 +27,8 @@
       "postal-code": "00100",
       "gender": "2",
       "email": "ukhBW@example.com",
-      "preference2-Koulutus-id-eligibility": "eligible",
       "last-name": "TAUsuL4BQc",
-      "hakukohteet_2": "1.2.246.562.20.38103650677",
       "address": "k7FRNaRXLJvOnS7g7qfq",
-      "hakukohteet_1": "1.2.246.562.20.90242725084",
       "have-finnish-ssn": "true",
       "phone": "12345",
       "postal-office": "HELSINKI",
@@ -32,12 +42,25 @@
   },
   {
     "hakutoiveet": [
-      "1.2.246.562.20.90242725085",
-      "1.2.246.562.20.38103650678"
+      {
+        "processingState": "unprocessed",
+        "eligibilityState": "unreviewed",
+        "paymentObligation": "unreviewed",
+        "hakukohdeOid": "1.2.246.562.20.90242725084",
+        "languageRequirement": "unreviewed",
+        "degreeRequirement": "fulfilled"
+      },
+      {
+        "processingState": "unprocessed",
+        "eligibilityState": "eligible",
+        "paymentObligation": "unreviewed",
+        "hakukohdeOid": "1.2.246.562.20.38103650677",
+        "languageRequirement": "unfulfilled",
+        "degreeRequirement": "unfulfilled"
+      }
     ],
     "keyValues": {
       "birth-date": "02.02.2002",
-      "preference1-Koulutus-id-eligibility": "unreviewed",
       "first-name": "Zl2A5",
       "ssn": "020202A0202",
       "preferred-name": "Zl2A5",
@@ -45,11 +68,8 @@
       "postal-code": "00100",
       "gender": "2",
       "email": "ukhBW@example.com",
-      "preference2-Koulutus-id-eligibility": "eligible",
       "last-name": "TAUsuL4BQc",
-      "hakukohteet_2": "1.2.246.562.20.38103650677",
       "address": "k7FRNaRXLJvOnS7g7qfq",
-      "hakukohteet_1": "1.2.246.562.20.90242725084",
       "have-finnish-ssn": "true",
       "phone": "12345",
       "postal-office": "HELSINKI",
@@ -63,12 +83,25 @@
   },
   {
     "hakutoiveet": [
-      "1.2.246.562.20.90242725086",
-      "1.2.246.562.20.38103650679"
+      {
+        "processingState": "unprocessed",
+        "eligibilityState": "unreviewed",
+        "paymentObligation": "unreviewed",
+        "hakukohdeOid": "1.2.246.562.20.90242725084",
+        "languageRequirement": "unreviewed",
+        "degreeRequirement": "fulfilled"
+      },
+      {
+        "processingState": "unprocessed",
+        "eligibilityState": "eligible",
+        "paymentObligation": "unreviewed",
+        "hakukohdeOid": "1.2.246.562.20.38103650677",
+        "languageRequirement": "unreviewed",
+        "degreeRequirement": "unfulfilled"
+      }
     ],
     "keyValues": {
       "birth-date": "02.02.2002",
-      "preference1-Koulutus-id-eligibility": "unreviewed",
       "first-name": "Zl2A5",
       "ssn": "020202A0202",
       "preferred-name": "Zl2A5",
@@ -76,11 +109,8 @@
       "postal-code": "00100",
       "gender": "2",
       "email": "ukhBW@example.com",
-      "preference2-Koulutus-id-eligibility": "eligible",
       "last-name": "TAUsuL4BQc",
-      "hakukohteet_2": "1.2.246.562.20.38103650677",
       "address": "k7FRNaRXLJvOnS7g7qfq",
-      "hakukohteet_1": "1.2.246.562.20.90242725084",
       "have-finnish-ssn": "true",
       "phone": "12345",
       "postal-office": "HELSINKI",
