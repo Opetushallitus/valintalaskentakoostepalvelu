@@ -72,11 +72,12 @@
                         <groupId>org.springframework</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>io.swagger</groupId>
-                        <artifactId>swagger-jaxrs</artifactId>
-                    </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+              <groupId>io.swagger</groupId>
+              <artifactId>swagger-jaxrs</artifactId>
+              <version>1.5.21</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.tarjonta</groupId>
@@ -586,7 +587,6 @@
         <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>jsr311-api</artifactId>
@@ -595,10 +595,6 @@
                 <exclusion>
                     <artifactId>*</artifactId>
                     <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>swagger-jaxrs</artifactId>
-                    <groupId>io.swagger</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
