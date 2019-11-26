@@ -61,7 +61,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 
                     @Override
                     public boolean process(Exchange exchange, AsyncCallback callback) {
-                        dokumenttiAsyncResource.lataa(dokumenttiId(exchange)).whenComplete(
+                        dokumenttiAsyncResource.lataa(dokumenttiId(exchange)). whenComplete(
                                 (response, throwable) -> {
                                     // Koitetaan parsia tiedostonimi, jolla tallennetaan Kelalle
                                     String headerValue = response.headers().firstValue("Content-Disposition").get();
@@ -73,8 +73,8 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 
                                     }
                                     try {
-                                        ObjectInputStream objectInputStream = new ObjectInputStream(response.body());
-                                        exchange.getOut().setBody(objectInputStream.readObject());
+                                        //ObjectInputStream objectInputStream = new ObjectInputStream(response.body());
+                                        exchange.getOut().setBody(response.body().readAllBytes());
                                         callback.done(false);
                                     } catch (Exception e) {
                                         LOG.error("Kela-ftp siirron dokumentin haku epäonnistui " + dokumenttiId(exchange));
