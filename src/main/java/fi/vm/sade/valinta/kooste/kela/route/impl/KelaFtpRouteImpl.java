@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 
+import java.io.ObjectInputStream;
+
 @Component
 public class KelaFtpRouteImpl extends SpringRouteBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(KelaFtpRouteImpl.class);
@@ -62,7 +64,13 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
                                         exchange.getOut().setHeader("CamelFileName", fileName);
                                         LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
                                     }
-                                    exchange.getOut().setBody(response.body());
+                                    try {
+                                        ObjectInputStream objectInputStream = new ObjectInputStream(response.body());
+                                        exchange.getOut().setBody(objectInputStream.readObject());
+                                    } catch (Exception e) {
+                                        LOG.error("Kela-ftp siirron dokumentin haku epäonnistui " + dokumenttiId(exchange));
+                                    }
+
                                 }
                         );
                     }
