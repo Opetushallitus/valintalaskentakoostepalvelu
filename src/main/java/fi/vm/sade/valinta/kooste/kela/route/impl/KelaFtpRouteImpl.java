@@ -53,16 +53,16 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
                 // Hae dokumentti
                 .process(new Processor() {
                     public void process(Exchange exchange) throws Exception {
-                        dokumenttiAsyncResource.lataa(dokumenttiId(exchange)).subscribe(
-                                response -> {
+                        dokumenttiAsyncResource.lataa(dokumenttiId(exchange)).whenComplete(
+                                (response, throwable) -> {
                                     // Koitetaan parsia tiedostonimi, jolla tallennetaan Kelalle
-                                    String headerValue = response.getHeaderString("Content-Disposition");
+                                    String headerValue = response.headers().firstValue("Content-Disposition").get();
                                     if (headerValue != null && !headerValue.isEmpty()) {
                                         String fileName = headerValue.substring(headerValue.indexOf("\"") + 1, headerValue.lastIndexOf("\""));
                                         exchange.getOut().setHeader("CamelFileName", fileName);
                                         LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
                                     }
-                                    exchange.getOut().setBody(response.getEntity());
+                                    exchange.getOut().setBody(response.body());
                                 }
                         );
                     }

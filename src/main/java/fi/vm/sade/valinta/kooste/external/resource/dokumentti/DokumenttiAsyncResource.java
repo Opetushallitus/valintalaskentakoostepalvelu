@@ -4,6 +4,7 @@ import io.reactivex.Observable;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -13,5 +14,5 @@ public interface DokumenttiAsyncResource {
 
     Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata);
 
-    Observable<Response> lataa(String documentId);
+    CompletableFuture<HttpResponse<InputStream>> lataa(String documentId);
 }

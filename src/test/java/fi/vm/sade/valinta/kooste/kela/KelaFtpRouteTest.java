@@ -22,6 +22,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Mockito.mock;
 
@@ -69,7 +71,9 @@ public class KelaFtpRouteTest {
 	@Test
 	public void testKelaFtpSiirto() {
 		String dokumenttiId = "dokumenttiId";
-		Mockito.when(dokumenttiAsyncResource.lataa(Mockito.anyString())).thenReturn(Observable.just(Response.ok().entity(new ByteArrayInputStream(dokumenttiId.getBytes())).build()));
+		ByteArrayInputStream inputStream =  new ByteArrayInputStream(dokumenttiId.getBytes());
+		CompletableFuture response = CompletableFuture.completedFuture(inputStream);
+		Mockito.when(dokumenttiAsyncResource.lataa(Mockito.anyString())).thenReturn(response);
 
 		kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
 
