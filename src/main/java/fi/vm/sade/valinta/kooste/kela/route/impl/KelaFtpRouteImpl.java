@@ -65,7 +65,6 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
                                     exchange.getOut().setBody(response.getEntity());
                                 }
                         );
-
                     }
                 })
                         // FTP-SIIRTO

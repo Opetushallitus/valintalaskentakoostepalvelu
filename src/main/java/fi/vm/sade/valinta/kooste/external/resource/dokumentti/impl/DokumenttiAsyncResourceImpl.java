@@ -71,7 +71,10 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
     public Observable<Response> lataa(String documentId) {
         return getAsObservableLazily(
                 getUrl("dokumenttipalvelu-service.dokumentit.lataa", documentId),
-                webClient -> webClient.accept(MediaType.WILDCARD_TYPE)
+                client -> {
+                    client.accept(MediaType.WILDCARD_TYPE);
+                    return client;
+                }
         );
     }
 }
