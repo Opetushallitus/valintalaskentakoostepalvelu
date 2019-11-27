@@ -19,7 +19,9 @@ import javax.ws.rs.core.Response;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.Reader;
 
 @Component
 public class KelaFtpRouteImpl extends SpringRouteBuilder {
@@ -61,7 +63,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 
                     @Override
                     public boolean process(Exchange exchange, AsyncCallback callback) {
-                        dokumenttiAsyncResource.lataa(dokumenttiId(exchange)). whenComplete(
+                        dokumenttiAsyncResource.lataa(dokumenttiId(exchange)).whenComplete(
                                 (response, throwable) -> {
                                     // Koitetaan parsia tiedostonimi, jolla tallennetaan Kelalle
                                     String headerValue = response.headers().firstValue("Content-Disposition").get();
@@ -69,18 +71,15 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
                                         String fileName = headerValue.substring(headerValue.indexOf("\"") + 1, headerValue.lastIndexOf("\""));
                                         exchange.getOut().setHeader("CamelFileName", fileName);
                                         LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
-
-
                                     }
                                     try {
-                                        //ObjectInputStream objectInputStream = new ObjectInputStream(response.body());
-                                        exchange.getOut().setBody(response.body().readAllBytes());
+                                        Reader reader = new InputStreamReader(response.body());
+                                        exchange.getOut().setBody(reader);
                                         callback.done(false);
                                     } catch (Exception e) {
                                         LOG.error("Kela-ftp siirron dokumentin haku epäonnistui " + dokumenttiId(exchange));
                                         callback.done(false);
                                     }
-
                                 }
                         );
                         return true;
