@@ -6,7 +6,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
@@ -17,6 +16,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -24,50 +24,17 @@ import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class JalkiohjauskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(JalkiohjauskirjeetKomponentti.class);
-
-    private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-
-    @Autowired
-    public JalkiohjauskirjeetKomponentti(KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
-        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-    }
-
-    public LetterBatch teeJalkiohjauskirjeet(
-            String ylikirjoitettuPreferoitukielikoodi,
-            @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
-            final Collection<HakemusWrapper> hakemukset,
-            final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
-            @Simple("${property.hakuOid}") String hakuOid,
-            @Property("templateName") String templateName,
-            @Property("sisalto") String sisalto,
-            @Property("tag") String tag,
-            boolean sahkoinenKorkeakoulunMassaposti
-    ) {
-        Map<String, Koodi> maatjavaltiot1 = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> postinumero = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
-        return teeJalkiohjauskirjeet(
-                maatjavaltiot1,
-                postinumero,
-                ylikirjoitettuPreferoitukielikoodi,
-                hyvaksymattomatHakijat,
-                hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)),
-                jalkiohjauskirjeessaKaytetytHakukohteet,
-                hakuOid,
-                templateName,
-                sisalto,
-                tag,
-                sahkoinenKorkeakoulunMassaposti
-        );
-    }
 
     public static LetterBatch teeJalkiohjauskirjeet(
             Map<String, Koodi> maatjavaltiot1,
@@ -80,7 +47,8 @@ public class JalkiohjauskirjeetKomponentti {
             @Property("templateName") String templateName,
             @Property("sisalto") String sisalto,
             @Property("tag") String tag,
-            boolean sahkoinenKorkeakoulunMassaposti
+            boolean sahkoinenKorkeakoulunMassaposti,
+            List<ContentStructureType> sisaltotyypit
     ) {
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
@@ -141,7 +109,10 @@ public class JalkiohjauskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintäpalvelulle jälkiohjauskirje-erä haulle {} asiointikielelä {}, jossa kirjeitä {} kappaletta!", hakuOid, preferoituKielikoodi, kirjeet.size());
-        LetterBatch viesti = new LetterBatch(kirjeet);
+        LetterBatch viesti = new LetterBatch(
+                kirjeet,
+                sisaltotyypit
+        );
         viesti.setApplicationPeriod(hakuOid);
         viesti.setFetchTarget(null);
         viesti.setLanguageCode(preferoituKielikoodi);

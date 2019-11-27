@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.NimiJaOpetuskieli;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -118,7 +119,10 @@ public class KoekutsukirjeetKomponentti {
                 kirjeet.add(new Letter(addressLabel, templateName, opetuskieli, replacements, hakemus.getSahkopostiOsoite()));
             }
             LOG.info("Luodaan koekutsukirjeet {} henkilolle", kirjeet.size());
-            LetterBatch viesti = new LetterBatch(kirjeet);
+            LetterBatch viesti = new LetterBatch(
+                    kirjeet,
+                    Collections.singletonList(ContentStructureType.letter)
+            );
             viesti.setApplicationPeriod(hakuOid);
             viesti.setFetchTarget(hakukohdeOid);
             viesti.setLanguageCode(opetuskieli);

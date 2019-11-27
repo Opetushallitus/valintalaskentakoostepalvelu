@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -54,13 +56,17 @@ public class HyvaksymiskirjeetKomponentti {
             String templateName,
             String palautusPvm,
             String palautusAika,
-            boolean sahkoinenKorkeakoulunMassaposti) {
+            boolean sahkoinenKorkeakoulunMassaposti,
+            List<ContentStructureType> sisaltotyypit) {
         try {
             assert (hakuOid != null);
             int kaikkiHyvaksytyt = hakukohteenHakijat.size();
             LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true.", kaikkiHyvaksytyt);
             final List<Letter> kirjeet = new ArrayList<>();
-            LetterBatch viesti = new LetterBatch(kirjeet);
+            LetterBatch viesti = new LetterBatch(
+                    kirjeet,
+                    sisaltotyypit
+            );
             asiointikieli.ifPresent(viesti::setLanguageCode);
             int count = 0;
             for (HakijaDTO hakija : hakukohteenHakijat) {
