@@ -130,7 +130,10 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
     @Override
     public Integer getHakutoiveenPrioriteetti(String hakukohdeOid) {
-        int i = hakemus.getHakutoiveet().indexOf(hakukohdeOid);
+        int i = hakemus.getHakutoiveet().stream()
+                .map(ht -> ht.getHakukohdeOid())
+                .collect(Collectors.toList())
+                .indexOf(hakukohdeOid);
         return i < 0 ? null : i + 1;
     }
 
