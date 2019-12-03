@@ -53,7 +53,7 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
 
     @Override
     public Boolean aloitaKelaSiirto(String dokumenttiId) throws InterruptedException, ExecutionException, TimeoutException {
-        Boolean done = dokumenttiAsyncResource.lataa(dokumenttiId)
+        return dokumenttiAsyncResource.lataa(dokumenttiId)
                 .thenApplyAsync(response -> {
             ChannelSftp channelSftp = new ChannelSftp();
             try {
@@ -77,14 +77,13 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
                 LOG.info("Kela-ftp siirto suoritettiin onnistuneesti. Dokumentti-id: " + dokumenttiId + ", tiedostonimi: " + fileName);
                 return true;
             } catch (Exception e) {
-                LOG.error("Kela-ftp siirron dokumentin haku epäonnistui dokumentille: " + dokumenttiId);
-                LOG.error(e.getStackTrace().toString());
+                LOG.error("Kela-ftp siirron dokumentin haku epäonnistui dokumentille: " + dokumenttiId + " Syy: ", e);
                 return false;
             } finally {
                 channelSftp.disconnect();
                 channelSftp.exit();
             }
         }).get(1, TimeUnit.HOURS);
-        return done;
+
     }
 }
