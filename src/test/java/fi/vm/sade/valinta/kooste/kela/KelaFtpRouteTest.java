@@ -1,84 +1,83 @@
 package fi.vm.sade.valinta.kooste.kela;
 
+import com.jcraft.jsch.JSchException;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
-import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
+import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl.DokumenttiAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaFtpRouteImpl;
+import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
-import io.reactivex.Observable;
-import org.apache.camel.CamelContext;
-import org.apache.camel.component.mock.MockEndpoint;
+
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnInputStreamAndHeaders;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static javax.ws.rs.HttpMethod.GET;
+
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.concurrent.CompletableFuture;
-
-import static org.mockito.Mockito.mock;
 
 @Configuration
 @ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class, KelaFtpRouteTest.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class KelaFtpRouteTest {
-	private static final String FTP_MOCK = "mock:ftpMock";
-	private static final String FTP_CONFIG = "retainFirst=1";
-	private static final String KELA_SIIRTO = "direct:kela_siirto";
+	private String HOST = "ftp://testikela.fi";
+	private String PORT = "22";
+	private String PATH = "/tmp";
+	private String USERNAME = "test";
+	private String PASSWORD = "Testi123";
+
+	private HttpClient client = new HttpClient(
+			java.net.http.HttpClient.newBuilder().build(),
+			null,
+			DateDeserializer.gsonBuilder().create()
+	);
+
+	private DokumenttiAsyncResource dokumenttiAsyncResource = new DokumenttiAsyncResourceImpl(client);
+	private KelaFtpRoute kelaFtpRoute = new KelaFtpRouteImpl(HOST, PORT, PATH, USERNAME, PASSWORD, dokumenttiAsyncResource);
 
 	@Bean(name = "kelaValvomo")
 	public ValvomoServiceImpl<KelaProsessi> getValvomoServiceImpl() {
 		return new ValvomoServiceImpl<>();
 	}
 
-	@Bean
-	public KelaFtpRoute getKelaFtpRoute(@Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-		return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(KELA_SIIRTO), KelaFtpRoute.class);
+	@Before
+	public void init() {
+		startShared();
+		MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
 	}
-
-	@Bean
-	public KelaFtpRouteImpl getKelaRouteImpl(DokumenttiAsyncResource dokumenttiAsyncResource) {
-		/**
-		 * Ylikirjoitetaan kela-ftp endpoint logitusreitilla yksikkotestia
-		 * varten!
-		 */
-		return new KelaFtpRouteImpl(KELA_SIIRTO, FTP_MOCK, FTP_CONFIG, dokumenttiAsyncResource);
-	}
-
-	@Bean
-	public DokumenttiAsyncResource mockDokumenttiAsyncResource() {
-		return mock(DokumenttiAsyncResource.class);
-	}
-
-	@Autowired
-	private KelaFtpRoute kelaFtpRoute;
-	@Autowired
-	private DokumenttiAsyncResource dokumenttiAsyncResource;
-	@Autowired
-	private CamelContext context;
-	@Autowired
-	private KelaFtpRouteImpl ftpRouteImpl;
 
 	@Test
-	public void testKelaFtpSiirto() {
+	public void testKelaFtpSiirto() throws JSchException {
 		String dokumenttiId = "dokumenttiId";
-		ByteArrayInputStream inputStream =  new ByteArrayInputStream(dokumenttiId.getBytes());
-		CompletableFuture response = CompletableFuture.completedFuture(inputStream);
-		Mockito.when(dokumenttiAsyncResource.lataa(Mockito.anyString())).thenReturn(response);
+		InputStream inputStream =  new ByteArrayInputStream(dokumenttiId.getBytes());
+		//JSch jSch = mock(JSch.class);
+		//Session session = mock(Session.class);
+		//ChannelSftp sftp = mock(ChannelSftp.class);
+		//HttpClient client = mock(HttpClient.class);
 
-		kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
+		mockToReturnInputStreamAndHeaders(GET, "/dokumenttipalvelu-service/resources/dokumentit/lataa/.*", dokumenttiId, inputStream);
+		Boolean done;
 
-		MockEndpoint resultEndpoint = context.getEndpoint(ftpRouteImpl.getFtpKelaSiirto(), MockEndpoint.class);
-		resultEndpoint.assertExchangeReceived(0).getIn(Response.class);
-		Mockito.verify(dokumenttiAsyncResource).lataa(Mockito.eq(dokumenttiId));
+		try {
+			done = kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			done = false;
+		}
+		//TODO: mock ftp server and check that file has "really" been transformed.
+		//assert done;
 	}
 }

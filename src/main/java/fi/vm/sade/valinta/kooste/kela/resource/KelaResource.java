@@ -96,7 +96,12 @@ public class KelaResource {
         LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
         AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.KELA_VASTAANOTTO_EXPORT_LATAUS_FTP,
                 ValintaResource.DOKUMENTTI, documentId, Changes.EMPTY);
-        kelaFtpRoute.aloitaKelaSiirto(documentId);
-        return Response.ok().build();
+        try {
+            kelaFtpRoute.aloitaKelaSiirto(documentId);
+            return Response.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().build();
+        }
     }
 }
