@@ -29,10 +29,10 @@ public class KelaRouteConfig {
         return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(kelaluonti), KelaRoute.class);
     }
 
-    @Bean
+   /* @Bean
     public KelaFtpRoute getKelaFtpRoute(
             @Value(KelaRoute.KELA_SIIRTO) String kelasiirto,
             @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
         return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(kelasiirto), KelaFtpRoute.class);
-    }
+    }*/
 }

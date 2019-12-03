@@ -33,7 +33,7 @@ public interface KelaRoute {
     /**
      * Camel route description.
      */
-    final String KELA_SIIRTO = "direct:kela_siirto";
+    //final String KELA_SIIRTO = "direct:kela_siirto";
 
     // jos palvelin sammuu niin ei suorita loppuun tyojonoa
     // "purgeWhenStopping=true" +
