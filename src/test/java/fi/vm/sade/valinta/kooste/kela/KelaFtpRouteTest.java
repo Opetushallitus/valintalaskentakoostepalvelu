@@ -18,6 +18,7 @@ import static javax.ws.rs.HttpMethod.GET;
 
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,7 @@ public class KelaFtpRouteTest {
 		MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
 	}
 
+	@Ignore
 	@Test
 	public void testKelaFtpSiirto() throws JSchException {
 		String dokumenttiId = "dokumenttiId";

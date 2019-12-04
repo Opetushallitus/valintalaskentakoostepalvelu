@@ -63,7 +63,7 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
             try {
                 channelSftp = setupJsch();
                 channelSftp.connect();
-                InputStream kelaData = response.body();
+                byte[] kelaData = response.body().readAllBytes();
                 // Parsitaan tiedostonimi, jos ei löydy, käytetään oletusnimeä:
                 String headerValue = response.headers().firstValue("Content-Disposition").orElse("");
                 String fileName = "";
@@ -76,7 +76,8 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
                 }
 
                 LOG.debug("Aloitetaan Kela-ftpsiirto dokumentille: " + fileName);
-                channelSftp.put(kelaData, path + fileName);
+                channelSftp.cd(path);
+                channelSftp.put(new ByteArrayInputStream(kelaData), fileName);
 
                 LOG.info("Kela-ftp siirto suoritettiin onnistuneesti. Dokumentti-id: " + dokumenttiId + ", tiedostonimi: " + fileName);
                 return true;
@@ -86,6 +87,7 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
             } finally {
                 channelSftp.disconnect();
                 channelSftp.exit();
+                LOG.info("Kela-ftp yhteys suljettu.");
             }
         }).get(1, TimeUnit.HOURS);
     }
