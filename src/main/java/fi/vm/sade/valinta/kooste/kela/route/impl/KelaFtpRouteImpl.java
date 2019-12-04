@@ -47,6 +47,11 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
        JSch jsch = new JSch();
        Session jschSession = jsch.getSession(userName, host, port);
        jschSession.setPassword(passWord);
+
+       java.util.Properties config = new java.util.Properties();
+       config.put("StrictHostKeyChecking", "no");
+       jschSession.setConfig(config);
+
        jschSession.connect();
        return (ChannelSftp) jschSession.openChannel("sftp");
     }
