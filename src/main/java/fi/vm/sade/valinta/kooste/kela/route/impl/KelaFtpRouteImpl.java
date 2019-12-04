@@ -58,8 +58,7 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
 
     @Override
     public Boolean aloitaKelaSiirto(String dokumenttiId) throws InterruptedException, ExecutionException, TimeoutException {
-        return dokumenttiAsyncResource.lataa(dokumenttiId)
-                .thenApplyAsync(response -> {
+        return dokumenttiAsyncResource.lataa(dokumenttiId).thenApplyAsync(response -> {
             ChannelSftp channelSftp = new ChannelSftp();
             try {
                 channelSftp = setupJsch();
@@ -89,6 +88,5 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
                 channelSftp.exit();
             }
         }).get(1, TimeUnit.HOURS);
-
     }
 }

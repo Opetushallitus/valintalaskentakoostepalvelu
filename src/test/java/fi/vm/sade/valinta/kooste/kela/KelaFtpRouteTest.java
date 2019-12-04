@@ -62,10 +62,6 @@ public class KelaFtpRouteTest {
 	public void testKelaFtpSiirto() throws JSchException {
 		String dokumenttiId = "dokumenttiId";
 		InputStream inputStream =  new ByteArrayInputStream(dokumenttiId.getBytes());
-		//JSch jSch = mock(JSch.class);
-		//Session session = mock(Session.class);
-		//ChannelSftp sftp = mock(ChannelSftp.class);
-		//HttpClient client = mock(HttpClient.class);
 
 		mockToReturnInputStreamAndHeaders(GET, "/dokumenttipalvelu-service/resources/dokumentit/lataa/.*", dokumenttiId, inputStream);
 		Boolean done;

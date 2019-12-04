@@ -100,7 +100,7 @@ public class KelaResource {
             kelaFtpRoute.aloitaKelaSiirto(documentId);
             return Response.ok().build();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Kela-dokumentin siirto dokumentille: " + documentId + " epäonnistui.", e);
             return Response.serverError().build();
         }
     }
