@@ -14,6 +14,7 @@
         <auditlog.api.version>8.3.0-SNAPSHOT</auditlog.api.version>
         <camel.version>2.12.1</camel.version>
         <jsch.version>0.1.55</jsch.version>
+        <fake-sftp-server-rule.version>2.0.1</fake-sftp-server-rule.version>
         <cxf.version>3.3.2</cxf.version>
         <fasterxml.jackson.version>2.9.5</fasterxml.jackson.version>
         <jetty.version>9.4.15.v20190215</jetty.version>
@@ -752,6 +753,11 @@
             <artifactId>camel-test</artifactId>
             <version>${camel.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.stefanbirkner</groupId>
+            <artifactId>fake-sftp-server-rule</artifactId>
+            <version>${fake-sftp-server-rule.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade</groupId>

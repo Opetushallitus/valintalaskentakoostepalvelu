@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.kela;
 
+import com.github.stefanbirkner.fakesftpserver.rule.FakeSftpServerRule;
 import com.jcraft.jsch.JSchException;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
@@ -17,9 +18,7 @@ import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startS
 import static javax.ws.rs.HttpMethod.GET;
 
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,16 +27,22 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 @ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class, KelaFtpRouteTest.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class KelaFtpRouteTest {
-	private String HOST = "ftp://testikela.fi";
-	private String PORT = "22";
+	private String HOST = "localhost";
+	private String PORT = "1234";
 	private String PATH = "/tmp";
 	private String USERNAME = "test";
 	private String PASSWORD = "Testi123";
+
+	@Rule
+	public final FakeSftpServerRule sftpServer = new FakeSftpServerRule()
+			.setPort(Integer.parseInt(PORT))
+			.addUser(USERNAME, PASSWORD);
 
 	private HttpClient client = new HttpClient(
 			java.net.http.HttpClient.newBuilder().build(),
@@ -59,23 +64,29 @@ public class KelaFtpRouteTest {
 		MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
 	}
 
-	@Ignore
 	@Test
-	public void testKelaFtpSiirto() throws JSchException {
+	public void testKelaFtpSiirto() {
 		String dokumenttiId = "dokumenttiId";
-		InputStream inputStream =  new ByteArrayInputStream(dokumenttiId.getBytes());
 
-		mockToReturnInputStreamAndHeaders(GET, "/dokumenttipalvelu-service/resources/dokumentit/lataa/.*", dokumenttiId, inputStream);
+        byte[] bytes = dokumenttiId.getBytes();
+        mockToReturnInputStreamAndHeaders(GET, "/dokumenttipalvelu-service/resources/dokumentit/lataa/.*", "kela.txt", bytes);
 		Boolean done;
 
 		try {
+			sftpServer.createDirectory(PATH);
+			assert !sftpServer.existsFile("/tmp/kela.txt");
 			done = kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
+			assert sftpServer.existsFile("/tmp/kela.txt");
+            String uploaded = sftpServer.getFileContent("/tmp/kela.txt", StandardCharsets.UTF_8);
 
+            String expected = new String(bytes, StandardCharsets.UTF_8);
+            String actual = uploaded;
+
+            Assert.assertEquals(expected, actual);
 		} catch (Exception e) {
 			e.printStackTrace();
 			done = false;
 		}
-		//TODO: mock ftp server and check that file has "really" been transformed.
-		//assert done;
+		assert done;
 	}
 }

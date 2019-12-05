@@ -11,6 +11,7 @@ import org.mockserver.model.RegexBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Date;
@@ -127,21 +128,21 @@ public class Integraatiopalvelimet {
                                 .withBody(r)
                 );
     }
-    private static void mockToReturnInputStreamValueAndHeaders(String method, String p, String n, InputStream r) {
-        mockServer
-                .when(
-                        request()
-                                .withMethod(method)
-                                .withPath(p)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withHeaders(
-                                        new org.mockserver.model.Header("Content-Disposition", "attachment; filename=\"" + n + "\"")
-                                )
-                                .withBody(String.valueOf(r))
-                );
+    private static void mockToReturnInputStreamValueAndHeaders(String method, String p, String n, byte[] r) {
+            mockServer
+                    .when(
+                            request()
+                                    .withMethod(method)
+                                    .withPath(p)
+                    )
+                    .respond(
+                            response()
+                                    .withStatusCode(200)
+                                    .withHeaders(
+                                            new org.mockserver.model.Header("Content-Disposition", "attachment; filename=\"" + n + "\"")
+                                    )
+                                    .withBody(r)
+                    );
     }
     public static void mockToNoContent(String method, String p) {
         mockServer
@@ -215,7 +216,7 @@ public class Integraatiopalvelimet {
         mockToReturnValueAndCheckBody(method, p, s = gson().toJson(r), regex);
         LOG.debug(s);
     }
-    public static void mockToReturnInputStreamAndHeaders(String method, String p, String n, InputStream r) {
+    public static void mockToReturnInputStreamAndHeaders(String method, String p, String n, byte[] r) {
         mockToReturnInputStreamValueAndHeaders(method, p, n, r);
         LOG.debug(n);
     }
