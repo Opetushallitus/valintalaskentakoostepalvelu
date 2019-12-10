@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 public class KoskiServiceTest {
     private static final Gson GSON = new Gson();
-    private final String koskifuntionimet = "HAEAMMATILLINENYTOARVOSANA,ONKOAMMATILLINENYTOARVIOINTIASTEIKKO,HAEAMMATILLINENYTOARVIOINTIASTEIKKO";
+    private final String koskifuntionimet = "HAEAMMATILLINENYTOARVOSANA,HAEAMMATILLINENYTOARVIOINTIASTEIKKO";
 
     private CompletableFuture<List<ValintaperusteetDTO>> koskiFunktionSisaltavaValintaperuste = luoKoskifunktionSisaltavaValintaperuste();
     private CompletableFuture<List<ValintaperusteetDTO>> kosketonValintaperuste = luoKosketonValintaperuste();
