@@ -33,17 +33,6 @@ public interface KelaRoute {
     /**
      * Camel route description.
      */
-    final String KELA_SIIRTO = "direct:kela_siirto";
-
-    // jos palvelin sammuu niin ei suorita loppuun tyojonoa
-    // "purgeWhenStopping=true" +
-    // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
-    // "&waitForTaskToComplete=Never" +
-    // tyojonossa on yksi tyostaja
-    // "&concurrentConsumers=1";
-    /**
-     * Camel route description.
-     */
     final String DIRECT_KELA_FAILED = "direct:kela_failed";
     /**
      * Property hakuOid

@@ -4,6 +4,8 @@ import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import io.reactivex.Observable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -14,14 +16,17 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Component
 public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implements DokumenttiAsyncResource {
+    private static final Logger LOG = LoggerFactory.getLogger(DokumenttiAsyncResourceImpl.class);
     private final HttpClient client;
 
     @Autowired
@@ -64,5 +69,18 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
                     return client;
                 }
         );
+    }
+
+    @Override
+    public CompletableFuture<HttpResponse<InputStream>> lataa(String documentId) {
+        return this.client.getResponse(
+                getUrl("dokumenttipalvelu-service.dokumentit.lataa", documentId),
+                Duration.ofMinutes(1)
+        ).thenApply(response -> {
+            if (response.statusCode() == 404) {
+                LOG.error("Dokumentin " + documentId + " lataus dokumenttipalvelusta epäonnistui.");
+            }
+            return response;
+        });
     }
 }

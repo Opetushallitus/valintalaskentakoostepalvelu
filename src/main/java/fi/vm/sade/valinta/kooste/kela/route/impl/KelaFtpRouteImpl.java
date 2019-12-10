@@ -1,80 +1,94 @@
 package fi.vm.sade.valinta.kooste.kela.route.impl;
 
-import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_DOKUMENTTI_ID;
-
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.apache.camel.spring.SpringRouteBuilder;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.core.Response;
-
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
-import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
+import java.io.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Component
-public class KelaFtpRouteImpl extends SpringRouteBuilder {
+public class KelaFtpRouteImpl implements KelaFtpRoute {
     private static final Logger LOG = LoggerFactory.getLogger(KelaFtpRouteImpl.class);
+    private DokumenttiAsyncResource dokumenttiAsyncResource;
+    private String host;
+    private int port;
+    private String path;
+    private String userName;
+    private String passWord;
 
-    private final String ftpKelaSiirto;
-    private final String kelaSiirto;
-    private DokumenttiResource dokumenttiResource;
-
-    /**
-     * @param host   esim ftp://user@host:port
-     * @param params esim passiveMode=true&password=...
-     */
     @Autowired
-    public KelaFtpRouteImpl(
-            @Value(KelaRoute.KELA_SIIRTO) String kelaSiirto,
-            @Value("${kela.ftp.protocol}://${kela.ftp.username}@${kela.ftp.host}:${kela.ftp.port}${kela.ftp.path}") final String host,
-            @Value("password=${kela.ftp.password}${kela.ftp.parameters}") final String params,
-            DokumenttiResource dokumenttiResource) {
-        this.kelaSiirto = kelaSiirto;
-        this.ftpKelaSiirto = host + "?" + params;
-        this.dokumenttiResource = dokumenttiResource;
+    public KelaFtpRouteImpl (
+            @Value("${kela.ftp.host}") final String host,
+            @Value("${kela.ftp.port}") final String port,
+            @Value("${kela.ftp.path}") final String path,
+            @Value("${kela.ftp.username}") final String userName,
+            @Value("${kela.ftp.password}") final String passWord,
+            DokumenttiAsyncResource dokumenttiAsyncResource) {
+        this.dokumenttiAsyncResource = dokumenttiAsyncResource;
+        this.host = host;
+        this.port = Integer.parseInt(port);
+        this.path = path;
+        this.userName = userName;
+        this.passWord = passWord;
     }
 
-    private String dokumenttiId(Exchange exchange) {
-        return exchange.getProperty(PROPERTY_DOKUMENTTI_ID, String.class);
+    private ChannelSftp setupJsch() throws JSchException {
+       JSch jsch = new JSch();
+       Session jschSession = jsch.getSession(userName, host, port);
+       jschSession.setPassword(passWord);
+
+       java.util.Properties config = new java.util.Properties();
+       config.put("StrictHostKeyChecking", "no");
+       jschSession.setConfig(config);
+
+       jschSession.connect();
+       return (ChannelSftp) jschSession.openChannel("sftp");
     }
 
     @Override
-    public void configure() throws Exception {
-        /**
-         * Kela-dokkarin siirto ftp:lla Kelalle
-         */
-        from(kelaSiirto)
-                // Hae dokumentti
-                .process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        Response response = dokumenttiResource.lataa(dokumenttiId(exchange));
-                        // Koitetaan parsia tiedostonimi, jolla tallennetaan Kelalle
-                        String headerValue = response.getHeaderString("Content-Disposition");
-                        if (headerValue != null && !headerValue.isEmpty()) {
-                            String fileName = headerValue.substring(headerValue.indexOf("\"") + 1, headerValue.lastIndexOf("\""));
-                            exchange.getOut().setHeader("CamelFileName", fileName);
-                            LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
-                        }
-                        exchange.getOut().setBody(response.getEntity());
-                    }
-                })
-                        // FTP-SIIRTO
-                .to(ftpKelaSiirto());
-    }
+    public Boolean aloitaKelaSiirto(String dokumenttiId) throws InterruptedException, ExecutionException, TimeoutException {
+        return dokumenttiAsyncResource.lataa(dokumenttiId).thenApplyAsync(response -> {
+            ChannelSftp channelSftp = new ChannelSftp();
+            try {
+                channelSftp = setupJsch();
+                channelSftp.connect();
+                byte[] kelaData = response.body().readAllBytes();
+                // Parsitaan tiedostonimi, jos ei löydy, käytetään oletusnimeä:
+                String headerValue = response.headers().firstValue("Content-Disposition").orElse("");
+                String fileName = "";
+                if (headerValue != null && !headerValue.isEmpty()) {
+                    fileName = headerValue.substring(headerValue.indexOf("\"") + 1, headerValue.lastIndexOf("\""));
+                    LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
+                } else {
+                    fileName  = "DEFAULT_KELA_FILENAME" + System.currentTimeMillis();
+                    LOG.debug("Kela-ftp siirron dokumenttinimeä ei saatu parsittua, käytetään oletusta: " + fileName);
+                }
 
-    /**
-     * @return ftps://...
-     */
-    private String ftpKelaSiirto() {
-        return ftpKelaSiirto;
-    }
+                LOG.debug("Aloitetaan Kela-ftpsiirto dokumentille: " + fileName);
+                channelSftp.cd(path);
+                channelSftp.put(new ByteArrayInputStream(kelaData), fileName);
 
-    public String getFtpKelaSiirto() {
-        return ftpKelaSiirto;
+                LOG.info("Kela-ftp siirto suoritettiin onnistuneesti. Dokumentti-id: " + dokumenttiId + ", tiedostonimi: " + fileName);
+                return true;
+            } catch (Exception e) {
+                LOG.error("Kela-ftp siirron dokumentin haku epäonnistui dokumentille: " + dokumenttiId + " Syy: ", e);
+                return false;
+            } finally {
+                channelSftp.disconnect();
+                channelSftp.exit();
+                LOG.info("Kela-ftp yhteys suljettu.");
+            }
+        }).get(1, TimeUnit.HOURS);
     }
 }

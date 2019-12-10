@@ -93,10 +93,15 @@ public class KelaResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "FTP-siirto", response = Response.class)
     public Response laheta(String documentId, @Context HttpServletRequest request) {
-        LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
+        LOG.info("Kela-ftp siirto aloitettu dokumentille: {}", documentId);
         AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.KELA_VASTAANOTTO_EXPORT_LATAUS_FTP,
                 ValintaResource.DOKUMENTTI, documentId, Changes.EMPTY);
-        kelaFtpRoute.aloitaKelaSiirto(documentId);
-        return Response.ok().build();
+        try {
+            kelaFtpRoute.aloitaKelaSiirto(documentId);
+            return Response.ok().build();
+        } catch (Exception e) {
+            LOG.error("Kela-dokumentin siirto dokumentille: " + documentId + " epäonnistui.", e);
+            return Response.serverError().build();
+        }
     }
 }

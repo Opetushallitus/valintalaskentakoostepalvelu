@@ -11,6 +11,8 @@ import org.mockserver.model.RegexBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
@@ -124,8 +126,23 @@ public class Integraatiopalvelimet {
                                         new org.mockserver.model.Header("Content-Type", "application/json; charset=utf-8")
                                 )
                                 .withBody(r)
-
                 );
+    }
+    private static void mockToReturnInputStreamValueAndHeaders(String method, String p, String n, byte[] r) {
+            mockServer
+                    .when(
+                            request()
+                                    .withMethod(method)
+                                    .withPath(p)
+                    )
+                    .respond(
+                            response()
+                                    .withStatusCode(200)
+                                    .withHeaders(
+                                            new org.mockserver.model.Header("Content-Disposition", "attachment; filename=\"" + n + "\"")
+                                    )
+                                    .withBody(r)
+                    );
     }
     public static void mockToNoContent(String method, String p) {
         mockServer
@@ -198,6 +215,10 @@ public class Integraatiopalvelimet {
         String s;
         mockToReturnValueAndCheckBody(method, p, s = gson().toJson(r), regex);
         LOG.debug(s);
+    }
+    public static void mockToReturnInputStreamAndHeaders(String method, String p, String n, byte[] r) {
+        mockToReturnInputStreamValueAndHeaders(method, p, n, r);
+        LOG.debug(n);
     }
     public static void mockToReturnString(String method, String p, String r) {
         mockToReturnValue(method, p, r);
