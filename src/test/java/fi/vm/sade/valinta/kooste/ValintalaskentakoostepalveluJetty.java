@@ -62,10 +62,13 @@ public class ValintalaskentakoostepalveluJetty {
             final File commonProperties = new File(ophConfiguration, "common.properties");
             final FileOutputStream output = new FileOutputStream(commonProperties);
             System.setProperty("user.home", tempDir.getAbsolutePath());
+            LOG.info("Set user.home to " + tempDir.getAbsolutePath() + " .");
+            LOG.info("Writing properties to " + commonProperties.getAbsolutePath() + " ...");
             IOUtils.writeLines(
                 Collections.singletonList("web.url.cas=some_cas_url"),
                 System.lineSeparator(),
                 output);
+            LOG.info("...successfully wrote to properties file in " + commonProperties.getAbsolutePath() + " the following content: " + IOUtils.readLines(new FileReader(commonProperties)));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }catch (IOException e) {
