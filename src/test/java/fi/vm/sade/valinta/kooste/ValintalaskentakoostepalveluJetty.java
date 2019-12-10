@@ -4,8 +4,8 @@ import com.google.common.io.Files;
 
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
-import fi.vm.sade.valinta.sharedutils.FakeAuthenticationInitialiser;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import fi.vm.sade.valinta.sharedutils.FakeAuthenticationInitialiser;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -16,9 +16,10 @@ import javax.servlet.DispatcherType;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Optional;
 
@@ -62,10 +63,7 @@ public class ValintalaskentakoostepalveluJetty {
             final FileOutputStream output = new FileOutputStream(commonProperties);
             System.setProperty("user.home", tempDir.getAbsolutePath());
             IOUtils.writeLines(
-                Arrays.asList(
-                    "web.url.cas=some_cas_url",
-                    "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl=" + Integraatiopalvelimet.mockServer.getUrl(),
-                    "valintalaskentakoostepalvelu.valintaperusteet-service.baseurl=" + Integraatiopalvelimet.mockServer.getUrl()),
+                Collections.singletonList("web.url.cas=some_cas_url"),
                 System.lineSeparator(),
                 output);
         } catch (FileNotFoundException e) {
@@ -100,7 +98,9 @@ public class ValintalaskentakoostepalveluJetty {
         MockOpintopolkuCasAuthenticationFilter.clear();
         UrlConfiguration.getInstance()
                 .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
-                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl());
+                .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl", Integraatiopalvelimet.mockServer.getUrl())
+                .addOverride("valintalaskentakoostepalvelu.valintaperusteet-service.baseurl", Integraatiopalvelimet.mockServer.getUrl());
     }
 
     private static void startServer() {
