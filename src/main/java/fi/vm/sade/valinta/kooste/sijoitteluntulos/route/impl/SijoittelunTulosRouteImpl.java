@@ -11,8 +11,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -85,7 +85,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
     private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
     private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
-    private final DokumenttiResource dokumenttiResource;
+    private final DokumenttiAsyncResource dokumenttiAsyncResource;
     private final ViestintapalveluResource viestintapalveluResource;
     private final ApplicationResource applicationResource;
     private final String hakukohteidenHaku;
@@ -115,7 +115,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             ViestintapalveluResource viestintapalveluResource,
             ApplicationResource applicationResource,
             AtaruAsyncResource ataruAsyncResource,
-            DokumenttiResource dokumenttiResource,
+            DokumenttiAsyncResource dokumenttiAsyncResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti,
             ValintalaskentaAsyncResource valintalaskentaResource
@@ -135,7 +135,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.luontiEpaonnistui = "direct:sijoitteluntulos_koko_haulle_deadletterchannel";
         this.hakukohteetTarjonnalta = hakukohteetTarjonnalta;
         this.sijoittelunTulosExcel = sijoittelunTulosExcel;
-        this.dokumenttiResource = dokumenttiResource;
+        this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.taulukkolaskenta = taulukkolaskenta;
         this.haeHakuTarjonnaltaKomponentti = haeHakuTarjonnaltaKomponentti;
         this.valintalaskentaResource = valintalaskentaResource;
@@ -226,10 +226,14 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 InputStream input = sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk, hakuDTO, valinnanvaiheet);
                                 try {
                                     String id = generateId();
-                                    dokumenttiResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", getTimeToLive(),
+                                    String finalTarjoajaOid = tarjoajaOid;
+                                    dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", getTimeToLive(),
                                             dokumenttiprosessi(exchange).getTags(),
-                                            "application/vnd.ms-excel", input);
-                                    prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, id));
+                                            "application/vnd.ms-excel", input).subscribe(
+                                                    ok -> {
+                                                        prosessi.getValmiit().add(new Valmis(hakukohdeOid, finalTarjoajaOid, id));
+                                                    }
+                                    );
                                 } catch (Exception e) {
                                     LOG.error("Dokumentin tallennus epäonnistui hakukohteelle " + hakukohdeOid, e);
                                     prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Ei saatu tallennettua dokumenttikantaan! " + e.getMessage()));
@@ -328,9 +332,13 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             } else {
                                 InputStream input = pipeInputStreams(viestintapalveluResource.haeOsoitetarratSync(osoitteet));
                                 String id = generateId();
-                                dokumenttiResource.tallenna(id, "osoitetarrat_" + hakukohdeOid + ".pdf", getTimeToLive(),
-                                        dokumenttiprosessi(exchange).getTags(), "application/pdf", input);
-                                prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, id));
+                                String finalTarjoajaOid = tarjoajaOid;
+                                dokumenttiAsyncResource.tallenna(id, "osoitetarrat_" + hakukohdeOid + ".pdf", getTimeToLive(),
+                                        dokumenttiprosessi(exchange).getTags(), "application/pdf", input).subscribe(
+                                                ok -> {
+                                                    prosessi.getValmiit().add(new Valmis(hakukohdeOid, finalTarjoajaOid, id));
+                                                }
+                                );
                             }
                             stopWatch.stop();
                             LOG.info(stopWatch.prettyPrint());
@@ -369,9 +377,12 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             try {
                                 InputStream tar = generoiYhteenvetoTar(prosessi.getValmiit());
                                 String id = generateId();
-                                dokumenttiResource.tallenna(id, "sijoitteluntuloksethaulle.tar", defaultExpirationDate().getTime(),
-                                        dokumenttiprosessi(exchange).getTags(), "application/x-tar", tar);
-                                prosessi.setDokumenttiId(id);
+                                dokumenttiAsyncResource.tallenna(id, "sijoitteluntuloksethaulle.tar", defaultExpirationDate().getTime(),
+                                        dokumenttiprosessi(exchange).getTags(), "application/x-tar", tar).subscribe(
+                                                ok -> {
+                                                    prosessi.setDokumenttiId(id);
+                                                }
+                                );
                             } catch (Exception e) {
                                 LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!", e);
                                 prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Tulostietojen tallennus epäonnistui!"));

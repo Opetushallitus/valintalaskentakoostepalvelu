@@ -2,8 +2,8 @@ package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
@@ -35,7 +35,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
 
     private final ApplicationResource applicationResource;
     private final AtaruAsyncResource ataruAsyncResource;
-    private final DokumenttiResource dokumenttiResource;
+    private final DokumenttiAsyncResource dokumenttiAsyncResource;
     private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
     private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
     private final HakukohdeResource hakukohdeResource;
@@ -44,13 +44,13 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
     public ValintatapajonoVientiRouteImpl(
             ApplicationResource applicationResource,
             AtaruAsyncResource ataruAsyncResource,
-            DokumenttiResource dokumenttiResource,
+            DokumenttiAsyncResource dokumenttiAsyncResource,
             HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
             HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
             HakukohdeResource hakukohdeResource) {
         this.applicationResource = applicationResource;
         this.ataruAsyncResource = ataruAsyncResource;
-        this.dokumenttiResource = dokumenttiResource;
+        this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.hakukohdeTarjonnalta = hakukohdeTarjonnalta;
         this.hakuTarjonnalta = hakuTarjonnalta;
         this.hakukohdeResource = hakukohdeResource;
@@ -139,9 +139,12 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             String id = generateId();
                             Long expirationTime = defaultExpirationDate().getTime();
                             List<String> tags = dokumenttiprosessi(exchange).getTags();
-                            dokumenttiResource.tallenna(id, "valintatapajono.xlsx", expirationTime, tags, "application/octet-stream", xlsx);
-                            dokumenttiprosessi(exchange).setDokumenttiId(id);
-                            dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+                            dokumenttiAsyncResource.tallenna(id, "valintatapajono.xlsx", expirationTime, tags, "application/octet-stream", xlsx).subscribe(
+                                    ok -> {
+                                        dokumenttiprosessi(exchange).setDokumenttiId(id);
+                                        dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+                                    }
+                            );
                         } catch (Exception e) {
                             LOG.error("Dokumenttipalveluun vienti virhe", e);
                             dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumenttipalveluun ei saatu vietyä taulukkolaskentatiedostoa!", ""));

@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnInputStreamAndHeaders;
+import static javax.ws.rs.HttpMethod.GET;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -19,21 +21,22 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockData;
-import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
-import fi.vm.sade.valinta.kooste.mocks.MockKoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
+import io.reactivex.Observable;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +57,17 @@ public class ErillishakuResourceTest {
 
     private void testVientiExcelTiedostoon(Hakutyyppi hakutyyppi) {
         MockApplicationAsyncResource.setResult(createVientiHakemus(hakutyyppi));
+        //mockToReturnInputStreamAndHeaders(GET, "/dokumenttipalvelu-service/resources/dokumentit/tallenna/.*", new org.mockserver.model.Header("Content-Disposition", "attachment; filename=\"kela.txt\""), bytes);
+        ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
+        Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyLong(),
+                Mockito.anyList(),
+                Mockito.anyString(),
+                inputStreamArgumentCaptor.capture()
+        )).thenReturn(Observable.just(Response.ok("OK").build()));
+
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
                 .query("hakutyyppi", hakutyyppi)
@@ -67,7 +81,7 @@ public class ErillishakuResourceTest {
                 .post(Entity.entity(Collections.emptyList(), MediaType.APPLICATION_JSON), ProsessiId.class);
 
         String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
-        final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
+        final InputStream storedDocument = MockDokumenttiAsyncResource.getStoredDocument(documentId);
         assertNotNull(storedDocument);
         verifyCreatedExcelDocument(hakutyyppi, storedDocument);
     }

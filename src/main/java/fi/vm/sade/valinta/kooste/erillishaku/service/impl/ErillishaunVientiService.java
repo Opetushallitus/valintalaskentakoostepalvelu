@@ -7,13 +7,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -50,7 +50,7 @@ public class ErillishaunVientiService {
     private final TarjontaAsyncResource hakuV1AsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final AtaruAsyncResource ataruAsyncResource;
-    private final DokumenttiResource dokumenttiResource;
+    private final DokumenttiAsyncResource dokumenttiAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
     @Autowired
@@ -59,13 +59,13 @@ public class ErillishaunVientiService {
             ApplicationAsyncResource applicationAsyncResource,
             AtaruAsyncResource ataruAsyncResource,
             TarjontaAsyncResource hakuV1AsyncResource,
-            DokumenttiResource dokumenttiResource,
+            DokumenttiAsyncResource dokumenttiAsyncResource,
             KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         this.tilaAsyncResource = tilaAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.ataruAsyncResource = ataruAsyncResource;
-        this.dokumenttiResource = dokumenttiResource;
+        this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         LOG.info("Luetaan valinnantulokset ja sijoittelu valinta-tulos-servicestä!!!!!!!");
     }
@@ -93,10 +93,13 @@ public class ErillishaunVientiService {
             excel -> {
                 LOG.info("Aloitetaan dokumenttipalveluun tallennus");
                 String uuid = UUID.randomUUID().toString();
-                dokumenttiResource.tallenna(uuid, "erillishaku.xlsx", DateTime.now().plusHours(1).toDate().getTime(),
-                        Collections.singletonList("erillishaku"), "application/octet-stream", excel.getExcel().vieXlsx());
-                prosessi.vaiheValmistui();
-                prosessi.valmistui(uuid);
+                dokumenttiAsyncResource.tallenna(uuid, "erillishaku.xlsx", DateTime.now().plusHours(1).toDate().getTime(),
+                        Collections.singletonList("erillishaku"), "application/octet-stream", excel.getExcel().vieXlsx()).subscribe(
+                                ok -> {
+                                    prosessi.vaiheValmistui();
+                                    prosessi.valmistui(uuid);
+                                }
+                );
             },
             poikkeus -> {
                 LOG.error("Erillishaun vienti keskeytyi virheeseen", poikkeus);
