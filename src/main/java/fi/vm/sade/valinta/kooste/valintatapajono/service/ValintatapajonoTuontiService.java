@@ -5,9 +5,6 @@ import com.google.gson.GsonBuilder;
 import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.User;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.valinta.sharedutils.AuditLog;
-import fi.vm.sade.valinta.sharedutils.ValintaResource;
-import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -19,6 +16,9 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.ValintaResource;
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import io.reactivex.Observable;
@@ -146,7 +146,7 @@ public class ValintatapajonoTuontiService {
         Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                 .flatMap(haku -> {
                     if (haku.getAtaruLomakeAvain() == null) {
-                        return applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid);
+                        return Observable.fromFuture(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid));
                     } else {
                         return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
                     }

@@ -6,12 +6,13 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
-import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -61,13 +62,13 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
-        return Observable.just(ImmutableList.of(oppijaRef.get()));
+    public CompletableFuture<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
+        return CompletableFuture.completedFuture(ImmutableList.of(oppijaRef.get()));
     }
 
     @Override
-    public Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
-        return Observable.just(oppijatRef.get());
+    public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
+        return CompletableFuture.completedFuture(oppijatRef.get());
     }
 
     @Override
@@ -94,61 +95,61 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public Observable<Suoritus> postSuoritus(Suoritus suoritus) {
+    public CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus) {
         if (postException.isPresent()) {
-            return Observable.error(postException.get());
+            return CompletableFuture.failedFuture(postException.get());
         }
         suoritus.setId("" + ids.getAndIncrement());
         suorituksetRef.getAndUpdate((List<Suoritus> suoritukset) -> {
                 suoritukset.add(suoritus);
                 return suoritukset;
         });
-        return Observable.just(suoritus);
+        return CompletableFuture.completedFuture(suoritus);
     }
 
     @Override
-    public Observable<Arvosana> postArvosana(Arvosana arvosana) {
+    public CompletableFuture<Arvosana> postArvosana(Arvosana arvosana) {
         if (postException.isPresent()) {
-            return Observable.error(postException.get());
+            return CompletableFuture.failedFuture(postException.get());
         }
         createdArvosanatRef.getAndUpdate((List<Arvosana> arvosanat) -> {
             arvosanat.add(arvosana);
             return arvosanat;
         });
-        return Observable.just(arvosana);
+        return CompletableFuture.completedFuture(arvosana);
     }
 
     @Override
-    public Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
+    public CompletableFuture<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
         if (postException.isPresent()) {
-            return Observable.error(postException.get());
+            return CompletableFuture.failedFuture(postException.get());
         }
         updatedArvosanatRef.getAndUpdate((List<Arvosana> arvosanat) -> {
             arvosanat.add(arvosanaWithUpdatedValues);
             return arvosanat;
         });
-        return Observable.just(arvosanaWithUpdatedValues);
+        return CompletableFuture.completedFuture(arvosanaWithUpdatedValues);
     }
 
     @Override
-    public Observable<String> deleteSuoritus(String suoritusId) {
+    public CompletableFuture<String> deleteSuoritus(String suoritusId) {
         deletedSuorituksetRef.getAndUpdate((List<String> suoritusIdt) -> {
             suoritusIdt.add(suoritusId);
             return suoritusIdt;
         });
         Suoritus suoritus = new Suoritus();
         suoritus.setId(suoritusId);
-        return Observable.just("OK");
+        return CompletableFuture.completedFuture("OK");
     }
 
     @Override
-    public Observable<String> deleteArvosana(String arvosanaId) {
+    public CompletableFuture<String> deleteArvosana(String arvosanaId) {
         deletedArvosanatRef.getAndUpdate((List<String> arvosanaIdt) -> {
             arvosanaIdt.add(arvosanaId);
             return arvosanaIdt;
         });
         Arvosana arvosana = new Arvosana();
         arvosana.setId(arvosanaId);
-        return Observable.just("OK");
+        return CompletableFuture.completedFuture("OK");
     }
 }

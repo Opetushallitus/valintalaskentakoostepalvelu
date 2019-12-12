@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
@@ -26,6 +27,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -36,17 +38,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import io.reactivex.Observable;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 /**
@@ -123,7 +133,7 @@ public class ValintalaskentaExcelResource {
             Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                     .flatMap(haku -> {
                                 Observable<List<HakemusWrapper>> hakemuksetO = ((StringUtils.isEmpty(haku.getAtaruLomakeAvain()))
-                                        ? applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid)
+                                        ? Observable.fromFuture(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid))
                                         : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)));
                         return Observable.zip(
                                         Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)),
@@ -183,7 +193,7 @@ public class ValintalaskentaExcelResource {
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
         final Observable<List<HakemusWrapper>> hakemuksetObservable = hakuObservable.flatMap(haku -> {
             if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
-                return applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid);
+                return Observable.fromFuture(applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid));
             } else {
                 return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
             }

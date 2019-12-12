@@ -438,6 +438,10 @@
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl" />
 
+		<bean class="fi.vm.sade.valinta.kooste.url.UrlConfiguration" factory-method="getInstance"/>
+		<bean class="fi.vm.sade.valinta.kooste.external.resource.koski.impl.KoskiAsyncResourceImpl" />
+		<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.actor.KoskiService" />
+
 		<bean id="OmatSivutHakemusResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.hakemus.OmatSivutHakemusResource"/>
 

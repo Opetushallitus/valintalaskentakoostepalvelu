@@ -20,6 +20,7 @@ public class MockServer {
 
     private final HttpServer httpServer;
     private final List<String> paths = Lists.newArrayList();
+    private int freeLocalPort;
 
     public MockServer() {
         this.httpServer = startServer();
@@ -32,10 +33,12 @@ public class MockServer {
         HttpServer server = null;
         while (++numberOfAttempt <= maxAttempts && !succeededToStart) {
             try {
-                server = HttpServer.create(new InetSocketAddress(PortChecker.findFreeLocalPort()), 0);
+                freeLocalPort = PortChecker.findFreeLocalPort();
+                server = HttpServer.create(new InetSocketAddress(freeLocalPort), 0);
                 server.setExecutor(null);
                 server.start();
                 succeededToStart = true;
+                System.out.println("Started " + getClass().getName() + " listening in port "+ freeLocalPort);
             } catch (Exception e) {
                 System.err.println(getClass().getName() + " WARNING : Could not start server on attempt " +
                     numberOfAttempt + "/" + maxAttempts + " , exception was:");
@@ -53,6 +56,7 @@ public class MockServer {
     }
 
     public MockServer addHandler(String path, HttpHandler handler) {
+        System.out.println(getClass().getName() + " listening in port "+ freeLocalPort + " added handler for path '" + path + "'");
         paths.add(path);
         this.httpServer.createContext(path, wrapWithCallerIdAssertion(handler));
         return this;

@@ -17,11 +17,11 @@ public interface ApplicationAsyncResource {
     List<String> DEFAULT_STATES = Arrays.asList("ACTIVE", "INCOMPLETE");
     int DEFAULT_ROW_LIMIT = 100000;
 
-    Observable<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
+    CompletableFuture<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 
     Observable<Set<String>> getApplicationOids(String hakuOid, String hakukohdeOid);
 
-    Observable<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
+    CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
 
     CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, List<String> hakukohdeOids);
 

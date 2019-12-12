@@ -1,18 +1,25 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
-import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
+import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -42,9 +49,9 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     public final List<Result> results = new ArrayList<>();
 
-    private static <T> Future<T> serviceAvailableCheck() {
+    private static <T> CompletableFuture<T> serviceAvailableCheck() {
         if(!serviceIsAvailable.get()) {
-            return Futures.immediateFailedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
+            return CompletableFuture.failedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
         }
         return null;
     }
@@ -101,7 +108,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         return Observable.fromFuture(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(
                 () -> {
                     results.add(new Result(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit));
-                    return Futures.immediateFuture(hakemusPrototyypit.stream()
+                    return CompletableFuture.completedFuture(hakemusPrototyypit.stream()
                                     .map(prototyyppi -> toHakemus(prototyyppi))
                                     .collect(Collectors.toList())
                     );
@@ -110,7 +117,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
         return getApplicationsByOids(hakuOid, Arrays.asList(hakukohdeOid));
     }
 
@@ -120,15 +127,15 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Observable<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
-        return Observable.fromFuture(Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
+    public CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
+        return Optional.ofNullable(MockApplicationAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck()).orElseGet(() -> {
             if (resultReference.get() != null) {
-                return Futures.immediateFuture(resultReference.get());
+                return CompletableFuture.completedFuture(resultReference.get());
             } else {
                 HakemusWrapper hakemus = getHakemus();
-                return Futures.immediateFuture(Arrays.asList(hakemus));
+                return CompletableFuture.completedFuture((Arrays.asList(hakemus)));
             }
-        }));
+        });
     }
 
     @Override

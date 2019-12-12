@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.external.resource;
 
 import fi.vm.sade.javautils.cas.ApplicationSession;
 import fi.vm.sade.javautils.cas.CasSession;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -260,10 +260,112 @@ public class HttpClients {
         );
     }
 
+    @Bean(name = "ValintapisteServiceHttpClient")
+    @Autowired
+    public HttpClient getValintapisteServiceHttpClient(
+        CookieManager cookieManager
+    ) {
+        return new HttpClient(
+            defaultHttpClientBuilder(cookieManager).build(),
+            null,
+            DateDeserializer.gsonBuilder().create()
+        );
+    }
+
+    @Bean(name = "ValintalaskentaValintakoeHttpClient")
+    @Autowired
+    public HttpClient getValintalaskentaValintakoeHttpClient(
+        CookieManager cookieManager
+    ) {
+        return new HttpClient(
+            defaultHttpClientBuilder(cookieManager).build(),
+            null,
+            DateDeserializer.gsonBuilder().create()
+        );
+    }
+
+    @Bean(name = "ValintalaskentaHttpClient")
+    @Autowired
+    public HttpClient getValintalaskentaHttpClient(
+        CookieManager cookieManager
+    ) {
+        return new HttpClient(
+            defaultHttpClientBuilder(cookieManager).build(),
+            null,
+            DateDeserializer.gsonBuilder().create()
+        );
+    }
+
+    @Bean(name = "SuoritusrekisteriInternalHttpClient")
+    @Autowired
+    public java.net.http.HttpClient getSuoritusrekisteriInternalHttpClient(CookieManager cookieManager) {
+        return defaultHttpClientBuilder(cookieManager).build();
+    }
+
+    @Profile("default")
+    @Bean(name = "SuoritusrekisteriApplicationSession")
+    @Autowired
+    public ApplicationSession getSuoritusrekisteriApplicationSession(
+            @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+            @Qualifier("SuoritusrekisteriInternalHttpClient") java.net.http.HttpClient applicationHttpClient,
+            CookieManager cookieManager,
+            @Value("${cas.service.suoritusrekisteri}") String service,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password
+    ) {
+        String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+        return new ApplicationSession(
+                applicationHttpClient,
+                cookieManager,
+                CALLER_ID,
+                Duration.ofSeconds(10),
+                new CasSession(casHttpClient, Duration.ofSeconds(10), CALLER_ID, URI.create(ticketsUrl), username, password),
+                service,
+                "JSESSIONID"
+        );
+    }
+
+    @Bean(name = "SuoritusrekisteriHttpClient")
+    @Autowired
+    public HttpClient getSuoritusrekisteriHttpClient(
+            @Qualifier("SuoritusrekisteriInternalHttpClient") java.net.http.HttpClient client,
+            @Qualifier("SuoritusrekisteriApplicationSession") ApplicationSession applicationSession
+    ) {
+        return new HttpClient(
+                client,
+                applicationSession,
+                DateDeserializer.gsonBuilder().create()
+        );
+    }
+
+    @Bean(name = "ValintaperusteetHttpClient")
+    @Autowired
+    public HttpClient getValintaperusteetHttpClient(
+        CookieManager cookieManager
+    ) {
+        return new HttpClient(
+            defaultHttpClientBuilder(cookieManager).build(),
+            null,
+            DateDeserializer.gsonBuilder().create()
+        );
+    }
+
     public static java.net.http.HttpClient.Builder defaultHttpClientBuilder(CookieManager cookieManager) {
         return java.net.http.HttpClient.newBuilder()
                 .version(java.net.http.HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(10))
                 .cookieHandler(cookieManager);
+    }
+
+    @Bean(name = "KoskiHttpClient")
+    @Autowired
+    public HttpClient getKoskiHttpClient(
+        CookieManager cookieManager
+    ) {
+        return new HttpClient(
+            defaultHttpClientBuilder(cookieManager).build(),
+            null,
+            DateDeserializer.gsonBuilder().create()
+        );
     }
 }

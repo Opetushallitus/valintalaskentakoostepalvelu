@@ -1,0 +1,91 @@
+{
+  "hakukohdeOid": "1.2.246.562.20.36384009951",
+  "hakuOid": "1.2.246.562.29.70000333388",
+  "tarjoajaOid": "1.2.246.562.10.50880626531",
+  "viimeinenValinnanvaihe": 2,
+  "valinnanVaihe": {
+    "valinnanVaiheJarjestysluku": 2,
+    "valinnanVaiheOid": "1546591900204503340104920222316",
+    "valintatapajono": [
+      {
+        "aloituspaikat": 20,
+        "kuvaus": "Testataan VTKU-98:n Koskidatan käyttöä",
+        "tyyppi": "valintatapajono_tv",
+        "nimi": "Timon todistusvalinta",
+        "oid": "1573720036491299050762248760371",
+        "prioriteetti": 1,
+        "siirretaanSijoitteluun": true,
+        "tasasijasaanto": "YLITAYTTO",
+        "jarjestyskriteerit": [
+          {
+            "prioriteetti": 0,
+            "funktiokutsu": {
+              "funktionimi": "NIMETTYLUKUARVO",
+              "tallennaTulos": false,
+              "omaopintopolku": false,
+              "arvokonvertteriparametrit": [],
+              "arvovalikonvertteriparametrit": [],
+              "syoteparametrit": [
+                {
+                  "avain": "nimi",
+                  "arvo": "ammatillinen_VTKU-98_20191114"
+                }
+              ],
+              "funktioargumentit": [
+                {
+                  "funktiokutsu": {
+                    "funktionimi": "HAEAMMATILLINENYTOARVOSANA",
+                    "tulosTunniste": "amm_yto_ml",
+                    "tulosTekstiFi": "Ammatillisen perustutkinnon yto Matemaattis-luonnontieteellinen osaaminen",
+                    "tulosTekstiSv": "Ammatillisen perustutkinnon yto Matemaattis-luonnontieteellinen osaaminen",
+                    "tulosTekstiEn": "Ammatillisen perustutkinnon yto Matemaattis-luonnontieteellinen osaaminen",
+                    "tallennaTulos": true,
+                    "omaopintopolku": true,
+                    "arvokonvertteriparametrit": [],
+                    "arvovalikonvertteriparametrit": [],
+                    "syoteparametrit": [],
+                    "funktioargumentit": [],
+                    "valintaperusteviitteet": [
+                      {
+                        "tunniste": "101054",
+                        "kuvaus": "Ammatillisen perustutkinnon yto:n Matemaattis-luonnontieteellinen osaaminen (101054) arvosana.",
+                        "lahde": "HAETTAVA_ARVO",
+                        "onPakollinen": false,
+                        "epasuoraViittaus": false,
+                        "indeksi": 2,
+                        "vaatiiOsallistumisen": true,
+                        "syotettavissaKaikille": true,
+                        "kuvaukset": {
+                          "tekstit": []
+                        },
+                        "tilastoidaan": false
+                      }
+                    ],
+                    "id": 481912247
+                  },
+                  "indeksi": 1,
+                  "id": 481912250
+                }
+              ],
+              "valintaperusteviitteet": [],
+              "id": 481912249
+            }
+          }
+        ],
+        "eiVarasijatayttoa": false,
+        "poissaOlevaTaytto": false,
+        "kaikkiEhdonTayttavatHyvaksytaan": false,
+        "kaytetaanValintalaskentaa": true,
+        "valmisSijoiteltavaksi": true,
+        "valisijoittelu": false,
+        "poistetaankoHylatyt": false
+      }
+    ],
+    "valintakoe": [],
+    "nimi": "Varsinainen valinta",
+    "aktiivinen": true,
+    "valinnanVaiheTyyppi": "TAVALLINEN"
+  },
+  "hakukohteenValintaperuste": []
+}
+

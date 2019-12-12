@@ -1,7 +1,12 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import static io.reactivex.Observable.zip;
+import static java.util.concurrent.TimeUnit.HOURS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
@@ -20,22 +25,24 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.concurrent.TimeUnit.*;
-import static io.reactivex.Observable.zip;
 
 @Service
 public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
@@ -79,10 +86,10 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 
     @Override
     public void koekutsukirjeetOsallistujille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, List<String> valintakoeTunnisteet) {
-        final Observable<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource.haeHakutoiveelle(koekutsu.getHakukohdeOid());
+        final Observable<List<ValintakoeOsallistuminenDTO>> osallistumiset = Observable.fromFuture(osallistumisetResource.haeHakutoiveelle(koekutsu.getHakukohdeOid()));
         final Observable<List<ValintakoeDTO>> valintakokeetObservable = valintakoeResource.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
         final Observable<List<HakemusWrapper>> hakemuksetObservable = ((StringUtils.isEmpty(koekutsu.getHaku().getAtaruLomakeAvain()))
-                ? applicationAsyncResource.getApplicationsByOid(koekutsu.getHaku().getOid(), koekutsu.getHakukohdeOid())
+                ? Observable.fromFuture(applicationAsyncResource.getApplicationsByOid(koekutsu.getHaku().getOid(), koekutsu.getHakukohdeOid()))
                 : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(koekutsu.getHakukohdeOid())));
 
         zip(valintakokeetObservable, hakemuksetObservable,

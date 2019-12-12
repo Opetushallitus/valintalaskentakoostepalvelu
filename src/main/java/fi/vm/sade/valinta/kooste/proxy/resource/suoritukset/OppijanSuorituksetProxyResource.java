@@ -1,8 +1,11 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
+import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
+import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
+import static java.util.concurrent.TimeUnit.MINUTES;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
@@ -20,6 +23,7 @@ import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -27,10 +31,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import io.reactivex.Observable;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
@@ -40,10 +49,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
-import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
-import static java.util.concurrent.TimeUnit.MINUTES;
 
 @Controller("SuorituksenArvosanatProxyResource")
 @Path("/proxy/suoritukset")
@@ -384,7 +389,7 @@ public class OppijanSuorituksetProxyResource {
         Observable<ParametritDTO> parametritObservable = Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid));
 
         Observable<List<Oppija>> suorituksetObservable = fetchEnsikertalaisuus
-                ? suoritusrekisteriAsyncResource.getSuorituksetByOppijas(opiskelijaOids, hakuOid)
+                ? Observable.fromFuture(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(opiskelijaOids, hakuOid))
                 : suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOids);
 
         return Observable.zip(hakuObservable, suorituksetObservable, parametritObservable,
@@ -399,10 +404,19 @@ public class OppijanSuorituksetProxyResource {
                                                 ParametritDTO parametrit,
                                                 Boolean fetchEnsikertalaisuus) {
 
-        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = tarjontaAsyncResource
-                .hakukohdeRyhmasForHakukohdes(haku.getOid())
+        Map<String, List<String>> hakukohdeRyhmasForHakukohdes = Observable.fromFuture(tarjontaAsyncResource
+                .hakukohdeRyhmasForHakukohdes(haku.getOid()))
                 .timeout(1, MINUTES)
                 .blockingFirst();
-        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(haku, "", hakukohdeRyhmasForHakukohdes, hakemukset, valintapisteet, suoritukset, parametrit, fetchEnsikertalaisuus);
+        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
+            haku,
+            "",
+            hakukohdeRyhmasForHakukohdes,
+            hakemukset,
+            valintapisteet,
+            suoritukset,
+            Collections.emptyMap(),
+            parametrit,
+            fetchEnsikertalaisuus);
     }
 }

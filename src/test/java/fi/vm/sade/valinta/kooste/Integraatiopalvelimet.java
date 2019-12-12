@@ -51,6 +51,7 @@ public class Integraatiopalvelimet {
         );
     }
     public static void mockForward(String method, String path, int port) {
+        LOG.info("mockForward: " + method + " to path '" + path + "' to " + mockServer.getHost() + ":" + port);
         mockServer
                 .when(
                         request()
@@ -107,6 +108,9 @@ public class Integraatiopalvelimet {
                 .respond(
                         response()
                                 .withStatusCode(200)
+                                .withHeaders(
+                                    new org.mockserver.model.Header("Content-Type", "application/json; charset=utf-8")
+                                )
                                 .withBody(r)
 
                 );
@@ -226,16 +230,19 @@ public class Integraatiopalvelimet {
     }
 
     public static class ClientAndServerWithHost extends ClientAndServer {
+        private final int port;
+
         ClientAndServerWithHost(int port){
             super(port);
+            this.port = port;
         }
 
         String getHost() {
-            return super.host;
+            return remoteAddress().getHostString();
         }
 
         public String getUrl() {
-            return "http://" + super.host + ":" + port;
+            return "http://" + getHost() + ":" + port;
         }
     }
 

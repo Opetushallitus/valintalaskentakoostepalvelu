@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintaperusteet;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class ValintaperusteetResource {
                 LOG.error("Valintaperusteet -kutsu aikakatkaistiin hakukohteelle {}", hakukohdeOid);
                 asyncResponse1.resume(Response.serverError().entity("Valintaperusteet -kutsu aikakatkaistiin").build());
             });
-            resource.haeValintaperusteet(hakukohdeOid, null)
+            Observable.fromFuture(resource.haeValintaperusteet(hakukohdeOid, null))
                     .subscribe(valintaperusteetDTOs -> {
                                 boolean kayttaaValintalaskentaa = !valintaperusteetDTOs.stream()
                                         .filter(v -> v.getViimeinenValinnanvaihe() == v.getValinnanVaihe().getValinnanVaiheJarjestysluku())

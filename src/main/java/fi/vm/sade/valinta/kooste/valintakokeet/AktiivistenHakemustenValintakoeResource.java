@@ -67,7 +67,7 @@ public class AktiivistenHakemustenValintakoeResource {
             @Suspended AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(30, TimeUnit.SECONDS);
 
-        valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)
+        Observable.fromFuture(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
                 .flatMap(osallistumiset ->
                         filtteroiPoisPassiivistenHakemustenOsallistumistiedot(osallistumiset, hakukohdeOid))
                 .subscribe(osallistumiset ->

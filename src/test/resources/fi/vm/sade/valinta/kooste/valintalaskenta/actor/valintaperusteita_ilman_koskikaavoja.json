@@ -1,0 +1,851 @@
+{
+  "hakukohdeOid": "1.2.246.562.20.36384009951",
+  "hakuOid": "1.2.246.562.29.70000333388",
+  "tarjoajaOid": "1.2.246.562.10.50880626531",
+  "viimeinenValinnanvaihe": 2,
+  "valinnanVaihe": {
+    "valinnanVaiheJarjestysluku": 2,
+    "valinnanVaiheOid": "1546591900204503340104920222316",
+    "valintatapajono": [
+      {
+        "aloituspaikat": 35,
+        "kuvaus": "Koepisteet",
+        "tyyppi": "valintatapajono_kp",
+        "nimi": "Koepisteet",
+        "oid": "15465919005928596892659840772965",
+        "prioriteetti": 0,
+        "siirretaanSijoitteluun": true,
+        "tasasijasaanto": "YLITAYTTO",
+        "jarjestyskriteerit": [
+          {
+            "nimi": "IB_paiva_finnips_ja_suomi_versio2",
+            "prioriteetti": 0,
+            "funktiokutsu": {
+              "funktionimi": "NIMETTYLUKUARVO",
+              "tallennaTulos": false,
+              "omaopintopolku": false,
+              "arvokonvertteriparametrit": [],
+              "arvovalikonvertteriparametrit": [],
+              "syoteparametrit": [
+                {
+                  "avain": "nimi",
+                  "arvo": "IB_paiva_finnips_ja_suomi_versio2"
+                }
+              ],
+              "funktioargumentit": [
+                {
+                  "funktiokutsu": {
+                    "funktionimi": "JOS",
+                    "tallennaTulos": false,
+                    "omaopintopolku": false,
+                    "arvokonvertteriparametrit": [],
+                    "arvovalikonvertteriparametrit": [],
+                    "syoteparametrit": [],
+                    "funktioargumentit": [
+                      {
+                        "funktiokutsu": {
+                          "funktionimi": "NIMETTYLUKUARVO",
+                          "tallennaTulos": false,
+                          "omaopintopolku": false,
+                          "arvokonvertteriparametrit": [],
+                          "arvovalikonvertteriparametrit": [],
+                          "syoteparametrit": [
+                            {
+                              "avain": "nimi",
+                              "arvo": "Liiketalouden Finnips-valintakoe"
+                            }
+                          ],
+                          "funktioargumentit": [
+                            {
+                              "funktiokutsu": {
+                                "funktionimi": "SUMMA",
+                                "tallennaTulos": false,
+                                "omaopintopolku": false,
+                                "arvokonvertteriparametrit": [],
+                                "arvovalikonvertteriparametrit": [],
+                                "syoteparametrit": [],
+                                "funktioargumentit": [
+                                  {
+                                    "funktiokutsu": {
+                                      "funktionimi": "HAELUKUARVO",
+                                      "tallennaTulos": false,
+                                      "omaopintopolku": false,
+                                      "arvokonvertteriparametrit": [],
+                                      "arvovalikonvertteriparametrit": [
+                                        {
+                                          "paluuarvo": "",
+                                          "minValue": "0",
+                                          "maxValue": "3",
+                                          "palautaHaettuArvo": "true",
+                                          "hylkaysperuste": "true",
+                                          "kuvaukset": {
+                                            "tekstit": [
+                                              {
+                                                "kieli": "EN",
+                                                "teksti": "Interview below 3 points. (one or several part/s of the exam failed)"
+                                              },
+                                              {
+                                                "kieli": "SV",
+                                                "teksti": "Interview below 3 points. (one or several part/s of the exam failed)"
+                                              },
+                                              {
+                                                "kieli": "FI",
+                                                "teksti": "Haastattelu alle 3 pistettä. (yksi tai useampi valintakokeen osio hylätty)"
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "paluuarvo": "",
+                                          "minValue": "3",
+                                          "maxValue": "16",
+                                          "palautaHaettuArvo": "true",
+                                          "hylkaysperuste": "false",
+                                          "kuvaukset": {
+                                            "tekstit": []
+                                          }
+                                        }
+                                      ],
+                                      "syoteparametrit": [
+                                        {
+                                          "avain": "oletusarvo",
+                                          "arvo": ""
+                                        }
+                                      ],
+                                      "funktioargumentit": [],
+                                      "valintaperusteviitteet": [
+                                        {
+                                          "tunniste": "IB_paiva_haastattelu_finnips",
+                                          "kuvaus": "Finnips haastattelu (3 p./16 p.)",
+                                          "lahde": "SYOTETTAVA_ARVO",
+                                          "onPakollinen": false,
+                                          "epasuoraViittaus": false,
+                                          "indeksi": 2,
+                                          "vaatiiOsallistumisen": true,
+                                          "syotettavissaKaikille": false,
+                                          "kuvaukset": {
+                                            "tekstit": [
+                                              {
+                                                "kieli": "FI",
+                                                "teksti": "Hakija ei ole osallistunut valintakokeen osioon / valintakokeeseen."
+                                              },
+                                              {
+                                                "kieli": "EN",
+                                                "teksti": "Applicant did not participate in the entrance examination or part of the examination."
+                                              },
+                                              {
+                                                "kieli": "SV",
+                                                "teksti": "Deltog inte i urvalsprovet."
+                                              }
+                                            ]
+                                          },
+                                          "tilastoidaan": true
+                                        }
+                                      ],
+                                      "id": 422944758
+                                    },
+                                    "indeksi": 3,
+                                    "id": 422944791
+                                  }
+                                ],
+                                "valintaperusteviitteet": [],
+                                "id": 422944788
+                              },
+                              "indeksi": 1,
+                              "id": 422944795
+                            }
+                          ],
+                          "valintaperusteviitteet": [],
+                          "id": 422944794
+                        },
+                        "indeksi": 2,
+                        "id": 422944873
+                      },
+                      {
+                        "funktiokutsu": {
+                          "funktionimi": "SUUREMPITAIYHTASUURI",
+                          "tallennaTulos": false,
+                          "omaopintopolku": false,
+                          "arvokonvertteriparametrit": [],
+                          "arvovalikonvertteriparametrit": [],
+                          "syoteparametrit": [],
+                          "funktioargumentit": [
+                            {
+                              "funktiokutsu": {
+                                "funktionimi": "HAELUKUARVO",
+                                "tallennaTulos": false,
+                                "omaopintopolku": false,
+                                "arvokonvertteriparametrit": [],
+                                "arvovalikonvertteriparametrit": [
+                                  {
+                                    "paluuarvo": "",
+                                    "minValue": "0",
+                                    "maxValue": "10",
+                                    "palautaHaettuArvo": "true",
+                                    "hylkaysperuste": "false",
+                                    "kuvaukset": {
+                                      "tekstit": []
+                                    }
+                                  }
+                                ],
+                                "syoteparametrit": [
+                                  {
+                                    "avain": "oletusarvo",
+                                    "arvo": "-1"
+                                  }
+                                ],
+                                "funktioargumentit": [],
+                                "valintaperusteviitteet": [
+                                  {
+                                    "tunniste": "IB_paiva_essee_finnips",
+                                    "kuvaus": "Finnips essee (3 p./10 p.)",
+                                    "lahde": "SYOTETTAVA_ARVO",
+                                    "onPakollinen": false,
+                                    "epasuoraViittaus": false,
+                                    "indeksi": 2,
+                                    "vaatiiOsallistumisen": false,
+                                    "syotettavissaKaikille": false,
+                                    "kuvaukset": {
+                                      "tekstit": []
+                                    },
+                                    "tilastoidaan": false
+                                  }
+                                ],
+                                "id": 422944840
+                              },
+                              "indeksi": 1,
+                              "id": 422944847
+                            },
+                            {
+                              "funktiokutsu": {
+                                "funktionimi": "LUKUARVO",
+                                "tallennaTulos": false,
+                                "omaopintopolku": false,
+                                "arvokonvertteriparametrit": [],
+                                "arvovalikonvertteriparametrit": [],
+                                "syoteparametrit": [
+                                  {
+                                    "avain": "luku",
+                                    "arvo": "0"
+                                  }
+                                ],
+                                "funktioargumentit": [],
+                                "valintaperusteviitteet": [],
+                                "id": 422944844
+                              },
+                              "indeksi": 2,
+                              "id": 422944848
+                            }
+                          ],
+                          "valintaperusteviitteet": [],
+                          "id": 422944846
+                        },
+                        "indeksi": 1,
+                        "id": 422944872
+                      },
+                      {
+                        "funktiokutsu": {
+                          "funktionimi": "JOS",
+                          "tallennaTulos": false,
+                          "omaopintopolku": false,
+                          "arvokonvertteriparametrit": [],
+                          "arvovalikonvertteriparametrit": [],
+                          "syoteparametrit": [],
+                          "funktioargumentit": [
+                            {
+                              "funktiokutsu": {
+                                "funktionimi": "SUUREMPITAIYHTASUURI",
+                                "tallennaTulos": false,
+                                "omaopintopolku": false,
+                                "arvokonvertteriparametrit": [],
+                                "arvovalikonvertteriparametrit": [],
+                                "syoteparametrit": [],
+                                "funktioargumentit": [
+                                  {
+                                    "funktiokutsu": {
+                                      "funktionimi": "LUKUARVO",
+                                      "tallennaTulos": false,
+                                      "omaopintopolku": false,
+                                      "arvokonvertteriparametrit": [],
+                                      "arvovalikonvertteriparametrit": [],
+                                      "syoteparametrit": [
+                                        {
+                                          "avain": "luku",
+                                          "arvo": "0"
+                                        }
+                                      ],
+                                      "funktioargumentit": [],
+                                      "valintaperusteviitteet": [],
+                                      "id": 422944855
+                                    },
+                                    "indeksi": 2,
+                                    "id": 422944859
+                                  },
+                                  {
+                                    "funktiokutsu": {
+                                      "funktionimi": "HAELUKUARVO",
+                                      "tallennaTulos": false,
+                                      "omaopintopolku": false,
+                                      "arvokonvertteriparametrit": [],
+                                      "arvovalikonvertteriparametrit": [
+                                        {
+                                          "paluuarvo": "",
+                                          "minValue": "0",
+                                          "maxValue": "10",
+                                          "palautaHaettuArvo": "true",
+                                          "hylkaysperuste": "false",
+                                          "kuvaukset": {
+                                            "tekstit": []
+                                          }
+                                        }
+                                      ],
+                                      "syoteparametrit": [
+                                        {
+                                          "avain": "oletusarvo",
+                                          "arvo": "-1"
+                                        }
+                                      ],
+                                      "funktioargumentit": [],
+                                      "valintaperusteviitteet": [
+                                        {
+                                          "tunniste": "IB_paiva_essee",
+                                          "kuvaus": "Suomessa essee (3 p./10 p.)",
+                                          "lahde": "SYOTETTAVA_ARVO",
+                                          "onPakollinen": false,
+                                          "epasuoraViittaus": false,
+                                          "indeksi": 2,
+                                          "vaatiiOsallistumisen": false,
+                                          "syotettavissaKaikille": false,
+                                          "kuvaukset": {
+                                            "tekstit": []
+                                          },
+                                          "tilastoidaan": false
+                                        }
+                                      ],
+                                      "id": 422944851
+                                    },
+                                    "indeksi": 1,
+                                    "id": 422944858
+                                  }
+                                ],
+                                "valintaperusteviitteet": [],
+                                "id": 422944857
+                              },
+                              "indeksi": 1,
+                              "id": 422944868
+                            },
+                            {
+                              "funktiokutsu": {
+                                "funktionimi": "HYLKAA",
+                                "tallennaTulos": false,
+                                "omaopintopolku": false,
+                                "arvokonvertteriparametrit": [],
+                                "arvovalikonvertteriparametrit": [],
+                                "syoteparametrit": [
+                                  {
+                                    "avain": "hylkaysperustekuvaus_FI",
+                                    "arvo": "Hakija ei osallistunut valintakokeeseen"
+                                  },
+                                  {
+                                    "avain": "hylkaysperustekuvaus_EN",
+                                    "arvo": "Applicant did not participate in the entrance examination."
+                                  },
+                                  {
+                                    "avain": "hylkaysperustekuvaus_SV",
+                                    "arvo": "Deltog inte i urvalsprovet."
+                                  }
+                                ],
+                                "funktioargumentit": [
+                                  {
+                                    "funktiokutsu": {
+                                      "funktionimi": "TOTUUSARVO",
+                                      "tallennaTulos": false,
+                                      "omaopintopolku": false,
+                                      "arvokonvertteriparametrit": [],
+                                      "arvovalikonvertteriparametrit": [],
+                                      "syoteparametrit": [
+                                        {
+                                          "avain": "totuusarvo",
+                                          "arvo": "true"
+                                        }
+                                      ],
+                                      "funktioargumentit": [],
+                                      "valintaperusteviitteet": [],
+                                      "id": 422944860
+                                    },
+                                    "indeksi": 1,
+                                    "id": 422944863
+                                  }
+                                ],
+                                "valintaperusteviitteet": [],
+                                "id": 422944862
+                              },
+                              "indeksi": 3,
+                              "id": 422944870
+                            },
+                            {
+                              "funktiokutsu": {
+                                "funktionimi": "NIMETTYLUKUARVO",
+                                "tallennaTulos": false,
+                                "omaopintopolku": false,
+                                "arvokonvertteriparametrit": [],
+                                "arvovalikonvertteriparametrit": [],
+                                "syoteparametrit": [
+                                  {
+                                    "avain": "nimi",
+                                    "arvo": "IB_paiva_koepisteet2019"
+                                  }
+                                ],
+                                "funktioargumentit": [
+                                  {
+                                    "funktiokutsu": {
+                                      "funktionimi": "SUMMA",
+                                      "tallennaTulos": false,
+                                      "omaopintopolku": false,
+                                      "arvokonvertteriparametrit": [],
+                                      "arvovalikonvertteriparametrit": [],
+                                      "syoteparametrit": [],
+                                      "funktioargumentit": [
+                                        {
+                                          "funktiokutsu": {
+                                            "funktionimi": "HAELUKUARVO",
+                                            "tallennaTulos": false,
+                                            "omaopintopolku": false,
+                                            "arvokonvertteriparametrit": [],
+                                            "arvovalikonvertteriparametrit": [
+                                              {
+                                                "paluuarvo": "",
+                                                "minValue": "0",
+                                                "maxValue": "2",
+                                                "palautaHaettuArvo": "true",
+                                                "hylkaysperuste": "true",
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Multiple choice questions below 2 points. (one or several part/s of the exam failed)"
+                                                    },
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Monivalintakysymykset alle 2 pistettä. (yksi tai useampi valintakokeen osio hylätty)"
+                                                    },
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Multiple choice questions below 2 points. (one or several part/s of the exam failed)"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "paluuarvo": "",
+                                                "minValue": "2",
+                                                "maxValue": "6",
+                                                "palautaHaettuArvo": "true",
+                                                "hylkaysperuste": "false",
+                                                "kuvaukset": {
+                                                  "tekstit": []
+                                                }
+                                              }
+                                            ],
+                                            "syoteparametrit": [
+                                              {
+                                                "avain": "oletusarvo",
+                                                "arvo": ""
+                                              }
+                                            ],
+                                            "funktioargumentit": [],
+                                            "valintaperusteviitteet": [
+                                              {
+                                                "tunniste": "IB_paiva_monivalinta",
+                                                "kuvaus": "Suomessa monivalintakysymykset (2 p./6 p.)",
+                                                "lahde": "SYOTETTAVA_ARVO",
+                                                "onPakollinen": false,
+                                                "epasuoraViittaus": false,
+                                                "indeksi": 2,
+                                                "vaatiiOsallistumisen": true,
+                                                "syotettavissaKaikille": false,
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Applicant did not participate in the entrance examination or part of the examination."
+                                                    },
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Deltog inte i urvalsprovet."
+                                                    },
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Hakija ei ole osallistunut valintakokeen osioon / valintakokeeseen."
+                                                    }
+                                                  ]
+                                                },
+                                                "tilastoidaan": true
+                                              }
+                                            ],
+                                            "id": 422945949
+                                          },
+                                          "indeksi": 4,
+                                          "id": 422945969
+                                        },
+                                        {
+                                          "funktiokutsu": {
+                                            "funktionimi": "HAELUKUARVO",
+                                            "tallennaTulos": false,
+                                            "omaopintopolku": false,
+                                            "arvokonvertteriparametrit": [],
+                                            "arvovalikonvertteriparametrit": [
+                                              {
+                                                "paluuarvo": "",
+                                                "minValue": "2",
+                                                "maxValue": "8",
+                                                "palautaHaettuArvo": "true",
+                                                "hylkaysperuste": "false",
+                                                "kuvaukset": {
+                                                  "tekstit": []
+                                                }
+                                              },
+                                              {
+                                                "paluuarvo": "",
+                                                "minValue": "0",
+                                                "maxValue": "2",
+                                                "palautaHaettuArvo": "true",
+                                                "hylkaysperuste": "true",
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Logical thinking below 2 points. (one or several part/s of the exam failed)"
+                                                    },
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Matemaattis-looginen osa alle 2 pistettä. (yksi tai useampi valintakokeen osio hylätty)"
+                                                    },
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Logical thinking below 2 points. (one or several part/s of the exam failed)"
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            ],
+                                            "syoteparametrit": [
+                                              {
+                                                "avain": "oletusarvo",
+                                                "arvo": ""
+                                              }
+                                            ],
+                                            "funktioargumentit": [],
+                                            "valintaperusteviitteet": [
+                                              {
+                                                "tunniste": "IB_paiva_matloog",
+                                                "kuvaus": "Suomessa matemaattis-loogista ajattelua mittaava osa (2 p./8 p.)",
+                                                "lahde": "SYOTETTAVA_ARVO",
+                                                "onPakollinen": false,
+                                                "epasuoraViittaus": false,
+                                                "indeksi": 2,
+                                                "vaatiiOsallistumisen": true,
+                                                "syotettavissaKaikille": false,
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Deltog inte i urvalsprovet."
+                                                    },
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Hakija ei ole osallistunut valintakokeen osioon / valintakokeeseen."
+                                                    },
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Applicant did not participate in the entrance examination or part of the examination."
+                                                    }
+                                                  ]
+                                                },
+                                                "tilastoidaan": true
+                                              }
+                                            ],
+                                            "id": 422945921
+                                          },
+                                          "indeksi": 2,
+                                          "id": 422945967
+                                        },
+                                        {
+                                          "funktiokutsu": {
+                                            "funktionimi": "HAELUKUARVO",
+                                            "tallennaTulos": false,
+                                            "omaopintopolku": false,
+                                            "arvokonvertteriparametrit": [
+                                              {
+                                                "paluuarvo": "0",
+                                                "arvo": "1",
+                                                "hylkaysperuste": "false",
+                                                "kuvaukset": {
+                                                  "tekstit": []
+                                                }
+                                              },
+                                              {
+                                                "paluuarvo": "0",
+                                                "arvo": "0",
+                                                "hylkaysperuste": "true",
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Compulsory exam section has been failed"
+                                                    },
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Valintakokeen pakollinen osio hylätty"
+                                                    },
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Urvalsprovets obligatoriska del underkänt"
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            ],
+                                            "arvovalikonvertteriparametrit": [],
+                                            "syoteparametrit": [
+                                              {
+                                                "avain": "oletusarvo",
+                                                "arvo": ""
+                                              }
+                                            ],
+                                            "funktioargumentit": [],
+                                            "valintaperusteviitteet": [
+                                              {
+                                                "tunniste": "IB_paiva_pakollinenosio",
+                                                "kuvaus": "Suomessa valintakokeen pakollinen osio (0=hylätty)",
+                                                "lahde": "SYOTETTAVA_ARVO",
+                                                "onPakollinen": false,
+                                                "epasuoraViittaus": false,
+                                                "indeksi": 2,
+                                                "vaatiiOsallistumisen": true,
+                                                "syotettavissaKaikille": false,
+                                                "kuvaukset": {
+                                                  "tekstit": []
+                                                },
+                                                "tilastoidaan": false
+                                              }
+                                            ],
+                                            "id": 422945960
+                                          },
+                                          "indeksi": 5,
+                                          "id": 422945970
+                                        },
+                                        {
+                                          "funktiokutsu": {
+                                            "funktionimi": "HAELUKUARVO",
+                                            "tallennaTulos": false,
+                                            "omaopintopolku": false,
+                                            "arvokonvertteriparametrit": [],
+                                            "arvovalikonvertteriparametrit": [
+                                              {
+                                                "paluuarvo": "",
+                                                "minValue": "3",
+                                                "maxValue": "10",
+                                                "palautaHaettuArvo": "true",
+                                                "hylkaysperuste": "false",
+                                                "kuvaukset": {
+                                                  "tekstit": []
+                                                }
+                                              },
+                                              {
+                                                "paluuarvo": "",
+                                                "minValue": "0",
+                                                "maxValue": "3",
+                                                "palautaHaettuArvo": "true",
+                                                "hylkaysperuste": "true",
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Essee alle 3 pistettä. (yksi tai useampi valintakokeen osio hylätty)"
+                                                    },
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Essay below 3 points. (one or several part/s of the exam failed)"
+                                                    },
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Essay below 3 points. (one or several part/s of the exam failed)"
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            ],
+                                            "syoteparametrit": [
+                                              {
+                                                "avain": "oletusarvo",
+                                                "arvo": ""
+                                              }
+                                            ],
+                                            "funktioargumentit": [],
+                                            "valintaperusteviitteet": [
+                                              {
+                                                "tunniste": "IB_paiva_essee",
+                                                "kuvaus": "Suomessa essee (3 p./10 p.)",
+                                                "lahde": "SYOTETTAVA_ARVO",
+                                                "onPakollinen": false,
+                                                "epasuoraViittaus": false,
+                                                "indeksi": 2,
+                                                "vaatiiOsallistumisen": true,
+                                                "syotettavissaKaikille": false,
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Deltog inte i urvalsprovet."
+                                                    },
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Hakija ei ole osallistunut valintakokeen osioon / valintakokeeseen."
+                                                    },
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Did not participate entrance examination or in the compulsory entrance examination section."
+                                                    }
+                                                  ]
+                                                },
+                                                "tilastoidaan": true
+                                              }
+                                            ],
+                                            "id": 422945907
+                                          },
+                                          "indeksi": 1,
+                                          "id": 422945966
+                                        },
+                                        {
+                                          "funktiokutsu": {
+                                            "funktionimi": "HAELUKUARVO",
+                                            "tallennaTulos": false,
+                                            "omaopintopolku": false,
+                                            "arvokonvertteriparametrit": [],
+                                            "arvovalikonvertteriparametrit": [
+                                              {
+                                                "paluuarvo": "",
+                                                "minValue": "0",
+                                                "maxValue": "3",
+                                                "palautaHaettuArvo": "true",
+                                                "hylkaysperuste": "true",
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Haastattelu alle 3 pistettä. (yksi tai useampi valintakokeen osio hylätty)"
+                                                    },
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Interview below 3 points. (one or several part/s of the exam failed)"
+                                                    },
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Interview below 3 points. (one or several part/s of the exam failed)"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "paluuarvo": "",
+                                                "minValue": "3",
+                                                "maxValue": "16",
+                                                "palautaHaettuArvo": "true",
+                                                "hylkaysperuste": "false",
+                                                "kuvaukset": {
+                                                  "tekstit": []
+                                                }
+                                              }
+                                            ],
+                                            "syoteparametrit": [
+                                              {
+                                                "avain": "oletusarvo",
+                                                "arvo": ""
+                                              }
+                                            ],
+                                            "funktioargumentit": [],
+                                            "valintaperusteviitteet": [
+                                              {
+                                                "tunniste": "IB_paiva_haastattelu",
+                                                "kuvaus": "Suomessa haastattelu (3 p./16 p.)",
+                                                "lahde": "SYOTETTAVA_ARVO",
+                                                "onPakollinen": false,
+                                                "epasuoraViittaus": false,
+                                                "indeksi": 2,
+                                                "vaatiiOsallistumisen": true,
+                                                "syotettavissaKaikille": false,
+                                                "kuvaukset": {
+                                                  "tekstit": [
+                                                    {
+                                                      "kieli": "FI",
+                                                      "teksti": "Hakija ei ole osallistunut valintakokeen osioon / valintakokeeseen."
+                                                    },
+                                                    {
+                                                      "kieli": "SV",
+                                                      "teksti": "Deltog inte i urvalsprovet."
+                                                    },
+                                                    {
+                                                      "kieli": "EN",
+                                                      "teksti": "Applicant did not participate in the entrance examination or part of the examination."
+                                                    }
+                                                  ]
+                                                },
+                                                "tilastoidaan": true
+                                              }
+                                            ],
+                                            "id": 422945935
+                                          },
+                                          "indeksi": 3,
+                                          "id": 422945968
+                                        }
+                                      ],
+                                      "valintaperusteviitteet": [],
+                                      "id": 422945965
+                                    },
+                                    "indeksi": 1,
+                                    "id": 422945972
+                                  }
+                                ],
+                                "valintaperusteviitteet": [],
+                                "id": 422945971
+                              },
+                              "indeksi": 2,
+                              "id": 422944869
+                            }
+                          ],
+                          "valintaperusteviitteet": [],
+                          "id": 422944867
+                        },
+                        "indeksi": 3,
+                        "id": 422944874
+                      }
+                    ],
+                    "valintaperusteviitteet": [],
+                    "id": 422944871
+                  },
+                  "indeksi": 1,
+                  "id": 422944876
+                }
+              ],
+              "valintaperusteviitteet": [],
+              "id": 422944875
+            }
+          }
+        ],
+        "eiVarasijatayttoa": false,
+        "poissaOlevaTaytto": true,
+        "kaikkiEhdonTayttavatHyvaksytaan": false,
+        "kaytetaanValintalaskentaa": true,
+        "valmisSijoiteltavaksi": true,
+        "valisijoittelu": false,
+        "poistetaankoHylatyt": false
+      }
+    ],
+    "valintakoe": [],
+    "nimi": "Varsinainen valinta",
+    "aktiivinen": true,
+    "valinnanVaiheTyyppi": "TAVALLINEN"
+  },
+  "hakukohteenValintaperuste": []
+}

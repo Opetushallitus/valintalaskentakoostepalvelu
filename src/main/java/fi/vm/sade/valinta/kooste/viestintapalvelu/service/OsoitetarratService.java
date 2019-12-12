@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -24,6 +25,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import io.reactivex.Observable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
@@ -31,12 +33,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -170,7 +177,7 @@ public class OsoitetarratService {
                     boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> selvitetytTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                     if (kutsutaankoJossainKokeessaKaikki) {
                         (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                                ? applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid)
+                                ? Observable.fromFuture(applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid))
                                 : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)))
                                 .subscribe(hakemukset -> {
                                     haetutHakemuksetRef.set(hakemukset);
@@ -182,7 +189,7 @@ public class OsoitetarratService {
                     }
                 },
                 poikkeuskasittelija);
-            valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid).subscribe(osallistumiset -> {
+            Observable.fromFuture(valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)).subscribe(osallistumiset -> {
                 osallistumistiedotRef.set(osallistumiset);
                 laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);

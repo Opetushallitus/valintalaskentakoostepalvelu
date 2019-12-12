@@ -12,7 +12,6 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
@@ -20,17 +19,20 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganizati
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultRyhmaliitos;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
+import io.reactivex.Observable;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,28 +99,30 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource implements 
     }
 
     @Override
-    public Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
-        Observable<ResultSearch> s = this.getAsObservableLazily(
-                getUrl("tarjonta-service.hakukohde.search"),
-                new TypeToken<ResultSearch>() {
-                }.getType(), client -> {
-                    client.query("hakuOid", hakuOid);
-                    return client;
-                });
+    public CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("hakuOid", hakuOid);
+        CompletableFuture<ResultSearch> s = this.client.getJson(
+            getUrl("tarjonta-service.hakukohde.search", parameters),
+            Duration.ofMinutes(5),
+            new com.google.gson.reflect.TypeToken<ResultSearch>() {
+            }.getType());
         return resultSearchToHakukohdeRyhmaMap(s);
     }
 
-    public static Observable<Map<String, List<String>>> resultSearchToHakukohdeRyhmaMap(Observable<ResultSearch> observable) {
-        return observable.map(ResultSearch::getResult)
-                .map(ResultTulos::getTulokset)
-                .flatMap(Observable::fromIterable)
-                .map(ResultOrganization::getTulokset)
-                .flatMap(Observable::fromIterable)
-                .map((ResultHakukohde s) -> new ImmutablePair<>(
-                        s.getOid(),
-                        getRyhmaList(s)))
-                .toMap(Pair::getKey, Pair::getValue).toObservable();
+    public static CompletableFuture<Map<String, List<String>>> resultSearchToHakukohdeRyhmaMap(CompletableFuture<ResultSearch> future) {
+        CompletableFuture<List<ResultOrganization>> organizationsFuture = future.thenApplyAsync(ResultSearch::getResult)
+            .thenApplyAsync(ResultTulos::getTulokset)
+            .thenComposeAsync(l -> CompletableFutureUtil.sequence(
+                l.stream().map(CompletableFuture::completedFuture).collect(Collectors.toList())));
+
+        return organizationsFuture
+            .thenApplyAsync(orgs -> orgs.stream().map(ResultOrganization::getTulokset).collect(Collectors.toList()))
+            .thenApplyAsync(hakukohdeListLists -> hakukohdeListLists.stream().flatMap(List::stream).collect(Collectors.toList()))
+            .thenApplyAsync(hks -> hks.stream().map(hk -> new ImmutablePair<>(hk.getOid(), getRyhmaList(hk))).collect(Collectors.toList()))
+            .thenApplyAsync(pairs -> pairs.stream().collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
     }
+
 
     private static List<String> getRyhmaList (ResultHakukohde hk) {
         if (hk.getRyhmaliitokset () != null)

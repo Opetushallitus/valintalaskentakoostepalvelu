@@ -7,6 +7,8 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -19,7 +21,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.net.HttpCookie;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Profile("test")
 @Configuration
 public class KoosteTestProfileConfiguration {
+    private static final Logger LOG = LoggerFactory.getLogger(KoosteTestProfileConfiguration.class);
 
     public static AtomicReference<String> PROXY_SERVER = new AtomicReference<>();
 
@@ -37,14 +39,16 @@ public class KoosteTestProfileConfiguration {
         Properties p0 = new Properties();
         p0.setProperty("valintalaskentakoostepalvelu.jatkuvasijoittelu.timer", "time=2018-12-12 10:12:12&delay=10000000");
         p0.setProperty("valintalaskentakoostepalvelu.valintalaskenta.rest.url", "http://" + proxyServer + "/valintalaskenta-laskenta-service/resources");
-        p0.setProperty("valintalaskentakoostepalvelu.ryhmasahkoposti.url", "http://" + proxyServer + "/ryhmasahkoposti-service");
         p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url", "http://" + proxyServer + "/viestintapalvelu");
         p0.setProperty("valintalaskentakoostepalvelu.hakemus.rest.url", "http://" + proxyServer + "/haku-app");
         p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
         p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.valintatulosservice.rest.url",Optional.ofNullable(System.getProperty("vts_server")).orElse("http://" + proxyServer) + "/valinta-tulos-service");
-        p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url",Optional.ofNullable(System.getProperty("sijoittelu_server")).orElse("http://" + proxyServer) + "/sijoittelu-service/resources");
+
+        p0.setProperty("valintalaskentakoostepalvelu.koski.username", "koostepalvelu2koski");
+        p0.setProperty("valintalaskentakoostepalvelu.koski.password", "secret");
+        p0.setProperty("valintalaskentakoostepalvelu.koski.max.oppijat.post.size", "5000");
+        p0.setProperty("valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta", "HAEAMMATILLINENYTOARVOSANA,HAEAMMATILLINENYTOARVIOINTIASTEIKKO");
 
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://" + proxyServer + "/organisaatio-service/rest");
@@ -52,8 +56,6 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.tarjonta.rest.url", "http://" + proxyServer + "/tarjonta-service/rest");
         p0.setProperty("valintalaskentakoostepalvelu.koodisto.url", "https://itest-virkailija.oph.ware.fi/");
         p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.valintaperusteet.rest.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.oppijantunnistus.rest.url", "http://" + proxyServer + "/oppijan-tunnistus");
         p0.setProperty("valintalaskentakoostepalvelu.kirjeet.polling.interval.millis", "50");
         p0.setProperty("root.organisaatio.oid", "");
         p0.setProperty("kela.ftp.protocol", "ftp");
@@ -79,7 +81,6 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("cas.service.haku-service", "");
         p0.setProperty("cas.service.authentication-service", "");
         p0.setProperty("cas.service.oppijanumerorekisteri-service", "");
-        p0.setProperty("valintalaskentakoostepalvelu.authentication.rest.url", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.username.to.sijoittelu", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.password.to.sijoittelu", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.username.to.valintatieto", "");
@@ -95,6 +96,8 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("omatsivut.email.application.modify.link.sv", "https://sv.test.domain/token/");
 
         p0.setProperty("valintalaskentakoostepalvelu.tarjonta.sync.cron", "0 0 0 * * SUN-SAT");
+
+        LOG.info(String.format("Lisätään testiajoa varten propertyjä: %s", p0));
 
         org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
         defaultProps.setProperties(p0);
@@ -140,6 +143,11 @@ public class KoosteTestProfileConfiguration {
 
     @Bean(name = "OppijanumerorekisteriApplicationSession")
     public ApplicationSession getOppijanumerorekisteriApplicationSession() {
+        return APPLICATION_SESSION;
+    }
+
+    @Bean(name = "SuoritusrekisteriApplicationSession")
+    public ApplicationSession getSuoritusrekisteriApplicationSession() {
         return APPLICATION_SESSION;
     }
 

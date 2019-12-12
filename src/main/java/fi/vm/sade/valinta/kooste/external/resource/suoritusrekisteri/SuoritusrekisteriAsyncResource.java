@@ -6,30 +6,31 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import io.reactivex.Observable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface SuoritusrekisteriAsyncResource {
 
     Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
                                                    String hakuOid);
 
-    Observable<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid,
-                                                                          String hakuOid);
+    CompletableFuture<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid,
+                                                                                 String hakuOid);
 
     Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid);
 
-    Observable<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid);
+    CompletableFuture<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid);
 
     Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid);
 
     Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids);
 
-    Observable<Suoritus> postSuoritus(Suoritus suoritus);
+    CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus);
 
-    Observable<Arvosana> postArvosana(Arvosana arvosana);
+    CompletableFuture<Arvosana> postArvosana(Arvosana arvosana);
 
-    Observable<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues);
+    CompletableFuture<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues);
 
-    Observable<String> deleteSuoritus(String suoritusId);
+    CompletableFuture<String> deleteSuoritus(String suoritusId);
 
-    Observable<String> deleteArvosana(String arvosanaId);
+    CompletableFuture<String> deleteArvosana(String arvosanaId);
 }

@@ -1,5 +1,9 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
+import static io.reactivex.Observable.zip;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
@@ -22,21 +26,22 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valin
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import org.apache.commons.lang3.BooleanUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static io.reactivex.Observable.zip;
 
 @Service
 public class ErillishaunVientiService {
@@ -73,7 +78,7 @@ public class ErillishaunVientiService {
         Observable<HakuV1RDTO> hakuFuture = Observable.fromFuture(hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid()));
         Observable<List<HakemusWrapper>> hakemusObservable = hakuFuture.flatMap(haku -> {
             if (haku.getAtaruLomakeAvain() == null) {
-                return applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
+                return Observable.fromFuture(applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()));
             } else {
                 return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(erillishaku.getHakukohdeOid()));
             }

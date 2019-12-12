@@ -8,8 +8,8 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
-import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,8 +61,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     }
 
     @Override
-    public Observable<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
-        return Observable.just(Maps.newHashMap());
+    public CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
+        return CompletableFuture.completedFuture(Maps.newHashMap());
     }
 
     public static void setMockHaku(HakuV1RDTO mockHaku) {

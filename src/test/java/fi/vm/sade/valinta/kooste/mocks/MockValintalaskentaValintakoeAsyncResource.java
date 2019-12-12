@@ -8,6 +8,7 @@ import io.reactivex.Observable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -44,8 +45,8 @@ public class MockValintalaskentaValintakoeAsyncResource implements Valintalasken
     }
 
     @Override
-    public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
-        return Observable.just(osallistumistiedot.get());
+    public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
+        return CompletableFuture.completedFuture(osallistumistiedot.get());
     }
 
     @Override

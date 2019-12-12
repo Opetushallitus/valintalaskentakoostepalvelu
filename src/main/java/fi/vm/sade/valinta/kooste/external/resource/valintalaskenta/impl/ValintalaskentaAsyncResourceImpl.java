@@ -4,6 +4,7 @@ import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.UUSI;
 import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VALMIS;
 import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VIRHE;
 
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
@@ -11,24 +12,29 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.Laskentakutsu;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import io.reactivex.Observable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import io.reactivex.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
     private final int MAX_POLL_INTERVAL_IN_SECONDS = 30;
+    private final HttpClient httpclient;
 
-    public ValintalaskentaAsyncResourceImpl() {
+    public ValintalaskentaAsyncResourceImpl(@Qualifier("ValintalaskentaHttpClient") HttpClient httpclient) {
         super(TimeUnit.HOURS.toMillis(8));
+        this.httpclient = httpclient;
     }
     @Override
     public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
@@ -113,21 +119,24 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     public Observable<String> kutsuRajapintaaPollaten(String api, Laskentakutsu laskentakutsu) {
         LOG.info("(Uuid: {}) Lähetetään laskenta-servicelle laskentakutsu. (Pollkey: {})", laskentakutsu.getUuid(), laskentakutsu.getPollKey());
-        return postAsObservableLazily(
-                getUrl(api),
-                String.class,
-                Entity.entity(laskentakutsu, MediaType.APPLICATION_JSON_TYPE),
-                client -> {
-                    client.accept(MediaType.TEXT_PLAIN_TYPE);
-                    return client;
-                }).switchMap(rval -> {
-                    if (UUSI.equals(rval)) {
-                        LOG.info("Saatiin tieto, että uusi laskenta on luotu (Pollkey: {}). Pollataan sen tilaa kunnes se on päättynyt (VALMIS tai VIRHE).", laskentakutsu.getPollKey());
-                        return pollaa(1, rval, laskentakutsu.getUuid(), laskentakutsu.getPollKey());
-                    } else {
-                        LOG.error("Yritettiin käynnistää laskenta, mutta saatiin palautusarvona {} eikä UUSI. Pollauksen pitäisi olla käynnissä muualla. Ei pollata.", rval);
-                        return Observable.error(new RuntimeException(String.format("Laskenta (pollKey=%s) epäonnistui!", laskentakutsu.getPollKey())));
-                    }
-                });
+
+        CompletableFuture<String> requestFuture = httpclient.post(
+            getUrl(api),
+            Duration.ofMinutes(10),
+            httpclient.createJsonBodyPublisher(laskentakutsu, Laskentakutsu.class),
+            builder -> builder
+                .header("Content-Type", "application/json")
+                .header("Accept", "text/plain"),
+            httpclient::parseTxt);
+
+        return Observable.fromFuture(requestFuture).switchMap(rval -> {
+            if (UUSI.equals(rval)) {
+                LOG.info("Saatiin tieto, että uusi laskenta on luotu (Pollkey: {}). Pollataan sen tilaa kunnes se on päättynyt (VALMIS tai VIRHE).", laskentakutsu.getPollKey());
+                return pollaa(1, rval, laskentakutsu.getUuid(), laskentakutsu.getPollKey());
+            } else {
+                LOG.error("Yritettiin käynnistää laskenta, mutta saatiin palautusarvona {} eikä UUSI. Pollauksen pitäisi olla käynnissä muualla. Ei pollata.", rval);
+                return Observable.error(new RuntimeException(String.format("Laskenta (pollKey=%s) epäonnistui!", laskentakutsu.getPollKey())));
+            }
+        });
     }
 }

@@ -1,15 +1,25 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import fi.vm.sade.service.valintaperusteet.dto.*;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
+import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -37,13 +47,13 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
         return null;
     }
     @Override
-    public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
+    public CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
         return null;
     }
 
     @Override
-    public Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
-        return Observable.just(hakukohteenValintaperusteetReference.get());
+    public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
+        return CompletableFuture.completedFuture(hakukohteenValintaperusteetReference.get());
     }
 
     public static void setHakukohteenValintaperusteetResult(List<ValintaperusteetDTO> hakukohteenValintaperusteetResult) {
@@ -86,8 +96,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-        return Observable.just(valintaperusteetResultReference.get());
+    public CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
+        return CompletableFuture.completedFuture(valintaperusteetResultReference.get());
     }
 
     @Override
