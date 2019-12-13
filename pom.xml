@@ -803,6 +803,7 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
+            <version>${valinta-sharedutils.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
