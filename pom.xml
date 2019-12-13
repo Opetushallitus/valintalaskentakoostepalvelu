@@ -27,7 +27,7 @@
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>7.4.0-SNAPSHOT</sijoittelu.version>
-        <valinta-sharedutils.version>5.7-SNAPSHOT</valinta-sharedutils.version>
+        <valinta-sharedutils.version>5.8-SNAPSHOT</valinta-sharedutils.version>
         <valintaperusteet.version>5.8-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>5.8-SNAPSHOT</valintalaskenta.version>
     </properties>
@@ -803,6 +803,7 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
+            <version>${valinta-sharedutils.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
@@ -1088,9 +1089,13 @@ buildTtime=${maven.build.timestamp}
             <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
             <releases>
                 <enabled>false</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
         <repository>
@@ -1098,9 +1103,13 @@ buildTtime=${maven.build.timestamp}
             <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local</url>
             <releases>
                 <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
             </releases>
             <snapshots>
                 <enabled>false</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
         <repository>

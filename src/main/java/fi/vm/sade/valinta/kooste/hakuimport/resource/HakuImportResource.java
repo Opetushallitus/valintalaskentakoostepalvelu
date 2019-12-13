@@ -3,13 +3,21 @@ package fi.vm.sade.valinta.kooste.hakuimport.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.Collection;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 
+import fi.vm.sade.auditlog.Changes;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.ValintaResource;
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,15 +65,23 @@ public class HakuImportResource {
     @GET
     @Path("/aktivoi")
     @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
-    public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
+    public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid, @Context HttpServletRequest request) {
         if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
-            return "no privileges.";
+            String errorMessage = "no privileges";
+            AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.HAKU_TUONNIN_AKTIVOINTI,
+                    ValintaResource.HAKU, hakuOid, Changes.EMPTY, Map.of("error", errorMessage));
+            return errorMessage;
         }
 
         if (StringUtils.isBlank(hakuOid)) {
-            return "get parameter 'hakuOid' required";
+            String errorMessage = "get parameter 'hakuOid' required";
+            AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.HAKU_TUONNIN_AKTIVOINTI,
+                    ValintaResource.HAKU, "", Changes.EMPTY, Map.of("error", errorMessage));
+            return errorMessage;
         } else {
             LOG.info("Haku import haulle {}", hakuOid);
+            AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.HAKU_TUONNIN_AKTIVOINTI,
+                    ValintaResource.HAKU, hakuOid, Changes.EMPTY);
             hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid);
             return "in progress";
         }
@@ -74,14 +90,19 @@ public class HakuImportResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @GET
     @Path("/hakukohde")
-    @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
+    @ApiOperation(value = "Hakukohde tuonnin aktivointi", response = String.class)
     public String aktivoiHakukohdeImport(
-            @QueryParam("hakukohdeOid") String hakukohdeOid) {
+            @QueryParam("hakukohdeOid") String hakukohdeOid, @Context HttpServletRequest request) {
 
         if (StringUtils.isBlank(hakukohdeOid)) {
-            return "get parameter 'hakukohde' required";
+            String errorMessage = "get parameter 'hakukohde' required";
+            AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.HAKUKOHDE_TUONNIN_AKTIVOINTI,
+                    ValintaResource.HAKUKOHDE, "", Changes.EMPTY, Map.of("error", errorMessage));
+            return errorMessage;
         } else {
             LOG.info("Hakukohde import hakukohteelle {}", hakukohdeOid);
+            AuditLog.log(KoosteAudit.AUDIT, AuditLog.getUser(request), ValintaperusteetOperation.HAKUKOHDE_TUONNIN_AKTIVOINTI,
+                    ValintaResource.HAKUKOHDE, hakukohdeOid, Changes.EMPTY);
             hakukohdeImportRoute.asyncAktivoiHakukohdeImport(hakukohdeOid, new HakuImportProsessi("Hakukohde", "Hakukhode"), SecurityContextHolder.getContext().getAuthentication());
             return "in progress";
         }

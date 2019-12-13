@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.jws.WebParam;
+import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -157,7 +158,8 @@ public class HakuImportKoosteReititysTest {
     @Test
     @Ignore
     public void testImportHaku() {
-        hakuImportAktivointiResource.aktivoiHakuImport(HAKU_OID);
+        HttpServletRequest requestMock = mock(HttpServletRequest.class);
+        hakuImportAktivointiResource.aktivoiHakuImport(HAKU_OID, requestMock);
         ArgumentCaptor<HakukohdeImportDTO> argCaptor = ArgumentCaptor.forClass(HakukohdeImportDTO.class);
         verify(valintaperusteService, times(HAKUKOHDE_URIS_AND_OIDS.length)).tuoHakukohde(argCaptor.capture());
 
