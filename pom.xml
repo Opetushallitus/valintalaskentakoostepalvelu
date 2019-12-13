@@ -1089,9 +1089,13 @@ buildTtime=${maven.build.timestamp}
             <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
             <releases>
                 <enabled>false</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
         <repository>
@@ -1099,9 +1103,13 @@ buildTtime=${maven.build.timestamp}
             <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local</url>
             <releases>
                 <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
             </releases>
             <snapshots>
                 <enabled>false</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
         <repository>
