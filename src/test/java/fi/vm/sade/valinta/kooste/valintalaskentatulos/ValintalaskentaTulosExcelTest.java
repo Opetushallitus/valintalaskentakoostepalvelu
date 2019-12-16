@@ -101,16 +101,6 @@ public class ValintalaskentaTulosExcelTest {
             MockApplicationAsyncResource.setResult(hakemusWrappers);
             MockApplicationAsyncResource.setResultByOid(hakemusWrappers);
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
-            ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-            Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                    Mockito.anyString(),
-                    Mockito.anyString(),
-                    Mockito.anyLong(),
-                    Mockito.anyList(),
-                    Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture()
-            )).thenReturn(new ObservableJust<Response>(null));
-
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
             lisatiedot.setValintakoeTunnisteet(Arrays.asList("7c0c20aa-c9a1-53eb-5e46-ca689b3625c0", "d579283e-ab61-e140-306c-7582a666fd85"));
@@ -119,8 +109,12 @@ public class ValintalaskentaTulosExcelTest {
                             .query("hakukohdeOid", "1.2.246.562.20.40041089257")
                             .post(Entity.entity(lisatiedot, "application/json"));
             assertEquals(200, r.getStatus());
-            byte[] excelBytes = IOUtils.toByteArray(inputStreamArgumentCaptor.getValue());
-            IOUtils.copy(new ByteArrayInputStream(excelBytes), new FileOutputStream("e.xls"));
+
+            JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
+            String storedDocumentId = odotaProsessiaPalautaDokumenttiId(new ProsessiId(dokumenttiJSON.get("id").toString()));
+            final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
+
+            IOUtils.copy(excelData, new FileOutputStream("e.xls"));
         } finally {
             Mocks.reset();
             MockApplicationAsyncResource.clear();
