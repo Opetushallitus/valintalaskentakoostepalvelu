@@ -18,6 +18,7 @@ import io.reactivex.Observable;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -54,7 +55,7 @@ public class ErillishaunVientiServiceTest {
         final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
         final ErillishaunVientiService erillishaunVientiService =
                 new ErillishaunVientiService(mockTilaAsyncResource, failingResource, mockAtaruAsyncResource, mockTarjontaAsyncService, mockDokumenttiAsyncResource, mockKoodistoCachedAsyncResource);
-        when(failingResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid())).thenReturn(Observable.error(new RuntimeException("Vienti epäonnistuu tarkoituksella")));
+        when(failingResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid())).thenReturn(CompletableFuture.failedFuture(new RuntimeException("Vienti epäonnistuu tarkoituksella")));
 
         erillishaunVientiService.vie(new AuditSession(), prosessi, erillishaku);
         verify(prosessi, timeout(10000).times(1)).keskeyta();
@@ -66,7 +67,7 @@ public class ErillishaunVientiServiceTest {
         final ErillishakuProsessiDTO prosessi = spy(new ErillishakuProsessiDTO(1));
 
         ApplicationAsyncResource applicationMock = mock(ApplicationAsyncResource.class);
-        when(applicationMock.getApplicationsByOid(anyString(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
+        when(applicationMock.getApplicationsByOid(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(Lists.newArrayList()));
 
         when(mockTilaAsyncResource.getErillishaunValinnantulokset(anyObject(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
         when(mockTilaAsyncResource.fetchLukuvuosimaksut(anyString(),any())).thenReturn(Observable.just(Lists.newArrayList()));
