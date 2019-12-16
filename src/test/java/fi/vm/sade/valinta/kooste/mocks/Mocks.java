@@ -57,7 +57,7 @@ public class Mocks {
         return MOCKS.dokumenttiAsyncResource;
     }
     public static void reset() {
-        Mockito.reset(getValintapisteAsyncResource(), getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource(), getDokumenttiAsyncResource());
+        Mockito.reset(getValintapisteAsyncResource(), getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource());
     }
 
 }

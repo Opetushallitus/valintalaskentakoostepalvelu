@@ -57,16 +57,6 @@ public class ErillishakuResourceTest {
 
     private void testVientiExcelTiedostoon(Hakutyyppi hakutyyppi) {
         MockApplicationAsyncResource.setResult(createVientiHakemus(hakutyyppi));
-        //mockToReturnInputStreamAndHeaders(GET, "/dokumenttipalvelu-service/resources/dokumentit/tallenna/.*", new org.mockserver.model.Header("Content-Disposition", "attachment; filename=\"kela.txt\""), bytes);
-        ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-        Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyLong(),
-                Mockito.anyList(),
-                Mockito.anyString(),
-                inputStreamArgumentCaptor.capture()
-        )).thenReturn(Observable.just(Response.ok("OK").build()));
 
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)

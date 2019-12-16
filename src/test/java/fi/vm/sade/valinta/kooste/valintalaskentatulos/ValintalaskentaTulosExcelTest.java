@@ -11,19 +11,18 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
+import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
-import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
+import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
@@ -32,6 +31,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenD
 import io.reactivex.Observable;
 import io.reactivex.internal.operators.observable.ObservableJust;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -211,17 +211,6 @@ public class ValintalaskentaTulosExcelTest {
             ));
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
-            ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-            Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                    Mockito.anyString(),
-                    Mockito.anyString(),
-                    Mockito.anyLong(),
-                    Mockito.anyList(),
-                    Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture()
-            )).thenReturn(Observable.just(Response.ok("OK").build()));
-
-
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
             lisatiedot.setValintakoeTunnisteet(Arrays.asList(SELVITETTY_TUNNISTE1, SELVITETTY_TUNNISTE2));
             Response r =
@@ -230,8 +219,11 @@ public class ValintalaskentaTulosExcelTest {
                             .query("hakukohdeOid", HAKUKOHDE1)
                             .post(Entity.entity(lisatiedot, "application/json"));
             assertEquals(200, r.getStatus());
-            byte[] excelBytes = IOUtils.toByteArray(inputStreamArgumentCaptor.getValue());
-            InputStream excelData = new ByteArrayInputStream(excelBytes);
+
+            JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
+            String storedDocumentId = odotaProsessiaPalautaDokumenttiId(new ProsessiId(dokumenttiJSON.get("id").toString()));
+            final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
+
             assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
 
@@ -338,17 +330,6 @@ public class ValintalaskentaTulosExcelTest {
 
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
-            ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-            Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                    Mockito.anyString(),
-                    Mockito.anyString(),
-                    Mockito.anyLong(),
-                    Mockito.anyList(),
-                    Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture()
-            )).thenReturn(Observable.just(Response.ok("OK").build()));
-
-
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
             lisatiedot.setValintakoeTunnisteet(Arrays.asList(SELVITETTY_TUNNISTE1));
             Response r = valintakoekutsutResource.getWebClient()
@@ -356,8 +337,10 @@ public class ValintalaskentaTulosExcelTest {
                             .query("hakukohdeOid", HAKUKOHDE1)
                             .post(Entity.entity(lisatiedot, "application/json"));
             assertEquals(200, r.getStatus());
-            byte[] excelBytes = IOUtils.toByteArray(inputStreamArgumentCaptor.getValue());
-            InputStream excelData = new ByteArrayInputStream(excelBytes);
+
+            JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
+            String storedDocumentId = odotaProsessiaPalautaDokumenttiId(new ProsessiId(dokumenttiJSON.get("id").toString()));
+            final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
             assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
             assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
@@ -370,5 +353,15 @@ public class ValintalaskentaTulosExcelTest {
         } finally {
             Mocks.reset();
         }
+    }
+
+    private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
+        Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessi -> {
+            if (prosessi.poikkeuksia()) {
+                throw new RuntimeException(prosessi.poikkeukset.toString());
+            }
+            return prosessi.valmis();
+        });
+        return valmisProsessi.dokumenttiId;
     }
 }
