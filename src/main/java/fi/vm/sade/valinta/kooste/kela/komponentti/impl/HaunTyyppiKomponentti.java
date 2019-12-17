@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti.impl;
 
+import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.time.Duration;
@@ -71,11 +72,11 @@ public class HaunTyyppiKomponentti {
             return this.client.getJson(
                     this.urlConfiguration.url("koodisto-service.koodiuri", koodiUri),
                     Duration.ofMinutes(1),
-                    LIST_ITEM_TYPE
+                    new TypeToken<String>() {}.getType()
             ).thenApplyAsync(
                     response -> {
                         LOG.error("got response: " + response.toString());
-                        List<Map<String,Object>> json = GSON.fromJson(response.toString(), LIST_ITEM_TYPE);
+                        List<Map<String,Object>> json = GSON.fromJson(new StringReader(response.toString()), LIST_ITEM_TYPE);
                         Map<String, Object> kobject = json.iterator().next();
                         LOG.error("JSON PARSED, GET VALUE: " + kobject.get("koodiArvo").toString());
                         return kobject.get("koodiArvo").toString();
