@@ -71,11 +71,13 @@ public class HaunTyyppiKomponentti {
             return this.client.getJson(
                     this.urlConfiguration.url("koodisto-service.koodiuri", koodiUri),
                     Duration.ofMinutes(1),
-                    new TypeToken<String>() {}.getType()
+                    LIST_ITEM_TYPE
             ).thenApplyAsync(
                     response -> {
+                        LOG.error("got response: " + response.toString());
                         List<Map<String,Object>> json = GSON.fromJson(response.toString(), LIST_ITEM_TYPE);
                         Map<String, Object> kobject = json.iterator().next();
+                        LOG.error("JSON PARSED, GET VALUE: " + kobject.get("koodiArvo").toString());
                         return kobject.get("koodiArvo").toString();
                     }
             ).get();
