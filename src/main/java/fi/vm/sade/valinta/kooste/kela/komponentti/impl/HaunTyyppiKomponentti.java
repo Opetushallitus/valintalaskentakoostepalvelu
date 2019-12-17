@@ -69,18 +69,18 @@ public class HaunTyyppiKomponentti {
 
     private String getKoodiForUri(String haunKohdejoukkoUri, String koodiUri, Integer koodiVersio, SearchKoodisCriteriaType koodistoHaku) {
         try {
-            return this.client.<Koodi>getJson(
+            return this.client.<List<Koodi>>getJson(
                     this.urlConfiguration.url("koodisto-service.koodiuri", koodiUri),
                     Duration.ofMinutes(1),
-                    new TypeToken<Koodi>() {}.getType()
+                    new TypeToken<List<Koodi>>() {}.getType()
             ).thenApplyAsync(
                     response -> {
                         LOG.error("got response: " + response.toString());
 //                        List<Map<String,Object>> json = GSON.fromJson(new StringReader(response.toString()), LIST_ITEM_TYPE);
 //                        Map<String, Object> kobject = json.iterator().next();
 
-                        LOG.error("JSON PARSED, GET VALUE: " + response.getKoodiArvo());
-                        return response.getKoodiArvo();
+                        LOG.error("JSON PARSED, GET VALUE: " + response.get(0).getKoodiArvo());
+                        return response.get(0).getKoodiArvo();
 
                         //return kobject.get("koodiArvo").toString();
                     }
