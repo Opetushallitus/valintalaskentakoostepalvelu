@@ -2,18 +2,24 @@ package fi.vm.sade.valinta.kooste.kela.komponentti.impl;
 
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.properties.OphProperties;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.apache.commons.io.input.AutoCloseInputStream;
 import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.koodisto.service.KoodiService;
@@ -31,14 +37,15 @@ import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 @Component
 public class HaunTyyppiKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HaunTyyppiKomponentti.class);
-    private final KoodiService koodiService;
     private final Gson GSON = new GsonBuilder().create();
     private static final Type LIST_ITEM_TYPE = new TypeToken<List<Map<String,Object>>>() {}.getType();
-    private final UrlConfiguration CONFIG = UrlConfiguration.getInstance();
+    private final HttpClient client;
+    private final UrlConfiguration urlConfiguration;
 
     @Autowired
-    public HaunTyyppiKomponentti(KoodiService koodiService) {
-        this.koodiService = koodiService;
+    public HaunTyyppiKomponentti(@Qualifier("KoodistoHttpClient") HttpClient client) {
+        this.client = client;
+        this.urlConfiguration = UrlConfiguration.getInstance();
     }
 
     public String haunTyyppi(String haunTyyppiUri) {
@@ -60,6 +67,26 @@ public class HaunTyyppiKomponentti {
     }
 
     private String getKoodiForUri(String haunKohdejoukkoUri, String koodiUri, Integer koodiVersio, SearchKoodisCriteriaType koodistoHaku) {
+        try {
+            return this.client.getJson(
+                    this.urlConfiguration.url("koodisto-service.koodiuri", koodiUri),
+                    Duration.ofMinutes(1),
+                    new TypeToken<String>() {}.getType()
+            ).thenApplyAsync(
+                    response -> {
+                        List<Map<String,Object>> json = GSON.fromJson(response.toString(), LIST_ITEM_TYPE);
+                        Map<String, Object> kobject = json.iterator().next();
+                        return kobject.get("koodiArvo").toString();
+                    }
+            ).get();
+        } catch (Exception e) {
+            LOG.error("Unable to fetch 'koodiuri' {} from koodisto!", koodiUri, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+/*
+    private String getKoodiForUris(String haunKohdejoukkoUri, String koodiUri, Integer koodiVersio, SearchKoodisCriteriaType koodistoHaku) {
         String koodistoJson = null;
         try {
             koodistoJson = IOUtils.toString(new AutoCloseInputStream(new URL(CONFIG.url("koodisto-service.koodiuri", koodiUri)).openStream()));
@@ -72,4 +99,5 @@ public class HaunTyyppiKomponentti {
         }
 
     }
+    */
 }
