@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 @Component
 public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(DokumenttipalveluRouteImpl.class);
@@ -31,11 +33,11 @@ public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         try {
-                            dokumenttiAsyncResource.tyhjenna();
+                            dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
                         } catch (Exception e) {
                             LOG.info("Dokumenttipalvelun tyhjennys-kutsu epäonnistui! Yritetään uudelleen.", e);
                             try { // FIXME kill me OK-152
-                                dokumenttiAsyncResource.tyhjenna();
+                                dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
                             } catch (Exception e2) {
                                 LOG.error("Dokumenttipalvelun tyhjennys-kutsu epäonnistui!", e2);
                             }
