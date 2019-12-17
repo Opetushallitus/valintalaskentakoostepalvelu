@@ -75,14 +75,11 @@ public class HaunTyyppiKomponentti {
                     new TypeToken<List<Koodi>>() {}.getType()
             ).thenApplyAsync(
                     response -> {
-                        LOG.error("got response: " + response.toString());
-//                        List<Map<String,Object>> json = GSON.fromJson(new StringReader(response.toString()), LIST_ITEM_TYPE);
-//                        Map<String, Object> kobject = json.iterator().next();
-
-                        LOG.error("JSON PARSED, GET VALUE: " + response.get(0).getKoodiArvo());
-                        return response.get(0).getKoodiArvo();
-
-                        //return kobject.get("koodiArvo").toString();
+                        if (response.iterator().hasNext()) {
+                            return response.iterator().next().getKoodiArvo();
+                        } else {
+                            throw new RuntimeException("Koodisto-fetch failed for koodiuri: " + koodiUri);
+                        }
                     }
             ).get();
         } catch (Exception e) {
