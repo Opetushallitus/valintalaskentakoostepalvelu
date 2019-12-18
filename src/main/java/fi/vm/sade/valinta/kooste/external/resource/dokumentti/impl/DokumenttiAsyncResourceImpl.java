@@ -90,13 +90,13 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
         return this.client.putResponse(
                 getUrl("dokumenttipalvelu-service.dokumentit.tyhjenna"),
                 Duration.ofMinutes(1),
-                "empty body".getBytes(),
+                "I wanna be some body".getBytes(),
                 "text/plain"
         ).thenApply(response -> {
-            if (response.statusCode() == 404) {
-                throw new RuntimeException("Dokumenttipalvelun vanhentuneiden dokumenttien tyhjennys epäonnistui.");
+            if (response.statusCode() != 204) {
+                return null;
             }
-            return null;
+            throw new RuntimeException("Dokumenttipalvelun vanhentuneiden dokumenttien tyhjennys epäonnistui.");
         });
     }
 }
