@@ -27,16 +27,12 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
-import io.reactivex.Observable;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -70,7 +66,7 @@ public class ErillishakuResourceTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(Collections.emptyList(), MediaType.APPLICATION_JSON), ProsessiId.class);
 
-        String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
+        String documentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, prosessiId);
         final InputStream storedDocument = MockDokumenttiAsyncResource.getStoredDocument(documentId);
         assertNotNull(storedDocument);
         verifyCreatedExcelDocument(hakutyyppi, storedDocument);
@@ -127,7 +123,7 @@ public class ErillishakuResourceTest {
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .post(Entity.entity(ExcelTestData.kkHakuToisenAsteenValintatuloksella(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
-        odotaProsessiaPalautaDokumenttiId(prosessiId);
+        DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, prosessiId);
     }
 
     @Test
@@ -144,7 +140,7 @@ public class ErillishakuResourceTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(ExcelTestData.toisenAsteenErillisHaku(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
-        odotaProsessiaPalautaDokumenttiId(prosessiId);
+        DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, prosessiId);
     }
 
     private void verifyCreatedExcelDocument(Hakutyyppi hakutyyppi, final InputStream storedDocument) {
@@ -194,16 +190,6 @@ public class ErillishakuResourceTest {
                 .maksuntila(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Maksuntila.MAKSAMATTA : null)
                 .build();
         assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
-    }
-
-    private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
-        Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessi -> {
-            if (prosessi.poikkeuksia()) {
-                throw new RuntimeException(prosessi.poikkeukset.toString());
-            }
-            return prosessi.valmis();
-        });
-        return valmisProsessi.dokumenttiId;
     }
 
     private WebClient createClient(String url) {

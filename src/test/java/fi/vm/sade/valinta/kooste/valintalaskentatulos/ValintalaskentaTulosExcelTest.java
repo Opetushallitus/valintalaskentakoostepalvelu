@@ -11,7 +11,6 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
@@ -28,19 +27,15 @@ import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import io.reactivex.Observable;
-import io.reactivex.internal.operators.observable.ObservableJust;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -111,7 +106,7 @@ public class ValintalaskentaTulosExcelTest {
             assertEquals(200, r.getStatus());
 
             JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
-            String storedDocumentId = odotaProsessiaPalautaDokumenttiId(new ProsessiId(dokumenttiJSON.get("id").toString()));
+            String storedDocumentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, new ProsessiId(dokumenttiJSON.get("id").toString()));
             final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
 
             IOUtils.copy(excelData, new FileOutputStream("e.xls"));
@@ -215,7 +210,7 @@ public class ValintalaskentaTulosExcelTest {
             assertEquals(200, r.getStatus());
 
             JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
-            String storedDocumentId = odotaProsessiaPalautaDokumenttiId(new ProsessiId(dokumenttiJSON.get("id").toString()));
+            String storedDocumentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, new ProsessiId(dokumenttiJSON.get("id").toString()));
             final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
 
             assertTrue(excelData != null);
@@ -333,7 +328,7 @@ public class ValintalaskentaTulosExcelTest {
             assertEquals(200, r.getStatus());
 
             JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
-            String storedDocumentId = odotaProsessiaPalautaDokumenttiId(new ProsessiId(dokumenttiJSON.get("id").toString()));
+            String storedDocumentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, new ProsessiId(dokumenttiJSON.get("id").toString()));
             final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
             assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
@@ -347,15 +342,5 @@ public class ValintalaskentaTulosExcelTest {
         } finally {
             Mocks.reset();
         }
-    }
-
-    private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
-        Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessi -> {
-            if (prosessi.poikkeuksia()) {
-                throw new RuntimeException(prosessi.poikkeukset.toString());
-            }
-            return prosessi.valmis();
-        });
-        return valmisProsessi.dokumenttiId;
     }
 }

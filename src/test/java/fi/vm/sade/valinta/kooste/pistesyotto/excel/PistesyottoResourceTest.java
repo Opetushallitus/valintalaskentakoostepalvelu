@@ -30,7 +30,6 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
@@ -64,7 +63,6 @@ import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
@@ -499,7 +497,7 @@ public class PistesyottoResourceTest {
                     .post(Entity.entity("", "application/json"));
 
             JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
-            String storedDocumentId = odotaProsessiaPalautaDokumenttiId(new ProsessiId(dokumenttiJSON.get("id").toString()));
+            String storedDocumentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, new ProsessiId(dokumenttiJSON.get("id").toString()));
             final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
             assertEquals(200, r.getStatus());
             Thread.sleep(2000);
@@ -649,7 +647,7 @@ public class PistesyottoResourceTest {
             assertEquals(200, r.getStatus());
 
             JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
-            String storedDocumentId = odotaProsessiaPalautaDokumenttiId(new ProsessiId(dokumenttiJSON.get("id").toString()));
+            String storedDocumentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, new ProsessiId(dokumenttiJSON.get("id").toString()));
             final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
             assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
@@ -1361,16 +1359,6 @@ public class PistesyottoResourceTest {
         } finally {
             cleanMocks();
         }
-    }
-
-    private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
-        Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(root, prosessiId, prosessi -> {
-            if (prosessi.poikkeuksia()) {
-                throw new RuntimeException(prosessi.poikkeukset.toString());
-            }
-            return prosessi.valmis();
-        });
-        return valmisProsessi.dokumenttiId;
     }
 
     public void cleanMocks() {
