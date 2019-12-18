@@ -143,6 +143,10 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                                     ok -> {
                                         dokumenttiprosessi(exchange).setDokumenttiId(id);
                                         dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+                                    },
+                                    poikkeus -> {
+                                        LOG.error("Valintatapajonoexcelin tallennus dokumenttipalveluun epäonnistui");
+                                        throw new RuntimeException(poikkeus);
                                     }
                             );
                         } catch (Exception e) {

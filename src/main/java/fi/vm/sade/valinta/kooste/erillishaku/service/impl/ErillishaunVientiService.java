@@ -98,7 +98,11 @@ public class ErillishaunVientiService {
                                 ok -> {
                                     prosessi.vaiheValmistui();
                                     prosessi.valmistui(uuid);
-                                }
+                                },
+                        poikkeus -> {
+                                    LOG.error("Erillihakuexcelin tallennus dokumenttipalveluun epäonnistui");
+                                    throw new RuntimeException(poikkeus);
+                        }
                 );
             },
             poikkeus -> {

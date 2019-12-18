@@ -232,6 +232,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                             "application/vnd.ms-excel", input).subscribe(
                                                     ok -> {
                                                         prosessi.getValmiit().add(new Valmis(hakukohdeOid, finalTarjoajaOid, id));
+                                                    },
+                                                    poikkeus -> {
+                                                        LOG.error("Sijoittelun tulosexcelin tallennus dokumenttipalveluun epäonnistui");
+                                                        throw new RuntimeException(poikkeus);
                                                     }
                                     );
                                 } catch (Exception e) {
@@ -337,6 +341,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         dokumenttiprosessi(exchange).getTags(), "application/pdf", input).subscribe(
                                                 ok -> {
                                                     prosessi.getValmiit().add(new Valmis(hakukohdeOid, finalTarjoajaOid, id));
+                                                },
+                                                poikkeus -> {
+                                                    LOG.error("Osoitetarrojen tallennus dokumenttipalveluun epäonnistui");
+                                                    throw new RuntimeException(poikkeus);
                                                 }
                                 );
                             }
@@ -381,6 +389,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         dokumenttiprosessi(exchange).getTags(), "application/x-tar", tar).subscribe(
                                                 ok -> {
                                                     prosessi.setDokumenttiId(id);
+                                                },
+                                                poikkeus -> {
+                                                    LOG.error("Sijoittelun tulostietojen tallennus dokumenttipalveluun epäonnistui");
+                                                    throw new RuntimeException(poikkeus);
                                                 }
                                 );
                             } catch (Exception e) {
