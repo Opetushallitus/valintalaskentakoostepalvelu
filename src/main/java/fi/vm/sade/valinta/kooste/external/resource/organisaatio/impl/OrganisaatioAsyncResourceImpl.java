@@ -60,7 +60,8 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource impleme
     public CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
         return this.client.getResponse(
                 getUrl("organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
-                Duration.ofMinutes(1)
+                Duration.ofMinutes(1),
+                x -> x
         ).thenApply(response -> {
             if (response.statusCode() == 404) {
                 return Optional.empty();

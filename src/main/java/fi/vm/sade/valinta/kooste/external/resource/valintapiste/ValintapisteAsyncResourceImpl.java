@@ -92,18 +92,14 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
         Map<String, String> query = new HashMap<>();
         setAuditInfo(query, auditSession);
         String url = getUrl("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID, query);
-        return httpClient.getJson(
-            url,
-            Duration.ofSeconds(10),
-            inputStreamHttpResponse -> {
-                List<Valintapisteet> pisteet = httpClient.parseJson(
-                    inputStreamHttpResponse,
-                    new GenericType<List<Valintapisteet>>() {
-                    }.getType());
-                return new PisteetWithLastModified(
-                    inputStreamHttpResponse.headers().firstValue(LAST_MODIFIED),
-                    pisteet);
-            });
+        return httpClient.getResponse(
+                url,
+                Duration.ofSeconds(10),
+                requestBuilder -> requestBuilder.setHeader("Accept", "application/json"))
+                .thenApply(response -> new PisteetWithLastModified(
+                        response.headers().firstValue(LAST_MODIFIED),
+                        httpClient.parseJson(response, new TypeToken<List<Valintapisteet>>() {}.getType())
+                ));
     }
 
     @Override

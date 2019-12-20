@@ -32,7 +32,8 @@ public class OhjausparametritAsyncResourceImpl implements OhjausparametritAsyncR
     public CompletableFuture<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
         return this.client.getResponse(
                 this.urlConfiguration.url("ohjausparametrit-service.parametri", hakuOid),
-                this.requestTimeout
+                this.requestTimeout,
+                x -> x
         ).thenApply(response -> {
             if (response.statusCode() == 404) {
                 return new ParametritDTO();

@@ -75,7 +75,8 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
     public CompletableFuture<HttpResponse<InputStream>> lataa(String documentId) {
         return this.client.getResponse(
                 getUrl("dokumenttipalvelu-service.dokumentit.lataa", documentId),
-                Duration.ofMinutes(1)
+                Duration.ofMinutes(1),
+                x -> x
         ).thenApply(response -> {
             if (response.statusCode() == 404) {
                 LOG.error("Dokumentin " + documentId + " lataus dokumenttipalvelusta epäonnistui.");

@@ -32,29 +32,25 @@ public class HttpClient {
         this.gson = gson;
     }
 
-    public <O> CompletableFuture<O> getJson(String url,
-                                            Duration timeout,
-                                            Function<HttpResponse<InputStream>, O> parseResponse) {
+    public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .header("Caller-Id", CALLER_ID)
                 .header("Accept", "application/json")
                 .GET()
                 .timeout(timeout)
                 .build();
-        return this.makeRequest(request).thenApply(parseResponse);
+        return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
     }
 
-    public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
-        Function<HttpResponse<InputStream>, O> parseResponse = response -> this.parseJson(response, outputType);
-        return this.getJson(url, timeout, parseResponse);
-    }
-
-    public CompletableFuture<HttpResponse<InputStream>> getResponse(String url, Duration timeout) {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                .header("Caller-Id", CALLER_ID)
-                .header("Accept", "*/*")
-                .GET()
-                .timeout(timeout)
+    public CompletableFuture<HttpResponse<InputStream>> getResponse(String url,
+                                                                    Duration timeout,
+                                                                    Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
+        HttpRequest request = requestCustomisation.apply(
+                HttpRequest.newBuilder(URI.create(url))
+                        .header("Caller-Id", CALLER_ID)
+                        .header("Accept", "*/*")
+                        .GET()
+                        .timeout(timeout))
                 .build();
         return this.makeRequest(request);
     }
