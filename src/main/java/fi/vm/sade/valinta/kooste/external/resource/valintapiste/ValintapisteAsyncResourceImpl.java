@@ -1,16 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintapiste;
 
 import com.google.gson.reflect.TypeToken;
-
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import io.mikael.urlbuilder.UrlBuilder;
 import io.reactivex.Observable;
 import org.apache.commons.io.IOUtils;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +19,11 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.net.URI;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -82,28 +80,20 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
         }
     }
 
-    private void setAuditInfo(WebClient client, AuditSession auditSession) {
-        client.query("sessionId", auditSession.getSessionId());
-        client.query("uid", auditSession.getPersonOid());
-        client.query("inetAddress", auditSession.getInetAddress());
-        client.query("userAgent", auditSession.getUserAgent());
-    }
-
-    private String setAuditInfo(String url, AuditSession auditSession) {
-        URI uri = UrlBuilder.fromString(url)
-            .addParameter("sessionId", auditSession.getSessionId())
-            .addParameter("uid", auditSession.getPersonOid())
-            .addParameter("inetAddress", auditSession.getInetAddress())
-            .addParameter("userAgent", auditSession.getUserAgent())
-            .toUri();
-        return uri.toString();
+    private void setAuditInfo(Map<String, String> query, AuditSession auditSession) {
+        query.put("sessionId", auditSession.getSessionId());
+        query.put("uid", auditSession.getPersonOid());
+        query.put("inetAddress", auditSession.getInetAddress());
+        query.put("userAgent", auditSession.getUserAgent());
     }
 
     @Override
     public CompletableFuture<PisteetWithLastModified> getValintapisteet(String hakuOID, String hakukohdeOID, AuditSession auditSession) {
-        String url = getUrl("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID);
+        Map<String, String> query = new HashMap<>();
+        setAuditInfo(query, auditSession);
+        String url = getUrl("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID, query);
         return httpClient.getJson(
-            setAuditInfo(url, auditSession),
+            url,
             Duration.ofSeconds(10),
             inputStreamHttpResponse -> {
                 List<Valintapisteet> pisteet = httpClient.parseJson(
@@ -118,11 +108,13 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public Observable<PisteetWithLastModified> getValintapisteet(Collection<String> hakemusOIDs, AuditSession auditSession) {
+        Map<String, String> query = new HashMap<>();
+        setAuditInfo(query, auditSession);
+        String url = getUrl("valintapiste-service.get.pisteet.with.hakemusoids", query);
         Observable<Response> response = postAsObservableLazily(
-                getUrl("valintapiste-service.get.pisteet.with.hakemusoids"),
+                url,
                 Entity.entity(hakemusOIDs, MediaType.APPLICATION_JSON_TYPE), client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    setAuditInfo(client, auditSession);
                     return client;
                 });
         return response.switchMap(this::handleResponse);
@@ -130,11 +122,12 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
 
     @Override
     public CompletableFuture<Set<String>> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
-        URI uri = UrlBuilder.fromString(setAuditInfo(getUrl("valintapiste-service.put.pisteet"), auditSession))
-            .addParameter("save-partially", "true")
-            .toUri();
+        Map<String, String> query = new HashMap<>();
+        query.put("save-partially", "true");
+        setAuditInfo(query, auditSession);
+        String url = getUrl("valintapiste-service.put.pisteet", query);
         return httpClient.putJson(
-            uri.toString(),
+            url,
             Duration.ofMinutes(30),
             pisteet,
             new TypeToken<List<Valintapisteet>>() {}.getType(),
