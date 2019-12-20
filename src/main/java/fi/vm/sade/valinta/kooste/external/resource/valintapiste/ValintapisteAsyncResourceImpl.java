@@ -101,7 +101,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
                     new GenericType<List<Valintapisteet>>() {
                     }.getType());
                 return new PisteetWithLastModified(
-                    Optional.ofNullable(inputStreamHttpResponse.headers().firstValue(LAST_MODIFIED).toString()),
+                    inputStreamHttpResponse.headers().firstValue(LAST_MODIFIED),
                     pisteet);
             });
     }
