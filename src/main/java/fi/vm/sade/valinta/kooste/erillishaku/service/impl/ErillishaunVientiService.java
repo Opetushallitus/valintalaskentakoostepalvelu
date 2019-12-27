@@ -96,6 +96,7 @@ public class ErillishaunVientiService {
                 dokumenttiAsyncResource.tallenna(uuid, "erillishaku.xlsx", DateTime.now().plusHours(1).toDate().getTime(),
                         Collections.singletonList("erillishaku"), "application/octet-stream", excel.getExcel().vieXlsx()).subscribe(
                                 ok -> {
+                                    LOG.error("ErillishakuExcelin vienti onnistui: ", uuid);
                                     prosessi.vaiheValmistui();
                                     prosessi.valmistui(uuid);
                                 },
