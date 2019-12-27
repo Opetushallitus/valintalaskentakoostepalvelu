@@ -93,7 +93,7 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
                 "I wanna be some body".getBytes(),
                 "text/plain"
         ).thenApply(response -> {
-            if (response.statusCode() != 204) {
+            if (response.statusCode() == 204) {
                 return null;
             }
             throw new RuntimeException("Dokumenttipalvelun vanhentuneiden dokumenttien tyhjennys epäonnistui.");
