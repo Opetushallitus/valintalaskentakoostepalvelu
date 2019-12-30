@@ -34,14 +34,14 @@ public class HaunTyyppiKomponentti {
     }
 
     public String haunTyyppi(String haunTyyppiUri) {
-        LOG.error("Tehdään koodistokutsu tuntemattomalle haunTyyppiUri:lle {}",
+        LOG.info("Tehdään koodistokutsu tuntemattomalle haunTyyppiUri:lle {}",
                 haunTyyppiUri);
         String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunTyyppiUri);
         return getKoodiForUri(koodiUri);
     }
 
     public String haunKohdejoukko(String haunKohdejoukkoUri) {
-        LOG.error("Tehdään koodistokutsu tuntemattomalle haunKohdejoukkoUri:lle {}", haunKohdejoukkoUri);
+        LOG.info("Tehdään koodistokutsu tuntemattomalle haunKohdejoukkoUri:lle {}", haunKohdejoukkoUri);
         String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunKohdejoukkoUri);
         return getKoodiForUri(koodiUri);
     }
