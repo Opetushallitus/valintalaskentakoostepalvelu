@@ -41,22 +41,17 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
-import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
+import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -65,9 +60,9 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
@@ -496,19 +491,16 @@ public class PistesyottoResourceTest {
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
                 .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), kaikkiPisteet)));
 
-            ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-            Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                    Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture()))
-                    .thenReturn(Observable.just(okResponse));
-
             Response r = pistesyottoVientiResource.getWebClient()
                     .query("hakuOid", HAKU1)
                     .query("hakukohdeOid", HAKUKOHDE1)
                     .post(Entity.entity("", "application/json"));
+
+            JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
+            String storedDocumentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, new ProsessiId(dokumenttiJSON.get("id").toString()));
+            final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
             assertEquals(200, r.getStatus());
             Thread.sleep(2000);
-            InputStream excelData = inputStreamArgumentCaptor.getValue();
             assertTrue(excelData != null);
             List<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
 
@@ -645,10 +637,6 @@ public class PistesyottoResourceTest {
                     })
                     .thenReturn(CompletableFuture.completedFuture(Collections.emptySet()));
 
-            ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-            Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                    Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture())).thenReturn(Observable.just(okResponse));
 
             Response r =
                     pistesyottoVientiResource.getWebClient()
@@ -657,7 +645,10 @@ public class PistesyottoResourceTest {
                             .post(Entity.entity("",
                                     "application/json"));
             assertEquals(200, r.getStatus());
-            InputStream excelData = inputStreamArgumentCaptor.getValue();
+
+            JSONObject dokumenttiJSON = new JSONObject(r.readEntity(String.class));
+            String storedDocumentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, new ProsessiId(dokumenttiJSON.get("id").toString()));
+            final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
             assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
 
@@ -769,7 +760,6 @@ public class PistesyottoResourceTest {
             );
             MockApplicationAsyncResource.setAdditionalDataResultByOid(additionalDataResultByOid);
         mockValintakokeetHakukohteille();
-        mockDokumenttiAsyncResourceTallenna();
         MockSuoritusrekisteriAsyncResource.setResult(new Oppija());
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
@@ -887,7 +877,6 @@ public class PistesyottoResourceTest {
                     .build()
                     .build());
             mockValintakokeetHakukohteille();
-            mockDokumenttiAsyncResourceTallenna();
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
@@ -1085,7 +1074,6 @@ public class PistesyottoResourceTest {
                 )
         );
         mockValintakokeetHakukohteille();
-        mockDokumenttiAsyncResourceTallenna();
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         Response r =
                 pistesyottoTuontiResource.getWebClient()
@@ -1122,7 +1110,6 @@ public class PistesyottoResourceTest {
                 applicationAddtionalDataDtosByOid
             );
             mockValintakokeetHakukohteille();
-            mockDokumenttiAsyncResourceTallenna();
 
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(applicationAddtionalDataDtosByOid))));
@@ -1244,7 +1231,6 @@ public class PistesyottoResourceTest {
                     })
                     .thenReturn(CompletableFuture.completedFuture(Collections.emptySet()));
 
-            mockDokumenttiAsyncResourceTallenna();
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1,
                     KIELIKOE_TOIMIPISTE_OID, "", "", "",
                     Optional.empty(),
@@ -1340,8 +1326,6 @@ public class PistesyottoResourceTest {
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
                 .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
 
-            mockDokumenttiAsyncResourceTallenna();
-
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1, KIELIKOE_TOIMIPISTE_OID, "", "", "",
                 Optional.empty(), Collections.singletonList(hakemus().setOid(HAKEMUS1).setEtunimiJaSukunimi("Etunimi", "Sukunimi").build()),
                 Sets.newHashSet(Collections.singletonList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
@@ -1375,12 +1359,6 @@ public class PistesyottoResourceTest {
         } finally {
             cleanMocks();
         }
-    }
-
-    public void mockDokumenttiAsyncResourceTallenna() {
-        Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
-                Mockito.any(InputStream.class))).thenReturn(Observable.just(okResponse));
     }
 
     public void cleanMocks() {

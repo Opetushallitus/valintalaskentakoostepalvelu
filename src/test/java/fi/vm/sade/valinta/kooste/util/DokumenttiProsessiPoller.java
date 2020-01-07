@@ -42,4 +42,14 @@ public class DokumenttiProsessiPoller {
             throw new RuntimeException(e);
         }
     }
+
+    public static String odotaProsessiaPalautaDokumenttiId(String root, final ProsessiId prosessiId) {
+        Prosessi valmisProsessi = pollDokumenttiProsessi(root, prosessiId, prosessi -> {
+            if (prosessi.poikkeuksia()) {
+                throw new RuntimeException(prosessi.poikkeukset.toString());
+            }
+            return prosessi.valmis();
+        });
+        return valmisProsessi.dokumenttiId;
+    }
 }

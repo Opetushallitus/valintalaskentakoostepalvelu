@@ -25,8 +25,6 @@ public class Mocks {
     @Autowired
     private HakukohdeResource hakukohdeResource;
     @Autowired
-    private DokumenttiAsyncResource dokumenttiAsyncResource;
-    @Autowired
     private KoodistoAsyncResource koodistoAsyncResource;
     @Autowired
     private OhjausparametritAsyncResource ohjausparametritAsyncResource;
@@ -53,11 +51,9 @@ public class Mocks {
     public static HakukohdeResource getHakukohdeResource() {
         return MOCKS.hakukohdeResource;
     }
-    public static DokumenttiAsyncResource getDokumenttiAsyncResource() {
-        return MOCKS.dokumenttiAsyncResource;
-    }
+
     public static void reset() {
-        Mockito.reset(getValintapisteAsyncResource(), getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource(), getDokumenttiAsyncResource());
+        Mockito.reset(getValintapisteAsyncResource(), getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource());
     }
 
 }

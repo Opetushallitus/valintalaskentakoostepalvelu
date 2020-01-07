@@ -84,4 +84,19 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
             return response;
         });
     }
+
+    @Override
+    public CompletableFuture<Void> tyhjenna() {
+        return this.client.putResponse(
+                getUrl("dokumenttipalvelu-service.dokumentit.tyhjenna"),
+                Duration.ofMinutes(1),
+                "I wanna be some body".getBytes(),
+                "text/plain"
+        ).thenApply(response -> {
+            if (response.statusCode() == 204) {
+                return null;
+            }
+            throw new RuntimeException("Dokumenttipalvelun vanhentuneiden dokumenttien tyhjennys epäonnistui: " + response.statusCode());
+        });
+    }
 }

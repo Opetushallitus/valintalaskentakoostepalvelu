@@ -15,4 +15,6 @@ public interface DokumenttiAsyncResource {
     Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata);
 
     CompletableFuture<HttpResponse<InputStream>> lataa(String documentId);
+
+    CompletableFuture<Void> tyhjenna();
 }

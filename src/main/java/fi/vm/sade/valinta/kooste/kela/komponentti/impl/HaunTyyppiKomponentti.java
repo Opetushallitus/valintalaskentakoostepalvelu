@@ -1,25 +1,18 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti.impl;
 
-import java.lang.reflect.Type;
-import java.net.URL;
+import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
-import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.properties.OphProperties;
+import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
-import org.apache.commons.io.input.AutoCloseInputStream;
-import org.apache.cxf.helpers.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.koodisto.service.KoodiService;
-import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
-import fi.vm.sade.koodisto.service.types.common.KoodiType;
-import fi.vm.sade.valinta.kooste.exception.KoodistoException;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 
 
@@ -31,45 +24,46 @@ import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 @Component
 public class HaunTyyppiKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HaunTyyppiKomponentti.class);
-    private final KoodiService koodiService;
-    private final Gson GSON = new GsonBuilder().create();
-    private static final Type LIST_ITEM_TYPE = new TypeToken<List<Map<String,Object>>>() {}.getType();
-    private final UrlConfiguration CONFIG = UrlConfiguration.getInstance();
+    private final HttpClient client;
+    private final UrlConfiguration urlConfiguration;
 
     @Autowired
-    public HaunTyyppiKomponentti(KoodiService koodiService) {
-        this.koodiService = koodiService;
+    public HaunTyyppiKomponentti(@Qualifier("KoodistoHttpClient") HttpClient client) {
+        this.client = client;
+        this.urlConfiguration = UrlConfiguration.getInstance();
     }
 
     public String haunTyyppi(String haunTyyppiUri) {
-        LOG.error("Tehdään koodistokutsu tuntemattomalle haunTyyppiUri:lle {}",
+        LOG.info("Tehdään koodistokutsu tuntemattomalle haunTyyppiUri:lle {}",
                 haunTyyppiUri);
         String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunTyyppiUri);
-        Integer koodiVersio = TarjontaUriToKoodistoUtil.stripVersion(haunTyyppiUri);
-        SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
-
-        return getKoodiForUri(haunTyyppiUri, koodiUri, koodiVersio, koodistoHaku);
+        return getKoodiForUri(koodiUri);
     }
 
     public String haunKohdejoukko(String haunKohdejoukkoUri) {
-        LOG.error("Tehdään koodistokutsu tuntemattomalle haunKohdejoukkoUri:lle {}", haunKohdejoukkoUri);
+        LOG.info("Tehdään koodistokutsu tuntemattomalle haunKohdejoukkoUri:lle {}", haunKohdejoukkoUri);
         String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunKohdejoukkoUri);
-        Integer koodiVersio = TarjontaUriToKoodistoUtil.stripVersion(haunKohdejoukkoUri);
-        SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
-        return getKoodiForUri(haunKohdejoukkoUri, koodiUri, koodiVersio, koodistoHaku);
+        return getKoodiForUri(koodiUri);
     }
 
-    private String getKoodiForUri(String haunKohdejoukkoUri, String koodiUri, Integer koodiVersio, SearchKoodisCriteriaType koodistoHaku) {
-        String koodistoJson = null;
+    private String getKoodiForUri(String koodiUri) {
         try {
-            koodistoJson = IOUtils.toString(new AutoCloseInputStream(new URL(CONFIG.url("koodisto-service.koodiuri", koodiUri)).openStream()));
-            List<Map<String,Object>> json = GSON.fromJson(koodistoJson, LIST_ITEM_TYPE);
-            Map<String, Object> kobject = json.iterator().next();
-            return kobject.get("koodiArvo").toString();
+            return this.client.<List<Koodi>>getJson(
+                    this.urlConfiguration.url("koodisto-service.koodiuri", koodiUri),
+                    Duration.ofMinutes(1),
+                    new TypeToken<List<Koodi>>() {}.getType()
+            ).thenApplyAsync(
+                    response -> {
+                        if (response.iterator().hasNext()) {
+                            return response.iterator().next().getKoodiArvo();
+                        } else {
+                            throw new RuntimeException("Koodisto-response was empty for koodiuri: " + koodiUri);
+                        }
+                    }
+            ).get();
         } catch (Exception e) {
             LOG.error("Unable to fetch 'koodiuri' {} from koodisto!", koodiUri, e);
             throw new RuntimeException(e);
         }
-
     }
 }

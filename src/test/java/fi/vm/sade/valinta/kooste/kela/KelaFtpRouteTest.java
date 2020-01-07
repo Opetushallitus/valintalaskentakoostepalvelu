@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.kela;
 
 import com.github.stefanbirkner.fakesftpserver.rule.FakeSftpServerRule;
-import com.jcraft.jsch.JSchException;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
@@ -25,8 +24,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
