@@ -96,7 +96,7 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implement
             if (response.statusCode() == 204) {
                 return null;
             }
-            throw new RuntimeException("Dokumenttipalvelun vanhentuneiden dokumenttien tyhjennys epäonnistui.");
+            throw new RuntimeException("Dokumenttipalvelun vanhentuneiden dokumenttien tyhjennys epäonnistui: " + response.statusCode());
         });
     }
 }
