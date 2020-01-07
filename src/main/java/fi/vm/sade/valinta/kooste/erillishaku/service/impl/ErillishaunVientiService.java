@@ -94,13 +94,13 @@ public class ErillishaunVientiService {
                 LOG.info("Aloitetaan dokumenttipalveluun tallennus");
                 String uuid = UUID.randomUUID().toString();
                 dokumenttiAsyncResource.tallenna(uuid, "erillishaku.xlsx", DateTime.now().plusHours(1).toDate().getTime(),
-                        Collections.singletonList("erillishaku"), "application/octet-stream", excel.getExcel().vieXlsx()).subscribe(
-                                ok -> {
-                                    LOG.info("Erillishaun vienti onnistui!");
-                                    prosessi.vaiheValmistui();
-                                    prosessi.valmistui(uuid);
-                                    prosessi.keskeyta();
-                                },
+                    Collections.singletonList("erillishaku"), "application/octet-stream", excel.getExcel().vieXlsx()).subscribe(
+                        ok -> {
+                            LOG.info("Erillishaun vienti onnistui!");
+                            prosessi.vaiheValmistui();
+                            prosessi.valmistui(uuid);
+                            prosessi.keskeyta();
+                        },
                         poikkeus -> {
                                     LOG.error("Erillihakuexcelin tallennus dokumenttipalveluun epäonnistui");
                                     throw new RuntimeException(poikkeus);
