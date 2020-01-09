@@ -5,10 +5,12 @@ import static io.reactivex.Observable.just;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.tuple.Pair.of;
 
+import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
@@ -25,6 +27,9 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuWrapper.PyynnonTunniste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.ValintaResource;
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import io.reactivex.Observable;
 import org.apache.commons.lang3.StringUtils;
@@ -38,11 +43,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -220,20 +221,33 @@ public class LaskentaActorFactory {
     }
 
     public LaskentaActor createLaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
+
         if (LaskentaTyyppi.VALINTARYHMALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
             LOG.info("Muodostetaan VALINTARYHMALASKENTA");
+            auditLogLaskentaStart(auditSession, actorParams, haku.getOid(),"VALINTARYHMALASKENTA");
             return createValintaryhmaActor(auditSession, laskentaSupervisor, haku, actorParams);
         }
         if (LaskentaTyyppi.VALINTAKOELASKENTA.equals(actorParams.getLaskentaTyyppi())) {
             LOG.info("Muodostetaan VALINTAKOELASKENTA");
+            auditLogLaskentaStart(auditSession, actorParams, haku.getOid(),"VALINTAKOELASKENTA");
             return createValintakoelaskentaActor(auditSession, laskentaSupervisor, haku, actorParams);
         }
         if (LaskentaTyyppi.VALINTALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
             LOG.info("Muodostetaan VALINTALASKENTA");
+            auditLogLaskentaStart(auditSession, actorParams, haku.getOid(),"VALINTALASKENTA");
             return createValintalaskentaActor(auditSession, laskentaSupervisor, haku, actorParams);
         }
         LOG.info("Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}", actorParams.getValinnanvaihe(), actorParams.isValintakoelaskenta());
+        auditLogLaskentaStart(auditSession, actorParams, haku.getOid(),"KAIKKI VAIHEET LASKENTA");
         return createValintalaskentaJaValintakoelaskentaActor(auditSession, laskentaSupervisor, haku, actorParams);
+    }
+
+    private void auditLogLaskentaStart(AuditSession auditSession, LaskentaActorParams actorParams, String hakuOid, String tyyppi) {
+        Map<String, String> additionalAuditInfo = new HashMap<>();
+        additionalAuditInfo.put("tyyppi", tyyppi);
+        additionalAuditInfo.put("uuid", actorParams.getLaskentaStartParams().getUuid());
+        additionalAuditInfo.put("hakukohteet", actorParams.getLaskentaStartParams().getHakukohdeDtos().stream().map(HakukohdeJaOrganisaatio::getHakukohdeOid).collect(Collectors.toList()).toString());
+        AuditLog.log(KoosteAudit.AUDIT, auditSession.asAuditUser(), ValintaperusteetOperation.LASKENTATOTEUTUS_LUONTI, ValintaResource.LASKENTATOTEUTUS, hakuOid, Changes.EMPTY, additionalAuditInfo);
     }
 
     private LaskentaActor laskentaHakukohteittainActor(LaskentaSupervisor laskentaSupervisor,
