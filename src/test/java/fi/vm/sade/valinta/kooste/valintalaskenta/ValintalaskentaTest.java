@@ -108,7 +108,7 @@ public class ValintalaskentaTest {
     private List<HakukohdeJaOrganisaatio> ataruHakukohdeJaOrganisaatios = Arrays.asList(
             new HakukohdeJaOrganisaatio(ataruHakukohdeOid, "Organisaatio1"),
             new HakukohdeJaOrganisaatio(ataruHakukohdeOid2, "Organisaatio2"));
-    private final AuditSession auditSession = new AuditSession("virkailijaOid", Collections.singletonList("APP_VALINTA_EVERYTHING_CRUD"), "Firefox", "127.0.0.1");
+    private final AuditSession auditSession = new AuditSession("1.2.3.4.5", Collections.singletonList("APP_VALINTA_EVERYTHING_CRUD"), "Firefox", "127.0.0.1");
 
     @Before
     public void setUpTestData() {
