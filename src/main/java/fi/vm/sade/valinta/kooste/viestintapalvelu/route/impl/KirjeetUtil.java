@@ -1,7 +1,20 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import com.google.common.collect.ComparisonChain;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUNUT;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUTETTU;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY;
+import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
+import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
+import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
+import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
+import static java.util.Optional.ofNullable;
 import com.google.common.collect.Maps;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -15,16 +28,14 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.CompareToBuilder;
-import org.codehaus.jackson.map.util.*;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
-
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
-import static fi.vm.sade.valinta.kooste.util.Formatter.*;
-import static java.util.Optional.ofNullable;
 
 public class KirjeetUtil {
     private static final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
