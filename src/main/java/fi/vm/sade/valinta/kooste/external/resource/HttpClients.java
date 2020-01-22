@@ -292,7 +292,7 @@ public class HttpClients {
         return new HttpClient(
             defaultHttpClientBuilder(cookieManager).build(),
             null,
-            DateDeserializer.gsonBuilder().create()
+            DateDeserializer.gsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create()
         );
     }
 
