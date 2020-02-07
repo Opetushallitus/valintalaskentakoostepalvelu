@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.koski.impl;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,7 +60,8 @@ public class KoskiAsyncResourceImpl implements KoskiAsyncResource {
 
     @Override
     public CompletableFuture<Set<KoskiOppija>> findKoskiOppijat(List<String> oppijanumerot) {
-        return batchedPostOppijasFuture(oppijanumerot, urlConfiguration.url("koski.oppijanumeroittain.post"));
+        return batchedPostOppijasFuture(oppijanumerot, urlConfiguration.url("koski.oppijanumeroittain.post"))
+            .whenComplete(debugLogOpiskeluoikeusVersiot());
     }
 
     private CompletableFuture<Set<KoskiOppija>> batchedPostOppijasFuture(List<String> oppijanumerot, String url) {
@@ -82,5 +85,25 @@ public class KoskiAsyncResourceImpl implements KoskiAsyncResource {
             })
             .collect(Collectors.toList()))
             .thenApplyAsync((List<List<KoskiOppija>> r) -> r.stream().flatMap(List::stream).collect(Collectors.toSet()));
+    }
+
+    private BiConsumer<Set<KoskiOppija>, Throwable> debugLogOpiskeluoikeusVersiot() {
+        return (koskiOppijat, throwable) -> {
+            if (LOG.isDebugEnabled() && koskiOppijat != null) {
+                koskiOppijat.forEach(this::debugLogOpiskeluoikeusVersiot);
+            }
+        };
+    }
+
+    private void debugLogOpiskeluoikeusVersiot(KoskiOppija oppija) {
+        oppija.getOpiskeluoikeudet().forEach(o -> {
+            JsonObject opiskeluoikeus = o.getAsJsonObject();
+            LOG.debug(String.format(
+                "Oppijan %s opiskeluoikeus %s : aikaleima=%s , versionumero=%s",
+                oppija.getOppijanumero(),
+                opiskeluoikeus.get("oid").getAsString(),
+                opiskeluoikeus.get("aikaleima").getAsString(),
+                opiskeluoikeus.get("versionumero").getAsInt()));
+        });
     }
 }
