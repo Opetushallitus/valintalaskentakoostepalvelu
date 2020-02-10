@@ -19,7 +19,10 @@ import java.util.concurrent.TimeoutException;
 import static fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
 
 public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CasKoosteInterceptor.class);
+
+    private static final String CSRF_VALUE = "CSRF";
     private static final String EXCHANGE_SESSION_TOKEN = "SessionToken";
 
     private final ApplicationSession applicationSession;
@@ -62,6 +65,8 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
             LOGGER.debug(String.format("Using header CasSecurityTicket=%s", session.serviceTicket.serviceTicket));
             OphCxfMessageUtil.addHeader(message, "CasSecurityTicket", session.serviceTicket.serviceTicket);
         }
+        OphCxfMessageUtil.addHeader(message, "CSRF", CSRF_VALUE);
+        OphCxfMessageUtil.appendToHeader(message, "Cookie", "CSRF=" + CSRF_VALUE, ";");
         OphCxfMessageUtil.appendToHeader(message, "Cookie", session.cookie.getName() + "=" + session.cookie.getValue(), ";");
     }
 
