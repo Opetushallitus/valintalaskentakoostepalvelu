@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 public class HttpClient {
     private static final String CALLER_ID = "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
+    private static final String CSRF_VALUE = "CSRF";
 
     private final java.net.http.HttpClient client;
     private final ApplicationSession session;
@@ -33,8 +34,7 @@ public class HttpClient {
     }
 
     public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                .header("Caller-Id", CALLER_ID)
+        HttpRequest request = buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
                 .header("Accept", "application/json")
                 .GET()
                 .timeout(timeout)
@@ -46,8 +46,7 @@ public class HttpClient {
                                                                     Duration timeout,
                                                                     Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
         HttpRequest request = requestCustomisation.apply(
-                HttpRequest.newBuilder(URI.create(url))
-                        .header("Caller-Id", CALLER_ID)
+                buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
                         .header("Accept", "*/*")
                         .GET()
                         .timeout(timeout))
@@ -61,8 +60,7 @@ public class HttpClient {
                                          Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation,
                                          Function<HttpResponse<InputStream>, O> parseResponse) {
         HttpRequest request = requestCustomisation.apply(
-            HttpRequest.newBuilder(URI.create(url))
-                .header("Caller-Id", CALLER_ID)
+                buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
                 .POST(bodyPublisher)
                 .timeout(timeout))
             .build();
@@ -76,9 +74,10 @@ public class HttpClient {
                                                 Type outputType,
                                                 Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
 
-        Function<HttpRequest.Builder, HttpRequest.Builder> addJsonHeaders = builder -> builder
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/json");
+        Function<HttpRequest.Builder, HttpRequest.Builder> addJsonHeaders = builder ->
+                buildWithCallerIdAndCsrfHeaders(builder)
+                        .header("Accept", "application/json")
+                        .header("Content-Type", "application/json");
 
         return this.post(
             url,
@@ -99,8 +98,7 @@ public class HttpClient {
                                                Type outputType,
                                                Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
         HttpRequest request = requestCustomisation.apply(
-            HttpRequest.newBuilder(URI.create(url))
-                .header("Caller-Id", CALLER_ID)
+                buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), StandardCharsets.UTF_8))
@@ -114,8 +112,7 @@ public class HttpClient {
                                                                     String contentType,
                                                                     Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
         HttpRequest request = requestCustomisation.apply(
-            HttpRequest.newBuilder(URI.create(url))
-                .header("Caller-Id", CALLER_ID)
+                buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
                 .header("Accept", "*/*")
                 .header("Content-Type", contentType)
                 .PUT(HttpRequest.BodyPublishers.ofByteArray(body))
@@ -129,13 +126,18 @@ public class HttpClient {
     }
 
     public CompletableFuture<String> delete(String url, Duration timeout) {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                .header("Caller-Id", CALLER_ID)
+        HttpRequest request = buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
                 .header("Accept", "*/*")
                 .DELETE()
                 .timeout(timeout)
                 .build();
         return this.makeRequest(request).thenApply(this::parseTxt);
+    }
+
+    private HttpRequest.Builder buildWithCallerIdAndCsrfHeaders(HttpRequest.Builder builder) {
+        return builder.header("Caller-Id", CALLER_ID)
+                .header("CSRF", CSRF_VALUE)
+                .header("Cookie", String.format("CSRF=%s;", CSRF_VALUE));
     }
 
     private CompletableFuture<HttpResponse<InputStream>> makeRequest(HttpRequest request) {

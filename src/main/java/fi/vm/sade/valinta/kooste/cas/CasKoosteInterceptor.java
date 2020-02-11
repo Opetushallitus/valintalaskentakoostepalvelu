@@ -54,8 +54,6 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
             LOGGER.info(String.format("Authentication failed using session %s", session));
             this.applicationSession.invalidateSession(session);
             OphCxfMessageUtil.addHeader(message, CAS_302_REDIRECT_MARKER.getKey(), CAS_302_REDIRECT_MARKER.getValue());
-            OphCxfMessageUtil.addHeader(message, "CSRF", CSRF_VALUE);
-            OphCxfMessageUtil.appendToHeader(message, "Cookie", "CSRF=" + CSRF_VALUE, ";");
         }
     }
 
