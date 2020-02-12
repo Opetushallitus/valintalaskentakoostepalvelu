@@ -74,8 +74,7 @@ public class HttpClient {
                                                 Type outputType,
                                                 Function<HttpRequest.Builder, HttpRequest.Builder> requestCustomisation) {
 
-        Function<HttpRequest.Builder, HttpRequest.Builder> addJsonHeaders = builder ->
-                buildWithCallerIdAndCsrfHeaders(builder)
+        Function<HttpRequest.Builder, HttpRequest.Builder> addJsonHeaders = builder -> builder
                         .header("Accept", "application/json")
                         .header("Content-Type", "application/json");
 
