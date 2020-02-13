@@ -20,7 +20,7 @@
         <jetty.version>9.4.15.v20190215</jetty.version>
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
-        <spring.security.version>5.1.4.RELEASE</spring.security.version>
+        <spring.security.version>5.2.2.RELEASE</spring.security.version>
         <spring.version>5.1.5.RELEASE</spring.version>
         <jaxb.version>2.3.0</jaxb.version>
         <mockito.version>2.24.0</mockito.version>
