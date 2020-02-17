@@ -27,7 +27,7 @@
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>7.4.0-SNAPSHOT</sijoittelu.version>
-        <valinta-sharedutils.version>5.9-SNAPSHOT</valinta-sharedutils.version>
+        <valinta-sharedutils.version>5.10-SNAPSHOT</valinta-sharedutils.version>
         <valintaperusteet.version>5.9-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>5.10-SNAPSHOT</valintalaskenta.version>
     </properties>
@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>java-cas</artifactId>
-                <version>0.6.0-SNAPSHOT</version>
+                <version>0.6.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade</groupId>
