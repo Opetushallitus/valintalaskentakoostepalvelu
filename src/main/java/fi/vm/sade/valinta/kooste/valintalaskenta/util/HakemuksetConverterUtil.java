@@ -254,6 +254,9 @@ public class HakemuksetConverterUtil {
         }
 
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
+            return of(PohjakoulutusToinenAste.YLIOPPILAS); //fixme
+            //Toistaiseksi poistettu tämä tarkistus käytöstä, koska abeilla ei vielä voi olla suoritusrekisterissä vaadittuja suorituksia. Todo: pysyvämpi korjaus.
+            /*
             boolean suressaValmisJaVahvistettuLukiosuoritus = suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isVahvistettu() && s.isValmis());
             String hakuVuosi = Integer.toString(haku.getHakukausiVuosi());
             boolean isAbiturientti = h.getAvaimet().stream().anyMatch(dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain()) && hakuVuosi.equals(dto.getArvo()));
@@ -262,7 +265,7 @@ public class HakemuksetConverterUtil {
             } else {
                 LOG.warn("Hakemuksella {} pohjakoulutus lukio, mutta valmista ja vahvistettua lukiosuoritusta ei löydy suoritusrekisteristä. Palautetaan pohjakoulutus PERUSKOULU.", h.getHakemusoid());
                 return of(PohjakoulutusToinenAste.PERUSKOULU);
-            }
+            }*/
         }
         Optional<SuoritusJaArvosanatWrapper> perusopetus = suorituksetRekisterista.stream()
                 .filter(s -> s.isPerusopetus() && s.isVahvistettu() && !s.isKeskeytynyt())

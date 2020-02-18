@@ -357,9 +357,10 @@ public class HakemuksetConverterUtilTest {
         List<SuoritusJaArvosanat> suoritukset = new ArrayList<>() {{
             add(vahvistamatonLukioKeskeytynytHakukaudella);
         }};
-        Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+        Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
 
+    /*
     @Test
     public void pohjakoulutusPeruskouluJosHakemuksellaLukioJaAbiturienttiJaSuressaEiValmistaSuoritusta() {
         HakemusDTO h = new HakemusDTO();
@@ -372,6 +373,7 @@ public class HakemuksetConverterUtilTest {
 
         Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
+    */
 
     @Test
     public void pohjakoulutusLukioJosHakemuksellaLukioJaEIAbiturienttiJaSuressaEiValmistaSuoritusta() {
