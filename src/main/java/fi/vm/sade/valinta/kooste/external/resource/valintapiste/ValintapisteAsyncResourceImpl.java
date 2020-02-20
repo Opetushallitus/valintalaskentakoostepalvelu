@@ -117,6 +117,23 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
     }
 
     @Override
+    public CompletableFuture<PisteetWithLastModified> getValintapisteetWithHakemusOidsAsFuture(List<String> hakemusOIDs, AuditSession auditSession) {
+        Map<String, String> query = new HashMap<>();
+        setAuditInfo(query, auditSession);
+        String url = getUrl("valintapiste-service.get.pisteet.with.hakemusoids", query);
+        return httpClient.postJson(
+                url,
+                Duration.ofMinutes(1),
+                hakemusOIDs,
+                new TypeToken<List<String>>() {}.getType(),
+                new TypeToken<PisteetWithLastModified>() {}.getType(),
+                requestBuilder -> requestBuilder
+                            .header("Content-Type", "application/json")
+                            .header("Accept", "text/plain")
+        );
+    }
+
+    @Override
     public CompletableFuture<Set<String>> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession) {
         Map<String, String> query = new HashMap<>();
         query.put("save-partially", "true");
