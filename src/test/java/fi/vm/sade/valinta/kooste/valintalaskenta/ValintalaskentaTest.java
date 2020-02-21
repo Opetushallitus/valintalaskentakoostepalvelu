@@ -55,10 +55,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class ValintalaskentaTest {
@@ -101,6 +98,7 @@ public class ValintalaskentaTest {
     private final HakuV1RDTO ataruHakuDTO = new HakuV1RDTO();
     private final Oppija oppijaFromSure1 = new Oppija();
     private final Oppija anonOppijaFromSure = new Oppija();
+    private final List<String> hakemusOids = new ArrayList<>();
     private final List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(
         new HakukohdeJaOrganisaatio(hakukohde1Oid, "o1"),
         new HakukohdeJaOrganisaatio(hakukohde2Oid, "o2"),
@@ -113,10 +111,12 @@ public class ValintalaskentaTest {
     @Before
     public void setUpTestData() {
         hakemus.setPersonOid("personOid");
+        hakemusOids.add(hakemus.getOid());
         hakuDTO.setOid(hakuOid);
         ataruHakuDTO.setOid(ataruHakuOid);
         ataruHakuDTO.setAtaruLomakeAvain("ataru-lomake-avain");
         String personOid1 = "1.2.246.562.24.86368188549";
+        ataruHakemus.setHakemusOid("ataruHakemusOid");
         ataruHakemus.setPersonOid(personOid1);
         oppijaFromSure1.setOppijanumero(personOid1);
         anonOppijaFromSure.setOppijanumero("personOid");
@@ -134,6 +134,7 @@ public class ValintalaskentaTest {
         when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
         when(valintaperusteetAsyncResource.haeHakijaryhmat(ataruHakukohdeOid2)).thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
+        when(valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(anyList(), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde1Oid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde2Oid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
         when(valintapisteAsyncResource.getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class))).thenReturn(CompletableFuture.completedFuture(pisteet));
@@ -389,9 +390,7 @@ public class ValintalaskentaTest {
         laskentaActorSystem.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
         Thread.sleep(500);
 
-        verify(valintapisteAsyncResource, times(2)).getValintapisteet(eq(hakuOid), eq(hakukohde1Oid), any(AuditSession.class));
-        verify(valintapisteAsyncResource).getValintapisteet(eq(hakuOid), eq(hakukohde2Oid), any(AuditSession.class));
-        verify(valintapisteAsyncResource).getValintapisteet(eq(hakuOid), eq(hakukohde3Oid), any(AuditSession.class));
+        verify(valintapisteAsyncResource, times(2)).getValintapisteetWithHakemusOidsAsFuture(eq(hakemusOids), any(AuditSession.class));
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde2Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, hakukohde3Oid, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(hakukohde1Oid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional("Ei saatu haettua hakemuksia kohteelle " + hakukohde1Oid));
@@ -401,9 +400,12 @@ public class ValintalaskentaTest {
 
     @Test
     public void epaonnistuneetAtaruLaskennatKirjataanSeurantapalveluun() throws InterruptedException {
+        final String ataruHakemusOid = "1.2.246.562.11.00000000000000000063";
+        final List<String> ataruHakemusOids = new ArrayList<>();
+        ataruHakemusOids.add(ataruHakemusOid);
         when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid)).thenReturn(
                 CompletableFuture.failedFuture(new RuntimeException(getClass().getSimpleName() + " : Ei saatu haettua hakemuksia kohteelle " + ataruHakukohdeOid)));
-        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063"))));
+        when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2)).thenReturn(CompletableFuture.completedFuture(Collections.singletonList(MockAtaruAsyncResource.getAtaruHakemusWrapper(ataruHakemusOid))));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid2, HakukohdeTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(seurantaAsyncResource.merkkaaHakukohteenTila(uuid, ataruHakukohdeOid, HakukohdeTila.KESKEYTETTY, Optional.empty())).thenReturn(Observable.just(Response.ok().build()));
         when(koskiService.haeKoskiOppijat(any(String.class), any(), any())).thenReturn(CompletableFuture.completedFuture(Collections.emptyMap()));
@@ -415,8 +417,7 @@ public class ValintalaskentaTest {
 
         verify(ataruAsyncResource, times(2)).getApplicationsByHakukohde(ataruHakukohdeOid);
         verify(ataruAsyncResource).getApplicationsByHakukohde(ataruHakukohdeOid2);
-        verify(valintapisteAsyncResource, times(2)).getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid), any(AuditSession.class));
-        verify(valintapisteAsyncResource).getValintapisteet(eq(ataruHakuOid), eq(ataruHakukohdeOid2), any(AuditSession.class));
+        verify(valintapisteAsyncResource, times(1)).getValintapisteetWithHakemusOidsAsFuture(eq(ataruHakemusOids), any(AuditSession.class));
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(uuid, ataruHakukohdeOid2, HakukohdeTila.VALMIS, Optional.empty());
         verify(seurantaAsyncResource).merkkaaHakukohteenTila(eq(uuid), eq(ataruHakukohdeOid), eq(HakukohdeTila.KESKEYTETTY), getIlmoitusDtoOptional("Ei saatu haettua hakemuksia kohteelle " + ataruHakukohdeOid));
         verify(seurantaAsyncResource).merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty());

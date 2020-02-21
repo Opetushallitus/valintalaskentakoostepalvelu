@@ -259,22 +259,23 @@ public class LaskentaActorFactory {
     }
 
     private CompletableFuture<LaskeDTO> getLaskeDtoFuture(String uuid,
-              HakuV1RDTO haku,
-              String hakukohdeOid,
-              LaskentaActorParams actorParams,
-              boolean withHakijaRyhmat,
-              CompletableFuture<List<ValintaperusteetDTO>> valintaperusteetF,
-              CompletableFuture<Pair<CompletableFuture<List<Oppija>>,
-                      CompletableFuture<PisteetWithLastModified>>> oppijatAndPisteetFuturePairF,
-              CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesF,
-              CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmatF,
-              CompletableFuture<List<HakemusWrapper>> hakemuksetF,
-              CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOidF) {
+                                                          HakuV1RDTO haku,
+                                                          String hakukohdeOid,
+                                                          LaskentaActorParams actorParams,
+                                                          boolean withHakijaRyhmat,
+                                                          CompletableFuture<List<ValintaperusteetDTO>> valintaperusteetF,
+                                                          CompletableFuture<List<Oppija>> oppijatF,
+                                                          CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesF,
+                                                          CompletableFuture<PisteetWithLastModified> valintapisteetForHakukohdesF,
+                                                          CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmatF,
+                                                          CompletableFuture<List<HakemusWrapper>> hakemuksetF,
+                                                          CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOidF) {
         return CompletableFuture.allOf(
+            valintapisteetForHakukohdesF,
             hakijaryhmatF,
             valintaperusteetF,
             hakemuksetF,
-            oppijatAndPisteetFuturePairF,
+            oppijatF,
             hakukohdeRyhmasForHakukohdesF,
             koskiOppijaByOppijaOidF)
             .thenApplyAsync(x -> {
@@ -283,10 +284,10 @@ public class LaskentaActorFactory {
                 verifyJonokriteeritOrThrowError(uuid, hakukohdeOid, valintaperusteet);
                 LOG.info("(Uuid: {}) Kaikki resurssit hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.", uuid, hakukohdeOid);
 
-                List<Oppija> oppijat = oppijatAndPisteetFuturePairF.join().getLeft().join();
-                PisteetWithLastModified pisteetWithLastModified = oppijatAndPisteetFuturePairF.join().getRight().join();
                 Map<String, List<String>> ryhmatHakukohteittain = hakukohdeRyhmasForHakukohdesF.join();
+                PisteetWithLastModified pisteetWithLastModified = valintapisteetForHakukohdesF.join();
                 List<HakemusWrapper> hakemukset = hakemuksetF.join();
+                List<Oppija> oppijat = oppijatF.join();
                 Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskiOppijaByOppijaOidF.join();
                 koskiOppijatOppijanumeroittain.forEach((k, v) -> {
                     LOG.debug(String.format("Koskesta löytyi oppijalle %s datat: %s", k, v));
@@ -396,20 +397,13 @@ public class LaskentaActorFactory {
                     retryHakemuksetAndOppijat);
         }
 
-        CompletableFuture<Pair<CompletableFuture<List<Oppija>>,
-                CompletableFuture<PisteetWithLastModified>>> oppijatAndPisteetFuturePairF = hakemukset.thenComposeAsync(hakemusWrappers -> {
-            List<String> oppijaOids = hakemusWrappers.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
+        CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses = hakemukset.thenComposeAsync(hws -> {
+            List<String> oppijaOids = hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
             LOG.info("Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}", oppijaOids.toString(), hakukohdeOid);
-            List<String> hakemusOids = hakemusWrappers.stream().map(HakemusWrapper::getOid).collect(Collectors.toList());
-            CompletableFuture<List<Oppija>> oppijasFuture = createResurssiFuture(tunniste,
+            return createResurssiFuture(tunniste,
                     "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
                     () -> suoritusrekisteriAsyncResource.getSuorituksetByOppijas(oppijaOids, hakuOid),
                     retryHakemuksetAndOppijat);
-            CompletableFuture<PisteetWithLastModified> pisteetFuture = createResurssiFuture(tunniste,
-                    "valintapisteAsyncResource.getValintapisteet",
-                    () -> valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(hakemusOids, auditSession),
-                    retryHakemuksetAndOppijat);
-            return CompletableFuture.completedFuture(Pair.of(oppijasFuture, pisteetFuture));
         });
 
         CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet = createResurssiFuture(tunniste,
@@ -418,6 +412,13 @@ public class LaskentaActorFactory {
         CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = createResurssiFuture(tunniste,
             "tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",
             () -> tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
+        CompletableFuture<PisteetWithLastModified> valintapisteetForHakukohdes = hakemukset.thenComposeAsync(hakemusWrappers -> {
+            List<String> hakemusOids = hakemusWrappers.stream().map(HakemusWrapper::getOid).collect(Collectors.toList());
+            return createResurssiFuture(tunniste,
+                    "valintapisteAsyncResource.getValintapisteet",
+                    () -> valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(hakemusOids, auditSession),
+                    retryHakemuksetAndOppijat);
+        });
         CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat
             ? createResurssiFuture(tunniste, "valintaperusteetAsyncResource.haeHakijaryhmat", () -> valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid))
             : CompletableFuture.completedFuture(emptyList());
@@ -433,8 +434,9 @@ public class LaskentaActorFactory {
             actorParams,
             withHakijaRyhmat,
             valintaperusteet,
-            oppijatAndPisteetFuturePairF,
+            oppijasForOidsFromHakemukses,
             hakukohdeRyhmasForHakukohdes,
+            valintapisteetForHakukohdes,
             hakijaryhmat,
             hakemukset,
             koskiOppijaByOppijaOid);
