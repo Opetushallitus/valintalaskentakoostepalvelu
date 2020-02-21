@@ -44,7 +44,7 @@ public class KoskiAsyncResourceImpl implements KoskiAsyncResource {
                                   @Qualifier("KoskiHttpClient") HttpClient httpClient,
                                   @Value("${valintalaskentakoostepalvelu.koski.username}") String koskiUsername,
                                   @Value("${valintalaskentakoostepalvelu.koski.password}") String koskiPassword,
-                                  @Value("${valintalaskentakoostepalvelu.koski.max.oppijat.post.size:5000}") int maxOppijatPostSize) {
+                                  @Value("${valintalaskentakoostepalvelu.koski.max.oppijat.post.size:1000}") int maxOppijatPostSize) {
         this.httpClient = httpClient;
         this.maxOppijatPostSize = maxOppijatPostSize;
         this.addBasicAuthenticationCredentials = r -> {
