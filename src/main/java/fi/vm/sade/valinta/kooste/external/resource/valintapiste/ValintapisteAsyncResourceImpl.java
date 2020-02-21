@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintapiste;
 
+import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.ACCEPT;
 import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
 import com.google.gson.reflect.TypeToken;
 
@@ -124,14 +125,16 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource impleme
         setAuditInfo(query, auditSession);
         String url = getUrl("valintapiste-service.get.pisteet.with.hakemusoids", query);
         return httpClient.post(
-                url,
-                Duration.ofMinutes(1),
-                httpClient.createJsonBodyPublisher(hakemusOIDs, new TypeToken<List<String>>() {}.getType()),
-                requestBuilder -> requestBuilder.setHeader("Accept", "application/json").setHeader(CONTENT_TYPE, "application/json"),
-                response -> new PisteetWithLastModified(
-                        response.headers().firstValue(LAST_MODIFIED),
-                        httpClient.parseJson(response, new TypeToken<List<Valintapisteet>>() {}.getType())
-                ));
+            url,
+            Duration.ofMinutes(1),
+            httpClient.createJsonBodyPublisher(hakemusOIDs, new TypeToken<List<String>>() {}.getType()),
+            requestBuilder -> requestBuilder
+                .setHeader(ACCEPT, "application/json")
+                .setHeader(CONTENT_TYPE, "application/json"),
+            response -> new PisteetWithLastModified(
+                response.headers().firstValue(LAST_MODIFIED),
+                httpClient.parseJson(response, new TypeToken<List<Valintapisteet>>() {}.getType())
+            ));
     }
 
     @Override
