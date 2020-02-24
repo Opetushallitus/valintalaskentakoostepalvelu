@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Service
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
@@ -51,6 +52,9 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     public Observable<String> laske(LaskeDTO laskeDTO) {
+        if (LOG.isDebugEnabled()) {
+            logitaKokotiedot(laskeDTO);
+        }
         Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laske", laskentakutsu);
@@ -61,6 +65,9 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
+        if (LOG.isDebugEnabled()) {
+            logitaKokotiedot(laskeDTO);
+        }
         Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.valintakokeet", laskentakutsu);
@@ -71,6 +78,9 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
+        if (LOG.isDebugEnabled()) {
+            logitaKokotiedot(laskeDTO);
+        }
         Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskekaikki", laskentakutsu);
@@ -81,6 +91,9 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista) {
+        if (LOG.isDebugEnabled()) {
+            lista.forEach(this::logitaKokotiedot);
+        }
         Laskentakutsu laskentakutsu = new Laskentakutsu(lista);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele", laskentakutsu);
@@ -138,5 +151,14 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
                 return Observable.error(new RuntimeException(String.format("Laskenta (pollKey=%s) epäonnistui!", laskentakutsu.getPollKey())));
             }
         });
+    }
+
+    private void logitaKokotiedot(LaskeDTO laskeDTO) {
+        Function<Object, Integer> koonLaskenta = o -> gson().toJson(o).length();
+        try {
+            LOG.debug(String.format("laskeDTO %s (hakukohde %s) koot: %s", laskeDTO.getUuid(), laskeDTO.getHakukohdeOid(), laskeDTO.logSerializedSizes(koonLaskenta)));
+        } catch (Exception e) {
+            LOG.error(String.format("Virhe, kun yritettiin logittaa laskeDTO:n %s (hakukohde %s) kokoa", laskeDTO.getUuid(), laskeDTO.getHakukohdeOid()), e);
+        }
     }
 }
