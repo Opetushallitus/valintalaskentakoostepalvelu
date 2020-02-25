@@ -1,11 +1,18 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.sort;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
@@ -24,20 +31,18 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.sort;
-import static java.util.Optional.*;
-import static java.util.stream.Collectors.*;
-
 public class HakemuksetConverterUtil {
-    private static final Gson GSON = new Gson();
     private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
     public static final String PK_PAATTOTODISTUSVUOSI = "PK_PAATTOTODISTUSVUOSI";
     public static final String LK_PAATTOTODISTUSVUOSI = "lukioPaattotodistusVuosi";
@@ -66,20 +71,20 @@ public class HakemuksetConverterUtil {
 
     public static List<HakemusDTO> muodostaHakemuksetDTOfromHakemukset(HakuV1RDTO haku, String hakukohdeOid,
                                                                        Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
-                                                                       List<HakemusWrapper> hakemukset, List<Valintapisteet> valintapisteet, List<Oppija> oppijat,
-                                                                       Map<String, KoskiOppija> koskiOppijatOppijanumeroittain,
+                                                                       List<HakemusWrapper> hakemukset,
+                                                                       List<Valintapisteet> valintapisteet,
+                                                                       List<Oppija> oppijat,
                                                                        ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus) {
         ensurePersonOids(hakemukset, hakukohdeOid);
         List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset, ofNullable(valintapisteet).orElse(emptyList()), hakukohdeRyhmasForHakukohdes);
         Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(HakemusWrapper::getOid, HakemusWrapper::hasHenkilotunnus));
         Map<String, Exception> errors = Maps.newHashMap();
-        return getHakemusDTOS(haku, hakukohdeOid, oppijat, koskiOppijatOppijanumeroittain, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
+        return getHakemusDTOS(haku, hakukohdeOid, oppijat, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
     }
 
     private static List<HakemusDTO> getHakemusDTOS(HakuV1RDTO haku,
                                                    String hakukohdeOid,
                                                    List<Oppija> oppijat,
-                                                   Map<String, KoskiOppija> koskiOppijatOppijanumeroittain,
                                                    ParametritDTO parametritDTO,
                                                    Boolean fetchEnsikertalaisuus,
                                                    List<HakemusDTO> hakemusDtot,
@@ -91,7 +96,6 @@ public class HakemuksetConverterUtil {
                         oppijat.size(), haku.getOid(), haku.getNimi(), hakukohdeOid, hakemusDtot.size()));
                 Map<String, Oppija> personOidToOppija = oppijat.stream().collect(toMap(Oppija::getOppijanumero, Function.identity()));
                 hakemusDtot.forEach(h -> tryToMergeKeysOfOppijaAndHakemus(haku, hakukohdeOid, parametritDTO, fetchEnsikertalaisuus, errors, personOidToOppija, hasHetu, h));
-                hakemusDtot.forEach(h -> addKoskiOpiskeluoikeudet(h, koskiOppijatOppijanumeroittain.get(h.getHakijaOid())));
             } else {
                 LOG.warn(String.format("oppijat is null when calling getHakemusDTOS for haku %s (\"%s\"), hakukohde %s for %d applications.",
                         haku.getOid(), haku.getNimi(), hakukohdeOid, hakemusDtot.size()));
@@ -105,14 +109,6 @@ public class HakemuksetConverterUtil {
             throw new RuntimeException(errors.entrySet().iterator().next().getValue());
         }
         return hakemusDtot;
-    }
-
-    private static void addKoskiOpiskeluoikeudet(HakemusDTO h, KoskiOppija koskiOppija) {
-        if (koskiOppija != null) {
-            h.setKoskiOpiskeluoikeudetJson(GSON.toJson(koskiOppija.getOpiskeluoikeudet()));
-        } else {
-            h.setKoskiOpiskeluoikeudetJson("[]");
-        }
     }
 
     public static void mergeKeysOfOppijaAndHakemus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid,

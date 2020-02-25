@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta;
 
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import io.reactivex.Observable;
@@ -13,13 +14,13 @@ public interface ValintalaskentaAsyncResource {
 
     Observable<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
 
-    Observable<String> laskeJaSijoittele(List<LaskeDTO> lista);
+    Observable<String> laskeJaSijoittele(List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot);
 
     Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
 
-    Observable<String> valintakokeet(LaskeDTO laskeDTO);
+    Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
-    Observable<String> laske(LaskeDTO laskeDTO);
+    Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
-    Observable<String> laskeKaikki(LaskeDTO laskeDTO);
+    Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 }

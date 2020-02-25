@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.Laskentakutsu;
+import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import io.reactivex.Observable;
@@ -51,11 +52,11 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
         }.getType());
     }
 
-    public Observable<String> laske(LaskeDTO laskeDTO) {
+    public Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset) {
         if (LOG.isDebugEnabled()) {
             logitaKokotiedot(laskeDTO);
         }
-        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritukset);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laske", laskentakutsu);
         } catch (Exception e) {
@@ -64,11 +65,11 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     @Override
-    public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
+    public Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritustiedot) {
         if (LOG.isDebugEnabled()) {
             logitaKokotiedot(laskeDTO);
         }
-        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritustiedot);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.valintakokeet", laskentakutsu);
         } catch (Exception e) {
@@ -77,11 +78,11 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     @Override
-    public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
+    public Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritustiedot) {
         if (LOG.isDebugEnabled()) {
             logitaKokotiedot(laskeDTO);
         }
-        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO);
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritustiedot);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskekaikki", laskentakutsu);
         } catch (Exception e) {
@@ -90,11 +91,12 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     @Override
-    public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista) {
+    public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
         if (LOG.isDebugEnabled()) {
             lista.forEach(this::logitaKokotiedot);
+            logitaSuoritustietojenKoko(suoritustiedot);
         }
-        Laskentakutsu laskentakutsu = new Laskentakutsu(lista);
+        Laskentakutsu laskentakutsu = new Laskentakutsu(lista, suoritustiedot);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele", laskentakutsu);
         } catch (Exception e) {
@@ -159,6 +161,14 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
             LOG.debug(String.format("laskeDTO %s (hakukohde %s) koot: %s", laskeDTO.getUuid(), laskeDTO.getHakukohdeOid(), laskeDTO.logSerializedSizes(koonLaskenta)));
         } catch (Exception e) {
             LOG.error(String.format("Virhe, kun yritettiin logittaa laskeDTO:n %s (hakukohde %s) kokoa", laskeDTO.getUuid(), laskeDTO.getHakukohdeOid()), e);
+        }
+    }
+
+    private void logitaSuoritustietojenKoko(SuoritustiedotDTO suoritustiedotDTO) {
+        try {
+            LOG.debug(String.format("Suoritustietojen koko: %s", gson().toJson(suoritustiedotDTO).length()));
+        } catch (Exception e) {
+            LOG.error("Virhe, kun yritettiin logittaa suoritustietojen kokoa", e);
         }
     }
 }
