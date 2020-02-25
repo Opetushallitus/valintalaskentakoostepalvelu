@@ -86,9 +86,16 @@ public class KoskiService {
             .thenApplyAsync(koskioppijat -> {
                 LOG.info(String.format("Saatiin Koskesta %s uuden oppijan tiedot, kun haettiin %d/%d oppijalle (%s:lle oli jo haettu tiedot) hakukohteen %s laskemista varten.",
                     koskioppijat.size(), oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
-                koskioppijat.forEach(koskiOppija ->
-                    suoritustiedotDTO.asetaKoskiopiskeluoikeudet(koskiOppija.getOppijanumero(), GSON.toJson(koskiOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit))));
-                return koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
+                Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
+                oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(oppijanumero -> {
+                    KoskiOppija loytynytOppija = koskiOppijatOppijanumeroittain.get(oppijanumero);
+                    if (loytynytOppija != null) {
+                        suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, GSON.toJson(loytynytOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit)));
+                    } else {
+                        suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, "[]");
+                    }
+                });
+                return koskiOppijatOppijanumeroittain;
             });
     }
 
