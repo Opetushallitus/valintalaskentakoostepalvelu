@@ -52,11 +52,13 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
         }.getType());
     }
 
-    public Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset) {
+    public Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritustiedot) {
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritustiedot);
         if (LOG.isDebugEnabled()) {
             logitaKokotiedot(laskeDTO);
+            logitaSuoritustietojenKoko(suoritustiedot);
+            LOG.debug(String.format("Suoritustietojen koko base64-gzippinä: %d", laskentakutsu.getSuoritustiedotDtoBase64Gzip().length()));
         }
-        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritukset);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laske", laskentakutsu);
         } catch (Exception e) {
@@ -66,10 +68,12 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritustiedot) {
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritustiedot);
         if (LOG.isDebugEnabled()) {
             logitaKokotiedot(laskeDTO);
+            logitaSuoritustietojenKoko(suoritustiedot);
+            LOG.debug(String.format("Suoritustietojen koko base64-gzippinä: %d", laskentakutsu.getSuoritustiedotDtoBase64Gzip().length()));
         }
-        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritustiedot);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.valintakokeet", laskentakutsu);
         } catch (Exception e) {
@@ -79,10 +83,12 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritustiedot) {
+        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritustiedot);
         if (LOG.isDebugEnabled()) {
             logitaKokotiedot(laskeDTO);
+            logitaSuoritustietojenKoko(suoritustiedot);
+            LOG.debug(String.format("Suoritustietojen koko base64-gzippinä: %d", laskentakutsu.getSuoritustiedotDtoBase64Gzip().length()));
         }
-        Laskentakutsu laskentakutsu = new Laskentakutsu(laskeDTO, suoritustiedot);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskekaikki", laskentakutsu);
         } catch (Exception e) {
@@ -92,11 +98,12 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
+        Laskentakutsu laskentakutsu = new Laskentakutsu(lista, suoritustiedot);
         if (LOG.isDebugEnabled()) {
             lista.forEach(this::logitaKokotiedot);
             logitaSuoritustietojenKoko(suoritustiedot);
+            LOG.debug(String.format("Suoritustietojen koko base64-gzippinä: %d", laskentakutsu.getSuoritustiedotDtoBase64Gzip().length()));
         }
-        Laskentakutsu laskentakutsu = new Laskentakutsu(lista, suoritustiedot);
         try {
             return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele", laskentakutsu);
         } catch (Exception e) {
