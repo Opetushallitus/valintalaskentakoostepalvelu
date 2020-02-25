@@ -52,7 +52,7 @@ public class KoskiServiceTest {
 
     @Test
     public void koskestaHaettavienHakukohteidenListallaVoiRajoittaaMilleHakukohteilleHaetaanKoskesta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("hakukohdeoid1,hakukohdeoid2", koskifuntionimet, koskiAsyncResource);
+        KoskiService service = new KoskiService("hakukohdeoid1,hakukohdeoid2", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
@@ -67,7 +67,7 @@ public class KoskiServiceTest {
 
     @Test
     public void koskidataaKayttavienFunktionimienListallaVoiRajoittaaMilleHakukohteilleHaetaanKoskesta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("ALL", koskifuntionimet, koskiAsyncResource);
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 

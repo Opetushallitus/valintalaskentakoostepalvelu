@@ -78,6 +78,7 @@ valintalaskentakoostepalvelu.laskennan.splittaus={{valintalaskentakoostepalvelu_
 valintalaskentakoostepalvelu.koski.baseurl={{valintalaskentakoostepalvelu_koski_baseurl | default("https://${host.virkailija}")}}
 valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit={{valintalaskentakoostepalvelu_laskenta_koskesta_haettavat_hakukohdeoidit | default("none")}}
 valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta={{valintalaskentakoostepalvelu_laskenta_funktionimet_joille_haetaan_tiedot_koskesta | default("HAEAMMATILLINENYTOARVOSANA,HAEAMMATILLINENYTOARVIOINTIASTEIKKO,ITEROIAMMATILLISETTUTKINNOT,ITEROIAMMATILLISETOSAT,ITEROIAMMATILLISETYTOOSAALUEET,HAEAMMATILLISENOSANLAAJUUS,HAEAMMATILLISENOSANARVOSANA,HAEAMMATILLISENYTOOSAALUEENLAAJUUS,HAEAMMATILLISENYTOOSAALUEENARVOSANA,HAEAMMATILLISENTUTKINNONKESKIARVO,HAEAMMATILLISENTUTKINNONSUORITUSTAPA")}}
+valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot.koskesta={{valintalaskentakoostepalvelu_laskenta_opiskeluoikeustyypit_joille_haetaan_tiedot_koskesta | default("ammatillinenkoulutus") }}
 valintalaskentakoostepalvelu.koski.username={{valintalaskentakoostepalvelu_koski_username | default("koostepalvelu2koski")}}
 valintalaskentakoostepalvelu.koski.password={{valintalaskentakoostepalvelu_koski_password}}
 valintalaskentakoostepalvelu.koski.max.oppijat.post.size={{valintalaskentakoostepalvelu_koski_max_oppijat_post_size | default("1000")}}

@@ -38,14 +38,17 @@ public class KoskiService {
     private final Predicate<String> koskiHakukohdeOidFilter;
     private final KoskiAsyncResource koskiAsyncResource;
     private final Set<Funktionimi> koskenFunktionimet;
+    private final Set<String> koskenOpiskeluoikeusTyypit;
 
     @Autowired
     public KoskiService(@Value("${valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit:none}") String koskiHakukohdeOiditString,
                         @Value("${valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta}") String koskenFunktionimetString,
+                        @Value("${valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot.koskesta}") String koskenOpiskeluoikeusTyypitString,
                         KoskiAsyncResource koskiAsyncResource) {
         this.koskiAsyncResource = koskiAsyncResource;
         this.koskiHakukohdeOidFilter = resolveKoskiHakukohdeOidFilter(koskiHakukohdeOiditString);
         this.koskenFunktionimet = resolveKoskenFunktionimet(koskenFunktionimetString);
+        this.koskenOpiskeluoikeusTyypit = resolveKoskenOpiskeluoikeudet(koskenOpiskeluoikeusTyypitString);
     }
 
     /**
@@ -84,7 +87,7 @@ public class KoskiService {
                 LOG.info(String.format("Saatiin Koskesta %s uuden oppijan tiedot, kun haettiin %d/%d oppijalle (%s:lle oli jo haettu tiedot) hakukohteen %s laskemista varten.",
                     koskioppijat.size(), oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
                 koskioppijat.forEach(koskiOppija ->
-                    suoritustiedotDTO.asetaKoskiopiskeluoikeudet(koskiOppija.getOppijanumero(), GSON.toJson(koskiOppija.getOpiskeluoikeudet())));
+                    suoritustiedotDTO.asetaKoskiopiskeluoikeudet(koskiOppija.getOppijanumero(), GSON.toJson(koskiOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit))));
                 return koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
             });
     }
@@ -136,5 +139,17 @@ public class KoskiService {
         LOG.info("Saatiin '" + koskenFunktionimetString + "' funktionimiksi, joille haetaan dataa Koskesta => haetaan Koskesta tietoja vain hakukohteille, " +
             "joiden valintaperusteissa käytetään seuraavannimisiä funktioita: " + funktionimet);
         return funktionimet;
+    }
+
+    private static Set<String> resolveKoskenOpiskeluoikeudet(String koskenOpiskeluoikeusTyypitString) {
+        if (StringUtils.isBlank(koskenOpiskeluoikeusTyypitString)) {
+            LOG.info("Saatiin '" + koskenOpiskeluoikeusTyypitString + "' opiskeluoikeuksiksi, joille haetaan dataa Koskesta => ei haeta ollenkaan tietoja Koskesta.");
+            return Collections.emptySet();
+        }
+        Set<String> opiskeluoikeusTyypit = Arrays.stream(koskenOpiskeluoikeusTyypitString.split(","))
+            .collect(Collectors.toSet());
+        LOG.info("Saatiin '" + koskenOpiskeluoikeusTyypitString + "' opiskeluoikeuksien tyypeiksi, joille haetaan dataa Koskesta => haetaan Koskesta tietoja vain opiskeluoikeuksista, " +
+            "tyypin koodiarvo on jokin seuraavista: " + opiskeluoikeusTyypit);
+        return opiskeluoikeusTyypit;
     }
 }

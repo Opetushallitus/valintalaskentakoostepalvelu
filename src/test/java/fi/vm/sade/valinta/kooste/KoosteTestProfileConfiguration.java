@@ -49,6 +49,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.koski.password", "secret");
         p0.setProperty("valintalaskentakoostepalvelu.koski.max.oppijat.post.size", "1000");
         p0.setProperty("valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta", "HAEAMMATILLINENYTOARVOSANA,HAEAMMATILLINENYTOARVIOINTIASTEIKKO,ITEROIAMMATILLISETTUTKINNOT,ITEROIAMMATILLISETOSAT,ITEROIAMMATILLISETYTOOSAALUEET,HAEAMMATILLISENOSANLAAJUUS,HAEAMMATILLISENOSANARVOSANA,HAEAMMATILLISENYTOOSAALUEENLAAJUUS,HAEAMMATILLISENYTOOSAALUEENARVOSANA,HAEAMMATILLISENTUTKINNONKESKIARVO,HAEAMMATILLISENTUTKINNONSUORITUSTAPA");
+        p0.setProperty("valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot.koskesta", "ammatillinenkoulutus");
 
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://" + proxyServer + "/organisaatio-service/rest");
