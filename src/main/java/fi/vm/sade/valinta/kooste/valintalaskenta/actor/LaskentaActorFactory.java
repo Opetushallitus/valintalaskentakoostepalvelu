@@ -23,6 +23,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuWrapper.PyynnonTunniste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
+import scala.concurrent.Future;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -410,9 +412,13 @@ public class LaskentaActorFactory {
         CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes = createResurssiFuture(tunniste,
             "tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",
             () -> tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid));
-        CompletableFuture<PisteetWithLastModified> valintapisteetForHakukohdes = createResurssiFuture(tunniste,
-            "valintapisteAsyncResource.getValintapisteet",
-            () -> valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession));
+        CompletableFuture<PisteetWithLastModified> valintapisteetHakemuksille = hakemukset.thenComposeAsync(hakemusWrappers -> {
+            List<String> hakemusOids = hakemusWrappers.stream().map(HakemusWrapper::getOid).collect(Collectors.toList());
+            return createResurssiFuture(tunniste,
+                    "valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture",
+                    () -> valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(hakemusOids, auditSession),
+                    retryHakemuksetAndOppijat);
+        });
         CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = withHakijaRyhmat
             ? createResurssiFuture(tunniste, "valintaperusteetAsyncResource.haeHakijaryhmat", () -> valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid))
             : CompletableFuture.completedFuture(emptyList());
@@ -430,7 +436,7 @@ public class LaskentaActorFactory {
             valintaperusteet,
             oppijasForOidsFromHakemukses,
             hakukohdeRyhmasForHakukohdes,
-            valintapisteetForHakukohdes,
+            valintapisteetHakemuksille,
             hakijaryhmat,
             hakemukset,
             koskiOppijaByOppijaOid);
