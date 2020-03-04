@@ -47,10 +47,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
  *
  *       valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl=http://localhost:8080
  *
- *    * Start the service
- *        VALINTALASKENTAKOOSTEPALVELU_USER_HOME="path to oph-configuration directory" \
- *        VALINTALASKENTAKOOSTEPALVELU_PORT=56748 \
- *        mvn exec:java
+ *    * Run this class directly, or with https://github.com/Opetushallitus/local-environment
  *
  *    * Now the swagger documentation for this service is running at
  *        http://localhost:56748/valintalaskentakoostepalvelu/swagger/
