@@ -16,7 +16,7 @@
         <jsch.version>0.1.55</jsch.version>
         <fake-sftp-server-rule.version>2.0.1</fake-sftp-server-rule.version>
         <cxf.version>3.3.2</cxf.version>
-        <fasterxml.jackson.version>2.9.5</fasterxml.jackson.version>
+        <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
         <jetty.version>9.4.15.v20190215</jetty.version>
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
