@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.google.gson.Gson;
@@ -13,6 +14,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +40,7 @@ public class KoskiServiceTest {
     private final String oppijanumero = "1.2.246.562.24.50534365452";
     private final KoskiOppija koskiOppija = new KoskiOppija();
     private Set<KoskiOppija> koskioppijat = Collections.singleton(koskiOppija);
+    private final SuoritustiedotDTO suoritustiedotDTO = new SuoritustiedotDTO();
 
     @Before
     public void setUpTestdata() {
@@ -49,28 +52,32 @@ public class KoskiServiceTest {
 
     @Test
     public void koskestaHaettavienHakukohteidenListallaVoiRajoittaaMilleHakukohteilleHaetaanKoskesta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("hakukohdeoid1,hakukohdeoid2", koskifuntionimet, koskiAsyncResource);
+        KoskiService service = new KoskiService("hakukohdeoid1,hakukohdeoid2", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
-        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset).get();
+        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO).get();
         assertThat(koskiOppijatOppijanumeroittain.entrySet(), hasSize(1));
         assertEquals(koskiOppijatOppijanumeroittain.get(oppijanumero), koskiOppija);
+        assertTrue(suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero));
+        assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
 
-        assertThat(service.haeKoskiOppijat("jokumuuhakukohde", koskiFunktionSisaltavaValintaperuste, hakemukset).get().entrySet(), is(empty()));
+        assertThat(service.haeKoskiOppijat("jokumuuhakukohde", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
     }
 
     @Test
     public void koskidataaKayttavienFunktionimienListallaVoiRajoittaaMilleHakukohteilleHaetaanKoskesta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("ALL", koskifuntionimet, koskiAsyncResource);
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
-        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset).get();
+        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO).get();
         assertThat(koskiOppijatOppijanumeroittain.entrySet(), hasSize(1));
         assertEquals(koskiOppijatOppijanumeroittain.get(oppijanumero), koskiOppija);
+        assertTrue(suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero));
+        assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
 
-        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset).get().entrySet(), is(empty()));
+        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
     }
 
     private CompletableFuture<List<ValintaperusteetDTO>> luoKoskifunktionSisaltavaValintaperuste() {

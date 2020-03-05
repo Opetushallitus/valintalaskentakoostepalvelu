@@ -16,7 +16,7 @@
         <jsch.version>0.1.55</jsch.version>
         <fake-sftp-server-rule.version>2.0.1</fake-sftp-server-rule.version>
         <cxf.version>3.3.2</cxf.version>
-        <fasterxml.jackson.version>2.9.5</fasterxml.jackson.version>
+        <fasterxml.jackson.version>2.10.2</fasterxml.jackson.version>
         <jetty.version>9.4.15.v20190215</jetty.version>
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
@@ -28,8 +28,8 @@
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>7.4.0-SNAPSHOT</sijoittelu.version>
         <valinta-sharedutils.version>5.10-SNAPSHOT</valinta-sharedutils.version>
-        <valintaperusteet.version>5.9-SNAPSHOT</valintaperusteet.version>
-        <valintalaskenta.version>5.10-SNAPSHOT</valintalaskenta.version>
+        <valintaperusteet.version>5.11-SNAPSHOT</valintaperusteet.version>
+        <valintalaskenta.version>5.12-SNAPSHOT</valintalaskenta.version>
     </properties>
 
     <dependencyManagement>
@@ -303,6 +303,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>${fasterxml.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-joda</artifactId>
                 <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
@@ -798,7 +803,6 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
-            <version>${valinta-sharedutils.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
@@ -1084,7 +1088,6 @@ buildTtime=${maven.build.timestamp}
             <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
             <releases>
                 <enabled>false</enabled>
-                <updatePolicy>always</updatePolicy>
                 <checksumPolicy>warn</checksumPolicy>
             </releases>
             <snapshots>
@@ -1098,12 +1101,10 @@ buildTtime=${maven.build.timestamp}
             <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local</url>
             <releases>
                 <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
                 <checksumPolicy>warn</checksumPolicy>
             </releases>
             <snapshots>
                 <enabled>false</enabled>
-                <updatePolicy>always</updatePolicy>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>

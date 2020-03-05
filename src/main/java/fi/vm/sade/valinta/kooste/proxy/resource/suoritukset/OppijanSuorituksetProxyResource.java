@@ -415,7 +415,6 @@ public class OppijanSuorituksetProxyResource {
             hakemukset,
             valintapisteet,
             suoritukset,
-            Collections.emptyMap(),
             parametrit,
             fetchEnsikertalaisuus);
     }
