@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>java-cas</artifactId>
-                <version>0.6.1-SNAPSHOT</version>
+                <version>0.6.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade</groupId>
@@ -1060,24 +1060,6 @@ buildTtime=${maven.build.timestamp}
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.0.2</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <configuration>
-                        <mainClass>fi.vm.sade.valinta.kooste.ValintaKoosteJetty</mainClass>
-                        <classpathScope>test</classpathScope>
-                        <systemProperties>
-                            <systemProperty>
-                                <key>user.home</key>
-                                <value>${env.VALINTALASKENTAKOOSTEPALVELU_USER_HOME}</value>
-                            </systemProperty>
-                            <systemProperty>
-                                <key>valintakooste.port</key>
-                                <value>${env.VALINTALASKENTAKOOSTEPALVELU_PORT}</value>
-                            </systemProperty>
-                        </systemProperties>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -1092,7 +1074,7 @@ buildTtime=${maven.build.timestamp}
             </releases>
             <snapshots>
                 <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
+                <updatePolicy>daily</updatePolicy>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
@@ -1114,5 +1096,22 @@ buildTtime=${maven.build.timestamp}
             <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
         </repository>
     </repositories>
+
+    <profiles>
+        <profile>
+            <id>opintopolku-local</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>exec-maven-plugin</artifactId>
+                            <version>1.6.0</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
