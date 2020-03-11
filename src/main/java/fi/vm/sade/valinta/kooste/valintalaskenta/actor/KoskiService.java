@@ -1,7 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import static fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi.ITEROIAMMATILLISETTUTKINNOT;
+import static fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi.ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI;
 import com.google.gson.Gson;
 
+import fi.vm.sade.service.valintaperusteet.dto.SyoteparametriDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetFunktiokutsuDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi;
@@ -16,9 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +33,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class KoskiService {
@@ -35,6 +42,7 @@ public class KoskiService {
     private static final Predicate<String> INCLUDE_ALL = s -> true;
     private static final Predicate<String> EXCLUDE_ALL = s -> false;
     private static final Gson GSON = new Gson();
+    private static final DateTimeFormatter FINNISH_DATE_FORMAT = DateTimeFormatter.ofPattern("d.M.yyyy");
     private final Predicate<String> koskiHakukohdeOidFilter;
     private final KoskiAsyncResource koskiAsyncResource;
     private final Set<Funktionimi> koskenFunktionimet;
@@ -62,6 +70,7 @@ public class KoskiService {
             return CompletableFuture.allOf(valintaperusteet, hakemukset).thenComposeAsync(x -> {
                 Collection<HakemusWrapper> hakemusWrappers = hakemukset.join();
                 if (sisaltaaKoskiFunktioita(valintaperusteet.join())) {
+                    LocalDate paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan = etsiKoskiDatanLeikkuriPvm(valintaperusteet.join(), hakukohdeOid);
                     return haeKoskiOppijat(hakukohdeOid, hakemusWrappers, suoritustiedotDTO);
                 } else {
                     LOG.info("Ei haeta tietoja Koskesta hakukohteelle " + hakukohdeOid + " , koska siltä ei löydy Koski-tietoja käyttäviä valintaperusteita.");
@@ -117,6 +126,42 @@ public class KoskiService {
         return funktiokutsu.getFunktioargumentit().stream()
             .anyMatch(argumentti ->
                 sisaltaaKoskiFunktioita(argumentti.getFunktiokutsu()));
+    }
+
+    private LocalDate etsiKoskiDatanLeikkuriPvm(List<ValintaperusteetDTO> valintaperusteetDTOS, String hakukohdeOid) {
+        List<String> leikkuriPvmMerkkijonot = valintaperusteetDTOS.stream()
+            .flatMap(valintaperusteetDTO -> valintaperusteetDTO.getValinnanVaihe().getValintatapajono().stream())
+            .flatMap(jono -> jono.getJarjestyskriteerit().stream())
+            .flatMap(kriteeri -> etsiFunktiokutsutRekursiivisesti(kriteeri.getFunktiokutsu(), fk -> ITEROIAMMATILLISETTUTKINNOT.equals(fk.getFunktionimi())).stream())
+            .flatMap(tutkintojenIterointiFunktio -> tutkintojenIterointiFunktio.getSyoteparametrit().stream()
+                .filter(parametri -> ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI.equals(parametri.getAvain()) && StringUtils.isNotBlank(parametri.getArvo()))
+                .map(SyoteparametriDTO::getArvo))
+            .collect(Collectors.toList());
+        List<LocalDate> kaikkiLeikkuriPvmtValintaperusteista = leikkuriPvmMerkkijonot.stream()
+            .map(pvm -> LocalDate.parse(pvm, FINNISH_DATE_FORMAT))
+            .sorted()
+            .collect(Collectors.toList());
+        LocalDate kaytettavaLeikkuriPvm;
+        if (!kaikkiLeikkuriPvmtValintaperusteista.isEmpty()) {
+            kaytettavaLeikkuriPvm = kaikkiLeikkuriPvmtValintaperusteista.get(kaikkiLeikkuriPvmtValintaperusteista.size() - 1);
+        } else {
+            kaytettavaLeikkuriPvm = LocalDate.now();
+        }
+        LOG.info(String.format("Saatiin hakukohteen %s valintaperusteista Koski-datan leikkuripäivämäärät %s. Käytetään leikkuripäivämääränä arvoa %s.",
+            hakukohdeOid, leikkuriPvmMerkkijonot, FINNISH_DATE_FORMAT.format(kaytettavaLeikkuriPvm)));
+        return kaytettavaLeikkuriPvm;
+    }
+
+    private List<ValintaperusteetFunktiokutsuDTO> etsiFunktiokutsutRekursiivisesti(ValintaperusteetFunktiokutsuDTO juuriFunktioKutsu,
+                                                                                   Predicate<ValintaperusteetFunktiokutsuDTO> predikaatti) {
+        List<ValintaperusteetFunktiokutsuDTO> tulokset = new LinkedList<>();
+        if (predikaatti.test(juuriFunktioKutsu)) {
+            tulokset.add(juuriFunktioKutsu);
+        }
+        tulokset.addAll(juuriFunktioKutsu.getFunktioargumentit().stream()
+            .flatMap(argumentti -> etsiFunktiokutsutRekursiivisesti(argumentti.getFunktiokutsu(), predikaatti).stream())
+            .collect(Collectors.toSet()));
+        return tulokset;
     }
 
     private static Predicate<String> resolveKoskiHakukohdeOidFilter(String koskiHakukohdeOiditString) {
