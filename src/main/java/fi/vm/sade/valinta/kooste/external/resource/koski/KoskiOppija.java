@@ -5,9 +5,13 @@ import com.google.gson.JsonElement;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 public class KoskiOppija {
+
     private KoskiHenkilö henkilö;
     private JsonArray opiskeluoikeudet;
 
@@ -17,6 +21,10 @@ public class KoskiOppija {
 
     public JsonArray getOpiskeluoikeudet() {
         return opiskeluoikeudet;
+    }
+
+    public void setOpiskeluoikeudet(JsonArray opiskeluoikeudet) {
+        this.opiskeluoikeudet = opiskeluoikeudet;
     }
 
     public void setHenkilö(KoskiHenkilö henkilö) {
@@ -29,15 +37,25 @@ public class KoskiOppija {
         }
         JsonArray tulos = new JsonArray();
         opiskeluoikeudet.forEach(opiskeluoikeus -> {
-            if (koskenOpiskeluoikeusTyypit.contains(tyypinKoodiarvo(opiskeluoikeus))) {
+            if (koskenOpiskeluoikeusTyypit.contains(OpiskeluoikeusJsonUtil.tyypinKoodiarvo(opiskeluoikeus))) {
                 tulos.add(opiskeluoikeus);
             }
         });
         return tulos;
     }
 
-    private String tyypinKoodiarvo(JsonElement opiskeluoikeus) {
-        return opiskeluoikeus.getAsJsonObject().get("tyyppi").getAsJsonObject().get("koodiarvo").getAsString();
+    public boolean sisaltaaUudempiaOpiskeluoikeuksiaKuin(LocalDate leikkuriPvm, Set<String> koskenOpiskeluoikeusTyypit) {
+        if (opiskeluoikeudet == null || opiskeluoikeudet.isJsonNull() || opiskeluoikeudet.size() == 0) {
+            return false;
+        }
+        for (JsonElement opiskeluoikeus : opiskeluoikeudet) {
+            if (koskenOpiskeluoikeusTyypit.contains(OpiskeluoikeusJsonUtil.tyypinKoodiarvo(opiskeluoikeus))) {
+                if (OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static class KoskiHenkilö {
@@ -52,5 +70,37 @@ public class KoskiOppija {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    public static class OpiskeluoikeusJsonUtil {
+        private static final DateTimeFormatter OPISKELUOIKEUDEN_AIKALEIMA_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+
+        public static String tyypinKoodiarvo(JsonElement opiskeluoikeus) {
+            return opiskeluoikeus.getAsJsonObject().get("tyyppi").getAsJsonObject().get("koodiarvo").getAsString();
+        }
+
+        public static boolean onUudempiKuin(LocalDate leikkuriPvm, JsonElement opiskeluoikeus) {
+            return onUudempiKuin(leikkuriPvm, aikaleima(opiskeluoikeus));
+        }
+
+        public static boolean onUudempiKuin(LocalDate leikkuriPvm, LocalDateTime aikaleima) {
+            return aikaleima.isAfter(leikkuriPvm.plusDays(1).atStartOfDay());
+        }
+
+        public static LocalDateTime aikaleima(JsonElement opiskeluoikeus) {
+            String aikaleima = opiskeluoikeus.getAsJsonObject().get("aikaleima").getAsString();
+            return LocalDateTime.parse(aikaleima, OPISKELUOIKEUDEN_AIKALEIMA_FORMAT);
+        }
+
+        public static String oid(JsonElement opiskeluoikeus) {
+            return opiskeluoikeus.getAsJsonObject().get("oid").getAsString();
+        }
+
+        public static int versionumero(JsonElement opiskeluoikeus) {
+            if (opiskeluoikeus == null) {
+                return -1;
+            }
+            return opiskeluoikeus.getAsJsonObject().get("versionumero").getAsInt();
+        }
     }
 }

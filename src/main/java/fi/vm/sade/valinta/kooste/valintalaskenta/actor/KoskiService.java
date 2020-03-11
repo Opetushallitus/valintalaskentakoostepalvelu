@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 import static fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi.ITEROIAMMATILLISETTUTKINNOT;
 import static fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi.ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 
 import fi.vm.sade.service.valintaperusteet.dto.SyoteparametriDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
@@ -10,6 +12,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetFunktiokutsuDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
+import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija.OpiskeluoikeusJsonUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,13 +31,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class KoskiService {
@@ -71,7 +75,7 @@ public class KoskiService {
                 Collection<HakemusWrapper> hakemusWrappers = hakemukset.join();
                 if (sisaltaaKoskiFunktioita(valintaperusteet.join())) {
                     LocalDate paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan = etsiKoskiDatanLeikkuriPvm(valintaperusteet.join(), hakukohdeOid);
-                    return haeKoskiOppijat(hakukohdeOid, hakemusWrappers, suoritustiedotDTO);
+                    return haeKoskiOppijat(hakukohdeOid, hakemusWrappers, suoritustiedotDTO, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
                 } else {
                     LOG.info("Ei haeta tietoja Koskesta hakukohteelle " + hakukohdeOid + " , koska siltä ei löydy Koski-tietoja käyttäviä valintaperusteita.");
                     return CompletableFuture.completedFuture(Collections.emptyMap());
@@ -83,7 +87,10 @@ public class KoskiService {
         }
     }
 
-    private CompletionStage<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid, Collection<HakemusWrapper> hakemusWrappers, SuoritustiedotDTO suoritustiedotDTO) {
+    private CompletionStage<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid,
+                                                                      Collection<HakemusWrapper> hakemusWrappers,
+                                                                      SuoritustiedotDTO suoritustiedotDTO,
+                                                                      LocalDate paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan) {
         LOG.info(String.format("Haetaan Koskesta tiedot %d oppijalle hakukohteen %s laskemista varten.", hakemusWrappers.size(), hakukohdeOid));
         List<String> oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat = hakemusWrappers.stream()
             .map(HakemusWrapper::getPersonOid)
@@ -95,6 +102,7 @@ public class KoskiService {
             .thenApplyAsync(koskioppijat -> {
                 LOG.info(String.format("Saatiin Koskesta %s uuden oppijan tiedot, kun haettiin %d/%d oppijalle (%s:lle oli jo haettu tiedot) hakukohteen %s laskemista varten.",
                     koskioppijat.size(), oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
+                haeUusimmatLeikkuripaivaaEdeltavatOpiskeluoikeudetTarvittaessa(koskioppijat, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
                 Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
                 oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(oppijanumero -> {
                     KoskiOppija loytynytOppija = koskiOppijatOppijanumeroittain.get(oppijanumero);
@@ -162,6 +170,59 @@ public class KoskiService {
             .flatMap(argumentti -> etsiFunktiokutsutRekursiivisesti(argumentti.getFunktiokutsu(), predikaatti).stream())
             .collect(Collectors.toSet()));
         return tulokset;
+    }
+
+    private void haeUusimmatLeikkuripaivaaEdeltavatOpiskeluoikeudetTarvittaessa(Set<KoskiOppija> koskioppijat, LocalDate leikkuriPvm) {
+        koskioppijat.forEach(koskiOppija -> {
+            if (koskiOppija.sisaltaaUudempiaOpiskeluoikeuksiaKuin(leikkuriPvm, koskenOpiskeluoikeusTyypit)) {
+                LOG.info(String.format("Oppijalle %s löytyi Koskesta haluttujen tyyppien %s opiskeluoikeuksia, jotka on päivitetty leikkuripäivämäärän %s jälkeen. " +
+                    "Haetaan tuoreimmat leikkuripäivämäärää edeltävät tiedot.", koskiOppija.getOppijanumero(), koskenOpiskeluoikeusTyypit,
+                    FINNISH_DATE_FORMAT.format(leikkuriPvm)));
+                koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
+                    koskiOppija,
+                    leikkuriPvm,
+                    koskiOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit)));
+            }
+        });
+    }
+
+    private JsonArray haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm, JsonArray opiskeluoikeudet) {
+        JsonArray tulokset = new JsonArray();
+        opiskeluoikeudet.forEach(opiskeluoikeus -> {
+            if (OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus)) {
+                haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, opiskeluoikeus).ifPresent(tulokset::add);
+            } else {
+                tulokset.add(opiskeluoikeus);
+            }
+        });
+        return tulokset;
+    }
+
+    private Optional<JsonElement> haePaivamaaranMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm, JsonElement opiskeluoikeus) {
+        int versionumero = OpiskeluoikeusJsonUtil.versionumero(opiskeluoikeus);
+        LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
+        String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
+        if (!OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, aikaleima)) {
+            LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s aikaleima on %s eli ennen leikkuripäivämäärää %s ja versio %d, joten huomioidaan tämä opiskeluoikeus.",
+                koskiOppija.getOppijanumero(),
+                opiskeluoikeudenOid,
+                aikaleima,
+                FINNISH_DATE_FORMAT.format(leikkuriPvm),
+                versionumero));
+            return Optional.of(opiskeluoikeus);
+        }
+        if (versionumero <= 1) {
+            LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s aikaleima on %s eli leikkuripäivämäärän %s jälkeen," +
+                    " ja versio %d, joten vanhempia versioita ei ole. Jätetään opiskeluoikeus huomioimatta.",
+                koskiOppija.getOppijanumero(),
+                opiskeluoikeudenOid,
+                aikaleima,
+                FINNISH_DATE_FORMAT.format(leikkuriPvm),
+                versionumero));
+            return Optional.empty();
+        }
+        JsonElement edellisenVersionOpiskeluoikeus = koskiAsyncResource.findVersionOfOpiskeluoikeus(opiskeluoikeudenOid, versionumero - 1).join();
+        return haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, edellisenVersionOpiskeluoikeus);
     }
 
     private static Predicate<String> resolveKoskiHakukohdeOidFilter(String koskiHakukohdeOiditString) {
