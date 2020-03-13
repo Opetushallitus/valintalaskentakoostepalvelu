@@ -95,7 +95,7 @@ public class KoskiService {
             .thenApplyAsync(koskioppijat -> {
                 LOG.info(String.format("Saatiin Koskesta %s uuden oppijan tiedot, kun haettiin %d/%d oppijalle (%s:lle oli jo haettu tiedot) hakukohteen %s laskemista varten.",
                     koskioppijat.size(), oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
-                koskiOpiskeluoikeusHistoryService.haeUusimmatLeikkuripaivaaEdeltavatOpiskeluoikeudetTarvittaessa(koskioppijat, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
+                koskiOpiskeluoikeusHistoryService.haeVanhemmatOpiskeluoikeudetTarvittaessa(koskioppijat, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
                 Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
                 oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(oppijanumero -> {
                     KoskiOppija loytynytOppija = koskiOppijatOppijanumeroittain.get(oppijanumero);

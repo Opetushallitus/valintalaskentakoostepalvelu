@@ -85,7 +85,7 @@ public class KoskiOpiskeluoikeusHistoryService {
         return tulokset;
     }
 
-    void haeUusimmatLeikkuripaivaaEdeltavatOpiskeluoikeudetTarvittaessa(Set<KoskiOppija> koskioppijat, LocalDate leikkuriPvm) {
+    void haeVanhemmatOpiskeluoikeudetTarvittaessa(Set<KoskiOppija> koskioppijat, LocalDate leikkuriPvm) {
         koskioppijat.forEach(koskiOppija -> {
             final Set<JsonElement> liianUudetOpiskeluoikeudet = koskiOppija.opiskeluoikeudetJotkaOvatUudempiaKuin(leikkuriPvm, koskenOpiskeluoikeusTyypit);
             if (!liianUudetOpiskeluoikeudet.isEmpty()) {
@@ -109,7 +109,8 @@ public class KoskiOpiskeluoikeusHistoryService {
                     opiskeluoikeudenOid,
                     aikaleima,
                     FINNISH_DATE_FORMAT.format(leikkuriPvm)));
-                haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, opiskeluoikeus).ifPresent(tulokset::add);
+                haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, opiskeluoikeus)
+                    .ifPresent(tulokset::add);
             } else {
                 tulokset.add(opiskeluoikeus);
             }
