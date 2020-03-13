@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -48,16 +49,9 @@ public class KoskiOpiskeluoikeusHistoryService {
                 .filter(parametri -> ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI.equals(parametri.getAvain()) && StringUtils.isNotBlank(parametri.getArvo()))
                 .map(SyoteparametriDTO::getArvo))
             .collect(Collectors.toList());
-        List<LocalDate> kaikkiLeikkuriPvmtValintaperusteista = leikkuriPvmMerkkijonot.stream()
+        LocalDate kaytettavaLeikkuriPvm = leikkuriPvmMerkkijonot.stream()
             .map(pvm -> LocalDate.parse(pvm, FINNISH_DATE_FORMAT))
-            .sorted()
-            .collect(Collectors.toList());
-        LocalDate kaytettavaLeikkuriPvm;
-        if (!kaikkiLeikkuriPvmtValintaperusteista.isEmpty()) {
-            kaytettavaLeikkuriPvm = kaikkiLeikkuriPvmtValintaperusteista.get(kaikkiLeikkuriPvmtValintaperusteista.size() - 1);
-        } else {
-            kaytettavaLeikkuriPvm = LocalDate.now();
-        }
+            .max(Comparator.naturalOrder()).orElse(LocalDate.now());
         LOG.info(String.format("Saatiin hakukohteen %s valintaperusteista Koski-datan leikkuripäivämäärät %s. Käytetään leikkuripäivämääränä arvoa %s.",
             hakukohdeOid, leikkuriPvmMerkkijonot, FINNISH_DATE_FORMAT.format(kaytettavaLeikkuriPvm)));
         return kaytettavaLeikkuriPvm;
