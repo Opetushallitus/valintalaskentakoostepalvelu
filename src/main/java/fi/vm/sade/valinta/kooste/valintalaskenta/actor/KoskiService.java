@@ -38,6 +38,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class KoskiService {
@@ -137,10 +138,7 @@ public class KoskiService {
     }
 
     private LocalDate etsiKoskiDatanLeikkuriPvm(List<ValintaperusteetDTO> valintaperusteetDTOS, String hakukohdeOid) {
-        List<String> leikkuriPvmMerkkijonot = valintaperusteetDTOS.stream()
-            .flatMap(valintaperusteetDTO -> valintaperusteetDTO.getValinnanVaihe().getValintatapajono().stream())
-            .flatMap(jono -> jono.getJarjestyskriteerit().stream())
-            .flatMap(kriteeri -> etsiFunktiokutsutRekursiivisesti(kriteeri.getFunktiokutsu(), fk -> ITEROIAMMATILLISETTUTKINNOT.equals(fk.getFunktionimi())).stream())
+        List<String> leikkuriPvmMerkkijonot = etsiTutkintojenIterointiFunktioKutsut(valintaperusteetDTOS)
             .flatMap(tutkintojenIterointiFunktio -> tutkintojenIterointiFunktio.getSyoteparametrit().stream()
                 .filter(parametri -> ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI.equals(parametri.getAvain()) && StringUtils.isNotBlank(parametri.getArvo()))
                 .map(SyoteparametriDTO::getArvo))
@@ -160,7 +158,17 @@ public class KoskiService {
         return kaytettavaLeikkuriPvm;
     }
 
-    private List<ValintaperusteetFunktiokutsuDTO> etsiFunktiokutsutRekursiivisesti(ValintaperusteetFunktiokutsuDTO juuriFunktioKutsu,
+    static Stream<ValintaperusteetFunktiokutsuDTO> etsiTutkintojenIterointiFunktioKutsut(List<ValintaperusteetDTO> valintaperusteetDTOS) {
+        return valintaperusteetDTOS.stream()
+            .flatMap(valintaperusteetDTO -> valintaperusteetDTO.getValinnanVaihe().getValintatapajono().stream())
+            .flatMap(jono -> jono.getJarjestyskriteerit().stream())
+            .flatMap(kriteeri ->
+                etsiFunktiokutsutRekursiivisesti(
+                    kriteeri.getFunktiokutsu(),
+                    fk -> ITEROIAMMATILLISETTUTKINNOT.equals(fk.getFunktionimi())).stream());
+    }
+
+    static private List<ValintaperusteetFunktiokutsuDTO> etsiFunktiokutsutRekursiivisesti(ValintaperusteetFunktiokutsuDTO juuriFunktioKutsu,
                                                                                    Predicate<ValintaperusteetFunktiokutsuDTO> predikaatti) {
         List<ValintaperusteetFunktiokutsuDTO> tulokset = new LinkedList<>();
         if (predikaatti.test(juuriFunktioKutsu)) {

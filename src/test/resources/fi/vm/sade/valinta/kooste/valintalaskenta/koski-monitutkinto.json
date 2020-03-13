@@ -1,0 +1,753 @@
+[
+     {
+       "oid": "1.2.246.562.15.32702385413",
+       "versionumero": 3,
+       "aikaleima": "2018-04-12T13:51:30.973557",
+       "lähdejärjestelmänId": {
+         "id": "2772",
+         "lähdejärjestelmä": {
+           "koodiarvo": "primus",
+           "nimi": {
+             "fi": "primus"
+           },
+           "koodistoUri": "lahdejarjestelma",
+           "koodistoVersio": 1
+         }
+       },
+       "oppilaitos": {
+         "oid": "1.2.246.562.10.98806593921",
+         "oppilaitosnumero": {
+           "koodiarvo": "42832",
+           "nimi": {
+             "fi": "Äyhtävän superopisto",
+             "sv": "Äyhtävän superopisto",
+             "en": "Äyhtävän superopisto"
+           },
+           "lyhytNimi": {
+             "fi": "Äyhtävän superop."
+           },
+           "koodistoUri": "oppilaitosnumero",
+           "koodistoVersio": 1
+         },
+         "nimi": {
+           "fi": "Äyhtävän superopisto",
+           "sv": "Äyhtävän superopisto",
+           "en": "Äyhtävän superopisto"
+         },
+         "kotipaikka": {
+           "koodiarvo": "999",
+           "nimi": {
+             "fi": "Äyhtävä",
+             "sv": "Äyhtävä"
+           },
+           "koodistoUri": "kunta",
+           "koodistoVersio": 2
+         }
+       },
+       "koulutustoimija": {
+         "oid": "1.2.246.562.10.83681839128",
+         "nimi": {
+           "fi": "Äyhtävän kunta"
+         },
+         "yTunnus": "7145612-8",
+         "kotipaikka": {
+           "koodiarvo": "997",
+           "nimi": {
+             "fi": "Äyhtävä",
+             "sv": "Äyhtävä"
+           },
+           "koodistoUri": "kunta",
+           "koodistoVersio": 2
+         }
+       },
+       "arvioituPäättymispäivä": "2017-12-19",
+       "ostettu": false,
+       "tila": {
+         "opiskeluoikeusjaksot": [
+           {
+             "alku": "2016-01-07",
+             "tila": {
+               "koodiarvo": "lasna",
+               "nimi": {
+                 "fi": "Läsnä",
+                 "sv": "Närvarande"
+               },
+               "koodistoUri": "koskiopiskeluoikeudentila",
+               "koodistoVersio": 1
+             },
+             "opintojenRahoitus": {
+               "koodiarvo": "1",
+               "nimi": {
+                 "fi": "Valtionosuusrahoitteinen koulutus",
+                 "sv": "Statsandelsfinansierad utbildning"
+               },
+               "koodistoUri": "opintojenrahoitus",
+               "koodistoVersio": 1
+             }
+           },
+           {
+             "alku": "2017-12-19",
+             "tila": {
+               "koodiarvo": "valmistunut",
+               "nimi": {
+                 "fi": "Valmistunut",
+                 "sv": "Utexaminerad"
+               },
+               "koodistoUri": "koskiopiskeluoikeudentila",
+               "koodistoVersio": 1
+             }
+           }
+         ]
+       },
+       "suoritukset": [
+         {
+           "koulutusmoduuli": {
+             "tunniste": {
+               "koodiarvo": "321602",
+               "nimi": {
+                 "fi": "Audiovisuaalisen viestinnän perustutkinto",
+                 "sv": "Grundexamen i audiovisuell kommunikation",
+                 "en": "Audiovisual Communication, VQ"
+               },
+               "lyhytNimi": {
+                 "fi": "Audiovis. viestinnän perustutk",
+                 "sv": "Grundexamen i audiovisuell kommunikation",
+                 "en": "Audiovisual Communication, Vocational Qualification"
+               },
+               "koodistoUri": "koulutus",
+               "koodistoVersio": 9
+             },
+             "perusteenDiaarinumero": "38/011/2014",
+             "koulutustyyppi": {
+               "koodiarvo": "1",
+               "nimi": {
+                 "fi": "Ammatillinen perustutkinto",
+                 "sv": "Yrkesinriktad grundexamen"
+               },
+               "lyhytNimi": {
+                 "fi": "Ammatillinen perustutkinto",
+                 "sv": "Yrkesinriktad grundexamen"
+               },
+               "koodistoUri": "koulutustyyppi",
+               "koodistoVersio": 2
+             }
+           },
+           "suoritustapa": {
+             "koodiarvo": "ops",
+             "nimi": {
+               "fi": "Ammatillinen perustutkinto",
+               "sv": "Läroplansbaserad",
+               "en": "Opetussuunnitelman mukainen"
+             },
+             "lyhytNimi": {
+               "fi": "ops",
+               "sv": "ops",
+               "en": "ops"
+             },
+             "koodistoUri": "ammatillisentutkinnonsuoritustapa",
+             "koodistoVersio": 1
+           },
+           "tutkintonimike": [
+             {
+               "koodiarvo": "10092",
+               "nimi": {
+                 "fi": "Media-assistentti",
+                 "sv": "Medieassistent"
+               },
+               "lyhytNimi": {
+                 "fi": "Media-assistentti",
+                 "sv": "Medieassistent"
+               },
+               "koodistoUri": "tutkintonimikkeet",
+               "koodistoVersio": 2
+             }
+           ],
+           "toimipiste": {
+             "oid": "1.2.246.562.10.98806593921",
+             "oppilaitosnumero": {
+               "koodiarvo": "42832",
+               "nimi": {
+                 "fi": "Äyhtävän superopisto",
+                 "sv": "Äyhtävän superopisto",
+                 "en": "Äyhtävän superopisto"
+               },
+               "lyhytNimi": {
+                 "fi": "Äyhtävän superop."
+               },
+               "koodistoUri": "oppilaitosnumero",
+               "koodistoVersio": 1
+             },
+             "nimi": {
+               "fi": "Äyhtävän superopisto",
+               "sv": "Äyhtävän superopisto",
+               "en": "Äyhtävän superopisto"
+             },
+             "kotipaikka": {
+               "koodiarvo": "749",
+               "nimi": {
+                 "fi": "Äyhtävä",
+                 "sv": "Äyhtävä"
+               },
+               "koodistoUri": "kunta",
+               "koodistoVersio": 2
+             }
+           },
+           "alkamispäivä": "2016-01-07",
+           "vahvistus": {
+             "päivä": "2017-12-19",
+             "paikkakunta": {
+               "koodiarvo": "749",
+               "nimi": {
+                 "fi": "Äyhtävä",
+                 "sv": "Äyhtävä"
+               },
+               "koodistoUri": "kunta",
+               "koodistoVersio": 2
+             },
+             "myöntäjäOrganisaatio": {
+               "oid": "1.2.246.562.10.98806593921",
+               "oppilaitosnumero": {
+                 "koodiarvo": "42832",
+                 "nimi": {
+                   "fi": "Äyhtävän superopisto",
+                   "sv": "Äyhtävän superopisto",
+                   "en": "Äyhtävän superopisto"
+                 },
+                 "lyhytNimi": {
+                   "fi": "Äyhtävän superop."
+                 },
+                 "koodistoUri": "oppilaitosnumero",
+                 "koodistoVersio": 1
+               },
+               "nimi": {
+                 "fi": "Äyhtävän superopisto",
+                 "sv": "Äyhtävän superopisto",
+                 "en": "Äyhtävän superopisto"
+               },
+               "kotipaikka": {
+                 "koodiarvo": "749",
+                 "nimi": {
+                   "fi": "Äyhtävä",
+                   "sv": "Äyhtävä"
+                 },
+                 "koodistoUri": "kunta",
+                 "koodistoVersio": 2
+               }
+             },
+             "myöntäjäHenkilöt": [
+               {
+                 "nimi": "Daisy Arrows",
+                 "titteli": {
+                   "fi": "Rehtori"
+                 },
+                 "organisaatio": {
+                   "oid": "1.2.246.562.10.98806593921",
+                   "oppilaitosnumero": {
+                     "koodiarvo": "42832",
+                     "nimi": {
+                       "fi": "Äyhtävän superopisto",
+                       "sv": "Äyhtävän superopisto",
+                       "en": "Äyhtävän superopisto"
+                     },
+                     "lyhytNimi": {
+                       "fi": "Äyhtävän superop."
+                     },
+                     "koodistoUri": "oppilaitosnumero",
+                     "koodistoVersio": 1
+                   },
+                   "nimi": {
+                     "fi": "Äyhtävän superopisto",
+                     "sv": "Äyhtävän superopisto",
+                     "en": "Äyhtävän superopisto"
+                   },
+                   "kotipaikka": {
+                     "koodiarvo": "749",
+                     "nimi": {
+                       "fi": "Äyhtävä",
+                       "sv": "Äyhtävä"
+                     },
+                     "koodistoUri": "kunta",
+                     "koodistoVersio": 2
+                   }
+                 }
+               }
+             ]
+           },
+           "suorituskieli": {
+             "koodiarvo": "FI",
+             "nimi": {
+               "fi": "suomi",
+               "sv": "finska",
+               "en": "Finnish"
+             },
+             "lyhytNimi": {
+               "fi": "suomi",
+               "sv": "finska",
+               "en": "Finnish"
+             },
+             "koodistoUri": "kieli",
+             "koodistoVersio": 1
+           },
+           "osasuoritukset": [],
+           "tyyppi": {
+             "koodiarvo": "ammatillinentutkinto",
+             "nimi": {
+               "fi": "Ammatillinen tutkinto",
+               "sv": "Yrkesinriktad examen"
+             },
+             "koodistoUri": "suorituksentyyppi",
+             "koodistoVersio": 1
+           }
+         }
+       ],
+       "tyyppi": {
+         "koodiarvo": "ammatillinenkoulutus",
+         "nimi": {
+           "fi": "Ammatillinen koulutus",
+           "sv": "Yrkesutbildning"
+         },
+         "lyhytNimi": {
+           "fi": "Ammatillinen koulutus"
+         },
+         "koodistoUri": "opiskeluoikeudentyyppi",
+         "koodistoVersio": 1
+       },
+       "alkamispäivä": "2016-01-07",
+       "päättymispäivä": "2017-12-19"
+     },
+     {
+       "oid": "1.2.246.562.15.12442534343",
+       "versionumero": 3,
+       "aikaleima": "2019-10-08T23:10:27.540254",
+       "lähdejärjestelmänId": {
+         "id": "153903",
+         "lähdejärjestelmä": {
+           "koodiarvo": "primus",
+           "nimi": {
+             "fi": "primus"
+           },
+           "koodistoUri": "lahdejarjestelma",
+           "koodistoVersio": 1
+         }
+       },
+       "oppilaitos": {
+         "oid": "1.2.246.562.10.43432423433",
+         "oppilaitosnumero": {
+           "koodiarvo": "83712",
+           "nimi": {
+             "fi": "Äyhtävän ammattiopisto"
+           },
+           "koodistoUri": "oppilaitosnumero",
+           "koodistoVersio": 1
+         },
+         "nimi": {
+           "fi": "Äyhtävän ammattiopisto"
+         },
+         "kotipaikka": {
+           "koodiarvo": "997",
+           "nimi": {
+             "fi": "Äyhtävä",
+             "sv": "Äyhtävä"
+           },
+           "koodistoUri": "kunta",
+           "koodistoVersio": 2
+         }
+       },
+       "koulutustoimija": {
+         "oid": "1.2.246.562.10.43434243433",
+         "nimi": {
+           "fi": "Äyhtävän Koulutuskuntayhtymä"
+         },
+         "yTunnus": "0025266-2",
+         "kotipaikka": {
+           "koodiarvo": "997",
+           "nimi": {
+             "fi": "Äyhtävä",
+             "sv": "Äyhtävä"
+           },
+           "koodistoUri": "kunta",
+           "koodistoVersio": 2
+         }
+       },
+       "arvioituPäättymispäivä": "2019-08-12",
+       "ostettu": false,
+       "tila": {
+         "opiskeluoikeusjaksot": [
+           {
+             "alku": "2018-08-14",
+             "tila": {
+               "koodiarvo": "lasna",
+               "nimi": {
+                 "fi": "Läsnä",
+                 "sv": "Närvarande",
+                 "en": "Present"
+               },
+               "koodistoUri": "koskiopiskeluoikeudentila",
+               "koodistoVersio": 1
+             },
+             "opintojenRahoitus": {
+               "koodiarvo": "1",
+               "nimi": {
+                 "fi": "Valtionosuusrahoitteinen koulutus",
+                 "sv": "Statsandelsfinansierad utbildning"
+               },
+               "koodistoUri": "opintojenrahoitus",
+               "koodistoVersio": 1
+             }
+           },
+           {
+             "alku": "2019-01-01",
+             "tila": {
+               "koodiarvo": "lasna",
+               "nimi": {
+                 "fi": "Läsnä",
+                 "sv": "Närvarande",
+                 "en": "Present"
+               },
+               "koodistoUri": "koskiopiskeluoikeudentila",
+               "koodistoVersio": 1
+             },
+             "opintojenRahoitus": {
+               "koodiarvo": "1",
+               "nimi": {
+                 "fi": "Valtionosuusrahoitteinen koulutus",
+                 "sv": "Statsandelsfinansierad utbildning"
+               },
+               "koodistoUri": "opintojenrahoitus",
+               "koodistoVersio": 1
+             }
+           },
+           {
+             "alku": "2019-08-30",
+             "tila": {
+               "koodiarvo": "valmistunut",
+               "nimi": {
+                 "fi": "Valmistunut",
+                 "sv": "Utexaminerad",
+                 "en": "Graduated"
+               },
+               "koodistoUri": "koskiopiskeluoikeudentila",
+               "koodistoVersio": 1
+             },
+             "opintojenRahoitus": {
+               "koodiarvo": "1",
+               "nimi": {
+                 "fi": "Valtionosuusrahoitteinen koulutus",
+                 "sv": "Statsandelsfinansierad utbildning"
+               },
+               "koodistoUri": "opintojenrahoitus",
+               "koodistoVersio": 1
+             }
+           }
+         ]
+       },
+       "suoritukset": [
+         {
+           "koulutusmoduuli": {
+             "tunniste": {
+               "koodiarvo": "361902",
+               "nimi": {
+                 "fi": "Luonto- ja ympäristöalan perustutkinto",
+                 "sv": "Grundexamen i natur och miljö",
+                 "en": "Vocational qualification in Natural and Environmental Protection"
+               },
+               "lyhytNimi": {
+                 "fi": "Luonto- ja ympär.alan perust.",
+                 "sv": "Grundexamen i natur och miljö",
+                 "en": "Vocational qualification in Natural and Environmental Protection"
+               },
+               "koodistoUri": "koulutus",
+               "koodistoVersio": 12
+             },
+             "perusteenDiaarinumero": "OPH-2847-2017",
+             "perusteenNimi": {
+               "fi": "Luonto- ja ympäristöalan perustutkinto",
+               "sv": "Grundexamen i natur och miljö",
+               "en": "Vocational Qualification in Natural and Environmental Protection"
+             },
+             "koulutustyyppi": {
+               "koodiarvo": "1",
+               "nimi": {
+                 "fi": "Ammatillinen perustutkinto",
+                 "sv": "Yrkesinriktad grundexamen",
+                 "en": "Vocational upper secondary qualification"
+               },
+               "lyhytNimi": {
+                 "fi": "Ammatillinen perustutkinto",
+                 "sv": "Yrkesinriktad grundexamen"
+               },
+               "koodistoUri": "koulutustyyppi",
+               "koodistoVersio": 2
+             }
+           },
+           "suoritustapa": {
+             "koodiarvo": "reformi",
+             "nimi": {
+               "fi": "Reformin mukainen näyttö",
+               "sv": "Reform"
+             },
+             "lyhytNimi": {
+               "fi": "Reformi"
+             },
+             "koodistoUri": "ammatillisentutkinnonsuoritustapa",
+             "koodistoVersio": 1
+           },
+           "tutkintonimike": [
+             {
+               "koodiarvo": "10135",
+               "nimi": {
+                 "fi": "Luonto-ohjaaja",
+                 "sv": "Naturinstruktör"
+               },
+               "lyhytNimi": {
+                 "fi": "Luonto-ohjaaja",
+                 "sv": "Naturinstruktör"
+               },
+               "koodistoUri": "tutkintonimikkeet",
+               "koodistoVersio": 2
+             }
+           ],
+           "osaamisala": [
+             {
+               "osaamisala": {
+                 "koodiarvo": "1764",
+                 "nimi": {
+                   "fi": "Luontoalan osaamisala",
+                   "sv": "Kompetensområdet för natur"
+                 },
+                 "lyhytNimi": {
+                   "fi": "Luontoalan osaamisala",
+                   "sv": "Kompetensområdet för natur"
+                 },
+                 "koodistoUri": "osaamisala",
+                 "koodistoVersio": 3
+               }
+             }
+           ],
+           "toimipiste": {
+             "oid": "1.2.246.562.10.3232323233232332323222",
+             "nimi": {
+               "fi": "Äyhtävän ammattiopisto, Äyhtävä, Norsukuja 3"
+             },
+             "kotipaikka": {
+               "koodiarvo": "997",
+               "nimi": {
+                 "fi": "Äyhtävä",
+                 "sv": "Äyhtävä"
+               },
+               "koodistoUri": "kunta",
+               "koodistoVersio": 2
+             }
+           },
+           "alkamispäivä": "2018-08-14",
+           "vahvistus": {
+             "päivä": "2019-08-30",
+             "paikkakunta": {
+               "koodiarvo": "997",
+               "nimi": {
+                 "fi": "Äyhtävä",
+                 "sv": "Äyhtävä"
+               },
+               "koodistoUri": "kunta",
+               "koodistoVersio": 2
+             },
+             "myöntäjäOrganisaatio": {
+               "oid": "1.2.246.562.10.12212121222",
+               "oppilaitosnumero": {
+                 "koodiarvo": "19821",
+                 "nimi": {
+                   "fi": "Äyhtävän ammattiopisto"
+                 },
+                 "koodistoUri": "oppilaitosnumero",
+                 "koodistoVersio": 1
+               },
+               "nimi": {
+                 "fi": "Äyhtävän ammattiopisto"
+               },
+               "kotipaikka": {
+                 "koodiarvo": "997",
+                 "nimi": {
+                   "fi": "Äyhtävä",
+                   "sv": "Äyhtävä"
+                 },
+                 "koodistoUri": "kunta",
+                 "koodistoVersio": 2
+               }
+             },
+             "myöntäjäHenkilöt": [
+               {
+                 "nimi": "Frank Johtaja",
+                 "titteli": {
+                   "fi": "Tirehtööri"
+                 },
+                 "organisaatio": {
+                   "oid": "1.2.246.562.10.11122132323",
+                   "oppilaitosnumero": {
+                     "koodiarvo": "32322",
+                     "nimi": {
+                       "fi": "Äyhtävän ammattiopisto"
+                     },
+                     "koodistoUri": "oppilaitosnumero",
+                     "koodistoVersio": 1
+                   },
+                   "nimi": {
+                     "fi": "Äyhtävän ammattiopisto"
+                   },
+                   "kotipaikka": {
+                     "koodiarvo": "999",
+                     "nimi": {
+                       "fi": "Äyhtävä",
+                       "sv": "Äyhtävä"
+                     },
+                     "koodistoUri": "kunta",
+                     "koodistoVersio": 2
+                   }
+                 }
+               }
+             ]
+           },
+           "suorituskieli": {
+             "koodiarvo": "FI",
+             "nimi": {
+               "fi": "suomi",
+               "sv": "finska",
+               "en": "Finnish"
+             },
+             "lyhytNimi": {
+               "fi": "suomi",
+               "sv": "finska",
+               "en": "Finnish"
+             },
+             "koodistoUri": "kieli",
+             "koodistoVersio": 1
+           },
+           "osaamisenHankkimistavat": [
+             {
+               "alku": "2018-12-10",
+               "loppu": "2018-12-31",
+               "osaamisenHankkimistapa": {
+                 "tunniste": {
+                   "koodiarvo": "koulutussopimus",
+                   "nimi": {
+                     "fi": "Koulutussopimus",
+                     "sv": "Utbildningsavtal"
+                   },
+                   "koodistoUri": "osaamisenhankkimistapa",
+                   "koodistoVersio": 1
+                 }
+               }
+             },
+             {
+               "alku": "2019-06-03",
+               "loppu": "2019-07-12",
+               "osaamisenHankkimistapa": {
+                 "tunniste": {
+                   "koodiarvo": "koulutussopimus",
+                   "nimi": {
+                     "fi": "Koulutussopimus",
+                     "sv": "Utbildningsavtal"
+                   },
+                   "koodistoUri": "osaamisenhankkimistapa",
+                   "koodistoVersio": 1
+                 }
+               }
+             }
+           ],
+           "koulutussopimukset": [
+             {
+               "alku": "2018-12-10",
+               "loppu": "2018-12-31",
+               "työssäoppimispaikka": {
+                 "fi": "Yksityinen asiakaskohde"
+               },
+               "paikkakunta": {
+                 "koodiarvo": "997",
+                 "nimi": {
+                   "fi": "Äyhtävä",
+                   "sv": "Äyhtävä"
+                 },
+                 "koodistoUri": "kunta",
+                 "koodistoVersio": 2
+               },
+               "maa": {
+                 "koodiarvo": "246",
+                 "nimi": {
+                   "fi": "Suomi",
+                   "sv": "Finland",
+                   "en": "Finland"
+                 },
+                 "lyhytNimi": {
+                   "fi": "FI",
+                   "sv": "FI",
+                   "en": "FI"
+                 },
+                 "koodistoUri": "maatjavaltiot2",
+                 "koodistoVersio": 2
+               }
+             },
+             {
+               "alku": "2019-06-03",
+               "loppu": "2019-07-12",
+               "työssäoppimispaikka": {
+                 "fi": "Yksityinen asiakaskohde"
+               },
+               "paikkakunta": {
+                 "koodiarvo": "997",
+                 "nimi": {
+                   "fi": "Äyhtävä",
+                   "sv": "Äyhtävä"
+                 },
+                 "koodistoUri": "kunta",
+                 "koodistoVersio": 2
+               },
+               "maa": {
+                 "koodiarvo": "246",
+                 "nimi": {
+                   "fi": "Suomi",
+                   "sv": "Finland",
+                   "en": "Finland"
+                 },
+                 "lyhytNimi": {
+                   "fi": "FI",
+                   "sv": "FI",
+                   "en": "FI"
+                 },
+                 "koodistoUri": "maatjavaltiot2",
+                 "koodistoVersio": 2
+               }
+             }
+           ],
+           "osasuoritukset": [],
+           "tyyppi": {
+             "koodiarvo": "ammatillinentutkinto",
+             "nimi": {
+               "fi": "Ammatillinen tutkinto",
+               "sv": "Yrkesinriktad examen",
+               "en": "Vocational education  qualification"
+             },
+             "koodistoUri": "suorituksentyyppi",
+             "koodistoVersio": 1
+           }
+         }
+       ],
+       "lisätiedot": {
+         "oikeusMaksuttomaanAsuntolapaikkaan": true,
+         "henkilöstökoulutus": false,
+         "koulutusvienti": false
+       },
+       "tyyppi": {
+         "koodiarvo": "ammatillinenkoulutus",
+         "nimi": {
+           "fi": "Ammatillinen koulutus",
+           "sv": "Yrkesutbildning"
+         },
+         "lyhytNimi": {
+           "fi": "Ammatillinen koulutus"
+         },
+         "koodistoUri": "opiskeluoikeudentyyppi",
+         "koodistoVersio": 1
+       },
+       "alkamispäivä": "2018-08-14",
+       "päättymispäivä": "2019-08-30"
+     }
+   ]
