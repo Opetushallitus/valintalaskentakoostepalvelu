@@ -101,9 +101,6 @@ public class KoskiOppija {
         }
 
         public static int versionumero(JsonElement opiskeluoikeus) {
-            if (opiskeluoikeus == null) {
-                return -1;
-            }
             return opiskeluoikeus.getAsJsonObject().get("versionumero").getAsInt();
         }
     }
