@@ -182,10 +182,8 @@ public class KoskiService {
 
     private void haeUusimmatLeikkuripaivaaEdeltavatOpiskeluoikeudetTarvittaessa(Set<KoskiOppija> koskioppijat, LocalDate leikkuriPvm) {
         koskioppijat.forEach(koskiOppija -> {
-            if (koskiOppija.sisaltaaUudempiaOpiskeluoikeuksiaKuin(leikkuriPvm, koskenOpiskeluoikeusTyypit)) {
-                LOG.info(String.format("Oppijalle %s löytyi Koskesta haluttujen tyyppien %s opiskeluoikeuksia, jotka on päivitetty leikkuripäivämäärän %s jälkeen. " +
-                    "Haetaan tuoreimmat leikkuripäivämäärää edeltävät tiedot.", koskiOppija.getOppijanumero(), koskenOpiskeluoikeusTyypit,
-                    FINNISH_DATE_FORMAT.format(leikkuriPvm)));
+            final Set<JsonElement> liianUudetOpiskeluoikeudet = koskiOppija.opiskeluoikeudetJotkaOvatUudempiaKuin(leikkuriPvm, koskenOpiskeluoikeusTyypit);
+            if (!liianUudetOpiskeluoikeudet.isEmpty()) {
                 koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
                     koskiOppija,
                     leikkuriPvm,
@@ -198,6 +196,14 @@ public class KoskiService {
         JsonArray tulokset = new JsonArray();
         opiskeluoikeudet.forEach(opiskeluoikeus -> {
             if (OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus)) {
+                LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
+                String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
+                LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s aikaleima on %s eli leikkuripäivämäärän %s jälkeen." +
+                        " Etsitään opiskeluoikeudesta versioita, jotka olisi tallennettu ennen leikkuripäivämäärää.",
+                    koskiOppija.getOppijanumero(),
+                    opiskeluoikeudenOid,
+                    aikaleima,
+                    FINNISH_DATE_FORMAT.format(leikkuriPvm)));
                 haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, opiskeluoikeus).ifPresent(tulokset::add);
             } else {
                 tulokset.add(opiskeluoikeus);
@@ -211,12 +217,13 @@ public class KoskiService {
         LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
         String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
         if (!OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, aikaleima)) {
-            LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s aikaleima on %s eli ennen leikkuripäivämäärää %s ja versio %d, joten huomioidaan tämä opiskeluoikeus.",
+            LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s version %d aikaleima on %s eli ennen leikkuripäivämäärää %s, joten huomioidaan tämä opiskeluoikeus.",
                 koskiOppija.getOppijanumero(),
                 opiskeluoikeudenOid,
+                versionumero,
                 aikaleima,
-                FINNISH_DATE_FORMAT.format(leikkuriPvm),
-                versionumero));
+                FINNISH_DATE_FORMAT.format(leikkuriPvm)
+                ));
             return Optional.of(opiskeluoikeus);
         }
         if (versionumero <= 1) {

@@ -8,6 +8,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class KoskiOppija {
@@ -44,18 +46,20 @@ public class KoskiOppija {
         return tulos;
     }
 
-    public boolean sisaltaaUudempiaOpiskeluoikeuksiaKuin(LocalDate leikkuriPvm, Set<String> koskenOpiskeluoikeusTyypit) {
+    public Set<JsonElement> opiskeluoikeudetJotkaOvatUudempiaKuin(LocalDate leikkuriPvm, Set<String> koskenOpiskeluoikeusTyypit) {
         if (opiskeluoikeudet == null || opiskeluoikeudet.isJsonNull() || opiskeluoikeudet.size() == 0) {
-            return false;
+            return Collections.emptySet();
         }
+
+        Set<JsonElement> tulokset = new HashSet<>();
         for (JsonElement opiskeluoikeus : opiskeluoikeudet) {
             if (koskenOpiskeluoikeusTyypit.contains(OpiskeluoikeusJsonUtil.tyypinKoodiarvo(opiskeluoikeus))) {
                 if (OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus)) {
-                    return true;
+                    tulokset.add(opiskeluoikeus);
                 }
             }
         }
-        return false;
+        return tulokset;
     }
 
     public static class KoskiHenkilö {
