@@ -148,14 +148,14 @@ public class KoskiServiceTest {
 
     private CompletableFuture<List<ValintaperusteetDTO>> koskiDataaKayttavaValintaperuste(String leikkuriPvm) {
         return this.koskiFunktionSisaltavaValintaperuste.thenApplyAsync(vps -> {
-                KoskiService.etsiTutkintojenIterointiFunktioKutsut(vps).forEach(iterointiFunktioKutsu -> {
-                    iterointiFunktioKutsu.getSyoteparametrit().stream()
-                        .filter(p -> Funktionimi.ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI.equals(p.getAvain()))
-                        .forEach(leikkuriPvmParametri ->
-                            leikkuriPvmParametri.setArvo(leikkuriPvm));
-                });
-                return vps;
+            KoskiOpiskeluoikeusHistoryService.etsiTutkintojenIterointiFunktioKutsut(vps).forEach(iterointiFunktioKutsu -> {
+                iterointiFunktioKutsu.getSyoteparametrit().stream()
+                    .filter(p -> Funktionimi.ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI.equals(p.getAvain()))
+                    .forEach(leikkuriPvmParametri ->
+                        leikkuriPvmParametri.setArvo(leikkuriPvm));
             });
+            return vps;
+        });
     }
 
     private CompletableFuture<List<ValintaperusteetDTO>> luoKoskifunktionSisaltavaValintaperuste() {
