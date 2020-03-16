@@ -85,20 +85,20 @@ public class KoskiService {
                                                                       SuoritustiedotDTO suoritustiedotDTO,
                                                                       LocalDate paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan) {
         LOG.info(String.format("Haetaan Koskesta tiedot %d oppijalle hakukohteen %s laskemista varten.", hakemusWrappers.size(), hakukohdeOid));
-        List<String> oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat = hakemusWrappers.stream()
+        List<String> oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat = hakemusWrappers.stream()
             .map(HakemusWrapper::getPersonOid)
             .filter(oppijanumero -> !suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero))
             .collect(Collectors.toList());
-        int maaraJoilleTiedotJoLoytyvat = hakemusWrappers.size() - oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size();
+        int maaraJoilleTiedotJoLoytyvat = hakemusWrappers.size() - oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat.size();
         return koskiAsyncResource
-            .findKoskiOppijat(oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat)
+            .findKoskiOppijat(oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat)
             .thenApplyAsync(koskioppijat -> {
                 LOG.info(String.format("Saatiin Koskesta %s uuden oppijan tiedot, kun haettiin %d/%d oppijalle (%s:lle oli jo haettu tiedot) hakukohteen %s laskemista varten.",
-                    koskioppijat.size(), oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
+                    koskioppijat.size(), oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
                 koskioppijat.forEach(o -> o.poistaMuuntyyppisetOpiskeluoikeudetKuin(koskenOpiskeluoikeusTyypit));
                 koskiOpiskeluoikeusHistoryService.haeVanhemmatOpiskeluoikeudetTarvittaessa(koskioppijat, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
                 Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
-                oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(oppijanumero -> {
+                oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(oppijanumero -> {
                     KoskiOppija loytynytOppija = koskiOppijatOppijanumeroittain.get(oppijanumero);
                     if (loytynytOppija != null) {
                         suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, GSON.toJson(loytynytOppija.getOpiskeluoikeudet()));
