@@ -95,12 +95,13 @@ public class KoskiService {
             .thenApplyAsync(koskioppijat -> {
                 LOG.info(String.format("Saatiin Koskesta %s uuden oppijan tiedot, kun haettiin %d/%d oppijalle (%s:lle oli jo haettu tiedot) hakukohteen %s laskemista varten.",
                     koskioppijat.size(), oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
+                koskioppijat.forEach(o -> o.poistaMuuntyyppisetOpiskeluoikeudetKuin(koskenOpiskeluoikeusTyypit));
                 koskiOpiskeluoikeusHistoryService.haeVanhemmatOpiskeluoikeudetTarvittaessa(koskioppijat, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
                 Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
                 oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(oppijanumero -> {
                     KoskiOppija loytynytOppija = koskiOppijatOppijanumeroittain.get(oppijanumero);
                     if (loytynytOppija != null) {
-                        suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, GSON.toJson(loytynytOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit)));
+                        suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, GSON.toJson(loytynytOppija.getOpiskeluoikeudet()));
                     } else {
                         suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, "[]");
                     }

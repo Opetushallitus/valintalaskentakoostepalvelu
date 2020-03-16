@@ -83,13 +83,12 @@ public class KoskiOpiskeluoikeusHistoryService {
         koskioppijat.forEach(koskiOppija ->
             koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
                 koskiOppija,
-                leikkuriPvm,
-                koskiOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit))));
+                leikkuriPvm)));
     }
 
-    private JsonArray haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm, JsonArray opiskeluoikeudet) {
+    private JsonArray haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm) {
         JsonArray tulokset = new JsonArray();
-        opiskeluoikeudet.forEach(opiskeluoikeus -> {
+        koskiOppija.getOpiskeluoikeudet().forEach(opiskeluoikeus -> {
             if (OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus)) {
                 LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
                 String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);

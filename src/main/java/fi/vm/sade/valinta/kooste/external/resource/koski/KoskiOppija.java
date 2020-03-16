@@ -31,7 +31,11 @@ public class KoskiOppija {
         this.henkilö = henkilö;
     }
 
-    public JsonArray haeOpiskeluoikeudet(Set<String> koskenOpiskeluoikeusTyypit) {
+    public void poistaMuuntyyppisetOpiskeluoikeudetKuin(Set<String> kiinnostavatOpiskeluoikeusTyypit) {
+        setOpiskeluoikeudet(haeOpiskeluoikeudet(kiinnostavatOpiskeluoikeusTyypit));
+    }
+
+    private JsonArray haeOpiskeluoikeudet(Set<String> koskenOpiskeluoikeusTyypit) {
         if (opiskeluoikeudet == null) {
             return null;
         }
