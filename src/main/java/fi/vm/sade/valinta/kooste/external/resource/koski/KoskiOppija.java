@@ -8,6 +8,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.Set;
 
 public class KoskiOppija {
@@ -63,7 +65,10 @@ public class KoskiOppija {
     }
 
     public static class OpiskeluoikeusJsonUtil {
-        private static final DateTimeFormatter OPISKELUOIKEUDEN_AIKALEIMA_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        private static final DateTimeFormatter OPISKELUOIKEUDEN_AIKALEIMA_FORMAT = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+            .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
+            .toFormatter();
 
         public static String tyypinKoodiarvo(JsonElement opiskeluoikeus) {
             return opiskeluoikeus.getAsJsonObject().get("tyyppi").getAsJsonObject().get("koodiarvo").getAsString();
