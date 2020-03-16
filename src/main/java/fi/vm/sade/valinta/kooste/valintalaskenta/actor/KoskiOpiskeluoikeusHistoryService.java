@@ -80,15 +80,11 @@ public class KoskiOpiskeluoikeusHistoryService {
     }
 
     void haeVanhemmatOpiskeluoikeudetTarvittaessa(Set<KoskiOppija> koskioppijat, LocalDate leikkuriPvm) {
-        koskioppijat.forEach(koskiOppija -> {
-            final Set<JsonElement> liianUudetOpiskeluoikeudet = koskiOppija.opiskeluoikeudetJotkaOvatUudempiaKuin(leikkuriPvm, koskenOpiskeluoikeusTyypit);
-            if (!liianUudetOpiskeluoikeudet.isEmpty()) {
-                koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
-                    koskiOppija,
-                    leikkuriPvm,
-                    koskiOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit)));
-            }
-        });
+        koskioppijat.forEach(koskiOppija ->
+            koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
+                koskiOppija,
+                leikkuriPvm,
+                koskiOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit))));
     }
 
     private JsonArray haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm, JsonArray opiskeluoikeudet) {
