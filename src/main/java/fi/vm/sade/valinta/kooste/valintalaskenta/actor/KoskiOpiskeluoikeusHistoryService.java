@@ -81,10 +81,20 @@ public class KoskiOpiskeluoikeusHistoryService {
     }
 
     void haeVanhemmatOpiskeluoikeudetTarvittaessa(Set<KoskiOppija> koskioppijat, LocalDate leikkuriPvm) {
-        koskioppijat.forEach(koskiOppija ->
-            koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
-                koskiOppija,
-                leikkuriPvm).join()));
+        Set<KoskiOppija> oppijatJoillaOnLiianUusiaOpiskeluoikeuksia = koskioppijat.stream()
+            .filter(o -> Lists.newArrayList(o.getOpiskeluoikeudet()).stream()
+                .anyMatch(opiskeluoikeus -> {
+                    return OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus);
+                })).collect(Collectors.toSet());
+        if (!oppijatJoillaOnLiianUusiaOpiskeluoikeuksia.isEmpty()) {
+            LOG.info(String.format("%d oppijasta %d:lla on opiskeluoikeuksia, joita on päivitetty leikkuripäivämäärän %s jälkeen. " +
+                "Haetaan näille riittävän vanhat versiot.", koskioppijat.size(), oppijatJoillaOnLiianUusiaOpiskeluoikeuksia.size(), leikkuriPvm));
+            oppijatJoillaOnLiianUusiaOpiskeluoikeuksia.forEach(koskiOppija ->
+                koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
+                    koskiOppija,
+                    leikkuriPvm).join()));
+
+        }
     }
 
     private CompletableFuture<JsonArray> haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm) {
