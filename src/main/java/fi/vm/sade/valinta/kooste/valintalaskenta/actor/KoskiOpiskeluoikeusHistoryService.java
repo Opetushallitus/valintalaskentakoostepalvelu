@@ -16,8 +16,6 @@ import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,15 +30,15 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Service
 public class KoskiOpiskeluoikeusHistoryService {
     private static final Logger LOG = LoggerFactory.getLogger(KoskiOpiskeluoikeusHistoryService.class);
 
     private static final DateTimeFormatter FINNISH_DATE_FORMAT = DateTimeFormatter.ofPattern("d.M.yyyy");
+    private final int koskiPyyntojenRinnakkaisuus;
     private final KoskiAsyncResource koskiAsyncResource;
 
-    @Autowired
-    public KoskiOpiskeluoikeusHistoryService(KoskiAsyncResource koskiAsyncResource) {
+    public KoskiOpiskeluoikeusHistoryService(int koskiPyyntojenRinnakkaisuus, KoskiAsyncResource koskiAsyncResource) {
+        this.koskiPyyntojenRinnakkaisuus = koskiPyyntojenRinnakkaisuus;
         this.koskiAsyncResource = koskiAsyncResource;
     }
 
@@ -81,20 +79,28 @@ public class KoskiOpiskeluoikeusHistoryService {
     }
 
     void haeVanhemmatOpiskeluoikeudetTarvittaessa(Set<KoskiOppija> koskioppijat, LocalDate leikkuriPvm) {
-        Set<KoskiOppija> oppijatJoillaOnLiianUusiaOpiskeluoikeuksia = koskioppijat.stream()
+        List<KoskiOppija> oppijatJoillaOnLiianUusiaOpiskeluoikeuksia = koskioppijat.stream()
             .filter(o -> Lists.newArrayList(o.getOpiskeluoikeudet()).stream()
                 .anyMatch(opiskeluoikeus -> {
                     return OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus);
-                })).collect(Collectors.toSet());
+                })).collect(Collectors.toList());
         if (!oppijatJoillaOnLiianUusiaOpiskeluoikeuksia.isEmpty()) {
-            LOG.info(String.format("%d oppijasta %d:lla on opiskeluoikeuksia, joita on päivitetty leikkuripäivämäärän %s jälkeen. " +
-                "Haetaan näille riittävän vanhat versiot.", koskioppijat.size(), oppijatJoillaOnLiianUusiaOpiskeluoikeuksia.size(), leikkuriPvm));
-            oppijatJoillaOnLiianUusiaOpiskeluoikeuksia.forEach(koskiOppija ->
-                koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
-                    koskiOppija,
-                    leikkuriPvm).join()));
-
+            LOG.info(String.format(
+                "%d oppijasta %d:lla on opiskeluoikeuksia, joita on päivitetty leikkuripäivämäärän %s jälkeen. " +
+                    "Haetaan näille riittävän vanhat versiot, %d opiskeluoikeutta rinnakkain.",
+                koskioppijat.size(), oppijatJoillaOnLiianUusiaOpiskeluoikeuksia.size(), leikkuriPvm, koskiPyyntojenRinnakkaisuus));
+            Lists.partition(oppijatJoillaOnLiianUusiaOpiskeluoikeuksia, koskiPyyntojenRinnakkaisuus).forEach(yhdenEränOppijat ->
+                haeLiianUusienOpiskeluoikeuksienTilalleRiittävänVanhat(leikkuriPvm, yhdenEränOppijat));
         }
+    }
+
+    private void haeLiianUusienOpiskeluoikeuksienTilalleRiittävänVanhat(LocalDate leikkuriPvm, List<KoskiOppija> yhdenEränOppijat) {
+        CompletableFutureUtil.sequence(yhdenEränOppijat.stream()
+            .map(koskiOppija -> haeOpiskeluoikeuksistaPaivanMukainenVersio(koskiOppija, leikkuriPvm)
+                .thenApplyAsync(päivämäärärajanTäyttävätOpiskeluoikeudet -> {
+                    koskiOppija.setOpiskeluoikeudet(päivämäärärajanTäyttävätOpiskeluoikeudet);
+                    return "OK";
+                })).collect(Collectors.toList())).join();
     }
 
     private CompletableFuture<JsonArray> haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm) {

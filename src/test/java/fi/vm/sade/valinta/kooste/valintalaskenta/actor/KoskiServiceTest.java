@@ -60,7 +60,7 @@ public class KoskiServiceTest {
 
     @Test
     public void koskestaHaettavienHakukohteidenListallaVoiRajoittaaMilleHakukohteilleHaetaanKoskesta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("hakukohdeoid1,hakukohdeoid2", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
+        KoskiService service = new KoskiService("hakukohdeoid1,hakukohdeoid2", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
@@ -75,7 +75,7 @@ public class KoskiServiceTest {
 
     @Test
     public void koskidataaKayttavienFunktionimienListallaVoiRajoittaaMilleHakukohteilleHaetaanKoskesta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
@@ -90,7 +90,7 @@ public class KoskiServiceTest {
 
     @Test
     public void josOpiskeluoikeudenTiedotOnPaivitettyLeikkuriPvmJalkeenHaetaanRiittävänVanhaVersio() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
         when(koskiAsyncResource.findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 2))
@@ -119,7 +119,7 @@ public class KoskiServiceTest {
 
     @Test
     public void josOpiskeluoikeudenVanhinVersioOnLeikkuriPvmJalkeenJatetaanopiskeluoikeusHuomioimatta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
         when(koskiAsyncResource.findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 2))

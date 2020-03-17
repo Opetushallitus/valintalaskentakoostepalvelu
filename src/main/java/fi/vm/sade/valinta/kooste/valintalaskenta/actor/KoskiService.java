@@ -46,12 +46,13 @@ public class KoskiService {
     public KoskiService(@Value("${valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit:none}") String koskiHakukohdeOiditString,
                         @Value("${valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta}") String koskenFunktionimetString,
                         @Value("${valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot.koskesta}") String koskenOpiskeluoikeusTyypitString,
+                        @Value("${valintalaskentakoostepalvelu.laskenta.kosken.historiapyyntojen.rinnakkaisuus}") Integer koskenHistoriapyyntojenRinnakkaisuus,
                         KoskiAsyncResource koskiAsyncResource) {
         this.koskiAsyncResource = koskiAsyncResource;
         this.koskiHakukohdeOidFilter = resolveKoskiHakukohdeOidFilter(koskiHakukohdeOiditString);
         this.koskenFunktionimet = resolveKoskenFunktionimet(koskenFunktionimetString);
         this.koskenOpiskeluoikeusTyypit = resolveKoskenOpiskeluoikeudet(koskenOpiskeluoikeusTyypitString);
-        this.koskiOpiskeluoikeusHistoryService = new KoskiOpiskeluoikeusHistoryService(koskiAsyncResource);
+        this.koskiOpiskeluoikeusHistoryService = new KoskiOpiskeluoikeusHistoryService(koskenHistoriapyyntojenRinnakkaisuus, koskiAsyncResource);
     }
 
     /**
