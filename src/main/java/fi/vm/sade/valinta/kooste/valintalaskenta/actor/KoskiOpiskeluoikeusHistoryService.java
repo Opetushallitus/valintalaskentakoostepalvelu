@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import static fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi.ITEROIAMMATILLISETTUTKINNOT;
 import static fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi.ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
@@ -11,6 +12,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetFunktiokutsuDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija.OpiskeluoikeusJsonUtil;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -83,12 +86,11 @@ public class KoskiOpiskeluoikeusHistoryService {
         koskioppijat.forEach(koskiOppija ->
             koskiOppija.setOpiskeluoikeudet(haeOpiskeluoikeuksistaPaivanMukainenVersio(
                 koskiOppija,
-                leikkuriPvm)));
+                leikkuriPvm).join()));
     }
 
-    private JsonArray haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm) {
-        JsonArray tulokset = new JsonArray();
-        koskiOppija.getOpiskeluoikeudet().forEach(opiskeluoikeus -> {
+    private CompletableFuture<JsonArray> haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm) {
+        return CompletableFutureUtil.sequence(Lists.newArrayList(koskiOppija.getOpiskeluoikeudet()).stream().map(opiskeluoikeus -> {
             if (OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus)) {
                 LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
                 String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
@@ -98,40 +100,44 @@ public class KoskiOpiskeluoikeusHistoryService {
                     opiskeluoikeudenOid,
                     aikaleima,
                     FINNISH_DATE_FORMAT.format(leikkuriPvm)));
-                haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, opiskeluoikeus)
-                    .ifPresent(tulokset::add);
+                return haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, CompletableFuture.completedFuture(opiskeluoikeus));
             } else {
-                tulokset.add(opiskeluoikeus);
+                return CompletableFuture.completedFuture(Optional.of(opiskeluoikeus));
             }
+        }).collect(Collectors.toList())).thenApplyAsync(opiskeluoikeusOptiot -> {
+            JsonArray result = new JsonArray();
+            opiskeluoikeusOptiot.forEach(o -> o.ifPresent(result::add));
+            return result;
         });
-        return tulokset;
     }
 
-    private Optional<JsonElement> haePaivamaaranMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm, JsonElement opiskeluoikeus) {
-        int versionumero = OpiskeluoikeusJsonUtil.versionumero(opiskeluoikeus);
-        LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
-        String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
-        if (!OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, aikaleima)) {
-            LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s version %d aikaleima on %s eli ennen leikkuripäivämäärää %s, joten huomioidaan tämä opiskeluoikeus.",
-                koskiOppija.getOppijanumero(),
-                opiskeluoikeudenOid,
-                versionumero,
-                aikaleima,
-                FINNISH_DATE_FORMAT.format(leikkuriPvm)
+    private CompletableFuture<Optional<JsonElement>> haePaivamaaranMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm, CompletableFuture<JsonElement> opiskeluoikeusF) {
+        return opiskeluoikeusF.thenComposeAsync(opiskeluoikeus -> {
+            int versionumero = OpiskeluoikeusJsonUtil.versionumero(opiskeluoikeus);
+            LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
+            String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
+            if (!OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, aikaleima)) {
+                LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s version %d aikaleima on %s eli ennen leikkuripäivämäärää %s, joten huomioidaan tämä opiskeluoikeus.",
+                    koskiOppija.getOppijanumero(),
+                    opiskeluoikeudenOid,
+                    versionumero,
+                    aikaleima,
+                    FINNISH_DATE_FORMAT.format(leikkuriPvm)
                 ));
-            return Optional.of(opiskeluoikeus);
-        }
-        if (versionumero <= 1) {
-            LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s aikaleima on %s eli leikkuripäivämäärän %s jälkeen," +
-                    " ja versio %d, joten vanhempia versioita ei ole. Jätetään opiskeluoikeus huomioimatta.",
-                koskiOppija.getOppijanumero(),
-                opiskeluoikeudenOid,
-                aikaleima,
-                FINNISH_DATE_FORMAT.format(leikkuriPvm),
-                versionumero));
-            return Optional.empty();
-        }
-        JsonElement edellisenVersionOpiskeluoikeus = koskiAsyncResource.findVersionOfOpiskeluoikeus(opiskeluoikeudenOid, versionumero - 1).join();
-        return haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, edellisenVersionOpiskeluoikeus);
+                return CompletableFuture.completedFuture(Optional.of(opiskeluoikeus));
+            }
+            if (versionumero <= 1) {
+                LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s aikaleima on %s eli leikkuripäivämäärän %s jälkeen," +
+                        " ja versio %d, joten vanhempia versioita ei ole. Jätetään opiskeluoikeus huomioimatta.",
+                    koskiOppija.getOppijanumero(),
+                    opiskeluoikeudenOid,
+                    aikaleima,
+                    FINNISH_DATE_FORMAT.format(leikkuriPvm),
+                    versionumero));
+                return CompletableFuture.completedFuture(Optional.empty());
+            }
+            CompletableFuture<JsonElement> edellisenVersionOpiskeluoikeus = koskiAsyncResource.findVersionOfOpiskeluoikeus(opiskeluoikeudenOid, versionumero - 1);
+            return haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, edellisenVersionOpiskeluoikeus);
+        });
     }
 }
