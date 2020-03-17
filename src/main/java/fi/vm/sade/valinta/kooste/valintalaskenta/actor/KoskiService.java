@@ -51,7 +51,7 @@ public class KoskiService {
         this.koskiHakukohdeOidFilter = resolveKoskiHakukohdeOidFilter(koskiHakukohdeOiditString);
         this.koskenFunktionimet = resolveKoskenFunktionimet(koskenFunktionimetString);
         this.koskenOpiskeluoikeusTyypit = resolveKoskenOpiskeluoikeudet(koskenOpiskeluoikeusTyypitString);
-        this.koskiOpiskeluoikeusHistoryService = new KoskiOpiskeluoikeusHistoryService(koskenOpiskeluoikeusTyypit, koskiAsyncResource);
+        this.koskiOpiskeluoikeusHistoryService = new KoskiOpiskeluoikeusHistoryService(koskiAsyncResource);
     }
 
     /**

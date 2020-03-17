@@ -38,12 +38,10 @@ public class KoskiOpiskeluoikeusHistoryService {
 
     private static final DateTimeFormatter FINNISH_DATE_FORMAT = DateTimeFormatter.ofPattern("d.M.yyyy");
     private final KoskiAsyncResource koskiAsyncResource;
-    private final Set<String> koskenOpiskeluoikeusTyypit;
 
     @Autowired
-    public KoskiOpiskeluoikeusHistoryService(Set<String> koskenOpiskeluoikeusTyypit, KoskiAsyncResource koskiAsyncResource) {
+    public KoskiOpiskeluoikeusHistoryService(KoskiAsyncResource koskiAsyncResource) {
         this.koskiAsyncResource = koskiAsyncResource;
-        this.koskenOpiskeluoikeusTyypit = koskenOpiskeluoikeusTyypit;
     }
 
     LocalDate etsiKoskiDatanLeikkuriPvm(List<ValintaperusteetDTO> valintaperusteetDTOS, String hakukohdeOid) {
