@@ -106,12 +106,14 @@ public class KoskiOpiskeluoikeusHistoryService {
     private CompletableFuture<JsonArray> haeOpiskeluoikeuksistaPaivanMukainenVersio(KoskiOppija koskiOppija, LocalDate leikkuriPvm) {
         return CompletableFutureUtil.sequence(Lists.newArrayList(koskiOppija.getOpiskeluoikeudet()).stream().map(opiskeluoikeus -> {
             if (OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, opiskeluoikeus)) {
-                LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
                 String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
-                LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s aikaleima on %s eli leikkuripäivämäärän %s jälkeen." +
+                int versionumero = OpiskeluoikeusJsonUtil.versionumero(opiskeluoikeus);
+                LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
+                LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s uusimman version %d aikaleima on %s eli leikkuripäivämäärän %s jälkeen." +
                         " Etsitään opiskeluoikeudesta versioita, jotka olisi tallennettu ennen leikkuripäivämäärää.",
                     koskiOppija.getOppijanumero(),
                     opiskeluoikeudenOid,
+                    versionumero,
                     aikaleima,
                     FINNISH_DATE_FORMAT.format(leikkuriPvm)));
                 return haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, CompletableFuture.completedFuture(opiskeluoikeus));
@@ -131,7 +133,7 @@ public class KoskiOpiskeluoikeusHistoryService {
             LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
             String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
             if (!OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, aikaleima)) {
-                LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s version %d aikaleima on %s eli ennen leikkuripäivämäärää %s, joten huomioidaan tämä opiskeluoikeus.",
+                LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s version %d aikaleima on %s eli leikkuripäivämäärään %s mennessä, joten huomioidaan tämä opiskeluoikeus.",
                     koskiOppija.getOppijanumero(),
                     opiskeluoikeudenOid,
                     versionumero,
