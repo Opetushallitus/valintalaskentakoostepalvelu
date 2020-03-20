@@ -22,7 +22,7 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
     }
 
     @Override
-    public Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata) {
+    public synchronized Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata) {
         docs.put(id, filedata);
         return Observable.just(Response.ok(filedata).build());
     }
@@ -37,7 +37,7 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
         return CompletableFuture.completedFuture(null);
     }
 
-    public final static InputStream getStoredDocument(String id) {
+    public synchronized static InputStream getStoredDocument(String id) {
         if (!docs.containsKey(id)) {
             throw new IllegalStateException("Doc " + id + " not found");
         }
