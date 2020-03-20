@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -92,7 +93,7 @@ public class ErillishaunVientiServiceTest {
         assertEquals("123456-7890", erillishakuRivi.getHenkilotunnus());
         assertEquals("Rivi", erillishakuRivi.getEtunimi());
         assertEquals("Esimerkki", erillishakuRivi.getSukunimi());
-        assertEquals(false, erillishakuRivi.isJulkaistaankoTiedot());
+        assertFalse(erillishakuRivi.isJulkaistaankoTiedot());
         assertEquals(Maksuvelvollisuus.NOT_CHECKED, erillishakuRivi.getMaksuvelvollisuus());
     }
 }
