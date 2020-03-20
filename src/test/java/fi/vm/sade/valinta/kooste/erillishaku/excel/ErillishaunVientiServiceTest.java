@@ -71,7 +71,7 @@ public class ErillishaunVientiServiceTest {
     }
 
     @Test
-    public void suoriteVientiIlmanhakemuksia() {
+    public void suoritaVientiIlmanhakemuksia() {
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "2", "1", "1");
         final ErillishakuProsessiDTO prosessi = spy(new ErillishakuProsessiDTO(1));
 
