@@ -1,27 +1,36 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
+
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
+import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.mocks.*;
-import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockKoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
-import org.mockito.Mockito;
 import io.reactivex.Observable;
-
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 public class ErillishaunVientiServiceTest {
     final MockApplicationAsyncResource mockApplicationAsyncResource = new MockApplicationAsyncResource();
@@ -62,7 +71,7 @@ public class ErillishaunVientiServiceTest {
     }
 
     @Test
-    public void suoriteVientiIlmanhakemuksia() throws IOException {
+    public void suoriteVientiIlmanhakemuksia() {
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "2", "1", "1");
         final ErillishakuProsessiDTO prosessi = spy(new ErillishakuProsessiDTO(1));
 
