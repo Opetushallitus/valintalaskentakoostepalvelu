@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -43,7 +42,7 @@ public class ErillishaunVientiServiceTest {
     @Test
     public void suoritaVientiTest() {
         AuditSession auditSession = new AuditSession();
-        when(mockTilaAsyncResource.getErillishaunValinnantulokset(anyObject(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
+        when(mockTilaAsyncResource.getErillishaunValinnantulokset(any(AuditSession.class), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
         when(mockTilaAsyncResource.fetchLukuvuosimaksut(anyString(),any())).thenReturn(Observable.just(Lists.newArrayList()));
         when(mockTilaAsyncResource.getErillishaunValinnantulokset(any(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
@@ -57,7 +56,7 @@ public class ErillishaunVientiServiceTest {
 
     @Test
     public void suoritaEpaonnistunutVientiTest() {
-        when(mockTilaAsyncResource.getErillishaunValinnantulokset(anyObject(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
+        when(mockTilaAsyncResource.getErillishaunValinnantulokset(any(AuditSession.class), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
         when(mockTilaAsyncResource.fetchLukuvuosimaksut(anyString(),any())).thenReturn(Observable.just(Lists.newArrayList()));
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
@@ -78,7 +77,7 @@ public class ErillishaunVientiServiceTest {
         ApplicationAsyncResource applicationMock = mock(ApplicationAsyncResource.class);
         when(applicationMock.getApplicationsByOid(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(Lists.newArrayList()));
 
-        when(mockTilaAsyncResource.getErillishaunValinnantulokset(anyObject(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
+        when(mockTilaAsyncResource.getErillishaunValinnantulokset(any(AuditSession.class), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
         when(mockTilaAsyncResource.fetchLukuvuosimaksut(anyString(),any())).thenReturn(Observable.just(Lists.newArrayList()));
 
         final ErillishaunVientiService erillishaunVientiService =
