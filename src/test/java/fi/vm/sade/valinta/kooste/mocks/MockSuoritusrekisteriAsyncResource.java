@@ -40,7 +40,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     public static AtomicReference<List<String>> deletedSuorituksetRef = new AtomicReference<>(new ArrayList<>());
     public static AtomicReference<List<String>> deletedArvosanatRef = new AtomicReference<>(new ArrayList<>());
 
-    public static void clear() {
+    public static synchronized void clear() {
         postException = Optional.empty();
         oppijaRef.set(null);
         oppijatRef.set(null);
@@ -51,33 +51,33 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
         deletedArvosanatRef.set(new ArrayList<>());
     }
 
-    public static void setPostException(Optional<RuntimeException> exception) {
+    public static synchronized void setPostException(Optional<RuntimeException> exception) {
         MockSuoritusrekisteriAsyncResource.postException = exception;
     }
 
 
     @Override
-    public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String hakuOid) {
+    public synchronized Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String hakuOid) {
         return Observable.just(ImmutableList.of(oppijaRef.get()));
     }
 
     @Override
-    public CompletableFuture<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
+    public synchronized CompletableFuture<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(String hakukohdeOid, String hakuOid) {
         return CompletableFuture.completedFuture(ImmutableList.of(oppijaRef.get()));
     }
 
     @Override
-    public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
+    public synchronized CompletableFuture<List<Oppija>> getSuorituksetByOppijas(List<String> opiskelijaOids, String hakuOid) {
         return CompletableFuture.completedFuture(oppijatRef.get());
     }
 
     @Override
-    public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
+    public synchronized Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
         return Observable.just(oppijaRef.get());
     }
 
     @Override
-    public Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
+    public synchronized Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids) {
         return Observable.just(oppijatRef.get());
     }
 
@@ -95,7 +95,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus) {
+    public synchronized CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus) {
         if (postException.isPresent()) {
             return CompletableFuture.failedFuture(postException.get());
         }
@@ -108,7 +108,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public CompletableFuture<Arvosana> postArvosana(Arvosana arvosana) {
+    public synchronized CompletableFuture<Arvosana> postArvosana(Arvosana arvosana) {
         if (postException.isPresent()) {
             return CompletableFuture.failedFuture(postException.get());
         }
@@ -120,7 +120,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public CompletableFuture<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
+    public synchronized CompletableFuture<Arvosana> updateExistingArvosana(String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
         if (postException.isPresent()) {
             return CompletableFuture.failedFuture(postException.get());
         }
@@ -132,7 +132,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public CompletableFuture<String> deleteSuoritus(String suoritusId) {
+    public synchronized CompletableFuture<String> deleteSuoritus(String suoritusId) {
         deletedSuorituksetRef.getAndUpdate((List<String> suoritusIdt) -> {
             suoritusIdt.add(suoritusId);
             return suoritusIdt;
@@ -143,7 +143,7 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public CompletableFuture<String> deleteArvosana(String arvosanaId) {
+    public synchronized CompletableFuture<String> deleteArvosana(String arvosanaId) {
         deletedArvosanatRef.getAndUpdate((List<String> arvosanaIdt) -> {
             arvosanaIdt.add(arvosanaId);
             return arvosanaIdt;

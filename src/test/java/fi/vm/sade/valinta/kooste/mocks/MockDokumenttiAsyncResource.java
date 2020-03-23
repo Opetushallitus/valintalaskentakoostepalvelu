@@ -1,23 +1,20 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import java.io.ByteArrayInputStream;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import io.reactivex.Observable;
+import org.springframework.stereotype.Service;
+
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
-import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import org.springframework.stereotype.Service;
-
-import io.reactivex.Observable;
-
-import javax.ws.rs.core.Response;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
-    private static Map<String, InputStream> docs = new HashMap<>();
+    private static Map<String, InputStream> docs = new ConcurrentHashMap<>();
 
     @Override
     public CompletableFuture<Void> uudelleenNimea(String dokumenttiId, String filename) {
@@ -25,7 +22,7 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
     }
 
     @Override
-    public Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata) {
+    public synchronized Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata) {
         docs.put(id, filedata);
         return Observable.just(Response.ok(filedata).build());
     }
@@ -40,7 +37,7 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
         return CompletableFuture.completedFuture(null);
     }
 
-    public final static InputStream getStoredDocument(String id) {
+    public synchronized static InputStream getStoredDocument(String id) {
         if (!docs.containsKey(id)) {
             throw new IllegalStateException("Doc " + id + " not found");
         }
