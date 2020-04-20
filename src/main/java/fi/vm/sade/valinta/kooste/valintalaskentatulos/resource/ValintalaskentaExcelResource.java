@@ -141,7 +141,7 @@ public class ValintalaskentaExcelResource {
                                         valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession),
                                         hakemuksetO,
                                         valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid),
-                                        valintalaskentaResource.laskennantulokset(hakukohdeOid),
+                                        Observable.fromFuture(valintalaskentaResource.laskennantulokset(hakukohdeOid)),
                                         (tarjontaHakukohde, valintatulokset, lukuvuosimaksut, hakemukset, hakukohde, valinnanvaiheet) -> {
                                             try {
                                                 String opetuskieli = KirjeetHakukohdeCache.getOpetuskieli(tarjontaHakukohde.getOpetusKielet());
@@ -190,7 +190,7 @@ public class ValintalaskentaExcelResource {
     public void haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
         Observable<HakukohdeV1RDTO> hakukohdeObservable = Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
         final Observable<HakuV1RDTO> hakuObservable = hakukohdeObservable.flatMap(hakukohde -> Observable.fromFuture(tarjontaResource.haeHaku(hakukohde.getHakuOid())));
-        final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
+        final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = Observable.fromFuture(valintalaskentaResource.laskennantulokset(hakukohdeOid));
         final Observable<List<HakemusWrapper>> hakemuksetObservable = hakuObservable.flatMap(haku -> {
             if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
                 return Observable.fromFuture(applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid));
