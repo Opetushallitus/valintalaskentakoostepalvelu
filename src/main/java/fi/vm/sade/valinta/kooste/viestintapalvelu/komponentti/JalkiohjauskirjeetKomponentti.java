@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
+import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
@@ -42,6 +43,7 @@ public class JalkiohjauskirjeetKomponentti {
             String ylikirjoitettuPreferoitukielikoodi,
             @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
             Map<String, HakemusWrapper> hakemusOidHakemukset,
+            Map<String, Map<String, List<SyotettyArvoDTO>>> syotetytArvot,
             final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
             @Simple("${property.hakuOid}") String hakuOid,
             @Property("templateName") String templateName,
@@ -74,7 +76,8 @@ public class JalkiohjauskirjeetKomponentti {
 
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 String hakukohdeOid = hakutoive.getHakukohdeOid();
-                Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(jalkiohjauskirjeessaKaytetytHakukohteet, hakukohdeOid, preferoituKielikoodi, hakutoive);
+                List<SyotettyArvoDTO> arvot = syotetytArvot.get(hakukohdeOid).getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
+                Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(jalkiohjauskirjeessaKaytetytHakukohteet, hakukohdeOid, preferoituKielikoodi, hakutoive, arvot);
 
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();

@@ -80,6 +80,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
+        mockValintalaskentaKutsu();
         mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
         mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -103,6 +104,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
+        mockValintalaskentaKutsu();
         mockLetterKutsut(".*010111A321.*010111A123.*|.*010111A123.*010111A321.*");
         mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -126,6 +128,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
+        mockValintalaskentaKutsu();
         mockLetterKutsut("^(?!.*010111A321).*010111A123.*$");
         mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -153,6 +156,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
+        mockValintalaskentaKutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":true).*010111A321.*(?=skipIPosti\":true).*");
         mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -178,6 +182,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
+        mockValintalaskentaKutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":true).*");
         mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -203,6 +208,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         ));
         mockHakukohde1Kutsu();
         mockHaku1Kutsu();
+        mockValintalaskentaKutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":false).*");
         mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -228,6 +234,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         ));
         mockHakukohde1Kutsu();
         mockHaku1KutsuToinenAste();
+        mockValintalaskentaKutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":false).*");
         mockKoodisto();
         ProsessiId dokumenttiId = makeCallAndReturnDokumenttiId("SV");
@@ -304,6 +311,10 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
         haku.setKohdejoukkoUri("haunkohdejoukko_11");
         mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
 
+    }
+
+    private void mockValintalaskentaKutsu() {
+        mockToReturnJson(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/HAKUKOHDE1/valinnanvaihe", Collections.emptyList());
     }
 
     private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
