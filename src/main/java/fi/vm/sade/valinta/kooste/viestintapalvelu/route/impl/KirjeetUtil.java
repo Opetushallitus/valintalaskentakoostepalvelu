@@ -16,7 +16,6 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
@@ -27,6 +26,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
+import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
@@ -96,17 +96,14 @@ public class KirjeetUtil {
         };
     }
 
-    public static StringBuilder createPaasyJaSoveltuvuuskoePisteet(HakutoiveDTO hakutoive) {
+    public static StringBuilder createPaasyJaSoveltuvuuskoePisteet(List<SyotettyArvoDTO> syotetytArvot) {
         StringBuilder pisteet = new StringBuilder();
-        for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-            if (pistetieto.getArvo() != null) {
-                try {
-                    String arvo = StringUtils.trimToEmpty(pistetieto.getArvo()).replace(",", ".");
-                    BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(arvo);
-                    pisteet.append(suomennaNumero(ehkaNumeroEhkaTotuusarvo)).append(ARVO_VALI);
-                } catch (NumberFormatException notNumber) {
-                    // OVT-6340 filtteroidaan totuusarvot pois
-                }
+        for (SyotettyArvoDTO pistetieto : syotetytArvot) {
+            try {
+                BigDecimal numero = new BigDecimal(StringUtils.trimToEmpty(pistetieto.getArvo()).replace(",", "."));
+                pisteet.append(suomennaNumero(numero)).append(ARVO_VALI);
+            } catch (NumberFormatException notNumber) {
+                // Lisätään vain lukutyyppiset arvot
             }
         }
         return pisteet;
@@ -175,7 +172,11 @@ public class KirjeetUtil {
         return "Hakukohteella " + hakukohdeOid + " ei ole tarjojannimeä";
     }
 
-    public static Map<String, Object> getTuloksetMap(Map<String, MetaHakukohde> kirjeessaKaytetytHakukohteet, String hakukohdeOid, String preferoituKielikoodi, HakutoiveDTO hakutoive) {
+    public static Map<String, Object> getTuloksetMap(Map<String, MetaHakukohde> kirjeessaKaytetytHakukohteet,
+                                                     String hakukohdeOid,
+                                                     String preferoituKielikoodi,
+                                                     HakutoiveDTO hakutoive,
+                                                     List<SyotettyArvoDTO> syotetytArvot) {
         Map<String, Object> tulokset = new HashMap<>();
         MetaHakukohde metakohde = kirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
         tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi().getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
@@ -184,7 +185,7 @@ public class KirjeetUtil {
         tulokset.put("hylkayksenSyy", "");
         tulokset.put("alinHyvaksyttyPistemaara", "");
         tulokset.put("kaikkiHakeneet", "");
-        tulokset.put("paasyJaSoveltuvuuskoe", createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
+        tulokset.put("paasyJaSoveltuvuuskoe", createPaasyJaSoveltuvuuskoePisteet(syotetytArvot).toString().trim());
         return tulokset;
     }
 

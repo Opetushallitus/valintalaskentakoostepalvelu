@@ -80,6 +80,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
         mockYksiHyvaksyttyKutsu();
+        mockValintalaskentaKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -105,6 +106,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockAtaruHakuKutsu();
         mockYksiHyvaksyttyKutsu();
+        mockValintalaskentaKutsu();
 
         mockToReturnJsonWithCookie(GET, "/lomake-editori/auth/cas", Collections.emptyMap(), "ring-session", "session-uuid");
         mockToReturnJson(POST, "/lomake-editori/api/external/valintalaskenta", Arrays.asList(
@@ -132,6 +134,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
+        mockValintalaskentaKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -158,6 +161,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
+        mockValintalaskentaKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -186,6 +190,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
+        mockValintalaskentaKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -216,6 +221,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
+        mockValintalaskentaKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -244,6 +250,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockKorkeakouluHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
+        mockValintalaskentaKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -272,6 +279,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         mockHakukohde1Kutsu();
         mockToinenAsteHaku1Kutsu();
         mockMolemmatHyvaksyttyKutsu();
+        mockValintalaskentaKutsu();
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
                 hakemus()
@@ -358,7 +366,10 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
         hk.setOpetusKielet(Sets.newHashSet("FI"));
         hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
         mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1", new Result(hk));
+    }
 
+    private void mockValintalaskentaKutsu() {
+        mockToReturnJson(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/HAKUKOHDE1/valinnanvaihe", Collections.emptyList());
     }
 
     private void mockKorkeakouluHaku1Kutsu() {
