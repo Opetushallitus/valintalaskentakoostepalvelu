@@ -105,10 +105,12 @@ public class ErillishaunTuontiHelper {
             }
             return loytynyt;
         }
-        henkilo.getIdentifications().forEach(identificationDto -> {
-            System.out.println("identificationDto.getIdentifier()" + identificationDto.getIdentifier());
-            System.out.println("identificationDto.getIdpEntityId()" + identificationDto.getIdpEntityId());
-        });
+        if (henkilo.getIdentifications() != null) {
+            henkilo.getIdentifications().forEach(identificationDto -> {
+                System.out.println("identificationDto.getIdentifier()" + identificationDto.getIdentifier());
+                System.out.println("identificationDto.getIdpEntityId()" + identificationDto.getIdpEntityId());
+            });
+        }
         Optional<ErillishakuRivi> riviSyntymaajanJaSukupuolenMukaan = kaikkiLisattavatTaiKeskeneraiset.stream()
                 .filter(r -> r.formatSyntymaAikaAsDate() != null)
                 .filter(r -> r.getSukupuoli() != null && henkilo.getSukupuoli() != null)
