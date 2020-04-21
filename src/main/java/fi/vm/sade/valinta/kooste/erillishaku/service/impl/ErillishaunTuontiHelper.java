@@ -105,21 +105,19 @@ public class ErillishaunTuontiHelper {
             }
             return loytynyt;
         }
-        if (henkilo.getIdentifications() != null) {
-            henkilo.getIdentifications().forEach(identificationDto -> {
-                System.out.println("identificationDto.getIdentifier()" + identificationDto.getIdentifier());
-                System.out.println("identificationDto.getIdpEntityId()" + identificationDto.getIdpEntityId());
-            });
-        }
-        Optional<ErillishakuRivi> riviSyntymaajanJaSukupuolenMukaan = kaikkiLisattavatTaiKeskeneraiset.stream()
+        Optional<ErillishakuRivi> riviSyntymaajanSukupuolenJaNimenMukaan = kaikkiLisattavatTaiKeskeneraiset.stream()
                 .filter(r -> r.formatSyntymaAikaAsDate() != null)
                 .filter(r -> r.getSukupuoli() != null && henkilo.getSukupuoli() != null)
+                .filter(r -> r.getEtunimi() != null && henkilo.getEtunimet() != null)
+                .filter(r -> r.getSukunimi() != null && henkilo.getSukunimi() != null)
                 .filter(r ->
-                        HakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika())) &&
-                                r.getSukupuoli().equals(Sukupuoli.toSukupuoliEnum(henkilo.getSukupuoli()))
+                        HakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate()).equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
+                                && r.getSukupuoli().equals(Sukupuoli.toSukupuoliEnum(henkilo.getSukupuoli()))
+                                && r.getEtunimi().equals(henkilo.getEtunimet())
+                                && r.getSukunimi().equals(henkilo.getSukunimi())
                 ).findFirst();
-        if (riviSyntymaajanJaSukupuolenMukaan.isPresent()) {
-            return riviSyntymaajanJaSukupuolenMukaan.get();
+        if (riviSyntymaajanSukupuolenJaNimenMukaan.isPresent()) {
+            return riviSyntymaajanSukupuolenJaNimenMukaan.get();
         }
         throw new HenkilonRivinPaattelyEpaonnistuiException("Ei löytynyt " + kaikkiLisattavatTaiKeskeneraiset.size() + " tuodusta rivistä henkilöä " + henkilo);
     }

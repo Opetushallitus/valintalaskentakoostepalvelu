@@ -40,9 +40,6 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
     }
 
     public Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
-        henkiloPrototyypit.forEach(henkiloCreateDTO -> {
-            System.out.println("henkilocreateDTO: " + henkiloCreateDTO.toString());
-        });
         return postAsObservableLazily(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findOrCreateMultiple"),
             new GenericType<List<HenkiloPerustietoDto>>() {}.getType(),
             Entity.entity(gson().toJson(henkiloPrototyypit), MediaType.APPLICATION_JSON_TYPE),
