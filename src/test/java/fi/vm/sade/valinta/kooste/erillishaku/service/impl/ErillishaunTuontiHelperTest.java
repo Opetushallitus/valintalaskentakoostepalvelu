@@ -41,6 +41,7 @@ public class ErillishaunTuontiHelperTest {
             null, null, null, null, null, null, null, null,
             null, null);
 
+    /* Erillinen erillishakurivi jossa hetu mukana, koska hetusta päätellään sukupuoli joka yliajaa parametrina annetun sukupuolen */
     private static final ErillishakuRivi ERILLISHAKU_RIVI_1_HETULLINEN = new ErillishakuRivi(null, PERSON_1_SUKUNIMI, PERSON_1_ETUNIMI,
             PERSON_1_HETU, null, PERSON_1_SYNTYMA_AIKA_SUOMALAINEN_MUOTO, null, PERSON_1_OID, null, null,
             false, null, null, null,
