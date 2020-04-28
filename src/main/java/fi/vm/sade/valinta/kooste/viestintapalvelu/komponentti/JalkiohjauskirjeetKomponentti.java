@@ -100,6 +100,7 @@ public class JalkiohjauskirjeetKomponentti {
             replacements.put("tulokset", tulosList);
             replacements.put("henkilotunnus", hakemus.getHenkilotunnus());
             replacements.put("syntymaaika", hakemus.getSyntymaaika());
+            replacements.put("hakijaOid", hakija.getHakijaOid());
 
             String sahkoposti = hakemus.getSahkopostiOsoite();
             boolean skipIPosti = sahkoinenKorkeakoulunMassaposti && !sendIPosti(hakemus);
