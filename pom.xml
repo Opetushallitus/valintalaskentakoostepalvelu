@@ -28,8 +28,8 @@
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>7.4.0-SNAPSHOT</sijoittelu.version>
         <valinta-sharedutils.version>5.11-SNAPSHOT</valinta-sharedutils.version>
-        <valintaperusteet.version>5.13-VTKU-110-SNAPSHOT</valintaperusteet.version>
-        <valintalaskenta.version>5.14-VTKU-110-SNAPSHOT</valintalaskenta.version>
+        <valintaperusteet.version>5.13-SNAPSHOT</valintaperusteet.version>
+        <valintalaskenta.version>5.14-SNAPSHOT</valintalaskenta.version>
     </properties>
 
     <dependencyManagement>
