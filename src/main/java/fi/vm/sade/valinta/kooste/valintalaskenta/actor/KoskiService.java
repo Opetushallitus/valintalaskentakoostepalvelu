@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +38,7 @@ public class KoskiService {
     private static final Gson GSON = new Gson();
     private final Predicate<String> koskiHakukohdeOidFilter;
     private final KoskiAsyncResource koskiAsyncResource;
+    private final KoskiOpiskeluoikeusHistoryService koskiOpiskeluoikeusHistoryService;
     private final Set<Funktionimi> koskenFunktionimet;
     private final Set<String> koskenOpiskeluoikeusTyypit;
 
@@ -44,11 +46,13 @@ public class KoskiService {
     public KoskiService(@Value("${valintalaskentakoostepalvelu.laskenta.koskesta.haettavat.hakukohdeoidit:none}") String koskiHakukohdeOiditString,
                         @Value("${valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta}") String koskenFunktionimetString,
                         @Value("${valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot.koskesta}") String koskenOpiskeluoikeusTyypitString,
+                        @Value("${valintalaskentakoostepalvelu.laskenta.kosken.historiapyyntojen.rinnakkaisuus}") Integer koskenHistoriapyyntojenRinnakkaisuus,
                         KoskiAsyncResource koskiAsyncResource) {
         this.koskiAsyncResource = koskiAsyncResource;
         this.koskiHakukohdeOidFilter = resolveKoskiHakukohdeOidFilter(koskiHakukohdeOiditString);
         this.koskenFunktionimet = resolveKoskenFunktionimet(koskenFunktionimetString);
         this.koskenOpiskeluoikeusTyypit = resolveKoskenOpiskeluoikeudet(koskenOpiskeluoikeusTyypitString);
+        this.koskiOpiskeluoikeusHistoryService = new KoskiOpiskeluoikeusHistoryService(koskenHistoriapyyntojenRinnakkaisuus, koskiAsyncResource);
     }
 
     /**
@@ -62,7 +66,10 @@ public class KoskiService {
             return CompletableFuture.allOf(valintaperusteet, hakemukset).thenComposeAsync(x -> {
                 Collection<HakemusWrapper> hakemusWrappers = hakemukset.join();
                 if (sisaltaaKoskiFunktioita(valintaperusteet.join())) {
-                    return haeKoskiOppijat(hakukohdeOid, hakemusWrappers, suoritustiedotDTO);
+                    LocalDate paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan = koskiOpiskeluoikeusHistoryService.etsiKoskiDatanLeikkuriPvm(
+                        valintaperusteet.join(),
+                        hakukohdeOid);
+                    return haeKoskiOppijat(hakukohdeOid, hakemusWrappers, suoritustiedotDTO, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
                 } else {
                     LOG.info("Ei haeta tietoja Koskesta hakukohteelle " + hakukohdeOid + " , koska siltä ei löydy Koski-tietoja käyttäviä valintaperusteita.");
                     return CompletableFuture.completedFuture(Collections.emptyMap());
@@ -74,23 +81,28 @@ public class KoskiService {
         }
     }
 
-    private CompletionStage<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid, Collection<HakemusWrapper> hakemusWrappers, SuoritustiedotDTO suoritustiedotDTO) {
+    private CompletionStage<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid,
+                                                                      Collection<HakemusWrapper> hakemusWrappers,
+                                                                      SuoritustiedotDTO suoritustiedotDTO,
+                                                                      LocalDate paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan) {
         LOG.info(String.format("Haetaan Koskesta tiedot %d oppijalle hakukohteen %s laskemista varten.", hakemusWrappers.size(), hakukohdeOid));
-        List<String> oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat = hakemusWrappers.stream()
+        List<String> oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat = hakemusWrappers.stream()
             .map(HakemusWrapper::getPersonOid)
             .filter(oppijanumero -> !suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero))
             .collect(Collectors.toList());
-        int maaraJoilleTiedotJoLoytyvat = hakemusWrappers.size() - oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size();
+        int maaraJoilleTiedotJoLoytyvat = hakemusWrappers.size() - oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat.size();
         return koskiAsyncResource
-            .findKoskiOppijat(oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat)
+            .findKoskiOppijat(oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat)
             .thenApplyAsync(koskioppijat -> {
                 LOG.info(String.format("Saatiin Koskesta %s uuden oppijan tiedot, kun haettiin %d/%d oppijalle (%s:lle oli jo haettu tiedot) hakukohteen %s laskemista varten.",
-                    koskioppijat.size(), oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
+                    koskioppijat.size(), oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat.size(), hakemusWrappers.size(), maaraJoilleTiedotJoLoytyvat, hakukohdeOid));
+                koskioppijat.forEach(o -> o.poistaMuuntyyppisetOpiskeluoikeudetKuin(koskenOpiskeluoikeusTyypit));
+                koskiOpiskeluoikeusHistoryService.haeVanhemmatOpiskeluoikeudetTarvittaessa(koskioppijat, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
                 Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = koskioppijat.stream().collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
-                oppijanumeroitJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(oppijanumero -> {
+                oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(oppijanumero -> {
                     KoskiOppija loytynytOppija = koskiOppijatOppijanumeroittain.get(oppijanumero);
                     if (loytynytOppija != null) {
-                        suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, GSON.toJson(loytynytOppija.haeOpiskeluoikeudet(koskenOpiskeluoikeusTyypit)));
+                        suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, GSON.toJson(loytynytOppija.getOpiskeluoikeudet()));
                     } else {
                         suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, "[]");
                     }

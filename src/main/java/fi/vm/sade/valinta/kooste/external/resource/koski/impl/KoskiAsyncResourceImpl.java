@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.koski.impl;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
@@ -62,6 +63,15 @@ public class KoskiAsyncResourceImpl implements KoskiAsyncResource {
     public CompletableFuture<Set<KoskiOppija>> findKoskiOppijat(List<String> oppijanumerot) {
         return batchedPostOppijasFuture(oppijanumerot, urlConfiguration.url("koski.oppijanumeroittain.post"))
             .whenComplete(debugLogOpiskeluoikeusVersiot());
+    }
+
+    @Override
+    public CompletableFuture<JsonElement> findVersionOfOpiskeluoikeus(String opiskeluoikeudenOid, int versionumero) {
+        return httpClient.getResponse(
+            urlConfiguration.url("koski.opiskeluoikeuden.versio", opiskeluoikeudenOid, versionumero),
+            Duration.ofMinutes(1),
+            addBasicAuthenticationCredentials
+        ).thenApplyAsync(r -> httpClient.parseJson(r, JsonElement.class));
     }
 
     private CompletableFuture<Set<KoskiOppija>> batchedPostOppijasFuture(List<String> oppijanumerot, String url) {

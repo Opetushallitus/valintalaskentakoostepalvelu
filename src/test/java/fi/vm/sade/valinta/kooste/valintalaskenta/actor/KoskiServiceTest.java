@@ -7,10 +7,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -48,11 +53,14 @@ public class KoskiServiceTest {
         KoskiOppija.KoskiHenkilö koskiHenkilo = new KoskiOppija.KoskiHenkilö();
         koskiHenkilo.oid = oppijanumero;
         koskiOppija.setHenkilö(koskiHenkilo);
+        koskiOppija.setOpiskeluoikeudet(GSON.fromJson(
+            classpathResourceAsString("fi/vm/sade/valinta/kooste/valintalaskenta/koski-monitutkinto.json"),
+            JsonArray.class));
     }
 
     @Test
     public void koskestaHaettavienHakukohteidenListallaVoiRajoittaaMilleHakukohteilleHaetaanKoskesta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("hakukohdeoid1,hakukohdeoid2", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
+        KoskiService service = new KoskiService("hakukohdeoid1,hakukohdeoid2", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
@@ -67,7 +75,7 @@ public class KoskiServiceTest {
 
     @Test
     public void koskidataaKayttavienFunktionimienListallaVoiRajoittaaMilleHakukohteilleHaetaanKoskesta() throws ExecutionException, InterruptedException {
-        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", koskiAsyncResource);
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
@@ -78,6 +86,76 @@ public class KoskiServiceTest {
         assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
 
         assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+    }
+
+    @Test
+    public void josOpiskeluoikeudenTiedotOnPaivitettyLeikkuriPvmJalkeenHaetaanRiittävänVanhaVersio() throws ExecutionException, InterruptedException {
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
+
+        when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
+        when(koskiAsyncResource.findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 2))
+            .thenReturn(CompletableFuture.completedFuture(GSON.fromJson(
+                classpathResourceAsString("fi/vm/sade/valinta/kooste/valintalaskenta/opiskeluoikeus-1.2.246.562.15.12442534343-versio-2019-10-05.json"),
+                JsonElement.class)));
+        when(koskiAsyncResource.findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 1))
+            .thenReturn(CompletableFuture.completedFuture(GSON.fromJson(
+                classpathResourceAsString("fi/vm/sade/valinta/kooste/valintalaskenta/opiskeluoikeus-1.2.246.562.15.12442534343-versio-2019-10-01.json"),
+                JsonElement.class)));
+
+        CompletableFuture<List<ValintaperusteetDTO>> valintaperuste = koskiDataaKayttavaValintaperuste("1.10.2019");
+        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", valintaperuste, hakemukset, suoritustiedotDTO).get();
+        assertThat(koskiOppijatOppijanumeroittain.entrySet(), hasSize(1));
+        assertEquals(koskiOppijatOppijanumeroittain.get(oppijanumero), koskiOppija);
+        assertTrue(suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero));
+        assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
+
+        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+
+        verify(koskiAsyncResource).findKoskiOppijat(Collections.singletonList(oppijanumero));
+        verify(koskiAsyncResource).findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 2);
+        verify(koskiAsyncResource).findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 1);
+        verifyNoMoreInteractions(koskiAsyncResource);
+    }
+
+    @Test
+    public void josOpiskeluoikeudenVanhinVersioOnLeikkuriPvmJalkeenJatetaanopiskeluoikeusHuomioimatta() throws ExecutionException, InterruptedException {
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
+
+        when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
+        when(koskiAsyncResource.findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 2))
+            .thenReturn(CompletableFuture.completedFuture(GSON.fromJson(
+                classpathResourceAsString("fi/vm/sade/valinta/kooste/valintalaskenta/opiskeluoikeus-1.2.246.562.15.12442534343-versio-2019-10-05.json"),
+                JsonElement.class)));
+        when(koskiAsyncResource.findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 1))
+            .thenReturn(CompletableFuture.completedFuture(GSON.fromJson(
+                classpathResourceAsString("fi/vm/sade/valinta/kooste/valintalaskenta/opiskeluoikeus-1.2.246.562.15.12442534343-versio-2019-10-01.json"),
+                JsonElement.class)));
+
+        CompletableFuture<List<ValintaperusteetDTO>> valintaperuste = koskiDataaKayttavaValintaperuste("30.9.2019");
+        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", valintaperuste, hakemukset, suoritustiedotDTO).get();
+        assertThat(koskiOppijatOppijanumeroittain.entrySet(), hasSize(1));
+        assertEquals(koskiOppijatOppijanumeroittain.get(oppijanumero), koskiOppija);
+        assertTrue(suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero));
+        assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
+
+        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+
+        verify(koskiAsyncResource).findKoskiOppijat(Collections.singletonList(oppijanumero));
+        verify(koskiAsyncResource).findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 2);
+        verify(koskiAsyncResource).findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 1);
+        verifyNoMoreInteractions(koskiAsyncResource);
+    }
+
+    private CompletableFuture<List<ValintaperusteetDTO>> koskiDataaKayttavaValintaperuste(String leikkuriPvm) {
+        return this.koskiFunktionSisaltavaValintaperuste.thenApplyAsync(vps -> {
+            KoskiOpiskeluoikeusHistoryService.etsiTutkintojenIterointiFunktioKutsut(vps).forEach(iterointiFunktioKutsu -> {
+                iterointiFunktioKutsu.getSyoteparametrit().stream()
+                    .filter(p -> Funktionimi.ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI.equals(p.getAvain()))
+                    .forEach(leikkuriPvmParametri ->
+                        leikkuriPvmParametri.setArvo(leikkuriPvm));
+            });
+            return vps;
+        });
     }
 
     private CompletableFuture<List<ValintaperusteetDTO>> luoKoskifunktionSisaltavaValintaperuste() {
