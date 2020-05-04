@@ -206,9 +206,23 @@ public abstract class AbstractPistesyottoKoosteService {
         };
         ConnectableObservable<List<ValintaperusteDTO>> kokeetO = Observable.fromFuture(valintaperusteetAsyncResource.findAvaimet(hakukohdeOid)).replay(1);
         ConnectableObservable<List<ValintakoeOsallistuminenDTO>> osallistumistiedotO = Observable.fromFuture(valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)).replay(1);
+
+        Observable<HakuV1RDTO> hakuO = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
+        Observable<List<HakemusWrapper>> hakemuksetO = Observable.merge(Observable.zip(
+                osallistumistiedotO,
+                hakuO.flatMap(haku -> Observable.fromFuture(getHakemukset(haku, hakukohdeOid))),
+                haePuuttuvatHakemukset
+        ));
+
+        Observable<PisteetWithLastModified> pisteetWithLastModifiedObservable = hakemuksetO.flatMap(hakemusWrappers -> {
+            List<String> hakemusOids = hakemusWrappers.stream().map(HakemusWrapper::getOid).collect(Collectors.toList());
+            return Observable.fromFuture(
+                    valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(hakemusOids, auditSession));
+        });
+
         Observable<PisteetWithLastModified> merge = Observable.merge(Observable.zip(
                 osallistumistiedotO,
-                Observable.fromFuture(valintapisteAsyncResource.getValintapisteet(hakuOid, hakukohdeOid, auditSession)),
+                pisteetWithLastModifiedObservable,
                 haePuuttuvatLisatiedot
         ));
         Observable<Pair<Optional<String>, List<ApplicationAdditionalDataDTO>>> lisatiedotO = Observable.zip(
@@ -233,12 +247,6 @@ public abstract class AbstractPistesyottoKoosteService {
                     ).collect(Collectors.toList()));
                 }
         );
-        Observable<HakuV1RDTO> hakuO = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
-        Observable<List<HakemusWrapper>> hakemuksetO = Observable.merge(Observable.zip(
-                osallistumistiedotO,
-                hakuO.flatMap(haku -> Observable.fromFuture(getHakemukset(haku, hakukohdeOid))),
-                haePuuttuvatHakemukset
-        ));
 
         prosessi.inkrementoiKokonaistyota();
         kokeetO.connect();
