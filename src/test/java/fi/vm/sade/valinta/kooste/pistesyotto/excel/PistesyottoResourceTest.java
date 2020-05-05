@@ -113,6 +113,7 @@ public class PistesyottoResourceTest {
     final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
     final String OSALLISTUMISENTUNNISTE2 = TUNNISTE2 + "-OSALLISTUMINEN";
     final String KIELIKOE_OSALLISTUMISENTUNNISTE = KIELIKOE_TUNNISTE + "-OSALLISTUMINEN";
+    private final List<String> HAKEMUS_OIDS = Arrays.asList("HAKEMUS1", "HAKEMUS2", "HAKEMUS3");
     private final List<HakemusWrapper> hakemukset = Arrays.asList(
             hakemus()
                     .setOid(HAKEMUS1)
@@ -414,6 +415,7 @@ public class PistesyottoResourceTest {
     public void pistesyottoVientiTest() throws Throwable {
         cleanMocks();
         try {
+            final List<String> vientiHakemukset = Arrays.asList(HAKEMUS1, HAKEMUS2);
             List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
                     osallistuminen()
                             .setHakemusOid(HAKEMUS1)
@@ -488,8 +490,8 @@ public class PistesyottoResourceTest {
 
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResultByOid))));
-            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
-                .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), kaikkiPisteet)));
+            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteetWithHakemusOidsAsFuture(Mockito.eq(vientiHakemukset), Mockito.any(AuditSession.class)))
+                    .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), kaikkiPisteet)));
 
             Response r = pistesyottoVientiResource.getWebClient()
                     .query("hakuOid", HAKU1)
@@ -628,7 +630,7 @@ public class PistesyottoResourceTest {
 
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), Collections.emptyList())));
-            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
+            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteetWithHakemusOidsAsFuture(Mockito.eq(HAKEMUS_OIDS), Mockito.any(AuditSession.class)))
                 .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
                 Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                     .thenAnswer((Answer<Observable<Set<String>>>) invocation -> {
@@ -765,7 +767,7 @@ public class PistesyottoResourceTest {
 
         Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
             .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResultByOid))));
-        Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
+        Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteetWithHakemusOidsAsFuture(Mockito.eq(HAKEMUS_OIDS), Mockito.any(AuditSession.class)))
             .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
             Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                 .thenAnswer((Answer<CompletableFuture<Set<String>>>) invocation -> {
@@ -881,7 +883,7 @@ public class PistesyottoResourceTest {
 
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResultByOid))));
-            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
+            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteetWithHakemusOidsAsFuture(Mockito.eq(HAKEMUS_OIDS), Mockito.any(AuditSession.class)))
                 .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
                 Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                     .thenAnswer((Answer<CompletableFuture<Set<String>>>) invocation -> {
@@ -1222,7 +1224,7 @@ public class PistesyottoResourceTest {
 
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResultByOid))));
-            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
+            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteetWithHakemusOidsAsFuture(Mockito.eq(HAKEMUS_OIDS), Mockito.any(AuditSession.class)))
                 .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
                 Mockito.when(Mocks.getValintapisteAsyncResource().putValintapisteet(Mockito.eq(Optional.empty()), Mockito.anyListOf(Valintapisteet.class), Mockito.any(AuditSession.class)))
                     .thenAnswer((Answer<CompletableFuture<Set<String>>>) invocation -> {
@@ -1323,8 +1325,8 @@ public class PistesyottoResourceTest {
 
             Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
                 .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), Collections.emptyList())));
-            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
-                .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
+            Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteetWithHakemusOidsAsFuture(Mockito.eq(HAKEMUS_OIDS), Mockito.any(AuditSession.class)))
+                    .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), asValintapisteet(additionalDataResult))));
 
             PistesyottoExcel excel = new PistesyottoExcel(HAKU1, HAKUKOHDE1, KIELIKOE_TOIMIPISTE_OID, "", "", "",
                 Optional.empty(), Collections.singletonList(hakemus().setOid(HAKEMUS1).setEtunimiJaSukunimi("Etunimi", "Sukunimi").build()),
