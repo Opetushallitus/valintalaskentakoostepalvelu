@@ -1,13 +1,14 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.excel;
 
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
+import static java.util.Arrays.asList;
 import com.codepoetics.protonpack.Indexed;
 import com.codepoetics.protonpack.StreamUtils;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
@@ -20,14 +21,16 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
-import static java.util.Arrays.asList;
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
 
 
 public class ValintalaskennanTulosExcel {
@@ -137,7 +140,7 @@ public class ValintalaskennanTulosExcel {
         }
     }
 
-    private static List<Column> fixedColumns = Arrays.asList(
+    private static final List<Column> fixedColumns = Arrays.asList(
             new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
             new Column("Sukunimi", 20, rivi -> rivi.hakemus.getSukunimi()),
             new Column("Etunimi", 20, rivi -> rivi.hakemus.getEtunimet()),
@@ -160,7 +163,7 @@ public class ValintalaskennanTulosExcel {
     }
     private static JarjestyskriteeritulosDTO getJarjestyskriteeri(final JonosijaDTO hakija) {
         return hakija.getJarjestyskriteerit().isEmpty()
-            ? new JarjestyskriteeritulosDTO(null, hakija.getTuloksenTila(), Collections.EMPTY_MAP, 1, "")
+            ? new JarjestyskriteeritulosDTO(null, hakija.getTuloksenTila(), Collections.emptyMap(), 1, "")
             : hakija.getJarjestyskriteerit().first();
     }
 
