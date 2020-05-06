@@ -55,10 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -135,9 +132,9 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
             "/valintapiste-service/api/haku/testioidi1/hakukohde/1.2.246.562.5.85532589612",
             Collections.emptySet());
 
-        mockToReturnJson(GET,
-            "/valintapiste-service/api/haku/testioidi1/hakukohde/1.2.246.562.5.85532589612",
-            pisteetFromValintaPisteService);
+        mockToReturnJson(POST,
+                "/valintapiste-service/api/pisteet-with-hakemusoids",
+                pisteetFromValintaPisteService);
     }
 
     @Test
