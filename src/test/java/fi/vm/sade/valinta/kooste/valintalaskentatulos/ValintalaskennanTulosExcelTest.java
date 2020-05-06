@@ -96,8 +96,8 @@ public class ValintalaskennanTulosExcelTest {
                         asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
                         asList("Jono", "Jono 1"),
                         Collections.emptyList(),
-                        asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "pääsykoetulos", "keskiarvo"),
-                        asList("2", "Suku 1", "Etu 1", "010101-123N", "sukuetu1@testi.fi", "Hakemus 1", "1", "HYVAKSYTTAVISSA", "", "666", "10", "9")
+                        asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "keskiarvo", "pääsykoetulos"),
+                        asList("2", "Suku 1", "Etu 1", "010101-123N", "sukuetu1@testi.fi", "Hakemus 1", "1", "HYVAKSYTTAVISSA", "", "666", "9", "10")
                 ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -120,8 +120,8 @@ public class ValintalaskennanTulosExcelTest {
                         asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
                         asList("Jono", "Jono 1"),
                         Collections.emptyList(),
-                        asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "pääsykoetulos", "keskiarvo"),
-                        asList("2", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000063", "1", "HYVAKSYTTAVISSA", "", "666", "10", "9")
+                        asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "keskiarvo", "pääsykoetulos"),
+                        asList("2", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000063", "1", "HYVAKSYTTAVISSA", "", "666", "9", "10")
                 ), getWorksheetData(ataruWorkbook.getSheetAt(0)));
     }
 
@@ -147,9 +147,9 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
                 asList("Jono", "Jono 1"),
                 Collections.emptyList(),
-                asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "pääsykoetulos", "lukion keskiarvo", "Ammatillisen perustutkinnon keskiarvo"),
-                asList("1", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000064", "1", "HYVAKSYTTAVISSA", "", "19", "8", "9", ""),
-                asList("2", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000065", "1", "HYVAKSYTTAVISSA", "", "17", "10", "", "3.2")
+                asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "Ammatillisen perustutkinnon keskiarvo", "lukion keskiarvo", "pääsykoetulos"),
+                asList("1", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000064", "1", "HYVAKSYTTAVISSA", "", "19", "", "9", "8"),
+                asList("2", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000065", "1", "HYVAKSYTTAVISSA", "", "17", "3.2", "", "10")
             ), getWorksheetData(ataruWorkbook.getSheetAt(0)));
     }
 

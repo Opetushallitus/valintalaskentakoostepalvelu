@@ -121,6 +121,7 @@ public class ValintalaskennanTulosExcel {
             .flatMap(js -> js.getFunktioTulokset().stream())
             .map(DynamicColumnHeader::new)
             .distinct()
+            .sorted()
             .collect(Collectors.toList());
     }
 
@@ -144,7 +145,7 @@ public class ValintalaskennanTulosExcel {
         }
     }
 
-    private static class DynamicColumnHeader {
+    private static class DynamicColumnHeader implements Comparable<DynamicColumnHeader> {
         public final String tunniste;
         public final String nimiFi;
         public final String nimiSv;
@@ -167,6 +168,14 @@ public class ValintalaskennanTulosExcel {
         @Override
         public boolean equals(Object obj) {
             return EqualsBuilder.reflectionEquals(this, obj);
+        }
+
+        @Override
+        public int compareTo(DynamicColumnHeader o) {
+            if (tunniste == null) {
+                return -1;
+            }
+            return tunniste.compareTo(o.tunniste);
         }
     }
 
