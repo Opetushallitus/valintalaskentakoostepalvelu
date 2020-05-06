@@ -1,5 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
+import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
+import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
@@ -29,30 +36,30 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
-
-import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
-import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
 public class ValintalaskennanTulosExcelTest {
-    private HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
+    private final HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
 
     {
         hakukohdeDTO.setHakukohteenNimet(map("fi", "Hakukohde 1"));
         hakukohdeDTO.setTarjoajaNimet(map("fi", "Tarjoaja 1"));
     }
 
-    private HakuV1RDTO haku = new HakuV1RDTO();
+    private final HakuV1RDTO haku = new HakuV1RDTO();
 
     {
         haku.setNimi(map("fi", "Haku 1"));
     }
 
-    private DateTime nyt = DateTime.now();
+    private final DateTime nyt = DateTime.now();
 
     @Test
     public void sheetNames() {
@@ -182,7 +189,7 @@ public class ValintalaskennanTulosExcelTest {
 
 
     private <T> HashMap<String, T> map(final String key, final T value) {
-        return new HashMap<String, T>() {{
+        return new HashMap<>() {{
             put(key, value);
         }};
     }
