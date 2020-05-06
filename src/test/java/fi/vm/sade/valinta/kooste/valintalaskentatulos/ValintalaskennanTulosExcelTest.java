@@ -126,6 +126,34 @@ public class ValintalaskennanTulosExcelTest {
     }
 
     @Test
+    public void sarakkeidenSisaltoOnOikeinVaikkaSeTulisiEriJarjestyksessaEriHakijoille() {
+        XSSFWorkbook ataruWorkbook = ValintalaskennanTulosExcel.luoExcel(
+            haku,
+            hakukohdeDTO,
+            Collections.singletonList(
+                valinnanvaihe(1, nyt.toDate(), Collections.singletonList(
+                    valintatapajono(1, ataruJonosijatJoissaOnEriSarakkeita())
+                ))),
+            asList(
+                MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000064"),
+                MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000065")));
+
+        assertEquals(
+            asList(
+                asList("Haku", "Haku 1"),
+                asList("Tarjoaja", "Tarjoaja 1"),
+                asList("Hakukohde", "Hakukohde 1"),
+                asList("Vaihe", "Vaihe 1"),
+                asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
+                asList("Jono", "Jono 1"),
+                Collections.emptyList(),
+                asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "pääsykoetulos", "lukion keskiarvo", "Ammatillisen perustutkinnon keskiarvo"),
+                asList("1", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000064", "1", "HYVAKSYTTAVISSA", "", "19", "8", "9", ""),
+                asList("2", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000065", "1", "HYVAKSYTTAVISSA", "", "17", "10", "", "3.2")
+            ), getWorksheetData(ataruWorkbook.getSheetAt(0)));
+    }
+
+    @Test
     public void emptySheet() {
         XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
                 valinnanvaihe(1, nyt.toDate(), asList(
@@ -261,6 +289,17 @@ public class ValintalaskennanTulosExcelTest {
                 new JonosijaDTO(2, "1.2.246.562.11.00000000000000000063", "1.2.246.562.24.86368188549",
                         jarjestyskriteerit(HYVAKSYTTAVISSA, Collections.emptyMap(), new BigDecimal(666)),
                         1, "Suku 1", "Etu 1", false, HYVAKSYTTAVISSA, Collections.emptyList(), Collections.emptyList(), Arrays.asList(new FunktioTulosDTO("pääsykoetulos", "10"), new FunktioTulosDTO("keskiarvo", "9")), false, false)
+        );
+    }
+
+    private List<JonosijaDTO> ataruJonosijatJoissaOnEriSarakkeita() {
+        return asList(
+            new JonosijaDTO(1, "1.2.246.562.11.00000000000000000064", "1.2.246.562.24.86368188550",
+                jarjestyskriteerit(HYVAKSYTTAVISSA, Collections.emptyMap(), new BigDecimal(19)),
+                1, "Lukiolainen", "Bob", false, HYVAKSYTTAVISSA, Collections.emptyList(), Collections.emptyList(), Arrays.asList(new FunktioTulosDTO("pääsykoetulos", "8"), new FunktioTulosDTO("lukion keskiarvo", "9")), false, false),
+            new JonosijaDTO(2, "1.2.246.562.11.00000000000000000065", "1.2.246.562.24.86368188551",
+                jarjestyskriteerit(HYVAKSYTTAVISSA, Collections.emptyMap(), new BigDecimal(17)),
+                1, "Ammattitutkittu", "Frank", false, HYVAKSYTTAVISSA, Collections.emptyList(), Collections.emptyList(), Arrays.asList(new FunktioTulosDTO("pääsykoetulos", "10"), new FunktioTulosDTO("Ammatillisen perustutkinnon keskiarvo", "3.2")), false, false)
         );
     }
 

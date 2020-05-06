@@ -68,7 +68,7 @@ public class ValintalaskennanTulosExcel {
                                         dynamicColumnHeaders.stream().map(h -> h.tunniste))
                                     .collect(Collectors.toList());
                                 addRow(sheet, allColumnHeaders);
-                                addJonosijaRows(hakemusByOid, jono, sheet);
+                                addJonosijaRows(hakemusByOid, jono, sheet, dynamicColumnHeaders);
                             }
                         }
                 );
@@ -91,11 +91,17 @@ public class ValintalaskennanTulosExcel {
         return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), truncatedSheetName);
     }
 
-    private static void addJonosijaRows(Map<String, HakemusWrapper> hakemusByOid, ValintatietoValintatapajonoDTO jono, XSSFSheet sheet) {
+    private static void addJonosijaRows(Map<String,HakemusWrapper> hakemusByOid,
+                                        ValintatietoValintatapajonoDTO jono,
+                                        XSSFSheet sheet,
+                                        List<DynamicColumnHeader> dynamicColumnHeaders) {
         sortedJonosijat(jono)
                 .map(hakija -> {
                     final Stream<Column> fixedColumnValuesStream = fixedColumns.stream();
-                    final Stream<Column> dynamicColumnValuesStream = hakija.getFunktioTulokset().stream().map(FunktioTulosDTO::getTunniste).map(t -> new Column(t, 14, rivi -> extractValue(t, rivi)));
+                    final Stream<Column> dynamicColumnValuesStream = dynamicColumnHeaders.stream()
+                        .map(header ->
+                            new Column(header.tunniste, 14, rivi ->
+                                extractValue(header.tunniste, rivi)));
                     final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()));
                     return Stream.concat(fixedColumnValuesStream, dynamicColumnValuesStream)
                             .map(column -> column.extractor.apply(hakemusRivi))
