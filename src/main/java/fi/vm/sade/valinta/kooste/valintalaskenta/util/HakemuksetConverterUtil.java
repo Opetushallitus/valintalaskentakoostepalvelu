@@ -59,8 +59,8 @@ public class HakemuksetConverterUtil {
     public static final String KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO = "haunkohdejoukko_11";
 
     public static final LocalDateTime POHJAKOULUTUS_PAATTELY_LEIKKURI_PVM = LocalDate.parse(
-            UrlConfiguration.getInstance().getProperty(
-                    "valintalaskentakoostepalvelu.pohjakoulutus.paattely.leikkuripvm")).atStartOfDay();
+            UrlConfiguration.getInstance().getOrElse(
+                    "valintalaskentakoostepalvelu.pohjakoulutus.paattely.leikkuripvm", "2020-06-01")).atStartOfDay();
 
     private static void tryToMergeKeysOfOppijaAndHakemus(HakuV1RDTO haku, String hakukohdeOid, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, Map<String, Exception> errors, Map<String, Oppija> personOidToOppija, Map<String, Boolean> hasHetu, HakemusDTO h) {
         try {
