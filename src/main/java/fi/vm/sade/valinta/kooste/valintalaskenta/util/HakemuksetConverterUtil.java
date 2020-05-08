@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -31,6 +32,8 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +57,10 @@ public class HakemuksetConverterUtil {
     public static final String DISCRETIONARY_POSTFIX = "discretionary";
 
     public static final String KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO = "haunkohdejoukko_11";
+
+    public static final LocalDateTime POHJAKOULUTUS_PAATTELY_LEIKKURI_PVM = LocalDate.parse(
+            UrlConfiguration.getInstance().getProperty(
+                    "valintalaskentakoostepalvelu.pohjakoulutus.paattely.leikkuripvm")).atStartOfDay();
 
     private static void tryToMergeKeysOfOppijaAndHakemus(HakuV1RDTO haku, String hakukohdeOid, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, Map<String, Exception> errors, Map<String, Oppija> personOidToOppija, Map<String, Boolean> hasHetu, HakemusDTO h) {
         try {
@@ -250,9 +257,9 @@ public class HakemuksetConverterUtil {
         }
 
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
-            return of(PohjakoulutusToinenAste.YLIOPPILAS); //fixme
-            //Toistaiseksi poistettu tämä tarkistus käytöstä, koska abeilla ei vielä voi olla suoritusrekisterissä vaadittuja suorituksia. Todo: pysyvämpi korjaus.
-            /*
+            if (LocalDateTime.now().isBefore(POHJAKOULUTUS_PAATTELY_LEIKKURI_PVM)) {
+                return of(PohjakoulutusToinenAste.YLIOPPILAS);
+            }
             boolean suressaValmisJaVahvistettuLukiosuoritus = suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isVahvistettu() && s.isValmis());
             String hakuVuosi = Integer.toString(haku.getHakukausiVuosi());
             boolean isAbiturientti = h.getAvaimet().stream().anyMatch(dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain()) && hakuVuosi.equals(dto.getArvo()));
@@ -261,7 +268,7 @@ public class HakemuksetConverterUtil {
             } else {
                 LOG.warn("Hakemuksella {} pohjakoulutus lukio, mutta valmista ja vahvistettua lukiosuoritusta ei löydy suoritusrekisteristä. Palautetaan pohjakoulutus PERUSKOULU.", h.getHakemusoid());
                 return of(PohjakoulutusToinenAste.PERUSKOULU);
-            }*/
+            }
         }
         Optional<SuoritusJaArvosanatWrapper> perusopetus = suorituksetRekisterista.stream()
                 .filter(s -> s.isPerusopetus() && s.isVahvistettu() && !s.isKeskeytynyt())
