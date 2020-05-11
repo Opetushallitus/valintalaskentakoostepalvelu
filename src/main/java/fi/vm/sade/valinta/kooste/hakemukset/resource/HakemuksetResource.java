@@ -58,7 +58,7 @@ public class HakemuksetResource {
                                             @Context HttpServletRequest request) {
         Preconditions.checkNotNull(hakuOid);
         Preconditions.checkNotNull(valinnanvaiheOid);
-        asyncResponse.setTimeout(10, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(1, TimeUnit.HOURS);
 
         Map<String, String> additionalAuditInfo = new HashMap<>();
         additionalAuditInfo.put("hakuOid", hakuOid);
