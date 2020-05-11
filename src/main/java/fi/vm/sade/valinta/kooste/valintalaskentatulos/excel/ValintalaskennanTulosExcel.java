@@ -15,8 +15,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -144,7 +144,7 @@ public class ValintalaskennanTulosExcel {
         public final boolean omaOpintopolku;
 
         public DynamicColumnHeader(FunktioTulosDTO funktioTulosDTO) {
-            if (org.apache.commons.lang3.StringUtils.isBlank(funktioTulosDTO.getTunniste())) {
+            if (StringUtils.isBlank(funktioTulosDTO.getTunniste())) {
                 throw new IllegalArgumentException("Tyhjä funktiotuloksen tunniste ei ole sallittu:" + ToStringBuilder.reflectionToString(funktioTulosDTO));
             }
             this.tunniste = funktioTulosDTO.getTunniste();
