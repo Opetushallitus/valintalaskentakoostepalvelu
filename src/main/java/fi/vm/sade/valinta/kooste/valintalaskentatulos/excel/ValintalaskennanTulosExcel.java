@@ -17,8 +17,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -145,6 +144,9 @@ public class ValintalaskennanTulosExcel {
         public final boolean omaOpintopolku;
 
         public DynamicColumnHeader(FunktioTulosDTO funktioTulosDTO) {
+            if (org.apache.commons.lang3.StringUtils.isBlank(funktioTulosDTO.getTunniste())) {
+                throw new IllegalArgumentException("Tyhjä funktiotuloksen tunniste ei ole sallittu:" + ToStringBuilder.reflectionToString(funktioTulosDTO));
+            }
             this.tunniste = funktioTulosDTO.getTunniste();
             this.nimiFi = funktioTulosDTO.getNimiFi();
             this.nimiSv = funktioTulosDTO.getNimiSv();
@@ -154,19 +156,19 @@ public class ValintalaskennanTulosExcel {
 
         @Override
         public int hashCode() {
-            return HashCodeBuilder.reflectionHashCode(this);
+            return tunniste.hashCode();
         }
 
         @Override
         public boolean equals(Object obj) {
-            return EqualsBuilder.reflectionEquals(this, obj);
+            if (!(obj instanceof DynamicColumnHeader)) {
+                return false;
+            }
+            return ((DynamicColumnHeader) obj).tunniste.equals(tunniste);
         }
 
         @Override
         public int compareTo(DynamicColumnHeader o) {
-            if (tunniste == null) {
-                return -1;
-            }
             return tunniste.compareTo(o.tunniste);
         }
     }
