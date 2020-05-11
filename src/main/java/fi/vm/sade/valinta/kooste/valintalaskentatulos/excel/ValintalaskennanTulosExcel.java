@@ -60,15 +60,15 @@ public class ValintalaskennanTulosExcel {
                             if (jono.getJonosijat().isEmpty()) {
                                 addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
                             } else {
-                                final List<String> fixedColumnHeaders = fixedColumnHeaders();
-                                final List<DynamicColumnHeader> dynamicColumnHeaders = dynamicColumnHeaders(jono);
+                                final List<Column> dynamicColumns = dynamicColumns(jono);
                                 final List<String> allColumnHeaders = Stream
                                     .concat(
-                                        fixedColumnHeaders.stream(),
-                                        dynamicColumnHeaders.stream().map(h -> h.tunniste))
+                                        fixedColumns.stream(),
+                                        dynamicColumns.stream())
+                                    .map(h -> h.name)
                                     .collect(Collectors.toList());
                                 addRow(sheet, allColumnHeaders);
-                                addJonosijaRows(hakemusByOid, jono, sheet, dynamicColumnHeaders);
+                                addJonosijaRows(hakemusByOid, jono, sheet, dynamicColumns);
                             }
                         }
                 );
@@ -91,30 +91,21 @@ public class ValintalaskennanTulosExcel {
         return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), truncatedSheetName);
     }
 
-    private static void addJonosijaRows(Map<String,HakemusWrapper> hakemusByOid,
+    private static void addJonosijaRows(Map<String, HakemusWrapper> hakemusByOid,
                                         ValintatietoValintatapajonoDTO jono,
                                         XSSFSheet sheet,
-                                        List<DynamicColumnHeader> dynamicColumnHeaders) {
+                                        List<Column> dynamicColumns) {
         sortedJonosijat(jono)
-                .map(hakija -> {
-                    final Stream<Column> fixedColumnValuesStream = fixedColumns.stream();
-                    final Stream<Column> dynamicColumnValuesStream = dynamicColumnHeaders.stream()
-                        .map(header ->
-                            new Column(header.tunniste, 14, rivi ->
-                                extractValue(header.tunniste, rivi)));
-                    final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()));
-                    return Stream.concat(fixedColumnValuesStream, dynamicColumnValuesStream)
-                            .map(column -> column.extractor.apply(hakemusRivi))
-                            .collect(Collectors.toList());
-                })
-                .forEach(v -> addRow(sheet, v));
+            .map(hakija -> {
+                final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()));
+                return Stream.concat(fixedColumns.stream(), dynamicColumns.stream())
+                    .map(column -> column.extractor.apply(hakemusRivi))
+                    .collect(Collectors.toList());
+            })
+            .forEach(v -> addRow(sheet, v));
     }
 
-    private static List<String> fixedColumnHeaders() {
-        return fixedColumns.stream().map(column -> column.name).collect(Collectors.toList());
-    }
-
-    private static List<DynamicColumnHeader> dynamicColumnHeaders(ValintatietoValintatapajonoDTO jono) {
+    private static List<Column> dynamicColumns(ValintatietoValintatapajonoDTO jono) {
         return jono
             .getJonosijat()
             .stream()
@@ -122,6 +113,7 @@ public class ValintalaskennanTulosExcel {
             .map(DynamicColumnHeader::new)
             .distinct()
             .sorted()
+            .map(header -> new Column(header.tunniste, 14, rivi -> extractValue(header.tunniste, rivi)))
             .collect(Collectors.toList());
     }
 
