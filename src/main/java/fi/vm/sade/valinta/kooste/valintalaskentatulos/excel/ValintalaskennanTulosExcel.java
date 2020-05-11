@@ -1,33 +1,36 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.excel;
 
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
+import static java.util.Arrays.asList;
 import com.codepoetics.protonpack.Indexed;
 import com.codepoetics.protonpack.StreamUtils;
+
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
-import static java.util.Arrays.asList;
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
 
 
 public class ValintalaskennanTulosExcel {
@@ -56,11 +59,15 @@ public class ValintalaskennanTulosExcel {
                             if (jono.getJonosijat().isEmpty()) {
                                 addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
                             } else {
-                                final List<String> fixedColumnHeaders = fixedColumnHeaders();
-                                final List<String> dynamicColumnHeaders = dynamicColumnHeaders(jono);
-                                final List<String> allColumnHeaders = Stream.concat(fixedColumnHeaders.stream(), dynamicColumnHeaders.stream()).collect(Collectors.toList());
+                                final List<Column> dynamicColumns = dynamicColumns(jono);
+                                final List<String> allColumnHeaders = Stream
+                                    .concat(
+                                        fixedColumns.stream(),
+                                        dynamicColumns.stream())
+                                    .map(h -> h.name)
+                                    .collect(Collectors.toList());
                                 addRow(sheet, allColumnHeaders);
-                                addJonosijaRows(hakemusByOid, jono, sheet);
+                                addJonosijaRows(hakemusByOid, jono, sheet, dynamicColumns);
                             }
                         }
                 );
@@ -83,28 +90,30 @@ public class ValintalaskennanTulosExcel {
         return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), truncatedSheetName);
     }
 
-    private static void addJonosijaRows(Map<String, HakemusWrapper> hakemusByOid, ValintatietoValintatapajonoDTO jono, XSSFSheet sheet) {
+    private static void addJonosijaRows(Map<String, HakemusWrapper> hakemusByOid,
+                                        ValintatietoValintatapajonoDTO jono,
+                                        XSSFSheet sheet,
+                                        List<Column> dynamicColumns) {
         sortedJonosijat(jono)
-                .map(hakija -> {
-                    final Stream<Column> fixedColumnValuesStream = fixedColumns.stream();
-                    final Stream<Column> dynamicColumnValuesStream = hakija.getFunktioTulokset().stream().map(FunktioTulosDTO::getTunniste).map(t -> new Column(t, 14, rivi -> extractValue(t, rivi)));
-                    final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()));
-                    return Stream.concat(fixedColumnValuesStream, dynamicColumnValuesStream)
-                            .map(column -> column.extractor.apply(hakemusRivi))
-                            .collect(Collectors.toList());
-                })
-                .forEach(v -> addRow(sheet, v));
+            .map(hakija -> {
+                final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()));
+                return Stream.concat(fixedColumns.stream(), dynamicColumns.stream())
+                    .map(column -> column.extractor.apply(hakemusRivi))
+                    .collect(Collectors.toList());
+            })
+            .forEach(v -> addRow(sheet, v));
     }
 
-    private static List<String> fixedColumnHeaders() {
-        return fixedColumns.stream().map(column -> column.name).collect(Collectors.toList());
-    }
-
-    private static List<String> dynamicColumnHeaders(ValintatietoValintatapajonoDTO jono) {
-        return sortedJonosijat(jono)
-                .findFirst()
-                .map(JonosijaDTO::getFunktioTulokset)
-                .orElse(new ArrayList<>()).stream().map(FunktioTulosDTO::getTunniste).collect(Collectors.toList());
+    private static List<Column> dynamicColumns(ValintatietoValintatapajonoDTO jono) {
+        return jono
+            .getJonosijat()
+            .stream()
+            .flatMap(js -> js.getFunktioTulokset().stream())
+            .map(DynamicColumnHeader::new)
+            .distinct()
+            .sorted()
+            .map(header -> new Column(header.tunniste, 14, rivi -> extractValue(header.tunniste, rivi)))
+            .collect(Collectors.toList());
     }
 
     private static String extractValue(String tunniste, HakemusRivi rivi) {
@@ -127,6 +136,43 @@ public class ValintalaskennanTulosExcel {
         }
     }
 
+    private static class DynamicColumnHeader implements Comparable<DynamicColumnHeader> {
+        public final String tunniste;
+        public final String nimiFi;
+        public final String nimiSv;
+        public final String nimiEn;
+        public final boolean omaOpintopolku;
+
+        public DynamicColumnHeader(FunktioTulosDTO funktioTulosDTO) {
+            if (StringUtils.isBlank(funktioTulosDTO.getTunniste())) {
+                throw new IllegalArgumentException("Tyhjä funktiotuloksen tunniste ei ole sallittu:" + ToStringBuilder.reflectionToString(funktioTulosDTO));
+            }
+            this.tunniste = funktioTulosDTO.getTunniste();
+            this.nimiFi = funktioTulosDTO.getNimiFi();
+            this.nimiSv = funktioTulosDTO.getNimiSv();
+            this.nimiEn = funktioTulosDTO.getNimiEn();
+            this.omaOpintopolku = funktioTulosDTO.isOmaopintopolku();
+        }
+
+        @Override
+        public int hashCode() {
+            return tunniste.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof DynamicColumnHeader)) {
+                return false;
+            }
+            return ((DynamicColumnHeader) obj).tunniste.equals(tunniste);
+        }
+
+        @Override
+        public int compareTo(DynamicColumnHeader o) {
+            return tunniste.compareTo(o.tunniste);
+        }
+    }
+
     private static class HakemusRivi {
         public final JonosijaDTO hakija;
         public final HakemusWrapper hakemus;
@@ -137,7 +183,7 @@ public class ValintalaskennanTulosExcel {
         }
     }
 
-    private static List<Column> fixedColumns = Arrays.asList(
+    private static final List<Column> fixedColumns = Arrays.asList(
             new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
             new Column("Sukunimi", 20, rivi -> rivi.hakemus.getSukunimi()),
             new Column("Etunimi", 20, rivi -> rivi.hakemus.getEtunimet()),
@@ -160,7 +206,7 @@ public class ValintalaskennanTulosExcel {
     }
     private static JarjestyskriteeritulosDTO getJarjestyskriteeri(final JonosijaDTO hakija) {
         return hakija.getJarjestyskriteerit().isEmpty()
-            ? new JarjestyskriteeritulosDTO(null, hakija.getTuloksenTila(), Collections.EMPTY_MAP, 1, "")
+            ? new JarjestyskriteeritulosDTO(null, hakija.getTuloksenTila(), Collections.emptyMap(), 1, "")
             : hakija.getJarjestyskriteerit().first();
     }
 
