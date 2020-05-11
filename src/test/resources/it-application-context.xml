@@ -75,6 +75,10 @@
   <bean id="ValintaperusteetResourceV2"
         class="fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2" />
 
+  <!--Valintalaskenta-->
+  <bean id="HakemuksetConverterUtil"
+        class="fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil" />
+
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">

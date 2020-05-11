@@ -40,6 +40,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
+import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusTyyppi;
@@ -70,6 +71,7 @@ public class ValintalaskentaTest {
     private final OhjausparametritAsyncResource ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
     private final ValintapisteAsyncResource valintapisteAsyncResource = mock(ValintapisteAsyncResource.class);
     private final KoskiService koskiService = mock(KoskiService.class);
+    private final HakemuksetConverterUtil hakemuksetConverterUtil = new HakemuksetConverterUtil("9999-12-31");
     private final LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(seurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource, tarjontaAsyncResource), new LaskentaActorFactory(
         5,
         valintalaskentaAsyncResource,
@@ -80,7 +82,8 @@ public class ValintalaskentaTest {
         suoritusrekisteriAsyncResource,
         tarjontaAsyncResource,
         valintapisteAsyncResource,
-        koskiService
+        koskiService,
+        hakemuksetConverterUtil
     ), 8);
     private final String hakukohde1Oid = "h1";
     private final String hakukohde2Oid = "h2";

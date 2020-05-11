@@ -77,6 +77,9 @@ public class OppijanSuorituksetProxyResource {
     @Autowired
     private AtaruAsyncResource ataruAsyncResource;
 
+    @Autowired
+    private HakemuksetConverterUtil hakemuksetConverterUtil;
+
     /**
      *
      @deprecated Use the one with the fixed path (opiskelijaOid instead of opiskeljaOid) {@link #getSuoritukset(String, String, String, AsyncResponse)} ()}
@@ -408,7 +411,7 @@ public class OppijanSuorituksetProxyResource {
                 .hakukohdeRyhmasForHakukohdes(haku.getOid()))
                 .timeout(1, MINUTES)
                 .blockingFirst();
-        return HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
+        return hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
             haku,
             "",
             hakukohdeRyhmasForHakukohdes,

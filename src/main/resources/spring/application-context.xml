@@ -329,6 +329,8 @@
 		<!-- Valintalaskenta -->
 		<bean id="ValintalaskentaKerrallaResource"
 			  class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
+		<bean id="HakemuksetConverterUtil"
+			  class="fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.actor" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.resource" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />

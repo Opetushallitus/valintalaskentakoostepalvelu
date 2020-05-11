@@ -18,7 +18,6 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
-import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -31,6 +30,9 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,8 +47,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Component("HakemuksetConverterUtil")
 public class HakemuksetConverterUtil {
-    private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
     public static final String PK_PAATTOTODISTUSVUOSI = "PK_PAATTOTODISTUSVUOSI";
     public static final String LK_PAATTOTODISTUSVUOSI = "lukioPaattotodistusVuosi";
     public static final String PERUSOPETUS_KIELI = "perusopetuksen_kieli";
@@ -55,14 +57,18 @@ public class HakemuksetConverterUtil {
     public static final String ENSIKERTALAINEN = "ensikertalainen";
     public static final String PREFERENCE_PREFIX = "preference";
     public static final String DISCRETIONARY_POSTFIX = "discretionary";
-
     public static final String KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO = "haunkohdejoukko_11";
 
-    public static final LocalDateTime POHJAKOULUTUS_PAATTELY_LEIKKURI_PVM = LocalDate.parse(
-            UrlConfiguration.getInstance().getOrElse(
-                    "valintalaskentakoostepalvelu.pohjakoulutus.paattely.leikkuripvm", "2020-06-01")).atStartOfDay();
+    private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
 
-    private static void tryToMergeKeysOfOppijaAndHakemus(HakuV1RDTO haku, String hakukohdeOid, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, Map<String, Exception> errors, Map<String, Oppija> personOidToOppija, Map<String, Boolean> hasHetu, HakemusDTO h) {
+    private final LocalDateTime pohjaKoulutusPaattelyLeikkuriPvm;
+    
+    public HakemuksetConverterUtil(
+            @Value("${valintalaskentakoostepalvelu.pohjakoulutus.paattely.leikkuripvm:2020-06-01}") String pohjaKoulutusPaattelyLeikkuriPvm) {
+        this.pohjaKoulutusPaattelyLeikkuriPvm = LocalDate.parse(pohjaKoulutusPaattelyLeikkuriPvm).atStartOfDay();
+    }
+
+    private void tryToMergeKeysOfOppijaAndHakemus(HakuV1RDTO haku, String hakukohdeOid, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, Map<String, Exception> errors, Map<String, Oppija> personOidToOppija, Map<String, Boolean> hasHetu, HakemusDTO h) {
         try {
             String personOid = h.getHakijaOid();
             if (personOidToOppija.containsKey(personOid)) {
@@ -76,7 +82,7 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    public static List<HakemusDTO> muodostaHakemuksetDTOfromHakemukset(HakuV1RDTO haku, String hakukohdeOid,
+    public List<HakemusDTO> muodostaHakemuksetDTOfromHakemukset(HakuV1RDTO haku, String hakukohdeOid,
                                                                        Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
                                                                        List<HakemusWrapper> hakemukset,
                                                                        List<Valintapisteet> valintapisteet,
@@ -89,7 +95,7 @@ public class HakemuksetConverterUtil {
         return getHakemusDTOS(haku, hakukohdeOid, oppijat, parametritDTO, fetchEnsikertalaisuus, hakemusDtot, hasHetu, errors);
     }
 
-    private static List<HakemusDTO> getHakemusDTOS(HakuV1RDTO haku,
+    private List<HakemusDTO> getHakemusDTOS(HakuV1RDTO haku,
                                                    String hakukohdeOid,
                                                    List<Oppija> oppijat,
                                                    ParametritDTO parametritDTO,
@@ -118,7 +124,7 @@ public class HakemuksetConverterUtil {
         return hakemusDtot;
     }
 
-    public static void mergeKeysOfOppijaAndHakemus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid,
+    public void mergeKeysOfOppijaAndHakemus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid,
                                                    ParametritDTO parametritDTO, Map<String, Exception> errors, Oppija oppija,
                                                    HakemusDTO hakemusDTO, Boolean fetchEnsikertalaisuus) {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
@@ -136,7 +142,7 @@ public class HakemuksetConverterUtil {
         hakemusDTO.setAvaimet(merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
     }
 
-    private static void ensikertalaisuus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid, Oppija oppija, HakemusDTO hakemusDTO, Map<String, AvainArvoDTO> merge) {
+    private void ensikertalaisuus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid, Oppija oppija, HakemusDTO hakemusDTO, Map<String, AvainArvoDTO> merge) {
         // Vain korkeakouluhauille
         if (ofNullable(haku.getKohdejoukkoUri()).filter(u -> u.startsWith("haunkohdejoukko_12")).isPresent()) {
             if (oppija.isEnsikertalainen() == null) {
@@ -150,7 +156,7 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<HakemusWrapper> hakemukset, List<Valintapisteet> valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+    private List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<HakemusWrapper> hakemukset, List<Valintapisteet> valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
         List<HakemusDTO> hakemusDtot;
         Map<String, Valintapisteet> hakemusOIDtoValintapisteet = valintapisteet.stream().collect(Collectors.toMap(Valintapisteet::getHakemusOID, v -> v));
         Map<String, Exception> epaonnistuneetKonversiot = Maps.newConcurrentMap();
@@ -165,7 +171,7 @@ public class HakemuksetConverterUtil {
         return hakemusDtot;
     }
 
-    private static List<HakemusDTO> getHakemusDTOS(String hakukohdeOid, List<HakemusWrapper> hakemukset, Map<String, List<String>> hakukohdeRyhmasForHakukohdes, Map<String, Valintapisteet> hakemusOIDtoValintapisteet, Map<String, Exception> epaonnistuneetKonversiot) {
+    private List<HakemusDTO> getHakemusDTOS(String hakukohdeOid, List<HakemusWrapper> hakemukset, Map<String, List<String>> hakukohdeRyhmasForHakukohdes, Map<String, Valintapisteet> hakemusOIDtoValintapisteet, Map<String, Exception> epaonnistuneetKonversiot) {
         List<HakemusDTO> hakemusDtot;
         try {
             hakemusDtot = hakemukset.parallelStream()
@@ -186,7 +192,7 @@ public class HakemuksetConverterUtil {
         return hakemusDtot;
     }
 
-    private static void ensurePersonOids(List<HakemusWrapper> hakemukset, String hakukohdeOid) {
+    private void ensurePersonOids(List<HakemusWrapper> hakemukset, String hakukohdeOid) {
         final List<HakemusWrapper> noPersonOid = hakemukset.stream()
                 .filter(h -> StringUtils.isBlank(h.getPersonOid()))
                 .collect(toList());
@@ -200,7 +206,7 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    public static Map<String, AvainArvoDTO> toAvainMap(List<AvainArvoDTO> avaimet, String hakemusOid, String hakukohdeOid, Map<String, Exception> poikkeukset) {
+    public Map<String, AvainArvoDTO> toAvainMap(List<AvainArvoDTO> avaimet, String hakemusOid, String hakukohdeOid, Map<String, Exception> poikkeukset) {
         return ofNullable(avaimet)
                 .orElse(emptyList()).stream().filter(Objects::nonNull).filter(a -> StringUtils.isNotBlank(a.getAvain()))
                 .collect(groupingBy(a -> a.getAvain(), mapping(a -> a, toList())))
@@ -218,7 +224,7 @@ public class HakemuksetConverterUtil {
                 .collect(toMap(a -> a.getAvain(), a -> a));
     }
 
-    public static List<SuoritusJaArvosanat> filterUnrelevantSuoritukset(HakuV1RDTO haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+    public List<SuoritusJaArvosanat> filterUnrelevantSuoritukset(HakuV1RDTO haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         return suoritukset.stream()
                 .map(SuoritusJaArvosanatWrapper::wrap)
                 .filter(s -> !(s.isSuoritusMistaSyntyyPeruskoulunArvosanoja() && !s.isVahvistettu() && !s.onTaltaHakemukselta(hakemus)))
@@ -231,7 +237,7 @@ public class HakemuksetConverterUtil {
                 .collect(toList());
     }
 
-    public static Optional<String> pohjakoulutus(HakuV1RDTO haku, HakemusDTO h, List<SuoritusJaArvosanat> suoritukset) {
+    public Optional<String> pohjakoulutus(HakuV1RDTO haku, HakemusDTO h, List<SuoritusJaArvosanat> suoritukset) {
         Optional<String> pk = h.getAvaimet().stream()
                 .filter(a -> POHJAKOULUTUS.equals(a.getAvain()))
                 .map(AvainArvoDTO::getArvo)
@@ -257,7 +263,7 @@ public class HakemuksetConverterUtil {
         }
 
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
-            if (LocalDateTime.now().isBefore(POHJAKOULUTUS_PAATTELY_LEIKKURI_PVM)) {
+            if (LocalDateTime.now().isBefore(pohjaKoulutusPaattelyLeikkuriPvm)) {
                 return of(PohjakoulutusToinenAste.YLIOPPILAS);
             }
             boolean suressaValmisJaVahvistettuLukiosuoritus = suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isVahvistettu() && s.isValmis());
@@ -297,7 +303,7 @@ public class HakemuksetConverterUtil {
         return of(pohjakoulutusHakemukselta);
     }
 
-    private static String paattelePerusopetuksenPohjakoulutus(SuoritusJaArvosanatWrapper perusopetus) {
+    private String paattelePerusopetuksenPohjakoulutus(SuoritusJaArvosanatWrapper perusopetus) {
         switch (perusopetus.getSuoritusJaArvosanat().getSuoritus().getYksilollistaminen()) {
             case "Kokonaan":
                 return PohjakoulutusToinenAste.YKSILOLLISTETTY;
@@ -310,7 +316,7 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    public static List<SuoritusJaArvosanat> pohjakoulutuksenSuoritukset(String pohjakoulutus, List<SuoritusJaArvosanat> suoritukset) {
+    public List<SuoritusJaArvosanat> pohjakoulutuksenSuoritukset(String pohjakoulutus, List<SuoritusJaArvosanat> suoritukset) {
         if (pohjakoulutus.equals(PohjakoulutusToinenAste.YLIOPPILAS)) {
             return suoritukset.stream()
                     .filter(s -> wrap(s).isLukio() || wrap(s).isYoTutkinto())
@@ -332,7 +338,7 @@ public class HakemuksetConverterUtil {
         throw new RuntimeException(String.format("Tuntematon pohjakoulutus %s", pohjakoulutus));
     }
 
-    public static Map<String, String> suoritustenTiedot(HakuV1RDTO haku,
+    public Map<String, String> suoritustenTiedot(HakuV1RDTO haku,
                                                         HakemusDTO hakemus,
                                                         List<SuoritusJaArvosanat> sureSuoritukset) {
         final Map<String, Predicate<SuoritusJaArvosanat>> predicates =
@@ -358,11 +364,11 @@ public class HakemuksetConverterUtil {
         return tiedot;
     }
 
-    private static boolean isDiscretionaryInUse(HakuV1RDTO haku) {
+    private boolean isDiscretionaryInUse(HakuV1RDTO haku) {
         return KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO.equals(haku.getKohdejoukkoUri().split("#")[0]);
     }
 
-    private static Map<String, String> automaticDiscretionaryOptions(String pohjakoulutus, HakuV1RDTO haku, HakemusDTO hakemus) {
+    private Map<String, String> automaticDiscretionaryOptions(String pohjakoulutus, HakuV1RDTO haku, HakemusDTO hakemus) {
         Map<String, String> tiedot = new HashMap<>();
         if (isDiscretionaryInUse(haku) &&
             (PohjakoulutusToinenAste.KESKEYTYNYT.equals(pohjakoulutus) ||
@@ -376,7 +382,7 @@ public class HakemuksetConverterUtil {
         return tiedot;
     }
 
-    private static Map<String, Integer> suoritusajat(Map<String, Predicate<SuoritusJaArvosanat>> predicates,
+    private Map<String, Integer> suoritusajat(Map<String, Predicate<SuoritusJaArvosanat>> predicates,
                                                      List<SuoritusJaArvosanat> suoritukset) {
         Map<String, Integer> vuodet = new HashMap<>();
         predicates.entrySet().stream()
@@ -395,7 +401,7 @@ public class HakemuksetConverterUtil {
         return vuodet;
     }
 
-    private static Integer suorituskausi(DateTime valmistumisPvm) {
+    private Integer suorituskausi(DateTime valmistumisPvm) {
         if (valmistumisPvm.isBefore(SuoritusJaArvosanatWrapper.VALMISTUMIS_DTF.parseDateTime("01.08." + valmistumisPvm.getYear()))) {
             return 2;
         } else {
@@ -403,13 +409,13 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    private static Map<String, Boolean> suoritustilat(Map<String, Predicate<SuoritusJaArvosanat>> predicates, List<SuoritusJaArvosanat> suoritukset) {
+    private Map<String, Boolean> suoritustilat(Map<String, Predicate<SuoritusJaArvosanat>> predicates, List<SuoritusJaArvosanat> suoritukset) {
         return predicates.keySet().stream()
                 .collect(toMap(prefix -> prefix + "_TILA", prefix -> suoritukset.stream()
                                 .anyMatch(s -> predicates.get(prefix).test(s) && wrap(s).isValmis() && (wrap(s).isVahvistettu() || wrap(s).isLukio()))));
     }
 
-    private static Map<Lisapistekoulutus, Boolean> lisapistekoulutukset(String pohjakoulutus, HakuV1RDTO haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+    private Map<Lisapistekoulutus, Boolean> lisapistekoulutukset(String pohjakoulutus, HakuV1RDTO haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         if (PohjakoulutusToinenAste.KESKEYTYNYT.equals(pohjakoulutus) ||
                 PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutus) ||
                 PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO.equals(pohjakoulutus)) {
@@ -430,7 +436,7 @@ public class HakemuksetConverterUtil {
                 ));
     }
 
-    private static Optional<Integer> pkPaattotodistusvuosi(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+    private Optional<Integer> pkPaattotodistusvuosi(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         return Stream.concat(
                 suoritukset.stream()
                         .filter(s -> wrap(s).isPerusopetus() && (wrap(s).isValmis() || wrap(s).isKesken()))
@@ -441,7 +447,7 @@ public class HakemuksetConverterUtil {
                 .findFirst();
     }
 
-    private static Optional<String> pkOpetuskieli(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+    private Optional<String> pkOpetuskieli(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         return Stream.concat(
                 suoritukset.stream()
                         .filter(s -> wrap(s).isPerusopetus() && (wrap(s).isValmis() || wrap(s).isKesken()))
@@ -453,7 +459,7 @@ public class HakemuksetConverterUtil {
                 .findFirst();
     }
 
-    private static Optional<String> lukioOpetuskieli(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+    private Optional<String> lukioOpetuskieli(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         return Stream.concat(
                 suoritukset.stream()
                         .filter(s -> wrap(s).isLukio() && (wrap(s).isValmis() || wrap(s).isKesken()))
@@ -465,7 +471,7 @@ public class HakemuksetConverterUtil {
                 .findFirst();
     }
 
-    private static boolean hakukaudella(HakuV1RDTO haku, SuoritusJaArvosanatWrapper s) {
+    private boolean hakukaudella(HakuV1RDTO haku, SuoritusJaArvosanatWrapper s) {
         DateTime valmistuminen = s.getValmistuminenAsDateTime();
         int hakuvuosi = haku.getHakukausiVuosi();
         DateTime kStart = new DateTime(hakuvuosi, 1, 1, 0, 0).minus(1);
