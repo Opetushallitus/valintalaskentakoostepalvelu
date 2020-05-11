@@ -16,6 +16,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaStatusExcelHandler;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
+import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -35,6 +36,7 @@ public class Mocks {
     static ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler = mock(ValintalaskentaStatusExcelHandler.class);
     static ValintapisteAsyncResource valintapisteAsyncResource = mock(ValintapisteAsyncResource.class);
     static KoskiService koskiService = mock(KoskiService.class);
+    static HakemuksetConverterUtil hakemuksetConverterUtil = new HakemuksetConverterUtil("9999-12-31");
     static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource, tarjontaAsyncResource),new LaskentaActorFactory(
             5,
             valintalaskentaAsyncResource,
@@ -45,7 +47,8 @@ public class Mocks {
             suoritusrekisteriAsyncResource,
             tarjontaAsyncResource,
             valintapisteAsyncResource,
-            koskiService
+            koskiService,
+            hakemuksetConverterUtil
     ), 8));
 
     public static void resetMocks() {

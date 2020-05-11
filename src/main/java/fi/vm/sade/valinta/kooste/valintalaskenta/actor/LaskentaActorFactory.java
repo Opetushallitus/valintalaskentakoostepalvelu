@@ -23,7 +23,6 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaResurssinhakuWrapper.PyynnonTunniste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
@@ -43,7 +42,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
-import scala.concurrent.Future;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -74,6 +72,7 @@ public class LaskentaActorFactory {
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
     private final KoskiService koskiService;
+    private final HakemuksetConverterUtil hakemuksetConverterUtil;
     private volatile int splittaus;
 
     @Autowired
@@ -87,7 +86,8 @@ public class LaskentaActorFactory {
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
         TarjontaAsyncResource tarjontaAsyncResource,
         ValintapisteAsyncResource valintapisteAsyncResource,
-        KoskiService koskiService
+        KoskiService koskiService,
+        HakemuksetConverterUtil hakemuksetConverterUtil
     ) {
         this.splittaus = splittaus;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
@@ -99,6 +99,7 @@ public class LaskentaActorFactory {
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.valintapisteAsyncResource = valintapisteAsyncResource;
         this.koskiService = koskiService;
+        this.hakemuksetConverterUtil = hakemuksetConverterUtil;
     }
 
     private Pair<String, Collection<String>> headAndTail(Collection<String> c) {
@@ -309,7 +310,7 @@ public class LaskentaActorFactory {
                         haku.isKorkeakouluHaku(),
                         actorParams.isErillishaku(),
                         hakukohdeOid,
-                        HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
+                        hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
                             haku,
                             hakukohdeOid,
                             ryhmatHakukohteittain,
@@ -326,7 +327,7 @@ public class LaskentaActorFactory {
                         haku.isKorkeakouluHaku(),
                         actorParams.isErillishaku(),
                         hakukohdeOid,
-                        HakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
+                        hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
                             haku,
                             hakukohdeOid,
                             ryhmatHakukohteittain,
