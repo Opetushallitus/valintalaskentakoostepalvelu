@@ -368,9 +368,9 @@ public class HakemuksetConverterUtilTest {
         Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
 
-    /*
     @Test
-    public void pohjakoulutusPeruskouluJosHakemuksellaLukioJaAbiturienttiJaSuressaEiValmistaSuoritusta() {
+    public void pohjakoulutusPeruskouluJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaAbiturientti() {
+        hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
         HakemusDTO h = new HakemusDTO();
         h.setHakijaOid("1.2.3.4.5.6");
         h.setAvaimet(new ArrayList<>() {{
@@ -381,7 +381,20 @@ public class HakemuksetConverterUtilTest {
 
         Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
-    */
+
+    @Test
+    public void pohjakoulutusPeruskouluJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaEIAbiturientti() {
+        hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
+        HakemusDTO h = new HakemusDTO();
+        h.setHakijaOid("1.2.3.4.5.6");
+        h.setAvaimet(new ArrayList<>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.YLIOPPILAS));
+            this.add(new AvainArvoDTO("lukioPaattotodistusVuosi", "2014"));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>();
+
+        Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+    }
 
     @Test
     public void pohjakoulutusLukioJosHakemuksellaLukioJaEIAbiturienttiJaSuressaEiValmistaSuoritusta() {

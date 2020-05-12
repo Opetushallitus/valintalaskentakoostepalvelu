@@ -30,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -61,11 +60,11 @@ public class HakemuksetConverterUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
 
-    private final LocalDateTime pohjaKoulutusPaattelyLeikkuriPvm;
-    
+    private final LocalDateTime abienPohjaKoulutusPaattelyLeikkuriPvm;
+
     public HakemuksetConverterUtil(
-            @Value("${valintalaskentakoostepalvelu.pohjakoulutus.paattely.leikkuripvm:2020-06-01}") String pohjaKoulutusPaattelyLeikkuriPvm) {
-        this.pohjaKoulutusPaattelyLeikkuriPvm = LocalDate.parse(pohjaKoulutusPaattelyLeikkuriPvm).atStartOfDay();
+            @Value("${valintalaskentakoostepalvelu.abi.pohjakoulutus.paattely.leikkuripvm:2020-06-01}") String abienPohjaKoulutusPaattelyLeikkuriPvm) {
+        this.abienPohjaKoulutusPaattelyLeikkuriPvm = LocalDate.parse(abienPohjaKoulutusPaattelyLeikkuriPvm).atStartOfDay();
     }
 
     private void tryToMergeKeysOfOppijaAndHakemus(HakuV1RDTO haku, String hakukohdeOid, ParametritDTO parametritDTO, Boolean fetchEnsikertalaisuus, Map<String, Exception> errors, Map<String, Oppija> personOidToOppija, Map<String, Boolean> hasHetu, HakemusDTO h) {
@@ -237,8 +236,8 @@ public class HakemuksetConverterUtil {
                 .collect(toList());
     }
 
-    public Optional<String> pohjakoulutus(HakuV1RDTO haku, HakemusDTO h, List<SuoritusJaArvosanat> suoritukset) {
-        Optional<String> pk = h.getAvaimet().stream()
+    public Optional<String> pohjakoulutus(HakuV1RDTO haku, HakemusDTO hakemusDTO, List<SuoritusJaArvosanat> suoritukset) {
+        Optional<String> pk = hakemusDTO.getAvaimet().stream()
                 .filter(a -> POHJAKOULUTUS.equals(a.getAvain()))
                 .map(AvainArvoDTO::getArvo)
                 .findFirst();
@@ -261,20 +260,13 @@ public class HakemuksetConverterUtil {
             suorituksetRekisterista.stream().filter(SuoritusJaArvosanatWrapper::isPerusopetus).allMatch(vahvistettuKeskeytynytPerusopetus)) {
             return of(PohjakoulutusToinenAste.KESKEYTYNYT);
         }
-
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
-            if (LocalDateTime.now().isBefore(pohjaKoulutusPaattelyLeikkuriPvm)) {
+            if (LocalDateTime.now().isBefore(abienPohjaKoulutusPaattelyLeikkuriPvm)
+                    || !isHakijaAbiturientti(haku, hakemusDTO)) {
                 return of(PohjakoulutusToinenAste.YLIOPPILAS);
             }
-            boolean suressaValmisJaVahvistettuLukiosuoritus = suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isVahvistettu() && s.isValmis());
-            String hakuVuosi = Integer.toString(haku.getHakukausiVuosi());
-            boolean isAbiturientti = h.getAvaimet().stream().anyMatch(dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain()) && hakuVuosi.equals(dto.getArvo()));
-            if (suressaValmisJaVahvistettuLukiosuoritus || !isAbiturientti) {
-                return of(PohjakoulutusToinenAste.YLIOPPILAS);
-            } else {
-                LOG.warn("Hakemuksella {} pohjakoulutus lukio, mutta valmista ja vahvistettua lukiosuoritusta ei löydy suoritusrekisteristä. Palautetaan pohjakoulutus PERUSKOULU.", h.getHakemusoid());
-                return of(PohjakoulutusToinenAste.PERUSKOULU);
-            }
+            LOG.warn("Hakemuksella {} pohjakoulutus lukio, mutta valmista ja vahvistettua lukiosuoritusta ei löydy suoritusrekisteristä. Palautetaan pohjakoulutus PERUSKOULU.", hakemusDTO.getHakemusoid());
+            return of(PohjakoulutusToinenAste.PERUSKOULU);
         }
         Optional<SuoritusJaArvosanatWrapper> perusopetus = suorituksetRekisterista.stream()
                 .filter(s -> s.isPerusopetus() && s.isVahvistettu() && !s.isKeskeytynyt())
@@ -291,7 +283,7 @@ public class HakemuksetConverterUtil {
         if (PohjakoulutusToinenAste.PERUSKOULU.equals(pohjakoulutusHakemukselta) &&
                 suorituksetRekisterista.stream().anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
             LOG.warn("Hakija {} ilmoittanut peruskoulun, mutta löytyi vahvistettu ulkomainen korvaava suoritus. " + "Käytetään hakemuksen pohjakoulutusta {}.",
-                    h.getHakijaOid(), pohjakoulutusHakemukselta);
+                    hakemusDTO.getHakijaOid(), pohjakoulutusHakemukselta);
             return of(pohjakoulutusHakemukselta);
         }
         if (PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO.equals(pohjakoulutusHakemukselta) ||
@@ -299,8 +291,14 @@ public class HakemuksetConverterUtil {
             return of(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO);
         }
         LOG.warn("Hakijan {} pohjakoulutusta ei voitu päätellä, käytetään hakemuksen pohjakoulutusta {}.",
-                h.getHakijaOid(), pohjakoulutusHakemukselta);
+                hakemusDTO.getHakijaOid(), pohjakoulutusHakemukselta);
         return of(pohjakoulutusHakemukselta);
+    }
+
+    private boolean isHakijaAbiturientti(HakuV1RDTO haku, HakemusDTO hakemusDTO) {
+        return hakemusDTO.getAvaimet().stream().anyMatch(
+                dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain())
+                        && Integer.toString(haku.getHakukausiVuosi()).equals(dto.getArvo()));
     }
 
     private String paattelePerusopetuksenPohjakoulutus(SuoritusJaArvosanatWrapper perusopetus) {
