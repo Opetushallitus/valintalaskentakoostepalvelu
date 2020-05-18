@@ -40,7 +40,7 @@ public class ValintalaskennanTulosExcel {
         XSSFWorkbook workbook = new XSSFWorkbook();
         valinnanVaiheet.stream()
                 .flatMap(vaihe -> vaihe.getValintatapajonot().stream().map(jono -> new ValintatapaJonoSheet(jono, vaihe)))
-                .collect(Collectors.groupingBy(jonoSheet -> jonoSheet.sheetName)).entrySet().stream()
+                .collect(Collectors.groupingBy(jonoSheet -> StringUtils.substring(jonoSheet.sheetName, 0, 31))).entrySet().stream()
                         .flatMap(ValintalaskennanTulosExcel::toValintatapajonoStream)
                         .sorted(ValintalaskennanTulosExcel::byReverseDateAndPriority)
                         .forEach((jonoSheet) -> {
@@ -84,10 +84,13 @@ public class ValintalaskennanTulosExcel {
     }
 
     private static ValintatapaJonoSheet toValintatapaJonoSheet(Indexed<ValintatapaJonoSheet> indexedJonoSheet) {
-        final String index = indexedJonoSheet.getIndex() == 0L ? "" : " (" + (indexedJonoSheet.getIndex() + 1L) + ")";
-        final String sheetName = indexedJonoSheet.getValue().sheetName + index;
-        final String truncatedSheetName = StringUtils.substring(sheetName, 0, 31 - " (0)".length());
-        return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), truncatedSheetName);
+        String sheetName = indexedJonoSheet.getValue().sheetName;
+        if (indexedJonoSheet.getIndex() > 0L) {
+            String indexSuffix = " " + (indexedJonoSheet.getIndex() + 1L);
+            sheetName = (StringUtils.substring(sheetName, 0, 31 - indexSuffix.length()))
+                    +  indexSuffix;
+        }
+        return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), sheetName);
     }
 
     private static void addJonosijaRows(Map<String, HakemusWrapper> hakemusByOid,

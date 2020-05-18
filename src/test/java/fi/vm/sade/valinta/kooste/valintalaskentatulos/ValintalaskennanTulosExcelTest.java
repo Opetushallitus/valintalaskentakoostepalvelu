@@ -72,9 +72,9 @@ public class ValintalaskennanTulosExcelTest {
                 )), hakemukset());
 
         assertEquals(3, workbook.getNumberOfSheets());
-        assertEquals("Jono 1", workbook.getSheetName(0));
-        assertEquals("Jono 2", workbook.getSheetName(1));
-        assertEquals("Jono 1 (2)", workbook.getSheetName(2));
+        assertEquals("Erittäin pitkä valintatapajonon", workbook.getSheetName(0));
+        assertEquals("Erittäin pitkä valintatapajon 2", workbook.getSheetName(1));
+        assertEquals("Erittäin pitkä valintatapajon 3", workbook.getSheetName(2));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ValintalaskennanTulosExcelTest {
                         asList("Hakukohde", "Hakukohde 1"),
                         asList("Vaihe", "Vaihe 1"),
                         asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
-                        asList("Jono", "Jono 1"),
+                        asList("Jono", "Erittäin pitkä valintatapajonon nimi 1"),
                         Collections.emptyList(),
                         asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "keskiarvo", "pääsykoetulos"),
                         asList("2", "Suku 1", "Etu 1", "010101-123N", "sukuetu1@testi.fi", "Hakemus 1", "1", "HYVAKSYTTAVISSA", "", "666", "9", "10")
@@ -118,7 +118,7 @@ public class ValintalaskennanTulosExcelTest {
                         asList("Hakukohde", "Hakukohde 1"),
                         asList("Vaihe", "Vaihe 1"),
                         asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
-                        asList("Jono", "Jono 1"),
+                        asList("Jono", "Erittäin pitkä valintatapajonon nimi 1"),
                         Collections.emptyList(),
                         asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "keskiarvo", "pääsykoetulos"),
                         asList("2", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000063", "1", "HYVAKSYTTAVISSA", "", "666", "9", "10")
@@ -145,7 +145,7 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Hakukohde", "Hakukohde 1"),
                 asList("Vaihe", "Vaihe 1"),
                 asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
-                asList("Jono", "Jono 1"),
+                asList("Jono", "Erittäin pitkä valintatapajonon nimi 1"),
                 Collections.emptyList(),
                 asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Sähköpostiosoite", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Selite", "Kokonaispisteet", "Ammatillisen perustutkinnon keskiarvo", "lukion keskiarvo", "pääsykoetulos"),
                 asList("1", "TAUsuL4BQc", "Zl2A5", "020202A0202", "ukhBW@example.com", "1.2.246.562.11.00000000000000000064", "1", "HYVAKSYTTAVISSA", "", "19", "", "9", "8"),
@@ -170,7 +170,7 @@ public class ValintalaskennanTulosExcelTest {
                         asList("Hakukohde", "Hakukohde 1"),
                         asList("Vaihe", "Vaihe 1"),
                         asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())),
-                        asList("Jono", "Jono 2"),
+                        asList("Jono", "Erittäin pitkä valintatapajonon nimi 2"),
                         Collections.emptyList(),
                         Collections.singletonList("Jonolle ei ole valintalaskennan tuloksia")
                 ), getWorksheetData(workbook.getSheetAt(1))
@@ -255,7 +255,7 @@ public class ValintalaskennanTulosExcelTest {
     private ValintatietoValintatapajonoDTO valintatapajono(int jonoNumero, final List<JonosijaDTO> jonosijat) {
         return new ValintatietoValintatapajonoDTO(
                 "jonoOid" + jonoNumero,
-                "Jono " + jonoNumero,
+                "Erittäin pitkä valintatapajonon nimi " + jonoNumero,
                 jonoNumero,
                 10,
                 true,
