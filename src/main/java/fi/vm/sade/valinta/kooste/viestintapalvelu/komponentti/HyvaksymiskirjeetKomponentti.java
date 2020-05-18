@@ -89,14 +89,14 @@ public class HyvaksymiskirjeetKomponentti {
                     //
                     // VT-1036
                     //
-                    List<Sijoitus> kkSijoitukset = Lists.newArrayList();
-                    tulokset.put("sijoitukset", kkSijoitukset);
+                    List<Sijoitus> sijoitukset = Lists.newArrayList();
+                    tulokset.put("sijoitukset", sijoitukset);
 
                     final boolean valittuHakukohteeseen = hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch((jono) -> jono.getTila().isHyvaksytty());
                     tulokset.put("hyvaksytty", valittuHakukohteeseen);
 
                     Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByPrioriteetti());
-                    KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, valittuHakukohteeseen, preferoituKielikoodi);
+                    KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, sijoitukset, preferoituKielikoodi);
 
                     Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                     List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
