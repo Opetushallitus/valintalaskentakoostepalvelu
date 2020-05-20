@@ -2,7 +2,10 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import static fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi.ITEROIAMMATILLISETTUTKINNOT;
 import static fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi.ITEROIAMMATILLISETTUTKINNOT_LEIKKURIPVM_PARAMETRI;
+import static java.io.File.separator;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
@@ -13,16 +16,22 @@ import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija.OpiskeluoikeusJsonUtil;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -36,10 +45,15 @@ public class KoskiOpiskeluoikeusHistoryService {
     private static final DateTimeFormatter FINNISH_DATE_FORMAT = DateTimeFormatter.ofPattern("d.M.yyyy");
     private final int koskiPyyntojenRinnakkaisuus;
     private final KoskiAsyncResource koskiAsyncResource;
+    private final Map<String, JsonElement> ohittavatOpiskeluoikeudetOideittain;
+    private static final Gson GSON = new Gson();
 
     public KoskiOpiskeluoikeusHistoryService(int koskiPyyntojenRinnakkaisuus, KoskiAsyncResource koskiAsyncResource) {
         this.koskiPyyntojenRinnakkaisuus = koskiPyyntojenRinnakkaisuus;
         this.koskiAsyncResource = koskiAsyncResource;
+        this.ohittavatOpiskeluoikeudetOideittain = lueOhitettavatOpiskeluoikeudetKonfiguraatiosta();
+        LOG.info(String.format("Saatiin %d ohitettavaa opiskeluoikeutta: %s",
+            ohittavatOpiskeluoikeudetOideittain.size(), ohittavatOpiskeluoikeudetOideittain.keySet()));
     }
 
     LocalDate etsiKoskiDatanLeikkuriPvm(List<ValintaperusteetDTO> valintaperusteetDTOS, String hakukohdeOid) {
@@ -132,6 +146,12 @@ public class KoskiOpiskeluoikeusHistoryService {
             int versionumero = OpiskeluoikeusJsonUtil.versionumero(opiskeluoikeus);
             LocalDateTime aikaleima = OpiskeluoikeusJsonUtil.aikaleima(opiskeluoikeus);
             String opiskeluoikeudenOid = OpiskeluoikeusJsonUtil.oid(opiskeluoikeus);
+
+            if (ohittavatOpiskeluoikeudetOideittain.containsKey(opiskeluoikeudenOid)) {
+                LOG.warn(String.format("Ohitetaan oppijan %s opiskeluoikeus %s konfiguraatiosta tulevalla arvolla.", koskiOppija.getOppijanumero(), opiskeluoikeudenOid));
+                return CompletableFuture.completedFuture(Optional.of(ohittavatOpiskeluoikeudetOideittain.get(opiskeluoikeudenOid)));
+            }
+
             if (!OpiskeluoikeusJsonUtil.onUudempiKuin(leikkuriPvm, aikaleima)) {
                 LOG.info(String.format("Koskesta haetun oppijan %s opiskeluoikeuden %s version %d aikaleima on %s eli leikkuripäivämäärään %s mennessä, joten huomioidaan tämä opiskeluoikeus.",
                     koskiOppija.getOppijanumero(),
@@ -155,5 +175,42 @@ public class KoskiOpiskeluoikeusHistoryService {
             CompletableFuture<JsonElement> edellisenVersionOpiskeluoikeus = koskiAsyncResource.findVersionOfOpiskeluoikeus(opiskeluoikeudenOid, versionumero - 1);
             return haePaivamaaranMukainenVersio(koskiOppija, leikkuriPvm, edellisenVersionOpiskeluoikeus);
         });
+    }
+
+    private static Map<String, JsonElement> lueOhitettavatOpiskeluoikeudetKonfiguraatiosta() {
+        try {
+            String kotihakemisto = System.getProperty("user.home");
+            File ohitusTiedostojenHakemisto = new File(String.format("%s%soph-configuration%svalintalaskentakoostepalvelu%skoski-ohitukset",
+                kotihakemisto, separator, separator, separator));
+            if (!ohitusTiedostojenHakemisto.exists()) {
+                LOG.info(String.format("Ei löydy ohitettavien opiskeluoikeuksien hakemistoa polusta '%s', " +
+                    "joten käytetään Koski-data sellaisena kuin se tulee.", ohitusTiedostojenHakemisto.getAbsolutePath()));
+                return Collections.emptyMap();
+            }
+            final File[] ohitustiedostot = ohitusTiedostojenHakemisto.listFiles();
+            if (ohitustiedostot == null || ohitustiedostot.length == 0) {
+                LOG.info(String.format("Ohitettavien opiskeluoikeuksien hakemistoa polussa '%s' on tyhjä, " +
+                    "joten käytetään Koski-data sellaisena kuin se tulee.", ohitusTiedostojenHakemisto.getAbsolutePath()));
+                return Collections.emptyMap();
+            }
+
+            return Arrays.stream(ohitustiedostot).collect(Collectors.toMap(
+                t -> t.getName().replace(".json", ""),
+                t -> {
+                    LOG.info(String.format("Luetaan tiedosto '%s'", t.getAbsolutePath()));
+                    return lueJsoniksi(t);
+                }));
+        } catch (Exception e) {
+            LOG.error("Ongelma luettaessa JSON-ohitustiedostoja. Käytetään Koski-data sellaisena kuin se tulee");
+            return Collections.emptyMap();
+        }
+    }
+
+    private static JsonElement lueJsoniksi(File tiedosto) {
+        try {
+            return GSON.fromJson(FileUtils.readFileToString(tiedosto, UTF_8), JsonElement.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
