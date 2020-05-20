@@ -82,7 +82,7 @@ valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot
 valintalaskentakoostepalvelu.laskenta.kosken.historiapyyntojen.rinnakkaisuus={{ kosken_historiapyyntojen_rinnakkaisuus | default("10") }}
 valintalaskentakoostepalvelu.koski.username={{valintalaskentakoostepalvelu_koski_username | default("koostepalvelu2koski")}}
 valintalaskentakoostepalvelu.koski.password={{valintalaskentakoostepalvelu_koski_password}}
-valintalaskentakoostepalvelu.koski.max.oppijat.post.size={{valintalaskentakoostepalvelu_koski_max_oppijat_post_size | default("1000")}}
+valintalaskentakoostepalvelu.koski.max.oppijat.post.size={{valintalaskentakoostepalvelu_koski_max_oppijat_post_size | default("500")}}
 valintalaskentakoostepalvelu.ohjausparametrit.cache.ttl.minutes=30
 valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds=20
 valintalaskentakoostepalvelu.tarjonta.sync.cron={{valintalaskentakoostepalvelu_tarjonta_sync_cron}}
