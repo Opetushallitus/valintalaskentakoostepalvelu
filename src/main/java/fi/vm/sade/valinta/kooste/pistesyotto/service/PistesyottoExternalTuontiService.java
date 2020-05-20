@@ -334,7 +334,7 @@ public class PistesyottoExternalTuontiService {
                                     List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().map(hakukohdeOid -> new Hakutoive(
                                             hakukohdeOid,
                                             hakukohdeOidToValintaperusteDTOMap.get(hakukohdeOid).getValintaperusteDTO(),
-                                            Optional.ofNullable(hakemusOidToValintakoeOsallistuminenDTOMap.get(hakukohdeOid)).orElse(Collections.emptyList()))).collect(Collectors.toList());
+                                            Optional.ofNullable(hakemusOidToValintakoeOsallistuminenDTOMap.get(pistetiedotHakemukselle.getHakemusOid())).orElse(Collections.emptyList()))).collect(Collectors.toList());
                                     return validoi(h, hakutoiveetList).map(osallistuminen -> {
                                         boolean isAuthorized = authorityCheck.test(osallistuminen.hakukohdeOid);
                                         if (isAuthorized) {
