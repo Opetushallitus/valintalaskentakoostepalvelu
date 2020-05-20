@@ -290,56 +290,56 @@ public class PistesyottoExternalTuontiService {
                 });
     }
 
-    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, AuditSession auditSession,
+    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> pistetiedotHakemuksille, AuditSession auditSession,
                     String hakuOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler,
                     Consumer<Throwable> exceptionHandler) {
-        getHakemuksetByHakemusOids(hakemukset.stream().map(HakemusDTO::getHakemusOid).collect(Collectors.toList()))
+        getHakemuksetByHakemusOids(pistetiedotHakemuksille.stream().map(HakemusDTO::getHakemusOid).collect(Collectors.toList()))
                 .subscribe(hakemusWrappers -> {
-                    List<HakemusJaHakutoiveet> hakemusJaHakutoiveets = collect(hakemukset, hakemusWrappers);
-                    Set<String> hakutoiveet = hakemusJaHakutoiveets.stream().flatMap(h -> h.hakutoiveet.stream()).collect(Collectors.toSet());
+                    List<HakemusJaHakutoiveet> pistetiedotJaHakutoiveet = collect(pistetiedotHakemuksille, hakemusWrappers);
+                    Set<String> hakutoiveet = pistetiedotJaHakutoiveet.stream().flatMap(h -> h.hakutoiveet.stream()).collect(Collectors.toSet());
                     Observable<List<HakukohdeJaValintaperusteDTO>> valintaperusteetHakutoiveille = valintaperusteetResource.findAvaimet(hakutoiveet);
                     Observable<List<ValintakoeOsallistuminenDTO>> osallistumisetHakutoiveille = valintakoeResource.haeHakutoiveille(hakutoiveet);
 
                     Observable.combineLatest(valintaperusteetHakutoiveille, osallistumisetHakutoiveille, (hakukohdeJaValintaperusteDTOs, osallistuminenDTOs) -> {
-                        Map<String, HakukohdeJaValintaperusteDTO> valintaperusteDTOMap = hakukohdeJaValintaperusteDTOs.stream().collect(
+                        Map<String, HakukohdeJaValintaperusteDTO> hakukohdeOidToValintaperusteDTOMap = hakukohdeJaValintaperusteDTOs.stream().collect(
                                 Collectors.toMap(HakukohdeJaValintaperusteDTO::getHakukohdeOid, hh -> hh));
 
-                        Map<String, List<ValintakoeOsallistuminenDTO>> osallistuminenDTOMap = osallistuminenDTOs.stream().collect(
+                        Map<String, List<ValintakoeOsallistuminenDTO>> hakemusOidToValintakoeOsallistuminenDTOMap = osallistuminenDTOs.stream().collect(
                                 Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, Arrays::asList, (h0, h1) -> Lists.newArrayList(Iterables.concat(h0, h1))));
 
-                        return hakemusJaHakutoiveets.stream().flatMap(
+                        return pistetiedotJaHakutoiveet.stream().flatMap(
                                 h -> {
-                                    final HakemusDTO hakemusDTO = h.hakemusDTO;
+                                    final HakemusDTO pistetiedotHakemukselle = h.hakemusDTO;
                                     final HakemusWrapper hakemus = h.hakemus;
                                     if (hakemus == null) {
                                         VirheDTO applicationNotFound = new VirheDTO();
-                                        applicationNotFound.setHakemusOid(hakemusDTO.getHakemusOid());
+                                        applicationNotFound.setHakemusOid(pistetiedotHakemukselle.getHakemusOid());
                                         applicationNotFound.setVirhe("Hakemusta ei löydy");
                                         return Stream.of(new OsallistuminenHakutoiveeseen(null, null, applicationNotFound));
                                     }
-                                    if (!hakemusDTO.getHenkiloOid().equals(hakemus.getPersonOid())) {
+                                    if (!pistetiedotHakemukselle.getHenkiloOid().equals(hakemus.getPersonOid())) {
                                         VirheDTO conflictingPersonOid = new VirheDTO();
-                                        conflictingPersonOid.setHakemusOid(hakemusDTO.getHakemusOid());
-                                        conflictingPersonOid.setVirhe("Annettu henkilö OID (" + hakemusDTO.getHenkiloOid() + ") ei vastaa hakemukselta löytyvää henkilö OID:a (" + hakemus.getPersonOid() + ")");
+                                        conflictingPersonOid.setHakemusOid(pistetiedotHakemukselle.getHakemusOid());
+                                        conflictingPersonOid.setVirhe("Annettu henkilö OID (" + pistetiedotHakemukselle.getHenkiloOid() + ") ei vastaa hakemukselta löytyvää henkilö OID:a (" + hakemus.getPersonOid() + ")");
                                         return Stream.of(new OsallistuminenHakutoiveeseen(null, null, conflictingPersonOid));
                                     }
-                                    List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().map(oid -> new Hakutoive(
-                                            oid,
-                                            valintaperusteDTOMap.get(oid).getValintaperusteDTO(),
-                                            Optional.ofNullable(osallistuminenDTOMap.get(oid)).orElse(Collections.emptyList()))).collect(Collectors.toList());
-                                    return validoi(h, hakutoiveetList).map(o -> {
-                                        boolean isAuthorized = authorityCheck.test(o.hakukohdeOid);
+                                    List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().map(hakukohdeOid -> new Hakutoive(
+                                            hakukohdeOid,
+                                            hakukohdeOidToValintaperusteDTOMap.get(hakukohdeOid).getValintaperusteDTO(),
+                                            Optional.ofNullable(hakemusOidToValintakoeOsallistuminenDTOMap.get(hakukohdeOid)).orElse(Collections.emptyList()))).collect(Collectors.toList());
+                                    return validoi(h, hakutoiveetList).map(osallistuminen -> {
+                                        boolean isAuthorized = authorityCheck.test(osallistuminen.hakukohdeOid);
                                         if (isAuthorized) {
-                                            return o;
+                                            return osallistuminen;
                                         } else {
                                             VirheDTO virheDTO = new VirheDTO();
-                                            if (o.isVirhe()) {
-                                                virheDTO.setHakemusOid(o.asVirheDTO().getHakemusOid());
+                                            if (osallistuminen.isVirhe()) {
+                                                virheDTO.setHakemusOid(osallistuminen.asVirheDTO().getHakemusOid());
                                             } else {
-                                                virheDTO.setHakemusOid(o.asApplicationAdditionalDataDTO().getOid());
+                                                virheDTO.setHakemusOid(osallistuminen.asApplicationAdditionalDataDTO().getOid());
                                             }
-                                            virheDTO.setVirhe("Tarvittavat muokkausoikeudet puuttuu hakutoiveelle " + o.hakukohdeOid);
-                                            return new OsallistuminenHakutoiveeseen(o.tunniste, o.hakukohdeOid, virheDTO);
+                                            virheDTO.setVirhe("Tarvittavat muokkausoikeudet puuttuu hakutoiveelle " + osallistuminen.hakukohdeOid);
+                                            return new OsallistuminenHakutoiveeseen(osallistuminen.tunniste, osallistuminen.hakukohdeOid, virheDTO);
                                         }
                                     });
                                 }
