@@ -189,14 +189,16 @@ public class PistesyottoExternalTuontiService {
                 if(laskentaKaikkiKutsutaan || osallistuu) {
                     return getOsallistuminenHakutoiveeseenStream(hakutoiveOid, hakemus, koe, peruste);
                 } else {
-                    StringBuilder errorMsg = new StringBuilder("Hakijaa ei ole kutsuttu hakutoiveen ").append(hakutoiveOid).append(" tunnisteella ").append(koe.getTunniste());
+                    String errorMsg = "Hakemuksen " + hakemus.getHakemusOid() + " hakijaa ei ole kutsuttu hakutoiveen " + hakutoiveOid + " tunnisteella " + koe.getTunniste();
+                    LOG.error(errorMsg);
                     VirheDTO virheDTO = new VirheDTO();
                     virheDTO.setHakemusOid(hakemus.getHakemusOid());
-                    virheDTO.setVirhe(errorMsg.toString());
+                    virheDTO.setVirhe(errorMsg);
                     return Stream.of(new OsallistuminenHakutoiveeseen(koe.getTunniste(), hakutoiveOid, virheDTO));
                 }
             }).orElseGet(() -> {
                 StringBuilder errorMsg = new StringBuilder("Puuttuva osallistumisen tulos hakutoiveelle ").append(hakutoiveOid).append(" tunnisteella ").append(koe.getTunniste());
+                LOG.error(errorMsg.toString());
                 VirheDTO virheDTO = new VirheDTO();
                 virheDTO.setHakemusOid(hakemus.getHakemusOid());
                 virheDTO.setVirhe(errorMsg.toString());
@@ -247,9 +249,11 @@ public class PistesyottoExternalTuontiService {
             hakutoives.stream().flatMap(h -> {
                 // Valintakokeen tunnistetta ei löydy valintaperusteet
                 if (! h.valintaperusteetDTO.stream().map(valintaperusteDTO -> valintaperusteDTO.getTunniste()).collect(Collectors.toSet()).contains(koe.getTunniste())) {
+                    String errorMessage = "Valintakoetta ei löydy annetulle tunnisteelle (" + koe.getTunniste() + ") käsiteltäessä hakemusta " + hakemusDTO.getHakemusOid();
+                    LOG.error(errorMessage);
                     VirheDTO invalidIdentifier = new VirheDTO();
                     invalidIdentifier.setHakemusOid(hakemusDTO.getHakemusOid());
-                    invalidIdentifier.setVirhe("Valintakoetta ei löydy annetulle tunnisteelle (" + koe.getTunniste() + ").");
+                    invalidIdentifier.setVirhe(errorMessage);
                     return Arrays.asList(new OsallistuminenHakutoiveeseen(koe.getTunniste(), h.hakukohdeOid, invalidIdentifier)).stream();
                 }
                 Stream<ValintaperusteDTO> valintaperusteStream = h.valintaperusteetDTO.stream().filter(v -> v.getTunniste().equals(koe.getTunniste()));
@@ -312,15 +316,19 @@ public class PistesyottoExternalTuontiService {
                                     final HakemusDTO pistetiedotHakemukselle = h.hakemusDTO;
                                     final HakemusWrapper hakemus = h.hakemus;
                                     if (hakemus == null) {
+                                        String errorMessage = "Hakemusta ei löydy tuotaessa pistetietoja hakemukselle " + pistetiedotHakemukselle.getHakemusOid();
+                                        LOG.error(errorMessage);
                                         VirheDTO applicationNotFound = new VirheDTO();
                                         applicationNotFound.setHakemusOid(pistetiedotHakemukselle.getHakemusOid());
-                                        applicationNotFound.setVirhe("Hakemusta ei löydy");
+                                        applicationNotFound.setVirhe(errorMessage);
                                         return Stream.of(new OsallistuminenHakutoiveeseen(null, null, applicationNotFound));
                                     }
                                     if (!pistetiedotHakemukselle.getHenkiloOid().equals(hakemus.getPersonOid())) {
+                                        String errorMessage = "Annettu henkilö OID (" + pistetiedotHakemukselle.getHenkiloOid() + ") ei vastaa hakemukselta löytyvää henkilö OID:a (" + hakemus.getPersonOid() + ")";
+                                        LOG.error(errorMessage);
                                         VirheDTO conflictingPersonOid = new VirheDTO();
                                         conflictingPersonOid.setHakemusOid(pistetiedotHakemukselle.getHakemusOid());
-                                        conflictingPersonOid.setVirhe("Annettu henkilö OID (" + pistetiedotHakemukselle.getHenkiloOid() + ") ei vastaa hakemukselta löytyvää henkilö OID:a (" + hakemus.getPersonOid() + ")");
+                                        conflictingPersonOid.setVirhe(errorMessage);
                                         return Stream.of(new OsallistuminenHakutoiveeseen(null, null, conflictingPersonOid));
                                     }
                                     List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().map(hakukohdeOid -> new Hakutoive(
@@ -332,13 +340,15 @@ public class PistesyottoExternalTuontiService {
                                         if (isAuthorized) {
                                             return osallistuminen;
                                         } else {
+                                            String errorMessage = "Tarvittavat muokkausoikeudet puuttuvat hakutoiveelle " + osallistuminen.hakukohdeOid;
+                                            LOG.error(errorMessage); //Fixme ehkä, näitä voi tulla aika paljon ja voivat olla turhahkoja.
                                             VirheDTO virheDTO = new VirheDTO();
                                             if (osallistuminen.isVirhe()) {
                                                 virheDTO.setHakemusOid(osallistuminen.asVirheDTO().getHakemusOid());
                                             } else {
                                                 virheDTO.setHakemusOid(osallistuminen.asApplicationAdditionalDataDTO().getOid());
                                             }
-                                            virheDTO.setVirhe("Tarvittavat muokkausoikeudet puuttuu hakutoiveelle " + osallistuminen.hakukohdeOid);
+                                            virheDTO.setVirhe(errorMessage);
                                             return new OsallistuminenHakutoiveeseen(osallistuminen.tunniste, osallistuminen.hakukohdeOid, virheDTO);
                                         }
                                     });
@@ -360,9 +370,11 @@ public class PistesyottoExternalTuontiService {
                                         });
                                         List<VirheDTO> valintapisteVirheet = conflictingHakemusOids.stream()
                                                 .map(hakemusOid -> {
+                                                    String errorMessage = "Yritettiin kirjoittaa yli uudempia pistetietoja hakemukselle " + hakemusOid;
+                                                    LOG.error(errorMessage);
                                                     VirheDTO virhe = new VirheDTO();
                                                     virhe.setHakemusOid(hakemusOid);
-                                                    virhe.setVirhe("Yritettiin kirjoittaa yli uudempia pistetietoja");
+                                                    virhe.setVirhe(errorMessage);
                                                     return virhe;
                                                 })
                                                 .collect(Collectors.toList());
