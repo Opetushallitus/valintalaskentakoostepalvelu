@@ -247,10 +247,10 @@ public class PistesyottoExternalTuontiService {
         final HakemusDTO pistetiedotHakemukselle = hakemusJaHakutoiveet.hakemusDTO;
         List<OsallistuminenHakutoiveeseen> hakemuksenKokeetStream = pistetiedotHakemukselle.getValintakokeet().stream().flatMap(koe ->
             hakutoives.stream().flatMap(hakutoive -> {
-                // Valintakokeen tunnistetta ei löydy valintaperusteet
+                // Valintakokeen tunnistetta ei löydy tämän hakutoiveen valintaperusteista
                 if (!hakutoive.valintaperusteetDTO.stream().map(valintaperusteDTO -> valintaperusteDTO.getTunniste()).collect(Collectors.toSet()).contains(koe.getTunniste())) {
-                    String errorMessage = "Valintakoetta ei löydy annetulle tunnisteelle (" + koe.getTunniste() + ") käsiteltäessä hakemusta " + pistetiedotHakemukselle.getHakemusOid();
-                    LOG.error(errorMessage);
+                    String errorMessage = "Valintakoetta ei löydy annetulle tunnisteelle (" + koe.getTunniste() + ") käsiteltäessä hakemusta " + pistetiedotHakemukselle.getHakemusOid() + " hakutoiveelle " + hakutoive.hakukohdeOid;
+                    LOG.warn(errorMessage);
                     VirheDTO invalidIdentifier = new VirheDTO();
                     invalidIdentifier.setHakemusOid(pistetiedotHakemukselle.getHakemusOid());
                     invalidIdentifier.setVirhe(errorMessage);
