@@ -377,9 +377,7 @@ public class HakemuksetConverterUtilTest {
             this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.YLIOPPILAS));
             this.add(new AvainArvoDTO("lukioPaattotodistusVuosi", "2015"));
         }});
-        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>();
-
-        Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+        Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>()).get());
     }
 
     @Test
@@ -391,9 +389,18 @@ public class HakemuksetConverterUtilTest {
             this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.YLIOPPILAS));
             this.add(new AvainArvoDTO("lukioPaattotodistusVuosi", "2014"));
         }});
-        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>();
+        Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>()).get());
+    }
 
-        Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+    @Test(expected = RuntimeException.class)
+    public void pohjakoulutusHeittaaPoikkeuksenJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessa() {
+        hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
+        HakemusDTO h = new HakemusDTO();
+        h.setHakijaOid("1.2.3.4.5.6");
+        h.setAvaimet(new ArrayList<>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.YLIOPPILAS));
+        }});
+        hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>());
     }
 
     @Test
@@ -404,9 +411,7 @@ public class HakemuksetConverterUtilTest {
             this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.YLIOPPILAS));
             this.add(new AvainArvoDTO("lukioPaattotodistusVuosi", "2014"));
         }});
-        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>();
-
-        Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+        Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>()).get());
     }
 
     @Test

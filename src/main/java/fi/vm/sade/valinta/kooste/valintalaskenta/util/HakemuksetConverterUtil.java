@@ -296,6 +296,11 @@ public class HakemuksetConverterUtil {
     }
 
     private boolean isHakijaAbiturientti(HakuV1RDTO haku, HakemusDTO hakemusDTO) {
+        if (hakemusDTO.getAvaimet().stream().noneMatch(dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain()))) {
+            throw new RuntimeException(
+                    String.format("Hakijalta %s (hakemusOid=%s) puuttui päättötodistusvuosi hakukohdeOid laskennassa.",
+                    hakemusDTO.getHakijaOid(), hakemusDTO.getHakemusoid()));
+        }
         return hakemusDTO.getAvaimet().stream().anyMatch(
                 dto -> LK_PAATTOTODISTUSVUOSI.equals(dto.getAvain())
                         && Integer.toString(haku.getHakukausiVuosi()).equals(dto.getArvo()));
