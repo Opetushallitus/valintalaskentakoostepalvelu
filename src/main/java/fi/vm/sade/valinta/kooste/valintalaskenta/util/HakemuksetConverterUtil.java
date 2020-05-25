@@ -251,7 +251,6 @@ public class HakemuksetConverterUtil {
 
         if (suorituksetRekisterista.stream()
                 .anyMatch(s -> (s.isLukio() && s.isValmis()) ||
-                        (s.isLukio() && s.isKesken() && hakukaudella(haku, s)) ||
                         (s.isYoTutkinto() && s.isVahvistettu() && s.isValmis()))) {
             return of(PohjakoulutusToinenAste.YLIOPPILAS);
         }
