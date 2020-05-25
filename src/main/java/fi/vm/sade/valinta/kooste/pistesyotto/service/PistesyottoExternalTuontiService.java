@@ -298,8 +298,8 @@ public class PistesyottoExternalTuontiService {
                     Consumer<Throwable> exceptionHandler) {
         getHakemuksetByHakemusOids(pistetiedotHakemuksille.stream().map(HakemusDTO::getHakemusOid).collect(Collectors.toList()))
                 .subscribe(hakemusWrappers -> {
-                    List<HakemusJaHakutoiveet> pistetiedotJaHakutoiveet = collect(pistetiedotHakemuksille, hakemusWrappers);
-                    Set<String> hakutoiveet = pistetiedotJaHakutoiveet.stream().flatMap(h -> h.hakutoiveet.stream()).collect(Collectors.toSet());
+                    List<HakemusJaHakutoiveet> pistetiedotJaHakemukset = collect(pistetiedotHakemuksille, hakemusWrappers);
+                    Set<String> hakutoiveet = pistetiedotJaHakemukset.stream().flatMap(h -> h.hakutoiveet.stream()).collect(Collectors.toSet());
                     Observable<List<HakukohdeJaValintaperusteDTO>> valintaperusteetHakutoiveille = valintaperusteetResource.findAvaimet(hakutoiveet);
                     Observable<List<ValintakoeOsallistuminenDTO>> osallistumisetHakutoiveille = valintakoeResource.haeHakutoiveille(hakutoiveet);
 
@@ -310,31 +310,31 @@ public class PistesyottoExternalTuontiService {
                         Map<String, List<ValintakoeOsallistuminenDTO>> hakemusOidToValintakoeOsallistuminenDTOMap = osallistuminenDTOs.stream().collect(
                                 Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, Arrays::asList, (h0, h1) -> Lists.newArrayList(Iterables.concat(h0, h1))));
 
-                        return pistetiedotJaHakutoiveet.stream().flatMap(
-                                pistetiedotJaHakutoiveetHakemukselle -> {
-                                    final HakemusDTO pistetiedotHakemukselle = pistetiedotJaHakutoiveetHakemukselle.hakemusDTO;
-                                    final HakemusWrapper hakemus = pistetiedotJaHakutoiveetHakemukselle.hakemus;
+                        return pistetiedotJaHakemukset.stream().flatMap(
+                                pistetiedotJaHakemus -> {
+                                    final HakemusDTO pistetiedot = pistetiedotJaHakemus.hakemusDTO;
+                                    final HakemusWrapper hakemus = pistetiedotJaHakemus.hakemus;
                                     if (hakemus == null) {
-                                        String errorMessage = "Hakemusta ei löydy tuotaessa pistetietoja hakemukselle " + pistetiedotHakemukselle.getHakemusOid();
+                                        String errorMessage = "Hakemusta ei löydy tuotaessa pistetietoja hakemukselle " + pistetiedot.getHakemusOid();
                                         LOG.error(errorMessage);
                                         VirheDTO applicationNotFound = new VirheDTO();
-                                        applicationNotFound.setHakemusOid(pistetiedotHakemukselle.getHakemusOid());
+                                        applicationNotFound.setHakemusOid(pistetiedot.getHakemusOid());
                                         applicationNotFound.setVirhe(errorMessage);
                                         return Stream.of(new OsallistuminenHakutoiveeseen(null, null, applicationNotFound));
                                     }
-                                    if (!pistetiedotHakemukselle.getHenkiloOid().equals(hakemus.getPersonOid())) {
-                                        String errorMessage = "Annettu henkilö OID (" + pistetiedotHakemukselle.getHenkiloOid() + ") ei vastaa hakemukselta löytyvää henkilö OID:a (" + hakemus.getPersonOid() + ")";
+                                    if (!pistetiedot.getHenkiloOid().equals(hakemus.getPersonOid())) {
+                                        String errorMessage = "Annettu henkilö OID (" + pistetiedot.getHenkiloOid() + ") ei vastaa hakemukselta löytyvää henkilö OID:a (" + hakemus.getPersonOid() + ")";
                                         LOG.error(errorMessage);
                                         VirheDTO conflictingPersonOid = new VirheDTO();
-                                        conflictingPersonOid.setHakemusOid(pistetiedotHakemukselle.getHakemusOid());
+                                        conflictingPersonOid.setHakemusOid(pistetiedot.getHakemusOid());
                                         conflictingPersonOid.setVirhe(errorMessage);
                                         return Stream.of(new OsallistuminenHakutoiveeseen(null, null, conflictingPersonOid));
                                     }
-                                    List<Hakutoive> hakutoiveetList = pistetiedotJaHakutoiveetHakemukselle.hakutoiveet.stream().map(hakukohdeOid -> new Hakutoive(
+                                    List<Hakutoive> hakutoiveetList = pistetiedotJaHakemus.hakutoiveet.stream().map(hakukohdeOid -> new Hakutoive(
                                             hakukohdeOid,
                                             hakukohdeOidToValintaperusteDTOMap.get(hakukohdeOid).getValintaperusteDTO(),
-                                            Optional.ofNullable(hakemusOidToValintakoeOsallistuminenDTOMap.get(pistetiedotHakemukselle.getHakemusOid())).orElse(Collections.emptyList()))).collect(Collectors.toList());
-                                    return luoOsallistumisetHakemukselle(pistetiedotJaHakutoiveetHakemukselle, hakutoiveetList).map(osallistuminen -> {
+                                            Optional.ofNullable(hakemusOidToValintakoeOsallistuminenDTOMap.get(pistetiedot.getHakemusOid())).orElse(Collections.emptyList()))).collect(Collectors.toList());
+                                    return luoOsallistumisetHakemukselle(pistetiedotJaHakemus, hakutoiveetList).map(osallistuminen -> {
                                         boolean isAuthorized = authorityCheck.test(osallistuminen.hakukohdeOid);
                                         if (isAuthorized) {
                                             return osallistuminen;
