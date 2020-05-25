@@ -194,16 +194,6 @@ public class HakemuksetConverterUtilTest {
                     .setTelma().setVahvistettu(true)
                     .setValmistuminen(HAKUKAUDELLA).setValmis()
                     .done();
-    private static final SuoritusJaArvosanat vahvistamatonLukioKeskenHakukaudella =
-            new SuoritusrekisteriSpec.SuoritusBuilder()
-                    .setLukio().setVahvistettu(false)
-                    .setValmistuminen(HAKUKAUDELLA).setKesken()
-                    .done();
-    private static final SuoritusJaArvosanat vahvistamatonLukioKeskenEiHakukaudella =
-            new SuoritusrekisteriSpec.SuoritusBuilder()
-                    .setLukio().setVahvistettu(false)
-                    .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA).setKesken()
-                    .done();
     private static final SuoritusJaArvosanat vahvistamatonLukioKeskeytynytHakukaudella =
             new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setLukio().setVahvistettu(false)
@@ -355,7 +345,8 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void pohjakoulutusPeruskouluJosHakemuksellaLukioJaLukioSuoritusKeskeytynytHakukaudella() {
+    public void pohjakoulutusLukioJosHakemuksellaLukioJaLukioSuoritusKeskeytynytHakukaudellaJaLeikkuriPvmOnTulevaisuudessa() {
+        hakemuksetConverterUtil = new HakemuksetConverterUtil("9999-12-31");
         HakemusDTO h = new HakemusDTO();
         h.setHakijaOid("1.2.3.4.5.6");
         h.setAvaimet(new ArrayList<>() {{
@@ -381,7 +372,7 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void pohjakoulutusPeruskouluJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaEIAbiturientti() {
+    public void pohjakoulutusLukioJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaEIAbiturientti() {
         hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
         HakemusDTO h = new HakemusDTO();
         h.setHakijaOid("1.2.3.4.5.6");
@@ -422,18 +413,6 @@ public class HakemuksetConverterUtilTest {
         }});
         List<SuoritusJaArvosanat> suoritukset = new ArrayList<>() {{
             add(vahvistamatonLukioValmisHakukaudella);
-        }};
-        Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
-    }
-
-    @Test
-    public void pohjakoulutusLukioJosLukionSuoritusKeskenHakukaudella() {
-        HakemusDTO h = new HakemusDTO();
-        h.setAvaimet(new ArrayList<>() {{
-            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
-        }});
-        List<SuoritusJaArvosanat> suoritukset = new ArrayList<>() {{
-            add(vahvistamatonLukioKeskenHakukaudella);
         }};
         Assert.assertEquals(PohjakoulutusToinenAste.YLIOPPILAS, hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
