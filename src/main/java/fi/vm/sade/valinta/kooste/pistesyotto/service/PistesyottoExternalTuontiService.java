@@ -307,6 +307,7 @@ public class PistesyottoExternalTuontiService {
                         Map<String, HakukohdeJaValintaperusteDTO> hakukohdeOidToValintaperusteDTOMap = hakukohdeJaValintaperusteDTOs.stream().collect(
                                 Collectors.toMap(HakukohdeJaValintaperusteDTO::getHakukohdeOid, hh -> hh));
 
+                        osallistuminenDTOs.stream().forEach(o -> o.getHakutoiveet().forEach(ht -> ht.getValinnanVaiheet().forEach(vv -> vv.getValintakokeet())));
                         Map<String, List<ValintakoeOsallistuminenDTO>> hakemusOidToValintakoeOsallistuminenDTOMap = osallistuminenDTOs.stream().collect(
                                 Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, Arrays::asList, (h0, h1) -> Lists.newArrayList(Iterables.concat(h0, h1))));
 
@@ -340,7 +341,6 @@ public class PistesyottoExternalTuontiService {
                                             return osallistuminen;
                                         } else {
                                             String errorMessage = "Tarvittavat muokkausoikeudet puuttuvat hakutoiveelle " + osallistuminen.hakukohdeOid;
-                                            LOG.error(errorMessage); //Fixme ehkä, näitä voi tulla aika paljon ja voivat olla turhahkoja.
                                             VirheDTO virheDTO = new VirheDTO();
                                             if (osallistuminen.isVirhe()) {
                                                 virheDTO.setHakemusOid(osallistuminen.asVirheDTO().getHakemusOid());
