@@ -93,28 +93,21 @@ public class ValintatapajonoTuontiService {
                                 try {
                                     valinnanvaihe.getValintatapajonot()
                                             .forEach(
-                                                    v -> {
-                                                        v.getJonosijat().forEach(jonosija -> {
-                                                            Map<String,String> additionalAuditFields = new HashMap<>();
-                                                            additionalAuditFields.put("hakuOid", hakuOid);
-                                                            additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
-                                                            additionalAuditFields.put("valinnanvaiheOid", valinnanvaihe.getValinnanvaiheoid());
-                                                            additionalAuditFields.put("valintatapajonoOid", v.getValintatapajonooid());
-                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, jonosija.getHakijaOid(), Changes.addedDto(jonosija), additionalAuditFields);
-                                                        });
-                                                    }
+                                                    v -> v.getJonosijat().forEach(jonosija -> {
+                                                        Map<String,String> additionalAuditFields = new HashMap<>();
+                                                        additionalAuditFields.put("hakuOid", hakuOid);
+                                                        additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
+                                                        additionalAuditFields.put("valinnanvaiheOid", valinnanvaihe.getValinnanvaiheoid());
+                                                        additionalAuditFields.put("valintatapajonoOid", v.getValintatapajonooid());
+                                                        AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, jonosija.getHakijaOid(), Changes.addedDto(jonosija), additionalAuditFields);
+                                                    })
                                             );
                                 } catch (Throwable t) {
                                     LOG.error("Audit logitus epäonnistui", t);
                                 }
                                 dokumentinSeurantaAsyncResource.paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS).subscribe(
-                                        dontcare -> {
-                                            LOG.error("Saatiin paivitettya dokId");
-                                        },
-                                        dontcare ->
-                                        {
-                                            LOG.error("Ei saatu paivitettya!", dontcare);
-                                        });
+                                        dontcare -> LOG.error("Saatiin paivitettya dokId"),
+                                        dontcare -> LOG.error("Ei saatu paivitettya!", dontcare));
                             },
                             poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef));
                     LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
@@ -191,9 +184,7 @@ public class ValintatapajonoTuontiService {
                 if (dokumenttiId != null) {
                     dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti))).subscribe(
                             dontcare -> {},
-                            dontcare -> {
-                                LOG.error("Virheen ilmoittamisessa virhe!", dontcare);
-                            });
+                            dontcare -> LOG.error("Virheen ilmoittamisessa virhe!", dontcare));
                 }
             } catch (Throwable t) {
                 LOG.error("Odottamaton virhe", t);
