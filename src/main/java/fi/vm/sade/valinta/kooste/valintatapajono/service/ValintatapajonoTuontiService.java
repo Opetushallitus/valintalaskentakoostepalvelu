@@ -29,11 +29,7 @@ import org.springframework.stereotype.Service;
 
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -56,13 +52,14 @@ public class ValintatapajonoTuontiService {
     @Autowired
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
-    public void tuo (BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
+    public void tuo(BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
         final String hakuOid,
         final String hakukohdeOid,
         final String tarjoajaOid,
         final String valintatapajonoOid,
         AsyncResponse asyncResponse,
-        User user) {
+        User user,
+        List<String> virheViestit) {
         AtomicReference<String> dokumenttiIdRef = new AtomicReference<>(null);
         AtomicInteger counter = new AtomicInteger(
                 1 // valinnanvaiheet
@@ -81,7 +78,7 @@ public class ValintatapajonoTuontiService {
                 try {
                     rivit = riviFunction.apply(valinnanvaiheetRef.get(), hakemuksetRef.get());
                 } catch (Throwable t) {
-                    poikkeusKasittelija("Rivien lukeminen annetuista tiedoista epäonnistui", asyncResponse, dokumenttiIdRef).accept(t);
+                    poikkeusKasittelija("Rivien lukeminen annetuista tiedoista epäonnistui", asyncResponse, dokumenttiIdRef, virheViestit).accept(t);
                     return null;
                 }
                 try {
@@ -109,7 +106,7 @@ public class ValintatapajonoTuontiService {
                                         dontcare -> LOG.error("Saatiin paivitettya dokId"),
                                         dontcare -> LOG.error("Ei saatu paivitettya!", dontcare));
                             },
-                            poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef));
+                            poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef, virheViestit));
                     LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
                     dokumentinSeurantaAsyncResource.paivitaKuvaus(dokumenttiIdRef.get(), "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...").subscribe(
                             dontcare -> {},
@@ -117,7 +114,7 @@ public class ValintatapajonoTuontiService {
                                 LOG.error("Onnistumisen ilmoittamisessa virhe!", dontcare);
                             });
                 } catch (Throwable t) {
-                    poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef).accept(t);
+                    poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef, virheViestit).accept(t);
                     return null;
                 }
             }
@@ -125,7 +122,7 @@ public class ValintatapajonoTuontiService {
         };
         valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).whenComplete((valinnanvaiheet, t) -> {
             if (t != null) {
-                poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef).accept(t);
+                poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef, virheViestit).accept(t);
             } else {
                 valinnanvaiheetRef.set(valinnanvaiheet);
                 mergeSuplier.get();
@@ -136,7 +133,7 @@ public class ValintatapajonoTuontiService {
                     valintaperusteetRef.set(valintaperusteet);
                     mergeSuplier.get();
                 },
-                poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef)
+                poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef, virheViestit)
         );
         Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                 .flatMap(haku -> {
@@ -148,12 +145,12 @@ public class ValintatapajonoTuontiService {
                 })
                 .subscribe(hakemukset -> {
                     if (hakemukset == null || hakemukset.isEmpty()) {
-                        poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef).accept(null);
+                        poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef, virheViestit).accept(null);
                     } else {
                         hakemuksetRef.set(hakemukset);
                         mergeSuplier.get();
                     }
-                }, poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
+                }, poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef, virheViestit));
 
         dokumentinSeurantaAsyncResource.luoDokumentti("Valintatapajonon tuonti").subscribe(
                 dokumenttiId -> {
@@ -164,11 +161,13 @@ public class ValintatapajonoTuontiService {
                     } catch (Throwable t) {
                         LOG.error("Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla.", t);
                     }
-                }, poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef));
+                }, poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef, virheViestit));
     }
 
-    private PoikkeusKasittelijaSovitin poikkeusKasittelija(String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
+    private PoikkeusKasittelijaSovitin poikkeusKasittelija(
+            String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef, List<String> virheet) {
         return new PoikkeusKasittelijaSovitin(poikkeus -> {
+            virheet.add(viesti);
             if (poikkeus == null) {
                 LOG.error("###Poikkeus tuonnissa {}\r\n###", viesti);
             } else {
