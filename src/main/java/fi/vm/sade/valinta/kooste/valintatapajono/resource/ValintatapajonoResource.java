@@ -38,9 +38,7 @@ import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -93,7 +91,7 @@ public class ValintatapajonoResource {
     @Consumes("application/octet-stream")
     @Produces("text/plain")
     @ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = List.class)
-    public List<String> tuonti(@QueryParam("hakuOid") String hakuOid,
+    public void tuonti(@QueryParam("hakuOid") String hakuOid,
                                @QueryParam("hakukohdeOid") String hakukohdeOid,
                                @QueryParam("valintatapajonoOid") String valintatapajonoOid,
                                InputStream file,
@@ -108,7 +106,6 @@ public class ValintatapajonoResource {
         try {
             IOUtils.copy(file, bytes = new ByteArrayOutputStream());
             IOUtils.closeQuietly(file);
-            List<String> virheViestit = new ArrayList<>();
             valintatapajonoTuontiService.tuo((valinnanvaiheet, hakemukset) -> {
                 ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
                 try {
@@ -122,13 +119,11 @@ public class ValintatapajonoResource {
                     throw new RuntimeException(t);
                 }
                 return listaus.getRivit();
-            }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse, user, virheViestit);
-            return virheViestit;
+            }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse, user);
         } catch (Throwable t) {
             asyncResponse.resume(Response.serverError()
                     .entity("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen")
                     .build());
-            return Collections.singletonList("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen");
         }
     }
 
@@ -138,7 +133,7 @@ public class ValintatapajonoResource {
     @Consumes("application/json")
     @Produces("text/plain")
     @ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = List.class)
-    public List<String> tuonti(@QueryParam("hakuOid") String hakuOid,
+    public void tuonti(@QueryParam("hakuOid") String hakuOid,
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @QueryParam("valintatapajonoOid") String valintatapajonoOid,
                        ValintatapajonoRivit rivit,
@@ -149,7 +144,6 @@ public class ValintatapajonoResource {
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
         String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
-        List<String> virheViestit = new ArrayList<>();
         valintatapajonoTuontiService.tuo(
             (valinnanvaiheet, hakemukset) -> rivit.getRivit(),
             hakuOid,
@@ -157,9 +151,7 @@ public class ValintatapajonoResource {
             tarjoajaOid,
             valintatapajonoOid,
             asyncResponse,
-            user,
-            virheViestit);
-        return virheViestit;
+            user);
     }
 
     private TimeoutHandler getTimeoutHandler(String hakuOid, String hakukohdeOid) {
