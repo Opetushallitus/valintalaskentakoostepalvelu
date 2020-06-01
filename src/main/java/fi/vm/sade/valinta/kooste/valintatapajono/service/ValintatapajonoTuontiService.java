@@ -130,12 +130,14 @@ public class ValintatapajonoTuontiService {
             }
             return null;
         };
-        valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).subscribe(
-                valinnanvaiheet -> {
-                    valinnanvaiheetRef.set(valinnanvaiheet);
-                    mergeSuplier.get();
-                },
-                poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
+        valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).whenComplete((valinnanvaiheet, t) -> {
+            if (t != null) {
+                poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef).accept(t);
+            } else {
+                valinnanvaiheetRef.set(valinnanvaiheet);
+                mergeSuplier.get();
+            }
+        });
         valintaperusteetAsyncResource.haeIlmanlaskentaa(hakukohdeOid).subscribe(
                 valintaperusteet -> {
                     valintaperusteetRef.set(valintaperusteet);

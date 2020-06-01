@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -43,9 +44,10 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     }
 
     @Override
-    public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-        return Observable.just(resultReference.get());
+    public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
+        return CompletableFuture.completedFuture(resultReference.get());
     }
+
     @Override
     public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
         return null;

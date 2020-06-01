@@ -4,6 +4,7 @@ import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.UUSI;
 import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VALMIS;
 import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VIRHE;
 
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
@@ -45,11 +46,12 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     @Override
-    public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-        return getAsObservableLazily(
+    public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
+        return this.httpclient.getJson(
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe", hakukohdeOid),
-                new GenericType<List<ValintatietoValinnanvaiheDTO>>() {
-        }.getType());
+                Duration.ofMinutes(30),
+                new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
+        );
     }
 
     public Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritustiedot) {
