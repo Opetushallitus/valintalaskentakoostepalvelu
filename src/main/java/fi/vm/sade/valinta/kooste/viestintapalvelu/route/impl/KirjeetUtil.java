@@ -12,7 +12,7 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
-import static java.util.Optional.ofNullable;
+
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
@@ -49,15 +49,20 @@ public class KirjeetUtil {
         tilaToPrioriteetti.put(PERUUNTUNUT, 7);
         tilaToPrioriteetti.put(HYLATTY, 8);
     }
-    public static void jononTulokset(Osoite osoite, HakutoiveDTO hakutoive, StringBuilder omatPisteet, StringBuilder hyvaksytyt, List<Sijoitus> kkSijoitukset, boolean valittuHakukohteeseen, String preferoitukielikoodi) {
+    public static void jononTulokset(Osoite osoite,
+                                     HakutoiveDTO hakutoive,
+                                     StringBuilder omatPisteet,
+                                     StringBuilder hyvaksytyt,
+                                     List<Sijoitus> jononTulokset,
+                                     String preferoitukielikoodi) {
         for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
             BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
             BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
             BigDecimal ensikertalaisenMinimipisteet = hakutoive.getEnsikertalaisuusHakijaryhmanAlimmatHyvaksytytPisteet();
             Pisteet jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
 
-            String kkNimi = valintatapajono.getValintatapajonoNimi();
-            kkSijoitukset.add(KirjeetUtil.asSijoituksetData(valittuHakukohteeseen, valintatapajono, kkNimi, preferoitukielikoodi, jononPisteet));
+            String varasijaTeksti = varasijanumeroTeksti(valintatapajono, preferoitukielikoodi).orElse(null);
+            jononTulokset.add(new Sijoitus(valintatapajono, varasijaTeksti, jononPisteet, preferoitukielikoodi));
 
             KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
             KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
@@ -121,18 +126,22 @@ public class KirjeetUtil {
         if (!hakutoiveenValintatapajonot.isEmpty()) {
             HakutoiveenValintatapajonoDTO firstValintatapajono = hakutoiveenValintatapajonot.get(0);
             varasijanumeroTeksti(firstValintatapajono, preferoituKielikoodi).ifPresent(varasijaTeksti -> tulokset.put("varasija", varasijaTeksti));
-            tulokset.put("hylkaysperuste", StringUtils.trimToNull(hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
-            String ehdollinenSyy = "";
-            if(firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi() != null && !firstValintatapajono.getEhdollisenHyvaksymisenEhtoKoodi().equals("")){
-                ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoFI();
-                if (preferoituKielikoodi.equals(KieliUtil.RUOTSI)) {
-                    ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoSV();
-                } else if (preferoituKielikoodi.equals(KieliUtil.ENGLANTI)) {
-                    ehdollinenSyy = firstValintatapajono.getEhdollisenHyvaksymisenEhtoEN();
+            if (firstValintatapajono.getTila().isHyvaksytty() && firstValintatapajono.isEhdollisestiHyvaksyttavissa()) {
+                switch (preferoituKielikoodi) {
+                    case KieliUtil.SUOMI:
+                        tulokset.put("hyvaksymisenEhto", firstValintatapajono.getEhdollisenHyvaksymisenEhtoFI());
+                        break;
+                    case KieliUtil.RUOTSI:
+                        tulokset.put("hyvaksymisenEhto", firstValintatapajono.getEhdollisenHyvaksymisenEhtoSV());
+                        break;
+                    case KieliUtil.ENGLANTI:
+                        tulokset.put("hyvaksymisenEhto", firstValintatapajono.getEhdollisenHyvaksymisenEhtoEN());
+                        break;
                 }
             }
+            tulokset.put("hylkaysperuste", StringUtils.trimToNull(hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
             tulokset.put("peruuntumisenSyy", StringUtils.trimToNull(peruuntumisenSyyText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
-            tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti(), firstValintatapajono.isEhdollisestiHyvaksyttavissa(), ehdollinenSyy));
+            tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono, preferoituKielikoodi));
         }
     }
 
@@ -177,12 +186,6 @@ public class KirjeetUtil {
         tulokset.put("kaikkiHakeneet", "");
         tulokset.put("paasyJaSoveltuvuuskoe", createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
         return tulokset;
-    }
-
-    private static Sijoitus asSijoituksetData(boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi, String preferoituKielikoodi, Pisteet pisteet) {
-        int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
-        String varasijaTeksti = valittuHakukohteeseen ? null : varasijanumeroTeksti(valintatapajono, preferoituKielikoodi).orElse(null);
-        return new Sijoitus(kkNimi, kkHyvaksytyt, varasijaTeksti, pisteet);
     }
 
     private static Optional<String> varasijanumeroTeksti(HakutoiveenValintatapajonoDTO valintatapajono, String preferoituKielikoodi) {

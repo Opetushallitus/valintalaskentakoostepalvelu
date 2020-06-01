@@ -81,10 +81,10 @@ public class JalkiohjauskirjeetKomponentti {
                 //
                 // VT-1036
                 //
-                List<Sijoitus> kkSijoitukset = Lists.newArrayList();
+                List<Sijoitus> sijoitukset = Lists.newArrayList();
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByPrioriteetti());
-                KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, kkSijoitukset, false, preferoituKielikoodi);
-                tulokset.put("sijoitukset", kkSijoitukset);
+                KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, sijoitukset, preferoituKielikoodi);
+                tulokset.put("sijoitukset", sijoitukset);
 
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();

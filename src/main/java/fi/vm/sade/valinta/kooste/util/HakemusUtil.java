@@ -15,6 +15,7 @@ import java.util.Map;
 
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,20 @@ import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 
 public class HakemusUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HakemusUtil.class);
-    private final static Map<String, Map<HakemuksenTila, String>> TILAT = valmistaTilat();
+    public final static Map<String, Map<HakemuksenTila, String>> TILAT = valmistaTilat();
+    private final static Map<String, String> VARASIJALLA = varasijallaTilat();
     private final static Map<String, String> VARASIJAT = varasijaTekstinTilat();
     private final static Map<String, String> EHDOLLINEN = ehdollinenTekstinTilat();
     private final static Map<String, Map<IlmoittautumisTila, String>> ILMOITTAUTUMISTILAT = ilmoittautumisTilat();
     private final static Map<String, Map<ValintatuloksenTila, String>> VALINTATULOKSEN_TILAT = valintatulostenTilat();
+
+    private static Map<String, String> varasijallaTilat() {
+        Map<String, String> m = Maps.newHashMap();
+        m.put(KieliUtil.SUOMI, "varasijalla");
+        m.put(KieliUtil.RUOTSI, "på reservplats");
+        m.put(KieliUtil.ENGLANTI, "on the waiting list");
+        return m;
+    }
 
     private static Map<String, String> varasijaTekstinTilat() {
         Map<String, String> varasijaTekstinTilat = Maps.newHashMap();
@@ -126,12 +136,38 @@ public class HakemusUtil {
         return Collections.unmodifiableMap(kielet);
     }
 
+    public static String varasijallaConverter(Integer numero, String preferoitukielikoodi) {
+        switch (preferoitukielikoodi) {
+            case KieliUtil.SUOMI:
+                return numero.toString() + ". " + VARASIJALLA.get(KieliUtil.SUOMI);
+            case KieliUtil.RUOTSI:
+                return numero.toString() + " " + VARASIJALLA.get(KieliUtil.RUOTSI);
+            case KieliUtil.ENGLANTI:
+                switch (numero % 10) {
+                    case 1:
+                        return numero.toString() + "st " + VARASIJALLA.get(KieliUtil.ENGLANTI);
+                    case 2:
+                        return numero.toString() + "nd " + VARASIJALLA.get(KieliUtil.ENGLANTI);
+                    case 3:
+                        return numero.toString() + "rd " + VARASIJALLA.get(KieliUtil.ENGLANTI);
+                    default:
+                        return numero.toString() + "th " + VARASIJALLA.get(KieliUtil.ENGLANTI);
+                }
+            default:
+                throw new IllegalArgumentException("Tuntematon kielikoodi " + preferoitukielikoodi);
+        }
+    }
+
     public static String varasijanNumeroConverter(Integer numero, String preferoitukielikoodi) {
         return VARASIJAT.get(preferoitukielikoodi) + numero;
     }
 
-    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean ehdollinen, String ehdollisenHyvaksymisenEhto) {
-        return tilaConverter(tila, preferoitukielikoodi, harkinnanvarainen, ehdollinen, false, null, ehdollisenHyvaksymisenEhto);
+    public static String tilaConverter(HakutoiveenValintatapajonoDTO valintatapajono, String preferoitukielikoodi) {
+        if (valintatapajono.getTila() == HakemuksenTila.VARALLA) {
+            return HakemusUtil.varasijallaConverter(valintatapajono.getVarasijanNumero(), preferoitukielikoodi);
+        } else {
+            return HakemusUtil.TILAT.get(preferoitukielikoodi).get(valintatapajono.getTila());
+        }
     }
 
     public static String tilaConverter(IlmoittautumisTila tila, String preferoitukielikoodi) {
