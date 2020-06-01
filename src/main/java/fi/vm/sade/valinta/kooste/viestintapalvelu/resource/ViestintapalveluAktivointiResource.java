@@ -257,7 +257,11 @@ public class ViestintapalveluAktivointiResource {
             @QueryParam("templateName") String templateName,
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("sijoitteluajoId") Long sijoitteluajoId,
+            @QueryParam("asiointikieli") String asiointikieli,
             @QueryParam("vainTulosEmailinKieltaneet") boolean vainTulosEmailinKieltaneet) {
+        if (hakuOid == null && hakukohdeOid == null && (hakemuksillaRajaus.getHakemusOids() == null || hakemuksillaRajaus.getHakemusOids().isEmpty())) {
+            throw new IllegalArgumentException("Parametri hakuOid tai hakukohdeOid, tai body parametri hakemusOids on pakollinen");
+        }
         try {
             if (templateName == null) {
                 templateName = "hyvaksymiskirje";
@@ -265,7 +269,6 @@ public class ViestintapalveluAktivointiResource {
             if (hakemuksillaRajaus == null) {
                 hakemuksillaRajaus = new DokumentinLisatiedot();
             }
-            LOG.info("Hyväksymiskirjeiden luonti aktivoitu hakukohteelle "+ hakukohdeOid + ", vainTulosEmailinKieltaneet: " + vainTulosEmailinKieltaneet);
 
             HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
                     tarjoajaOid,
@@ -279,9 +282,21 @@ public class ViestintapalveluAktivointiResource {
                     palautusAika,
                     vainTulosEmailinKieltaneet
             );
-            if (hakemuksillaRajaus.getHakemusOids() == null) {
-                return hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(hyvaksymiskirjeDTO);
+            if (hakemuksillaRajaus.getHakemusOids() == null || hakemuksillaRajaus.getHakemusOids().isEmpty()) {
+                if (hakukohdeOid == null) {
+                    if (asiointikieli == null) {
+                        LOG.info(String.format("Hyväksymiskirjeiden luonti aktivoitu hakukohteittain haulle %s, vainTulosEmailinKieltaneet: %s", hakuOid, vainTulosEmailinKieltaneet));
+                        return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hyvaksymiskirjeDTO);
+                    } else {
+                        LOG.info(String.format("Hyväksymiskirjeiden luonti aktivoitu haulle %s, vainTulosEmailinKieltaneet: %s, asiointikieli: %s", hakuOid, vainTulosEmailinKieltaneet, asiointikieli));
+                        return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hyvaksymiskirjeDTO, asiointikieli);
+                    }
+                } else {
+                    LOG.info(String.format("Hyväksymiskirjeiden luonti aktivoitu hakukohteelle %s, vainTulosEmailinKieltaneet: %s", hakukohdeOid, vainTulosEmailinKieltaneet));
+                    return hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(hyvaksymiskirjeDTO);
+                }
             } else {
+                LOG.info(String.format("Hyväksymiskirjeiden luonti aktivoitu hakemuksille, vainTulosEmailinKieltaneet: %s", vainTulosEmailinKieltaneet));
                 return hyvaksymiskirjeetService.hyvaksymiskirjeetHakemuksille(hyvaksymiskirjeDTO, hakemuksillaRajaus.getHakemusOids());
             }
         } catch (Exception e) {
