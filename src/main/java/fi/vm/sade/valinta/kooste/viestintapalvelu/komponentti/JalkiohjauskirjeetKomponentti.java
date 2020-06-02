@@ -63,52 +63,56 @@ public class JalkiohjauskirjeetKomponentti {
         String preferoituKielikoodi = kaytetaanYlikirjoitettuKielikoodia ? ylikirjoitettuPreferoitukielikoodi : KieliUtil.SUOMI;
         int count = 0;
         for (HakijaDTO hakija : hyvaksymattomatHakijat) {
-            final String hakemusOid = hakija.getHakemusOid();
-            if (!hakemusOidHakemukset.containsKey(hakemusOid)) {
-                continue;
-            }
-            final HakemusWrapper hakemus = hakemusOidHakemukset.get(hakemusOid);
-            final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maatjavaltiot1, postinumerot, new TuloskirjeNimiPaattelyStrategy());
-            final List<Map<String, Object>> tulosList = new ArrayList<>();
-            if (!kaytetaanYlikirjoitettuKielikoodia) {
-                preferoituKielikoodi = hakemus.getAsiointikieli();
-            }
+            try {
+                final String hakemusOid = hakija.getHakemusOid();
+                if (!hakemusOidHakemukset.containsKey(hakemusOid)) {
+                    continue;
+                }
+                final HakemusWrapper hakemus = hakemusOidHakemukset.get(hakemusOid);
+                final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maatjavaltiot1, postinumerot, new TuloskirjeNimiPaattelyStrategy());
+                final List<Map<String, Object>> tulosList = new ArrayList<>();
+                if (!kaytetaanYlikirjoitettuKielikoodia) {
+                    preferoituKielikoodi = hakemus.getAsiointikieli();
+                }
 
-            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                String hakukohdeOid = hakutoive.getHakukohdeOid();
-                List<SyotettyArvoDTO> arvot = syotetytArvot.get(hakukohdeOid).getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
-                Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(jalkiohjauskirjeessaKaytetytHakukohteet, hakukohdeOid, preferoituKielikoodi, hakutoive, arvot);
+                for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+                    String hakukohdeOid = hakutoive.getHakukohdeOid();
+                    List<SyotettyArvoDTO> arvot = syotetytArvot.get(hakukohdeOid).getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
+                    Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(jalkiohjauskirjeessaKaytetytHakukohteet, hakukohdeOid, preferoituKielikoodi, hakutoive, arvot);
 
-                StringBuilder omatPisteet = new StringBuilder();
-                StringBuilder hyvaksytyt = new StringBuilder();
-                //
-                // VT-1036
-                //
-                List<Sijoitus> sijoitukset = Lists.newArrayList();
-                Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByPrioriteetti());
-                KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, sijoitukset, preferoituKielikoodi);
-                tulokset.put("sijoitukset", sijoitukset);
+                    StringBuilder omatPisteet = new StringBuilder();
+                    StringBuilder hyvaksytyt = new StringBuilder();
+                    //
+                    // VT-1036
+                    //
+                    List<Sijoitus> sijoitukset = Lists.newArrayList();
+                    Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByPrioriteetti());
+                    KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, sijoitukset, preferoituKielikoodi);
+                    tulokset.put("sijoitukset", sijoitukset);
 
-                Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
-                List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
-                KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
-                tulokset.put("omatPisteet", omatPisteet.toString());
-                tulokset.put("hyvaksytyt", hyvaksytyt.toString());
-                tulosList.add(tulokset);
-            }
-            Map<String, Object> replacements = Maps.newHashMap();
-            replacements.put("tulokset", tulosList);
-            replacements.put("henkilotunnus", hakemus.getHenkilotunnus());
-            replacements.put("syntymaaika", hakemus.getSyntymaaika());
-            replacements.put("hakijaOid", hakija.getHakijaOid());
+                    Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
+                    List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
+                    KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
+                    tulokset.put("omatPisteet", omatPisteet.toString());
+                    tulokset.put("hyvaksytyt", hyvaksytyt.toString());
+                    tulosList.add(tulokset);
+                }
+                Map<String, Object> replacements = Maps.newHashMap();
+                replacements.put("tulokset", tulosList);
+                replacements.put("henkilotunnus", hakemus.getHenkilotunnus());
+                replacements.put("syntymaaika", hakemus.getSyntymaaika());
+                replacements.put("hakijaOid", hakija.getHakijaOid());
 
-            String sahkoposti = hakemus.getSahkopostiOsoite();
-            boolean skipIPosti = sahkoinenKorkeakoulunMassaposti && !sendIPosti(hakemus);
-            kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements,
-                    hakija.getHakijaOid(), skipIPosti, sahkoposti, hakija.getHakemusOid()));
-            count++;
-            if(count % 10000 == 0) {
-                LOG.info("Luotu {}/{} kirjettä", count, kaikkiHyvaksymattomat);
+                String sahkoposti = hakemus.getSahkopostiOsoite();
+                boolean skipIPosti = sahkoinenKorkeakoulunMassaposti && !sendIPosti(hakemus);
+                kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements,
+                        hakija.getHakijaOid(), skipIPosti, sahkoposti, hakija.getHakemusOid()));
+                count++;
+                if (count % 10000 == 0) {
+                    LOG.info("Luotu {}/{} kirjettä", count, kaikkiHyvaksymattomat);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("Hakemuksen %s kirjedatan käsittely epäonnistui", hakija.getHakemusOid()), e);
             }
         }
 

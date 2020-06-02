@@ -56,21 +56,25 @@ public class KirjeetUtil {
                                      List<Sijoitus> jononTulokset,
                                      String preferoitukielikoodi) {
         for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-            BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
-            BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
-            BigDecimal ensikertalaisenMinimipisteet = hakutoive.getEnsikertalaisuusHakijaryhmanAlimmatHyvaksytytPisteet();
-            Pisteet jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
+            try {
+                BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
+                BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
+                BigDecimal ensikertalaisenMinimipisteet = hakutoive.getEnsikertalaisuusHakijaryhmanAlimmatHyvaksytytPisteet();
+                Pisteet jononPisteet = KirjeetUtil.asPisteetData(numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
 
-            String varasijaTeksti = varasijanumeroTeksti(valintatapajono, preferoitukielikoodi).orElse(null);
-            jononTulokset.add(new Sijoitus(valintatapajono, varasijaTeksti, jononPisteet, preferoitukielikoodi));
+                String varasijaTeksti = varasijanumeroTeksti(valintatapajono, preferoitukielikoodi).orElse(null);
+                jononTulokset.add(new Sijoitus(valintatapajono, varasijaTeksti, jononPisteet, preferoitukielikoodi));
 
-            KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
-            KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
-            if (valintatapajono.getHyvaksytty() == null) {
-                throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksytty.");
-            }
-            if (valintatapajono.getHakeneet() == null) {
-                throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
+                KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
+                KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
+                if (valintatapajono.getHyvaksytty() == null) {
+                    throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksytty.");
+                }
+                if (valintatapajono.getHakeneet() == null) {
+                    throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("Valintatapajonon %s datan käsittely epäonnistui", valintatapajono.getValintatapajonoOid()), e);
             }
         }
     }
