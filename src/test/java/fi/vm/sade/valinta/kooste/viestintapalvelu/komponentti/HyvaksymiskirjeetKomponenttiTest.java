@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -21,6 +20,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
+import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -205,7 +205,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
             HakutoiveDTO h = new HakutoiveDTO() {{
                 setHakukohdeOid(HAKUKOHDE_OID);
                 setHakutoive(1);
-                setPistetiedot(ImmutableList.of());
                 setTarjoajaOid(ORGANIZATION_OID);
                 setKaikkiJonotSijoiteltu(true);
                 HakutoiveenValintatapajonoDTO j = new HakutoiveenValintatapajonoDTO() {{
@@ -218,10 +217,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
                     setValintatapajonoNimi(VALINTATAPAJONO_NIMI);
                 }};
                 setHakutoiveenValintatapajonot(Lists.newArrayList(j));
-                setPistetiedot(ImmutableList.of(
-                        new PistetietoDTO() {{ setArvo(PISTE_TIEDOT1); }},
-                        new PistetietoDTO() {{ setArvo(PISTE_TIEDOT2); }}
-                ));
             }};
             setHakutoiveet(Sets.newTreeSet(ImmutableList.of(h)));
         }};
@@ -255,6 +250,11 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 .setCountryCode(OSOITE_COUNTRY_CODE)
                 .createOsoite();
 
+        SyotettyArvoDTO piste1 = new SyotettyArvoDTO();
+        piste1.setArvo(PISTE_TIEDOT1);
+        SyotettyArvoDTO piste2 = new SyotettyArvoDTO();
+        piste2.setArvo(PISTE_TIEDOT2);
+
         return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                 new HashMap<>(),
                 new HashMap<>(),
@@ -276,6 +276,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
                                 )
                         )
                 ),
+                ImmutableMap.of(HAKUKOHDE_OID, ImmutableMap.of(HAKEMUS_OID, ImmutableList.of(piste1, piste2))),
                 FETCH_TARGET,
                 APPLICATION_PERIOD,
                 ofNullable(LANGUAGE_CODE),

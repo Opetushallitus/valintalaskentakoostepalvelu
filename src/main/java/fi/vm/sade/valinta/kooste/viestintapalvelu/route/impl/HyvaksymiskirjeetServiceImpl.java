@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
@@ -34,6 +35,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetK
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
+import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import org.apache.commons.lang.StringUtils;
@@ -71,6 +74,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
+    private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final AtaruAsyncResource ataruAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
@@ -88,6 +92,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     public HyvaksymiskirjeetServiceImpl(
             ViestintapalveluAsyncResource viestintapalveluAsyncResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
+            ValintalaskentaAsyncResource valintalaskentaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             AtaruAsyncResource ataruAsyncResource,
             TarjontaAsyncResource tarjontaAsyncResource,
@@ -102,6 +107,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             @Value("${valintalaskentakoostepalvelu.kirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
+        this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.ataruAsyncResource = ataruAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
@@ -329,10 +335,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF = hakijatF.thenComposeAsync(hakijat -> hakemuksetByOids(hakuOid, hakijat.stream()
                         .map(HakijaDTO::getHakemusOid)
                         .collect(Collectors.toList())));
+                CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
                 CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
                 CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF.thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, null));
 
-                CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, hakukohteetF, osoitteetF).get(1, TimeUnit.HOURS);
+                CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, syotetytArvotF, hakukohteetF, osoitteetF).get(1, TimeUnit.HOURS);
                 List<Pair<String, Future<String>>> fs = hakijatF.join().stream()
                         .flatMap(hakija -> hakija.getHakutoiveet().stream())
                         .filter(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
@@ -349,6 +356,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                 hakukohteetF.join(),
                                                 hyvaksytytHakijat(hakijatF.join(), hakemuksetF.join(), hakukohdeOid, null, false),
                                                 hakemuksetF.join(),
+                                                syotetytArvotF.join(),
                                                 hakukohdeOid,
                                                 hakuOid,
                                                 Optional.empty(),
@@ -426,6 +434,28 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .thenApplyAsync(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
     }
 
+    private CompletableFuture<Map<String, List<SyotettyArvoDTO>>> syotetytArvotByHakukohde(String hakukohdeOid) {
+        return this.valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid)
+                .thenApplyAsync(valinnanvaiheet -> valinnanvaiheet.stream()
+                        .flatMap(valinnanvaihe -> valinnanvaihe.getValintatapajonot().stream())
+                        .flatMap(valintatapajono -> valintatapajono.getJonosijat().stream())
+                        .collect(Collectors.toMap(
+                                JonosijaDTO::getHakemusOid,
+                                JonosijaDTO::getSyotetytArvot,
+                                (l, ll) -> { l.addAll(ll); return l; }
+                        )));
+    }
+
+    private CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> hakijoidenSyotetytArvot(List<HakijaDTO> hakijat) {
+        return CompletableFutureUtil.sequence(
+                hakijat.stream()
+                        .flatMap(hakija -> hakija.getHakutoiveet().stream())
+                        .map(HakutoiveDTO::getHakukohdeOid)
+                        .distinct()
+                        .collect(Collectors.toMap(Function.identity(), this::syotetytArvotByHakukohde))
+        );
+    }
+
     private CompletableFuture<String> muodostaHyvaksymiskirjeet(
             DokumenttiProsessi prosessi,
             CompletableFuture<ParametritParser> haunParametritF,
@@ -441,7 +471,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         CompletableFuture<Map<String, Koodi>> postinumerotF = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
         CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF.thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, asiointikieli));
         CompletableFuture<String> vakiosisaltoF = this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, hakukohteetF, osoitteetF, vakiosisaltoF)
+        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
+        return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, syotetytArvotF, hakukohteetF, osoitteetF, vakiosisaltoF)
                 .thenApplyAsync(v -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                         maatjavaltiot1F.join(),
                         postinumerotF.join(),
@@ -449,6 +480,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         hakukohteetF.join(),
                         hakijatF.join(),
                         hakemuksetF.join(),
+                        syotetytArvotF.join(),
                         hyvaksymiskirjeDTO.getHakukohdeOid(),
                         hyvaksymiskirjeDTO.getHakuOid(),
                         Optional.ofNullable(asiointikieli),
@@ -473,13 +505,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
         CompletableFuture<Map<String, Koodi>> maatjavaltiot1F = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         CompletableFuture<Map<String, Koodi>> postinumerotF = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
-        return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, hakijatF, hakemuksetF, hakukohteetF)
+        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
+        return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, hakijatF, hakemuksetF, hakukohteetF, syotetytArvotF)
                 .thenApplyAsync(v -> JalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(
                         maatjavaltiot1F.join(),
                         postinumerotF.join(),
                         jalkiohjauskirjeDTO.getKielikoodi(),
                         hakijatF.join(),
                         hakemuksetF.join(),
+                        syotetytArvotF.join(),
                         hakukohteetF.join(),
                         jalkiohjauskirjeDTO.getHakuOid(),
                         jalkiohjauskirjeDTO.getTemplateName(),

@@ -17,13 +17,13 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
+import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +48,7 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
             Map<String, HakemusWrapper> hakemukset,
+            Map<String, Map<String, List<SyotettyArvoDTO>>> syotetytArvot,
             String hakukohdeOidFromRequest,
             String hakuOid,
             Optional<String> asiointikieli,
@@ -82,7 +83,8 @@ public class HyvaksymiskirjeetKomponentti {
                 final List<Map<String, Object>> tulosList = new ArrayList<>();
 
                 for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                    Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(hyvaksymiskirjeessaKaytetytHakukohteet, hakukohdeOid, preferoituKielikoodi, hakutoive);
+                    List<SyotettyArvoDTO> arvot = syotetytArvot.get(hakutoive.getHakukohdeOid()).getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
+                    Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(hyvaksymiskirjeessaKaytetytHakukohteet, hakukohdeOid, preferoituKielikoodi, hakutoive, arvot);
 
                     StringBuilder omatPisteet = new StringBuilder();
                     StringBuilder hyvaksytyt = new StringBuilder();

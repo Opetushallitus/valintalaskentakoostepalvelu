@@ -209,7 +209,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                             : Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))).timeout(5, MINUTES).blockingFirst();
                             hk = valintaTulosServiceAsyncResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).timeout(5, MINUTES).toFuture().get();
                             lukuvuosimaksus = valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(hakukohdeOid, auditSession).timeout(5, MINUTES).toFuture().get();
-                            valinnanvaiheet = valintalaskentaResource.laskennantulokset(hakukohdeOid).timeout(1, MINUTES).toFuture().get();
+                            valinnanvaiheet = valintalaskentaResource.laskennantulokset(hakukohdeOid).get(1, MINUTES);
                             hakuDTO = haeHakuTarjonnaltaKomponentti.getHaku(hakuOid);
 
                         } catch (Exception e) {
