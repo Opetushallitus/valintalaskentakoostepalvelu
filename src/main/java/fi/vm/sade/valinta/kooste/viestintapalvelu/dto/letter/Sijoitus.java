@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
@@ -10,6 +9,7 @@ import java.util.Optional;
 public class Sijoitus {
     private String nimi;
     private String tila;
+    private boolean hyvaksytty;
     private String tilanKuvaus;
     private String hyvaksymisenEhto;
     private String oma;
@@ -22,6 +22,7 @@ public class Sijoitus {
                     String preferoituKielikoodi) {
         this.nimi = valintatapajono.getValintatapajonoNimi();
         this.tila = HakemusUtil.tilaConverter(valintatapajono, preferoituKielikoodi);
+        this.hyvaksytty = valintatapajono.getTila().isHyvaksytty();
         this.tilanKuvaus = valintatapajono.getTilanKuvaukset().get(preferoituKielikoodi);
         if (valintatapajono.getTila().isHyvaksytty() && valintatapajono.isEhdollisestiHyvaksyttavissa()) {
             switch (preferoituKielikoodi) {
@@ -59,6 +60,10 @@ public class Sijoitus {
 
     public String getTila() {
         return tila;
+    }
+
+    public boolean isHyvaksytty() {
+        return hyvaksytty;
     }
 
     public String getTilanKuvaus() {
