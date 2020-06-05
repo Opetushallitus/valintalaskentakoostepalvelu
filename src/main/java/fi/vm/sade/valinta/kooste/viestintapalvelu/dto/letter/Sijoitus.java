@@ -1,8 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 
 import java.util.Optional;
 
@@ -23,20 +24,10 @@ public class Sijoitus {
         this.nimi = valintatapajono.getValintatapajonoNimi();
         this.tila = HakemusUtil.tilaConverter(valintatapajono, preferoituKielikoodi);
         this.hyvaksytty = valintatapajono.getTila().isHyvaksytty();
-        this.tilanKuvaus = valintatapajono.getTilanKuvaukset().get(preferoituKielikoodi);
-        if (valintatapajono.getTila().isHyvaksytty() && valintatapajono.isEhdollisestiHyvaksyttavissa()) {
-            switch (preferoituKielikoodi) {
-                case KieliUtil.SUOMI:
-                    this.hyvaksymisenEhto = valintatapajono.getEhdollisenHyvaksymisenEhtoFI();
-                    break;
-                case KieliUtil.RUOTSI:
-                    this.hyvaksymisenEhto = valintatapajono.getEhdollisenHyvaksymisenEhtoSV();
-                    break;
-                case KieliUtil.ENGLANTI:
-                    this.hyvaksymisenEhto = valintatapajono.getEhdollisenHyvaksymisenEhtoEN();
-                    break;
-            }
-        }
+        this.tilanKuvaus = (valintatapajono.getTila() == HakemuksenTila.HYLATTY || valintatapajono.getTila() == HakemuksenTila.PERUUNTUNUT) ?
+                new Teksti(valintatapajono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, null) :
+                null;
+        this.hyvaksymisenEhto = Teksti.ehdollisenHyvaksymisenEhto(valintatapajono).getTeksti(preferoituKielikoodi, null);
         this.oma = Optional.ofNullable(valintatapajono.getHyvaksytty()).map(Object::toString).orElse(null);
         this.varasija = varasijaTeksti;
         this.pisteet = pisteet;
