@@ -127,18 +127,9 @@ public class KirjeetUtil {
         if (!hakutoiveenValintatapajonot.isEmpty()) {
             HakutoiveenValintatapajonoDTO firstValintatapajono = hakutoiveenValintatapajonot.get(0);
             varasijanumeroTeksti(firstValintatapajono, preferoituKielikoodi).ifPresent(varasijaTeksti -> tulokset.put("varasija", varasijaTeksti));
-            if (firstValintatapajono.getTila().isHyvaksytty() && firstValintatapajono.isEhdollisestiHyvaksyttavissa()) {
-                switch (preferoituKielikoodi) {
-                    case KieliUtil.SUOMI:
-                        tulokset.put("hyvaksymisenEhto", firstValintatapajono.getEhdollisenHyvaksymisenEhtoFI());
-                        break;
-                    case KieliUtil.RUOTSI:
-                        tulokset.put("hyvaksymisenEhto", firstValintatapajono.getEhdollisenHyvaksymisenEhtoSV());
-                        break;
-                    case KieliUtil.ENGLANTI:
-                        tulokset.put("hyvaksymisenEhto", firstValintatapajono.getEhdollisenHyvaksymisenEhtoEN());
-                        break;
-                }
+            String hyvaksymisenEhto = Teksti.ehdollisenHyvaksymisenEhto(firstValintatapajono).getTeksti(preferoituKielikoodi, null);
+            if (hyvaksymisenEhto != null) {
+                tulokset.put("hyvaksymisenEhto", hyvaksymisenEhto);
             }
             tulokset.put("hylkaysperuste", StringUtils.trimToNull(hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot)));
             tulokset.put("peruuntumisenSyy", StringUtils.trimToNull(peruuntumisenSyyText(preferoituKielikoodi, hakutoiveenValintatapajonot)));

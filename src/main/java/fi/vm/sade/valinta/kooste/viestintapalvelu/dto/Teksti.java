@@ -6,10 +6,12 @@ import static fi.vm.sade.valinta.kooste.util.KieliUtil.SUOMI;
 import static fi.vm.sade.valinta.kooste.util.KieliUtil.normalisoiKielikoodi;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
@@ -96,5 +98,15 @@ public class Teksti {
 
     public static String getTeksti(final Map<String, String> n) {
         return new Teksti(n).getTeksti();
+    }
+
+    public static Teksti ehdollisenHyvaksymisenEhto(HakutoiveenValintatapajonoDTO valintatapajono) {
+        Map<String, String> m = new HashMap<>();
+        if (valintatapajono.getTila().isHyvaksytty() && valintatapajono.isEhdollisestiHyvaksyttavissa()) {
+            m.put(SUOMI, valintatapajono.getEhdollisenHyvaksymisenEhtoFI());
+            m.put(RUOTSI, valintatapajono.getEhdollisenHyvaksymisenEhtoSV());
+            m.put(ENGLANTI, valintatapajono.getEhdollisenHyvaksymisenEhtoEN());
+        }
+        return new Teksti(m);
     }
 }
