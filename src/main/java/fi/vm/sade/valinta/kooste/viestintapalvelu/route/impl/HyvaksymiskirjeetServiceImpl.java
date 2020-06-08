@@ -562,7 +562,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         .anyMatch(valintatapajono -> valintatapajono.getTila().isHyvaksytty()))
                 .collect(Collectors.toList());
         if (l.isEmpty()) {
-            throw new IllegalStateException("Ei ole hakijoita, joille kirjeet voisi muodostaa");
+            // Palauta lokalisointi-avain virheviestille käyttöliittymää varten
+            throw new IllegalStateException("valintalaskenta.hyvaksymiskirjeet.eihakijoita");
         }
         return l;
     }
