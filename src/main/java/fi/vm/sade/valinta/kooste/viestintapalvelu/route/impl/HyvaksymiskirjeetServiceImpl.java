@@ -543,7 +543,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             } catch (Exception e) {
                 LOG.error(errorMessage, e);
                 prosessi.inkrementoiOhitettujaToita();
-                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(e.getMessage()));
+                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(
+                        e.getCause() != null ? e.getCause().getMessage() : e.getMessage()));
             }
         });
 
