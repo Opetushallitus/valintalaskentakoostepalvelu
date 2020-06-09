@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetFunktiokutsuDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktionimi;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,13 +67,13 @@ public class KoskiService {
         if (koskiHakukohdeOidFilter.test(hakukohdeOid)) {
             return CompletableFuture.allOf(valintaperusteet, hakemukset).thenComposeAsync(x -> {
                 Collection<HakemusWrapper> hakemusWrappers = hakemukset.join();
-                if (sisaltaaKoskiFunktioita(valintaperusteet.join())) {
+                if (sisaltaaKoskiFunktioitaLaskennassaMukanaOlevissaJonoissa(valintaperusteet.join())) {
                     LocalDate paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan = koskiOpiskeluoikeusHistoryService.etsiKoskiDatanLeikkuriPvm(
                         valintaperusteet.join(),
                         hakukohdeOid);
                     return haeKoskiOppijat(hakukohdeOid, hakemusWrappers, suoritustiedotDTO, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
                 } else {
-                    LOG.info("Ei haeta tietoja Koskesta hakukohteelle " + hakukohdeOid + " , koska siltä ei löydy Koski-tietoja käyttäviä valintaperusteita.");
+                    LOG.info("Ei haeta tietoja Koskesta hakukohteelle " + hakukohdeOid + " , koska siltä ei löydy Koski-tietoja käyttäviä valintaperusteita laskennassa mukana olevissa jonoissa.");
                     return CompletableFuture.completedFuture(Collections.emptyMap());
                 }
             });
@@ -111,15 +113,19 @@ public class KoskiService {
             });
     }
 
-    private boolean sisaltaaKoskiFunktioita(List<ValintaperusteetDTO> valintaperusteet) {
+    private boolean sisaltaaKoskiFunktioitaLaskennassaMukanaOlevissaJonoissa(List<ValintaperusteetDTO> valintaperusteet) {
         if (koskenFunktionimet.isEmpty()) {
             return false;
         }
         return valintaperusteet.stream()
             .anyMatch(valintaperusteetDTO -> valintaperusteetDTO.getValinnanVaihe().getValintatapajono().stream()
-                .anyMatch(jono -> jono.getJarjestyskriteerit().stream()
+                .anyMatch(jono -> mukanaLaskennassa(jono) && jono.getJarjestyskriteerit().stream()
                     .anyMatch(kriteeri ->
                         sisaltaaKoskiFunktioita(kriteeri.getFunktiokutsu()))));
+    }
+
+    private boolean mukanaLaskennassa(ValintatapajonoJarjestyskriteereillaDTO jono) {
+        return jono.getEiLasketaPaivamaaranJalkeen() == null || jono.getEiLasketaPaivamaaranJalkeen().after(new Date());
     }
 
     private boolean sisaltaaKoskiFunktioita(ValintaperusteetFunktiokutsuDTO funktiokutsu) {

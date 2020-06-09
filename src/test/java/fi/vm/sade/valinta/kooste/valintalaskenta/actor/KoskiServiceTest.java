@@ -26,6 +26,10 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +90,22 @@ public class KoskiServiceTest {
         assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
 
         assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+    }
+
+    @Test
+    public void koskestaEiHaetaDataaJosJononViimeinenLaskentapvmOnOhitettu() throws ExecutionException, InterruptedException {
+        final java.util.Date eilinen = Date.from(LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC));
+        KoskiService service = new KoskiService("ALL", koskifuntionimet, "ammatillinenkoulutus", 5, koskiAsyncResource);
+        koskiFunktionSisaltavaValintaperuste.get().forEach(valintaperusteetDTO ->
+            valintaperusteetDTO.getValinnanVaihe().getValintatapajono().forEach(jono ->
+                jono.setEiLasketaPaivamaaranJalkeen(eilinen)));
+
+        when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero)))
+            .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Tätähän ei pitänyt kutsua!")));
+
+        assertThat(service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+
+        verifyNoMoreInteractions(koskiAsyncResource);
     }
 
     @Test
