@@ -29,6 +29,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +40,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
     private final int MAX_POLL_INTERVAL_IN_SECONDS = 30;
     private final HttpClient httpclient;
+    private final ExecutorService lahetaLaskeDTOExecutor = Executors.newFixedThreadPool(1);
 
     public ValintalaskentaAsyncResourceImpl(@Qualifier("ValintalaskentaHttpClient") HttpClient httpclient) {
         super(TimeUnit.HOURS.toMillis(8));
@@ -150,23 +153,25 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     private CompletableFuture<String> lahetaYksittainenLaskeDto(LaskeDTO dto, Laskentakutsu laskentakutsu) {
-        final String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.lisaa.hakukohde.laskentakutsuun", laskentakutsu.getPollKey());
-        return httpclient.post(
-            url,
-            Duration.ofMinutes(10),
-            httpclient.createJsonBodyPublisher(dto, LaskeDTO.class),
-            builder -> builder
-                .header("Content-Type", "application/json")
-                .header("Accept", "text/plain"),
-            httpclient::parseTxt).whenComplete((tulos, poikkeus) -> {
-            if (poikkeus != null) {
-                LOG.error(String.format("Laskenta %s , hakukohde %s : Virhe lähetettäessä hakukohteen lisäämistä kutsuun valintalaskennalle osoitteeseen '%s'",
-                    laskentakutsu.getUuid(), dto.getHakukohdeOid(), url), poikkeus);
-            } else {
-                LOG.info(String.format("Laskenta %s , hakukohde %s : Saatiin valintalaskennalta hakukohteen lisäämiseen vastaus '%s'",
-                    laskentakutsu.getUuid(), dto.getHakukohdeOid(), tulos));
-            }
-        });
+        return CompletableFuture.supplyAsync(() -> {
+            final String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.lisaa.hakukohde.laskentakutsuun", laskentakutsu.getPollKey());
+            return httpclient.post(
+                    url,
+                    Duration.ofMinutes(10),
+                    httpclient.createJsonBodyPublisher(dto, LaskeDTO.class),
+                    builder -> builder
+                            .header("Content-Type", "application/json")
+                            .header("Accept", "text/plain"),
+                    httpclient::parseTxt).whenComplete((tulos, poikkeus) -> {
+                if (poikkeus != null) {
+                    LOG.error(String.format("Laskenta %s , hakukohde %s : Virhe lähetettäessä hakukohteen lisäämistä kutsuun valintalaskennalle osoitteeseen '%s'",
+                            laskentakutsu.getUuid(), dto.getHakukohdeOid(), url), poikkeus);
+                } else {
+                    LOG.info(String.format("Laskenta %s , hakukohde %s : Saatiin valintalaskennalta hakukohteen lisäämiseen vastaus '%s'",
+                            laskentakutsu.getUuid(), dto.getHakukohdeOid(), tulos));
+                }
+            }).join();
+        }, lahetaLaskeDTOExecutor);
     }
 
     private CompletableFuture<String> lahetaSuoritustiedot(SuoritustiedotDTO suoritustiedot, Laskentakutsu laskentakutsu) {
