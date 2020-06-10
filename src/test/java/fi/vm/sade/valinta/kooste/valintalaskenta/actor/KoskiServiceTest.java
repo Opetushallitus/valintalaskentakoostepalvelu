@@ -28,7 +28,6 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +38,7 @@ import java.util.concurrent.ExecutionException;
 
 public class KoskiServiceTest {
     private static final Gson GSON = new Gson();
+    private static final java.util.Date NYT = new java.util.Date();
     private final String koskifuntionimet = "HAEAMMATILLINENYTOARVOSANA,HAEAMMATILLINENYTOARVIOINTIASTEIKKO";
 
     private CompletableFuture<List<ValintaperusteetDTO>> koskiFunktionSisaltavaValintaperuste = luoKoskifunktionSisaltavaValintaperuste();
@@ -68,13 +68,13 @@ public class KoskiServiceTest {
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
-        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO).get();
+        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO, NYT).get();
         assertThat(koskiOppijatOppijanumeroittain.entrySet(), hasSize(1));
         assertEquals(koskiOppijatOppijanumeroittain.get(oppijanumero), koskiOppija);
         assertTrue(suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero));
         assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
 
-        assertThat(service.haeKoskiOppijat("jokumuuhakukohde", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+        assertThat(service.haeKoskiOppijat("jokumuuhakukohde", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO, NYT).get().entrySet(), is(empty()));
     }
 
     @Test
@@ -83,13 +83,13 @@ public class KoskiServiceTest {
 
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero))).thenReturn(CompletableFuture.completedFuture(koskioppijat));
 
-        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO).get();
+        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO, NYT).get();
         assertThat(koskiOppijatOppijanumeroittain.entrySet(), hasSize(1));
         assertEquals(koskiOppijatOppijanumeroittain.get(oppijanumero), koskiOppija);
         assertTrue(suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero));
         assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
 
-        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO, NYT).get().entrySet(), is(empty()));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class KoskiServiceTest {
         when(koskiAsyncResource.findKoskiOppijat(Collections.singletonList(oppijanumero)))
             .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Tätähän ei pitänyt kutsua!")));
 
-        assertThat(service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+        assertThat(service.haeKoskiOppijat("hakukohdeoid1", koskiFunktionSisaltavaValintaperuste, hakemukset, suoritustiedotDTO, NYT).get().entrySet(), is(empty()));
 
         verifyNoMoreInteractions(koskiAsyncResource);
     }
@@ -123,13 +123,13 @@ public class KoskiServiceTest {
                 JsonElement.class)));
 
         CompletableFuture<List<ValintaperusteetDTO>> valintaperuste = koskiDataaKayttavaValintaperuste("1.10.2019");
-        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", valintaperuste, hakemukset, suoritustiedotDTO).get();
+        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", valintaperuste, hakemukset, suoritustiedotDTO, NYT).get();
         assertThat(koskiOppijatOppijanumeroittain.entrySet(), hasSize(1));
         assertEquals(koskiOppijatOppijanumeroittain.get(oppijanumero), koskiOppija);
         assertTrue(suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero));
         assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
 
-        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO, NYT).get().entrySet(), is(empty()));
 
         verify(koskiAsyncResource).findKoskiOppijat(Collections.singletonList(oppijanumero));
         verify(koskiAsyncResource).findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 2);
@@ -152,13 +152,13 @@ public class KoskiServiceTest {
                 JsonElement.class)));
 
         CompletableFuture<List<ValintaperusteetDTO>> valintaperuste = koskiDataaKayttavaValintaperuste("30.9.2019");
-        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", valintaperuste, hakemukset, suoritustiedotDTO).get();
+        Map<String, KoskiOppija> koskiOppijatOppijanumeroittain = service.haeKoskiOppijat("hakukohdeoid1", valintaperuste, hakemukset, suoritustiedotDTO, NYT).get();
         assertThat(koskiOppijatOppijanumeroittain.entrySet(), hasSize(1));
         assertEquals(koskiOppijatOppijanumeroittain.get(oppijanumero), koskiOppija);
         assertTrue(suoritustiedotDTO.onKoskiopiskeluoikeudet(oppijanumero));
         assertEquals(GSON.toJson(koskiOppija.getOpiskeluoikeudet()), suoritustiedotDTO.haeKoskiOpiskeluoikeudetJson(oppijanumero));
 
-        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO).get().entrySet(), is(empty()));
+        assertThat(service.haeKoskiOppijat("hakukohdeoid1", kosketonValintaperuste, hakemukset, suoritustiedotDTO, NYT).get().entrySet(), is(empty()));
 
         verify(koskiAsyncResource).findKoskiOppijat(Collections.singletonList(oppijanumero));
         verify(koskiAsyncResource).findVersionOfOpiskeluoikeus("1.2.246.562.15.12442534343", 2);

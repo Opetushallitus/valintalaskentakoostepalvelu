@@ -63,11 +63,12 @@ public class KoskiService {
     public CompletableFuture<Map<String, KoskiOppija>> haeKoskiOppijat(String hakukohdeOid,
                                                                        CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet,
                                                                        CompletableFuture<List<HakemusWrapper>> hakemukset,
-                                                                       SuoritustiedotDTO suoritustiedotDTO) {
+                                                                       SuoritustiedotDTO suoritustiedotDTO,
+                                                                       Date nyt) {
         if (koskiHakukohdeOidFilter.test(hakukohdeOid)) {
             return CompletableFuture.allOf(valintaperusteet, hakemukset).thenComposeAsync(x -> {
                 Collection<HakemusWrapper> hakemusWrappers = hakemukset.join();
-                if (sisaltaaKoskiFunktioitaLaskennassaMukanaOlevissaJonoissa(valintaperusteet.join())) {
+                if (sisaltaaKoskiFunktioitaLaskennassaMukanaOlevissaJonoissa(valintaperusteet.join(), nyt)) {
                     LocalDate paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan = koskiOpiskeluoikeusHistoryService.etsiKoskiDatanLeikkuriPvm(
                         valintaperusteet.join(),
                         hakukohdeOid);
@@ -113,19 +114,19 @@ public class KoskiService {
             });
     }
 
-    private boolean sisaltaaKoskiFunktioitaLaskennassaMukanaOlevissaJonoissa(List<ValintaperusteetDTO> valintaperusteet) {
+    private boolean sisaltaaKoskiFunktioitaLaskennassaMukanaOlevissaJonoissa(List<ValintaperusteetDTO> valintaperusteet, Date nyt) {
         if (koskenFunktionimet.isEmpty()) {
             return false;
         }
         return valintaperusteet.stream()
             .anyMatch(valintaperusteetDTO -> valintaperusteetDTO.getValinnanVaihe().getValintatapajono().stream()
-                .anyMatch(jono -> mukanaLaskennassa(jono) && jono.getJarjestyskriteerit().stream()
+                .anyMatch(jono -> mukanaLaskennassa(jono, nyt) && jono.getJarjestyskriteerit().stream()
                     .anyMatch(kriteeri ->
                         sisaltaaKoskiFunktioita(kriteeri.getFunktiokutsu()))));
     }
 
-    private boolean mukanaLaskennassa(ValintatapajonoJarjestyskriteereillaDTO jono) {
-        return jono.getEiLasketaPaivamaaranJalkeen() == null || jono.getEiLasketaPaivamaaranJalkeen().after(new Date());
+    private boolean mukanaLaskennassa(ValintatapajonoJarjestyskriteereillaDTO jono, Date nyt) {
+        return jono.getEiLasketaPaivamaaranJalkeen() == null || jono.getEiLasketaPaivamaaranJalkeen().after(nyt);
     }
 
     private boolean sisaltaaKoskiFunktioita(ValintaperusteetFunktiokutsuDTO funktiokutsu) {

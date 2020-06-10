@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class LaskentaActorFactory {
         });
     }
 
-    private LaskentaActor createValintaryhmaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams a) {
+    private LaskentaActor createValintaryhmaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams a, Date nyt) {
         LaskentaActorParams fakeOnlyOneHakukohdeParams = new LaskentaActorParams(a.getLaskentaStartParams(), Collections.singletonList(new HakukohdeJaOrganisaatio()), a.getParametritDTO());
         fakeOnlyOneHakukohdeParams.setValintaryhmalaskenta(true);
         final SuoritustiedotDTO suoritustiedot = new SuoritustiedotDTO();
@@ -135,7 +136,7 @@ public class LaskentaActorFactory {
                     Observable<Pair<Collection<String>, List<LaskeDTO>>> recursiveSequentialFetch = just(of(hakukohdeOids, emptyList()));
 
                     Function<String, Observable<LaskeDTO>> fetchLaskeDTO = h -> Observable.fromFuture(fetchResourcesForOneLaskenta(
-                            auditSession, uuid, haku, h, a, true, true, suoritustiedot));
+                            auditSession, uuid, haku, h, a, true, true, suoritustiedot, nyt));
 
                     Observable<String> laskenta = fetchRecursively(fetchLaskeDTO, recursiveSequentialFetch).switchMap(hksAndDtos -> {
                         List<LaskeDTO> allLaskeDTOs = hksAndDtos.getRight();
@@ -157,13 +158,13 @@ public class LaskentaActorFactory {
         LOG.info("Laskenta split count asetettu arvoon {}", splitCount);
     }
 
-    private LaskentaActor createValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
+    private LaskentaActor createValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams, Date nyt) {
         final String uuid = actorParams.getUuid();
         return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
                 hakukohdeJaOrganisaatio -> {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     SuoritustiedotDTO suoritustiedot = new SuoritustiedotDTO();
-                    Observable<String> laskenta = Observable.fromFuture(fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, false, suoritustiedot))
+                    Observable<String> laskenta = Observable.fromFuture(fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, false, suoritustiedot, nyt))
                             .switchMap(timedSwitchMap((took, exception) -> {
                                 if (exception.isPresent()) {
                                     LOG.error("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt virheeseen: {}", uuid, millisToString(took), hakukohdeOid, exception.get());
@@ -193,6 +194,8 @@ public class LaskentaActorFactory {
 
     private LaskentaActor createValintalaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
+        final Date nyt = new Date();
+        LOG.info(String.format("Jos laskennassa %s on jonoja, joita ei lasketa %s jälkeen, ei haeta niille tietoja Koskesta.", actorParams.getUuid(), nyt));
         return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
                 hakukohdeJaOrganisaatio -> {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
@@ -200,7 +203,7 @@ public class LaskentaActorFactory {
 
 
                     SuoritustiedotDTO suoritustiedot = new SuoritustiedotDTO();
-                    Observable<String> laskenta = Observable.fromFuture(fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, true, suoritustiedot))
+                    Observable<String> laskenta = Observable.fromFuture(fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false, true, suoritustiedot, nyt))
                             .switchMap(timedSwitchMap((took, exception) -> {
                                 if (exception.isPresent()) {
                                     LOG.error("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt virheeseen: {}", uuid, millisToString(took), hakukohdeOid, exception.get());
@@ -213,14 +216,14 @@ public class LaskentaActorFactory {
         );
     }
 
-    private LaskentaActor createValintalaskentaJaValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
+    private LaskentaActor createValintalaskentaJaValintakoelaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams, Date nyt) {
         final String uuid = actorParams.getUuid();
         return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
                 hakukohdeJaOrganisaatio -> {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan + valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                     SuoritustiedotDTO suoritustiedot = new SuoritustiedotDTO();
-                    Observable<String> laskenta = Observable.fromFuture(fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false,true, suoritustiedot))
+                    Observable<String> laskenta = Observable.fromFuture(fetchResourcesForOneLaskenta(auditSession, uuid, haku, hakukohdeOid, actorParams, false,true, suoritustiedot, nyt))
                             .switchMap(timedSwitchMap((took, exception) -> {
                                 if (exception.isPresent()) {
                                     LOG.error("(Uuid={}) (Kesto {}s) Laskenta hakukohteelle {} on päättynyt virheeseen: {}", uuid, millisToString(took), hakukohdeOid, exception.get());
@@ -234,16 +237,18 @@ public class LaskentaActorFactory {
     }
 
     public LaskentaActor createLaskentaActor(AuditSession auditSession, LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
+        final Date nyt = new Date();
+        LOG.info(String.format("Jos laskennassa %s on jonoja, joita ei lasketa %s jälkeen, ei haeta niille tietoja Koskesta.", actorParams.getUuid(), nyt));
 
         if (LaskentaTyyppi.VALINTARYHMALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
             LOG.info("Muodostetaan VALINTARYHMALASKENTA");
             auditLogLaskentaStart(auditSession, actorParams, haku.getOid(),"VALINTARYHMALASKENTA");
-            return createValintaryhmaActor(auditSession, laskentaSupervisor, haku, actorParams);
+            return createValintaryhmaActor(auditSession, laskentaSupervisor, haku, actorParams, nyt);
         }
         if (LaskentaTyyppi.VALINTAKOELASKENTA.equals(actorParams.getLaskentaTyyppi())) {
             LOG.info("Muodostetaan VALINTAKOELASKENTA");
             auditLogLaskentaStart(auditSession, actorParams, haku.getOid(),"VALINTAKOELASKENTA");
-            return createValintakoelaskentaActor(auditSession, laskentaSupervisor, haku, actorParams);
+            return createValintakoelaskentaActor(auditSession, laskentaSupervisor, haku, actorParams, nyt);
         }
         if (LaskentaTyyppi.VALINTALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
             LOG.info("Muodostetaan VALINTALASKENTA");
@@ -252,7 +257,7 @@ public class LaskentaActorFactory {
         }
         LOG.info("Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}", actorParams.getValinnanvaihe(), actorParams.isValintakoelaskenta());
         auditLogLaskentaStart(auditSession, actorParams, haku.getOid(),"KAIKKI VAIHEET LASKENTA");
-        return createValintalaskentaJaValintakoelaskentaActor(auditSession, laskentaSupervisor, haku, actorParams);
+        return createValintalaskentaJaValintakoelaskentaActor(auditSession, laskentaSupervisor, haku, actorParams, nyt);
     }
 
     private void auditLogLaskentaStart(AuditSession auditSession, LaskentaActorParams actorParams, String hakuOid, String tyyppi) {
@@ -389,7 +394,8 @@ public class LaskentaActorFactory {
                                                                      LaskentaActorParams actorParams,
                                                                      boolean retryHakemuksetAndOppijat,
                                                                      boolean withHakijaRyhmat,
-                                                                     SuoritustiedotDTO suoritustiedotDTO) {
+                                                                     SuoritustiedotDTO suoritustiedotDTO,
+                                                                     Date nyt) {
         final String hakuOid = haku.getOid();
 
         PyynnonTunniste tunniste = new PyynnonTunniste("Please put individual resource source identifier here!", uuid, hakukohdeOid);
@@ -434,7 +440,7 @@ public class LaskentaActorFactory {
             : CompletableFuture.completedFuture(emptyList());
         CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOid = createResurssiFuture(tunniste,
             "koskiService.haeKoskiOppijat",
-            () -> koskiService.haeKoskiOppijat(hakukohdeOid, valintaperusteet, hakemukset, suoritustiedotDTO));
+            () -> koskiService.haeKoskiOppijat(hakukohdeOid, valintaperusteet, hakemukset, suoritustiedotDTO, nyt));
 
         LOG.info("(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.", uuid, hakukohdeOid);
         return getLaskeDtoFuture(
