@@ -273,7 +273,7 @@ public class ValintalaskentaTest {
 
         LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(auditSession, uuid, hakuOid, false, vaiheenNumero, null, hakukohdeJaOrganisaatios, LaskentaTyyppi.VALINTARYHMA);
 
-        when(valintalaskentaAsyncResource.laskeJaSijoittele(anyList(), any(SuoritustiedotDTO.class))).thenReturn(Observable.just("Valintaryhmälaskenta onnistui"));
+        when(valintalaskentaAsyncResource.laskeJaSijoittele(eq(uuid), anyList(), any(SuoritustiedotDTO.class))).thenReturn(Observable.just("Valintaryhmälaskenta onnistui"));
         when(seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, Optional.empty())).thenReturn(Observable.just(Response.noContent().build()));
         when(seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle()).thenReturn(Observable.just(Optional.empty()));
 
@@ -289,7 +289,7 @@ public class ValintalaskentaTest {
         verify(valintaperusteetAsyncResource).haeHakijaryhmat(eq(hakukohde3Oid));
         Mockito.verifyNoMoreInteractions(valintaperusteetAsyncResource);
 
-        verify(valintalaskentaAsyncResource).laskeJaSijoittele(anyList(), any(SuoritustiedotDTO.class));
+        verify(valintalaskentaAsyncResource).laskeJaSijoittele(eq(uuid), anyList(), any(SuoritustiedotDTO.class));
         Mockito.verifyNoMoreInteractions(valintalaskentaAsyncResource);
 
         verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();

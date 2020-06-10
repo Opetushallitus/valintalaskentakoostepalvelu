@@ -145,7 +145,7 @@ public class LaskentaActorFactory {
                         } else if(allLaskeDTOs.size() != hakukohdeOids.size()) {
                             throw new RuntimeException("Hakukohteita oli " + hakukohdeOids.size() + " mutta haettuja laskeDTOita oli " + allLaskeDTOs.size() + "!");
                         }
-                        return valintalaskentaAsyncResource.laskeJaSijoittele(allLaskeDTOs, suoritustiedot);
+                        return valintalaskentaAsyncResource.laskeJaSijoittele(uuid, allLaskeDTOs, suoritustiedot);
                     });
                     return laskenta;
                 }
