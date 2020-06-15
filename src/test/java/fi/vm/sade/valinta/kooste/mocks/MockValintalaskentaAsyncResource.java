@@ -58,7 +58,7 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     }
 
     @Override
-    public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
+    public Observable<String> laskeJaSijoittele(String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
         throw new UnsupportedOperationException();
     }
 

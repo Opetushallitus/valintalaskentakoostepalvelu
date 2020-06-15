@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.Laskentakutsu;
@@ -23,17 +24,23 @@ import org.springframework.stereotype.Service;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import java.net.http.HttpRequest;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource implements ValintalaskentaAsyncResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
     private final int MAX_POLL_INTERVAL_IN_SECONDS = 30;
     private final HttpClient httpclient;
+    private final ExecutorService lahetaLaskeDTOExecutor = Executors.newFixedThreadPool(1);
 
     public ValintalaskentaAsyncResourceImpl(@Qualifier("ValintalaskentaHttpClient") HttpClient httpclient) {
         super(TimeUnit.HOURS.toMillis(8));
@@ -99,18 +106,111 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
     }
 
     @Override
-    public Observable<String> laskeJaSijoittele(List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
-        Laskentakutsu laskentakutsu = new Laskentakutsu(lista, suoritustiedot);
+    public Observable<String> laskeJaSijoittele(String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
+        Laskentakutsu laskentakutsu = Laskentakutsu.luoTyhjaValintaryhmaLaskentaPalasissaSiirtoaVarten(uuid);
         if (LOG.isDebugEnabled()) {
             lista.forEach(this::logitaKokotiedot);
             logitaSuoritustietojenKoko(suoritustiedot);
-            LOG.debug(String.format("Suoritustietojen koko base64-gzippinä: %d", laskentakutsu.getSuoritustiedotDtoBase64Gzip().length()));
         }
+
+        LOG.info(String.format("Laskenta %s : siirretään %d hakukohteen laskennan käynnistys paloissa valintalaskennalle.",
+            laskentakutsu.getUuid(), lista.size()));
+
         try {
-            return kutsuRajapintaaPollaten("valintalaskenta-laskenta-service.valintalaskenta.laskejasijoittele", laskentakutsu);
+            return kutsuRajapintaaPollaten(laskentakutsu, (aloitaLaskentakutsunLahettaminenPaloissa(laskentakutsu)
+                .thenComposeAsync(x -> CompletableFutureUtil.sequence(lista.stream()
+                    .map(dto -> lahetaYksittainenLaskeDto(dto, laskentakutsu))
+                    .collect(Collectors.toList())))
+                .thenComposeAsync(x -> lahetaSuoritustiedot(suoritustiedot, laskentakutsu))
+                .thenComposeAsync(x -> {
+                    LOG.info(String.format("Laskenta %s : kaikkien %d hakukohteen laskentaresurssit on saatu siirrettyä paloissa valintalaskennalle. Lähetetään käynnistyskutsu!",
+                        laskentakutsu.getUuid(), lista.size()));
+                    return kaynnistaPaloissaSiirrettyLaskenta(laskentakutsu);
+                })));
         } catch (Exception e) {
+            LOG.error("Valintaryhmälaskennan käynnistyksessä tapahtui virhe", e);
             throw e;
         }
+    }
+
+    private CompletableFuture<String> aloitaLaskentakutsunLahettaminenPaloissa(Laskentakutsu laskentakutsu) {
+        final String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.aloita.laskentakutsu.paloissa", laskentakutsu.getPollKey());
+        return httpclient.post(
+            url,
+            Duration.ofMinutes(1),
+            httpclient.createJsonBodyPublisher(laskentakutsu, Laskentakutsu.class),
+            builder -> builder
+                .header("Content-Type", "application/json")
+                .header("Accept", "text/plain"),
+            httpclient::parseTxt).whenComplete((tulos, poikkeus) -> {
+            if (poikkeus != null) {
+                LOG.error(String.format("Laskenta %s : Virhe lähetettäessä paloissa siirrettävän laskentakutsun aloitusta valintalaskennalle osoitteeseen '%s'",
+                    laskentakutsu.getUuid(), url), poikkeus);
+            } else {
+                LOG.info(String.format("Laskenta %s : Saatiin valintalaskennalta paloissa siirrettävän laskentakutsun aloitukseen vastaus '%s'", laskentakutsu.getUuid(), tulos));
+            }
+        });
+    }
+
+    private CompletableFuture<String> lahetaYksittainenLaskeDto(LaskeDTO dto, Laskentakutsu laskentakutsu) {
+        return CompletableFuture.supplyAsync(() -> {
+            final String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.lisaa.hakukohde.laskentakutsuun", laskentakutsu.getPollKey());
+            return httpclient.post(
+                    url,
+                    Duration.ofMinutes(10),
+                    httpclient.createJsonBodyPublisher(dto, LaskeDTO.class),
+                    builder -> builder
+                            .header("Content-Type", "application/json")
+                            .header("Accept", "text/plain"),
+                    httpclient::parseTxt).whenComplete((tulos, poikkeus) -> {
+                if (poikkeus != null) {
+                    LOG.error(String.format("Laskenta %s , hakukohde %s : Virhe lähetettäessä hakukohteen lisäämistä kutsuun valintalaskennalle osoitteeseen '%s'",
+                            laskentakutsu.getUuid(), dto.getHakukohdeOid(), url), poikkeus);
+                } else {
+                    LOG.info(String.format("Laskenta %s , hakukohde %s : Saatiin valintalaskennalta hakukohteen lisäämiseen vastaus '%s'",
+                            laskentakutsu.getUuid(), dto.getHakukohdeOid(), tulos));
+                }
+            }).join();
+        }, lahetaLaskeDTOExecutor);
+    }
+
+    private CompletableFuture<String> lahetaSuoritustiedot(SuoritustiedotDTO suoritustiedot, Laskentakutsu laskentakutsu) {
+        final String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.lisaa.suoritustiedot.laskentakutsuun", laskentakutsu.getPollKey());
+        return httpclient.post(
+            url,
+            Duration.ofMinutes(10),
+            HttpRequest.BodyPublishers.ofString(Laskentakutsu.toBase64Gzip(suoritustiedot), StandardCharsets.UTF_8),
+            builder -> builder
+                .header("Content-Type", "text/plain")
+                .header("Accept", "text/plain"),
+            httpclient::parseTxt).whenComplete((tulos, poikkeus) -> {
+            if (poikkeus != null) {
+                LOG.error(String.format("Laskenta %s : Virhe lähetettäessä suoritustietojen lisäämistä kutsuun valintalaskennalle osoitteeseen '%s'",
+                    laskentakutsu.getUuid(), url), poikkeus);
+            } else {
+                LOG.info(String.format("Laskenta %s : Saatiin valintalaskennalta suoritustietojen lisäämiseen vastaus '%s'",
+                    laskentakutsu.getUuid(), tulos));
+            }
+        });
+    }
+
+    private CompletableFuture<String> kaynnistaPaloissaSiirrettyLaskenta(Laskentakutsu laskentakutsu) {
+        final String url = getUrl("valintalaskenta-laskenta-service.valintalaskenta.kaynnista.paloissa.aloitettu.laskenta", laskentakutsu.getPollKey());
+        return httpclient.post(
+            url,
+            Duration.ofMinutes(10),
+            httpclient.createJsonBodyPublisher(laskentakutsu, Laskentakutsu.class),
+            builder -> builder
+                .header("Content-Type", "application/json")
+                .header("Accept", "text/plain"),
+            httpclient::parseTxt).whenComplete((tulos, poikkeus) -> {
+            if (poikkeus != null) {
+                LOG.error(String.format("Laskenta %s : Virhe lähetettäessä paloissa siirretyn laskentakutsun aloitusta valintalaskennalle osoitteeseen '%s'",
+                    laskentakutsu.getUuid(), url), poikkeus);
+            } else {
+                LOG.info(String.format("Laskenta %s : Saatiin valintalaskennalta paloissa siirretyn laskennan aloitukseen vastaus '%s'", laskentakutsu.getUuid(), tulos));
+            }
+        });
     }
 
     @Override
@@ -153,6 +253,10 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
                 .header("Accept", "text/plain"),
             httpclient::parseTxt);
 
+        return kutsuRajapintaaPollaten(laskentakutsu, requestFuture);
+    }
+
+    private Observable<String> kutsuRajapintaaPollaten(Laskentakutsu laskentakutsu, CompletableFuture<String> requestFuture) {
         return Observable.fromFuture(requestFuture).switchMap(rval -> {
             if (UUSI.equals(rval)) {
                 LOG.info("Saatiin tieto, että uusi laskenta on luotu (Pollkey: {}). Pollataan sen tilaa kunnes se on päättynyt (VALMIS tai VIRHE).", laskentakutsu.getPollKey());
