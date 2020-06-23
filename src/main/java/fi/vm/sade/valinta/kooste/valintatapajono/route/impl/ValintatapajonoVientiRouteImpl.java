@@ -107,12 +107,12 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {
                             LOG.error("Hakemuspalvelun virhe", e);
-                            dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.HAKU, "Hakemuspalvelulta ei saatu hakemuksia hakukohteelle", ""));
+                            dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.HAKU, "Hakemuspalvelulta ei saatu hakemuksia hakukohteelle", e.getMessage()));
                             throw e;
                         }
                         if (hakemukset.isEmpty()) {
                             LOG.error("Nolla hakemusta!");
-                            dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.HAKU, "Hakukohteella ei ole hakemuksia!", ""));
+                            dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.HAKU, "Hakukohteella ei ole hakemuksia!", "Nolla hakemusta!"));
                             throw new RuntimeException("Hakukohteelle saatiin tyhjä hakemusjoukko!");
                         }
                         final List<ValintatietoValinnanvaiheDTO> valinnanvaiheet;
@@ -121,7 +121,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {
                             LOG.error("Valinnanvaiheiden haku virhe", e);
-                            dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.VALINTALASKENTA, "Valintalaskennalta ei saatu valinnanvaiheita", ""));
+                            dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.VALINTALASKENTA, "Valintalaskennalta ei saatu valinnanvaiheita", e.getMessage()));
                             throw e;
                         }
                         InputStream xlsx;
@@ -132,7 +132,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {
                             LOG.error("Valintatapajono excelin luonti virhe", e);
-                            dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Valintatapajono exceliä ei saatu luotua!", ""));
+                            dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Valintatapajono exceliä ei saatu luotua!", e.getMessage()));
                             throw e;
                         }
                         try {
