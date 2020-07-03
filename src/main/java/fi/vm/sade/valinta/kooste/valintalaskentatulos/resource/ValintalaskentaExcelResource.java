@@ -210,7 +210,7 @@ public class ValintalaskentaExcelResource {
                     LOG.error("Valintalaskennan tulokset -excelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
                     asyncResponse.resume(
                             Response
-                                    .ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL)
+                                    .ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Virhe: " + e.getMessage()}}), APPLICATION_VND_MS_EXCEL)
                                     .header("content-disposition", "inline; filename=yritauudelleen.xls")
                                     .build()
                     );

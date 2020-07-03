@@ -39,6 +39,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -89,13 +90,13 @@ public class ValintatapajonoResource {
     @Path("/tuonti")
     @Consumes("application/octet-stream")
     @Produces("text/plain")
-    @ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = ProsessiId.class)
+    @ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = List.class)
     public void tuonti(@QueryParam("hakuOid") String hakuOid,
-                       @QueryParam("hakukohdeOid") String hakukohdeOid,
-                       @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-                       InputStream file,
-                       @Suspended AsyncResponse asyncResponse,
-                       @Context HttpServletRequest request) {
+                               @QueryParam("hakukohdeOid") String hakukohdeOid,
+                               @QueryParam("valintatapajonoOid") String valintatapajonoOid,
+                               InputStream file,
+                               @Suspended AsyncResponse asyncResponse,
+                               @Context HttpServletRequest request) {
         final User user = AuditLog.getUser(request);
         asyncResponse.setTimeout(1L, MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
@@ -131,7 +132,7 @@ public class ValintatapajonoResource {
     @Path("/tuonti/json")
     @Consumes("application/json")
     @Produces("text/plain")
-    @ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = String.class)
+    @ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = List.class)
     public void tuonti(@QueryParam("hakuOid") String hakuOid,
                        @QueryParam("hakukohdeOid") String hakukohdeOid,
                        @QueryParam("valintatapajonoOid") String valintatapajonoOid,

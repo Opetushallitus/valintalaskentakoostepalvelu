@@ -27,13 +27,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.HEAD;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -56,7 +53,7 @@ public class ValintatapajonoTuontiService {
     @Autowired
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
-    public void tuo (BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
+    public void tuo(BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
         final String hakuOid,
         final String hakukohdeOid,
         final String tarjoajaOid,
@@ -93,28 +90,21 @@ public class ValintatapajonoTuontiService {
                                 try {
                                     valinnanvaihe.getValintatapajonot()
                                             .forEach(
-                                                    v -> {
-                                                        v.getJonosijat().forEach(jonosija -> {
-                                                            Map<String,String> additionalAuditFields = new HashMap<>();
-                                                            additionalAuditFields.put("hakuOid", hakuOid);
-                                                            additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
-                                                            additionalAuditFields.put("valinnanvaiheOid", valinnanvaihe.getValinnanvaiheoid());
-                                                            additionalAuditFields.put("valintatapajonoOid", v.getValintatapajonooid());
-                                                            AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, jonosija.getHakijaOid(), Changes.addedDto(jonosija), additionalAuditFields);
-                                                        });
-                                                    }
+                                                    v -> v.getJonosijat().forEach(jonosija -> {
+                                                        Map<String,String> additionalAuditFields = new HashMap<>();
+                                                        additionalAuditFields.put("hakuOid", hakuOid);
+                                                        additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
+                                                        additionalAuditFields.put("valinnanvaiheOid", valinnanvaihe.getValinnanvaiheoid());
+                                                        additionalAuditFields.put("valintatapajonoOid", v.getValintatapajonooid());
+                                                        AuditLog.log(KoosteAudit.AUDIT, user, ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL, ValintaResource.VALINTATAPAJONOSERVICE, jonosija.getHakijaOid(), Changes.addedDto(jonosija), additionalAuditFields);
+                                                    })
                                             );
                                 } catch (Throwable t) {
                                     LOG.error("Audit logitus epäonnistui", t);
                                 }
                                 dokumentinSeurantaAsyncResource.paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS).subscribe(
-                                        dontcare -> {
-                                            LOG.error("Saatiin paivitettya dokId");
-                                        },
-                                        dontcare ->
-                                        {
-                                            LOG.error("Ei saatu paivitettya!", dontcare);
-                                        });
+                                        dontcare -> LOG.error("Saatiin paivitettya dokId"),
+                                        dontcare -> LOG.error("Ei saatu paivitettya!", dontcare));
                             },
                             poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef));
                     LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
@@ -174,7 +164,8 @@ public class ValintatapajonoTuontiService {
                 }, poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef));
     }
 
-    private PoikkeusKasittelijaSovitin poikkeusKasittelija(String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
+    private PoikkeusKasittelijaSovitin poikkeusKasittelija(
+            String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
         return new PoikkeusKasittelijaSovitin(poikkeus -> {
             if (poikkeus == null) {
                 LOG.error("###Poikkeus tuonnissa {}\r\n###", viesti);
@@ -182,7 +173,7 @@ public class ValintatapajonoTuontiService {
                 LOG.error("###Poikkeus tuonnissa :" + viesti + "###", poikkeus);
             }
             try {
-                asyncResponse.resume(Response.serverError().entity(viesti).build());
+                asyncResponse.resume(Response.serverError().entity(viesti + (poikkeus != null ? " poikkeus: " + poikkeus.getMessage() : "")).build());
             } catch (Throwable t) {
                 // ei väliä vaikka response jos tehty
             }
@@ -191,9 +182,7 @@ public class ValintatapajonoTuontiService {
                 if (dokumenttiId != null) {
                     dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti))).subscribe(
                             dontcare -> {},
-                            dontcare -> {
-                                LOG.error("Virheen ilmoittamisessa virhe!", dontcare);
-                            });
+                            dontcare -> LOG.error("Virheen ilmoittamisessa virhe!", dontcare));
                 }
             } catch (Throwable t) {
                 LOG.error("Odottamaton virhe", t);
