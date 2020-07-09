@@ -150,7 +150,7 @@ public class ValintalaskentaExcelResource {
 
                                                 InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(VastaanottoFilterUtil.nullifyVastaanottoBasedOnHakemuksenTila(valintatulokset, hakukohde), opetuskieli,
                                                         hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, lukuvuosimaksut, hakukohde, haku, valinnanvaiheet);
-                                                return dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", DateTime.now().plusHours(24).toDate().getTime(), Collections.emptyList(), "application/vnd.ms-excel", xls);
+                                                return dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xlsx", DateTime.now().plusHours(24).toDate().getTime(), Collections.emptyList(), "application/vnd.ms-excel", xls);
                                             } catch (Throwable e) {
                                                 LOG.error("Dokumentin generointi epäonnistui", e);
                                                 p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumentin generointi", e.getMessage()));

@@ -214,7 +214,7 @@ public class ValintalaskentaTulosExcelTest {
             final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
 
             assertTrue(excelData != null);
-            Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
+            Collection<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
 
             assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
             assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
@@ -331,7 +331,7 @@ public class ValintalaskentaTulosExcelTest {
             String storedDocumentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, new ProsessiId(dokumenttiJSON.get("id").toString()));
             final InputStream excelData = MockDokumenttiAsyncResource.getStoredDocument(storedDocumentId);
             assertTrue(excelData != null);
-            Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
+            Collection<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
             assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
             assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
             // Ei osallistujat ei tule mukaan

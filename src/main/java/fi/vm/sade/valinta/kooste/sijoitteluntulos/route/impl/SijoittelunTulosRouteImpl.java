@@ -218,7 +218,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
                         try {
                             if (pakkaaTiedostotTarriin) {
-                                Tiedosto tiedosto = new Tiedosto("sijoitteluntulos_" + hakukohdeOid + ".xls", IOUtils.toByteArray(
+                                Tiedosto tiedosto = new Tiedosto("sijoitteluntulos_" + hakukohdeOid + ".xlsx", IOUtils.toByteArray(
                                         sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi, hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk, hakuDTO, valinnanvaiheet)));
                                 prosessi.getValmiit().add(new Valmis(tiedosto, hakukohdeOid, tarjoajaOid));
                                 return;
@@ -227,7 +227,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 try {
                                     String id = generateId();
                                     String finalTarjoajaOid = tarjoajaOid;
-                                    dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", getTimeToLive(),
+                                    dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xlsx", getTimeToLive(),
                                             dokumenttiprosessi(exchange).getTags(),
                                             "application/vnd.ms-excel", input).subscribe(
                                                     ok -> {
