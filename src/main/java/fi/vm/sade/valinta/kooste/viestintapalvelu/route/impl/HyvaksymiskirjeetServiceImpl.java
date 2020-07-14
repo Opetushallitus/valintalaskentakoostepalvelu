@@ -272,7 +272,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             asiointikieli,
                             true,
                             Arrays.asList(
-                                    ContentStructureType.letter,
+                                    //ContentStructureType.letter,
                                     ContentStructureType.accessibleHtml
                             )
                     );
@@ -308,7 +308,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             jalkiohjauskirjeDTO,
                             true,
                             Arrays.asList(
-                                    ContentStructureType.letter,
+                                    //ContentStructureType.letter,
                                     ContentStructureType.accessibleHtml
                             )
                     );
