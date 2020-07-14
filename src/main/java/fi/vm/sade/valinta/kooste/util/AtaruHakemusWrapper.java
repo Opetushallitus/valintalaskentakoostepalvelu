@@ -166,7 +166,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     }
 
     @Override
-    public boolean getVainSahkoinenViestinta() { return false; }
+    public boolean getVainSahkoinenViestinta() { return true; }
 
     @Override
     public boolean getLupaTulosEmail() {
