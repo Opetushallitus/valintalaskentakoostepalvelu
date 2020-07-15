@@ -181,7 +181,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
-        mockHaku1Kutsu();
+        mockHaku1KutsuToinenAste();
         mockValintalaskentaKutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":true).*");
         mockKoodisto();
@@ -207,7 +207,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                         .buildHakuappHakemus()
         ));
         mockHakukohde1Kutsu();
-        mockHaku1Kutsu();
+        mockHaku1KutsuToinenAste();
         mockValintalaskentaKutsu();
         mockLetterKutsut(".*010111A123.*(?=skipIPosti\":false).*010111A321.*(?=skipIPosti\":false).*");
         mockKoodisto();

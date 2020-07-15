@@ -50,6 +50,7 @@ public class JalkiohjauskirjeetKomponentti {
             @Property("sisalto") String sisalto,
             @Property("tag") String tag,
             boolean sahkoinenKorkeakoulunMassaposti,
+            boolean isKkHaku,
             List<ContentStructureType> sisaltotyypit
     ) {
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
@@ -127,7 +128,7 @@ public class JalkiohjauskirjeetKomponentti {
         viesti.setOrganizationOid(null);
         viesti.setTag(tag);
         viesti.setTemplateName(templateName);
-        viesti.setIposti(true);
+        viesti.setIposti(sahkoinenKorkeakoulunMassaposti && isKkHaku ? false : true);
         viesti.setSkipDokumenttipalvelu(sahkoinenKorkeakoulunMassaposti);
         Map<String, Object> templateReplacements = Maps.newHashMap();
         templateReplacements.put("sisalto", sisalto);
