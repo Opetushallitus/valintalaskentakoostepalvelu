@@ -464,7 +464,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF,
             HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
             String asiointikieli,
-            boolean sahkoinenKorkeakoulunMassaposti,
+            boolean sahkoinenMassaposti,
             List<ContentStructureType> sisaltotyypit
     ) {
         CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
@@ -490,7 +490,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         hyvaksymiskirjeDTO.getTemplateName(),
                         parsePalautusPvm(hyvaksymiskirjeDTO.getPalautusPvm(), haunParametritF.join()),
                         parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametritF.join()),
-                        sahkoinenKorkeakoulunMassaposti,
+                        sahkoinenMassaposti,
                         sisaltotyypit))
                 .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
     }
@@ -500,7 +500,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             CompletableFuture<List<HakijaDTO>> hakijatF,
             CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF,
             JalkiohjauskirjeDTO jalkiohjauskirjeDTO,
-            boolean sahkoinenKorkeakoulunMassaposti,
+            boolean sahkoinenMassaposti,
             boolean isKkHaku,
             List<ContentStructureType> sisaltotyypit
     ) {
@@ -521,7 +521,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                         jalkiohjauskirjeDTO.getTemplateName(),
                         jalkiohjauskirjeDTO.getSisalto(),
                         jalkiohjauskirjeDTO.getTag(),
-                        sahkoinenKorkeakoulunMassaposti,
+                        sahkoinenMassaposti,
                         isKkHaku,
                         sisaltotyypit))
                 .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
