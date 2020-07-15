@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -53,11 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -87,6 +84,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private final ExecutorService smallBatchExecutor;
     private final ExecutorService bigBatchExecutor;
     private final int pollingIntervalMillis;
+    private final int syotettavatArvotThreadpoolMaxSize;
 
     @Autowired
     public HyvaksymiskirjeetServiceImpl(
@@ -104,7 +102,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             KirjeetHakukohdeCache kirjeetHakukohdeCache,
             @Value("${valintalaskentakoostepalvelu.kirjeet.smallBatchMaxConcurrency:6}") int smallBatchMaxConcurrency,
             @Value("${valintalaskentakoostepalvelu.kirjeet.bigBatchMaxConcurrency:1}") int bigBatchMaxConcurrency,
-            @Value("${valintalaskentakoostepalvelu.kirjeet.polling.interval.millis:10000}") int pollingIntervalMillis) {
+            @Value("${valintalaskentakoostepalvelu.kirjeet.polling.interval.millis:10000}") int pollingIntervalMillis,
+            @Value("${valintalaskentakoostepalvelu.kirjeet.syotettavatArvotThreadpoolMaxSize:2}") int syotettavatArvotThreadpoolMaxSize) {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
@@ -117,9 +116,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.dokumenttiProsessiKomponentti = dokumenttiProsessiKomponentti;
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
-        this.smallBatchExecutor = Executors.newFixedThreadPool(smallBatchMaxConcurrency);
-        this.bigBatchExecutor = Executors.newFixedThreadPool(bigBatchMaxConcurrency);
+        this.smallBatchExecutor = createExecutorService(smallBatchMaxConcurrency, "kirjeet-small-batch");
+        this.bigBatchExecutor = createExecutorService(bigBatchMaxConcurrency, "kirjeet-big-batch");
         this.pollingIntervalMillis = pollingIntervalMillis;
+        this.syotettavatArvotThreadpoolMaxSize = syotettavatArvotThreadpoolMaxSize;
     }
 
     @Override
@@ -471,7 +471,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         CompletableFuture<Map<String, Koodi>> postinumerotF = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
         CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF.thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, asiointikieli));
         CompletableFuture<String> vakiosisaltoF = this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
+        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot, createExecutorService(syotettavatArvotThreadpoolMaxSize, "hyvaksymiskirjeet-syotettavat-arvot"));
         return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, syotetytArvotF, hakukohteetF, osoitteetF, vakiosisaltoF)
                 .thenApplyAsync(v -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                         maatjavaltiot1F.join(),
@@ -505,7 +505,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
         CompletableFuture<Map<String, Koodi>> maatjavaltiot1F = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         CompletableFuture<Map<String, Koodi>> postinumerotF = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
-        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
+        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot, createExecutorService(syotettavatArvotThreadpoolMaxSize, "jalkiohjauskirjeet-syotettavat-arvot"));
         return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, hakijatF, hakemuksetF, hakukohteetF, syotetytArvotF)
                 .thenApplyAsync(v -> JalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(
                         maatjavaltiot1F.join(),
@@ -676,6 +676,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     }
                     return Observable.empty();
                 });
+    }
+
+    private ExecutorService createExecutorService(int maxSize, String threadName) {
+        ThreadFactory threadFactory = new CustomizableThreadFactory(threadName + "-");
+        return Executors.newFixedThreadPool(maxSize, threadFactory);
     }
 
     private static String parsePalautusPvm(String specifiedPvm, ParametritParser haunParametrit) {

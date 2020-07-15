@@ -89,6 +89,7 @@ valintalaskentakoostepalvelu.tarjonta.sync.cron={{valintalaskentakoostepalvelu_t
 valintalaskentakoostepalvelu.kirjeet.smallBatchMaxConcurrency={{ valintalaskentakoostepalvelu_kirjeet_small_batch_concurrency | default("6") }}
 valintalaskentakoostepalvelu.kirjeet.bigBatchMaxConcurrency={{ valintalaskentakoostepalvelu_kirjeet_big_batch_concurrency | default("1") }}
 valintalaskentakoostepalvelu.kirjeet.polling.interval.millis=10000
+valintalaskentakoostepalvelu.kirjeet.syotettavatArvotThreadpoolMaxSize={{ valintalaskentakoostepalvelu_kirjeet_syotettavat_arvot_threadpool_max_size | default("2") }}
 valintalaskentakoostepalvelu.global.http.connectionTimeoutMillis={{valintalaskentakoostepalvelu_global_http_connectiontimeoutmillis}}
 valintalaskentakoostepalvelu.global.http.receiveTimeoutMillis={{valintalaskentakoostepalvelu_global_http_receivetimeoutmillis}}
 valintalaskentakoostepalvelu.hakuimport.threadpoolsize={{ valintalaskentakoostepalvelu_hakuimport_threadpoolsize | default("10") }}
