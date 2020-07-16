@@ -436,15 +436,19 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     }
 
     private CompletableFuture<Map<String, List<SyotettyArvoDTO>>> syotetytArvotByHakukohde(String hakukohdeOid) {
-        return this.valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid)
-                .thenApplyAsync(valinnanvaiheet -> valinnanvaiheet.stream()
-                        .flatMap(valinnanvaihe -> valinnanvaihe.getValintatapajonot().stream())
-                        .flatMap(valintatapajono -> valintatapajono.getJonosijat().stream())
-                        .collect(Collectors.toMap(
-                                JonosijaDTO::getHakemusOid,
-                                JonosijaDTO::getSyotetytArvot,
-                                (l, ll) -> { l.addAll(ll); return l; }
-                        )));
+        return CompletableFuture.runAsync(() -> LOG.info("Haetaan hakukohteen {} syötetyt arvot valintalaskennasta", hakukohdeOid))
+                .thenComposeAsync(x -> this.valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid)
+                        .thenApplyAsync(valinnanvaiheet -> valinnanvaiheet.stream()
+                                .flatMap(valinnanvaihe -> valinnanvaihe.getValintatapajonot().stream())
+                                .flatMap(valintatapajono -> valintatapajono.getJonosijat().stream())
+                                .collect(Collectors.toMap(
+                                        JonosijaDTO::getHakemusOid,
+                                        JonosijaDTO::getSyotetytArvot,
+                                        (l, ll) -> {
+                                            l.addAll(ll);
+                                            return l;
+                                        }
+                                ))));
     }
 
     private CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> hakijoidenSyotetytArvot(List<HakijaDTO> hakijat) {

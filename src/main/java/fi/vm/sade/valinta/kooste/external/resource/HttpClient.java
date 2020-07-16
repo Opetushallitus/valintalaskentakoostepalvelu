@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 
 import fi.vm.sade.javautils.cas.ApplicationSession;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class HttpClient {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HttpClient.class);
+
     private static final String CALLER_ID = "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
     private static final String CSRF_VALUE = "CSRF";
 
@@ -157,6 +162,7 @@ public class HttpClient {
     private CompletableFuture<HttpResponse<InputStream>> sendAsync(HttpRequest request) {
         return this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
                 .handle((response, e) -> {
+                    LOG.info("Tehtiin pyyntö urliin: {}", request.uri());
                     if (e != null) {
                         throw new IllegalStateException(request.uri().toString(), e);
                     }
