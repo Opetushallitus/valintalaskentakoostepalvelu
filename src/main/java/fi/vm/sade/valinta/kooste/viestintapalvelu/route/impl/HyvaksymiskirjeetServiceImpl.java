@@ -63,6 +63,7 @@ import java.util.stream.Stream;
 
 import static fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static fi.vm.sade.valinta.kooste.util.ExecutorUtil.*;
 
 @Service
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
@@ -435,29 +436,26 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 .thenApplyAsync(hakemukset -> hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
     }
 
-    private CompletableFuture<Map<String, List<SyotettyArvoDTO>>> syotetytArvotByHakukohde(String hakukohdeOid) {
-        return CompletableFuture.runAsync(() -> LOG.info("Haetaan hakukohteen {} syötetyt arvot valintalaskennasta", hakukohdeOid))
-                .thenComposeAsync(x -> this.valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid)
-                        .thenApplyAsync(valinnanvaiheet -> valinnanvaiheet.stream()
-                                .flatMap(valinnanvaihe -> valinnanvaihe.getValintatapajonot().stream())
-                                .flatMap(valintatapajono -> valintatapajono.getJonosijat().stream())
-                                .collect(Collectors.toMap(
-                                        JonosijaDTO::getHakemusOid,
-                                        JonosijaDTO::getSyotetytArvot,
-                                        (l, ll) -> {
-                                            l.addAll(ll);
-                                            return l;
-                                        }
-                                ))));
+    private CompletableFuture<Map<String, List<SyotettyArvoDTO>>> syotetytArvotByHakukohde(String hakukohdeOid, Executor executor) {
+        return this.valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid, executor)
+                .thenApplyAsync(valinnanvaiheet -> valinnanvaiheet.stream()
+                        .flatMap(valinnanvaihe -> valinnanvaihe.getValintatapajonot().stream())
+                        .flatMap(valintatapajono -> valintatapajono.getJonosijat().stream())
+                        .collect(Collectors.toMap(
+                                JonosijaDTO::getHakemusOid,
+                                JonosijaDTO::getSyotetytArvot,
+                                (l, ll) -> { l.addAll(ll); return l; }
+                        )));
     }
 
     private CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> hakijoidenSyotetytArvot(List<HakijaDTO> hakijat) {
+        Executor executor = createExecutorService(2, "syotetytArvotByHakukohde");
         return CompletableFutureUtil.sequence(
                 hakijat.stream()
                         .flatMap(hakija -> hakija.getHakutoiveet().stream())
                         .map(HakutoiveDTO::getHakukohdeOid)
                         .distinct()
-                        .collect(Collectors.toMap(Function.identity(), this::syotetytArvotByHakukohde))
+                        .collect(Collectors.toMap(Function.identity(), hk -> syotetytArvotByHakukohde(hk, executor)))
         );
     }
 
@@ -476,7 +474,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         CompletableFuture<Map<String, Koodi>> postinumerotF = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
         CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF = hakukohteetF.thenComposeAsync(hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, asiointikieli));
         CompletableFuture<String> vakiosisaltoF = this.haeHakukohteenVakiosisalto(hyvaksymiskirjeDTO.getSisalto(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot, createExecutorService(syotettavatArvotThreadpoolMaxSize, "hyvaksymiskirjeet-syotettavat-arvot"));
+        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
         return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, haunParametritF, hakijatF, hakemuksetF, syotetytArvotF, hakukohteetF, osoitteetF, vakiosisaltoF)
                 .thenApplyAsync(v -> HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                         maatjavaltiot1F.join(),
@@ -511,7 +509,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF = hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
         CompletableFuture<Map<String, Koodi>> maatjavaltiot1F = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         CompletableFuture<Map<String, Koodi>> postinumerotF = koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
-        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot, createExecutorService(syotettavatArvotThreadpoolMaxSize, "jalkiohjauskirjeet-syotettavat-arvot"));
+        CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF = hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
         return CompletableFuture.allOf(maatjavaltiot1F, postinumerotF, hakijatF, hakemuksetF, hakukohteetF, syotetytArvotF)
                 .thenApplyAsync(v -> JalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(
                         maatjavaltiot1F.join(),
@@ -683,11 +681,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     }
                     return Observable.empty();
                 });
-    }
-
-    private ExecutorService createExecutorService(int maxSize, String threadName) {
-        ThreadFactory threadFactory = new CustomizableThreadFactory(threadName + "-");
-        return Executors.newFixedThreadPool(maxSize, threadFactory);
     }
 
     private boolean isKkHaku(String hakuOid) {
