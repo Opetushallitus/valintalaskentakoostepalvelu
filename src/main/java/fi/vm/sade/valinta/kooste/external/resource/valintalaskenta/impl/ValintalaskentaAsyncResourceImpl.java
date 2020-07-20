@@ -28,10 +28,7 @@ import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,10 +51,16 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource impl
 
     @Override
     public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
+        return this.laskennantulokset(hakukohdeOid, null);
+    }
+
+    @Override
+    public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid, Executor executor) {
         return this.httpclient.getJson(
                 getUrl("valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe", hakukohdeOid),
-                Duration.ofMinutes(30),
-                new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
+                Duration.ofMinutes(1),
+                new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType(),
+                executor
         );
     }
 
