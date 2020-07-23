@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 
 import fi.vm.sade.javautils.cas.ApplicationSession;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,9 +19,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 public class HttpClient {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HttpClient.class);
+
     private static final String CALLER_ID = "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
     private static final String CSRF_VALUE = "CSRF";
 
@@ -34,12 +40,16 @@ public class HttpClient {
     }
 
     public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
+        return this.getJson(url, timeout, outputType, null);
+    }
+
+    public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType, Executor executor) {
         HttpRequest request = buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
                 .header("Accept", "application/json")
                 .GET()
                 .timeout(timeout)
                 .build();
-        return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
+        return this.makeRequest(request, executor).thenApply(response -> this.parseJson(response, outputType));
     }
 
     public CompletableFuture<HttpResponse<InputStream>> getResponse(String url,
@@ -51,7 +61,7 @@ public class HttpClient {
                         .GET()
                         .timeout(timeout))
                 .build();
-        return this.makeRequest(request);
+        return this.makeRequest(request, null);
     }
 
     public <O> CompletableFuture<O> post(String url,
@@ -64,7 +74,7 @@ public class HttpClient {
                 .POST(bodyPublisher)
                 .timeout(timeout))
             .build();
-        return this.makeRequest(request).thenApply(parseResponse);
+        return this.makeRequest(request, null).thenApply(parseResponse);
     }
 
     public <I, O> CompletableFuture<O> postJson(String url,
@@ -103,7 +113,7 @@ public class HttpClient {
                 .PUT(HttpRequest.BodyPublishers.ofString(this.gson.toJson(body, inputType), StandardCharsets.UTF_8))
                 .timeout(timeout))
             .build();
-        return this.makeRequest(request).thenApply(response -> this.parseJson(response, outputType));
+        return this.makeRequest(request, null).thenApply(response -> this.parseJson(response, outputType));
     }
     public CompletableFuture<HttpResponse<InputStream>> putResponse(String url,
                                                                     Duration timeout,
@@ -117,7 +127,7 @@ public class HttpClient {
                 .PUT(HttpRequest.BodyPublishers.ofByteArray(body))
                 .timeout(timeout))
             .build();
-        return this.makeRequest(request);
+        return this.makeRequest(request, null);
     }
 
     public CompletableFuture<HttpResponse<InputStream>> putResponse(String url, Duration timeout, byte[] body, String contentType) {
@@ -130,7 +140,7 @@ public class HttpClient {
                 .DELETE()
                 .timeout(timeout)
                 .build();
-        return this.makeRequest(request).thenApply(this::parseTxt);
+        return this.makeRequest(request, null).thenApply(this::parseTxt);
     }
 
     private HttpRequest.Builder buildWithCallerIdAndCsrfHeaders(HttpRequest.Builder builder) {
@@ -139,19 +149,31 @@ public class HttpClient {
                 .header("Cookie", String.format("CSRF=%s;", CSRF_VALUE));
     }
 
-    private CompletableFuture<HttpResponse<InputStream>> makeRequest(HttpRequest request) {
+    private CompletableFuture<HttpResponse<InputStream>> makeRequest(HttpRequest request, Executor executor) {
         if (this.session == null) {
-            return this.sendAsync(request);
+            return this.sendAsync(request, executor);
         }
         return this.session.getSessionToken()
-                .thenComposeAsync(sessionToken -> this.sendAsync(request)
+                .thenComposeAsync(sessionToken -> this.sendAsync(request, executor)
                         .thenComposeAsync(response -> {
                             if (isUnauthenticated(response) || isRedirectToCas(response)) {
                                 this.session.invalidateSession(sessionToken);
-                                return this.session.getSessionToken().thenComposeAsync(s -> this.sendAsync(request));
+                                return this.session.getSessionToken().thenComposeAsync(s -> this.sendAsync(request, executor));
                             }
                             return CompletableFuture.completedFuture(response);
                         }));
+    }
+
+    private CompletableFuture<HttpResponse<InputStream>> sendAsync(HttpRequest request, Executor executor) {
+        if(executor == null) return sendAsync(request);
+        return this.client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                .handleAsync((response, e) -> {
+                    LOG.info("Tehtiin pyyntö urliin: {}", request.uri());
+                    if (e != null) {
+                        throw new IllegalStateException(request.uri().toString(), e);
+                    }
+                    return response;
+                }, executor);
     }
 
     private CompletableFuture<HttpResponse<InputStream>> sendAsync(HttpRequest request) {

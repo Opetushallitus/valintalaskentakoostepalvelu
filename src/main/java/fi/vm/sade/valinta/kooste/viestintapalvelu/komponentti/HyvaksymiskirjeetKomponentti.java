@@ -57,7 +57,7 @@ public class HyvaksymiskirjeetKomponentti {
             String templateName,
             String palautusPvm,
             String palautusAika,
-            boolean sahkoinenKorkeakoulunMassaposti,
+            boolean sahkoinenMassaposti,
             List<ContentStructureType> sisaltotyypit) {
         try {
             assert (hakuOid != null);
@@ -129,7 +129,7 @@ public class HyvaksymiskirjeetKomponentti {
                 replacements.put("syntymaaika", hakemus.getSyntymaaika());
 
                 String sahkoposti = hakemus.getSahkopostiOsoite();
-                //boolean skipIPosti = sahkoinenKorkeakoulunMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
+                //boolean skipIPosti = sahkoinenMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
                 boolean skipIPosti = true;
                 kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements, hakija.getHakijaOid(),
                         skipIPosti, sahkoposti, hakija.getHakemusOid()));
@@ -155,7 +155,7 @@ public class HyvaksymiskirjeetKomponentti {
             viesti.setTag(tag);
             viesti.setTemplateName(templateName);
             viesti.setIposti(false);
-            viesti.setSkipDokumenttipalvelu(sahkoinenKorkeakoulunMassaposti);
+            viesti.setSkipDokumenttipalvelu(sahkoinenMassaposti);
             Map<String, Object> templateReplacements = Maps.newHashMap();
             templateReplacements.put("sisalto", sisalto);
             viesti.setTemplateReplacements(templateReplacements);
