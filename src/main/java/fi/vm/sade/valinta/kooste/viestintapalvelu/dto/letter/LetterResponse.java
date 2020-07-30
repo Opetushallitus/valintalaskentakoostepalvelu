@@ -4,43 +4,48 @@ import java.util.Map;
 
 public class LetterResponse {
 
-    public static final String STATUS_ERROR = "error";
-    public static final String STATUS_SUCCESS = "success";
+  public static final String STATUS_ERROR = "error";
+  public static final String STATUS_SUCCESS = "success";
 
-    private String batchId;
-    private String status;
-    private Map<String, String> errors;
+  private String batchId;
+  private String status;
+  private Map<String, String> errors;
 
-    public String getBatchId() {
-        return batchId;
-    }
+  public String getBatchId() {
+    return batchId;
+  }
 
-    public void setBatchId(String batchId) {
-        this.batchId = batchId;
-    }
+  public void setBatchId(String batchId) {
+    this.batchId = batchId;
+  }
 
-    public String getStatus() {
-        return status;
-    }
+  public String getStatus() {
+    return status;
+  }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+  public void setStatus(String status) {
+    this.status = status;
+  }
 
-    public Map<String, String> getErrors() {
-        return errors;
-    }
+  public Map<String, String> getErrors() {
+    return errors;
+  }
 
-    public void setErrors(Map<String, String> errors) {
-        this.errors = errors;
-    }
+  public void setErrors(Map<String, String> errors) {
+    this.errors = errors;
+  }
 
-    @Override
-    public String toString() {
-        return "LetterResponse{" +
-                "batchId='" + batchId + '\'' +
-                ", status='" + status + '\'' +
-                ", errors=" + errors +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "LetterResponse{"
+        + "batchId='"
+        + batchId
+        + '\''
+        + ", status='"
+        + status
+        + '\''
+        + ", errors="
+        + errors
+        + '}';
+  }
 }

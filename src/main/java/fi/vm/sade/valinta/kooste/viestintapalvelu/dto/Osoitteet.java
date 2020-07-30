@@ -4,16 +4,15 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Osoitteet implements Serializable {
-    private List<Osoite> addressLabels;
+  private List<Osoite> addressLabels;
 
-    public Osoitteet(List<Osoite> addressLabels) {
-        this.addressLabels = addressLabels;
-    }
+  public Osoitteet(List<Osoite> addressLabels) {
+    this.addressLabels = addressLabels;
+  }
 
-    public List<Osoite> getAddressLabels() {
-        return addressLabels;
-    }
+  public List<Osoite> getAddressLabels() {
+    return addressLabels;
+  }
 
-    private static final long serialVersionUID = -7777955308444290462L;
-
+  private static final long serialVersionUID = -7777955308444290462L;
 }

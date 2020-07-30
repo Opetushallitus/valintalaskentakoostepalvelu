@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KoodistoUrheilija {
 
-    private String koodiUri;
+  private String koodiUri;
 
-    public String getKoodiUri() {
-        return koodiUri;
-    }
+  public String getKoodiUri() {
+    return koodiUri;
+  }
 
-    public void setKoodiUri(String koodiUri) {
-        this.koodiUri = koodiUri;
-    }
+  public void setKoodiUri(String koodiUri) {
+    this.koodiUri = koodiUri;
+  }
 }

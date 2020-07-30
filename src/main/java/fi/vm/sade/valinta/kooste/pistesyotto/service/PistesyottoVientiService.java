@@ -15,69 +15,87 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import io.reactivex.Observable;
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import io.reactivex.Observable;
-
-import javax.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
 
 public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
-    private static final Logger LOG = LoggerFactory.getLogger(PistesyottoVientiService.class);
-    private final DokumenttiAsyncResource dokumenttiAsyncResource;
+  private static final Logger LOG = LoggerFactory.getLogger(PistesyottoVientiService.class);
+  private final DokumenttiAsyncResource dokumenttiAsyncResource;
 
-    @Autowired
-    public PistesyottoVientiService(
-            ValintapisteAsyncResource valintapisteAsyncResource,
-            ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource,
-            ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-            ApplicationAsyncResource applicationAsyncResource,
-            AtaruAsyncResource ataruAsyncResource,
-            TarjontaAsyncResource tarjontaAsyncResource,
-            OhjausparametritAsyncResource ohjausparametritAsyncResource,
-            OrganisaatioAsyncResource organisaatioAsyncResource,
-            DokumenttiAsyncResource dokumenttiAsyncResource,
-            SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
-        super(applicationAsyncResource,
-                ataruAsyncResource,
-                valintapisteAsyncResource,
-                suoritusrekisteriAsyncResource,
-                tarjontaAsyncResource,
-                ohjausparametritAsyncResource,
-                organisaatioAsyncResource,
-                valintaperusteetAsyncResource,
-                valintalaskentaValintakoeAsyncResource);
-        this.dokumenttiAsyncResource = dokumenttiAsyncResource;
-    }
+  @Autowired
+  public PistesyottoVientiService(
+      ValintapisteAsyncResource valintapisteAsyncResource,
+      ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource,
+      ValintaperusteetAsyncResource valintaperusteetAsyncResource,
+      ApplicationAsyncResource applicationAsyncResource,
+      AtaruAsyncResource ataruAsyncResource,
+      TarjontaAsyncResource tarjontaAsyncResource,
+      OhjausparametritAsyncResource ohjausparametritAsyncResource,
+      OrganisaatioAsyncResource organisaatioAsyncResource,
+      DokumenttiAsyncResource dokumenttiAsyncResource,
+      SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+    super(
+        applicationAsyncResource,
+        ataruAsyncResource,
+        valintapisteAsyncResource,
+        suoritusrekisteriAsyncResource,
+        tarjontaAsyncResource,
+        ohjausparametritAsyncResource,
+        organisaatioAsyncResource,
+        valintaperusteetAsyncResource,
+        valintalaskentaValintakoeAsyncResource);
+    this.dokumenttiAsyncResource = dokumenttiAsyncResource;
+  }
 
-    public void vie(String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
-        PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
-            LOG.error(String.format("Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
-                auditSession.getPersonOid(), hakuOid, hakukohdeOid), poikkeus);
-            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
-        });
-        prosessi.inkrementoiKokonaistyota();
-        muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList()).flatMap(p -> {
-            PistesyottoExcel pistesyottoExcel = p.getLeft();
-            String id = UUID.randomUUID().toString();
-            Observable<Response> tallennus = dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", defaultExpirationDate().getTime(), prosessi.getTags(),
-                "application/octet-stream", pistesyottoExcel.getExcel().vieXlsx());
-            return Observable.just(id).zipWith(tallennus, Pair::of);
-        }).subscribe(
+  public void vie(
+      String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
+    PoikkeusKasittelijaSovitin poikkeuskasittelija =
+        new PoikkeusKasittelijaSovitin(
+            poikkeus -> {
+              LOG.error(
+                  String.format(
+                      "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
+                      auditSession.getPersonOid(), hakuOid, hakukohdeOid),
+                  poikkeus);
+              prosessi
+                  .getPoikkeukset()
+                  .add(
+                      new Poikkeus(
+                          Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
+            });
+    prosessi.inkrementoiKokonaistyota();
+    muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
+        .flatMap(
+            p -> {
+              PistesyottoExcel pistesyottoExcel = p.getLeft();
+              String id = UUID.randomUUID().toString();
+              Observable<Response> tallennus =
+                  dokumenttiAsyncResource.tallenna(
+                      id,
+                      "pistesyotto.xlsx",
+                      defaultExpirationDate().getTime(),
+                      prosessi.getTags(),
+                      "application/octet-stream",
+                      pistesyottoExcel.getExcel().vieXlsx());
+              return Observable.just(id).zipWith(tallennus, Pair::of);
+            })
+        .subscribe(
             idWithResponse -> {
-                prosessi.inkrementoiTehtyjaToita();
-                prosessi.setDokumenttiId(idWithResponse.getLeft());
+              prosessi.inkrementoiTehtyjaToita();
+              prosessi.setDokumenttiId(idWithResponse.getLeft());
             },
-            poikkeuskasittelija
-        );
-    }
+            poikkeuskasittelija);
+  }
 
-    protected Date defaultExpirationDate() {
-        return DateTime.now().plusHours(168).toDate();
-    }
+  protected Date defaultExpirationDate() {
+    return DateTime.now().plusHours(168).toDate();
+  }
 }

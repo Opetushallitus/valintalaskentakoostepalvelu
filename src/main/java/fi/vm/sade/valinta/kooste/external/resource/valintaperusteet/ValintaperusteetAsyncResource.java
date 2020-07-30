@@ -11,45 +11,49 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
 import io.reactivex.Observable;
-
-import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.core.Response;
 
 public interface ValintaperusteetAsyncResource {
 
-    Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids);
+  Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle(
+      Collection<String> hakukohdeOids);
 
-    CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid);
+  CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid);
 
-    // @GET /valintaperusteet-service/resources/hakukohde/haku/{}
-    Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid);
+  // @GET /valintaperusteet-service/resources/hakukohde/haku/{}
+  Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid);
 
-    CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
+  CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
+      String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
 
-    // @GET /valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
-    Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid);
+  // @GET /valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
+  Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid);
 
-    // @POST /valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
-    Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
+  // @POST /valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
+  Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
 
-    CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
-    Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids);
+  CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
 
-    Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid);
+  Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids);
 
-    Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
+  Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid);
 
-    // @POST /valintaperusteet-service/resources/hakukohde/valintakoe
-    Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids);
+  Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
 
-    Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids);
+  // @POST /valintaperusteet-service/resources/hakukohde/valintakoe
+  Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
+      Collection<String> hakukohdeOids);
 
-    // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
-    Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
+  Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
+      Collection<String> hakukohdeOids);
 
-    Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid);
+  // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
+  Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
+
+  Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid);
 }

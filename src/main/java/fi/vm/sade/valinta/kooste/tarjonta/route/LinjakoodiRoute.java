@@ -1,9 +1,8 @@
 package fi.vm.sade.valinta.kooste.tarjonta.route;
 
+import fi.vm.sade.valinta.kooste.OPH;
 import org.apache.camel.Property;
 
-import fi.vm.sade.valinta.kooste.OPH;
-
 public interface LinjakoodiRoute {
-    String haeLinjakoodi(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid);
+  String haeLinjakoodi(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid);
 }

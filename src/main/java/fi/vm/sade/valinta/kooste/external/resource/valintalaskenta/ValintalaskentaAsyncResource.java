@@ -6,25 +6,27 @@ import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import io.reactivex.Observable;
-
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public interface ValintalaskentaAsyncResource {
-    Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid);
+  Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid);
 
-    Observable<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
+  Observable<ValinnanvaiheDTO> lisaaTuloksia(
+      String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
 
-    Observable<String> laskeJaSijoittele(String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot);
+  Observable<String> laskeJaSijoittele(
+      String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot);
 
-    CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
+  CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
 
-    CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid, Executor executor);
+  CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
+      String hakukohdeOid, Executor executor);
 
-    Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
+  Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
-    Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
+  Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
-    Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
+  Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 }

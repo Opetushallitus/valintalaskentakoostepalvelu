@@ -1,33 +1,30 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource.dto;
 
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-
 import java.util.Collection;
 
-/**
- * @author Jussi Jartamo
- */
+/** @author Jussi Jartamo */
 public class Prosessi {
-    public Osatyo kokonaistyo = new Osatyo();
-    public String dokumenttiId;
-    public Collection<Poikkeus> poikkeukset;
-    public boolean keskeytetty;
+  public Osatyo kokonaistyo = new Osatyo();
+  public String dokumenttiId;
+  public Collection<Poikkeus> poikkeukset;
+  public boolean keskeytetty;
 
-    public boolean poikkeuksia() {
-        return !(poikkeukset == null || poikkeukset.isEmpty());
-    }
+  public boolean poikkeuksia() {
+    return !(poikkeukset == null || poikkeukset.isEmpty());
+  }
+
+  public boolean valmis() {
+    return dokumenttiId != null || kokonaistyo.valmis();
+  }
+
+  public static class Osatyo {
+    public int tehty = 0;
+    public int kokonaismaara = 0;
+    public int ohitettu;
 
     public boolean valmis() {
-        return dokumenttiId != null || kokonaistyo.valmis();
+      return tehty == kokonaismaara;
     }
-
-    public static class Osatyo {
-        public int tehty = 0;
-        public int kokonaismaara = 0;
-        public int ohitettu;
-
-        public boolean valmis() {
-            return tehty == kokonaismaara;
-        }
-    }
+  }
 }

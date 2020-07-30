@@ -3,11 +3,11 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 import akka.actor.TypedActor;
 
 public interface LaskentaActor extends TypedActor.PostStop {
-    String getHakuOid();
+  String getHakuOid();
 
-    boolean isValmis();
+  boolean isValmis();
 
-    void start();
+  void start();
 
-    void lopeta();
+  void lopeta();
 }

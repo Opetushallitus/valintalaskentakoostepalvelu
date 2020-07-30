@@ -12,14 +12,19 @@ import org.springframework.context.annotation.Profile;
 @Profile("default")
 @Configuration
 public class ValintalaskentaTulosConfig {
-    @Bean
-    public SijoittelunTulosExcelRoute getSijoittelunTulosExcelRoute(@Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(SijoittelunTulosExcelRoute.SEDA_SIJOITTELU_EXCEL), SijoittelunTulosExcelRoute.class);
-    }
+  @Bean
+  public SijoittelunTulosExcelRoute getSijoittelunTulosExcelRoute(
+      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+    return ProxyWithAnnotationHelper.createProxy(
+        context.getEndpoint(SijoittelunTulosExcelRoute.SEDA_SIJOITTELU_EXCEL),
+        SijoittelunTulosExcelRoute.class);
+  }
 
-    @Bean
-    public ValintalaskentaTulosExcelRoute getValintalaskentaTulosExcelRoute(@Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(ValintalaskentaTulosExcelRoute.DIRECT_VALINTALASKENTA_EXCEL), ValintalaskentaTulosExcelRoute.class);
-    }
-
+  @Bean
+  public ValintalaskentaTulosExcelRoute getValintalaskentaTulosExcelRoute(
+      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+    return ProxyWithAnnotationHelper.createProxy(
+        context.getEndpoint(ValintalaskentaTulosExcelRoute.DIRECT_VALINTALASKENTA_EXCEL),
+        ValintalaskentaTulosExcelRoute.class);
+  }
 }

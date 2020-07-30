@@ -8,24 +8,33 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
 import io.reactivex.Observable;
-
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
+import javax.ws.rs.core.Response;
 
 public interface LaskentaSeurantaAsyncResource {
 
-    Observable<Optional<String>> otaSeuraavaLaskentaTyonAlle();
+  Observable<Optional<String>> otaSeuraavaLaskentaTyonAlle();
 
-    Observable<LaskentaDto> laskenta(String uuid);
+  Observable<LaskentaDto> laskenta(String uuid);
 
-    Observable<LaskentaDto> resetoiTilat(String uuid);
+  Observable<LaskentaDto> resetoiTilat(String uuid);
 
-    Observable<TunnisteDto> luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids);
+  Observable<TunnisteDto> luoLaskenta(
+      LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids);
 
-    Observable<Response> merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional);
+  Observable<Response> merkkaaHakukohteenTila(
+      String uuid,
+      String hakukohdeOid,
+      HakukohdeTila tila,
+      Optional<IlmoitusDto> ilmoitusDtoOptional);
 
-    Observable<Response> merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila, Optional<IlmoitusDto> ilmoitusDtoOptional);
+  Observable<Response> merkkaaLaskennanTila(
+      String uuid,
+      LaskentaTila tila,
+      HakukohdeTila hakukohdetila,
+      Optional<IlmoitusDto> ilmoitusDtoOptional);
 
-    Observable<Response> merkkaaLaskennanTila(String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional);
+  Observable<Response> merkkaaLaskennanTila(
+      String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional);
 }
