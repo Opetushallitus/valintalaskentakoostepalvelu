@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -14,7 +13,11 @@ import static org.mockito.Mockito.when;
 import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
-import io.reactivex.internal.operators.observable.ObservableJust;
+import io.reactivex.Observable;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.ws.rs.container.AsyncResponse;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,69 +31,69 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import io.reactivex.Observable;
-
-import javax.ws.rs.container.AsyncResponse;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(classes = LaskentaKerrallaContext.class)
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class,
-        DirtiesContextTestExecutionListener.class })
+@TestExecutionListeners({
+  DependencyInjectionTestExecutionListener.class,
+  DirtiesContextTestExecutionListener.class
+})
 public class LaskentaKerrallaFailTest {
-    private static final String LASKENTASEURANTA_ID = "laskentaseuranta.id";
+  private static final String LASKENTASEURANTA_ID = "laskentaseuranta.id";
 
-    @Autowired
-    ValintalaskentaKerrallaResource valintalaskentaKerralla;
+  @Autowired ValintalaskentaKerrallaResource valintalaskentaKerralla;
 
-    @BeforeClass
-    public static void resetMocks() {
-        Mocks.resetMocks();
-    }
+  @BeforeClass
+  public static void resetMocks() {
+    Mocks.resetMocks();
+  }
 
-    @Before
-    public void yksiLaskentaTyonAlleJokaEpaonnistuu() {
-        when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any())).thenReturn(Observable.error(new Throwable("FAIL")));
-        AtomicInteger seurantaCount = new AtomicInteger(0);
-        doAnswer(invocation -> {
-            if (seurantaCount.getAndIncrement() < 1)
-                return Observable.just(LASKENTASEURANTA_ID);
-            else {
+  @Before
+  public void yksiLaskentaTyonAlleJokaEpaonnistuu() {
+    when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any()))
+        .thenReturn(Observable.error(new Throwable("FAIL")));
+    AtomicInteger seurantaCount = new AtomicInteger(0);
+    doAnswer(
+            invocation -> {
+              if (seurantaCount.getAndIncrement() < 1) return Observable.just(LASKENTASEURANTA_ID);
+              else {
                 return Observable.just(Optional.empty());
-            }
-        }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
+              }
+            })
+        .when(Mocks.laskentaSeurantaAsyncResource)
+        .otaSeuraavaLaskentaTyonAlle();
+  }
+
+  @Test
+  public void testValintaperusteetHaunHakukohteetFail() {
+    MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(null);
+    AsyncResponse asyncResponse = mock(AsyncResponse.class);
+    try {
+      valintalaskentaKerralla.valintalaskentaHaulle(
+          "haku.oid",
+          false,
+          0,
+          false,
+          "haun nimi",
+          "nimi",
+          "valintaryhma.oid",
+          LaskentaTyyppi.HAKUKOHDE,
+          false,
+          new ArrayList(),
+          asyncResponse);
+    } catch (Throwable t) {
     }
-    @Test
-    public void testValintaperusteetHaunHakukohteetFail() {
-        MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(null);
-        AsyncResponse asyncResponse = mock(AsyncResponse.class);
-        try {
-            valintalaskentaKerralla.valintalaskentaHaulle(
-                    "haku.oid",
-                    false,
-                    0,
-                    false,
-                    "haun nimi",
-                    "nimi",
-                    "valintaryhma.oid",
-                    LaskentaTyyppi.HAKUKOHDE,
-                    false,
-                    new ArrayList(),
-                    asyncResponse);
-        } catch (Throwable t) { }
 
-        verifyZeroInteractions(Mocks.applicationAsyncResource);
-        verifyZeroInteractions(Mocks.ohjausparametritAsyncResource);
-        verifyZeroInteractions(Mocks.valintalaskentaAsyncResource);
-        verifyZeroInteractions(Mocks.suoritusrekisteriAsyncResource);
+    verifyZeroInteractions(Mocks.applicationAsyncResource);
+    verifyZeroInteractions(Mocks.ohjausparametritAsyncResource);
+    verifyZeroInteractions(Mocks.valintalaskentaAsyncResource);
+    verifyZeroInteractions(Mocks.suoritusrekisteriAsyncResource);
 
-        verify(asyncResponse, times(1)).resume(isA(ResponseImpl.class));
-        ArgumentCaptor<ResponseImpl> responseCaptor = ArgumentCaptor.forClass(ResponseImpl.class);
-        verify(asyncResponse).resume(responseCaptor.capture());
+    verify(asyncResponse, times(1)).resume(isA(ResponseImpl.class));
+    ArgumentCaptor<ResponseImpl> responseCaptor = ArgumentCaptor.forClass(ResponseImpl.class);
+    verify(asyncResponse).resume(responseCaptor.capture());
 
-        assertEquals(500, responseCaptor.getValue().getStatus());
-    }
+    assertEquals(500, responseCaptor.getValue().getStatus());
+  }
 }

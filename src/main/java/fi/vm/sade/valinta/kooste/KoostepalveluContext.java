@@ -20,50 +20,54 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @Configuration
 @Import({KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class, JaxrsConfiguration.class})
 public class KoostepalveluContext {
-    static final String TYHJA_ARVO_POIKKEUS = "Reititysta ei voida jatkaa tyhjalle arvolle!";
+  static final String TYHJA_ARVO_POIKKEUS = "Reititysta ei voida jatkaa tyhjalle arvolle!";
 
-    private static final Logger LOG = LoggerFactory.getLogger(KoostepalveluContext.class);
+  private static final Logger LOG = LoggerFactory.getLogger(KoostepalveluContext.class);
 
-    @Bean
-    public OidProvider getOidProvider(@Value("${valintalaskentakoostepalvelu.organisaatio-service-url}") String organisaatioServiceUrl,
-                                      @Value("${root.organisaatio.oid}") String rootOrganisationOid) {
-        return new OidProvider(organisaatioServiceUrl, rootOrganisationOid, HttpClients.CALLER_ID);
+  @Bean
+  public OidProvider getOidProvider(
+      @Value("${valintalaskentakoostepalvelu.organisaatio-service-url}")
+          String organisaatioServiceUrl,
+      @Value("${root.organisaatio.oid}") String rootOrganisationOid) {
+    return new OidProvider(organisaatioServiceUrl, rootOrganisationOid, HttpClients.CALLER_ID);
+  }
+
+  @Bean
+  public OrganisationHierarchyAuthorizer getOrganisationHierarchyAuthorizer() {
+    return new OrganisationHierarchyAuthorizer();
+  }
+
+  @Bean(name = "authorizer")
+  public Authorizer getAuthorizerImpl(
+      OrganisationHierarchyAuthorizer organisationHierarchyAuthorizer) {
+    return new ThreadLocalAuthorizer();
+  }
+
+  /** Camel only Context (helps unit testing). */
+  @Configuration
+  public static class CamelConfig {
+
+    @Bean(name = "javaDslCamelContext")
+    public static SpringCamelContext getSpringCamelContext(
+        @Value("${valintalaskentakoostepalvelu.camelContext.threadpoolsize:10}")
+            Integer threadPoolSize,
+        ApplicationContext applicationContext,
+        RoutesBuilder[] routes)
+        throws Exception {
+      SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
+      //            camelContext.getTypeConverterRegistry().addTypeConverter(HakemusDTO.class,
+      // Hakemus.class, new HakemusToHakemusDTOConverter());
+      camelContext.disableJMX();
+      camelContext.setAutoStartup(true);
+      for (RoutesBuilder route : routes) {
+        camelContext.addRoutes(route);
+      }
+      return camelContext;
     }
 
     @Bean
-    public OrganisationHierarchyAuthorizer getOrganisationHierarchyAuthorizer() {
-        return new OrganisationHierarchyAuthorizer();
+    public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+      return new PropertySourcesPlaceholderConfigurer();
     }
-
-    @Bean(name = "authorizer")
-    public Authorizer getAuthorizerImpl(OrganisationHierarchyAuthorizer organisationHierarchyAuthorizer) {
-        return new ThreadLocalAuthorizer();
-    }
-
-    /**
-     * Camel only Context (helps unit testing).
-     */
-    @Configuration
-    public static class CamelConfig {
-
-        @Bean(name = "javaDslCamelContext")
-        public static SpringCamelContext getSpringCamelContext(
-                @Value("${valintalaskentakoostepalvelu.camelContext.threadpoolsize:10}") Integer threadPoolSize,
-                ApplicationContext applicationContext, RoutesBuilder[] routes)
-                throws Exception {
-            SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
-//            camelContext.getTypeConverterRegistry().addTypeConverter(HakemusDTO.class, Hakemus.class, new HakemusToHakemusDTOConverter());
-            camelContext.disableJMX();
-            camelContext.setAutoStartup(true);
-            for (RoutesBuilder route : routes) {
-                camelContext.addRoutes(route);
-            }
-            return camelContext;
-        }
-
-        @Bean
-        public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
-            return new PropertySourcesPlaceholderConfigurer();
-        }
-    }
+  }
 }

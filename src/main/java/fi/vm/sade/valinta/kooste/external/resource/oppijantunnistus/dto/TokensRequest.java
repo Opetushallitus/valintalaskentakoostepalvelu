@@ -3,102 +3,110 @@ package fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto;
 import java.util.Map;
 
 public class TokensRequest {
-    private String url;
-    private String hakuOid;
-    private String letterId;
-    private String templatename;
-    private String lang;
-    private Map<String, String> applicationOidToEmailAddress;
-    private Long expires;
+  private String url;
+  private String hakuOid;
+  private String letterId;
+  private String templatename;
+  private String lang;
+  private Map<String, String> applicationOidToEmailAddress;
+  private Long expires;
 
-    public TokensRequest() {
+  public TokensRequest() {}
 
-    }
+  public TokensRequest(
+      String url,
+      String templatename,
+      String lang,
+      Map<String, String> applicationOidToEmailAddress,
+      Long expires) {
+    this.url = url;
+    this.templatename = templatename;
+    this.lang = lang;
+    this.applicationOidToEmailAddress = applicationOidToEmailAddress;
+    this.expires = expires;
+  }
 
-    public TokensRequest(String url, String templatename, String lang, Map<String, String> applicationOidToEmailAddress, Long expires) {
-        this.url = url;
-        this.templatename = templatename;
-        this.lang = lang;
-        this.applicationOidToEmailAddress = applicationOidToEmailAddress;
-        this.expires = expires;
-    }
+  public String getUrl() {
+    return url;
+  }
 
-    public String getUrl() {
-        return url;
-    }
+  public void setUrl(String url) {
+    this.url = url;
+  }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+  public String getTemplatename() {
+    return templatename;
+  }
 
-    public String getTemplatename() {
-        return templatename;
-    }
+  public void setTemplatename(String templatename) {
+    this.templatename = templatename;
+  }
 
-    public void setTemplatename(String templatename) {
-        this.templatename = templatename;
-    }
+  public String getLang() {
+    return lang;
+  }
 
-    public String getLang() {
-        return lang;
-    }
+  public void setLang(String lang) {
+    this.lang = lang;
+  }
 
-    public void setLang(String lang) {
-        this.lang = lang;
-    }
+  public Map<String, String> getApplicationOidToEmailAddress() {
+    return applicationOidToEmailAddress;
+  }
 
-    public Map<String, String> getApplicationOidToEmailAddress() {
-        return applicationOidToEmailAddress;
-    }
+  public void setApplicationOidToEmailAddress(Map<String, String> applicationOidToEmailAddress) {
+    this.applicationOidToEmailAddress = applicationOidToEmailAddress;
+  }
 
-    public void setApplicationOidToEmailAddress(Map<String, String> applicationOidToEmailAddress) {
-        this.applicationOidToEmailAddress = applicationOidToEmailAddress;
-    }
+  public Long getExpires() {
+    return expires;
+  }
 
-    public Long getExpires() {
-        return expires;
-    }
+  public void setExpires(Long expires) {
+    this.expires = expires;
+  }
 
-    public void setExpires(Long expires) {
-        this.expires = expires;
-    }
+  public String getHakuOid() {
+    return hakuOid;
+  }
 
-    public String getHakuOid() {
-        return hakuOid;
-    }
+  public void setHakuOid(String hakuOid) {
+    this.hakuOid = hakuOid;
+  }
 
-    public void setHakuOid(String hakuOid) {
-        this.hakuOid = hakuOid;
-    }
+  public String getLetterId() {
+    return letterId;
+  }
 
-    public String getLetterId() {
-        return letterId;
-    }
+  public void setLetterId(String letterId) {
+    this.letterId = letterId;
+  }
 
-    public void setLetterId(String letterId) {
-        this.letterId = letterId;
-    }
-
-    @Override
-    public String toString() {
-        return "TokensRequest{" +
-                "url='" + url + '\'' +
-                ", hakuOid='" + hakuOid + '\'' +
-                ", letterId='" + letterId + '\'' +
-                ", templatename='" + templatename + '\'' +
-                ", lang='" + lang + '\'' +
-                ", applicationOidToEmailAddress=" + applicationOidToEmailAddress +
-                ", expires=" + expires +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "TokensRequest{"
+        + "url='"
+        + url
+        + '\''
+        + ", hakuOid='"
+        + hakuOid
+        + '\''
+        + ", letterId='"
+        + letterId
+        + '\''
+        + ", templatename='"
+        + templatename
+        + '\''
+        + ", lang='"
+        + lang
+        + '\''
+        + ", applicationOidToEmailAddress="
+        + applicationOidToEmailAddress
+        + ", expires="
+        + expires
+        + '}';
+  }
 }
-
-
-
-
-
-
-
 
 /*
 (s/defschema TokensRequest {:url (rs/describe s/Str "Base URL for secure links.")

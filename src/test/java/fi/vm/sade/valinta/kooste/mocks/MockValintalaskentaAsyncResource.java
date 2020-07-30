@@ -6,67 +6,72 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-import org.springframework.stereotype.Service;
 import io.reactivex.Observable;
-
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.stereotype.Service;
 
-/**
- * @author Jussi Jartamo
- */
+/** @author Jussi Jartamo */
 @Service
 public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncResource {
 
-    private static AtomicReference<List<ValintatietoValinnanvaiheDTO>> resultReference = new AtomicReference<>();
+  private static AtomicReference<List<ValintatietoValinnanvaiheDTO>> resultReference =
+      new AtomicReference<>();
 
-    public static void setResult(List<ValintatietoValinnanvaiheDTO> result) {
-        resultReference.set(result);
-    }
-    public static void clear() {
-        resultReference.set(null);
-    }
+  public static void setResult(List<ValintatietoValinnanvaiheDTO> result) {
+    resultReference.set(result);
+  }
 
-    @Override
-    public Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset) {
-        throw new UnsupportedOperationException();
-    }
+  public static void clear() {
+    resultReference.set(null);
+  }
 
-    @Override
-    public Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-        return CompletableFuture.completedFuture(resultReference.get());
-    }
+  @Override
+  public Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid, Executor executor) {
-        return CompletableFuture.completedFuture(resultReference.get());
-    }
+  @Override
+  public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
+      String hakukohdeOid) {
+    return CompletableFuture.completedFuture(resultReference.get());
+  }
 
-    @Override
-    public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
-        return null;
-    }
-    @Override
-    public Observable<ValinnanvaiheDTO> lisaaTuloksia(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final ValinnanvaiheDTO vaihe) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
+      String hakukohdeOid, Executor executor) {
+    return CompletableFuture.completedFuture(resultReference.get());
+  }
 
-    @Override
-    public Observable<String> laskeJaSijoittele(String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
+    return null;
+  }
 
+  @Override
+  public Observable<ValinnanvaiheDTO> lisaaTuloksia(
+      final String hakuOid,
+      final String hakukohdeOid,
+      final String tarjoajaOid,
+      final ValinnanvaiheDTO vaihe) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Observable<String> laskeJaSijoittele(
+      String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
+    throw new UnsupportedOperationException();
+  }
 }
-

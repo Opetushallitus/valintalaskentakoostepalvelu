@@ -12,126 +12,143 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import io.reactivex.Observable;
-import org.springframework.stereotype.Service;
-
-import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.ws.rs.core.Response;
+import org.springframework.stereotype.Service;
 
-/**
- * @author Jussi Jartamo
- */
+/** @author Jussi Jartamo */
 @Service
 public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncResource {
-    private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference = new AtomicReference<>();
-    private static AtomicReference<Set<String>> hakukohteetValinnanvaiheelleResultReference = new AtomicReference<>();
-    private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference = new AtomicReference<>();
-    private static AtomicReference<List<HakukohdeJaValintaperusteDTO>> hakukohdeJaValintaperusteetResultReference = new AtomicReference<>();
-    private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference = new AtomicReference<>();
-    private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference = new AtomicReference<>();
-    private static AtomicReference<List<ValintaperusteetDTO>> hakukohteenValintaperusteetReference = new AtomicReference<>();
+  private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference =
+      new AtomicReference<>();
+  private static AtomicReference<Set<String>> hakukohteetValinnanvaiheelleResultReference =
+      new AtomicReference<>();
+  private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference =
+      new AtomicReference<>();
+  private static AtomicReference<List<HakukohdeJaValintaperusteDTO>>
+      hakukohdeJaValintaperusteetResultReference = new AtomicReference<>();
+  private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference =
+      new AtomicReference<>();
+  private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference =
+      new AtomicReference<>();
+  private static AtomicReference<List<ValintaperusteetDTO>> hakukohteenValintaperusteetReference =
+      new AtomicReference<>();
 
-    public static void setValintaperusteetResult(List<ValintaperusteDTO> result) {
-        valintaperusteetResultReference.set(result);
-    }
+  public static void setValintaperusteetResult(List<ValintaperusteDTO> result) {
+    valintaperusteetResultReference.set(result);
+  }
 
-    public static void setHakukohteetValinnanvaiheelleResult(Set<String> result) {
-        hakukohteetValinnanvaiheelleResultReference.set(result);
-    }
+  public static void setHakukohteetValinnanvaiheelleResult(Set<String> result) {
+    hakukohteetValinnanvaiheelleResultReference.set(result);
+  }
 
-    public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle (Collection<String> hakukohdeOids) {
-        return null;
-    }
-    @Override
-    public CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
-        return null;
-    }
+  public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle(
+      Collection<String> hakukohdeOids) {
+    return null;
+  }
 
-    @Override
-    public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
-        return CompletableFuture.completedFuture(hakukohteenValintaperusteetReference.get());
-    }
+  @Override
+  public CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(
+      String hakukohdeOid) {
+    return null;
+  }
 
-    public static void setHakukohteenValintaperusteetResult(List<ValintaperusteetDTO> hakukohteenValintaperusteetResult) {
-        MockValintaperusteetAsyncResource.hakukohteenValintaperusteetReference.set(hakukohteenValintaperusteetResult);
-    }
+  @Override
+  public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
+      String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
+    return CompletableFuture.completedFuture(hakukohteenValintaperusteetReference.get());
+  }
 
-    public static void setHakukohdeValintaperusteResult(List<HakukohdeJaValintaperusteDTO> result) {
-        hakukohdeJaValintaperusteetResultReference.set(result);
-    }
-    public static void setValintakokeetResult(List<ValintakoeDTO> result) {
-        valintakokeetResultReference.set(result);
-    }
-    public static void setResult(List<ValinnanVaiheJonoillaDTO> result) {
-        resultReference.set(result);
-    }
-    public static void setHakukohdeResult(List<HakukohdeJaValintakoeDTO> result) {
-        hakukohdeResultReference.set(result);
-    }
-    public static void clear() {
-        resultReference.set(null);
-        hakukohdeResultReference.set(null);
-        hakukohdeJaValintaperusteetResultReference.set(null);
-        valintaperusteetResultReference.set(null);
-        valintakokeetResultReference.set(null);
-    }
+  public static void setHakukohteenValintaperusteetResult(
+      List<ValintaperusteetDTO> hakukohteenValintaperusteetResult) {
+    MockValintaperusteetAsyncResource.hakukohteenValintaperusteetReference.set(
+        hakukohteenValintaperusteetResult);
+  }
 
-    @Override
-    public Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
-        return Observable.just(valintakokeetResultReference.get());
-    }
+  public static void setHakukohdeValintaperusteResult(List<HakukohdeJaValintaperusteDTO> result) {
+    hakukohdeJaValintaperusteetResultReference.set(result);
+  }
 
-    @Override
-    public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
-        return Observable.just(hakukohteetValinnanvaiheelleResultReference.get());
-    }
+  public static void setValintakokeetResult(List<ValintakoeDTO> result) {
+    valintakokeetResultReference.set(result);
+  }
 
-    @Override
-    public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
-        throw new UnsupportedOperationException();
-    }
+  public static void setResult(List<ValinnanVaiheJonoillaDTO> result) {
+    resultReference.set(result);
+  }
 
-    @Override
-    public CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-        return CompletableFuture.completedFuture(valintaperusteetResultReference.get());
-    }
+  public static void setHakukohdeResult(List<HakukohdeJaValintakoeDTO> result) {
+    hakukohdeResultReference.set(result);
+  }
 
-    @Override
-    public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids) {
-        return Observable.just(hakukohdeJaValintaperusteetResultReference.get());
-    }
+  public static void clear() {
+    resultReference.set(null);
+    hakukohdeResultReference.set(null);
+    hakukohdeJaValintaperusteetResultReference.set(null);
+    valintaperusteetResultReference.set(null);
+    valintakokeetResultReference.set(null);
+  }
 
-    @Override
-    public Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
+    return Observable.just(valintakokeetResultReference.get());
+  }
 
-    @Override
-    public Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
+    return Observable.just(hakukohteetValinnanvaiheelleResultReference.get());
+  }
 
-    @Override
-    public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
-        return Observable.just(hakukohdeResultReference.get());
-    }
+  @Override
+  public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids) {
-        return Observable.just(hakukohdeResultReference.get());
-    }
+  @Override
+  public CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
+    return CompletableFuture.completedFuture(valintaperusteetResultReference.get());
+  }
 
-    @Override
-    public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(
+      Collection<String> hakukohdeOids) {
+    return Observable.just(hakukohdeJaValintaperusteetResultReference.get());
+  }
 
-    @Override
-    public Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
+      Collection<String> hakukohdeOids) {
+    return Observable.just(hakukohdeResultReference.get());
+  }
+
+  @Override
+  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
+      Collection<String> hakukohdeOids) {
+    return Observable.just(hakukohdeResultReference.get());
+  }
+
+  @Override
+  public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid) {
+    throw new UnsupportedOperationException();
+  }
 }

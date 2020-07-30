@@ -5,24 +5,22 @@ import io.swagger.annotations.ApiModel;
 @ApiModel(value = "valinta.kooste.hakemukset.dto.ValintakoeDTO", description = "Valintakoe")
 public class ValintakoeDTO {
 
-    private String tunniste;
+  private String tunniste;
 
-    public ValintakoeDTO(String tunniste) {
-        this.tunniste = tunniste;
-    }
+  public ValintakoeDTO(String tunniste) {
+    this.tunniste = tunniste;
+  }
 
-    public String getTunniste() {
-        return tunniste;
-    }
+  public String getTunniste() {
+    return tunniste;
+  }
 
-    public void setTunniste(String tunniste) {
-        this.tunniste = tunniste;
-    }
+  public void setTunniste(String tunniste) {
+    this.tunniste = tunniste;
+  }
 
-    @Override
-    public String toString() {
-        return "ValintakoeDTO{" +
-                "tunniste='" + tunniste + '\'' +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "ValintakoeDTO{" + "tunniste='" + tunniste + '\'' + '}';
+  }
 }
