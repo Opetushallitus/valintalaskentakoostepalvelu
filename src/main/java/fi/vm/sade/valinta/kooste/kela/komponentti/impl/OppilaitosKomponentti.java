@@ -5,6 +5,7 @@ import fi.vm.sade.valinta.kooste.exception.OrganisaatioException;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import java.util.LinkedList;
 import java.util.List;
+import javax.ws.rs.ForbiddenException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,8 +94,12 @@ public class OppilaitosKomponentti {
       return organisaatio.getOppilaitosKoodi();
     }
 
-    List<OrganisaatioRDTO> children = organisaatioProxy.children(organisaatio.getOid(), false);
-
+    List<OrganisaatioRDTO> children;
+    try {
+      children = organisaatioProxy.children(organisaatio.getOid(), false);
+    } catch (ForbiddenException fe) { // Varhaiskasvatuksen organisaatioille palautuu tällaisia.
+      return null;
+    }
     if (children != null && !children.isEmpty()) {
       for (OrganisaatioRDTO childOrg : children) {
         String oppilaitosNro = getOppilaitosnumeroFromChildren(childOrg);
@@ -103,7 +108,6 @@ public class OppilaitosKomponentti {
         }
       }
     }
-
     return null;
   }
 }
