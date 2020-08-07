@@ -454,7 +454,8 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
 
   @Override
   public HakemusDTO toHakemusDto(
-      Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
+      Valintapisteet valintapisteet,
+      Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
       boolean shouldUseApplicationPersonOid) {
     HakemusDTO hakemusTyyppi = new HakemusDTO();
     hakemusTyyppi.setHakemusoid(getOid());

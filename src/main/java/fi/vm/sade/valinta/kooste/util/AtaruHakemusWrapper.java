@@ -318,11 +318,13 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public HakemusDTO toHakemusDto(
-      Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
+      Valintapisteet valintapisteet,
+      Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
       boolean shouldUseApplicationPersonOid) {
     HakemusDTO hakemusDto = new HakemusDTO();
     hakemusDto.setHakemusoid(getOid());
-    hakemusDto.setHakijaOid(shouldUseApplicationPersonOid ? getApplicationPersonOid() : getPersonOid());
+    hakemusDto.setHakijaOid(
+        shouldUseApplicationPersonOid ? getApplicationPersonOid() : getPersonOid());
     hakemusDto.setHakuoid(getHakuoid());
 
     if (hakemus.getKeyValues() != null) {
