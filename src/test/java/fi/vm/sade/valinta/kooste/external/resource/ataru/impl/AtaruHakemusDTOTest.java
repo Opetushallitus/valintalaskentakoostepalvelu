@@ -37,7 +37,7 @@ public class AtaruHakemusDTOTest {
         ataruResource.getApplicationsByOids(Collections.singletonList(hakemusOid)).get();
     HakemusWrapper hakemusWrapper = hakemusWrappers.get(0);
     HakemusDTO hakemusDto =
-        hakemusWrapper.toHakemusDto(new Valintapisteet(), Collections.emptyMap());
+        hakemusWrapper.toHakemusDto(new Valintapisteet(), Collections.emptyMap(), true);
     assertEquals(hakemusOid, hakemusDto.getHakemusoid());
     assertAvainArvo(
         hakemusDto.getAvaimet(), "preference1-Koulutus-id", "1.2.246.562.20.755368276710");

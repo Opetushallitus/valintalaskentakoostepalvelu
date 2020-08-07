@@ -240,6 +240,11 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
+  public String getApplicationPersonOid() {
+    return getPersonOid();
+  }
+
+  @Override
   public Integer getHakutoiveenPrioriteetti(String hakukohdeOid) {
     getHakutoiveet();
 
@@ -449,7 +454,8 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
 
   @Override
   public HakemusDTO toHakemusDto(
-      Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+      Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
+      boolean shouldUseApplicationPersonOid) {
     HakemusDTO hakemusTyyppi = new HakemusDTO();
     hakemusTyyppi.setHakemusoid(getOid());
     hakemusTyyppi.setHakijaOid(getPersonOid());

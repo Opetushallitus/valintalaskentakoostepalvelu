@@ -107,14 +107,16 @@ public class HakemuksetConverterUtil {
       List<Valintapisteet> valintapisteet,
       List<Oppija> oppijat,
       ParametritDTO parametritDTO,
-      Boolean fetchEnsikertalaisuus) {
+      Boolean fetchEnsikertalaisuus,
+      boolean shouldUseApplicationPersonOid) {
     ensurePersonOids(hakemukset, hakukohdeOid);
     List<HakemusDTO> hakemusDtot =
         hakemuksetToHakemusDTOs(
             hakukohdeOid,
             hakemukset,
             ofNullable(valintapisteet).orElse(emptyList()),
-            hakukohdeRyhmasForHakukohdes);
+            hakukohdeRyhmasForHakukohdes,
+            shouldUseApplicationPersonOid);
     Map<String, Boolean> hasHetu =
         hakemukset.stream()
             .collect(toMap(HakemusWrapper::getOid, HakemusWrapper::hasHenkilotunnus));
@@ -264,7 +266,8 @@ public class HakemuksetConverterUtil {
       String hakukohdeOid,
       List<HakemusWrapper> hakemukset,
       List<Valintapisteet> valintapisteet,
-      Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+      Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
+      boolean shouldUseApplicationPersonOid) {
     List<HakemusDTO> hakemusDtot;
     Map<String, Valintapisteet> hakemusOIDtoValintapisteet =
         valintapisteet.stream().collect(Collectors.toMap(Valintapisteet::getHakemusOID, v -> v));
@@ -275,7 +278,8 @@ public class HakemuksetConverterUtil {
             hakemukset,
             hakukohdeRyhmasForHakukohdes,
             hakemusOIDtoValintapisteet,
-            epaonnistuneetKonversiot);
+            epaonnistuneetKonversiot,
+            shouldUseApplicationPersonOid);
     if (!epaonnistuneetKonversiot.isEmpty()) {
       RuntimeException e =
           new RuntimeException(
@@ -295,7 +299,8 @@ public class HakemuksetConverterUtil {
       List<HakemusWrapper> hakemukset,
       Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
       Map<String, Valintapisteet> hakemusOIDtoValintapisteet,
-      Map<String, Exception> epaonnistuneetKonversiot) {
+      Map<String, Exception> epaonnistuneetKonversiot,
+      boolean shouldUseApplicationPersonOid) {
     List<HakemusDTO> hakemusDtot;
     try {
       hakemusDtot =
@@ -306,7 +311,8 @@ public class HakemuksetConverterUtil {
                     try {
                       return h.toHakemusDto(
                           hakemusOIDtoValintapisteet.get(h.getOid()),
-                          hakukohdeRyhmasForHakukohdes); // TODO there maybe come null pisteet here
+                          hakukohdeRyhmasForHakukohdes, // TODO there maybe come null pisteet here
+                          shouldUseApplicationPersonOid);
                     } catch (Exception e) {
                       epaonnistuneetKonversiot.put(h.getOid(), e);
                       return null;

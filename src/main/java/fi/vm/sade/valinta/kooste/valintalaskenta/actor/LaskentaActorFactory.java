@@ -496,6 +496,7 @@ public class LaskentaActorFactory {
                         pisteetWithLastModified.valintapisteet,
                         oppijat,
                         actorParams.getParametritDTO(),
+                        true,
                         true),
                     valintaperusteet);
 
@@ -513,6 +514,7 @@ public class LaskentaActorFactory {
                         pisteetWithLastModified.valintapisteet,
                         oppijat,
                         actorParams.getParametritDTO(),
+                        true,
                         true),
                     valintaperusteet,
                     hakijaryhmatF.join());

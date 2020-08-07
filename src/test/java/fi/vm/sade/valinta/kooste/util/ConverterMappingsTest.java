@@ -47,7 +47,7 @@ public class ConverterMappingsTest {
     HakemusDTO dto =
         wrapper.toHakemusDto(
             new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
-            Maps.newHashMap());
+            Maps.newHashMap(), false);
     // LOG.error("\r\n{}", new GsonBuilder().setPrettyPrinting().create()
     // .toJson(dto));
     assertTrue(
@@ -85,7 +85,7 @@ public class ConverterMappingsTest {
     HakemusDTO dto =
         wrapper.toHakemusDto(
             new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
-            hakukohdeRyhmasForHakukohdes);
+            hakukohdeRyhmasForHakukohdes, false);
     assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
   }
 
@@ -179,7 +179,7 @@ public class ConverterMappingsTest {
     HakemusDTO dto =
         wrapper.toHakemusDto(
             new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
-            Maps.newHashMap());
+            Maps.newHashMap(), false);
 
     final int prefixes =
         dto.getAvaimet().stream()
@@ -218,7 +218,7 @@ public class ConverterMappingsTest {
     HakemusDTO dto =
         wrapper.toHakemusDto(
             new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
-            hakukohdeRyhmasForHakukohdes);
+            hakukohdeRyhmasForHakukohdes, true);
 
     assertEquals(wrapper.getOid(), dto.getHakemusoid());
 

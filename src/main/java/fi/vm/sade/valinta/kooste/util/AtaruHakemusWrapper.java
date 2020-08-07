@@ -172,6 +172,11 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
+  public String getApplicationPersonOid() {
+    return StringUtils.trimToEmpty(hakemus.getPersonOid());
+  }
+
+  @Override
   public Integer getHakutoiveenPrioriteetti(String hakukohdeOid) {
     int i =
         hakemus.getHakutoiveet().stream()
@@ -313,10 +318,11 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public HakemusDTO toHakemusDto(
-      Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes) {
+      Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
+      boolean shouldUseApplicationPersonOid) {
     HakemusDTO hakemusDto = new HakemusDTO();
     hakemusDto.setHakemusoid(getOid());
-    hakemusDto.setHakijaOid(getPersonOid());
+    hakemusDto.setHakijaOid(shouldUseApplicationPersonOid ? getApplicationPersonOid() : getPersonOid());
     hakemusDto.setHakuoid(getHakuoid());
 
     if (hakemus.getKeyValues() != null) {
