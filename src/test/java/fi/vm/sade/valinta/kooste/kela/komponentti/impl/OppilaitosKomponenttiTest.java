@@ -68,12 +68,17 @@ public class OppilaitosKomponenttiTest {
 
     OrganisaatioRDTO childOrg2 = new OrganisaatioRDTO();
     childOrg2.setOid("child2Oid");
-    childOrg2.setOppilaitosKoodi("oppilaitosNroFromChild");
+    childOrg2.setStatus("PASSIIVINEN");
+    childOrg2.setOppilaitosKoodi("oppilaitosNroFromPassiveChild");
+
+    OrganisaatioRDTO childOrg3 = new OrganisaatioRDTO();
+    childOrg3.setOid("child2Oid");
+    childOrg3.setOppilaitosKoodi("oppilaitosNroFromChild");
 
     when(organisaatioResource.getOrganisaatioByOID("orgWithChildrenOid"))
         .thenReturn(orgWithChildren);
     when(organisaatioResource.children("orgWithChildrenOid", false))
-        .thenReturn(Arrays.asList(childOrg1, childOrg2));
+        .thenReturn(Arrays.asList(childOrg1, childOrg2, childOrg3));
 
     // For empty oppilaitosnumero
     OrganisaatioRDTO emptyOrg = new OrganisaatioRDTO();
