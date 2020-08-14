@@ -97,8 +97,8 @@ public class OppilaitosKomponentti {
 
     List<OrganisaatioRDTO> children;
     try {
-      children = organisaatioProxy.children(organisaatio.getOid(), false)
-              .stream()
+      children =
+          organisaatioProxy.children(organisaatio.getOid(), false).stream()
               .filter(o -> !"PASSIIVINEN".equals(o.getStatus()))
               .collect(Collectors.toList());
     } catch (ForbiddenException fe) { // Varhaiskasvatuksen organisaatioille palautuu tällaisia.
