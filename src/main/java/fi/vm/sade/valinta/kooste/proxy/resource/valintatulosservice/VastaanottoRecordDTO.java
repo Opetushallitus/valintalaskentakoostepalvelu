@@ -83,8 +83,7 @@ public class VastaanottoRecordDTO {
     return selite;
   }
 
-  @NotNull
-  public void setSelite(String selite) {
+  public void setSelite(@NotNull String selite) {
     assertNotNull(selite, "selite");
     this.selite = selite;
   }
