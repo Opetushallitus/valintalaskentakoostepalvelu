@@ -79,7 +79,7 @@
             <dependency>
               <groupId>io.swagger</groupId>
               <artifactId>swagger-jaxrs</artifactId>
-              <version>1.6.2</version>
+              <version>1.5.21</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.tarjonta</groupId>
@@ -414,7 +414,7 @@
             <dependency>
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
-                <version>0.9.12</version>
+                <version>0.9.10</version>
             </dependency>
             <dependency>
                 <groupId>org.ow2.asm</groupId>
