@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import java.util.Arrays;
+import javax.ws.rs.ForbiddenException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +67,10 @@ public class OppilaitosKomponenttiTest {
     childOrg1.setOid("child1Oid");
     childOrg1.setOppilaitosKoodi(null);
 
+    OrganisaatioRDTO childOrgVarh = new OrganisaatioRDTO();
+    childOrgVarh.setOid("orgVarhaiskasvatus");
+    childOrgVarh.setOppilaitosKoodi(null);
+
     OrganisaatioRDTO childOrg2 = new OrganisaatioRDTO();
     childOrg2.setOid("child2Oid");
     childOrg2.setStatus("PASSIIVINEN");
@@ -78,7 +83,9 @@ public class OppilaitosKomponenttiTest {
     when(organisaatioResource.getOrganisaatioByOID("orgWithChildrenOid"))
         .thenReturn(orgWithChildren);
     when(organisaatioResource.children("orgWithChildrenOid", false))
-        .thenReturn(Arrays.asList(childOrg1, childOrg2, childOrg3));
+        .thenReturn(Arrays.asList(childOrg1, childOrgVarh, childOrg2, childOrg3));
+    when(organisaatioResource.children("orgVarhaiskasvatus", false))
+        .thenThrow(new ForbiddenException());
 
     // For empty oppilaitosnumero
     OrganisaatioRDTO emptyOrg = new OrganisaatioRDTO();

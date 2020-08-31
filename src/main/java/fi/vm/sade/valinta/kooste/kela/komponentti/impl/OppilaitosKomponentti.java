@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.kela.komponentti.impl;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.valinta.kooste.exception.OrganisaatioException;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,15 +96,8 @@ public class OppilaitosKomponentti {
       return organisaatio.getOppilaitosKoodi();
     }
 
-    List<OrganisaatioRDTO> children;
-    try {
-      children =
-          organisaatioProxy.children(organisaatio.getOid(), false).stream()
-              .filter(o -> !"PASSIIVINEN".equals(o.getStatus()))
-              .collect(Collectors.toList());
-    } catch (ForbiddenException fe) { // Varhaiskasvatuksen organisaatioille palautuu tällaisia.
-      return null;
-    }
+    List<OrganisaatioRDTO> children = getNonPassiveChildOrgs(organisaatio.getOid());
+
     if (children != null && !children.isEmpty()) {
       for (OrganisaatioRDTO childOrg : children) {
         String oppilaitosNro = getOppilaitosnumeroFromChildren(childOrg);
@@ -113,5 +107,15 @@ public class OppilaitosKomponentti {
       }
     }
     return null;
+  }
+
+  private List<OrganisaatioRDTO> getNonPassiveChildOrgs(String orgOid) throws Exception {
+    try {
+      return organisaatioProxy.children(orgOid, false).stream()
+          .filter(o -> !"PASSIIVINEN".equals(o.getStatus()))
+          .collect(Collectors.toList());
+    } catch (ForbiddenException fe) { // Varhaiskasvatuksen organisaatioille palautuu tällaisia.
+      return Collections.emptyList();
+    }
   }
 }
