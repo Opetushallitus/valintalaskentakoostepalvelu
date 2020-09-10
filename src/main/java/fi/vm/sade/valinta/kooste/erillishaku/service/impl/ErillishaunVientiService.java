@@ -189,7 +189,7 @@ public class ErillishaunVientiService {
                       Optional.ofNullable(valinnantulokset.get(hakemus.getOid()));
                   Optional<Maksuntila> maksuntila =
                       lukuvuosimaksus.stream()
-                          .filter(l -> hakemus.getPersonOid().equals(l.getPersonOid()))
+                          .filter(l -> hakemus.getApplicationPersonOid().equals(l.getPersonOid()))
                           .map(Lukuvuosimaksu::getMaksuntila)
                           .findAny();
                   return tulosOpt
@@ -264,7 +264,7 @@ public class ErillishaunVientiService {
                     createErillishakuRivi(
                         hakemus.getOid(),
                         hakemus,
-                        ofNullable(personOidToMaksuntila.get(hakemus.getPersonOid())),
+                        ofNullable(personOidToMaksuntila.get(hakemus.getApplicationPersonOid())),
                         "KESKEN",
                         null,
                         tarjontaHakukohde.getOid(),
