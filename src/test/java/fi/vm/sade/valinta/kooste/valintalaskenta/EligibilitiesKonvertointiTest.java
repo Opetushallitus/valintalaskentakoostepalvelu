@@ -64,7 +64,7 @@ public class EligibilitiesKonvertointiTest {
               h -> {
                 try {
                   HakemusWrapper hakemus = new HakuappHakemusWrapper(h);
-                  return hakemus.toHakemusDto(new Valintapisteet(), Maps.newHashMap());
+                  return hakemus.toHakemusDto(new Valintapisteet(), Maps.newHashMap(), false);
                 } catch (Exception e) {
                   epaonnistuneetKonversiot.put(h.getOid(), e);
                   return null;

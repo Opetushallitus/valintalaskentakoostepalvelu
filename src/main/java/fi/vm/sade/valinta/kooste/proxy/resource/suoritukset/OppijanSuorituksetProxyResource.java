@@ -542,6 +542,7 @@ public class OppijanSuorituksetProxyResource {
         valintapisteet,
         suoritukset,
         parametrit,
-        fetchEnsikertalaisuus);
+        fetchEnsikertalaisuus,
+        false);
   }
 }

@@ -56,6 +56,8 @@ public abstract class HakemusWrapper {
 
   public abstract String getPersonOid();
 
+  public abstract String getApplicationPersonOid();
+
   public abstract Integer getHakutoiveenPrioriteetti(String hakukohdeOid);
 
   public abstract Boolean getToisenAsteenSuoritus();
@@ -97,5 +99,7 @@ public abstract class HakemusWrapper {
   public abstract boolean equals(Object o);
 
   public abstract HakemusDTO toHakemusDto(
-      Valintapisteet valintapisteet, Map<String, List<String>> hakukohdeRyhmasForHakukohdes);
+      Valintapisteet valintapisteet,
+      Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
+      boolean shouldUseApplicationPersonOid);
 }
