@@ -1,9 +1,8 @@
 package fi.vm.sade.valinta.kooste.kela.resource;
 
 import fi.vm.sade.auditlog.Changes;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.KomotoResource;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakuFiltteri;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
@@ -22,7 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -38,9 +40,7 @@ import org.springframework.stereotype.Controller;
 public class KelaResource {
   private static final Logger LOG = LoggerFactory.getLogger(KelaResource.class);
 
-  @Autowired private HakukohdeResource hakukohdeResource;
-
-  @Autowired private KomotoResource komotoResource;
+  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
 
   @Autowired(required = false)
   private KelaRoute kelaRoute;
@@ -80,7 +80,7 @@ public class KelaResource {
             hakuTietue.getHakuOids(),
             aineistonNimi,
             organisaationNimi,
-            new KelaCache(hakukohdeResource, komotoResource),
+            new KelaCache(tarjontaAsyncResource),
             kelaProsessi,
             alkuPvm,
             loppuPvm));

@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
@@ -93,9 +93,9 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                 HakuV1RDTO haku = hakuTarjonnalta.getHaku(hakuOid);
                 String hakuNimi = new Teksti(haku.getNimi()).getTeksti();
                 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-                HakukohdeDTO hnimi = hakukohdeTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
+                HakukohdeV1RDTO hnimi = hakukohdeTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
                 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-                String hakukohdeNimi = new Teksti(hnimi.getHakukohdeNimi()).getTeksti();
+                String hakukohdeNimi = new Teksti(hnimi.getHakukohteenNimet()).getTeksti();
                 String valintatapajonoOid = valintatapajonoOid(exchange);
                 if (hakukohdeOid == null || hakuOid == null || valintatapajonoOid == null) {
                   LOG.error(
