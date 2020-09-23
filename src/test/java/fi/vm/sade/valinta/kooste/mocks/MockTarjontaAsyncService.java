@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import io.reactivex.Observable;
@@ -50,7 +52,13 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     hakukohdeDTO.setHakuOid(hakuOid);
     hakukohdeDTO.setOid(hakukohdeOid);
     hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
+    hakukohdeDTO.setOpetusKielet(ImmutableSet.of("FI", "SV"));
     return CompletableFuture.completedFuture(hakukohdeDTO);
+  }
+
+  @Override
+  public CompletableFuture<KoulutusV1RDTO> haeKoulutus(String koulutusOid) {
+    return null;
   }
 
   @Override
@@ -64,6 +72,12 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   @Override
   public CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
     return CompletableFuture.completedFuture(Maps.newHashMap());
+  }
+
+  @Override
+  public CompletableFuture<HakukohdeValintaperusteetV1RDTO> findValintaperusteetByOid(
+      String hakukohdeOid) {
+    return null;
   }
 
   public static void setMockHaku(HakuV1RDTO mockHaku) {

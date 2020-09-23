@@ -2,13 +2,20 @@ package fi.vm.sade.valinta.kooste.kela.dto;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
-import fi.vm.sade.valinta.kooste.kela.komponentti.*;
+import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.OppilaitosSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.TilaSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.TutkinnontasoSource;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -55,7 +62,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
                 HenkiloPerustietoDto henkilotiedot =
                     henkilotietoSource.getByPersonOid(hakija.getHakijaOid());
                 String hakukohdeOid = hakutoive.getHakukohdeOid();
-                HakukohdeDTO hakuKohde = hakukohdeSource.getHakukohdeByOid(hakukohdeOid);
+                HakukohdeV1RDTO hakuKohde = hakukohdeSource.getHakukohdeByOid(hakukohdeOid);
                 final String etunimi = henkilotiedot.getEtunimet();
                 final String sukunimi = henkilotiedot.getSukunimi();
                 final String henkilotunnus = henkilotiedot.getHetu();
@@ -95,7 +102,8 @@ public class KelaHaku extends KelaAbstraktiHaku {
                   return;
                 }
 
-                String organisaatioOid = hakuKohde.getTarjoajaOid();
+                Iterator<String> i = hakuKohde.getTarjoajaOids().iterator();
+                String organisaatioOid = i.hasNext() ? i.next() : null;
                 String oppilaitosnumero = "XXXXX";
 
                 if (organisaatioOid == null || organisaatioOid.equalsIgnoreCase("undefined")) {

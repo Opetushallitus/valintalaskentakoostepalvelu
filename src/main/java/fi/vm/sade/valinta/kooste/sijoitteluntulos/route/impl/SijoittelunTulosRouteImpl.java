@@ -8,8 +8,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
@@ -189,12 +189,12 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 String tarjoajaNimi;
                 String preferoitukielikoodi = KieliUtil.SUOMI;
                 try {
-                  HakukohdeDTO nimi = nimiTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
-                  tarjoajaOid = nimi.getTarjoajaOid();
-                  Teksti hakukohdeTeksti = new Teksti(nimi.getHakukohdeNimi());
+                  HakukohdeV1RDTO nimi = nimiTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
+                  tarjoajaOid = nimi.getTarjoajaOids().iterator().next();
+                  Teksti hakukohdeTeksti = new Teksti(nimi.getHakukohteenNimet());
                   preferoitukielikoodi = hakukohdeTeksti.getKieli();
                   hakukohdeNimi = hakukohdeTeksti.getTeksti();
-                  tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi()).getTeksti();
+                  tarjoajaNimi = new Teksti(nimi.getTarjoajaNimet()).getTeksti();
                 } catch (Exception e) {
                   hakukohdeNimi = "Nimetön hakukohde " + hakukohdeOid;
                   tarjoajaNimi = "Nimetön tarjoaja " + tarjoajaOid;
@@ -372,8 +372,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 stopWatch.start("Tiedot tarjonnasta");
                 String tarjoajaOid = StringUtils.EMPTY;
                 try {
-                  HakukohdeDTO nimi = nimiTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
-                  tarjoajaOid = nimi.getTarjoajaOid();
+                  HakukohdeV1RDTO nimi = nimiTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
+                  tarjoajaOid = nimi.getTarjoajaOids().iterator().next();
                 } catch (Exception e) {
                   prosessi
                       .getVaroitukset()
