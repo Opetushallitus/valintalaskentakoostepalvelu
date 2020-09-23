@@ -69,8 +69,6 @@ public class KoekutsukirjeetTest {
           ArgumentCaptor.forClass(LetterBatch.class);
       Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class)))
           .thenReturn(new CompletableFuture<>());
-      Mockito.when(Mocks.getHakukohdeResource().getByOID(Mockito.anyString()))
-          .thenReturn(HAKUKOHDEDTO1);
       MockValintaperusteetAsyncResource.setHakukohdeResult(
           Arrays.asList(
               hakukohdeJaValintakoe()
@@ -167,8 +165,6 @@ public class KoekutsukirjeetTest {
           ArgumentCaptor.forClass(LetterBatch.class);
       Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class)))
           .thenReturn(new CompletableFuture<>());
-      Mockito.when(Mocks.getHakukohdeResource().getByOID(Mockito.anyString()))
-          .thenReturn(HAKUKOHDEDTO1);
       MockValintaperusteetAsyncResource.setHakukohdeResult(
           Arrays.asList(
               hakukohdeJaValintakoe()

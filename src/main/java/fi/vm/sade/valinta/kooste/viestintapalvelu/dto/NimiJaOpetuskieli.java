@@ -1,12 +1,12 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 
 public class NimiJaOpetuskieli {
-  private final HakukohdeDTO nimi;
+  private final HakukohdeV1RDTO nimi;
   private final String opetuskieli;
 
-  public NimiJaOpetuskieli(HakukohdeDTO nimi, String opetuskieli) {
+  public NimiJaOpetuskieli(HakukohdeV1RDTO nimi, String opetuskieli) {
     this.nimi = nimi;
     this.opetuskieli = opetuskieli;
   }
@@ -15,15 +15,15 @@ public class NimiJaOpetuskieli {
     return opetuskieli;
   }
 
-  public HakukohdeDTO getNimi() {
+  public HakukohdeV1RDTO getNimi() {
     return nimi;
   }
 
   public Teksti getHakukohdeNimi() {
-    return new Teksti(nimi.getHakukohdeNimi());
+    return new Teksti(nimi.getHakukohteenNimet());
   }
 
   public Teksti getTarjoajaNimi() {
-    return new Teksti(nimi.getTarjoajaNimi());
+    return new Teksti(nimi.getTarjoajaNimet());
   }
 }

@@ -1,46 +1,33 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.exception.TarjontaException;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import java.util.concurrent.TimeUnit;
 import org.apache.camel.Property;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti! Proxy provides retries! */
 @Component("hakukohdeNimiTarjonnaltaKomponentti")
 public class HaeHakukohdeNimiTarjonnaltaKomponentti {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
-  private HakukohdeResource tarjontaResource;
-  private String tarjontaResourceUrl;
+  private TarjontaAsyncResource tarjontaAsyncResource;
 
   @Autowired
-  public HaeHakukohdeNimiTarjonnaltaKomponentti(
-      HakukohdeResource tarjontaResource,
-      @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String tarjontaResourceUrl) {
-    this.tarjontaResource = tarjontaResource;
-    this.tarjontaResourceUrl = tarjontaResourceUrl;
+  public HaeHakukohdeNimiTarjonnaltaKomponentti(TarjontaAsyncResource tarjontaAsyncResource) {
+    this.tarjontaAsyncResource = tarjontaAsyncResource;
   }
 
-  public HakukohdeDTO haeHakukohdeNimi(@Property("hakukohdeOid") String hakukohdeOid) {
+  public HakukohdeV1RDTO haeHakukohdeNimi(@Property("hakukohdeOid") String hakukohdeOid) {
     if (hakukohdeOid == null) {
       throw new SijoittelupalveluException(
           "Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
-    } else {
-      LOG.debug(
-          "Yhteys {}, HakukohdeResource.getHakukohdeNimi({})",
-          new Object[] {tarjontaResourceUrl, hakukohdeOid});
-      try {
-        HakukohdeDTO nimi = tarjontaResource.getByOID(hakukohdeOid);
-        return nimi;
-      } catch (Exception e) {
-        throw new TarjontaException("Tarjonnasta ei löydy hakukohdetta " + hakukohdeOid);
-      }
+    }
+    try {
+      return tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
+    } catch (Exception e) {
+      throw new TarjontaException("Tarjonnasta ei löydy hakukohdetta " + hakukohdeOid);
     }
   }
 }
