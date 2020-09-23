@@ -1,15 +1,18 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ErrorV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.GenericSearchParamsV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -103,6 +106,16 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
+  public CompletableFuture<KoulutusV1RDTO> haeKoulutus(String koulutusOid) {
+    return this.client
+        .<ResultV1RDTO<KoulutusV1RDTO>>getJson(
+            getUrl("tarjonta-service.koulutus.koulutusoid", koulutusOid),
+            Duration.ofMinutes(5),
+            new TypeToken<ResultV1RDTO<KoulutusV1RDTO>>() {}.getType())
+        .thenApplyAsync(ResultV1RDTO::getResult);
+  }
+
+  @Override
   public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
     return this.<ResultV1RDTO<Set<String>>>getAsObservableLazily(
             getUrl("tarjonta-service.haku.findoidstosynctarjontafor"),
@@ -120,6 +133,17 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
             Duration.ofMinutes(5),
             new com.google.gson.reflect.TypeToken<ResultSearch>() {}.getType());
     return resultSearchToHakukohdeRyhmaMap(s);
+  }
+
+  @Override
+  public CompletableFuture<HakukohdeValintaperusteetV1RDTO> findValintaperusteetByOid(
+      String hakukohdeOid) {
+    return this.client
+        .<ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>>getJson(
+            getUrl("tarjonta-service.hakukohde.valintaperusteet", hakukohdeOid),
+            Duration.ofMinutes(5),
+            new TypeToken<ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>>() {}.getType())
+        .thenApplyAsync(ResultV1RDTO::getResult);
   }
 
   public static CompletableFuture<Map<String, List<String>>> resultSearchToHakukohdeRyhmaMap(
@@ -160,6 +184,23 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
 
   public static Gson getGson() {
     return DateDeserializer.gsonBuilder()
+        .registerTypeAdapter(
+            KoulutusV1RDTO.class,
+            (JsonDeserializer<KoulutusV1RDTO>)
+                (json, typeOfT, context) -> {
+                  JsonObject o = json.getAsJsonObject();
+                  String toteutustyyppi = o.getAsJsonPrimitive("toteutustyyppi").getAsString();
+                  for (JsonSubTypes.Type type :
+                      KoulutusV1RDTO.class.getAnnotation(JsonSubTypes.class).value()) {
+                    if (type.name().equals(toteutustyyppi)) {
+                      return context.deserialize(o, type.value());
+                    }
+                  }
+                  throw new IllegalStateException(
+                      String.format(
+                          "Tyyppiä %s olevan koulutuksen jäsentäminen epäonnistui",
+                          toteutustyyppi));
+                })
         .registerTypeAdapter(
             ResultV1RDTO.class,
             (JsonDeserializer)

@@ -1,22 +1,29 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.*;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.Kieli;
+import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
+import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.NimiJaOpetuskieli;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -31,16 +38,16 @@ public class KoekutsukirjeetKomponentti {
 
   private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
   private final HaeOsoiteKomponentti osoiteKomponentti;
-  private final HakukohdeResource tarjontaResource;
+  private final TarjontaAsyncResource tarjontaAsyncResource;
 
   @Autowired
   public KoekutsukirjeetKomponentti(
       KoodistoCachedAsyncResource koodistoCachedAsyncResource,
       HaeOsoiteKomponentti osoiteKomponentti,
-      HakukohdeResource tarjontaResource) {
+      TarjontaAsyncResource tarjontaAsyncResource) {
     this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     this.osoiteKomponentti = osoiteKomponentti;
-    this.tarjontaResource = tarjontaResource;
+    this.tarjontaAsyncResource = tarjontaAsyncResource;
   }
 
   public LetterBatch valmistaKoekutsukirjeet(
@@ -78,19 +85,20 @@ public class KoekutsukirjeetKomponentti {
                     Collectors.toMap(
                         h -> h,
                         h -> {
-                          HakukohdeDTO nimi = tarjontaResource.getByOID(hakukohdeOid);
-                          Collection<String> kielikoodit =
-                              Collections2.transform(
-                                  nimi.getOpetuskielet(),
-                                  new Function<String, String>() {
-                                    @Override
-                                    public String apply(String tarjonnanEpastandardiKoodistoUri) {
-                                      return TarjontaUriToKoodistoUtil.cleanUri(
-                                          tarjonnanEpastandardiKoodistoUri);
-                                    }
-                                  });
-                          String opetuskieli = new Kieli(kielikoodit).getKieli();
-                          return new NimiJaOpetuskieli(nimi, opetuskieli);
+                          try {
+                            HakukohdeV1RDTO nimi =
+                                tarjontaAsyncResource
+                                    .haeHakukohde(hakukohdeOid)
+                                    .get(5, TimeUnit.MINUTES);
+                            Collection<String> kielikoodit =
+                                nimi.getOpetusKielet().stream()
+                                    .map(TarjontaUriToKoodistoUtil::cleanUri)
+                                    .collect(Collectors.toList());
+                            String opetuskieli = new Kieli(kielikoodit).getKieli();
+                            return new NimiJaOpetuskieli(nimi, opetuskieli);
+                          } catch (Exception e) {
+                            throw new RuntimeException(e);
+                          }
                         }));
       } catch (Exception e) {
         LOG.error("Tarjonnalta ei saatu hakukohteelle({}) nimea!", hakukohdeOid);

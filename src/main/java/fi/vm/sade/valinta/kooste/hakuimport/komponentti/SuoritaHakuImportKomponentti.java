@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,30 +18,16 @@ public class SuoritaHakuImportKomponentti {
 
   private static final Logger LOG = LoggerFactory.getLogger(SuoritaHakuImportKomponentti.class);
 
-  @Autowired private fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource;
-
-  private static final int MAX_COUNT = -1;
+  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
 
   public Collection<String> suoritaHakukohdeImport(@Property(OPH.HAKUOID) String hakuOid) {
-    ResultV1RDTO<HakuV1RDTO> a = hakuResource.findByOid(hakuOid); // getByOIDHakukohde(hakuOid,
-    // null,
-    // MAX_COUNT,
-    // 0,
-    // null,
-    // null,
-    // null,
-    // null);
-    LOG.info("Importoidaan hakukohteita yhteensä {} kpl", a.getResult().getHakukohdeOids().size());
-
-    Collection<String> hakukohdeOids = a.getResult().getHakukohdeOids();
-
-    // Collection<String> hakukohdeOids =
-    // Sets.newHashSet(Collections2.filter(
-    // Collections2.transform(a, new Function<OidRDTO, String>() {
-    // public String apply(OidRDTO input) {
-    // }
-    // }), Predicates.notNull()));
-
-    return hakukohdeOids;
+    try {
+      HakuV1RDTO haku = tarjontaAsyncResource.haeHaku(hakuOid).get(60, TimeUnit.SECONDS);
+      List<String> hakukohdeOids = haku.getHakukohdeOids();
+      LOG.info("Importoidaan hakukohteita yhteensä {} kpl", hakukohdeOids.size());
+      return hakukohdeOids;
+    } catch (Exception e) {
+      throw new RuntimeException(String.format("Haun %s haku epäonnistui", hakuOid), e);
+    }
   }
 }

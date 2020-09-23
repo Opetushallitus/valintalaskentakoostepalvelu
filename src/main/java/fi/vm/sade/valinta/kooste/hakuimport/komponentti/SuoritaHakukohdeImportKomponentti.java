@@ -6,9 +6,9 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdekoodiDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohteenValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.MonikielinenTekstiDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import java.util.concurrent.TimeUnit;
 import org.apache.camel.Body;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -19,21 +19,19 @@ public class SuoritaHakukohdeImportKomponentti {
   private static final Logger LOG =
       LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
 
-  private final HakukohdeV1ResourceWrapper hakukohdeResource;
+  private TarjontaAsyncResource tarjontaAsyncResource;
 
   @Autowired
-  public SuoritaHakukohdeImportKomponentti(HakukohdeV1ResourceWrapper hakukohdeResource) {
-    this.hakukohdeResource = hakukohdeResource;
+  public SuoritaHakukohdeImportKomponentti(TarjontaAsyncResource tarjontaAsyncResource) {
+    this.tarjontaAsyncResource = tarjontaAsyncResource;
   }
 
   public HakukohdeImportDTO suoritaHakukohdeImport(
       @Body // @Property(OPH.HAKUKOHDEOID)
           String hakukohdeOid) {
     try {
-      ResultV1RDTO<HakukohdeValintaperusteetV1RDTO> result =
-          hakukohdeResource.findValintaperusteetByOid(hakukohdeOid);
-
-      HakukohdeValintaperusteetV1RDTO data = result.getResult();
+      HakukohdeValintaperusteetV1RDTO data =
+          tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
       HakukohdeImportDTO importTyyppi = new HakukohdeImportDTO();
 
       importTyyppi.setTarjoajaOid(data.getTarjoajaOid());
@@ -232,8 +230,9 @@ public class SuoritaHakukohdeImportKomponentti {
 
       return importTyyppi;
     } catch (Exception e) {
-      LOG.error("Importointi hakukohteelle " + hakukohdeOid + " epaonnistui!", e);
-      throw e;
+      String msg = String.format("Importointi hakukohteelle %s epaonnistui!", hakukohdeOid);
+      LOG.error(msg, e);
+      throw new RuntimeException(msg, e);
     }
   }
 }

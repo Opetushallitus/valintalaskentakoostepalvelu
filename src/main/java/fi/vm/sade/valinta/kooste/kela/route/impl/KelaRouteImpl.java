@@ -11,13 +11,12 @@ import fi.vm.sade.organisaatio.resource.api.KelaResource;
 import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Change;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
@@ -80,9 +79,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
   private final HaunTyyppiKomponentti haunTyyppiKomponentti;
   private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final OppilaitosKomponentti oppilaitosKomponentti;
-  private final HakuV1Resource hakuResource;
+  private final TarjontaAsyncResource tarjontaAsyncResource;
   private final LinjakoodiKomponentti linjakoodiKomponentti;
-  private final HakukohdeResource hakukohdeResource;
   private final String kelaLuonti;
   private final KelaResource kelaResource;
 
@@ -92,20 +90,18 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
       DokumenttiAsyncResource dokumenttiAsyncResource,
       KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti,
       KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
-      HakuV1Resource hakuResource,
+      TarjontaAsyncResource tarjontaAsyncResource,
       HaunTyyppiKomponentti haunTyyppiKomponentti,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       OppilaitosKomponentti oppilaitosKomponentti,
       LinjakoodiKomponentti linjakoodiKomponentti,
-      HakukohdeResource hakukohdeResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
       KelaResource kelaResource) {
     this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
-    this.hakukohdeResource = hakukohdeResource;
     this.oppilaitosKomponentti = oppilaitosKomponentti;
     this.linjakoodiKomponentti = linjakoodiKomponentti;
     this.haunTyyppiKomponentti = haunTyyppiKomponentti;
-    this.hakuResource = hakuResource;
+    this.tarjontaAsyncResource = tarjontaAsyncResource;
     this.kelaLuonti = kelaLuonti;
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     this.kelaHakijaKomponentti = kelaHakijaKomponentti;
@@ -158,13 +154,16 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                   List<Haku> haut = Lists.newArrayList();
                   for (String hakuOid : luonti.getHakuOids()) {
                     try {
-                      haut.add(new TunnistamatonHaku(hakuResource.findByOid(hakuOid).getResult()));
+                      haut.add(
+                          new TunnistamatonHaku(
+                              tarjontaAsyncResource.haeHaku(hakuOid).get(5, MINUTES)));
                     } catch (Exception e) {
                       luonti
                           .getProsessi()
                           .getPoikkeuksetUudelleenYrityksessa()
                           .add(new Poikkeus(Poikkeus.TARJONTA, "Haun haku oid:lla.", hakuOid));
-                      throw e;
+                      throw new RuntimeException(
+                          String.format("Haun %s haku epäonnistui", hakuOid), e);
                     }
                   }
                   return new KelaLuontiJaHaut(luonti, haut);
@@ -312,13 +311,14 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                   List<KelaHakijaRivi> rivit = Lists.newArrayList();
                   HakukohdeSource hakukohdeSource =
                       new HakukohdeSource() {
-                        Cache<String, HakukohdeDTO> hakukohdeCache =
-                            CacheBuilder.<String, String>newBuilder().build();
+                        Cache<String, HakukohdeV1RDTO> hakukohdeCache =
+                            CacheBuilder.newBuilder().build();
 
-                        public HakukohdeDTO getHakukohdeByOid(String oid) {
+                        public HakukohdeV1RDTO getHakukohdeByOid(String oid) {
                           try {
-                            return hakukohdeCache.get(oid, () -> hakukohdeResource.getByOID(oid));
-                          } catch (Throwable t) {
+                            return hakukohdeCache.get(
+                                oid, () -> tarjontaAsyncResource.haeHakukohde(oid).get(5, MINUTES));
+                          } catch (Exception t) {
                             LOG.error(
                                 "Ei saatu tarjonnalta hakukohdetta oidilla {} (/tarjonta-service/rest/hakukohde/...",
                                 oid,
