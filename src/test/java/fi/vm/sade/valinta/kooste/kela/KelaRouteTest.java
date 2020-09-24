@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.kela;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
@@ -11,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
@@ -27,6 +27,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import io.reactivex.Observable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -109,7 +111,7 @@ public class KelaRouteTest extends CamelTestSupport {
         .thenReturn(CompletableFuture.completedFuture(createHakukohdeDTO()));
     Mockito.when(tarjontaAsyncResource.haeHaku(Mockito.anyString()))
         .then(
-            (Answer<CompletableFuture<HakuV1RDTO>>)
+            (Answer<CompletableFuture<Haku>>)
                 invocation -> {
                   String s = invocation.getArguments()[0].toString();
                   LOG.error("Tarjonnasta haku {}", s);
@@ -204,11 +206,8 @@ public class KelaRouteTest extends CamelTestSupport {
         null);
   }
 
-  private HakuV1RDTO createHaku(String oid) {
-    HakuV1RDTO h = new HakuV1RDTO();
-    h.setOid(oid);
-    h.setKoulutuksenAlkamiskausiUri("ALKKAUSIURI");
-    h.setHakutyyppiUri("HAKUTYYPPIURI");
-    return h;
+  private Haku createHaku(String oid) {
+    return new Haku(
+        oid, new HashMap<>(), new HashSet<>(), null, null, null, null, "ALKKAUSIURI", null);
   }
 }

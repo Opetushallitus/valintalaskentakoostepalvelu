@@ -16,6 +16,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
@@ -87,14 +88,18 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
         .map(ResultTulos::getTulokset);
   }
 
-  @Override
-  public CompletableFuture<HakuV1RDTO> haeHaku(String hakuOid) {
+  private CompletableFuture<HakuV1RDTO> getTarjontaHaku(String hakuOid) {
     return this.client
         .<ResultV1RDTO<HakuV1RDTO>>getJson(
             getUrl("tarjonta-service.haku.hakuoid", hakuOid),
             Duration.ofMinutes(5),
             new com.google.gson.reflect.TypeToken<ResultV1RDTO<HakuV1RDTO>>() {}.getType())
         .thenApplyAsync(ResultV1RDTO::getResult);
+  }
+
+  @Override
+  public CompletableFuture<Haku> haeHaku(String hakuOid) {
+    return this.getTarjontaHaku(hakuOid).thenApplyAsync(h -> h == null ? null : new Haku(h));
   }
 
   @Override
@@ -109,7 +114,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
 
   @Override
   public CompletableFuture<Set<String>> haunHakukohteet(String hakuOid) {
-    return this.haeHaku(hakuOid).thenApplyAsync(h -> new HashSet<>(h.getHakukohdeOids()));
+    return this.getTarjontaHaku(hakuOid).thenApplyAsync(h -> new HashSet<>(h.getHakukohdeOids()));
   }
 
   @Override

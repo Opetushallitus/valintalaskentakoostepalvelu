@@ -12,10 +12,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
@@ -25,6 +25,8 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import io.reactivex.Observable;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -67,9 +69,19 @@ public class AktiivistenHakemustenValintakoeResourceTest {
       new ValintakoeOsallistuminenBuilder().setHakemusOid(ataruHakemus3.getOid()).build();
 
   private final HakukohdeV1RDTO hakukohdeDTO = new TarjontaSpec.HakukohdeBuilder(hakuOid).build();
-  private final HakuV1RDTO hakuDTOEditori =
-      new TarjontaSpec.HakuBuilder(hakuOid, ataruLomakeAvain).build();
-  private final HakuV1RDTO hakuDTOHakuApp = new TarjontaSpec.HakuBuilder(hakuOid, null).build();
+  private final Haku hakuDTOEditori =
+      new Haku(
+          hakuOid,
+          new HashMap<>(),
+          new HashSet<>(),
+          ataruLomakeAvain,
+          null,
+          null,
+          null,
+          null,
+          null);
+  private final Haku hakuDTOHakuApp =
+      new Haku(hakuOid, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null);
 
   private final ValintalaskentaValintakoeAsyncResource valintakoeAsyncResource =
       mock(ValintalaskentaValintakoeAsyncResource.class);
