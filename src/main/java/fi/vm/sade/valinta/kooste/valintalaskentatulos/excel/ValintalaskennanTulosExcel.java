@@ -5,9 +5,9 @@ import static java.util.Arrays.asList;
 
 import com.codepoetics.protonpack.Indexed;
 import com.codepoetics.protonpack.StreamUtils;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
@@ -34,7 +34,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ValintalaskennanTulosExcel {
   public static XSSFWorkbook luoExcel(
-      HakuV1RDTO haku,
+      Haku haku,
       final HakukohdeV1RDTO hakukohdeDTO,
       List<Organisaatio> tarjoajat,
       List<ValintatietoValinnanvaiheDTO> valinnanVaiheet,
@@ -61,7 +61,7 @@ public class ValintalaskennanTulosExcel {
               final ValintatietoValintatapajonoDTO jono = jonoSheet.jono;
 
               setColumnWidths(sheet);
-              addRow(sheet, "Haku", getTeksti(haku.getNimi()));
+              addRow(sheet, "Haku", getTeksti(haku.nimi));
               addRow(
                   sheet,
                   "Tarjoaja",

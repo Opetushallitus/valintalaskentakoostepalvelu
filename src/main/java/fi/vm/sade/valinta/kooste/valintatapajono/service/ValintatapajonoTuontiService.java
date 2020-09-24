@@ -188,12 +188,12 @@ public class ValintatapajonoTuontiService {
     Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
         .flatMap(
             haku -> {
-              if (haku.getAtaruLomakeAvain() == null) {
-                return Observable.fromFuture(
-                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid));
-              } else {
+              if (haku.isHakemuspalvelu()) {
                 return Observable.fromFuture(
                     ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
+              } else {
+                return Observable.fromFuture(
+                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid));
               }
             })
         .subscribe(

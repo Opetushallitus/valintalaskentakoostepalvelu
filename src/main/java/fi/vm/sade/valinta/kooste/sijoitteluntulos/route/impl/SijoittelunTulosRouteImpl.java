@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -18,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -29,7 +29,6 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Tiedosto;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
@@ -59,6 +58,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -101,7 +101,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
   private final OrganisaatioAsyncResource organisaatioAsyncResource;
   private final AtaruAsyncResource ataruAsyncResource;
   private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
-  private final HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti;
   private final ValintalaskentaAsyncResource valintalaskentaResource;
 
   @Autowired
@@ -126,7 +125,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
       AtaruAsyncResource ataruAsyncResource,
       DokumenttiAsyncResource dokumenttiAsyncResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
-      HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti,
       ValintalaskentaAsyncResource valintalaskentaResource) {
     this.tarjontaAsyncResource = tarjontaAsyncResource;
     this.organisaatioAsyncResource = organisaatioAsyncResource;
@@ -146,7 +144,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     this.sijoittelunTulosExcel = sijoittelunTulosExcel;
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     this.taulukkolaskenta = taulukkolaskenta;
-    this.haeHakuTarjonnaltaKomponentti = haeHakuTarjonnaltaKomponentti;
     this.valintalaskentaResource = valintalaskentaResource;
   }
 
@@ -222,29 +219,26 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 List<HakemusWrapper> hakemukset = Collections.emptyList();
                 List<Lukuvuosimaksu> lukuvuosimaksus = Collections.emptyList();
                 fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hk = null;
-                HakuV1RDTO hakuDTO = null;
+                Haku hakuDTO = null;
                 List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
                 try {
+                  hakuDTO = tarjontaAsyncResource.haeHaku(hakuOid).get(5, TimeUnit.MINUTES);
                   // TODO here it would make more sense to parallelise the asynchronous calls and
                   // bundle the results together after they all complete.
                   hakemukset =
-                      Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
-                          .flatMap(
-                              haku ->
-                                  StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                                      ? Observable.just(
-                                          applicationResource
-                                              .getApplicationsByOid(
-                                                  hakuOid,
-                                                  hakukohdeOid,
-                                                  ApplicationResource.ACTIVE_AND_INCOMPLETE,
-                                                  ApplicationResource.MAX)
-                                              .stream()
-                                              .<HakemusWrapper>map(HakuappHakemusWrapper::new)
-                                              .collect(Collectors.toList()))
-                                      : Observable.fromFuture(
-                                          ataruAsyncResource.getApplicationsByHakukohde(
-                                              hakukohdeOid)))
+                      (hakuDTO.isHakemuspalvelu()
+                              ? Observable.fromFuture(
+                                  ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                              : Observable.just(
+                                  applicationResource
+                                      .getApplicationsByOid(
+                                          hakuOid,
+                                          hakukohdeOid,
+                                          ApplicationResource.ACTIVE_AND_INCOMPLETE,
+                                          ApplicationResource.MAX)
+                                      .stream()
+                                      .<HakemusWrapper>map(HakuappHakemusWrapper::new)
+                                      .collect(Collectors.toList())))
                           .timeout(5, MINUTES)
                           .blockingFirst();
                   hk =
@@ -261,8 +255,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                           .get();
                   valinnanvaiheet =
                       valintalaskentaResource.laskennantulokset(hakukohdeOid).get(1, MINUTES);
-                  hakuDTO = haeHakuTarjonnaltaKomponentti.getHaku(hakuOid);
-
                 } catch (Exception e) {
                   log.error("Problem when getting resources for creating the excel", e);
                 }
@@ -428,16 +420,16 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                       Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid(exchange)))
                           .flatMap(
                               haku ->
-                                  StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                                      ? Observable.just(
+                                  haku.isHakemuspalvelu()
+                                      ? Observable.fromFuture(
+                                          ataruAsyncResource.getApplicationsByOids(
+                                              hyvaksytytHakemukset))
+                                      : Observable.just(
                                           applicationResource
                                               .getApplicationsByOids(hyvaksytytHakemukset)
                                               .stream()
                                               .<HakemusWrapper>map(HakuappHakemusWrapper::new)
-                                              .collect(Collectors.toList()))
-                                      : Observable.fromFuture(
-                                          ataruAsyncResource.getApplicationsByOids(
-                                              hyvaksytytHakemukset)))
+                                              .collect(Collectors.toList())))
                           .timeout(5, MINUTES)
                           .blockingFirst();
                   stopWatch.stop();

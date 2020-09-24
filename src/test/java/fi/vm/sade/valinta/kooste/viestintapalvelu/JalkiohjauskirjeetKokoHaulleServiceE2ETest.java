@@ -356,12 +356,14 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   private void mockHaku1Kutsu() {
     HakuV1RDTO haku = new HakuV1RDTO();
     haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
+    haku.setTarjoajaOids(new String[] {});
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
   }
 
   private void mockHaku1KutsuToinenAste() {
     HakuV1RDTO haku = new HakuV1RDTO();
     haku.setKohdejoukkoUri("haunkohdejoukko_11");
+    haku.setTarjoajaOids(new String[] {});
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
   }
 
