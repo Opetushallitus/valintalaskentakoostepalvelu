@@ -5,9 +5,15 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdekoodiDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohteenValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.MonikielinenTekstiDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ValintakoeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.camel.Body;
 import org.apache.commons.lang.StringUtils;
@@ -20,176 +26,98 @@ public class SuoritaHakukohdeImportKomponentti {
       LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
 
   private TarjontaAsyncResource tarjontaAsyncResource;
+  private KoodistoCachedAsyncResource koodistoAsyncResource;
 
   @Autowired
-  public SuoritaHakukohdeImportKomponentti(TarjontaAsyncResource tarjontaAsyncResource) {
+  public SuoritaHakukohdeImportKomponentti(
+      TarjontaAsyncResource tarjontaAsyncResource,
+      KoodistoCachedAsyncResource koodistoAsyncResource) {
     this.tarjontaAsyncResource = tarjontaAsyncResource;
+    this.koodistoAsyncResource = koodistoAsyncResource;
   }
 
   public HakukohdeImportDTO suoritaHakukohdeImport(
       @Body // @Property(OPH.HAKUKOHDEOID)
           String hakukohdeOid) {
     try {
-      HakukohdeValintaperusteetV1RDTO data =
-          tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
+      HakukohdeV1RDTO hakukohde =
+          tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
+      HakuV1RDTO haku =
+          tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid()).get(5, TimeUnit.MINUTES);
+      Map<String, Koodi> kaudet = koodistoAsyncResource.haeKoodisto("kausi");
       HakukohdeImportDTO importTyyppi = new HakukohdeImportDTO();
 
-      importTyyppi.setTarjoajaOid(data.getTarjoajaOid());
-      importTyyppi.setHaunkohdejoukkoUri(data.getHakuKohdejoukkoUri());
+      Iterator<String> tarjoajaOids = hakukohde.getTarjoajaOids().iterator();
+      importTyyppi.setTarjoajaOid(tarjoajaOids.hasNext() ? tarjoajaOids.next() : null);
+      importTyyppi.setHaunkohdejoukkoUri(haku.getKohdejoukkoUri());
 
-      if (data.getTarjoajaNimi() != null) {
-        for (String s : data.getTarjoajaNimi().keySet()) {
-          MonikielinenTekstiDTO m = new MonikielinenTekstiDTO();
-          m.setLang(s);
-          m.setText(data.getTarjoajaNimi().get(s));
-          importTyyppi.getTarjoajaNimi().add(m);
-        }
-      }
+      hakukohde
+          .getTarjoajaNimet()
+          .forEach(
+              (key, value) -> {
+                MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
+                dto.setLang(key);
+                dto.setText(value);
+                importTyyppi.getTarjoajaNimi().add(dto);
+              });
 
-      if (data.getHakukohdeNimi() != null) {
-        for (String s : data.getHakukohdeNimi().keySet()) {
-          MonikielinenTekstiDTO m = new MonikielinenTekstiDTO();
-          m.setLang(s);
-          m.setText(data.getHakukohdeNimi().get(s));
-          importTyyppi.getHakukohdeNimi().add(m);
-        }
-      }
+      hakukohde
+          .getHakukohteenNimet()
+          .forEach(
+              (key, value) -> {
+                MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
+                dto.setLang(key);
+                dto.setText(value);
+                importTyyppi.getHakukohdeNimi().add(dto);
+              });
 
-      if (data.getHakuKausi() != null) {
-        for (String s : data.getHakuKausi().keySet()) {
-          MonikielinenTekstiDTO m = new MonikielinenTekstiDTO();
-          m.setLang(s);
-          m.setText(data.getHakuKausi().get(s));
-          importTyyppi.getHakuKausi().add(m);
-        }
-      }
+      kaudet.forEach(
+          (arvo, koodi) -> {
+            if (haku.getHakukausiUri().startsWith(koodi.getKoodiUri())) {
+              koodi
+                  .getMetadata()
+                  .forEach(
+                      metadata -> {
+                        MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
+                        dto.setLang("kieli_" + metadata.getKieli().toLowerCase());
+                        dto.setText(metadata.getNimi());
+                        importTyyppi.getHakuKausi().add(dto);
+                      });
+            }
+          });
 
-      importTyyppi.setHakuVuosi(Integer.toString(data.getHakuVuosi()));
+      importTyyppi.setHakuVuosi(Integer.toString(haku.getHakukausiVuosi()));
 
       HakukohdekoodiDTO hkt = new HakukohdekoodiDTO();
-      if (data.getHakukohdeNimiUri() != null) {
-        hkt.setKoodiUri(data.getHakukohdeNimiUri());
+      if (hakukohde.getHakukohteenNimiUri() != null) {
+        hkt.setKoodiUri(hakukohde.getHakukohteenNimiUri());
       } else {
-        if (data.getOid() == null) {
-          LOG.error("Hakukohteella ei ole Oidia!");
-          throw new RuntimeException("Hakukohteella ei ole Oidia!");
-        }
-        hkt.setKoodiUri("hakukohteet_" + data.getOid().replace(".", ""));
+        hkt.setKoodiUri("hakukohteet_" + hakukohde.getOid().replace(".", ""));
       }
       importTyyppi.setHakukohdekoodi(hkt);
 
-      importTyyppi.setHakukohdeOid(data.getOid());
-      importTyyppi.setHakuOid(data.getHakuOid());
-      importTyyppi.setValinnanAloituspaikat(data.getValintojenAloituspaikatLkm());
-      importTyyppi.setTila(data.getTila());
-      if (data.getValintakokeet() != null) {
-        LOG.debug("Valintakokeita löytyi {}!", data.getValintakokeet().size());
-        for (ValintakoeRDTO valinakoe : data.getValintakokeet()) {
+      importTyyppi.setHakukohdeOid(hakukohde.getOid());
+      importTyyppi.setHakuOid(hakukohde.getHakuOid());
+      importTyyppi.setValinnanAloituspaikat(
+          hakukohde.getValintojenAloituspaikatLkm() == null
+              ? 0
+              : hakukohde.getValintojenAloituspaikatLkm());
+      importTyyppi.setTila(hakukohde.getTila().name());
+      if (hakukohde.getValintakokeet() != null) {
+        for (ValintakoeV1RDTO valintakoe : hakukohde.getValintakokeet()) {
           HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
-          v.setOid(valinakoe.getOid());
-          v.setTyyppiUri(valinakoe.getTyyppiUri());
+          v.setOid(valintakoe.getOid());
+          v.setTyyppiUri(valintakoe.getValintakoetyyppi());
           importTyyppi.getValintakoe().add(v);
         }
       }
 
-      String hakukohdeKoodiTunniste = data.getOid().replaceAll("\\.", "_");
+      String hakukohdeKoodiTunniste = hakukohde.getOid().replace(".", "_");
 
       AvainArvoDTO avainArvo = new AvainArvoDTO();
 
       avainArvo.setAvain("hakukohde_oid");
-      avainArvo.setArvo(data.getOid());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("paasykoe_min");
-      avainArvo.setArvo(data.getPaasykoeMin().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("paasykoe_max");
-      avainArvo.setArvo(data.getPaasykoeMax().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("paasykoe_hylkays_min");
-      avainArvo.setArvo(data.getPaasykoeHylkaysMin().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("paasykoe_hylkays_max");
-      avainArvo.setArvo(data.getPaasykoeHylkaysMax().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("lisanaytto_min");
-      avainArvo.setArvo(data.getLisanayttoMin().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("lisanaytto_max");
-      avainArvo.setArvo(data.getLisanayttoMax().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("lisanaytto_hylkays_min");
-      avainArvo.setArvo(data.getLisanayttoHylkaysMin().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("lisanaytto_hylkays_max");
-      avainArvo.setArvo(data.getLisanayttoHylkaysMax().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("paasykoe_ja_lisanaytto_hylkays_min");
-      avainArvo.setArvo(data.getHylkaysMin().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("paasykoe_ja_lisanaytto_hylkays_max");
-      avainArvo.setArvo(data.getHylkaysMax().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("painotettu_keskiarvo_hylkays_min");
-      avainArvo.setArvo(data.getPainotettuKeskiarvoHylkaysMin().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("painotettu_keskiarvo_hylkays_max");
-      avainArvo.setArvo(data.getPainotettuKeskiarvoHylkaysMax().toString());
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("paasykoe_tunniste");
-      avainArvo.setArvo(
-          data.getPaasykoeTunniste() != null
-              ? data.getPaasykoeTunniste()
-              : hakukohdeKoodiTunniste + "_paasykoe");
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("lisanaytto_tunniste");
-      avainArvo.setArvo(
-          data.getLisanayttoTunniste() != null
-              ? data.getLisanayttoTunniste()
-              : hakukohdeKoodiTunniste + "_lisanaytto");
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("lisapiste_tunniste");
-      avainArvo.setArvo(
-          data.getLisapisteTunniste() != null
-              ? data.getLisapisteTunniste()
-              : hakukohdeKoodiTunniste + "_lisapiste");
-      importTyyppi.getValintaperuste().add(avainArvo);
-
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain("urheilija_lisapiste_tunniste");
-      avainArvo.setArvo(
-          data.getUrheilijaLisapisteTunniste() != null
-              ? data.getUrheilijaLisapisteTunniste()
-              : hakukohdeKoodiTunniste + "_urheilija_lisapiste");
+      avainArvo.setArvo(hakukohde.getOid());
       importTyyppi.getValintaperuste().add(avainArvo);
 
       avainArvo = new AvainArvoDTO();
@@ -198,9 +126,9 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.getValintaperuste().add(avainArvo);
 
       String opetuskieli = null;
-      if (data.getOpetuskielet().size() > 0) {
+      if (!hakukohde.getOpetusKielet().isEmpty()) {
+        opetuskieli = hakukohde.getOpetusKielet().iterator().next().replace("kieli_", "");
         avainArvo = new AvainArvoDTO();
-        opetuskieli = data.getOpetuskielet().get(0);
         avainArvo.setAvain("opetuskieli");
         avainArvo.setArvo(opetuskieli);
         importTyyppi.getValintaperuste().add(avainArvo);
@@ -208,9 +136,7 @@ public class SuoritaHakukohdeImportKomponentti {
 
       // Kielikoetunnisteen selvittäminen
       String kielikoetunniste;
-      if (StringUtils.isNotBlank(data.getKielikoeTunniste())) {
-        kielikoetunniste = data.getKielikoeTunniste();
-      } else if (StringUtils.isNotBlank(opetuskieli)) {
+      if (StringUtils.isNotBlank(opetuskieli)) {
         kielikoetunniste = "kielikoe_" + opetuskieli;
       } else {
         kielikoetunniste = hakukohdeKoodiTunniste + "_kielikoe";
@@ -221,11 +147,108 @@ public class SuoritaHakukohdeImportKomponentti {
       avainArvo.setArvo(kielikoetunniste);
       importTyyppi.getValintaperuste().add(avainArvo);
 
-      for (String avain : data.getPainokertoimet().keySet()) {
+      HakukohdeValintaperusteetV1RDTO valintaperusteet =
+          tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
+
+      if (valintaperusteet != null) {
         avainArvo = new AvainArvoDTO();
-        avainArvo.setAvain(avain);
-        avainArvo.setArvo(data.getPainokertoimet().get(avain));
+        avainArvo.setAvain("paasykoe_min");
+        avainArvo.setArvo(valintaperusteet.getPaasykoeMin().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("paasykoe_max");
+        avainArvo.setArvo(valintaperusteet.getPaasykoeMax().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("paasykoe_hylkays_min");
+        avainArvo.setArvo(valintaperusteet.getPaasykoeHylkaysMin().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("paasykoe_hylkays_max");
+        avainArvo.setArvo(valintaperusteet.getPaasykoeHylkaysMax().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("lisanaytto_min");
+        avainArvo.setArvo(valintaperusteet.getLisanayttoMin().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("lisanaytto_max");
+        avainArvo.setArvo(valintaperusteet.getLisanayttoMax().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("lisanaytto_hylkays_min");
+        avainArvo.setArvo(valintaperusteet.getLisanayttoHylkaysMin().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("lisanaytto_hylkays_max");
+        avainArvo.setArvo(valintaperusteet.getLisanayttoHylkaysMax().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("paasykoe_ja_lisanaytto_hylkays_min");
+        avainArvo.setArvo(valintaperusteet.getHylkaysMin().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("paasykoe_ja_lisanaytto_hylkays_max");
+        avainArvo.setArvo(valintaperusteet.getHylkaysMax().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("painotettu_keskiarvo_hylkays_min");
+        avainArvo.setArvo(valintaperusteet.getPainotettuKeskiarvoHylkaysMin().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("painotettu_keskiarvo_hylkays_max");
+        avainArvo.setArvo(valintaperusteet.getPainotettuKeskiarvoHylkaysMax().toString());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("paasykoe_tunniste");
+        avainArvo.setArvo(
+            valintaperusteet.getPaasykoeTunniste() != null
+                ? valintaperusteet.getPaasykoeTunniste()
+                : hakukohdeKoodiTunniste + "_paasykoe");
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("lisanaytto_tunniste");
+        avainArvo.setArvo(
+            valintaperusteet.getLisanayttoTunniste() != null
+                ? valintaperusteet.getLisanayttoTunniste()
+                : hakukohdeKoodiTunniste + "_lisanaytto");
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("lisapiste_tunniste");
+        avainArvo.setArvo(
+            valintaperusteet.getLisapisteTunniste() != null
+                ? valintaperusteet.getLisapisteTunniste()
+                : hakukohdeKoodiTunniste + "_lisapiste");
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoDTO();
+        avainArvo.setAvain("urheilija_lisapiste_tunniste");
+        avainArvo.setArvo(
+            valintaperusteet.getUrheilijaLisapisteTunniste() != null
+                ? valintaperusteet.getUrheilijaLisapisteTunniste()
+                : hakukohdeKoodiTunniste + "_urheilija_lisapiste");
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        for (String avain : valintaperusteet.getPainokertoimet().keySet()) {
+          avainArvo = new AvainArvoDTO();
+          avainArvo.setAvain(avain);
+          avainArvo.setArvo(valintaperusteet.getPainokertoimet().get(avain));
+          importTyyppi.getValintaperuste().add(avainArvo);
+        }
       }
 
       return importTyyppi;
