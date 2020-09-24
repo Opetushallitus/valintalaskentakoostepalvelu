@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 import java.io.IOException;
@@ -26,12 +27,14 @@ public class SuoritaHakukohdeImportKomponenttiTest {
   private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
 
   private TarjontaAsyncResource tarjontaAsyncResource;
+  private KoodistoCachedAsyncResource koodistoAsyncResource;
 
   @Before
   public void setUp() {
     tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
+    koodistoAsyncResource = mock(KoodistoCachedAsyncResource.class);
     suoritaHakukohdeImportKomponentti =
-        new SuoritaHakukohdeImportKomponentti(tarjontaAsyncResource);
+        new SuoritaHakukohdeImportKomponentti(tarjontaAsyncResource, koodistoAsyncResource);
   }
 
   @Test
