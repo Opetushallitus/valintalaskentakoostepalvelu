@@ -49,6 +49,7 @@ public class SuoritaHakukohdeImportKomponentti {
 
       Iterator<String> tarjoajaOids = hakukohde.getTarjoajaOids().iterator();
       importTyyppi.setTarjoajaOid(tarjoajaOids.hasNext() ? tarjoajaOids.next() : null);
+      importTyyppi.setTarjoajaOids(hakukohde.getTarjoajaOids());
       importTyyppi.setHaunkohdejoukkoUri(haku.getKohdejoukkoUri());
 
       hakukohde
