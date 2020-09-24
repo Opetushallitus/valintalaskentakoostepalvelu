@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
@@ -14,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public interface TarjontaAsyncResource {
-  CompletableFuture<HakuV1RDTO> haeHaku(String hakuOid);
+  CompletableFuture<Haku> haeHaku(String hakuOid);
 
   Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(
       Collection<String> organizationGroupOids);

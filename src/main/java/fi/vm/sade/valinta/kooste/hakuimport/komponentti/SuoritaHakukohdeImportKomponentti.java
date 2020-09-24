@@ -5,7 +5,6 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdekoodiDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohteenValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.MonikielinenTekstiDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ValintakoeV1RDTO;
@@ -13,6 +12,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import java.util.Iterator;
@@ -52,7 +52,7 @@ public class SuoritaHakukohdeImportKomponentti {
     try {
       HakukohdeV1RDTO hakukohde =
           tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
-      HakuV1RDTO haku =
+      Haku haku =
           tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid()).get(5, TimeUnit.MINUTES);
       List<KoulutusV1RDTO> toteutukset =
           CompletableFutureUtil.sequence(
@@ -66,7 +66,7 @@ public class SuoritaHakukohdeImportKomponentti {
       Iterator<String> tarjoajaOids = hakukohde.getTarjoajaOids().iterator();
       importTyyppi.setTarjoajaOid(tarjoajaOids.hasNext() ? tarjoajaOids.next() : null);
       importTyyppi.setTarjoajaOids(hakukohde.getTarjoajaOids());
-      importTyyppi.setHaunkohdejoukkoUri(haku.getKohdejoukkoUri());
+      importTyyppi.setHaunkohdejoukkoUri(haku.kohdejoukkoUri);
 
       CompletableFutureUtil.sequence(
               hakukohde.getTarjoajaOids().stream()
@@ -95,22 +95,26 @@ public class SuoritaHakukohdeImportKomponentti {
                 importTyyppi.getHakukohdeNimi().add(dto);
               });
 
-      kaudet.forEach(
-          (arvo, koodi) -> {
-            if (haku.getHakukausiUri().startsWith(koodi.getKoodiUri())) {
-              koodi
-                  .getMetadata()
-                  .forEach(
-                      metadata -> {
-                        MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
-                        dto.setLang("kieli_" + metadata.getKieli().toLowerCase());
-                        dto.setText(metadata.getNimi());
-                        importTyyppi.getHakuKausi().add(dto);
-                      });
-            }
-          });
+      if (haku.hakukausiUri != null) {
+        kaudet.forEach(
+            (arvo, koodi) -> {
+              if (haku.hakukausiUri.startsWith(koodi.getKoodiUri())) {
+                koodi
+                    .getMetadata()
+                    .forEach(
+                        metadata -> {
+                          MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
+                          dto.setLang("kieli_" + metadata.getKieli().toLowerCase());
+                          dto.setText(metadata.getNimi());
+                          importTyyppi.getHakuKausi().add(dto);
+                        });
+              }
+            });
+      }
 
-      importTyyppi.setHakuVuosi(Integer.toString(haku.getHakukausiVuosi()));
+      if (haku.hakukausiVuosi != null) {
+        importTyyppi.setHakuVuosi(Integer.toString(haku.hakukausiVuosi));
+      }
 
       HakukohdekoodiDTO hkt = new HakukohdekoodiDTO();
       if (hakukohde.getHakukohteenNimiUri() != null) {

@@ -328,6 +328,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     HakuV1RDTO haku = new HakuV1RDTO();
     haku.setOid("testioidi1");
     haku.setHakukohdeOids(singletonList("1.2.246.562.5.85532589612"));
+    haku.setTarjoajaOids(new String[] {});
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/testioidi1", new Result(haku));
   }
 

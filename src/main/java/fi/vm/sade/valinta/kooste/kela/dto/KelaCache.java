@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.kela.dto;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
@@ -37,10 +37,10 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
   }
 
   @Override
-  public Date lukuvuosi(HakuV1RDTO hakuDTO, String hakukohdeOid) {
+  public Date lukuvuosi(Haku hakuDTO, String hakukohdeOid) {
     if (!lukuvuosi.containsKey(hakukohdeOid)) {
-      String alkamiskausiUri = hakuDTO.getKoulutuksenAlkamiskausiUri();
-      int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
+      String alkamiskausiUri = hakuDTO.koulutuksenAlkamiskausiUri;
+      Integer vuosi = hakuDTO.koulutuksenAlkamisvuosi;
 
       if (alkamiskausiUri == null) {
         // Kyseessä jatkuva haku, haetaan alkamistiedot koulutukselta
@@ -68,12 +68,11 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
       int kuukausi = 1;
 
       if (alkamiskausiUri != null && alkamiskausiUri.startsWith("kausi_s")) {
-
         kuukausi = 8;
       } else if (alkamiskausiUri != null && alkamiskausiUri.startsWith("kausi_k")) {
         kuukausi = 1;
       } else {
-        LOG.error("Viallinen arvo {}, koodilla kausi ", new Object[] {alkamiskausiUri});
+        LOG.error("Viallinen arvo {}, koodilla kausi ", alkamiskausiUri);
       }
 
       lukuvuosi.put(hakukohdeOid, new DateTime(vuosi, kuukausi, 1, 1, 1).toDate());
@@ -82,12 +81,12 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
   }
 
   @Override
-  public Date poimintapaivamaara(HakuV1RDTO haku) {
+  public Date poimintapaivamaara(Haku haku) {
     return now;
   }
 
   @Override
-  public Date valintapaivamaara(HakuV1RDTO haku) {
+  public Date valintapaivamaara(Haku haku) {
     return now;
   }
 

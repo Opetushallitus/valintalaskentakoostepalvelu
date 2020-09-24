@@ -16,7 +16,6 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import io.reactivex.Observable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -96,11 +95,7 @@ public class AuthorityCheckService {
 
     boolean isAuthorized =
         Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
-            .map(
-                haku -> {
-                  String[] organisaatioOids = haku.getTarjoajaOids();
-                  return isAuthorizedForAnyParentOid(organisaatioOids, userRoles, requiredRoles);
-                })
+            .map(haku -> isAuthorizedForAnyParentOid(haku.tarjoajaOids, userRoles, requiredRoles))
             .timeout(2, MINUTES)
             .blockingFirst();
 
@@ -114,7 +109,7 @@ public class AuthorityCheckService {
   }
 
   public boolean isAuthorizedForAnyParentOid(
-      String[] organisaatioOids,
+      Set<String> organisaatioOids,
       Collection<? extends GrantedAuthority> userRoles,
       Collection<String> requiredRoles) {
     try {
@@ -136,7 +131,7 @@ public class AuthorityCheckService {
       String msg =
           String.format(
               "Organisaatioiden %s parentOids -haku epäonnistui",
-              Arrays.toString(organisaatioOids));
+              String.join(", ", organisaatioOids));
       LOG.error(msg, e);
       throw new ForbiddenException(msg);
     }
@@ -165,7 +160,7 @@ public class AuthorityCheckService {
                     return false;
                   } else {
                     return isAuthorizedForAnyParentOid(
-                        new String[] {vastuuorganisaatioOid}, userRoles, requiredRoles);
+                        Collections.singleton(vastuuorganisaatioOid), userRoles, requiredRoles);
                   }
                 })
             .timeout(2, MINUTES)

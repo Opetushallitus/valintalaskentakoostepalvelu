@@ -3,12 +3,12 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -84,12 +83,12 @@ public class OsoitetarratService {
   }
 
   public void osoitetarratSijoittelussaHyvaksytyille(
-      DokumenttiProsessi prosessi, HakuV1RDTO haku, String hakukohdeOid) {
+      DokumenttiProsessi prosessi, Haku haku, String hakukohdeOid) {
     Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
     try {
       LOG.error(
           "Luodaan osoitetarrat sijoittelussa hyväksytyille (haku={}, hakukohde={})",
-          haku.getOid(),
+          haku.oid,
           hakukohdeOid);
       prosessi.setKokonaistyo(5);
       final AtomicReference<List<HakemusWrapper>> haetutHakemuksetRef = new AtomicReference<>();
@@ -112,7 +111,7 @@ public class OsoitetarratService {
       posti(laskuri, postiRef, poikkeuskasittelija);
 
       valintaTulosServiceAsyncResource
-          .getHakukohdeBySijoitteluajoPlainDTO(haku.getOid(), hakukohdeOid)
+          .getHakukohdeBySijoitteluajoPlainDTO(haku.oid, hakukohdeOid)
           .map(
               hakukohteenTulos ->
                   hakukohteenTulos.getValintatapajonot().stream()
@@ -127,10 +126,9 @@ public class OsoitetarratService {
                   return Observable.error(
                       new RuntimeException("Sijoittelussa ei ole hyväksyttyjä hakijoita"));
                 } else {
-                  return StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                      ? applicationAsyncResource.getApplicationsByOids(hakemusOids)
-                      : Observable.fromFuture(
-                          ataruAsyncResource.getApplicationsByOids(hakemusOids));
+                  return haku.isHakemuspalvelu()
+                      ? Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids))
+                      : applicationAsyncResource.getApplicationsByOids(hakemusOids);
                 }
               })
           .subscribe(
@@ -146,14 +144,14 @@ public class OsoitetarratService {
 
   public void osoitetarratValintakokeeseenOsallistujille(
       DokumenttiProsessi prosessi,
-      HakuV1RDTO haku,
+      Haku haku,
       String hakukohdeOid,
       Set<String> selvitetytTunnisteet) {
     PoikkeusKasittelijaSovitin poikkeuskasittelija = poikkeuskasittelija(prosessi);
     try {
       LOG.info(
           "Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})",
-          haku.getOid(),
+          haku.oid,
           hakukohdeOid);
       prosessi.setKokonaistyo(5 + 1 + 1); // AtomicReferencet + luonti + dokumenttipalveluun vienti
       final AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedotRef =
@@ -220,12 +218,12 @@ public class OsoitetarratService {
                       Set<String> puuttuvatHakemusOidit =
                           Sets.newHashSet(valintakokeisiinOsallistujienHakemusOidit);
                       puuttuvatHakemusOidit.removeAll(mahdollisestiHakukohteenHakemusOidit);
-                      (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
-                              ? applicationAsyncResource.getApplicationsByOids(
-                                  puuttuvatHakemusOidit)
-                              : Observable.fromFuture(
+                      (haku.isHakemuspalvelu()
+                              ? Observable.fromFuture(
                                   ataruAsyncResource.getApplicationsByOids(
-                                      Lists.newArrayList(puuttuvatHakemusOidit))))
+                                      Lists.newArrayList(puuttuvatHakemusOidit)))
+                              : applicationAsyncResource.getApplicationsByOids(
+                                  puuttuvatHakemusOidit))
                           .subscribe(
                               puuttuvatHakemukset -> {
                                 haetutHakemuksetRef.set(
@@ -253,12 +251,12 @@ public class OsoitetarratService {
                                 selvitetytTunnisteet.contains(vk.getSelvitettyTunniste())
                                     && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                 if (kutsutaankoJossainKokeessaKaikki) {
-                  (StringUtils.isEmpty(haku.getAtaruLomakeAvain())
+                  (haku.isHakemuspalvelu()
                           ? Observable.fromFuture(
-                              applicationAsyncResource.getApplicationsByOid(
-                                  haku.getOid(), hakukohdeOid))
+                              ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
                           : Observable.fromFuture(
-                              ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)))
+                              applicationAsyncResource.getApplicationsByOid(
+                                  haku.oid, hakukohdeOid)))
                       .subscribe(
                           hakemukset -> {
                             haetutHakemuksetRef.set(hakemukset);
