@@ -212,7 +212,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid()))
             .switchMap(
                 hk -> {
-                  final boolean hakuAppHaku = StringUtils.isBlank(hk.getAtaruLomakeAvain());
+                  final boolean hakuAppHaku = StringUtils.isBlank(hk.ataruLomakeAvain);
                   if (hakuAppHaku) {
                     return passivoiHakemukset(poistettavat);
                   } else {

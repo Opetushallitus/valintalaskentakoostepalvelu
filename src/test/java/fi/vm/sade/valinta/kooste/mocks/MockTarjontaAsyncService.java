@@ -4,13 +4,13 @@ import static fi.vm.sade.valinta.kooste.mocks.MockData.hakuOid;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoodiUrisV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusAmmatillinenPerustutkintoAlk2018V1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import io.reactivex.Observable;
@@ -26,16 +26,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MockTarjontaAsyncService implements TarjontaAsyncResource {
-  private static Map<String, HakuV1RDTO> mockHaku = new HashMap<>();
+  private static Map<String, Haku> mockHaku = new HashMap<>();
 
   @Override
-  public CompletableFuture<HakuV1RDTO> haeHaku(String hakuOid) {
+  public CompletableFuture<Haku> haeHaku(String hakuOid) {
     if (mockHaku.containsKey(hakuOid)) {
       return CompletableFuture.completedFuture(mockHaku.get(hakuOid));
     }
-    HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
-    hakuV1RDTO.setOid(hakuOid);
-    return CompletableFuture.completedFuture(hakuV1RDTO);
+    return CompletableFuture.completedFuture(
+        new Haku(hakuOid, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null));
   }
 
   @Override
@@ -105,8 +104,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     return null;
   }
 
-  public static void setMockHaku(HakuV1RDTO mockHaku) {
-    MockTarjontaAsyncService.mockHaku.put(mockHaku.getOid(), mockHaku);
+  public static void setMockHaku(Haku mockHaku) {
+    MockTarjontaAsyncService.mockHaku.put(mockHaku.oid, mockHaku);
   }
 
   public static void clear() {

@@ -9,12 +9,12 @@ import static org.mockito.Mockito.when;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.*;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
@@ -481,9 +481,16 @@ public class SijoittelunTulosExcelKomponenttiTest {
         .collect(Collectors.toList());
   }
 
-  private HakuV1RDTO getKkHaku() {
-    HakuV1RDTO haku = new HakuV1RDTO();
-    haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
-    return haku;
+  private Haku getKkHaku() {
+    return new Haku(
+        "hakuoid",
+        new HashMap<>(),
+        new HashSet<>(),
+        null,
+        "haunkohdejoukko_12#1",
+        null,
+        null,
+        null,
+        null);
   }
 }

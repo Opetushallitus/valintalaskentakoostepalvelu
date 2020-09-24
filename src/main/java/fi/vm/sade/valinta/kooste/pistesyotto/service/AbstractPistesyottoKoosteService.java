@@ -14,7 +14,6 @@ import fi.vm.sade.auditlog.User;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -27,6 +26,7 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
@@ -66,7 +66,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -123,11 +122,11 @@ public abstract class AbstractPistesyottoKoosteService {
       List<ValintaperusteDTO> valintaperusteet,
       List<ApplicationAdditionalDataDTO> pistetiedot,
       List<HakukohdeJaValintakoeDTO> hakukohdeJaValintakoe,
-      HakuV1RDTO hakuV1RDTO,
+      Haku haku,
       HakukohdeV1RDTO hakukohdeDTO,
       List<Organisaatio> tarjoajat,
       Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
-    String hakuNimi = new Teksti(hakuV1RDTO.getNimi()).getTeksti();
+    String hakuNimi = new Teksti(haku.nimi).getTeksti();
     String tarjoajaOid = HakukohdeHelper.tarjoajaOid(hakukohdeDTO);
     String hakukohdeNimi = new Teksti(hakukohdeDTO.getHakukohteenNimet()).getTeksti();
     String tarjoajaNimi =
@@ -172,12 +171,11 @@ public abstract class AbstractPistesyottoKoosteService {
             });
   }
 
-  private CompletableFuture<List<HakemusWrapper>> getHakemukset(
-      HakuV1RDTO haku, String hakukohdeOid) {
-    if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
-      return applicationAsyncResource.getApplicationsByOid(haku.getOid(), hakukohdeOid);
-    } else {
+  private CompletableFuture<List<HakemusWrapper>> getHakemukset(Haku haku, String hakukohdeOid) {
+    if (haku.isHakemuspalvelu()) {
       return ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid);
+    } else {
+      return applicationAsyncResource.getApplicationsByOid(haku.oid, hakukohdeOid);
     }
   }
 
@@ -281,7 +279,7 @@ public abstract class AbstractPistesyottoKoosteService {
         Observable.fromFuture(valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
             .replay(1);
 
-    Observable<HakuV1RDTO> hakuO = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
+    Observable<Haku> hakuO = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
     Observable<List<HakemusWrapper>> hakemuksetO =
         Observable.merge(
             Observable.zip(
