@@ -29,7 +29,7 @@
         <sijoittelu.version>7.5.0-SNAPSHOT</sijoittelu.version>
         <valinta-sharedutils.version>5.11-SNAPSHOT</valinta-sharedutils.version>
         <valintaperusteet.version>5.16-SNAPSHOT</valintaperusteet.version>
-        <valintalaskenta.version>5.17-SNAPSHOT</valintalaskenta.version>
+        <valintalaskenta.version>5.16-SNAPSHOT</valintalaskenta.version>
     </properties>
 
     <dependencyManagement>
