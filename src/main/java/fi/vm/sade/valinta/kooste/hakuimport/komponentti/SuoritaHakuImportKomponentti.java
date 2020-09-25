@@ -1,10 +1,9 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -22,10 +21,10 @@ public class SuoritaHakuImportKomponentti {
 
   public Collection<String> suoritaHakukohdeImport(@Property(OPH.HAKUOID) String hakuOid) {
     try {
-      HakuV1RDTO haku = tarjontaAsyncResource.haeHaku(hakuOid).get(60, TimeUnit.SECONDS);
-      List<String> hakukohdeOids = haku.getHakukohdeOids();
-      LOG.info("Importoidaan hakukohteita yhteensä {} kpl", hakukohdeOids.size());
-      return hakukohdeOids;
+      Set<String> hakukohteet =
+          tarjontaAsyncResource.haunHakukohteet(hakuOid).get(60, TimeUnit.SECONDS);
+      LOG.info("Importoidaan hakukohteita yhteensä {} kpl", hakukohteet.size());
+      return hakukohteet;
     } catch (Exception e) {
       throw new RuntimeException(String.format("Haun %s haku epäonnistui", hakuOid), e);
     }
