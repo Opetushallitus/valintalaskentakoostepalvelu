@@ -2,12 +2,11 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import io.reactivex.Observable;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.ws.rs.core.Response;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,8 +24,10 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
   }
 
   @Override
-  public Observable<Response> haeOrganisaatio(String organisaatioOid) {
-    throw new UnsupportedOperationException();
+  public CompletableFuture<Organisaatio> haeOrganisaatio(String organisaatioOid) {
+    Organisaatio organisaatio = new Organisaatio();
+    organisaatio.setOid(organisaatioOid);
+    return CompletableFuture.completedFuture(organisaatio);
   }
 
   @Override

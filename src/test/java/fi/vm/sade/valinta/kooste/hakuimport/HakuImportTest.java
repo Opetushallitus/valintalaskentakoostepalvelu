@@ -7,6 +7,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
@@ -101,7 +102,9 @@ public class HakuImportTest extends CamelTestSupport {
     ValintaperusteetAsyncResource valintaperusteetRestResource =
         Mockito.mock(ValintaperusteetAsyncResource.class);
     TarjontaAsyncResource tarjontaAsyncResource = Mockito.mock(TarjontaAsyncResource.class);
-    KoodistoCachedAsyncResource koodistoAsyncResource =
+    OrganisaatioAsyncResource organisaatioAsyncResource =
+        Mockito.mock(OrganisaatioAsyncResource.class);
+    KoodistoCachedAsyncResource koodistoCachedAsyncResource =
         Mockito.mock(KoodistoCachedAsyncResource.class);
     try {
       HakukohdeValintaperusteetV1RDTO valintaperusteet =
@@ -131,7 +134,8 @@ public class HakuImportTest extends CamelTestSupport {
     }
 
     SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti =
-        new SuoritaHakukohdeImportKomponentti(tarjontaAsyncResource, koodistoAsyncResource);
+        new SuoritaHakukohdeImportKomponentti(
+            tarjontaAsyncResource, organisaatioAsyncResource, koodistoCachedAsyncResource);
 
     return new HakuImportRouteImpl(
         1,

@@ -12,6 +12,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -46,10 +47,16 @@ import org.springframework.util.StreamUtils;
 
 public class ValintalaskennanTulosExcelTest {
   private final HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
+  private final Organisaatio tarjoaja = new Organisaatio();
 
   {
     hakukohdeDTO.setHakukohteenNimet(map("fi", "Hakukohde 1"));
+    hakukohdeDTO.setTarjoajaOids(Collections.singleton("tarjoajaoid"));
     hakukohdeDTO.setTarjoajaNimet(map("fi", "Tarjoaja 1"));
+    tarjoaja.setOid("tarjoajaoid");
+    Map<String, String> nimi = new HashMap<>();
+    nimi.put("fi", "Tarjoaja 1");
+    tarjoaja.setNimi(nimi);
   }
 
   private final HakuV1RDTO haku = new HakuV1RDTO();
@@ -66,6 +73,7 @@ public class ValintalaskennanTulosExcelTest {
         ValintalaskennanTulosExcel.luoExcel(
             haku,
             hakukohdeDTO,
+            Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
                     1,
@@ -91,6 +99,7 @@ public class ValintalaskennanTulosExcelTest {
         ValintalaskennanTulosExcel.luoExcel(
             haku,
             hakukohdeDTO,
+            Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
                     1,
@@ -150,6 +159,7 @@ public class ValintalaskennanTulosExcelTest {
         ValintalaskennanTulosExcel.luoExcel(
             haku,
             hakukohdeDTO,
+            Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
                     1,
@@ -211,6 +221,7 @@ public class ValintalaskennanTulosExcelTest {
         ValintalaskennanTulosExcel.luoExcel(
             haku,
             hakukohdeDTO,
+            Collections.singletonList(tarjoaja),
             Collections.singletonList(
                 valinnanvaihe(
                     1,
@@ -285,6 +296,7 @@ public class ValintalaskennanTulosExcelTest {
         ValintalaskennanTulosExcel.luoExcel(
             haku,
             hakukohdeDTO,
+            Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
                     1,
@@ -352,6 +364,7 @@ public class ValintalaskennanTulosExcelTest {
     ValintalaskennanTulosExcel.luoExcel(
         haku,
         hakukohdeDTO,
+        Collections.singletonList(tarjoaja),
         asList(
             valinnanvaihe(
                 1,
@@ -372,6 +385,7 @@ public class ValintalaskennanTulosExcelTest {
         ValintalaskennanTulosExcel.luoExcel(
             haku,
             hakukohdeDTO,
+            Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
                     1,
