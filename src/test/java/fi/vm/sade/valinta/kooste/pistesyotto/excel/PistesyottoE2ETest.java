@@ -23,6 +23,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
@@ -141,6 +142,11 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     mockTarjontaHakukohdeCall();
     mockTarjontaHakuCall();
     mockOrganisaatioKutsu();
+
+    Organisaatio organisaatio = new Organisaatio();
+    organisaatio.setOid("1.2.3.44444.5");
+    organisaatio.setNimi(new HashMap<String, String>());
+    mockToReturnJson(GET, "/organisaatio-service/rest/organisaatio/1.2.3.44444.5", organisaatio);
 
     mockToReturnJson(
         PUT,

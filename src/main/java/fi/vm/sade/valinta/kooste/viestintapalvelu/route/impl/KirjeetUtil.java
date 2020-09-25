@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 
 public class KirjeetUtil {
@@ -235,9 +236,11 @@ public class KirjeetUtil {
             .getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
     tulokset.put(
         "organisaationNimi",
-        metakohde
-            .getTarjoajaNimi()
-            .getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
+        metakohde.getTarjoajaNimet().stream()
+            .map(
+                t ->
+                    t.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)))
+            .collect(Collectors.joining(" - ")));
     tulokset.put(
         "oppilaitoksenNimi", ""); // tieto on jo osana hakukohdenimea joten tuskin tarvii toistaa
     tulokset.put("hylkayksenSyy", "");

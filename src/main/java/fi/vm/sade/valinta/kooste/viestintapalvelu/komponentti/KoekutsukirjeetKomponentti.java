@@ -2,19 +2,21 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.Kieli;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.NimiJaOpetuskieli;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
@@ -37,17 +39,17 @@ public class KoekutsukirjeetKomponentti {
   private static final Logger LOG = LoggerFactory.getLogger(KoekutsukirjeetKomponentti.class);
 
   private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-  private final HaeOsoiteKomponentti osoiteKomponentti;
   private final TarjontaAsyncResource tarjontaAsyncResource;
+  private final OrganisaatioAsyncResource organisaatioAsyncResource;
 
   @Autowired
   public KoekutsukirjeetKomponentti(
       KoodistoCachedAsyncResource koodistoCachedAsyncResource,
-      HaeOsoiteKomponentti osoiteKomponentti,
-      TarjontaAsyncResource tarjontaAsyncResource) {
+      TarjontaAsyncResource tarjontaAsyncResource,
+      OrganisaatioAsyncResource organisaatioAsyncResource) {
     this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-    this.osoiteKomponentti = osoiteKomponentti;
     this.tarjontaAsyncResource = tarjontaAsyncResource;
+    this.organisaatioAsyncResource = organisaatioAsyncResource;
   }
 
   public LetterBatch valmistaKoekutsukirjeet(
@@ -70,45 +72,45 @@ public class KoekutsukirjeetKomponentti {
       final List<Map<String, String>> customLetterContents = Collections.emptyList();
 
       // final HakukohdeNimiRDTO nimi;
-      final Map<String, NimiJaOpetuskieli> nimet;
+      Map<String, HakukohdeV1RDTO> hakukohteet;
       try {
         Set<String> kaikkiMuutHakutoiveetOids =
-            Sets.newHashSet(
-                hakemusOidJaMuutHakukohdeOids.entrySet().stream()
-                    .flatMap(e -> e.getValue().stream())
-                    .collect(Collectors.toSet()));
-        kaikkiMuutHakutoiveetOids.add(
-            hakukohdeOid); // <- pitaisi olla kylla jo listassa mutta varmuuden vuoksi
-        nimet =
-            kaikkiMuutHakutoiveetOids.stream()
-                .collect(
-                    Collectors.toMap(
-                        h -> h,
-                        h -> {
-                          try {
-                            HakukohdeV1RDTO nimi =
-                                tarjontaAsyncResource
-                                    .haeHakukohde(hakukohdeOid)
-                                    .get(5, TimeUnit.MINUTES);
-                            Collection<String> kielikoodit =
-                                nimi.getOpetusKielet().stream()
-                                    .map(TarjontaUriToKoodistoUtil::cleanUri)
-                                    .collect(Collectors.toList());
-                            String opetuskieli = new Kieli(kielikoodit).getKieli();
-                            return new NimiJaOpetuskieli(nimi, opetuskieli);
-                          } catch (Exception e) {
-                            throw new RuntimeException(e);
-                          }
-                        }));
+            hakemusOidJaMuutHakukohdeOids.entrySet().stream()
+                .flatMap(e -> e.getValue().stream())
+                .collect(Collectors.toSet());
+        kaikkiMuutHakutoiveetOids.add(hakukohdeOid);
+        hakukohteet =
+            CompletableFutureUtil.sequence(
+                    kaikkiMuutHakutoiveetOids.stream()
+                        .collect(
+                            Collectors.toMap(
+                                h -> h, h -> tarjontaAsyncResource.haeHakukohde(hakukohdeOid))))
+                .get(5, TimeUnit.MINUTES);
       } catch (Exception e) {
         LOG.error("Tarjonnalta ei saatu hakukohteelle({}) nimea!", hakukohdeOid);
         throw e;
       }
 
-      NimiJaOpetuskieli kohdeHakukohdeNimi = nimet.get(hakukohdeOid);
-      String opetuskieli = kohdeHakukohdeNimi.getOpetuskieli();
-      String hakukohdeNimiTietyllaKielella = "";
-      String tarjoajaNimiTietyllaKielella = "";
+      HakukohdeV1RDTO hakukohde = hakukohteet.get(hakukohdeOid);
+      List<Organisaatio> tarjoajat =
+          CompletableFutureUtil.sequence(
+                  hakukohde.getTarjoajaOids().stream()
+                      .map(organisaatioAsyncResource::haeOrganisaatio)
+                      .collect(Collectors.toList()))
+              .get(5, TimeUnit.MINUTES);
+      String opetuskieli =
+          new Kieli(
+                  hakukohde.getOpetusKielet().stream()
+                      .map(TarjontaUriToKoodistoUtil::cleanUri)
+                      .collect(Collectors.toList()))
+              .getKieli();
+      String hakukohdeNimiTietyllaKielella =
+          Teksti.getTeksti(hakukohde.getHakukohteenNimet(), opetuskieli);
+      String tarjoajaNimiTietyllaKielella =
+          Teksti.getTeksti(
+              tarjoajat.stream().map(Organisaatio::getNimi).collect(Collectors.toList()),
+              " - ",
+              opetuskieli);
       Map<String, Koodi> maajavaltio =
           koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
       Map<String, Koodi> posti =
@@ -117,19 +119,11 @@ public class KoekutsukirjeetKomponentti {
         Osoite addressLabel =
             OsoiteHakemukseltaUtil.osoiteHakemuksesta(
                 hakemus, maajavaltio, posti, new NimiPaattelyStrategy());
-
-        hakukohdeNimiTietyllaKielella =
-            kohdeHakukohdeNimi.getHakukohdeNimi().getTeksti(opetuskieli);
-        tarjoajaNimiTietyllaKielella = kohdeHakukohdeNimi.getTarjoajaNimi().getTeksti(opetuskieli);
-
         List<String> muutHakukohteet = Collections.emptyList();
         try {
           muutHakukohteet =
               hakemusOidJaMuutHakukohdeOids.get(hakemus.getOid()).stream()
-                  .map(
-                      h -> {
-                        return nimet.get(h).getHakukohdeNimi().getTeksti(opetuskieli);
-                      })
+                  .map(h -> Teksti.getTeksti(hakukohteet.get(h).getHakukohteenNimet(), opetuskieli))
                   .collect(Collectors.toList());
         } catch (Exception e) {
           LOG.error("valmistaKoekutsukirjeet throws", e);
