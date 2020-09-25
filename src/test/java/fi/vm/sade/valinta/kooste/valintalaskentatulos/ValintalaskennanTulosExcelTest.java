@@ -7,12 +7,13 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import com.google.common.collect.ImmutableSet;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -47,13 +48,22 @@ import org.junit.Test;
 import org.springframework.util.StreamUtils;
 
 public class ValintalaskennanTulosExcelTest {
-  private final HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
+  private final Hakukohde hakukohde =
+      new Hakukohde(
+          "hakukohdeoid",
+          null,
+          map("fi", "Hakukohde 1"),
+          "hakuoid",
+          ImmutableSet.of("tarjoajaoid"),
+          new HashSet<>(),
+          null,
+          new HashSet<>(),
+          null,
+          Collections.emptySet(),
+          null);
   private final Organisaatio tarjoaja = new Organisaatio();
 
   {
-    hakukohdeDTO.setHakukohteenNimet(map("fi", "Hakukohde 1"));
-    hakukohdeDTO.setTarjoajaOids(Collections.singleton("tarjoajaoid"));
-    hakukohdeDTO.setTarjoajaNimet(map("fi", "Tarjoaja 1"));
     tarjoaja.setOid("tarjoajaoid");
     Map<String, String> nimi = new HashMap<>();
     nimi.put("fi", "Tarjoaja 1");
@@ -70,7 +80,7 @@ public class ValintalaskennanTulosExcelTest {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             haku,
-            hakukohdeDTO,
+            hakukohde,
             Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
@@ -96,7 +106,7 @@ public class ValintalaskennanTulosExcelTest {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             haku,
-            hakukohdeDTO,
+            hakukohde,
             Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
@@ -156,7 +166,7 @@ public class ValintalaskennanTulosExcelTest {
     XSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
             haku,
-            hakukohdeDTO,
+            hakukohde,
             Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
@@ -218,7 +228,7 @@ public class ValintalaskennanTulosExcelTest {
     XSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
             haku,
-            hakukohdeDTO,
+            hakukohde,
             Collections.singletonList(tarjoaja),
             Collections.singletonList(
                 valinnanvaihe(
@@ -293,7 +303,7 @@ public class ValintalaskennanTulosExcelTest {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             haku,
-            hakukohdeDTO,
+            hakukohde,
             Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(
@@ -361,7 +371,7 @@ public class ValintalaskennanTulosExcelTest {
                 false));
     ValintalaskennanTulosExcel.luoExcel(
         haku,
-        hakukohdeDTO,
+        hakukohde,
         Collections.singletonList(tarjoaja),
         asList(
             valinnanvaihe(
@@ -382,7 +392,7 @@ public class ValintalaskennanTulosExcelTest {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             haku,
-            hakukohdeDTO,
+            hakukohde,
             Collections.singletonList(tarjoaja),
             asList(
                 valinnanvaihe(

@@ -20,6 +20,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.shared.types.TarjontaTila;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -403,7 +404,11 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
     hakukohdeDTO.setHakuOid("testioidi1");
     hakukohdeDTO.setOid("1.2.246.562.5.85532589612");
+    hakukohdeDTO.setTila(TarjontaTila.JULKAISTU);
     hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
+    hakukohdeDTO.setHakukohdeKoulutusOids(Collections.emptyList());
+    hakukohdeDTO.setPohjakoulutusvaatimus("");
+    hakukohdeDTO.setValintakokeet(Collections.emptyList());
     mockToReturnJson(
         GET,
         "/tarjonta-service/rest/v1/hakukohde/1.2.246.562.5.85532589612",

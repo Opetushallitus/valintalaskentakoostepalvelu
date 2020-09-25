@@ -14,7 +14,6 @@ import fi.vm.sade.auditlog.User;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeCreateDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -27,7 +26,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -123,12 +122,12 @@ public abstract class AbstractPistesyottoKoosteService {
       List<ApplicationAdditionalDataDTO> pistetiedot,
       List<HakukohdeJaValintakoeDTO> hakukohdeJaValintakoe,
       Haku haku,
-      HakukohdeV1RDTO hakukohdeDTO,
+      Hakukohde hakukohdeDTO,
       List<Organisaatio> tarjoajat,
       Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
     String hakuNimi = new Teksti(haku.nimi).getTeksti();
-    String tarjoajaOid = HakukohdeHelper.tarjoajaOid(hakukohdeDTO);
-    String hakukohdeNimi = new Teksti(hakukohdeDTO.getHakukohteenNimet()).getTeksti();
+    String tarjoajaOid = hakukohdeDTO.tarjoajaOids.iterator().next();
+    String hakukohdeNimi = new Teksti(hakukohdeDTO.nimi).getTeksti();
     String tarjoajaNimi =
         Teksti.getTeksti(
             tarjoajat.stream().map(Organisaatio::getNimi).collect(Collectors.toList()), " - ");
@@ -328,13 +327,12 @@ public abstract class AbstractPistesyottoKoosteService {
                                   .applicationAdditionalDataDTO)
                       .collect(Collectors.toList()));
             });
-    CompletableFuture<HakukohdeV1RDTO> hakukohdeF =
-        tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
+    CompletableFuture<Hakukohde> hakukohdeF = tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
     CompletableFuture<List<Organisaatio>> tarjoajatF =
         hakukohdeF.thenComposeAsync(
             hakukohde ->
                 CompletableFutureUtil.sequence(
-                    hakukohde.getTarjoajaOids().stream()
+                    hakukohde.tarjoajaOids.stream()
                         .map(organisaatioAsyncResource::haeOrganisaatio)
                         .collect(Collectors.toList())));
 
@@ -590,7 +588,7 @@ public abstract class AbstractPistesyottoKoosteService {
         .haeHakukohde(hakukohdeOid)
         .thenCompose(
             hakukohde -> {
-              Optional<String> tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst();
+              Optional<String> tarjoajaOid = hakukohde.tarjoajaOids.stream().findFirst();
               if (tarjoajaOid.isPresent()) {
                 return organisaatioAsyncResource
                     .haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid.get())
