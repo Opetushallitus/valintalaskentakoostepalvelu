@@ -5,19 +5,19 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdekoodiDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohteenValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.MonikielinenTekstiDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.ValintakoeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Valintakoe;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.camel.Body;
@@ -50,26 +50,24 @@ public class SuoritaHakukohdeImportKomponentti {
       @Body // @Property(OPH.HAKUKOHDEOID)
           String hakukohdeOid) {
     try {
-      HakukohdeV1RDTO hakukohde =
+      Hakukohde hakukohde =
           tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
-      Haku haku =
-          tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid()).get(5, TimeUnit.MINUTES);
+      Haku haku = tarjontaAsyncResource.haeHaku(hakukohde.hakuOid).get(5, TimeUnit.MINUTES);
       List<KoulutusV1RDTO> toteutukset =
           CompletableFutureUtil.sequence(
-                  hakukohde.getHakukohdeKoulutusOids().stream()
+                  hakukohde.toteutusOids.stream()
                       .map(tarjontaAsyncResource::haeToteutus)
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
       Map<String, Koodi> kaudet = koodistoAsyncResource.haeKoodisto("kausi");
       HakukohdeImportDTO importTyyppi = new HakukohdeImportDTO();
 
-      Iterator<String> tarjoajaOids = hakukohde.getTarjoajaOids().iterator();
-      importTyyppi.setTarjoajaOid(tarjoajaOids.hasNext() ? tarjoajaOids.next() : null);
-      importTyyppi.setTarjoajaOids(hakukohde.getTarjoajaOids());
+      importTyyppi.setTarjoajaOid(hakukohde.tarjoajaOids.iterator().next());
+      importTyyppi.setTarjoajaOids(hakukohde.tarjoajaOids);
       importTyyppi.setHaunkohdejoukkoUri(haku.kohdejoukkoUri);
 
       CompletableFutureUtil.sequence(
-              hakukohde.getTarjoajaOids().stream()
+              hakukohde.tarjoajaOids.stream()
                   .map(organisaatioAsyncResource::haeOrganisaatio)
                   .collect(Collectors.toList()))
           .get(5, TimeUnit.MINUTES)
@@ -85,15 +83,13 @@ public class SuoritaHakukohdeImportKomponentti {
                             importTyyppi.getTarjoajaNimi().add(dto);
                           }));
 
-      hakukohde
-          .getHakukohteenNimet()
-          .forEach(
-              (key, value) -> {
-                MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
-                dto.setLang(key);
-                dto.setText(value);
-                importTyyppi.getHakukohdeNimi().add(dto);
-              });
+      hakukohde.nimi.forEach(
+          (kieli, nimi) -> {
+            MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
+            dto.setLang(kieli);
+            dto.setText(nimi);
+            importTyyppi.getHakukohdeNimi().add(dto);
+          });
 
       if (haku.hakukausiUri != null) {
         kaudet.forEach(
@@ -117,35 +113,29 @@ public class SuoritaHakukohdeImportKomponentti {
       }
 
       HakukohdekoodiDTO hkt = new HakukohdekoodiDTO();
-      if (hakukohde.getHakukohteenNimiUri() != null) {
-        hkt.setKoodiUri(hakukohde.getHakukohteenNimiUri());
-      } else {
-        hkt.setKoodiUri("hakukohteet_" + hakukohde.getOid().replace(".", ""));
-      }
+      hkt.setKoodiUri(
+          Objects.requireNonNullElse(
+              hakukohde.hakukohteetUri, "hakukohteet_" + hakukohde.oid.replace(".", "")));
       importTyyppi.setHakukohdekoodi(hkt);
 
-      importTyyppi.setHakukohdeOid(hakukohde.getOid());
-      importTyyppi.setHakuOid(hakukohde.getHakuOid());
+      importTyyppi.setHakukohdeOid(hakukohde.oid);
+      importTyyppi.setHakuOid(hakukohde.hakuOid);
+      importTyyppi.setTila(hakukohde.tila.name());
       importTyyppi.setValinnanAloituspaikat(
-          hakukohde.getValintojenAloituspaikatLkm() == null
-              ? 0
-              : hakukohde.getValintojenAloituspaikatLkm());
-      importTyyppi.setTila(hakukohde.getTila().name());
-      if (hakukohde.getValintakokeet() != null) {
-        for (ValintakoeV1RDTO valintakoe : hakukohde.getValintakokeet()) {
-          HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
-          v.setOid(valintakoe.getOid());
-          v.setTyyppiUri(valintakoe.getValintakoetyyppi());
-          importTyyppi.getValintakoe().add(v);
-        }
+          Objects.requireNonNullElse(hakukohde.valintojenAloituspaikat, 0));
+      for (Valintakoe valintakoe : hakukohde.valintakokeet) {
+        HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
+        v.setOid(valintakoe.oid);
+        v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
+        importTyyppi.getValintakoe().add(v);
       }
 
-      String hakukohdeKoodiTunniste = hakukohde.getOid().replace(".", "_");
+      String hakukohdeKoodiTunniste = hakukohde.oid.replace(".", "_");
 
       AvainArvoDTO avainArvo = new AvainArvoDTO();
 
       avainArvo.setAvain("hakukohde_oid");
-      avainArvo.setArvo(hakukohde.getOid());
+      avainArvo.setArvo(hakukohde.oid);
       importTyyppi.getValintaperuste().add(avainArvo);
 
       avainArvo = new AvainArvoDTO();

@@ -51,7 +51,7 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
                   .thenComposeAsync(
                       hakukohde ->
                           CompletableFutureUtil.sequence(
-                              hakukohde.getHakukohdeKoulutusOids().stream()
+                              hakukohde.toteutusOids.stream()
                                   .map(tarjontaAsyncResource::haeToteutus)
                                   .collect(Collectors.toList())))
                   .get(5, TimeUnit.MINUTES);

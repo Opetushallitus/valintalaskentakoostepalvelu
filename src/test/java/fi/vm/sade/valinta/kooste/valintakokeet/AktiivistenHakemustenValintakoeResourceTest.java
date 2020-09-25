@@ -12,19 +12,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
-import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.ValintakoeOsallistuminenBuilder;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import io.reactivex.Observable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +68,19 @@ public class AktiivistenHakemustenValintakoeResourceTest {
   private ValintakoeOsallistuminenDTO ataruOsallistuminen3 =
       new ValintakoeOsallistuminenBuilder().setHakemusOid(ataruHakemus3.getOid()).build();
 
-  private final HakukohdeV1RDTO hakukohdeDTO = new TarjontaSpec.HakukohdeBuilder(hakuOid).build();
+  private final Hakukohde hakukohdeDTO =
+      new Hakukohde(
+          hakukohdeOid,
+          null,
+          new HashMap<>(),
+          hakuOid,
+          Collections.emptySet(),
+          new HashSet<>(),
+          null,
+          new HashSet<>(),
+          null,
+          Collections.emptySet(),
+          null);
   private final Haku hakuDTOEditori =
       new Haku(
           hakuOid,

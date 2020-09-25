@@ -3,13 +3,13 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -93,7 +93,7 @@ public class ValintakoekutsutExcelService {
       prosessi.setKokonaistyo(9); // 7 + luonti + dokumenttipalveluun vienti
       final boolean useWhitelist =
           !Optional.ofNullable(hakemusOids).orElse(Collections.emptySet()).isEmpty();
-      final AtomicReference<HakukohdeV1RDTO> hakukohdeRef = new AtomicReference<>();
+      final AtomicReference<Hakukohde> hakukohdeRef = new AtomicReference<>();
       final AtomicReference<List<HakemusOsallistuminenDTO>> tiedotHakukohteelleRef =
           new AtomicReference<>();
       final AtomicReference<Map<String, ValintakoeDTO>> valintakokeetRef = new AtomicReference<>();
@@ -114,8 +114,7 @@ public class ValintakoekutsutExcelService {
               .setSynkronoituToiminto(
                   () -> {
                     String hakuNimi = new Teksti(haku.nimi).getTeksti();
-                    String hakukohdeNimi =
-                        new Teksti(hakukohdeRef.get().getHakukohteenNimi()).getTeksti();
+                    String hakukohdeNimi = new Teksti(hakukohdeRef.get().nimi).getTeksti();
                     try {
                       InputStream filedata =
                           valintakoeKutsuExcelKomponentti.luoTuloksetXlsMuodossa(

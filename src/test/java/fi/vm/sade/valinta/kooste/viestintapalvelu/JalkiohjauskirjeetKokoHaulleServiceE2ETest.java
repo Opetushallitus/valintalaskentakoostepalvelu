@@ -24,6 +24,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoodiUrisV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusAmmatillinenPerustutkintoAlk2018V1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
+import fi.vm.sade.tarjonta.shared.types.TarjontaTila;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
@@ -347,9 +348,12 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
 
   private void mockHakukohde1Kutsu() {
     HakukohdeV1RDTO hk = new HakukohdeV1RDTO();
+    hk.setTila(TarjontaTila.JULKAISTU);
     hk.setOpetusKielet(Sets.newHashSet("FI"));
     hk.setTarjoajaOids(Sets.newHashSet("T1", "T2"));
     hk.setHakukohdeKoulutusOids(Collections.singletonList("koulutusoid"));
+    hk.setPohjakoulutusvaatimus("");
+    hk.setValintakokeet(Collections.emptyList());
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1", new Result(hk));
   }
 

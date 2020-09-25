@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.kela;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -11,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
@@ -27,6 +27,7 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import io.reactivex.Observable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,10 +79,19 @@ public class KelaRouteTest extends CamelTestSupport {
   @Produce(uri = DIRECT_KELA)
   protected ProducerTemplate template;
 
-  private HakukohdeV1RDTO createHakukohdeDTO() {
-    HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
-    hakukohdeDTO.setOid(HAKUKOHDE1);
-    return hakukohdeDTO;
+  private Hakukohde createHakukohdeDTO() {
+    return new Hakukohde(
+        HAKUKOHDE1,
+        null,
+        new HashMap<>(),
+        null,
+        Collections.emptySet(),
+        new HashSet<>(),
+        null,
+        new HashSet<>(),
+        null,
+        Collections.emptySet(),
+        null);
   }
 
   private List<ValintaTulosServiceDto> createHakijat() {

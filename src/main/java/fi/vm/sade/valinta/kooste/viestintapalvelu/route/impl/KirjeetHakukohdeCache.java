@@ -79,21 +79,20 @@ public class KirjeetHakukohdeCache {
         .thenComposeAsync(
             hakukohde ->
                 CompletableFutureUtil.sequence(
-                        hakukohde.getHakukohdeKoulutusOids().stream()
+                        hakukohde.toteutusOids.stream()
                             .map(tarjontaAsyncResource::haeToteutus)
                             .collect(Collectors.toList()))
                     .thenComposeAsync(
                         toteutukset ->
                             CompletableFutureUtil.sequence(
-                                    hakukohde.getTarjoajaOids().stream()
+                                    hakukohde.tarjoajaOids.stream()
                                         .map(organisaatioAsyncResource::haeOrganisaatio)
                                         .collect(Collectors.toList()))
                                 .thenApplyAsync(
                                     tarjoajat -> {
-                                      Teksti hakukohdeNimi =
-                                          new Teksti(hakukohde.getHakukohteenNimet());
+                                      Teksti hakukohdeNimi = new Teksti(hakukohde.nimi);
                                       return new MetaHakukohde(
-                                          hakukohde.getTarjoajaOids().iterator().next(),
+                                          hakukohde.tarjoajaOids.iterator().next(),
                                           hakukohdeNimi,
                                           tarjoajat.stream()
                                               .map(t -> new Teksti(t.getNimi()))
@@ -109,7 +108,7 @@ public class KirjeetHakukohdeCache {
                                                               .keySet()
                                                               .stream())
                                                   .collect(Collectors.toList())),
-                                          hakukohde.getOhjeetUudelleOpiskelijalle());
+                                          hakukohde.ohjeetUudelleOpiskelijalle);
                                     })));
   }
 }

@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.kela.dto;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
@@ -60,7 +60,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
                 HenkiloPerustietoDto henkilotiedot =
                     henkilotietoSource.getByPersonOid(hakija.getHakijaOid());
                 String hakukohdeOid = hakutoive.getHakukohdeOid();
-                HakukohdeV1RDTO hakuKohde = hakukohdeSource.getHakukohdeByOid(hakukohdeOid);
+                Hakukohde hakuKohde = hakukohdeSource.getHakukohdeByOid(hakukohdeOid);
                 final String etunimi = henkilotiedot.getEtunimet();
                 final String sukunimi = henkilotiedot.getSukunimi();
                 final String henkilotunnus = henkilotiedot.getHetu();
@@ -100,7 +100,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
                   return;
                 }
 
-                Iterator<String> i = hakuKohde.getTarjoajaOids().iterator();
+                Iterator<String> i = hakuKohde.tarjoajaOids.iterator();
                 String organisaatioOid = i.hasNext() ? i.next() : null;
                 String oppilaitosnumero = "XXXXX";
 
