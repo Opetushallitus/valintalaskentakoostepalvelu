@@ -76,7 +76,7 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
       kielet.add("kieli_fi");
       kielet.add("kieli_sv");
       return CompletableFuture.completedFuture(
-          new Toteutus(toteutusOid, null, null, null, kielet));
+          new Toteutus(toteutusOid, null, null, null, kielet, new HashSet<>()));
     }
     return null;
   }
