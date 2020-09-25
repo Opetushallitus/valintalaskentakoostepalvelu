@@ -57,6 +57,11 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
+  public CompletableFuture<Set<String>> haunHakukohteet(String hakuOid) {
+    return null;
+  }
+
+  @Override
   public CompletableFuture<KoulutusV1RDTO> haeKoulutus(String koulutusOid) {
     return null;
   }
