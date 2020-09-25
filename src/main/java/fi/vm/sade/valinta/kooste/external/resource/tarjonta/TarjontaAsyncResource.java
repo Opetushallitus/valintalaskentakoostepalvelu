@@ -23,6 +23,8 @@ public interface TarjontaAsyncResource {
 
   CompletableFuture<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid);
 
+  CompletableFuture<Set<String>> haunHakukohteet(String hakuOid);
+
   CompletableFuture<KoulutusV1RDTO> haeKoulutus(String koulutusOid);
 
   /**
