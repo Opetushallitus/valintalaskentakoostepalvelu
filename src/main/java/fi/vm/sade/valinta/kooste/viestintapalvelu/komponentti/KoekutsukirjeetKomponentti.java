@@ -2,13 +2,13 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -73,7 +73,7 @@ public class KoekutsukirjeetKomponentti {
       final List<Map<String, String>> customLetterContents = Collections.emptyList();
 
       // final HakukohdeNimiRDTO nimi;
-      Map<String, HakukohdeV1RDTO> hakukohteet;
+      Map<String, Hakukohde> hakukohteet;
       try {
         Set<String> kaikkiMuutHakutoiveetOids =
             hakemusOidJaMuutHakukohdeOids.entrySet().stream()
@@ -92,16 +92,16 @@ public class KoekutsukirjeetKomponentti {
         throw e;
       }
 
-      HakukohdeV1RDTO hakukohde = hakukohteet.get(hakukohdeOid);
+      Hakukohde hakukohde = hakukohteet.get(hakukohdeOid);
       List<Organisaatio> tarjoajat =
           CompletableFutureUtil.sequence(
-                  hakukohde.getTarjoajaOids().stream()
+                  hakukohde.tarjoajaOids.stream()
                       .map(organisaatioAsyncResource::haeOrganisaatio)
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
       List<KoulutusV1RDTO> toteutukset =
           CompletableFutureUtil.sequence(
-                  hakukohde.getHakukohdeKoulutusOids().stream()
+                  hakukohde.toteutusOids.stream()
                       .map(tarjontaAsyncResource::haeToteutus)
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
@@ -112,8 +112,7 @@ public class KoekutsukirjeetKomponentti {
                       .map(TarjontaUriToKoodistoUtil::cleanUri)
                       .collect(Collectors.toList()))
               .getKieli();
-      String hakukohdeNimiTietyllaKielella =
-          Teksti.getTeksti(hakukohde.getHakukohteenNimet(), opetuskieli);
+      String hakukohdeNimiTietyllaKielella = Teksti.getTeksti(hakukohde.nimi, opetuskieli);
       String tarjoajaNimiTietyllaKielella =
           Teksti.getTeksti(
               tarjoajat.stream().map(Organisaatio::getNimi).collect(Collectors.toList()),
@@ -131,7 +130,7 @@ public class KoekutsukirjeetKomponentti {
         try {
           muutHakukohteet =
               hakemusOidJaMuutHakukohdeOids.get(hakemus.getOid()).stream()
-                  .map(h -> Teksti.getTeksti(hakukohteet.get(h).getHakukohteenNimet(), opetuskieli))
+                  .map(h -> Teksti.getTeksti(hakukohteet.get(h).nimi, opetuskieli))
                   .collect(Collectors.toList());
         } catch (Exception e) {
           LOG.error("valmistaKoekutsukirjeet throws", e);

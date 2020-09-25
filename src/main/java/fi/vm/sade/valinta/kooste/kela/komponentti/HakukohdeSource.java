@@ -1,8 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 
 public interface HakukohdeSource {
-
-  HakukohdeV1RDTO getHakukohdeByOid(String oid);
+  Hakukohde getHakukohdeByOid(String oid);
 }
