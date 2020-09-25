@@ -32,6 +32,10 @@ public class KoodistoCachedAsyncResource {
       CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
   private final Cache<String, CompletableFuture<Koodi>> koodiCache =
       CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
+  private final Cache<String, CompletableFuture<List<Koodi>>> ylakooditCache =
+      CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
+  private final Cache<String, CompletableFuture<List<Koodi>>> alakooditCache =
+      CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
 
   @Autowired
   public KoodistoCachedAsyncResource(KoodistoAsyncResource koodistoAsyncResource) {
@@ -102,6 +106,36 @@ public class KoodistoCachedAsyncResource {
           .findFirst()
           .map(m -> m.getNimi())
           .orElse(defaultArvo);
+    }
+  }
+
+  public CompletableFuture<List<Koodi>> ylakoodit(String koodiUri) {
+    try {
+      CompletableFuture<List<Koodi>> f =
+          this.ylakooditCache.get(koodiUri, () -> this.koodistoAsyncResource.ylakoodit(koodiUri));
+      if (f.isCompletedExceptionally()) {
+        this.ylakooditCache.invalidate(koodiUri);
+        return this.ylakooditCache.get(
+            koodiUri, () -> this.koodistoAsyncResource.ylakoodit(koodiUri));
+      }
+      return f;
+    } catch (ExecutionException e) {
+      return CompletableFuture.failedFuture(e);
+    }
+  }
+
+  public CompletableFuture<List<Koodi>> alakoodit(String koodiUri) {
+    try {
+      CompletableFuture<List<Koodi>> f =
+          this.alakooditCache.get(koodiUri, () -> this.koodistoAsyncResource.alakoodit(koodiUri));
+      if (f.isCompletedExceptionally()) {
+        this.alakooditCache.invalidate(koodiUri);
+        return this.alakooditCache.get(
+            koodiUri, () -> this.koodistoAsyncResource.alakoodit(koodiUri));
+      }
+      return f;
+    } catch (ExecutionException e) {
+      return CompletableFuture.failedFuture(e);
     }
   }
 

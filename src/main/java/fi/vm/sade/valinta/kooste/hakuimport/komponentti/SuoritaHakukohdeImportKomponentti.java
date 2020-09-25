@@ -11,17 +11,22 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Koulutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Valintakoe;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
+import fi.vm.sade.valinta.kooste.util.IterableUtil;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.camel.Body;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +51,43 @@ public class SuoritaHakukohdeImportKomponentti {
     this.koodistoAsyncResource = koodistoAsyncResource;
   }
 
+  private CompletableFuture<List<Pair<String, List<Koodi>>>> hakukohteetKooditYlakoodeineen(
+      List<Koodi> koodit) {
+    return CompletableFutureUtil.sequence(
+        koodit.stream()
+            .filter(koodi -> "hakukohteet".equals(koodi.getKoodistoUri()))
+            .collect(
+                Collectors.toMap(
+                    Koodi::getKoodiUri,
+                    Function.identity(),
+                    (k, kk) -> k.getVersio() < kk.getVersio() ? kk : k))
+            .values()
+            .stream()
+            .map(
+                hakukohteetKoodi -> {
+                  String uri = hakukohteetKoodi.getKoodiUri() + "#" + hakukohteetKoodi.getVersio();
+                  return koodistoAsyncResource
+                      .ylakoodit(uri)
+                      .thenApplyAsync(ylakoodit -> Pair.of(uri, ylakoodit));
+                })
+            .collect(Collectors.toList()));
+  }
+
+  private boolean vastaavaPohjakoulutus(
+      Pair<String, List<Koodi>> hakukohteet, String pohjakoulutusvaatimustoinenasteUri) {
+    return hakukohteet.getRight().stream()
+        .anyMatch(
+            ylakoodi ->
+                "pohjakoulutusvaatimustoinenaste".equals(ylakoodi.getKoodistoUri())
+                    && pohjakoulutusvaatimustoinenasteUri.split("#")[0].equals(
+                        ylakoodi.getKoodiUri()));
+  }
+
+  private boolean vainOsaamisalaanLiittyva(Pair<String, List<Koodi>> hakukohteet) {
+    return hakukohteet.getRight().stream()
+        .noneMatch(ylakoodi -> "koulutus".equals(ylakoodi.getKoodistoUri()));
+  }
+
   public HakukohdeImportDTO suoritaHakukohdeImport(
       @Body // @Property(OPH.HAKUKOHDEOID)
           String hakukohdeOid) {
@@ -53,12 +95,22 @@ public class SuoritaHakukohdeImportKomponentti {
       Hakukohde hakukohde =
           tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
       Haku haku = tarjontaAsyncResource.haeHaku(hakukohde.hakuOid).get(5, TimeUnit.MINUTES);
-      List<Toteutus> toteutukset =
+      List<CompletableFuture<Toteutus>> toteutusFs =
+          hakukohde.toteutusOids.stream()
+              .map(tarjontaAsyncResource::haeToteutus)
+              .collect(Collectors.toList());
+      List<Koulutus> koulutukset =
           CompletableFutureUtil.sequence(
-                  hakukohde.toteutusOids.stream()
-                      .map(tarjontaAsyncResource::haeToteutus)
+                  toteutusFs.stream()
+                      .map(
+                          toteutusF ->
+                              toteutusF.thenComposeAsync(
+                                  toteutus ->
+                                      tarjontaAsyncResource.haeKoulutus(toteutus.koulutusOid)))
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
+      List<Toteutus> toteutukset =
+          CompletableFutureUtil.sequence(toteutusFs).get(5, TimeUnit.MINUTES);
       Map<String, Koodi> kaudet = koodistoAsyncResource.haeKoodisto("kausi");
       HakukohdeImportDTO importTyyppi = new HakukohdeImportDTO();
 
@@ -113,9 +165,69 @@ public class SuoritaHakukohdeImportKomponentti {
       }
 
       HakukohdekoodiDTO hkt = new HakukohdekoodiDTO();
-      hkt.setKoodiUri(
-          Objects.requireNonNullElse(
-              hakukohde.hakukohteetUri, "hakukohteet_" + hakukohde.oid.replace(".", "")));
+      String hakukohteetUri = hakukohde.hakukohteetUri;
+      String pohjakoulutusvaatimustoinenasteUri =
+          IterableUtil.singleton(
+              hakukohde.pohjakoulutusvaatimusUrit.stream()
+                      .filter(uri -> uri.startsWith("pohjakoulutusvaatimustoinenaste_"))
+                  ::iterator);
+      if (hakukohteetUri == null && pohjakoulutusvaatimustoinenasteUri != null) {
+        String osaamisalaUri =
+            IterableUtil.singleton(
+                toteutukset.stream()
+                        .flatMap(toteutus -> toteutus.osaamisalaUris.stream())
+                        .filter(Objects::nonNull)
+                        .distinct()
+                    ::iterator);
+        if (osaamisalaUri != null) {
+          hakukohteetUri =
+              koodistoAsyncResource
+                  .alakoodit(osaamisalaUri)
+                  .thenComposeAsync(this::hakukohteetKooditYlakoodeineen)
+                  .thenApplyAsync(
+                      hakukohteetKoodit ->
+                          IterableUtil.singleton(
+                              hakukohteetKoodit.stream()
+                                      .filter(
+                                          h ->
+                                              this.vastaavaPohjakoulutus(
+                                                      h, pohjakoulutusvaatimustoinenasteUri)
+                                                  && this.vainOsaamisalaanLiittyva(h))
+                                      .map(Pair::getLeft)
+                                  ::iterator))
+                  .get(5, TimeUnit.MINUTES);
+        }
+        if (hakukohteetUri == null) {
+          String koulutusUri =
+              IterableUtil.singleton(
+                  koulutukset.stream()
+                          .map(koulutus -> koulutus.koulutusUri)
+                          .filter(Objects::nonNull)
+                          .distinct()
+                      ::iterator);
+          if (koulutusUri != null) {
+            hakukohteetUri =
+                koodistoAsyncResource
+                    .alakoodit(koulutusUri)
+                    .thenComposeAsync(this::hakukohteetKooditYlakoodeineen)
+                    .thenApplyAsync(
+                        hakukohteetKoodit ->
+                            IterableUtil.singleton(
+                                hakukohteetKoodit.stream()
+                                        .filter(
+                                            h ->
+                                                this.vastaavaPohjakoulutus(
+                                                    h, pohjakoulutusvaatimustoinenasteUri))
+                                        .map(Pair::getLeft)
+                                    ::iterator))
+                    .get(5, TimeUnit.MINUTES);
+          }
+        }
+      }
+      if (hakukohteetUri == null) {
+        hakukohteetUri = "hakukohteet_" + hakukohde.oid.replace(".", "");
+      }
+      hkt.setKoodiUri(hakukohteetUri);
       importTyyppi.setHakukohdekoodi(hkt);
 
       importTyyppi.setHakukohdeOid(hakukohde.oid);
