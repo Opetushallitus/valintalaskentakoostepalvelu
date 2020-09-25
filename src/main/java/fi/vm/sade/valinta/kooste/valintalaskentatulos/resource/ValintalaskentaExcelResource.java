@@ -172,6 +172,13 @@ public class ValintalaskentaExcelResource {
                                         hakukohde.getTarjoajaOids().stream()
                                             .map(organisaatioAsyncResource::haeOrganisaatio)
                                             .collect(Collectors.toList())))),
+                        Observable.fromFuture(
+                            hakukohdeF.thenComposeAsync(
+                                hakukohde ->
+                                    CompletableFutureUtil.sequence(
+                                        hakukohde.getHakukohdeKoulutusOids().stream()
+                                            .map(tarjontaAsyncResource::haeKoulutus)
+                                            .collect(Collectors.toList())))),
                         valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
                         valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(
                             hakukohdeOid, auditSession),
@@ -182,6 +189,7 @@ public class ValintalaskentaExcelResource {
                             valintalaskentaResource.laskennantulokset(hakukohdeOid)),
                         (tarjontaHakukohde,
                             tarjoajat,
+                            koulutukset,
                             valintatulokset,
                             lukuvuosimaksut,
                             hakemukset,
@@ -190,7 +198,15 @@ public class ValintalaskentaExcelResource {
                           try {
                             String opetuskieli =
                                 KirjeetHakukohdeCache.getOpetuskieli(
-                                    tarjontaHakukohde.getOpetusKielet());
+                                    koulutukset.stream()
+                                        .flatMap(
+                                            koulutus ->
+                                                koulutus
+                                                    .getOpetuskielis()
+                                                    .getUris()
+                                                    .keySet()
+                                                    .stream())
+                                        .collect(Collectors.toList()));
                             Teksti hakukohteenNimet =
                                 new Teksti(tarjontaHakukohde.getHakukohteenNimet());
                             String tarjoajaNimet =

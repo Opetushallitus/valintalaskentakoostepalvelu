@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -98,9 +99,16 @@ public class KoekutsukirjeetKomponentti {
                       .map(organisaatioAsyncResource::haeOrganisaatio)
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
+      List<KoulutusV1RDTO> koulutukset =
+          CompletableFutureUtil.sequence(
+                  hakukohde.getHakukohdeKoulutusOids().stream()
+                      .map(tarjontaAsyncResource::haeKoulutus)
+                      .collect(Collectors.toList()))
+              .get(5, TimeUnit.MINUTES);
       String opetuskieli =
           new Kieli(
-                  hakukohde.getOpetusKielet().stream()
+                  koulutukset.stream()
+                      .flatMap(koulutus -> koulutus.getOpetuskielis().getUris().keySet().stream())
                       .map(TarjontaUriToKoodistoUtil::cleanUri)
                       .collect(Collectors.toList()))
               .getKieli();
