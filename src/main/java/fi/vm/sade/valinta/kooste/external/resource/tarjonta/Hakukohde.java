@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHakukohde;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -61,6 +63,31 @@ public class Hakukohde {
     this.valintakokeet =
         dto.getValintakokeet().stream().map(Valintakoe::new).collect(Collectors.toSet());
     this.ohjeetUudelleOpiskelijalle = dto.getOhjeetUudelleOpiskelijalle();
+  }
+
+  public Hakukohde(KoutaHakukohde dto) {
+    this.oid = dto.oid;
+    switch (dto.tila) {
+      case "julkaistu":
+        this.tila = Tila.JULKAISTU;
+        break;
+      case "tallennettu":
+        this.tila = Tila.LUONNOS;
+        break;
+      default:
+        this.tila = Tila.POISTETTU;
+    }
+    this.nimi = new HashMap<>();
+    dto.nimi.forEach((kieli, nimi) -> this.nimi.put("kieli_" + kieli, nimi));
+    this.hakuOid = dto.hakuOid;
+    this.tarjoajaOids = dto.tarjoajat;
+    this.toteutusOids = Collections.singleton(dto.toteutusOid);
+    this.hakukohteetUri = null;
+    this.pohjakoulutusvaatimusUrit = dto.pohjakoulutusvaatimusKoodiUrit;
+    this.valintojenAloituspaikat = dto.aloituspaikat;
+    this.valintakokeet =
+        dto.valintakokeet.stream().map(Valintakoe::new).collect(Collectors.toSet());
+    this.ohjeetUudelleOpiskelijalle = null;
   }
 
   public enum Tila {
