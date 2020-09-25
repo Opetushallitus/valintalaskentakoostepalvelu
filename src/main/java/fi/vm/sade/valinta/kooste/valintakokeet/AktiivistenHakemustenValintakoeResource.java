@@ -102,8 +102,7 @@ public class AktiivistenHakemustenValintakoeResource {
 
     return Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
         .flatMap(
-            hakukohde ->
-                Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid())))
+            hakukohde -> Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakukohde.hakuOid)))
         .flatMap(
             haku -> {
               if (haku.isHakemuspalvelu()) {

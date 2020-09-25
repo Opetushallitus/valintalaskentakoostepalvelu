@@ -11,11 +11,11 @@ import fi.vm.sade.organisaatio.resource.api.KelaResource;
 import fi.vm.sade.organisaatio.resource.api.TasoJaLaajuusDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Change;
@@ -281,10 +281,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                   List<KelaHakijaRivi> rivit = Lists.newArrayList();
                   HakukohdeSource hakukohdeSource =
                       new HakukohdeSource() {
-                        Cache<String, HakukohdeV1RDTO> hakukohdeCache =
-                            CacheBuilder.newBuilder().build();
+                        Cache<String, Hakukohde> hakukohdeCache = CacheBuilder.newBuilder().build();
 
-                        public HakukohdeV1RDTO getHakukohdeByOid(String oid) {
+                        public Hakukohde getHakukohdeByOid(String oid) {
                           try {
                             return hakukohdeCache.get(
                                 oid, () -> tarjontaAsyncResource.haeHakukohde(oid).get(5, MINUTES));

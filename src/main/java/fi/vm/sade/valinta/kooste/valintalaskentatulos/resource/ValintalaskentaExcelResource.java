@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
 import com.google.common.collect.Sets;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -10,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -160,7 +160,7 @@ public class ValintalaskentaExcelResource {
                             ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
                         : Observable.fromFuture(
                             applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid)));
-                CompletableFuture<HakukohdeV1RDTO> hakukohdeF =
+                CompletableFuture<Hakukohde> hakukohdeF =
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
                 return Observable.zip(
                         Observable.fromFuture(hakukohdeF),
@@ -168,14 +168,14 @@ public class ValintalaskentaExcelResource {
                             hakukohdeF.thenComposeAsync(
                                 hakukohde ->
                                     CompletableFutureUtil.sequence(
-                                        hakukohde.getTarjoajaOids().stream()
+                                        hakukohde.tarjoajaOids.stream()
                                             .map(organisaatioAsyncResource::haeOrganisaatio)
                                             .collect(Collectors.toList())))),
                         Observable.fromFuture(
                             hakukohdeF.thenComposeAsync(
                                 hakukohde ->
                                     CompletableFutureUtil.sequence(
-                                        hakukohde.getHakukohdeKoulutusOids().stream()
+                                        hakukohde.toteutusOids.stream()
                                             .map(tarjontaAsyncResource::haeToteutus)
                                             .collect(Collectors.toList())))),
                         valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
@@ -206,8 +206,7 @@ public class ValintalaskentaExcelResource {
                                                     .keySet()
                                                     .stream())
                                         .collect(Collectors.toList()));
-                            Teksti hakukohteenNimet =
-                                new Teksti(tarjontaHakukohde.getHakukohteenNimet());
+                            Teksti hakukohteenNimet = new Teksti(tarjontaHakukohde.nimi);
                             String tarjoajaNimet =
                                 Teksti.getTeksti(
                                     tarjoajat.stream()
@@ -294,19 +293,19 @@ public class ValintalaskentaExcelResource {
   @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
   public void haeValintalaskentaTuloksetExcelMuodossa(
       @QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
-    Observable<HakukohdeV1RDTO> hakukohdeObservable =
+    Observable<Hakukohde> hakukohdeObservable =
         Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
     Observable<List<Organisaatio>> tarjoajatObservable =
         hakukohdeObservable.flatMap(
             hakukohde ->
                 Observable.fromFuture(
                     CompletableFutureUtil.sequence(
-                        hakukohde.getTarjoajaOids().stream()
+                        hakukohde.tarjoajaOids.stream()
                             .map(organisaatioAsyncResource::haeOrganisaatio)
                             .collect(Collectors.toList()))));
     final Observable<Haku> hakuObservable =
         hakukohdeObservable.flatMap(
-            hakukohde -> Observable.fromFuture(tarjontaResource.haeHaku(hakukohde.getHakuOid())));
+            hakukohde -> Observable.fromFuture(tarjontaResource.haeHaku(hakukohde.hakuOid)));
     final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable =
         Observable.fromFuture(valintalaskentaResource.laskennantulokset(hakukohdeOid));
     final Observable<List<HakemusWrapper>> hakemuksetObservable =

@@ -836,14 +836,14 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         .thenComposeAsync(
             hakukohde ->
                 CompletableFutureUtil.sequence(
-                        hakukohde.getHakukohdeKoulutusOids().stream()
+                        hakukohde.toteutusOids.stream()
                             .map(tarjontaAsyncResource::haeToteutus)
                             .collect(Collectors.toList()))
                     .thenComposeAsync(
                         toteutukset ->
                             viestintapalveluAsyncResource.haeKirjepohja(
-                                hakukohde.getHakuOid(),
-                                hakukohde.getTarjoajaOids().iterator().next(),
+                                hakukohde.hakuOid,
+                                hakukohde.tarjoajaOids.iterator().next(),
                                 "hyvaksymiskirje",
                                 KirjeetHakukohdeCache.getOpetuskieli(
                                     toteutukset.stream()
@@ -855,7 +855,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                     .keySet()
                                                     .stream())
                                         .collect(Collectors.toList())),
-                                hakukohde.getOid())))
+                                hakukohde.oid)))
         .thenComposeAsync(
             kirjepohjat ->
                 kirjepohjat.stream()
