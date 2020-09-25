@@ -819,12 +819,27 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         .haeHakukohde(hakukohdeOid)
         .thenComposeAsync(
             hakukohde ->
-                viestintapalveluAsyncResource.haeKirjepohja(
-                    hakukohde.getHakuOid(),
-                    hakukohde.getTarjoajaOids().iterator().next(),
-                    "hyvaksymiskirje",
-                    KirjeetHakukohdeCache.getOpetuskieli(hakukohde.getOpetusKielet()),
-                    hakukohde.getOid()))
+                CompletableFutureUtil.sequence(
+                        hakukohde.getHakukohdeKoulutusOids().stream()
+                            .map(tarjontaAsyncResource::haeKoulutus)
+                            .collect(Collectors.toList()))
+                    .thenComposeAsync(
+                        koulutukset ->
+                            viestintapalveluAsyncResource.haeKirjepohja(
+                                hakukohde.getHakuOid(),
+                                hakukohde.getTarjoajaOids().iterator().next(),
+                                "hyvaksymiskirje",
+                                KirjeetHakukohdeCache.getOpetuskieli(
+                                    koulutukset.stream()
+                                        .flatMap(
+                                            koulutus ->
+                                                koulutus
+                                                    .getOpetuskielis()
+                                                    .getUris()
+                                                    .keySet()
+                                                    .stream())
+                                        .collect(Collectors.toList())),
+                                hakukohde.getOid())))
         .thenComposeAsync(
             kirjepohjat ->
                 kirjepohjat.stream()

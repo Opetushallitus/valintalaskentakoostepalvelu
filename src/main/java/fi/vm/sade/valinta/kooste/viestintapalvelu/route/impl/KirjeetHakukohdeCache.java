@@ -79,21 +79,37 @@ public class KirjeetHakukohdeCache {
         .thenComposeAsync(
             hakukohde ->
                 CompletableFutureUtil.sequence(
-                        hakukohde.getTarjoajaOids().stream()
-                            .map(organisaatioAsyncResource::haeOrganisaatio)
+                        hakukohde.getHakukohdeKoulutusOids().stream()
+                            .map(tarjontaAsyncResource::haeKoulutus)
                             .collect(Collectors.toList()))
-                    .thenApplyAsync(
-                        tarjoajat -> {
-                          Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
-                          return new MetaHakukohde(
-                              hakukohde.getTarjoajaOids().iterator().next(),
-                              hakukohdeNimi,
-                              tarjoajat.stream()
-                                  .map(t -> new Teksti(t.getNimi()))
-                                  .collect(Collectors.toList()),
-                              hakukohdeNimi.getKieli(),
-                              getOpetuskieli(hakukohde.getOpetusKielet()),
-                              hakukohde.getOhjeetUudelleOpiskelijalle());
-                        }));
+                    .thenComposeAsync(
+                        koulutukset ->
+                            CompletableFutureUtil.sequence(
+                                    hakukohde.getTarjoajaOids().stream()
+                                        .map(organisaatioAsyncResource::haeOrganisaatio)
+                                        .collect(Collectors.toList()))
+                                .thenApplyAsync(
+                                    tarjoajat -> {
+                                      Teksti hakukohdeNimi =
+                                          new Teksti(hakukohde.getHakukohteenNimet());
+                                      return new MetaHakukohde(
+                                          hakukohde.getTarjoajaOids().iterator().next(),
+                                          hakukohdeNimi,
+                                          tarjoajat.stream()
+                                              .map(t -> new Teksti(t.getNimi()))
+                                              .collect(Collectors.toList()),
+                                          hakukohdeNimi.getKieli(),
+                                          getOpetuskieli(
+                                              koulutukset.stream()
+                                                  .flatMap(
+                                                      koulutus ->
+                                                          koulutus
+                                                              .getOpetuskielis()
+                                                              .getUris()
+                                                              .keySet()
+                                                              .stream())
+                                                  .collect(Collectors.toList())),
+                                          hakukohde.getOhjeetUudelleOpiskelijalle());
+                                    })));
   }
 }
