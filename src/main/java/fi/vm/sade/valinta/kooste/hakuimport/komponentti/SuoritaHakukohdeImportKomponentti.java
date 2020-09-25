@@ -11,28 +11,36 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1R
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ValintakoeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.camel.Body;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SuoritaHakukohdeImportKomponentti {
   private static final Logger LOG =
       LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
 
   private TarjontaAsyncResource tarjontaAsyncResource;
+  private OrganisaatioAsyncResource organisaatioAsyncResource;
   private KoodistoCachedAsyncResource koodistoAsyncResource;
 
   @Autowired
   public SuoritaHakukohdeImportKomponentti(
       TarjontaAsyncResource tarjontaAsyncResource,
+      OrganisaatioAsyncResource organisaatioAsyncResource,
       KoodistoCachedAsyncResource koodistoAsyncResource) {
     this.tarjontaAsyncResource = tarjontaAsyncResource;
+    this.organisaatioAsyncResource = organisaatioAsyncResource;
     this.koodistoAsyncResource = koodistoAsyncResource;
   }
 
@@ -52,15 +60,22 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.setTarjoajaOids(hakukohde.getTarjoajaOids());
       importTyyppi.setHaunkohdejoukkoUri(haku.getKohdejoukkoUri());
 
-      hakukohde
-          .getTarjoajaNimet()
+      CompletableFutureUtil.sequence(
+              hakukohde.getTarjoajaOids().stream()
+                  .map(organisaatioAsyncResource::haeOrganisaatio)
+                  .collect(Collectors.toList()))
+          .get(5, TimeUnit.MINUTES)
           .forEach(
-              (key, value) -> {
-                MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
-                dto.setLang(key);
-                dto.setText(value);
-                importTyyppi.getTarjoajaNimi().add(dto);
-              });
+              tarjoaja ->
+                  tarjoaja
+                      .getNimi()
+                      .forEach(
+                          (kieli, nimi) -> {
+                            MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
+                            dto.setLang("kieli_" + kieli);
+                            dto.setText(nimi);
+                            importTyyppi.getTarjoajaNimi().add(dto);
+                          }));
 
       hakukohde
           .getHakukohteenNimet()

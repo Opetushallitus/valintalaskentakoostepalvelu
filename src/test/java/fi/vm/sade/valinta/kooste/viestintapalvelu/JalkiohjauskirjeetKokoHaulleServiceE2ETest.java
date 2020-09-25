@@ -23,6 +23,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
@@ -80,6 +81,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setAsiointikieli(KieliUtil.RUOTSI)
                 .setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
     mockHakukohde1Kutsu();
     mockHaku1Kutsu();
     mockValintalaskentaKutsu();
@@ -106,6 +108,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setAsiointikieli(KieliUtil.RUOTSI)
                 .setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
     mockHakukohde1Kutsu();
     mockHaku1Kutsu();
     mockValintalaskentaKutsu();
@@ -132,6 +135,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setAsiointikieli(KieliUtil.ENGLANTI)
                 .setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
     mockHakukohde1Kutsu();
     mockHaku1Kutsu();
     mockValintalaskentaKutsu();
@@ -162,6 +166,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setVainSahkoinenViestinta(true)
                 .setSahkoposti("testi@sahkoposti.fi")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
     mockHakukohde1Kutsu();
     mockHaku1Kutsu();
     mockValintalaskentaKutsu();
@@ -190,6 +195,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setVainSahkoinenViestinta(true)
                 .setSahkoposti("testi@sahkoposti.fi")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
     mockHakukohde1Kutsu();
     mockHaku1KutsuToinenAste();
     mockValintalaskentaKutsu();
@@ -218,6 +224,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setVainSahkoinenViestinta(false)
                 .setSahkoposti("testi@sahkoposti.fi")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
     mockHakukohde1Kutsu();
     mockHaku1KutsuToinenAste();
     mockValintalaskentaKutsu();
@@ -246,6 +253,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setVainSahkoinenViestinta(true)
                 .setSahkoposti("testi@sahkoposti.fi")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
     mockHakukohde1Kutsu();
     mockHaku1KutsuToinenAste();
     mockValintalaskentaKutsu();
@@ -306,6 +314,15 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     hp.setResults(Arrays.asList(hakija1, hakija2));
     hp.setTotalCount(hp.getResults().size());
     mockToReturnJson(GET, "/valinta-tulos-service/haku/HAKU1/ilmanHyvaksyntaa", hp);
+  }
+
+  private void mockOrganisaatioKutsut() {
+    Organisaatio t1 = new Organisaatio();
+    Organisaatio t2 = new Organisaatio();
+    t1.setOid("T1");
+    t2.setOid("T2");
+    mockToReturnJson(GET, "/organisaatio-service/rest/organisaatio/T1", t1);
+    mockToReturnJson(GET, "/organisaatio-service/rest/organisaatio/T2", t2);
   }
 
   private void mockHakukohde1Kutsu() {

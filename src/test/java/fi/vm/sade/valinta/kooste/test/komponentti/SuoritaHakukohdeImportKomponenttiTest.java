@@ -9,6 +9,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 import java.io.IOException;
@@ -27,14 +28,17 @@ public class SuoritaHakukohdeImportKomponenttiTest {
   private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
 
   private TarjontaAsyncResource tarjontaAsyncResource;
-  private KoodistoCachedAsyncResource koodistoAsyncResource;
+  private OrganisaatioAsyncResource organisaatioAsyncResource;
+  private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
   @Before
   public void setUp() {
     tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
-    koodistoAsyncResource = mock(KoodistoCachedAsyncResource.class);
+    organisaatioAsyncResource = mock(OrganisaatioAsyncResource.class);
+    koodistoCachedAsyncResource = mock(KoodistoCachedAsyncResource.class);
     suoritaHakukohdeImportKomponentti =
-        new SuoritaHakukohdeImportKomponentti(tarjontaAsyncResource, koodistoAsyncResource);
+        new SuoritaHakukohdeImportKomponentti(
+            tarjontaAsyncResource, organisaatioAsyncResource, koodistoCachedAsyncResource);
   }
 
   @Test
