@@ -120,6 +120,47 @@ public class HttpClients {
         defaultHttpClientBuilder(cookieManager).build(), null, TarjontaAsyncResourceImpl.getGson());
   }
 
+  @Bean(name = "KoutaInternalHttpClient")
+  @Autowired
+  public java.net.http.HttpClient getKoutaInternalHttpClient(CookieManager cookieManager) {
+    return defaultHttpClientBuilder(cookieManager).build();
+  }
+
+  @Profile("default")
+  @Bean(name = "KoutaApplicationSession")
+  @Autowired
+  public ApplicationSession getKoutaApplicationSession(
+      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+      @Qualifier("KoutaInternalHttpClient") java.net.http.HttpClient applicationHttpClient,
+      CookieManager cookieManager,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.kouta-internal}") String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.kouta-internal}") String password) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    String service = UrlConfiguration.getInstance().url("kouta-internal.auth.login");
+    return new ApplicationSession(
+        applicationHttpClient,
+        cookieManager,
+        CALLER_ID,
+        Duration.ofSeconds(10),
+        new CasSession(
+            casHttpClient,
+            Duration.ofSeconds(10),
+            CALLER_ID,
+            URI.create(ticketsUrl),
+            username,
+            password),
+        service,
+        "session");
+  }
+
+  @Bean(name = "KoutaHttpClient")
+  @Autowired
+  public HttpClient getKoutaHttpClient(
+      @Qualifier("KoutaInternalHttpClient") java.net.http.HttpClient client,
+      @Qualifier("KoutaApplicationSession") ApplicationSession applicationSession) {
+    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+  }
+
   @Bean(name = "ValintaTulosServiceHttpClient")
   @Autowired
   public HttpClient getValintaTulosServiceHttpClient(CookieManager cookieManager) {

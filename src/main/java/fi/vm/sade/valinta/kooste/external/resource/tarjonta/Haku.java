@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHaku;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +50,20 @@ public class Haku {
     this.koulutuksenAlkamiskausiUri = dto.getKoulutuksenAlkamiskausiUri();
     this.koulutuksenAlkamisvuosi = dto.getKoulutuksenAlkamisVuosi();
     this.ataruLomakeAvain = dto.getAtaruLomakeAvain();
+  }
+
+  public Haku(KoutaHaku dto) {
+    this.oid = dto.oid;
+    this.nimi = new HashMap<>();
+    dto.nimi.forEach((kieli, nimi) -> this.nimi.put("kieli_" + kieli, nimi));
+    this.tarjoajaOids = new HashSet<>();
+    this.tarjoajaOids.add(dto.organisaatioOid);
+    this.kohdejoukkoUri = dto.kohdejoukkoKoodiUri;
+    this.hakukausiUri = null; // TODO
+    this.hakukausiVuosi = null;
+    this.koulutuksenAlkamiskausiUri = null; // TODO
+    this.koulutuksenAlkamisvuosi = null;
+    this.ataruLomakeAvain = dto.hakulomakeAtaruId;
   }
 
   public boolean isKorkeakouluhaku() {
