@@ -9,12 +9,14 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ValintakoeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -52,6 +54,12 @@ public class SuoritaHakukohdeImportKomponentti {
           tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
       HakuV1RDTO haku =
           tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid()).get(5, TimeUnit.MINUTES);
+      List<KoulutusV1RDTO> koulutukset =
+          CompletableFutureUtil.sequence(
+                  hakukohde.getHakukohdeKoulutusOids().stream()
+                      .map(tarjontaAsyncResource::haeKoulutus)
+                      .collect(Collectors.toList()))
+              .get(5, TimeUnit.MINUTES);
       Map<String, Koodi> kaudet = koodistoAsyncResource.haeKoodisto("kausi");
       HakukohdeImportDTO importTyyppi = new HakukohdeImportDTO();
 
@@ -141,14 +149,16 @@ public class SuoritaHakukohdeImportKomponentti {
       avainArvo.setArvo(hakukohdeKoodiTunniste + "_riittava_kielitaito");
       importTyyppi.getValintaperuste().add(avainArvo);
 
-      String opetuskieli = null;
-      if (!hakukohde.getOpetusKielet().isEmpty()) {
-        opetuskieli = hakukohde.getOpetusKielet().iterator().next().replace("kieli_", "");
-        avainArvo = new AvainArvoDTO();
-        avainArvo.setAvain("opetuskieli");
-        avainArvo.setArvo(opetuskieli);
-        importTyyppi.getValintaperuste().add(avainArvo);
-      }
+      String opetuskieli =
+          koulutukset.stream()
+              .flatMap(koulutus -> koulutus.getOpetuskielis().getUris().keySet().stream())
+              .map(uri -> uri.replace("kieli_", ""))
+              .findAny()
+              .orElse(null);
+      avainArvo = new AvainArvoDTO();
+      avainArvo.setAvain("opetuskieli");
+      avainArvo.setArvo(opetuskieli);
+      importTyyppi.getValintaperuste().add(avainArvo);
 
       // Kielikoetunnisteen selvittäminen
       String kielikoetunniste;
