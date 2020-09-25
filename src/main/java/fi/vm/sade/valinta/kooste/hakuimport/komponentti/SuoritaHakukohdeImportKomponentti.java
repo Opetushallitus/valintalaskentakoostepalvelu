@@ -237,7 +237,7 @@ public class SuoritaHakukohdeImportKomponentti {
           Objects.requireNonNullElse(hakukohde.valintojenAloituspaikat, 0));
       for (Valintakoe valintakoe : hakukohde.valintakokeet) {
         HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
-        v.setOid(valintakoe.oid);
+        v.setOid(valintakoe.id);
         v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
         importTyyppi.getValintakoe().add(v);
       }

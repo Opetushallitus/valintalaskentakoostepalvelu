@@ -155,6 +155,11 @@ public class KoosteTestProfileConfiguration {
     return APPLICATION_SESSION;
   }
 
+  @Bean(name = "KoutaApplicationSession")
+  public ApplicationSession getKoutaApplicationSession() {
+    return APPLICATION_SESSION;
+  }
+
   @Bean(name = "HakuAppApplicationSession")
   public ApplicationSession getHakuAppApplicationSession() {
     return APPLICATION_SESSION;
