@@ -1,31 +1,32 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import java.util.List;
 
 /**
  * Wrapperi sijoittelun HakutoiveDTO:lle jossa meta dataa liittyen kaikkiin hakukohteen hakijoihin
  */
 public class MetaHakukohde {
   private final Teksti hakukohdeNimi;
-  private final Teksti tarjoajaNimi;
+  private final List<Teksti> tarjoajaNimet;
   private final String hakukohteenKieli;
   private final String opetuskieli;
   private final String tarjoajaOid;
   private final String ohjeetUudelleOpiskelijalle;
 
-  public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi) {
-    this(tarjoajaOid, hakukohdeNimi, tarjoajaNimi, null, null, null);
+  public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, List<Teksti> tarjoajaNimet) {
+    this(tarjoajaOid, hakukohdeNimi, tarjoajaNimet, null, null, null);
   }
 
   public MetaHakukohde(
       String tarjoajaOid,
       Teksti hakukohdeNimi,
-      Teksti tarjoajaNimi,
+      List<Teksti> tarjoajaNimet,
       String hakukohteenKieli,
       String opetuskieli,
       String ohjeetUudelleOpiskelijalle) {
     this.hakukohdeNimi = hakukohdeNimi;
-    this.tarjoajaNimi = tarjoajaNimi;
+    this.tarjoajaNimet = tarjoajaNimet;
     this.hakukohteenKieli = hakukohteenKieli;
     this.opetuskieli = opetuskieli;
     this.tarjoajaOid = tarjoajaOid;
@@ -33,8 +34,11 @@ public class MetaHakukohde {
   }
 
   public MetaHakukohde(
-      String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli) {
-    this(tarjoajaOid, hakukohdeNimi, tarjoajaNimi, hakukohteenKieli, null, null);
+      String tarjoajaOid,
+      Teksti hakukohdeNimi,
+      List<Teksti> tarjoajaNimet,
+      String hakukohteenKieli) {
+    this(tarjoajaOid, hakukohdeNimi, tarjoajaNimet, hakukohteenKieli, null, null);
   }
 
   public String getTarjoajaOid() {
@@ -76,7 +80,7 @@ public class MetaHakukohde {
     return hakukohdeNimi;
   }
 
-  public Teksti getTarjoajaNimi() {
-    return tarjoajaNimi;
+  public List<Teksti> getTarjoajaNimet() {
+    return tarjoajaNimet;
   }
 }

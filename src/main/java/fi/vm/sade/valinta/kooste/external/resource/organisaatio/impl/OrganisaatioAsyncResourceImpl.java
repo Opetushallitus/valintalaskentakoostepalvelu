@@ -1,43 +1,38 @@
 package fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl;
 
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import io.reactivex.Observable;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-/**
- * https://${host.virkailija}/organisaatio-service/rest esim
- * /organisaatio-service/rest/organisaatio/1.2.246.562.10.39218317368 ?noCache=1413976497594
- */
 @Service
-public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource
-    implements OrganisaatioAsyncResource {
+public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource {
   private final HttpClient client;
+  private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public OrganisaatioAsyncResourceImpl(@Qualifier("OrganisaatioHttpClient") HttpClient client) {
-    super(TimeUnit.MINUTES.toMillis(1));
     this.client = client;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
-  public Observable<Response> haeOrganisaatio(String organisaatioOid) {
-    return getAsObservableLazily(
-        getUrl("organisaatio-service.organisaatio", organisaatioOid),
-        webClient -> webClient.accept(MediaType.WILDCARD_TYPE));
+  public CompletableFuture<Organisaatio> haeOrganisaatio(String organisaatioOid) {
+    return this.client.getJson(
+        this.urlConfiguration.url("organisaatio-service.organisaatio", organisaatioOid),
+        Duration.ofMinutes(1),
+        new TypeToken<Organisaatio>() {}.getType());
   }
 
   @Override
@@ -48,19 +43,19 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource
     parameters.put("aktiiviset", Boolean.toString(true));
     parameters.put("suunnitellut", Boolean.toString(true));
     parameters.put("lakkautetut", Boolean.toString(true));
-    String url = getUrl("organisaatio-service.organisaatio.hierarkia.tyyppi", parameters);
 
     return client.getJson(
-        url,
+        this.urlConfiguration.url("organisaatio-service.organisaatio.hierarkia.tyyppi", parameters),
         Duration.ofMinutes(1),
-        new com.google.gson.reflect.TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType());
+        new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType());
   }
 
   @Override
   public CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
     return this.client
         .getResponse(
-            getUrl("organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
+            this.urlConfiguration.url(
+                "organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
             Duration.ofMinutes(1),
             x -> x)
         .thenApply(
@@ -69,9 +64,7 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource
                 return Optional.empty();
               }
               return Optional.of(
-                  this.client.parseJson(
-                      response,
-                      new com.google.gson.reflect.TypeToken<HakutoimistoDTO>() {}.getType()));
+                  this.client.parseJson(response, new TypeToken<HakutoimistoDTO>() {}.getType()));
             });
   }
 }

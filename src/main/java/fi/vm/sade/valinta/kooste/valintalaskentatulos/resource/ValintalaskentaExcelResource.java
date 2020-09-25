@@ -8,10 +8,13 @@ import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.VastaanottoFilterUtil;
@@ -35,6 +38,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -70,6 +75,7 @@ public class ValintalaskentaExcelResource {
   @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
   @Autowired private ValintalaskentaAsyncResource valintalaskentaResource;
   @Autowired private TarjontaAsyncResource tarjontaResource;
+  @Autowired private OrganisaatioAsyncResource organisaatioAsyncResource;
   @Autowired private ApplicationAsyncResource applicationResource;
   @Autowired private AtaruAsyncResource ataruAsyncResource;
   @Context private HttpServletRequest httpServletRequestJaxRS;
@@ -155,8 +161,17 @@ public class ValintalaskentaExcelResource {
                             applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid))
                         : Observable.fromFuture(
                             ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)));
+                CompletableFuture<HakukohdeV1RDTO> hakukohdeF =
+                    tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
                 return Observable.zip(
-                        Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid)),
+                        Observable.fromFuture(hakukohdeF),
+                        Observable.fromFuture(
+                            hakukohdeF.thenComposeAsync(
+                                hakukohde ->
+                                    CompletableFutureUtil.sequence(
+                                        hakukohde.getTarjoajaOids().stream()
+                                            .map(organisaatioAsyncResource::haeOrganisaatio)
+                                            .collect(Collectors.toList())))),
                         valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
                         valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(
                             hakukohdeOid, auditSession),
@@ -166,6 +181,7 @@ public class ValintalaskentaExcelResource {
                         Observable.fromFuture(
                             valintalaskentaResource.laskennantulokset(hakukohdeOid)),
                         (tarjontaHakukohde,
+                            tarjoajat,
                             valintatulokset,
                             lukuvuosimaksut,
                             hakemukset,
@@ -177,7 +193,13 @@ public class ValintalaskentaExcelResource {
                                     tarjontaHakukohde.getOpetusKielet());
                             Teksti hakukohteenNimet =
                                 new Teksti(tarjontaHakukohde.getHakukohteenNimet());
-                            Teksti tarjoajaNimet = new Teksti(tarjontaHakukohde.getTarjoajaNimet());
+                            String tarjoajaNimet =
+                                Teksti.getTeksti(
+                                    tarjoajat.stream()
+                                        .map(Organisaatio::getNimi)
+                                        .collect(Collectors.toList()),
+                                    " - ",
+                                    opetuskieli);
 
                             InputStream xls =
                                 sijoittelunTulosExcelKomponentti.luoXls(
@@ -185,7 +207,7 @@ public class ValintalaskentaExcelResource {
                                         valintatulokset, hakukohde),
                                     opetuskieli,
                                     hakukohteenNimet.getTeksti(opetuskieli),
-                                    tarjoajaNimet.getTeksti(opetuskieli),
+                                    tarjoajaNimet,
                                     hakukohdeOid,
                                     hakemukset,
                                     lukuvuosimaksut,
@@ -259,6 +281,14 @@ public class ValintalaskentaExcelResource {
       @QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
     Observable<HakukohdeV1RDTO> hakukohdeObservable =
         Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
+    Observable<List<Organisaatio>> tarjoajatObservable =
+        hakukohdeObservable.flatMap(
+            hakukohde ->
+                Observable.fromFuture(
+                    CompletableFutureUtil.sequence(
+                        hakukohde.getTarjoajaOids().stream()
+                            .map(organisaatioAsyncResource::haeOrganisaatio)
+                            .collect(Collectors.toList()))));
     final Observable<HakuV1RDTO> hakuObservable =
         hakukohdeObservable.flatMap(
             hakukohde -> Observable.fromFuture(tarjontaResource.haeHaku(hakukohde.getHakuOid())));
@@ -279,6 +309,7 @@ public class ValintalaskentaExcelResource {
         Observable.combineLatest(
             hakuObservable,
             hakukohdeObservable,
+            tarjoajatObservable,
             valinnanVaiheetObservable,
             hakemuksetObservable,
             ValintalaskennanTulosExcel::luoExcel);

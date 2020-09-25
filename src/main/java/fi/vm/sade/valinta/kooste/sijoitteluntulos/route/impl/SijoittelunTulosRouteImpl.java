@@ -16,6 +16,8 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -30,6 +32,7 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukko
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
@@ -94,7 +97,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
   private final String dokumenttipalveluUrl;
   private final String muodostaDokumentit;
   private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-  private TarjontaAsyncResource tarjontaAsyncResource;
+  private final TarjontaAsyncResource tarjontaAsyncResource;
+  private final OrganisaatioAsyncResource organisaatioAsyncResource;
   private final AtaruAsyncResource ataruAsyncResource;
   private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
   private final HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti;
@@ -116,6 +120,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
       SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
       HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta,
       TarjontaAsyncResource tarjontaAsyncResource,
+      OrganisaatioAsyncResource organisaatioAsyncResource,
       ViestintapalveluResource viestintapalveluResource,
       ApplicationResource applicationResource,
       AtaruAsyncResource ataruAsyncResource,
@@ -124,6 +129,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
       HaeHakuTarjonnaltaKomponentti haeHakuTarjonnaltaKomponentti,
       ValintalaskentaAsyncResource valintalaskentaResource) {
     this.tarjontaAsyncResource = tarjontaAsyncResource;
+    this.organisaatioAsyncResource = organisaatioAsyncResource;
     this.ataruAsyncResource = ataruAsyncResource;
     this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
     this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
@@ -180,8 +186,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
               @Override
               public void process(Exchange exchange) {
                 SijoittelunTulosProsessi prosessi = prosessi(exchange);
-                HakukohdeTyyppi hakukohde = exchange.getIn().getBody(HakukohdeTyyppi.class);
-                String hakukohdeOid = hakukohde.getOid();
+                String hakukohdeOid = exchange.getIn().getBody(HakukohdeTyyppi.class).getOid();
                 String hakuOid = hakuOid(exchange);
                 String tarjoajaOid = StringUtils.EMPTY;
                 AuditSession auditSession = auditSession(exchange);
@@ -189,12 +194,23 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 String tarjoajaNimi;
                 String preferoitukielikoodi = KieliUtil.SUOMI;
                 try {
-                  HakukohdeV1RDTO nimi = nimiTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
-                  tarjoajaOid = nimi.getTarjoajaOids().iterator().next();
-                  Teksti hakukohdeTeksti = new Teksti(nimi.getHakukohteenNimet());
+                  HakukohdeV1RDTO hakukohde =
+                      tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, MINUTES);
+                  tarjoajaOid = hakukohde.getTarjoajaOids().iterator().next();
+                  Teksti hakukohdeTeksti = new Teksti(hakukohde.getHakukohteenNimet());
                   preferoitukielikoodi = hakukohdeTeksti.getKieli();
                   hakukohdeNimi = hakukohdeTeksti.getTeksti();
-                  tarjoajaNimi = new Teksti(nimi.getTarjoajaNimet()).getTeksti();
+                  tarjoajaNimi =
+                      Teksti.getTeksti(
+                          CompletableFutureUtil.sequence(
+                                  hakukohde.getTarjoajaOids().stream()
+                                      .map(organisaatioAsyncResource::haeOrganisaatio)
+                                      .collect(Collectors.toList()))
+                              .get(5, MINUTES)
+                              .stream()
+                              .map(Organisaatio::getNimi)
+                              .collect(Collectors.toList()),
+                          " - ");
                 } catch (Exception e) {
                   hakukohdeNimi = "Nimetön hakukohde " + hakukohdeOid;
                   tarjoajaNimi = "Nimetön tarjoaja " + tarjoajaOid;
