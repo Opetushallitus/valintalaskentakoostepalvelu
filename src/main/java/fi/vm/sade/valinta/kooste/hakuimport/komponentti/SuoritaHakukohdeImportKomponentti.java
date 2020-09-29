@@ -6,13 +6,13 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdekoodiDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohteenValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.MonikielinenTekstiDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Valintakoe;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import java.util.List;
@@ -53,7 +53,7 @@ public class SuoritaHakukohdeImportKomponentti {
       Hakukohde hakukohde =
           tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
       Haku haku = tarjontaAsyncResource.haeHaku(hakukohde.hakuOid).get(5, TimeUnit.MINUTES);
-      List<KoulutusV1RDTO> toteutukset =
+      List<Toteutus> toteutukset =
           CompletableFutureUtil.sequence(
                   hakukohde.toteutusOids.stream()
                       .map(tarjontaAsyncResource::haeToteutus)
@@ -145,7 +145,7 @@ public class SuoritaHakukohdeImportKomponentti {
 
       String opetuskieli =
           toteutukset.stream()
-              .flatMap(toteutus -> toteutus.getOpetuskielis().getUris().keySet().stream())
+              .flatMap(koulutus -> koulutus.opetuskielet.stream())
               .map(uri -> uri.replace("kieli_", ""))
               .findAny()
               .orElse(null);

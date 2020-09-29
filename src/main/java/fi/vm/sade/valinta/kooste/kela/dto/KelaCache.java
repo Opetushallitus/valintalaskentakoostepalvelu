@@ -2,10 +2,10 @@ package fi.vm.sade.valinta.kooste.kela.dto;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
@@ -45,7 +45,7 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
       if (alkamiskausiUri == null) {
         // Kyseessä jatkuva haku, haetaan alkamistiedot koulutukselta
         try {
-          List<KoulutusV1RDTO> toteutukset =
+          List<Toteutus> toteutukset =
               tarjontaAsyncResource
                   .haeHakukohde(hakukohdeOid)
                   .thenComposeAsync(
@@ -55,9 +55,9 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
                                   .map(tarjontaAsyncResource::haeToteutus)
                                   .collect(Collectors.toList())))
                   .get(5, TimeUnit.MINUTES);
-          for (KoulutusV1RDTO toteutus : toteutukset) {
-            alkamiskausiUri = toteutus.getKoulutuksenAlkamiskausi().getUri();
-            vuosi = toteutus.getKoulutuksenAlkamisvuosi();
+          for (Toteutus toteutus : toteutukset) {
+            alkamiskausiUri = toteutus.alkamiskausiUri;
+            vuosi = toteutus.alkamisvuosi;
           }
         } catch (Exception e) {
           LOG.error("Ei voitu hakea lukuvuotta tarjonnalta. HakukohdeOid:" + hakukohdeOid, e);

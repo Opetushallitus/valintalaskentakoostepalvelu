@@ -19,6 +19,7 @@ import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultRyhmaliitos;
@@ -119,13 +120,14 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public CompletableFuture<KoulutusV1RDTO> haeToteutus(String toteutusOid) {
+  public CompletableFuture<Toteutus> haeToteutus(String toteutusOid) {
     return this.client
         .<ResultV1RDTO<KoulutusV1RDTO>>getJson(
             getUrl("tarjonta-service.koulutus.koulutusoid", toteutusOid),
             Duration.ofMinutes(5),
             new TypeToken<ResultV1RDTO<KoulutusV1RDTO>>() {}.getType())
-        .thenApplyAsync(ResultV1RDTO::getResult);
+        .thenApplyAsync(ResultV1RDTO::getResult)
+        .thenApplyAsync(r -> r == null ? null : new Toteutus(r));
   }
 
   @Override

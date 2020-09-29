@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import io.reactivex.Observable;
 import java.util.Collection;
@@ -24,7 +23,7 @@ public interface TarjontaAsyncResource {
 
   CompletableFuture<Set<String>> haunHakukohteet(String hakuOid);
 
-  CompletableFuture<KoulutusV1RDTO> haeToteutus(String toteutusOid);
+  CompletableFuture<Toteutus> haeToteutus(String toteutusOid);
 
   CompletableFuture<KomoV1RDTO> haeKoulutus(String koulutusOid);
 

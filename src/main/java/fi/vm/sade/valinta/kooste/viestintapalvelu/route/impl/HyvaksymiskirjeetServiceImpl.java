@@ -847,13 +847,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                 "hyvaksymiskirje",
                                 KirjeetHakukohdeCache.getOpetuskieli(
                                     toteutukset.stream()
-                                        .flatMap(
-                                            toteutus ->
-                                                toteutus
-                                                    .getOpetuskielis()
-                                                    .getUris()
-                                                    .keySet()
-                                                    .stream())
+                                        .flatMap(toteutus -> toteutus.opetuskielet.stream())
                                         .collect(Collectors.toList())),
                                 hakukohde.oid)))
         .thenComposeAsync(

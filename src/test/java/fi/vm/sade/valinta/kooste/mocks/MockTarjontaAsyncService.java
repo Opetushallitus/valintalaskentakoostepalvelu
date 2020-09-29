@@ -6,12 +6,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoodiUrisV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusAmmatillinenPerustutkintoAlk2018V1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import io.reactivex.Observable;
 import java.util.Collection;
@@ -72,17 +70,13 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
-  public CompletableFuture<KoulutusV1RDTO> haeToteutus(String toteutusOid) {
+  public CompletableFuture<Toteutus> haeToteutus(String toteutusOid) {
     if ("mocktoteutusoid".equals(toteutusOid)) {
-      KoulutusV1RDTO koulutus = new KoulutusAmmatillinenPerustutkintoAlk2018V1RDTO();
-      koulutus.setOid(toteutusOid);
-      KoodiUrisV1RDTO kielet = new KoodiUrisV1RDTO();
-      HashMap<String, Integer> uris = new HashMap<>();
-      uris.put("kieli_fi", 1);
-      uris.put("kieli_sv", 1);
-      kielet.setUris(uris);
-      koulutus.setOpetuskielis(kielet);
-      return CompletableFuture.completedFuture(koulutus);
+      Set<String> kielet = new HashSet<>();
+      kielet.add("kieli_fi");
+      kielet.add("kieli_sv");
+      return CompletableFuture.completedFuture(
+          new Toteutus(toteutusOid, null, null, null, kielet));
     }
     return null;
   }
