@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -10,12 +9,12 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyn
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.Kieli;
 import fi.vm.sade.valinta.kooste.util.NimiPaattelyStrategy;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
-import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
@@ -99,7 +98,7 @@ public class KoekutsukirjeetKomponentti {
                       .map(organisaatioAsyncResource::haeOrganisaatio)
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
-      List<KoulutusV1RDTO> toteutukset =
+      List<Toteutus> toteutukset =
           CompletableFutureUtil.sequence(
                   hakukohde.toteutusOids.stream()
                       .map(tarjontaAsyncResource::haeToteutus)
@@ -108,8 +107,7 @@ public class KoekutsukirjeetKomponentti {
       String opetuskieli =
           new Kieli(
                   toteutukset.stream()
-                      .flatMap(toteutus -> toteutus.getOpetuskielis().getUris().keySet().stream())
-                      .map(TarjontaUriToKoodistoUtil::cleanUri)
+                      .flatMap(toteutus -> toteutus.opetuskielet.stream())
                       .collect(Collectors.toList()))
               .getKieli();
       String hakukohdeNimiTietyllaKielella = Teksti.getTeksti(hakukohde.nimi, opetuskieli);
