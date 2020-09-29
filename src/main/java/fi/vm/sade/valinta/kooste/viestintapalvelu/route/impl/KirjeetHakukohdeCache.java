@@ -80,10 +80,10 @@ public class KirjeetHakukohdeCache {
             hakukohde ->
                 CompletableFutureUtil.sequence(
                         hakukohde.getHakukohdeKoulutusOids().stream()
-                            .map(tarjontaAsyncResource::haeKoulutus)
+                            .map(tarjontaAsyncResource::haeToteutus)
                             .collect(Collectors.toList()))
                     .thenComposeAsync(
-                        koulutukset ->
+                        toteutukset ->
                             CompletableFutureUtil.sequence(
                                     hakukohde.getTarjoajaOids().stream()
                                         .map(organisaatioAsyncResource::haeOrganisaatio)
@@ -100,10 +100,10 @@ public class KirjeetHakukohdeCache {
                                               .collect(Collectors.toList()),
                                           hakukohdeNimi.getKieli(),
                                           getOpetuskieli(
-                                              koulutukset.stream()
+                                              toteutukset.stream()
                                                   .flatMap(
-                                                      koulutus ->
-                                                          koulutus
+                                                      toteutus ->
+                                                          toteutus
                                                               .getOpetuskielis()
                                                               .getUris()
                                                               .keySet()

@@ -99,16 +99,16 @@ public class KoekutsukirjeetKomponentti {
                       .map(organisaatioAsyncResource::haeOrganisaatio)
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
-      List<KoulutusV1RDTO> koulutukset =
+      List<KoulutusV1RDTO> toteutukset =
           CompletableFutureUtil.sequence(
                   hakukohde.getHakukohdeKoulutusOids().stream()
-                      .map(tarjontaAsyncResource::haeKoulutus)
+                      .map(tarjontaAsyncResource::haeToteutus)
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
       String opetuskieli =
           new Kieli(
-                  koulutukset.stream()
-                      .flatMap(koulutus -> koulutus.getOpetuskielis().getUris().keySet().stream())
+                  toteutukset.stream()
+                      .flatMap(toteutus -> toteutus.getOpetuskielis().getUris().keySet().stream())
                       .map(TarjontaUriToKoodistoUtil::cleanUri)
                       .collect(Collectors.toList()))
               .getKieli();

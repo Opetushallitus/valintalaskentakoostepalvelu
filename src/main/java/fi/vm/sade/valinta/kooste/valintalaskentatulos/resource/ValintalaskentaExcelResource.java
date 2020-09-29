@@ -177,7 +177,7 @@ public class ValintalaskentaExcelResource {
                                 hakukohde ->
                                     CompletableFutureUtil.sequence(
                                         hakukohde.getHakukohdeKoulutusOids().stream()
-                                            .map(tarjontaAsyncResource::haeKoulutus)
+                                            .map(tarjontaAsyncResource::haeToteutus)
                                             .collect(Collectors.toList())))),
                         valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid),
                         valintaTulosServiceAsyncResource.fetchLukuvuosimaksut(
@@ -189,7 +189,7 @@ public class ValintalaskentaExcelResource {
                             valintalaskentaResource.laskennantulokset(hakukohdeOid)),
                         (tarjontaHakukohde,
                             tarjoajat,
-                            koulutukset,
+                            toteutukset,
                             valintatulokset,
                             lukuvuosimaksut,
                             hakemukset,
@@ -198,10 +198,10 @@ public class ValintalaskentaExcelResource {
                           try {
                             String opetuskieli =
                                 KirjeetHakukohdeCache.getOpetuskieli(
-                                    koulutukset.stream()
+                                    toteutukset.stream()
                                         .flatMap(
-                                            koulutus ->
-                                                koulutus
+                                            toteutus ->
+                                                toteutus
                                                     .getOpetuskielis()
                                                     .getUris()
                                                     .keySet()
