@@ -101,12 +101,7 @@ public class KirjeetHakukohdeCache {
                                           getOpetuskieli(
                                               toteutukset.stream()
                                                   .flatMap(
-                                                      toteutus ->
-                                                          toteutus
-                                                              .getOpetuskielis()
-                                                              .getUris()
-                                                              .keySet()
-                                                              .stream())
+                                                      toteutus -> toteutus.opetuskielet.stream())
                                                   .collect(Collectors.toList())),
                                           hakukohde.ohjeetUudelleOpiskelijalle);
                                     })));
