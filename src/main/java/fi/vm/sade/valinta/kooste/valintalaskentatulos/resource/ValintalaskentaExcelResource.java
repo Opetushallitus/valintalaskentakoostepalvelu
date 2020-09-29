@@ -198,13 +198,7 @@ public class ValintalaskentaExcelResource {
                             String opetuskieli =
                                 KirjeetHakukohdeCache.getOpetuskieli(
                                     toteutukset.stream()
-                                        .flatMap(
-                                            toteutus ->
-                                                toteutus
-                                                    .getOpetuskielis()
-                                                    .getUris()
-                                                    .keySet()
-                                                    .stream())
+                                        .flatMap(toteutus -> toteutus.opetuskielet.stream())
                                         .collect(Collectors.toList()));
                             Teksti hakukohteenNimet = new Teksti(tarjontaHakukohde.nimi);
                             String tarjoajaNimet =
