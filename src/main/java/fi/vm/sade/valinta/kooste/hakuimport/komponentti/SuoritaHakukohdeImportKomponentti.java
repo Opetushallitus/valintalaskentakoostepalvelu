@@ -54,10 +54,10 @@ public class SuoritaHakukohdeImportKomponentti {
           tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
       HakuV1RDTO haku =
           tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid()).get(5, TimeUnit.MINUTES);
-      List<KoulutusV1RDTO> koulutukset =
+      List<KoulutusV1RDTO> toteutukset =
           CompletableFutureUtil.sequence(
                   hakukohde.getHakukohdeKoulutusOids().stream()
-                      .map(tarjontaAsyncResource::haeKoulutus)
+                      .map(tarjontaAsyncResource::haeToteutus)
                       .collect(Collectors.toList()))
               .get(5, TimeUnit.MINUTES);
       Map<String, Koodi> kaudet = koodistoAsyncResource.haeKoodisto("kausi");
@@ -150,8 +150,8 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.getValintaperuste().add(avainArvo);
 
       String opetuskieli =
-          koulutukset.stream()
-              .flatMap(koulutus -> koulutus.getOpetuskielis().getUris().keySet().stream())
+          toteutukset.stream()
+              .flatMap(toteutus -> toteutus.getOpetuskielis().getUris().keySet().stream())
               .map(uri -> uri.replace("kieli_", ""))
               .findAny()
               .orElse(null);
