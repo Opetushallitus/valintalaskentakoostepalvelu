@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoodiUrisV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusAmmatillinenPerustutkintoAlk2018V1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
@@ -55,7 +56,7 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     hakukohdeDTO.setHakuOid(hakuOid);
     hakukohdeDTO.setOid(hakukohdeOid);
     hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
-    hakukohdeDTO.setHakukohdeKoulutusOids(Collections.singletonList("mockkoulutusoid"));
+    hakukohdeDTO.setHakukohdeKoulutusOids(Collections.singletonList("mocktoteutusoid"));
     return CompletableFuture.completedFuture(hakukohdeDTO);
   }
 
@@ -65,10 +66,10 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
-  public CompletableFuture<KoulutusV1RDTO> haeKoulutus(String koulutusOid) {
-    if ("mockkoulutusoid".equals(koulutusOid)) {
+  public CompletableFuture<KoulutusV1RDTO> haeToteutus(String toteutusOid) {
+    if ("mocktoteutusoid".equals(toteutusOid)) {
       KoulutusV1RDTO koulutus = new KoulutusAmmatillinenPerustutkintoAlk2018V1RDTO();
-      koulutus.setOid(koulutusOid);
+      koulutus.setOid(toteutusOid);
       KoodiUrisV1RDTO kielet = new KoodiUrisV1RDTO();
       HashMap<String, Integer> uris = new HashMap<>();
       uris.put("kieli_fi", 1);
@@ -77,6 +78,11 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
       koulutus.setOpetuskielis(kielet);
       return CompletableFuture.completedFuture(koulutus);
     }
+    return null;
+  }
+
+  @Override
+  public CompletableFuture<KomoV1RDTO> haeKoulutus(String koulutusOid) {
     return null;
   }
 
