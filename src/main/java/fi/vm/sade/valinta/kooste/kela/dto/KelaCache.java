@@ -45,19 +45,19 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
       if (alkamiskausiUri == null) {
         // Kyseessä jatkuva haku, haetaan alkamistiedot koulutukselta
         try {
-          List<KoulutusV1RDTO> koulutukset =
+          List<KoulutusV1RDTO> toteutukset =
               tarjontaAsyncResource
                   .haeHakukohde(hakukohdeOid)
                   .thenComposeAsync(
                       hakukohde ->
                           CompletableFutureUtil.sequence(
                               hakukohde.getHakukohdeKoulutusOids().stream()
-                                  .map(tarjontaAsyncResource::haeKoulutus)
+                                  .map(tarjontaAsyncResource::haeToteutus)
                                   .collect(Collectors.toList())))
                   .get(5, TimeUnit.MINUTES);
-          for (KoulutusV1RDTO koulutus : koulutukset) {
-            alkamiskausiUri = koulutus.getKoulutuksenAlkamiskausi().getUri();
-            vuosi = koulutus.getKoulutuksenAlkamisvuosi();
+          for (KoulutusV1RDTO toteutus : toteutukset) {
+            alkamiskausiUri = toteutus.getKoulutuksenAlkamiskausi().getUri();
+            vuosi = toteutus.getKoulutuksenAlkamisvuosi();
           }
         } catch (Exception e) {
           LOG.error("Ei voitu hakea lukuvuotta tarjonnalta. HakukohdeOid:" + hakukohdeOid, e);

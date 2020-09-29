@@ -12,6 +12,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
@@ -112,12 +113,22 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public CompletableFuture<KoulutusV1RDTO> haeKoulutus(String koulutusOid) {
+  public CompletableFuture<KoulutusV1RDTO> haeToteutus(String toteutusOid) {
     return this.client
         .<ResultV1RDTO<KoulutusV1RDTO>>getJson(
-            getUrl("tarjonta-service.koulutus.koulutusoid", koulutusOid),
+            getUrl("tarjonta-service.koulutus.koulutusoid", toteutusOid),
             Duration.ofMinutes(5),
             new TypeToken<ResultV1RDTO<KoulutusV1RDTO>>() {}.getType())
+        .thenApplyAsync(ResultV1RDTO::getResult);
+  }
+
+  @Override
+  public CompletableFuture<KomoV1RDTO> haeKoulutus(String koulutusOid) {
+    return this.client
+        .<ResultV1RDTO<KomoV1RDTO>>getJson(
+            getUrl("tarjonta-service.komo.komooid", koulutusOid),
+            Duration.ofMinutes(5),
+            new TypeToken<ResultV1RDTO<KomoV1RDTO>>() {}.getType())
         .thenApplyAsync(ResultV1RDTO::getResult);
   }
 
