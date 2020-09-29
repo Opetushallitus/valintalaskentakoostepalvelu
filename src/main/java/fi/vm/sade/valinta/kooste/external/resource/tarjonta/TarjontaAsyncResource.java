@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import io.reactivex.Observable;
 import java.util.Collection;
@@ -25,7 +24,7 @@ public interface TarjontaAsyncResource {
 
   CompletableFuture<Toteutus> haeToteutus(String toteutusOid);
 
-  CompletableFuture<KomoV1RDTO> haeKoulutus(String koulutusOid);
+  CompletableFuture<Koulutus> haeKoulutus(String koulutusOid);
 
   /**
    * Fetch from tarjonta-service the hakuOids that should be synchronized.

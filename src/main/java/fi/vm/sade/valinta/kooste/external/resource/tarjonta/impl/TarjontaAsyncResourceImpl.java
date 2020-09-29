@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Koulutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
@@ -131,13 +132,14 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public CompletableFuture<KomoV1RDTO> haeKoulutus(String koulutusOid) {
+  public CompletableFuture<Koulutus> haeKoulutus(String koulutusOid) {
     return this.client
         .<ResultV1RDTO<KomoV1RDTO>>getJson(
             getUrl("tarjonta-service.komo.komooid", koulutusOid),
             Duration.ofMinutes(5),
             new TypeToken<ResultV1RDTO<KomoV1RDTO>>() {}.getType())
-        .thenApplyAsync(ResultV1RDTO::getResult);
+        .thenApplyAsync(ResultV1RDTO::getResult)
+        .thenApplyAsync(r -> r == null ? null : new Koulutus(r));
   }
 
   @Override
