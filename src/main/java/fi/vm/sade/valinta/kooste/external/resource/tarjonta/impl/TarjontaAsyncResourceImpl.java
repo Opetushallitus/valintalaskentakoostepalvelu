@@ -206,11 +206,13 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
-    return this.<ResultV1RDTO<Set<String>>>getAsObservableLazily(
+  public CompletableFuture<Set<String>> findHakuOidsForAutosyncTarjonta() {
+    return this.client
+        .<ResultV1RDTO<Set<String>>>getJson(
             getUrl("tarjonta-service.haku.findoidstosynctarjontafor"),
+            Duration.ofMinutes(5),
             new TypeToken<ResultV1RDTO<Set<String>>>() {}.getType())
-        .map(result -> result.getResult());
+        .thenApplyAsync(r -> r.getResult() == null ? new HashSet<>() : r.getResult());
   }
 
   @Override
