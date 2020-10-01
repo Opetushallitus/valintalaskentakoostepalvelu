@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
-import io.reactivex.Observable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,8 +12,8 @@ public interface TarjontaAsyncResource {
   CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(
       Iterable<String> organizationGroupOids);
 
-  Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(
-      Collection<String> organizationOids);
+  CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
+      Iterable<String> organizationOids);
 
   CompletableFuture<Hakukohde> haeHakukohde(String hakukohdeOid);
 

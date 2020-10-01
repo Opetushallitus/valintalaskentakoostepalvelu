@@ -10,9 +10,6 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Koulutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
-import io.reactivex.Observable;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,8 +39,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
-  public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(
-      Collection<String> organizationOids) {
+  public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
+      Iterable<String> organizationOids) {
     return null;
   }
 

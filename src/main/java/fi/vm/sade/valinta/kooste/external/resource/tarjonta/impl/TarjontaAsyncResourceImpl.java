@@ -25,16 +25,13 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaKoulutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaToteutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultRyhmaliitos;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
-import io.reactivex.Observable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +41,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -87,17 +85,49 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(
-      Collection<String> organizationOids) {
-    return this.<ResultSearch>getAsObservableLazily(
-            getUrl("tarjonta-service.hakukohde.search"),
-            new TypeToken<ResultSearch>() {}.getType(),
-            client -> {
-              client.query("organisationOid", organizationOids.toArray());
-              return client;
-            })
-        .map(ResultSearch::getResult)
-        .map(ResultTulos::getTulokset);
+  public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
+      Iterable<String> organizationOids) {
+    Map<String, String> tarjontaParameters = new HashMap<>();
+    tarjontaParameters.put("organisationOid", String.join(",", organizationOids));
+    CompletableFuture<Set<String>> tarjontaF =
+        this.client
+            .<ResultSearch>getJson(
+                getUrl("tarjonta-service.hakukohde.search", tarjontaParameters),
+                Duration.ofMinutes(5),
+                new TypeToken<ResultSearch>() {}.getType())
+            .thenApplyAsync(
+                r ->
+                    r.getResult().getTulokset().stream()
+                        .flatMap(t -> t.getTulokset().stream())
+                        .map(ResultHakukohde::getOid)
+                        .collect(Collectors.toSet()));
+    CompletableFuture<List<Set<String>>> koutaF =
+        CompletableFutureUtil.sequence(
+            StreamSupport.stream(organizationOids.spliterator(), false)
+                .map(
+                    organizationOid -> {
+                      Map<String, String> koutaParameters = new HashMap<>();
+                      koutaParameters.put("tarjoaja", organizationOid);
+                      return this.koutaClient
+                          .<Set<KoutaHakukohde>>getJson(
+                              getUrl("kouta-internal.hakukohde.search", koutaParameters),
+                              Duration.ofSeconds(10),
+                              new TypeToken<Set<KoutaHakukohde>>() {}.getType())
+                          .thenApplyAsync(
+                              hakukohteet ->
+                                  hakukohteet.stream().map(h -> h.oid).collect(Collectors.toSet()));
+                    })
+                .collect(Collectors.toList()));
+    return tarjontaF.thenComposeAsync(
+        tarjontaHakukohdeOids ->
+            koutaF.thenApplyAsync(
+                koutaHakukohdeOids -> {
+                  HashSet<String> s = new HashSet<>(tarjontaHakukohdeOids);
+                  for (Set<String> oids : koutaHakukohdeOids) {
+                    s.addAll(oids);
+                  }
+                  return s;
+                }));
   }
 
   private CompletableFuture<HakuV1RDTO> getTarjontaHaku(String hakuOid) {

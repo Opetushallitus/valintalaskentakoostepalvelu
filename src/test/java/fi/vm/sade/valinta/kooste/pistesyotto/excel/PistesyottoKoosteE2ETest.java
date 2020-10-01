@@ -297,6 +297,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     mockTarjontaHakukohdeCall();
     mockValintakoe();
     mockTarjontaHakukohdeRyhmaCall();
+    mockKoutaHakukohdeSearchCall();
 
     Hakemus hakemusHakuAppista = new Hakemus();
     hakemusHakuAppista.setAdditionalInfo(applicationAdditionaData.getAdditionalData());
@@ -395,6 +396,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     mockTarjontaHakukohdeCall();
     mockValintakoe();
     mockTarjontaHakukohdeRyhmaCall();
+    mockKoutaHakukohdeSearchCall();
 
     Hakemus hakemusHakuAppista = new Hakemus();
     hakemusHakuAppista.setAdditionalInfo(applicationAdditionalDataDto.getAdditionalData());
@@ -452,6 +454,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     mockTarjontaHakukohdeCall();
     mockValintakoe();
     mockTarjontaHakukohdeRyhmaCall();
+    mockKoutaHakukohdeSearchCall();
 
     Hakemus hakemusHakuAppista = new Hakemus();
     hakemusHakuAppista.setAdditionalInfo(applicationAdditionalDataDto.getAdditionalData());
@@ -570,6 +573,10 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     String s =
         "{\"result\": {\"tulokset\": [{\"tulokset\": [{\"oid\": \"1.2.246.562.20.50849071738\",\"ryhmaliitokset\": [{\"ryhmaOid\": \"1.2.246.562.28.77463971187\"},{\"ryhmaOid\": \"1.2.246.562.28.10942030083\"},{\"ryhmaOid\": \"1.2.246.562.28.92529355477\"}]},{\"oid\": \"1.2.246.562.20.52702700353\",\"ryhmaliitokset\": []}]}],\"tuloksia\": 1}}";
     mockToReturnString(GET, "/tarjonta-service/rest/v1/hakukohde/search", s);
+  }
+
+  private void mockKoutaHakukohdeSearchCall() {
+    mockToReturnString(GET, "/kouta-internal/hakukohde/search", "[]");
   }
 
   private void mockOrganisaatioKutsu() {
