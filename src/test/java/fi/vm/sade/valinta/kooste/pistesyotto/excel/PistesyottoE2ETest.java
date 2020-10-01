@@ -221,6 +221,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
     mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest);
+    mockKoutaOrganisaatioHakuCall();
 
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createHttpResource(resourcesAddress + "/pistesyotto/tuonti");
@@ -255,6 +256,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
     mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest + ".666");
+    mockKoutaOrganisaatioHakuCall();
 
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createHttpResource(resourcesAddress + "/pistesyotto/tuonti");
@@ -323,6 +325,10 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         "/tarjonta-service/rest/v1/hakukohde/search",
         tarjontaHakukohdeSearchResult,
         ImmutableMap.of("organisationOid", kayttajanOrganisaatioOid));
+  }
+
+  private void mockKoutaOrganisaatioHakuCall() {
+    mockToReturnString(GET, "/kouta-internal/hakukohde/search", "[]");
   }
 
   private void mockTarjontaHakuCall() {
