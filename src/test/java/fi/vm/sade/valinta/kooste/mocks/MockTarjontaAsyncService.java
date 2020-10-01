@@ -36,8 +36,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
-  public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(
-      Collection<String> organizationGroupOids) {
+  public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(
+      Iterable<String> organizationGroupOids) {
     return null;
   }
 
