@@ -14,7 +14,6 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Koulutus;
@@ -27,6 +26,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaToteutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultRyhmaliitos;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import java.lang.reflect.ParameterizedType;
@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +46,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
-    implements TarjontaAsyncResource {
+public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
+  private final UrlConfiguration urlConfiguration = UrlConfiguration.getInstance();
   private final HttpClient client;
   private final HttpClient koutaClient;
 
@@ -56,14 +55,8 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   public TarjontaAsyncResourceImpl(
       @Qualifier("TarjontaHttpClient") HttpClient client,
       @Qualifier("KoutaHttpClient") HttpClient koutaClient) {
-    super(TimeUnit.MINUTES.toMillis(5));
     this.client = client;
     this.koutaClient = koutaClient;
-  }
-
-  @Override
-  protected Gson createGson() {
-    return getGson();
   }
 
   @Override
@@ -73,7 +66,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
     parameters.put("organisaatioRyhmaOid", String.join(",", organizationGroupOids));
     return this.client
         .<ResultSearch>getJson(
-            getUrl("tarjonta-service.hakukohde.search", parameters),
+            urlConfiguration.url("tarjonta-service.hakukohde.search", parameters),
             Duration.ofMinutes(5),
             new TypeToken<ResultSearch>() {}.getType())
         .thenApplyAsync(
@@ -92,7 +85,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
     CompletableFuture<Set<String>> tarjontaF =
         this.client
             .<ResultSearch>getJson(
-                getUrl("tarjonta-service.hakukohde.search", tarjontaParameters),
+                urlConfiguration.url("tarjonta-service.hakukohde.search", tarjontaParameters),
                 Duration.ofMinutes(5),
                 new TypeToken<ResultSearch>() {}.getType())
             .thenApplyAsync(
@@ -110,7 +103,8 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
                       koutaParameters.put("tarjoaja", organizationOid);
                       return this.koutaClient
                           .<Set<KoutaHakukohde>>getJson(
-                              getUrl("kouta-internal.hakukohde.search", koutaParameters),
+                              urlConfiguration.url(
+                                  "kouta-internal.hakukohde.search", koutaParameters),
                               Duration.ofSeconds(10),
                               new TypeToken<Set<KoutaHakukohde>>() {}.getType())
                           .thenApplyAsync(
@@ -133,7 +127,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   private CompletableFuture<HakuV1RDTO> getTarjontaHaku(String hakuOid) {
     return this.client
         .<ResultV1RDTO<HakuV1RDTO>>getJson(
-            getUrl("tarjonta-service.haku.hakuoid", hakuOid),
+            urlConfiguration.url("tarjonta-service.haku.hakuoid", hakuOid),
             Duration.ofMinutes(5),
             new com.google.gson.reflect.TypeToken<ResultV1RDTO<HakuV1RDTO>>() {}.getType())
         .thenApplyAsync(ResultV1RDTO::getResult);
@@ -143,7 +137,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   public CompletableFuture<Haku> haeHaku(String hakuOid) {
     CompletableFuture<KoutaHaku> koutaF =
         this.koutaClient.getJson(
-            getUrl("kouta-internal.haku.hakuoid", hakuOid),
+            urlConfiguration.url("kouta-internal.haku.hakuoid", hakuOid),
             Duration.ofSeconds(10),
             new TypeToken<KoutaHaku>() {}.getType());
     return this.getTarjontaHaku(hakuOid)
@@ -159,13 +153,13 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
     CompletableFuture<HakukohdeV1RDTO> tarjontaF =
         this.client
             .<ResultV1RDTO<HakukohdeV1RDTO>>getJson(
-                getUrl("tarjonta-service.hakukohde.hakukohdeoid", hakukohdeOid),
+                urlConfiguration.url("tarjonta-service.hakukohde.hakukohdeoid", hakukohdeOid),
                 Duration.ofMinutes(5),
                 new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {}.getType())
             .thenApplyAsync(ResultV1RDTO::getResult);
     CompletableFuture<KoutaHakukohde> koutaF =
         this.koutaClient.getJson(
-            getUrl("kouta-internal.hakukohde.hakukohdeoid", hakukohdeOid),
+            urlConfiguration.url("kouta-internal.hakukohde.hakukohdeoid", hakukohdeOid),
             Duration.ofSeconds(10),
             new TypeToken<KoutaHakukohde>() {}.getType());
     return tarjontaF.thenComposeAsync(
@@ -181,7 +175,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
     koutaParameters.put("haku", hakuOid);
     CompletableFuture<Set<KoutaHakukohde>> koutaF =
         this.koutaClient.getJson(
-            getUrl("kouta-internal.hakukohde.search", koutaParameters),
+            urlConfiguration.url("kouta-internal.hakukohde.search", koutaParameters),
             Duration.ofSeconds(10),
             new TypeToken<Set<KoutaHakukohde>>() {}.getType());
     return this.getTarjontaHaku(hakuOid)
@@ -199,13 +193,13 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
     CompletableFuture<KoulutusV1RDTO> tarjontaF =
         this.client
             .<ResultV1RDTO<KoulutusV1RDTO>>getJson(
-                getUrl("tarjonta-service.koulutus.koulutusoid", toteutusOid),
+                urlConfiguration.url("tarjonta-service.koulutus.koulutusoid", toteutusOid),
                 Duration.ofMinutes(5),
                 new TypeToken<ResultV1RDTO<KoulutusV1RDTO>>() {}.getType())
             .thenApplyAsync(ResultV1RDTO::getResult);
     CompletableFuture<KoutaToteutus> koutaF =
         this.koutaClient.getJson(
-            getUrl("kouta-internal.toteutus.toteutusoid", toteutusOid),
+            urlConfiguration.url("kouta-internal.toteutus.toteutusoid", toteutusOid),
             Duration.ofMinutes(5),
             new TypeToken<KoutaToteutus>() {}.getType());
     return tarjontaF.thenComposeAsync(
@@ -220,13 +214,13 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
     CompletableFuture<KomoV1RDTO> tarjontaF =
         this.client
             .<ResultV1RDTO<KomoV1RDTO>>getJson(
-                getUrl("tarjonta-service.komo.komooid", koulutusOid),
+                urlConfiguration.url("tarjonta-service.komo.komooid", koulutusOid),
                 Duration.ofMinutes(5),
                 new TypeToken<ResultV1RDTO<KomoV1RDTO>>() {}.getType())
             .thenApplyAsync(ResultV1RDTO::getResult);
     CompletableFuture<KoutaKoulutus> koutaF =
         this.koutaClient.getJson(
-            getUrl("kouta-internal.koulutus.koulutusoid", koulutusOid),
+            urlConfiguration.url("kouta-internal.koulutus.koulutusoid", koulutusOid),
             Duration.ofMinutes(5),
             new TypeToken<KoutaKoulutus>() {}.getType());
     return tarjontaF.thenComposeAsync(
@@ -240,7 +234,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   public CompletableFuture<Set<String>> findHakuOidsForAutosyncTarjonta() {
     return this.client
         .<ResultV1RDTO<Set<String>>>getJson(
-            getUrl("tarjonta-service.haku.findoidstosynctarjontafor"),
+            urlConfiguration.url("tarjonta-service.haku.findoidstosynctarjontafor"),
             Duration.ofMinutes(5),
             new TypeToken<ResultV1RDTO<Set<String>>>() {}.getType())
         .thenApplyAsync(r -> r.getResult() == null ? new HashSet<>() : r.getResult());
@@ -252,14 +246,14 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
     tarjontaParameters.put("hakuOid", hakuOid);
     CompletableFuture<ResultSearch> tarjontaF =
         this.client.getJson(
-            getUrl("tarjonta-service.hakukohde.search", tarjontaParameters),
+            urlConfiguration.url("tarjonta-service.hakukohde.search", tarjontaParameters),
             Duration.ofMinutes(5),
             new TypeToken<ResultSearch>() {}.getType());
     Map<String, String> koutaParameters = new HashMap<>();
     koutaParameters.put("haku", hakuOid);
     CompletableFuture<Set<KoutaHakukohde>> koutaF =
         this.koutaClient.getJson(
-            getUrl("kouta-internal.hakukohde.search", koutaParameters),
+            urlConfiguration.url("kouta-internal.hakukohde.search", koutaParameters),
             Duration.ofSeconds(10),
             new TypeToken<Set<KoutaHakukohde>>() {}.getType());
     return tarjontaF.thenComposeAsync(
@@ -277,7 +271,7 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
       String hakukohdeOid) {
     return this.client
         .<ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>>getJson(
-            getUrl("tarjonta-service.hakukohde.valintaperusteet", hakukohdeOid),
+            urlConfiguration.url("tarjonta-service.hakukohde.valintaperusteet", hakukohdeOid),
             Duration.ofMinutes(5),
             new TypeToken<ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>>() {}.getType())
         .thenApplyAsync(ResultV1RDTO::getResult);
