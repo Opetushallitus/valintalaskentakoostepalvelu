@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
 import org.slf4j.Logger;
@@ -59,28 +60,22 @@ public class AuthorityCheckService {
               .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids)
               .orElse(Observable.just(Collections.emptyList()));
 
-      Observable<List<ResultOrganization>> searchByOrganizationGroupOids =
+      CompletableFuture<Set<String>> searchByOrganizationGroupOids =
           Optional.of(organizationGroupOids)
               .filter(oids -> !oids.isEmpty())
               .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
-              .orElse(Observable.just(Collections.emptyList()));
+              .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
       return Observable.combineLatest(
           searchByOrganizationOids,
-          searchByOrganizationGroupOids,
+          Observable.fromFuture(searchByOrganizationGroupOids),
           (orgs, groupOrgs) -> {
             Set<String> hakukohdeOidSet1 =
                 orgs.stream()
                     .flatMap(o -> o.getTulokset().stream())
                     .map(ResultHakukohde::getOid)
                     .collect(Collectors.toSet());
-            Set<String> hakukohdeOidSet2 =
-                groupOrgs.stream()
-                    .flatMap(o -> o.getTulokset().stream())
-                    .map(ResultHakukohde::getOid)
-                    .collect(Collectors.toSet());
-
-            return (oid) -> Sets.union(hakukohdeOidSet1, hakukohdeOidSet2).contains(oid);
+            return (oid) -> Sets.union(hakukohdeOidSet1, groupOrgs).contains(oid);
           });
     }
   }
