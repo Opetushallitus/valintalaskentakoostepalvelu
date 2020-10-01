@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
@@ -70,17 +69,21 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(
-      Collection<String> organizationGroupOids) {
-    return this.<ResultSearch>getAsObservableLazily(
-            getUrl("tarjonta-service.hakukohde.search"),
-            new TypeToken<ResultSearch>() {}.getType(),
-            client -> {
-              client.query("organisaatioRyhmaOid", organizationGroupOids.toArray());
-              return client;
-            })
-        .map(ResultSearch::getResult)
-        .map(ResultTulos::getTulokset);
+  public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(
+      Iterable<String> organizationGroupOids) {
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("organisaatioRyhmaOid", String.join(",", organizationGroupOids));
+    return this.client
+        .<ResultSearch>getJson(
+            getUrl("tarjonta-service.hakukohde.search", parameters),
+            Duration.ofMinutes(5),
+            new TypeToken<ResultSearch>() {}.getType())
+        .thenApplyAsync(
+            r ->
+                r.getResult().getTulokset().stream()
+                    .flatMap(t -> t.getTulokset().stream())
+                    .map(ResultHakukohde::getOid)
+                    .collect(Collectors.toSet()));
   }
 
   @Override

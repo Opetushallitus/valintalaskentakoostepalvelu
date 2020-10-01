@@ -12,8 +12,8 @@ import java.util.concurrent.CompletableFuture;
 public interface TarjontaAsyncResource {
   CompletableFuture<Haku> haeHaku(String hakuOid);
 
-  Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(
-      Collection<String> organizationGroupOids);
+  CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(
+      Iterable<String> organizationGroupOids);
 
   Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(
       Collection<String> organizationOids);
