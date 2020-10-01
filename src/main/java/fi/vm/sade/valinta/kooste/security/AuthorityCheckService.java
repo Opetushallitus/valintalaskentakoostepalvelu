@@ -8,10 +8,7 @@ import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationGroup
 import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationOidsFromSecurityRoles;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
-import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
@@ -22,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +50,11 @@ public class AuthorityCheckService {
         return Observable.error(
             new RuntimeException("Unauthorized. User has no organization OIDS"));
       }
-      Observable<List<ResultOrganization>> searchByOrganizationOids =
+      CompletableFuture<Set<String>> searchByOrganizationOids =
           Optional.of(organizationOids)
               .filter(oids -> !oids.isEmpty())
               .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids)
-              .orElse(Observable.just(Collections.emptyList()));
+              .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
       CompletableFuture<Set<String>> searchByOrganizationGroupOids =
           Optional.of(organizationGroupOids)
@@ -66,17 +62,11 @@ public class AuthorityCheckService {
               .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
               .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
-      return Observable.combineLatest(
-          searchByOrganizationOids,
-          Observable.fromFuture(searchByOrganizationGroupOids),
-          (orgs, groupOrgs) -> {
-            Set<String> hakukohdeOidSet1 =
-                orgs.stream()
-                    .flatMap(o -> o.getTulokset().stream())
-                    .map(ResultHakukohde::getOid)
-                    .collect(Collectors.toSet());
-            return (oid) -> Sets.union(hakukohdeOidSet1, groupOrgs).contains(oid);
-          });
+      return Observable.fromFuture(
+          searchByOrganizationOids.thenComposeAsync(
+              byOrgs ->
+                  searchByOrganizationGroupOids.thenApplyAsync(
+                      byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid))));
     }
   }
 
