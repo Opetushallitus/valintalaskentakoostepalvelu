@@ -31,7 +31,7 @@ public interface TarjontaAsyncResource {
    *
    * @return Set of hakuOids as strings.
    */
-  Observable<Set<String>> findHakuOidsForAutosyncTarjonta();
+  CompletableFuture<Set<String>> findHakuOidsForAutosyncTarjonta();
 
   CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid);
 

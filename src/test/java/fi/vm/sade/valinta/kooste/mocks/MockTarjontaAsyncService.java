@@ -87,11 +87,11 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
-  public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
+  public CompletableFuture<Set<String>> findHakuOidsForAutosyncTarjonta() {
     Set<String> set = new HashSet<>();
     set.add(hakuOid);
     set.add(hakuOid + "-1");
-    return Observable.just(set);
+    return CompletableFuture.completedFuture(set);
   }
 
   @Override

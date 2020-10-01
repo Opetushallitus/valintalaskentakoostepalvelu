@@ -22,15 +22,19 @@ public class TarjontaSyncServiceImpl implements TarjontaSyncService {
   HakuImportRoute hakuImportAktivointiRoute;
 
   public void syncHakukohteetFromTarjonta() {
-    Set<String> hakuOids =
-        tarjontaAsyncResource.findHakuOidsForAutosyncTarjonta().timeout(1, MINUTES).blockingFirst();
-    if (hakuOids != null) {
+    try {
+      Set<String> hakuOids =
+          tarjontaAsyncResource.findHakuOidsForAutosyncTarjonta().get(1, MINUTES);
+      if (hakuOids.isEmpty()) {
+        LOG.info("Found no hakuOids to sync from tarjonta-service");
+        return;
+      }
       for (String hakuOid : hakuOids) {
         LOG.info("Starting synchronization for haku: " + hakuOid);
         hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid);
       }
-    } else {
-      LOG.info("Found no hakuOids to sync from tarjonta-service");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }
