@@ -30,13 +30,13 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganizati
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultRyhmaliitos;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
-import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,8 +45,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -217,14 +215,28 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
 
   @Override
   public CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("hakuOid", hakuOid);
-    CompletableFuture<ResultSearch> s =
+    Map<String, String> tarjontaParameters = new HashMap<>();
+    tarjontaParameters.put("hakuOid", hakuOid);
+    CompletableFuture<ResultSearch> tarjontaF =
         this.client.getJson(
-            getUrl("tarjonta-service.hakukohde.search", parameters),
+            getUrl("tarjonta-service.hakukohde.search", tarjontaParameters),
             Duration.ofMinutes(5),
-            new com.google.gson.reflect.TypeToken<ResultSearch>() {}.getType());
-    return resultSearchToHakukohdeRyhmaMap(s);
+            new TypeToken<ResultSearch>() {}.getType());
+    Map<String, String> koutaParameters = new HashMap<>();
+    koutaParameters.put("haku", hakuOid);
+    CompletableFuture<Set<KoutaHakukohde>> koutaF =
+        this.koutaClient.getJson(
+            getUrl("kouta-internal.hakukohde.search", koutaParameters),
+            Duration.ofSeconds(10),
+            new TypeToken<Set<KoutaHakukohde>>() {}.getType());
+    return tarjontaF.thenComposeAsync(
+        r ->
+            r.getResult().getTulokset().isEmpty()
+                ? koutaF.thenApplyAsync(
+                    hakukohteet ->
+                        hakukohteet.stream()
+                            .collect(Collectors.toMap(hk -> hk.oid, hk -> Collections.emptyList())))
+                : CompletableFuture.completedFuture(resultSearchToHakukohdeRyhmaMap(r)));
   }
 
   @Override
@@ -238,40 +250,18 @@ public class TarjontaAsyncResourceImpl extends UrlConfiguredResource
         .thenApplyAsync(ResultV1RDTO::getResult);
   }
 
-  public static CompletableFuture<Map<String, List<String>>> resultSearchToHakukohdeRyhmaMap(
-      CompletableFuture<ResultSearch> future) {
-    CompletableFuture<List<ResultOrganization>> organizationsFuture =
-        future
-            .thenApplyAsync(ResultSearch::getResult)
-            .thenApplyAsync(ResultTulos::getTulokset)
-            .thenComposeAsync(
-                l ->
-                    CompletableFutureUtil.sequence(
-                        l.stream()
-                            .map(CompletableFuture::completedFuture)
+  public static Map<String, List<String>> resultSearchToHakukohdeRyhmaMap(ResultSearch result) {
+    return result.getResult().getTulokset().stream()
+        .flatMap(t -> t.getTulokset().stream())
+        .collect(
+            Collectors.toMap(
+                ResultHakukohde::getOid,
+                hk ->
+                    hk.getRyhmaliitokset() == null
+                        ? Collections.emptyList()
+                        : hk.getRyhmaliitokset().stream()
+                            .map(ResultRyhmaliitos::getRyhmaOid)
                             .collect(Collectors.toList())));
-
-    return organizationsFuture
-        .thenApplyAsync(
-            orgs -> orgs.stream().map(ResultOrganization::getTulokset).collect(Collectors.toList()))
-        .thenApplyAsync(
-            hakukohdeListLists ->
-                hakukohdeListLists.stream().flatMap(List::stream).collect(Collectors.toList()))
-        .thenApplyAsync(
-            hks ->
-                hks.stream()
-                    .map(hk -> new ImmutablePair<>(hk.getOid(), getRyhmaList(hk)))
-                    .collect(Collectors.toList()))
-        .thenApplyAsync(
-            pairs -> pairs.stream().collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
-  }
-
-  private static List<String> getRyhmaList(ResultHakukohde hk) {
-    if (hk.getRyhmaliitokset() != null)
-      return hk.getRyhmaliitokset().stream()
-          .map(ResultRyhmaliitos::getRyhmaOid)
-          .collect(Collectors.toList());
-    return Lists.newArrayList();
   }
 
   public static Gson getGson() {
