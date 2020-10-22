@@ -134,7 +134,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         Collections.singletonList(kielikoeFi));
     mockToReturnJson(
         GET,
-        "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/testihakukohde",
+        "/valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/testihakukohde",
         Collections.<ValintakoeOsallistuminenDTO>emptyList());
     mockToNotFound(GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku");
 
@@ -180,7 +180,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         Collections.singletonList(kielikoeFi));
     mockToReturnJson(
         GET,
-        "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/testihakukohde",
+        "/valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/testihakukohde",
         Collections.<ValintakoeOsallistuminenDTO>emptyList());
     mockToReturnJson(
         GET, "/ohjausparametrit-service/api/v1/rest/parametri/testihaku", new ParametritDTO());
@@ -509,7 +509,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     result.setHakemusOid("1.2.246.562.11.00000060710");
     mockToReturnJson(
         GET,
-        "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakemus/1.2.246.562.11.00000060710",
+        "/valintalaskenta-laskenta-service/resources/valintakoe/hakemus/1.2.246.562.11.00000060710",
         result);
   }
 

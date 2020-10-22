@@ -173,6 +173,11 @@ public class KoosteTestProfileConfiguration {
     return APPLICATION_SESSION;
   }
 
+  @Bean(name = "ValintalaskentaApplicationSession")
+  public ApplicationSession getValintalaskentaApplicationSession() {
+    return APPLICATION_SESSION;
+  }
+
   @Bean(name = "springSecurityFilterChain")
   public static Filter getFilter() {
     return new Filter() {

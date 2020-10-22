@@ -137,7 +137,7 @@ public class ValinnanvaiheenValintakoekutsutService {
     Observable<List<HakukohdeJaValintaperusteDTO>> avaimetHakutoiveille =
         valintaperusteetAsyncResource.findAvaimet(hakutoiveet);
     Observable<List<ValintakoeOsallistuminenDTO>> valintakoeOsallistumisetHakutoiveille =
-        valintalaskentaValintakoeAsyncResource.haeHakutoiveille(hakutoiveet);
+        Observable.fromFuture(valintalaskentaValintakoeAsyncResource.haeHakutoiveille(hakutoiveet));
     Observable.combineLatest(
             avaimetHakutoiveille,
             valintakoeOsallistumisetHakutoiveille,

@@ -459,7 +459,7 @@ public class PistesyottoExternalTuontiService {
               Observable<List<HakukohdeJaValintaperusteDTO>> valintaperusteetHakutoiveille =
                   valintaperusteetResource.findAvaimet(hakutoiveet);
               Observable<List<ValintakoeOsallistuminenDTO>> osallistumisetHakutoiveille =
-                  valintakoeResource.haeHakutoiveille(hakutoiveet);
+                  Observable.fromFuture(valintakoeResource.haeHakutoiveille(hakutoiveet));
 
               Observable.combineLatest(
                       valintaperusteetHakutoiveille,
