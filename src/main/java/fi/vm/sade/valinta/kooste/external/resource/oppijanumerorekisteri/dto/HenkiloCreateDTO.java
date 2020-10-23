@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +34,7 @@ public class HenkiloCreateDTO implements Serializable {
       String asiointiKieli,
       String kansalaisuus) {
     this.aidinkieli = createKielisyys(aidinkieli);
-    this.sukupuoli = sukupuoli.isEmpty() ? null : sukupuoli;
+    this.sukupuoli = isNotBlank(sukupuoli) ? sukupuoli : null;
     this.etunimet = etunimet;
 
     final String trimmedEtunimet = this.etunimet.trim();
@@ -43,9 +45,9 @@ public class HenkiloCreateDTO implements Serializable {
     }
 
     this.sukunimi = sukunimi;
-    this.hetu = hetu;
+    this.hetu = isNotBlank(hetu) ? hetu : null;
     this.syntymaaika = syntymaaika;
-    this.oidHenkilo = oidHenkilo.isEmpty() ? null : oidHenkilo;
+    this.oidHenkilo = isNotBlank(oidHenkilo) ? oidHenkilo : null;
     this.henkiloTyyppi = henkiloTyyppi;
     this.asiointiKieli = createKielisyys(asiointiKieli);
     this.kansalaisuus = createKansalaisuusSet(kansalaisuus);
