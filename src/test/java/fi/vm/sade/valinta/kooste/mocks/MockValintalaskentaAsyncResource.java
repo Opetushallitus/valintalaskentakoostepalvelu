@@ -61,7 +61,7 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
   }
 
   @Override
-  public Observable<ValinnanvaiheDTO> lisaaTuloksia(
+  public CompletableFuture<ValinnanvaiheDTO> lisaaTuloksia(
       final String hakuOid,
       final String hakukohdeOid,
       final String tarjoajaOid,

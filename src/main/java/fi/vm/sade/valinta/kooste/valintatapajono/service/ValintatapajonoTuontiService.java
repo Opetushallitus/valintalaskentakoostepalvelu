@@ -95,8 +95,8 @@ public class ValintatapajonoTuontiService {
                       valinnanvaiheetRef.get(),
                       rivit);
               LOG.info("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
-              valintalaskentaAsyncResource
-                  .lisaaTuloksia(hakuOid, hakukohdeOid, tarjoajaOid, valinnanvaihe)
+              Observable.fromFuture(valintalaskentaAsyncResource
+                  .lisaaTuloksia(hakuOid, hakukohdeOid, tarjoajaOid, valinnanvaihe))
                   .subscribe(
                       ok -> {
                         try {
