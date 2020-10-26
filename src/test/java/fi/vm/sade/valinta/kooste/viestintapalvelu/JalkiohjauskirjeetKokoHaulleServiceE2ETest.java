@@ -330,7 +330,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   private void mockValintalaskentaKutsu() {
     mockToReturnJson(
         GET,
-        "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/HAKUKOHDE1/valinnanvaihe",
+        "/valintalaskenta-laskenta-service/resources/hakukohde/HAKUKOHDE1/valinnanvaihe",
         Collections.emptyList());
   }
 
