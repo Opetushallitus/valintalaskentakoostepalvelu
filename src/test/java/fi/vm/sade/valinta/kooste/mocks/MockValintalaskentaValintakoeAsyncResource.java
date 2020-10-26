@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.mocks;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import io.reactivex.Observable;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

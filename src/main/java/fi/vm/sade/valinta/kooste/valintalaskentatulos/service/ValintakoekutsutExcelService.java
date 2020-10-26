@@ -256,12 +256,12 @@ public class ValintakoekutsutExcelService {
                   voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken
                       .vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 }
-                Observable.fromFuture(valintalaskentaAsyncResource
-                    .haeValintatiedotHakukohteelle(
-                        hakukohdeOid,
-                        kiinnostavatValintakokeet.stream()
-                            .map(ValintakoeDTO::getSelvitettyTunniste)
-                            .collect(Collectors.toList())))
+                Observable.fromFuture(
+                        valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(
+                            hakukohdeOid,
+                            kiinnostavatValintakokeet.stream()
+                                .map(ValintakoeDTO::getSelvitettyTunniste)
+                                .collect(Collectors.toList())))
                     .subscribe(
                         osallistuminen -> {
                           List<HakemusOsallistuminenDTO> hakukohteeseenOsallistujat =

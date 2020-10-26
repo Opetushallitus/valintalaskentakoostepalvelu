@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   private final ExecutorService lahetaLaskeDTOExecutor = Executors.newFixedThreadPool(1);
 
   public ValintalaskentaAsyncResourceImpl(
-          @Qualifier("ValintalaskentaCasInterceptor") AbstractPhaseInterceptor casInterceptor,
+      @Qualifier("ValintalaskentaCasInterceptor") AbstractPhaseInterceptor casInterceptor,
       @Qualifier("ValintalaskentaHttpClient") HttpClient httpclient) {
     super(TimeUnit.HOURS.toMillis(8), casInterceptor);
     this.httpclient = httpclient;
@@ -66,9 +65,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
       String hakukohdeOid, Executor executor) {
     return this.httpclient.getJson(
-        getUrl(
-            "valintalaskenta-laskenta-service.hakukohde.valinnanvaihe",
-            hakukohdeOid),
+        getUrl("valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid),
         Duration.ofMinutes(1),
         new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType(),
         executor);
@@ -308,19 +305,18 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
     HashMap<String, String> query = new HashMap<>();
     query.put("tarjoajaOid", tarjoajaOid);
     return this.httpclient.postJson(
-            getUrl("valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid, query),
-                    Duration.ofMinutes(5),
-                    vaihe,
-                    new TypeToken<List<ValinnanvaiheDTO>>() {}.getType(),
-                    new TypeToken<List<ValinnanvaiheDTO>>() {}.getType()
-    );
+        getUrl("valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid, query),
+        Duration.ofMinutes(5),
+        vaihe,
+        new TypeToken<List<ValinnanvaiheDTO>>() {}.getType(),
+        new TypeToken<List<ValinnanvaiheDTO>>() {}.getType());
     /*return postAsObservableLazily(
-        getUrl(
-            "valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe",
-            hakukohdeOid),
-        ValinnanvaiheDTO.class,
-        entity,
-        (webclient) -> webclient.query("tarjoajaOid", tarjoajaOid));*/
+    getUrl(
+        "valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe",
+        hakukohdeOid),
+    ValinnanvaiheDTO.class,
+    entity,
+    (webclient) -> webclient.query("tarjoajaOid", tarjoajaOid));*/
   }
 
   public Observable<String> pollaa(int pollInterval, Object result, String uuid, String pollKey) {

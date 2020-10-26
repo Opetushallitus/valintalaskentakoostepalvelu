@@ -315,7 +315,7 @@ public class HttpClients {
   @Bean(name = "ValintalaskentaInternalHttpClient")
   @Autowired
   public java.net.http.HttpClient getValintalaskentaInternalHttpClient(
-          CookieManager cookieManager) {
+      CookieManager cookieManager) {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
@@ -323,40 +323,39 @@ public class HttpClients {
   @Bean(name = "ValintalaskentaApplicationSession")
   @Autowired
   public ApplicationSession getValintalaskentaApplicationSession(
-          @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-          @Qualifier("ValintalaskentaInternalHttpClient")
-                  java.net.http.HttpClient applicationHttpClient,
-          CookieManager cookieManager,
-          @Value("${cas.service.valintalaskenta-service}") String service,
-          @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
-          @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
+      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+      @Qualifier("ValintalaskentaInternalHttpClient")
+          java.net.http.HttpClient applicationHttpClient,
+      CookieManager cookieManager,
+      @Value("${cas.service.valintalaskenta-service}") String service,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new ApplicationSession(
-            applicationHttpClient,
-            cookieManager,
-            CALLER_ID,
+        applicationHttpClient,
+        cookieManager,
+        CALLER_ID,
+        Duration.ofSeconds(10),
+        new CasSession(
+            casHttpClient,
             Duration.ofSeconds(10),
-            new CasSession(
-                    casHttpClient,
-                    Duration.ofSeconds(10),
-                    CALLER_ID,
-                    URI.create(ticketsUrl),
-                    username,
-                    password),
-            service,
-            "JSESSIONID");
+            CALLER_ID,
+            URI.create(ticketsUrl),
+            username,
+            password),
+        service,
+        "JSESSIONID");
   }
 
   @Bean(name = "ValintalaskentaHttpClient")
   @Autowired
   public HttpClient getValintalaskentaHttpClient(
-          @Qualifier("ValintalaskentaInternalHttpClient") java.net.http.HttpClient client,
-          @Qualifier("ValintalaskentaApplicationSession") ApplicationSession applicationSession) {
+      @Qualifier("ValintalaskentaInternalHttpClient") java.net.http.HttpClient client,
+      @Qualifier("ValintalaskentaApplicationSession") ApplicationSession applicationSession) {
     return new HttpClient(
-            client,
-            applicationSession,
-            DateDeserializer.gsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create()
-    );
+        client,
+        applicationSession,
+        DateDeserializer.gsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create());
   }
 
   @Bean(name = "ValintaperusteetHttpClient")

@@ -5,7 +5,6 @@ import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -32,41 +31,38 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
   public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(
       String hakukohdeOid) {
     return httpClient.getJson(
-        getUrl(
-            "valintalaskenta-laskenta-service.valintakoe.hakutoive.hakukohdeoid",
-            hakukohdeOid),
+        getUrl("valintalaskenta-laskenta-service.valintakoe.hakutoive.hakukohdeoid", hakukohdeOid),
         Duration.ofMinutes(1),
         new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
   }
 
   @Override
   public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(
-          Collection<String> hakukohdeOids) {
-    return httpClient.postJson(getUrl(
-            "valintalaskenta-laskenta-service.valintakoe.hakutoive"),
-            Duration.ofMinutes(5),
-            hakukohdeOids,
-            new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
-            new com.google.gson.reflect.TypeToken<List<ValintakoeOsallistuminenDTO>>() {}.getType()
-    );
+      Collection<String> hakukohdeOids) {
+    return httpClient.postJson(
+        getUrl("valintalaskenta-laskenta-service.valintakoe.hakutoive"),
+        Duration.ofMinutes(5),
+        hakukohdeOids,
+        new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
+        new com.google.gson.reflect.TypeToken<List<ValintakoeOsallistuminenDTO>>() {}.getType());
   }
 
   @Override
   public CompletableFuture<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid) {
     return httpClient.getJson(
-            getUrl("valintalaskenta-laskenta-service.valintakoe.hakemus", hakemusOid),
-            Duration.ofMinutes(1),
-            new GenericType<ValintakoeOsallistuminenDTO>() {}.getType());
+        getUrl("valintalaskenta-laskenta-service.valintakoe.hakemus", hakemusOid),
+        Duration.ofMinutes(1),
+        new GenericType<ValintakoeOsallistuminenDTO>() {}.getType());
   }
 
   @Override
   public CompletableFuture<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(
       String hakukohdeOid, List<String> valintakoeTunnisteet) {
     return httpClient.postJson(
-            getUrl("valintalaskenta-laskenta-service.valintatieto.hakukohde", hakukohdeOid),
-            Duration.ofMinutes(5),
-            valintakoeTunnisteet,
-            new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
-            new com.google.gson.reflect.TypeToken<List<HakemusOsallistuminenDTO>>() {}.getType());
+        getUrl("valintalaskenta-laskenta-service.valintatieto.hakukohde", hakukohdeOid),
+        Duration.ofMinutes(5),
+        valintakoeTunnisteet,
+        new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
+        new com.google.gson.reflect.TypeToken<List<HakemusOsallistuminenDTO>>() {}.getType());
   }
 }
