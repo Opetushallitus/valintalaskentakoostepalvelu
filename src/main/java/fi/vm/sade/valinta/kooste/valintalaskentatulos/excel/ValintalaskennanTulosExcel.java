@@ -269,7 +269,7 @@ public class ValintalaskennanTulosExcel {
     public final ValinnanvaiheDTO vaihe;
     public final String sheetName;
 
-    private static String removeSpecialCharacters(String name) {
+    private String removeSpecialCharacters(String name) {
         return name.replaceAll("[^\\p{Alpha}\\p{Digit}\\-\\s]+","");
     }
 
