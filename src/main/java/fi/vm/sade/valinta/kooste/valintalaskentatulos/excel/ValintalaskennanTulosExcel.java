@@ -270,7 +270,7 @@ public class ValintalaskennanTulosExcel {
     public final String sheetName;
 
     private String removeSpecialCharacters(String name) {
-      return name.replaceAll("[^\\p{Alpha}\\p{Digit}\\-\\s]+", "");
+      return name.replaceAll("[^\\p{L}\\p{Digit}\\-\\s.,]+", "");
     }
 
     public ValintatapaJonoSheet(ValintatietoValintatapajonoDTO jono, ValinnanvaiheDTO vaihe) {
