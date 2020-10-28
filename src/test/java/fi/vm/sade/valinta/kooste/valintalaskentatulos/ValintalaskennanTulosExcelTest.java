@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Function;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -64,10 +63,11 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void sheetNames() {
-    Function<ValintatietoValintatapajonoDTO,ValintatietoValintatapajonoDTO> setName = (a) -> {
-        a.setNimi("Erittäin-., **pitkä valintatapajon**on");
-        return a;
-    };
+    Function<ValintatietoValintatapajonoDTO, ValintatietoValintatapajonoDTO> setName =
+        (a) -> {
+          a.setNimi("Erittäin-., **pitkä valintatapajon**on");
+          return a;
+        };
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             haku,
@@ -82,7 +82,8 @@ public class ValintalaskennanTulosExcelTest {
                 valinnanvaihe(
                     2,
                     nyt.minusMonths(12).toDate(),
-                    Collections.singletonList(setName.apply(valintatapajono(1, Collections.emptyList()))))),
+                    Collections.singletonList(
+                        setName.apply(valintatapajono(1, Collections.emptyList()))))),
             hakemukset());
 
     assertEquals(3, workbook.getNumberOfSheets());
