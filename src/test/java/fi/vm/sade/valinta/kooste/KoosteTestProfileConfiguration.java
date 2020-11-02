@@ -93,6 +93,7 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("cas.service.sijoittelu-service", "");
     p0.setProperty("cas.service.organisaatio-service", "");
     p0.setProperty("cas.service.valintalaskenta-service", "");
+    p0.setProperty("cas.service.valintaperusteet-service", "");
     p0.setProperty("cas.service.dokumenttipalvelu", "");
     p0.setProperty(
         "valintalaskentakoostepalvelu.swagger.basepath", "/valintalaskentakoostepalvelu/resources");
@@ -178,6 +179,11 @@ public class KoosteTestProfileConfiguration {
     return APPLICATION_SESSION;
   }
 
+  @Bean(name = "ValintaperusteetApplicationSession")
+  public ApplicationSession getValintaperusteetApplicationSession() {
+    return APPLICATION_SESSION;
+  }
+
   @Bean(name = "springSecurityFilterChain")
   public static Filter getFilter() {
     return new Filter() {
@@ -229,6 +235,11 @@ public class KoosteTestProfileConfiguration {
 
   @Bean(name = "ValintalaskentaCasInterceptor")
   public AbstractPhaseInterceptor<Message> getValintalaskentaCasInterceptor() {
+    return INTERCEPTOR;
+  }
+
+  @Bean(name = "ValintaperusteetCasInterceptor")
+  public AbstractPhaseInterceptor<Message> getValintaperusteetCasInterceptor() {
     return INTERCEPTOR;
   }
 
