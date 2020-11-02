@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.function.Function;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -62,6 +63,11 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void sheetNames() {
+    Function<ValintatietoValintatapajonoDTO, ValintatietoValintatapajonoDTO> setName =
+        (a) -> {
+          a.setNimi("Erittäin-., **pitkä valintatapajon**on");
+          return a;
+        };
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             haku,
@@ -71,18 +77,19 @@ public class ValintalaskennanTulosExcelTest {
                     1,
                     nyt.toDate(),
                     asList(
-                        valintatapajono(1, jonosijat()),
-                        valintatapajono(2, Collections.emptyList()))),
+                        setName.apply(valintatapajono(1, jonosijat())),
+                        setName.apply(valintatapajono(2, Collections.emptyList())))),
                 valinnanvaihe(
                     2,
                     nyt.minusMonths(12).toDate(),
-                    Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
+                    Collections.singletonList(
+                        setName.apply(valintatapajono(1, Collections.emptyList()))))),
             hakemukset());
 
     assertEquals(3, workbook.getNumberOfSheets());
-    assertEquals("Erittäin pitkä valintatapajonon", workbook.getSheetName(0));
-    assertEquals("Erittäin pitkä valintatapajon 2", workbook.getSheetName(1));
-    assertEquals("Erittäin pitkä valintatapajon 3", workbook.getSheetName(2));
+    assertEquals("Erittäin-., pitkä valintatapajo", workbook.getSheetName(0));
+    assertEquals("Erittäin-., pitkä valintatapa 2", workbook.getSheetName(1));
+    assertEquals("Erittäin-., pitkä valintatapa 3", workbook.getSheetName(2));
   }
 
   @Test

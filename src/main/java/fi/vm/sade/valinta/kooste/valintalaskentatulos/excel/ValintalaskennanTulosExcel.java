@@ -269,16 +269,20 @@ public class ValintalaskennanTulosExcel {
     public final ValinnanvaiheDTO vaihe;
     public final String sheetName;
 
+    private String removeSpecialCharacters(String name) {
+      return name.replaceAll("[^\\p{L}\\p{Digit}\\-\\s.,]+", "");
+    }
+
     public ValintatapaJonoSheet(ValintatietoValintatapajonoDTO jono, ValinnanvaiheDTO vaihe) {
       this.jono = jono;
       this.vaihe = vaihe;
-      this.sheetName = jono.getNimi();
+      this.sheetName = removeSpecialCharacters(jono.getNimi());
     }
 
     public ValintatapaJonoSheet(ValintatapaJonoSheet cloneSheetWithNewName, String sheetName) {
       this.jono = cloneSheetWithNewName.jono;
       this.vaihe = cloneSheetWithNewName.vaihe;
-      this.sheetName = sheetName;
+      this.sheetName = removeSpecialCharacters(sheetName);
     }
 
     public Date getCreatedAt() {
