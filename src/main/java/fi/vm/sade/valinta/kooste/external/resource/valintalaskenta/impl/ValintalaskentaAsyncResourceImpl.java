@@ -51,7 +51,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   @Override
   public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
     return getAsObservableLazily(
-        "/valintalaskentakoostepalvelu/jonotsijoittelussa/" + hakuOid,
+        "/valintatapajono/jonotsijoittelussa/" + hakuOid,
         new GenericType<List<JonoDto>>() {}.getType());
   }
 
