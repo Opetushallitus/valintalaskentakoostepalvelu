@@ -46,7 +46,7 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource
   @Autowired
   public ValintaperusteetAsyncResourceImpl(
       @Qualifier("ValintaperusteetCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("ValintalaskentaHttpClient") HttpClient httpClient) {
+      @Qualifier("ValintaperusteetHttpClient") HttpClient httpClient) {
     super(TimeUnit.HOURS.toMillis(1L), casInterceptor);
     this.httpClient = httpClient;
   }
