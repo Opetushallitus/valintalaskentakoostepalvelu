@@ -62,8 +62,10 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   @Override
   public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(
       Iterable<String> organizationGroupOids) {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("organisaatioRyhmaOid", String.join(",", organizationGroupOids));
+    Map<String, String[]> parameters = new HashMap<>();
+    parameters.put(
+        "organisaatioRyhmaOid",
+        StreamSupport.stream(organizationGroupOids.spliterator(), false).toArray(String[]::new));
     return this.client
         .<ResultSearch>getJson(
             urlConfiguration.url("tarjonta-service.hakukohde.search", parameters),
@@ -80,8 +82,10 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   @Override
   public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
       Iterable<String> organizationOids) {
-    Map<String, String> tarjontaParameters = new HashMap<>();
-    tarjontaParameters.put("organisationOid", String.join(",", organizationOids));
+    Map<String, String[]> tarjontaParameters = new HashMap<>();
+    tarjontaParameters.put(
+        "organisationOid",
+        StreamSupport.stream(organizationOids.spliterator(), false).toArray(String[]::new));
     CompletableFuture<Set<String>> tarjontaF =
         this.client
             .<ResultSearch>getJson(
