@@ -66,7 +66,17 @@ public class AuthorityCheckService {
           searchByOrganizationOids.thenComposeAsync(
               byOrgs ->
                   searchByOrganizationGroupOids.thenApplyAsync(
-                      byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid))));
+                      byGroups ->
+                          (oid) -> {
+                            LOG.info(
+                                "HakukohdeOIDAuthorityCheck | oid: {} | byOrgs.contains(oid): {} | byGroups.contains(oid): {} | byOrgs: {} | byGroups: {}",
+                                oid,
+                                byOrgs.contains(oid),
+                                byGroups.contains(oid),
+                                byOrgs,
+                                byGroups);
+                            return byOrgs.contains(oid) || byGroups.contains(oid);
+                          })));
     }
   }
 

@@ -41,12 +41,17 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TarjontaAsyncResourceImpl.class);
+
   private final UrlConfiguration urlConfiguration = UrlConfiguration.getInstance();
   private final HttpClient client;
   private final HttpClient koutaClient;
@@ -80,8 +85,10 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   @Override
   public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
       Iterable<String> organizationOids) {
-    Map<String, String> tarjontaParameters = new HashMap<>();
-    tarjontaParameters.put("organisationOid", String.join(",", organizationOids));
+    Map<String, String[]> tarjontaParameters = new HashMap<>();
+    tarjontaParameters.put(
+        "organisationOid",
+        StreamSupport.stream(organizationOids.spliterator(), false).toArray(String[]::new));
     CompletableFuture<Set<String>> tarjontaF =
         this.client
             .<ResultSearch>getJson(
@@ -116,6 +123,10 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
         tarjontaHakukohdeOids ->
             koutaF.thenApplyAsync(
                 koutaHakukohdeOids -> {
+                  LOG.info(
+                      "tarjontaHakukohdeOids: {} | koutaHakukohdeOids: {}",
+                      tarjontaHakukohdeOids,
+                      koutaHakukohdeOids);
                   HashSet<String> s = new HashSet<>(tarjontaHakukohdeOids);
                   for (Set<String> oids : koutaHakukohdeOids) {
                     s.addAll(oids);
