@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import java.util.Map;
+import java.util.Optional;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +46,8 @@ public class NumeroDataArvo extends TilaDataArvo {
     return tarkistaRajat(arvo);
   }
 
-  public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
-    // LOG.error("{}", arvo);
+  public PistesyottoArvo asPistesyottoArvo(String raakaarvo, String tila) {
+    final String arvo = Optional.ofNullable(raakaarvo).orElse("").replaceAll(",", ".");
     String lopullinenTila;
     if (isAsetettu(arvo)) {
       lopullinenTila = getAsetettuTila();

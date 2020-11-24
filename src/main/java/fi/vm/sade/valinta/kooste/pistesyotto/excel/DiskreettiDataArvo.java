@@ -62,8 +62,8 @@ public class DiskreettiDataArvo extends TilaDataArvo {
     return tarkistaArvo(arvo);
   }
 
-  public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
-    // LOG.error("{}", arvo);
+  public PistesyottoArvo asPistesyottoArvo(String raakaarvo, String tila) {
+    final String arvo = Optional.ofNullable(raakaarvo).orElse("").replaceAll(",", ".");
     String lopullinenTila;
     if (isAsetettu(arvo)) {
       lopullinenTila = getAsetettuTila();
