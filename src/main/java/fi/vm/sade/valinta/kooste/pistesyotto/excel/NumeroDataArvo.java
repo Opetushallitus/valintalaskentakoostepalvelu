@@ -2,13 +2,9 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import java.util.Map;
 import java.util.Optional;
-
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NumeroDataArvo extends TilaDataArvo {
-  private final Logger LOG = LoggerFactory.getLogger(NumeroDataArvo.class);
   private final double min;
   private final double max;
   private final String tunniste;
@@ -68,10 +64,6 @@ public class NumeroDataArvo extends TilaDataArvo {
   }
 
   private String konvertoi(String arvo) {
-    /* try {
-        return new java.math.BigDecimal(arvo).setScale(2, RoundingMode.HALF_UP).toString();
-    } catch (Exception e) {
-    } */
     return arvo;
   }
 
