@@ -4,14 +4,9 @@ import com.google.common.collect.Sets;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DiskreettiDataArvo extends TilaDataArvo {
-
-  private final Logger LOG = LoggerFactory.getLogger(DiskreettiDataArvo.class);
   private final Set<String> arvot;
-  private final Set<Double> numerot;
   private final Map<Double, String> konversio;
   private final String tunniste;
   private final String osallistuminenTunniste;
@@ -36,7 +31,6 @@ public class DiskreettiDataArvo extends TilaDataArvo {
                   }
                 })
             .collect(Collectors.toMap(a -> Double.parseDouble(a), a -> a));
-    this.numerot = this.konversio.keySet();
     this.tunniste = tunniste;
     this.osallistuminenTunniste = osallistuminenTunniste;
   }
@@ -62,8 +56,8 @@ public class DiskreettiDataArvo extends TilaDataArvo {
     return tarkistaArvo(arvo);
   }
 
-  public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
-    // LOG.error("{}", arvo);
+  public PistesyottoArvo asPistesyottoArvo(String raakaarvo, String tila) {
+    final String arvo = Optional.ofNullable(raakaarvo).orElse("").replaceAll(",", ".");
     String lopullinenTila;
     if (isAsetettu(arvo)) {
       lopullinenTila = getAsetettuTila();
