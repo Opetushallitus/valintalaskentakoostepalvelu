@@ -9,13 +9,12 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.mocks.*;
-import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -33,6 +32,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -67,7 +68,8 @@ public class ValintalaskentaTulosExcelTest {
   final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
   final String TUNNISTE2 = "TUNNISTE2";
   final String SELVITETTY_TUNNISTE2 = "SELVITETTY_TUNNISTE2";
-  final HakuV1RDTO haku = new TarjontaSpec.HakuBuilder(HAKU1, null).build();
+  final Haku haku =
+      new Haku(HAKU1, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null);
 
   @Before
   public void startServer() {

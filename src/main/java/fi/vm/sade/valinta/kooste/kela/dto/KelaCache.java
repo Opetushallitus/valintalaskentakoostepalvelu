@@ -1,18 +1,19 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.KomotoResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.KomotoDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.OidRDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,37 +28,36 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
   private final ConcurrentHashMap<String, HenkiloPerustietoDto> henkilotiedot =
       new ConcurrentHashMap<>();
 
+  private TarjontaAsyncResource tarjontaAsyncResource;
   private final Date now;
-  private final HakukohdeResource hakukohdeResource;
-  private final KomotoResource komotoResource;
 
-  public KelaCache(HakukohdeResource hakukohdeResource, KomotoResource komotoResource) {
+  public KelaCache(TarjontaAsyncResource tarjontaAsyncResource) {
     now = new Date();
-    this.hakukohdeResource = hakukohdeResource;
-    this.komotoResource = komotoResource;
+    this.tarjontaAsyncResource = tarjontaAsyncResource;
   }
 
   @Override
-  public Date lukuvuosi(HakuV1RDTO hakuDTO, String hakukohdeOid) {
+  public Date lukuvuosi(Haku hakuDTO, String hakukohdeOid) {
     if (!lukuvuosi.containsKey(hakukohdeOid)) {
-      String alkamiskausiUri = hakuDTO.getKoulutuksenAlkamiskausiUri();
-      int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
+      String alkamiskausiUri = hakuDTO.koulutuksenAlkamiskausiUri;
+      Integer vuosi = hakuDTO.koulutuksenAlkamisvuosi;
 
       if (alkamiskausiUri == null) {
         // Kyseessä jatkuva haku, haetaan alkamistiedot koulutukselta
         try {
-          List<OidRDTO> komotoOids = hakukohdeResource.getKomotosByHakukohdeOID(hakukohdeOid);
-
-          for (OidRDTO komotoOid : komotoOids) {
-            try {
-              KomotoDTO komoto = komotoResource.getByOID(komotoOid.getOid());
-              alkamiskausiUri = komoto.getKoulutuksenAlkamiskausi();
-              vuosi = komoto.getKoulutuksenAlkamisvuosi();
-            } catch (Exception e) {
-              LOG.error(
-                  "Komoton haku tai käsittely epäonnistui. komotoOid:" + komotoOid.getOid(), e);
-              throw new RuntimeException(e);
-            }
+          List<Toteutus> toteutukset =
+              tarjontaAsyncResource
+                  .haeHakukohde(hakukohdeOid)
+                  .thenComposeAsync(
+                      hakukohde ->
+                          CompletableFutureUtil.sequence(
+                              hakukohde.toteutusOids.stream()
+                                  .map(tarjontaAsyncResource::haeToteutus)
+                                  .collect(Collectors.toList())))
+                  .get(5, TimeUnit.MINUTES);
+          for (Toteutus toteutus : toteutukset) {
+            alkamiskausiUri = toteutus.alkamiskausiUri;
+            vuosi = toteutus.alkamisvuosi;
           }
         } catch (Exception e) {
           LOG.error("Ei voitu hakea lukuvuotta tarjonnalta. HakukohdeOid:" + hakukohdeOid, e);
@@ -68,12 +68,11 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
       int kuukausi = 1;
 
       if (alkamiskausiUri != null && alkamiskausiUri.startsWith("kausi_s")) {
-
         kuukausi = 8;
       } else if (alkamiskausiUri != null && alkamiskausiUri.startsWith("kausi_k")) {
         kuukausi = 1;
       } else {
-        LOG.error("Viallinen arvo {}, koodilla kausi ", new Object[] {alkamiskausiUri});
+        LOG.error("Viallinen arvo {}, koodilla kausi ", alkamiskausiUri);
       }
 
       lukuvuosi.put(hakukohdeOid, new DateTime(vuosi, kuukausi, 1, 1, 1).toDate());
@@ -82,12 +81,12 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
   }
 
   @Override
-  public Date poimintapaivamaara(HakuV1RDTO haku) {
+  public Date poimintapaivamaara(Haku haku) {
     return now;
   }
 
   @Override
-  public Date valintapaivamaara(HakuV1RDTO haku) {
+  public Date valintapaivamaara(Haku haku) {
     return now;
   }
 

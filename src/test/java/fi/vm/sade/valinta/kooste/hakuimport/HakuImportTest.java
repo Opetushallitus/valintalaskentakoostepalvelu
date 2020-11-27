@@ -1,16 +1,14 @@
 package fi.vm.sade.valinta.kooste.hakuimport;
 
+import static org.mockito.Mockito.when;
+
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeHakutulosV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakutuloksetV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
@@ -19,11 +17,10 @@ import fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.Produce;
@@ -36,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -103,53 +101,41 @@ public class HakuImportTest extends CamelTestSupport {
         };
     ValintaperusteetAsyncResource valintaperusteetRestResource =
         Mockito.mock(ValintaperusteetAsyncResource.class);
-    HakukohdeV1ResourceWrapper w =
-        new HakukohdeV1ResourceWrapper() {
-          @Override
-          public ResultV1RDTO<HakukohdeValintaperusteetV1RDTO> findValintaperusteetByOid(
-              String oid) {
-            if (VIALLINEN_HAKUKOHDE.equals(oid)) {
-              HakukohdeValintaperusteetV1RDTO obj = new HakukohdeValintaperusteetV1RDTO();
-              return new ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>(obj);
-            }
-            try {
-
-              HakukohdeValintaperusteetV1RDTO obj =
-                  new GsonBuilder()
-                      .registerTypeAdapter(
-                          Date.class,
-                          new JsonDeserializer() {
-                            @Override
-                            public Object deserialize(
-                                JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                                throws JsonParseException {
-                              return new Date(json.getAsJsonPrimitive().getAsLong());
-                            }
-                          })
-                      .create()
-                      .fromJson(
-                          IOUtils.toString(
-                              new ClassPathResource(
-                                      "hakukohdeimport/data2/1.2.246.562.20.27059719875.json")
-                                  .getInputStream()),
-                          HakukohdeValintaperusteetV1RDTO.class);
-              return new ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>(obj);
-
-            } catch (Exception e) {
-
-            }
-            return null;
-          }
-
-          @Override
-          public ResultV1RDTO<HakutuloksetV1RDTO<HakukohdeHakutulosV1RDTO>> search(
-              String hakuOid, List<String> hakukohdeTilas) {
-            return null;
-          }
-        };
+    TarjontaAsyncResource tarjontaAsyncResource = Mockito.mock(TarjontaAsyncResource.class);
+    OrganisaatioAsyncResource organisaatioAsyncResource =
+        Mockito.mock(OrganisaatioAsyncResource.class);
+    KoodistoCachedAsyncResource koodistoCachedAsyncResource =
+        Mockito.mock(KoodistoCachedAsyncResource.class);
+    try {
+      HakukohdeValintaperusteetV1RDTO valintaperusteet =
+          new GsonBuilder()
+              .registerTypeAdapter(
+                  Date.class,
+                  (JsonDeserializer<Date>)
+                      (json, typeOfT, context) -> new Date(json.getAsJsonPrimitive().getAsLong()))
+              .create()
+              .fromJson(
+                  IOUtils.toString(
+                      new ClassPathResource("hakukohdeimport/data2/1.2.246.562.20.27059719875.json")
+                          .getInputStream()),
+                  HakukohdeValintaperusteetV1RDTO.class);
+      when(tarjontaAsyncResource.findValintaperusteetByOid(Mockito.anyString()))
+          .thenAnswer(
+              (Answer<CompletableFuture<HakukohdeValintaperusteetV1RDTO>>)
+                  invocationOnMock -> {
+                    if (invocationOnMock.getArgument(0).equals(VIALLINEN_HAKUKOHDE)) {
+                      return CompletableFuture.completedFuture(
+                          new HakukohdeValintaperusteetV1RDTO());
+                    } else {
+                      return CompletableFuture.completedFuture(valintaperusteet);
+                    }
+                  });
+    } catch (IOException ignored) {
+    }
 
     SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti =
-        new SuoritaHakukohdeImportKomponentti(w);
+        new SuoritaHakukohdeImportKomponentti(
+            tarjontaAsyncResource, organisaatioAsyncResource, koodistoCachedAsyncResource);
 
     return new HakuImportRouteImpl(
         1,

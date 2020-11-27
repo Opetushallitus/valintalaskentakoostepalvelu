@@ -4,7 +4,6 @@ import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
 import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -13,6 +12,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.Ohjausparame
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
@@ -262,7 +262,7 @@ public class OppijanSuorituksetProxyResource {
         valintapisteAsyncResource.getValintapisteet(
             allHakemus.stream().map(h -> h.getHakemus().getOid()).collect(Collectors.toList()),
             auditSession);
-    Observable<HakuV1RDTO> hakuV1RDTOObservable =
+    Observable<Haku> hakuV1RDTOObservable =
         Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
     Observable.combineLatest(
             hakuV1RDTOObservable,
@@ -341,7 +341,7 @@ public class OppijanSuorituksetProxyResource {
         valintapisteAsyncResource.getValintapisteet(hakemusOids, auditSession);
     Observable<List<HakemusWrapper>> ataruHakemukset =
         Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids));
-    Observable<HakuV1RDTO> hakuV1RDTOObservable =
+    Observable<Haku> hakuV1RDTOObservable =
         Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
     Observable.combineLatest(
             hakuV1RDTOObservable,
@@ -405,8 +405,7 @@ public class OppijanSuorituksetProxyResource {
       String hakemusOid,
       Observable<HakemusWrapper> hakemusObservable,
       Boolean fetchEnsikertalaisuus) {
-    Observable<HakuV1RDTO> hakuObservable =
-        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
+    Observable<Haku> hakuObservable = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
     Observable<Oppija> suorituksetObservable =
         fetchEnsikertalaisuus
             ? suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskelijaOid, hakuOid)
@@ -446,8 +445,7 @@ public class OppijanSuorituksetProxyResource {
       List<String> hakemusOids,
       Boolean fetchEnsikertalaisuus) {
 
-    Observable<HakuV1RDTO> hakuObservable =
-        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
+    Observable<Haku> hakuObservable = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
     Observable<List<HakemusWrapper>> hakemuksetObservable =
         applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids);
     Observable<List<Valintapisteet>> valintapisteetObservable =
@@ -502,8 +500,7 @@ public class OppijanSuorituksetProxyResource {
       List<String> opiskelijaOids,
       Boolean fetchEnsikertalaisuus) {
 
-    Observable<HakuV1RDTO> hakuObservable =
-        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
+    Observable<Haku> hakuObservable = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
     Observable<ParametritDTO> parametritObservable =
         Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid));
 
@@ -523,7 +520,7 @@ public class OppijanSuorituksetProxyResource {
   }
 
   private List<HakemusDTO> createHakemusDTOs(
-      HakuV1RDTO haku,
+      Haku haku,
       List<Oppija> suoritukset,
       List<HakemusWrapper> hakemukset,
       List<Valintapisteet> valintapisteet,
@@ -531,7 +528,7 @@ public class OppijanSuorituksetProxyResource {
       Boolean fetchEnsikertalaisuus) {
 
     Map<String, List<String>> hakukohdeRyhmasForHakukohdes =
-        Observable.fromFuture(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.getOid()))
+        Observable.fromFuture(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.oid))
             .timeout(1, MINUTES)
             .blockingFirst();
     return hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(

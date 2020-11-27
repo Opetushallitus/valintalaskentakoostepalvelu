@@ -2,32 +2,37 @@ package fi.vm.sade.valinta.kooste.kela;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.KomotoResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.*;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.HaunTyyppiKomponentti;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaDokumentinLuontiKomponenttiImpl;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponenttiImpl;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.OppilaitosKomponentti;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteImpl;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import io.reactivex.Observable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -44,7 +49,8 @@ import org.slf4j.LoggerFactory;
 public class KelaRouteTest extends CamelTestSupport {
 
   private final Logger LOG = LoggerFactory.getLogger(KelaRouteTest.class);
-  private final HakuV1Resource hakuResource = Mockito.mock(HakuV1Resource.class);
+  private final TarjontaAsyncResource tarjontaAsyncResource =
+      Mockito.mock(TarjontaAsyncResource.class);
   private final DokumenttiAsyncResource dokumenttiAsyncResource =
       Mockito.mock(DokumenttiAsyncResource.class);
   private final KelaHakijaRiviKomponenttiImpl hkRivi =
@@ -62,8 +68,6 @@ public class KelaRouteTest extends CamelTestSupport {
       Mockito.mock(OppilaitosKomponentti.class);
   private final LinjakoodiKomponentti linjakoodiKomponentti =
       Mockito.mock(LinjakoodiKomponentti.class);
-  private final HakukohdeResource hakukohdeResource = Mockito.mock(HakukohdeResource.class);
-  private final KomotoResource komotoResource = Mockito.mock(KomotoResource.class);
 
   private final String HAKU1 = "HAKU1OID";
   private final String HAKU2 = "HAKU2OID";
@@ -75,10 +79,19 @@ public class KelaRouteTest extends CamelTestSupport {
   @Produce(uri = DIRECT_KELA)
   protected ProducerTemplate template;
 
-  private HakukohdeDTO createHakukohdeDTO() {
-    HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
-    hakukohdeDTO.setOid(HAKUKOHDE1);
-    return hakukohdeDTO;
+  private Hakukohde createHakukohdeDTO() {
+    return new Hakukohde(
+        HAKUKOHDE1,
+        null,
+        new HashMap<>(),
+        null,
+        Collections.emptySet(),
+        new HashSet<>(),
+        null,
+        new HashSet<>(),
+        null,
+        Collections.emptySet(),
+        null);
   }
 
   private List<ValintaTulosServiceDto> createHakijat() {
@@ -104,17 +117,16 @@ public class KelaRouteTest extends CamelTestSupport {
   public void kelaLuonninTestaus() {
     Mockito.when(valintaTulosServiceAsyncResource.getHaunValintatulokset(Mockito.anyString()))
         .thenReturn(Observable.just(createHakijat()));
-    Mockito.when(hakukohdeResource.getByOID(Mockito.anyString())).thenReturn(createHakukohdeDTO());
-    Mockito.when(hakuResource.findByOid(Mockito.anyString()))
+    Mockito.when(tarjontaAsyncResource.haeHakukohde(Mockito.anyString()))
+        .thenReturn(CompletableFuture.completedFuture(createHakukohdeDTO()));
+    Mockito.when(tarjontaAsyncResource.haeHaku(Mockito.anyString()))
         .then(
-            new Answer<ResultV1RDTO<HakuV1RDTO>>() {
-              @Override
-              public ResultV1RDTO<HakuV1RDTO> answer(InvocationOnMock invocation) throws Throwable {
-                String s = invocation.getArguments()[0].toString();
-                LOG.error("Tarjonnasta haku {}", s);
-                return new ResultV1RDTO<HakuV1RDTO>(createHaku(s));
-              }
-            });
+            (Answer<CompletableFuture<Haku>>)
+                invocation -> {
+                  String s = invocation.getArguments()[0].toString();
+                  LOG.error("Tarjonnasta haku {}", s);
+                  return CompletableFuture.completedFuture(createHaku(s));
+                });
     Mockito.when(haunTyyppiKomponentti.haunTyyppi(Mockito.anyString()))
         .then(
             new Answer<String>() {
@@ -160,7 +172,7 @@ public class KelaRouteTest extends CamelTestSupport {
             hakuOids,
             StringUtils.EMPTY,
             StringUtils.EMPTY,
-            new KelaCache(hakukohdeResource, komotoResource),
+            new KelaCache(tarjontaAsyncResource),
             kelaProsessi);
     template.sendBodyAndProperty(
         kelaLuonti, ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, kelaProsessi);
@@ -195,21 +207,17 @@ public class KelaRouteTest extends CamelTestSupport {
         dokumenttiAsyncResource,
         hkRivi,
         dkRivi,
-        hakuResource,
+        tarjontaAsyncResource,
         haunTyyppiKomponentti,
         oppijanumerorekisteriAsyncResource,
         oppilaitosKomponentti,
         linjakoodiKomponentti,
-        hakukohdeResource,
         valintaTulosServiceAsyncResource,
         null);
   }
 
-  private HakuV1RDTO createHaku(String oid) {
-    HakuV1RDTO h = new HakuV1RDTO();
-    h.setOid(oid);
-    h.setKoulutuksenAlkamiskausiUri("ALKKAUSIURI");
-    h.setHakutyyppiUri("HAKUTYYPPIURI");
-    return h;
+  private Haku createHaku(String oid) {
+    return new Haku(
+        oid, new HashMap<>(), new HashSet<>(), null, null, null, null, "ALKKAUSIURI", null);
   }
 }

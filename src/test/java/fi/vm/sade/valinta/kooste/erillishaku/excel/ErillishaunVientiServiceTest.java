@@ -24,6 +24,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockKoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import io.reactivex.Observable;
@@ -36,6 +37,8 @@ public class ErillishaunVientiServiceTest {
       new MockApplicationAsyncResource();
   final MockAtaruAsyncResource mockAtaruAsyncResource = new MockAtaruAsyncResource();
   final MockTarjontaAsyncService mockTarjontaAsyncService = new MockTarjontaAsyncService();
+  final MockOrganisaationAsyncResource mockOrganisaationAsyncResource =
+      new MockOrganisaationAsyncResource();
   final MockDokumenttiAsyncResource mockDokumenttiAsyncResource = new MockDokumenttiAsyncResource();
   final ValintaTulosServiceAsyncResource mockTilaAsyncResource =
       Mockito.mock(ValintaTulosServiceAsyncResource.class);
@@ -61,7 +64,8 @@ public class ErillishaunVientiServiceTest {
             mockAtaruAsyncResource,
             mockTarjontaAsyncService,
             mockDokumenttiAsyncResource,
-            mockKoodistoCachedAsyncResource);
+            mockKoodistoCachedAsyncResource,
+            mockOrganisaationAsyncResource);
 
     erillishaunVientiService.vie(auditSession, prosessi, erillishaku);
     verify(prosessi, timeout(10000).times(1)).valmistui(anyString());
@@ -84,7 +88,8 @@ public class ErillishaunVientiServiceTest {
             mockAtaruAsyncResource,
             mockTarjontaAsyncService,
             mockDokumenttiAsyncResource,
-            mockKoodistoCachedAsyncResource);
+            mockKoodistoCachedAsyncResource,
+            mockOrganisaationAsyncResource);
     when(failingResource.getApplicationsByOid(
             erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()))
         .thenReturn(
@@ -117,7 +122,8 @@ public class ErillishaunVientiServiceTest {
             mockAtaruAsyncResource,
             mockTarjontaAsyncService,
             mockDokumenttiAsyncResource,
-            mockKoodistoCachedAsyncResource);
+            mockKoodistoCachedAsyncResource,
+            mockOrganisaationAsyncResource);
     erillishaunVientiService.vie(new AuditSession(), prosessi, erillishaku);
 
     verify(prosessi, timeout(5000).times(1)).valmistui(anyString());

@@ -4,12 +4,13 @@ import static fi.vm.sade.valinta.kooste.mocks.MockData.hakuOid;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Koulutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
-import io.reactivex.Observable;
-import java.util.Collection;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,45 +21,74 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MockTarjontaAsyncService implements TarjontaAsyncResource {
-  private static Map<String, HakuV1RDTO> mockHaku = new HashMap<>();
+  private static Map<String, Haku> mockHaku = new HashMap<>();
 
   @Override
-  public CompletableFuture<HakuV1RDTO> haeHaku(String hakuOid) {
+  public CompletableFuture<Haku> haeHaku(String hakuOid) {
     if (mockHaku.containsKey(hakuOid)) {
       return CompletableFuture.completedFuture(mockHaku.get(hakuOid));
     }
-    HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
-    hakuV1RDTO.setOid(hakuOid);
-    return CompletableFuture.completedFuture(hakuV1RDTO);
+    return CompletableFuture.completedFuture(
+        new Haku(hakuOid, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null));
   }
 
   @Override
-  public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(
-      Collection<String> organizationGroupOids) {
+  public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(
+      Iterable<String> organizationGroupOids) {
     return null;
   }
 
   @Override
-  public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(
-      Collection<String> organizationOids) {
+  public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
+      Iterable<String> organizationOids) {
     return null;
   }
 
   @Override
-  public CompletableFuture<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
-    HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
-    hakukohdeDTO.setHakuOid(hakuOid);
-    hakukohdeDTO.setOid(hakukohdeOid);
-    hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
-    return CompletableFuture.completedFuture(hakukohdeDTO);
+  public CompletableFuture<Hakukohde> haeHakukohde(String hakukohdeOid) {
+    return CompletableFuture.completedFuture(
+        new Hakukohde(
+            hakukohdeOid,
+            null,
+            new HashMap<>(),
+            hakuOid,
+            ImmutableSet.of("1.2.3.44444.5"),
+            ImmutableSet.of("mocktoteutusoid"),
+            null,
+            new HashSet<>(),
+            null,
+            Collections.emptySet(),
+            null));
   }
 
   @Override
-  public Observable<Set<String>> findHakuOidsForAutosyncTarjonta() {
+  public CompletableFuture<Set<String>> haunHakukohteet(String hakuOid) {
+    return null;
+  }
+
+  @Override
+  public CompletableFuture<Toteutus> haeToteutus(String toteutusOid) {
+    if ("mocktoteutusoid".equals(toteutusOid)) {
+      Set<String> kielet = new HashSet<>();
+      kielet.add("kieli_fi");
+      kielet.add("kieli_sv");
+      return CompletableFuture.completedFuture(
+          new Toteutus(toteutusOid, null, null, null, kielet, new HashSet<>()));
+    }
+    return null;
+  }
+
+  @Override
+  public CompletableFuture<Koulutus> haeKoulutus(String koulutusOid) {
+    return null;
+  }
+
+  @Override
+  public CompletableFuture<Set<String>> findHakuOidsForAutosyncTarjonta() {
     Set<String> set = new HashSet<>();
     set.add(hakuOid);
     set.add(hakuOid + "-1");
-    return Observable.just(set);
+    return CompletableFuture.completedFuture(set);
   }
 
   @Override
@@ -66,8 +96,14 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     return CompletableFuture.completedFuture(Maps.newHashMap());
   }
 
-  public static void setMockHaku(HakuV1RDTO mockHaku) {
-    MockTarjontaAsyncService.mockHaku.put(mockHaku.getOid(), mockHaku);
+  @Override
+  public CompletableFuture<HakukohdeValintaperusteetV1RDTO> findValintaperusteetByOid(
+      String hakukohdeOid) {
+    return null;
+  }
+
+  public static void setMockHaku(Haku mockHaku) {
+    MockTarjontaAsyncService.mockHaku.put(mockHaku.oid, mockHaku);
   }
 
   public static void clear() {

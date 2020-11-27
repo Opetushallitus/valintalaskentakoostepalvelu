@@ -8,6 +8,7 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
@@ -16,12 +17,13 @@ import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResourc
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
-import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Entity;
@@ -69,8 +71,6 @@ public class KoekutsukirjeetTest {
           ArgumentCaptor.forClass(LetterBatch.class);
       Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class)))
           .thenReturn(new CompletableFuture<>());
-      Mockito.when(Mocks.getHakukohdeResource().getByOID(Mockito.anyString()))
-          .thenReturn(HAKUKOHDEDTO1);
       MockValintaperusteetAsyncResource.setHakukohdeResult(
           Arrays.asList(
               hakukohdeJaValintakoe()
@@ -167,8 +167,6 @@ public class KoekutsukirjeetTest {
           ArgumentCaptor.forClass(LetterBatch.class);
       Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class)))
           .thenReturn(new CompletableFuture<>());
-      Mockito.when(Mocks.getHakukohdeResource().getByOID(Mockito.anyString()))
-          .thenReturn(HAKUKOHDEDTO1);
       MockValintaperusteetAsyncResource.setHakukohdeResult(
           Arrays.asList(
               hakukohdeJaValintakoe()
@@ -222,7 +220,16 @@ public class KoekutsukirjeetTest {
                   .build()));
 
       MockTarjontaAsyncService.setMockHaku(
-          new TarjontaSpec.HakuBuilder("H0", "AtaruLomakeAvain").build());
+          new Haku(
+              "H0",
+              new HashMap<>(),
+              new HashSet<>(),
+              "AtaruLomakeAvain",
+              null,
+              null,
+              null,
+              null,
+              null));
 
       Response r =
           koekutsukirjeResource

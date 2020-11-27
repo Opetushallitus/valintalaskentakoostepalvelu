@@ -12,7 +12,6 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -257,8 +256,12 @@ public class ErillishakuResource {
 
   private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
     try {
-      return HakukohdeHelper.tarjoajaOid(
-          tarjontaResource.haeHakukohde(hakukohdeOid).get(30, SECONDS));
+      return tarjontaResource
+          .haeHakukohde(hakukohdeOid)
+          .get(30, SECONDS)
+          .tarjoajaOids
+          .iterator()
+          .next();
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new RuntimeException(e);
     }
