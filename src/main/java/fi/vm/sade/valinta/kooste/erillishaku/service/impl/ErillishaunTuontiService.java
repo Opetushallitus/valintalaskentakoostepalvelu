@@ -210,14 +210,14 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         rivit.stream().filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
 
     Observable<Boolean> passivointi =
-      Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid())).switchMap(hk -> {
-        final boolean hakuAppHaku = StringUtils.isBlank(hk.getAtaruLomakeAvain());
-        if(hakuAppHaku) {
-          return passivoiHakemukset(poistettavat);
-        } else {
-          return Observable.just(true);
-        }
-      });
+        Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid())).switchMap(hk -> {
+          final boolean hakuAppHaku = StringUtils.isBlank(hk.getAtaruLomakeAvain());
+          if (hakuAppHaku) {
+            return passivoiHakemukset(poistettavat);
+          } else {
+            return Observable.just(true);
+          }
+        });
 
     Observable<String> maksuntilojenTallennus =
         maksutilojenTallennus(auditSession, haku, lisattavatTaiKeskeneraiset);
@@ -298,9 +298,9 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
           poistettavat.stream().map(ErillishakuRivi::getHakemusOid).collect(Collectors.toList());
 
       return applicationAsyncResource
-              .changeStateOfApplicationsToPassive(
-                      hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä")
-              .timeout(1, MINUTES)
+          .changeStateOfApplicationsToPassive(
+              hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä")
+          .timeout(1, MINUTES)
           .map(resp -> true);
     } else {
       return Observable.just(true);
