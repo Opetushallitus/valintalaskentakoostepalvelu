@@ -74,7 +74,8 @@ public class ErillishaunTuontiServiceTest {
 
   public static TarjontaAsyncResource mockTarjonta() {
     final TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
-    when(tarjontaAsyncResource.haeHaku(Mockito.any())).thenReturn(CompletableFuture.completedFuture(new HakuV1RDTO()));
+    when(tarjontaAsyncResource.haeHaku(Mockito.any()))
+        .thenReturn(CompletableFuture.completedFuture(new HakuV1RDTO()));
     return tarjontaAsyncResource;
   }
 
@@ -384,7 +385,8 @@ class ErillisHakuTuontiTestCase {
 
   public static TarjontaAsyncResource mockTarjonta() {
     final TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
-    when(tarjontaAsyncResource.haeHaku(Mockito.any())).thenReturn(CompletableFuture.completedFuture(new HakuV1RDTO()));
+    when(tarjontaAsyncResource.haeHaku(Mockito.any()))
+        .thenReturn(CompletableFuture.completedFuture(new HakuV1RDTO()));
     return tarjontaAsyncResource;
   }
 

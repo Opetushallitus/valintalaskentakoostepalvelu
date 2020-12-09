@@ -62,7 +62,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,14 +209,16 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         rivit.stream().filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
 
     Observable<Boolean> passivointi =
-        Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid())).switchMap(hk -> {
-          final boolean hakuAppHaku = StringUtils.isBlank(hk.getAtaruLomakeAvain());
-          if (hakuAppHaku) {
-            return passivoiHakemukset(poistettavat);
-          } else {
-            return Observable.just(true);
-          }
-        });
+        Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid()))
+            .switchMap(
+                hk -> {
+                  final boolean hakuAppHaku = StringUtils.isBlank(hk.getAtaruLomakeAvain());
+                  if (hakuAppHaku) {
+                    return passivoiHakemukset(poistettavat);
+                  } else {
+                    return Observable.just(true);
+                  }
+                });
 
     Observable<String> maksuntilojenTallennus =
         maksutilojenTallennus(auditSession, haku, lisattavatTaiKeskeneraiset);
