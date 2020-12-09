@@ -210,15 +210,14 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         rivit.stream().filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
 
     Observable<Boolean> passivointi =
-        Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid())).switchMap(hk -> {
-            if(StringUtils.isBlank(hk.getAtaruLomakeAvain())) {
-                return Observable.just(true);
-            } else {
-                return passivoiHakemukset(poistettavat);
-            }
-        });
-
-
+      Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid())).switchMap(hk -> {
+        final boolean hakuAppHaku = StringUtils.isBlank(hk.getAtaruLomakeAvain());
+        if(hakuAppHaku) {
+          return passivoiHakemukset(poistettavat);
+        } else {
+          return Observable.just(true);
+        }
+      });
 
     Observable<String> maksuntilojenTallennus =
         maksutilojenTallennus(auditSession, haku, lisattavatTaiKeskeneraiset);
