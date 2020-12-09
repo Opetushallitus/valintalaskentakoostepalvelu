@@ -31,6 +31,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
@@ -61,6 +62,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,18 +78,21 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
   private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
   private final Scheduler scheduler;
   private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
+  private final TarjontaAsyncResource hakuV1AsyncResource;
 
   public ErillishaunTuontiService(
       ApplicationAsyncResource applicationAsyncResource,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource,
+      TarjontaAsyncResource hakuV1AsyncResource,
       Scheduler scheduler) {
     super(koodistoCachedAsyncResource);
     this.applicationAsyncResource = applicationAsyncResource;
     this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
     this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
     this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
+    this.hakuV1AsyncResource = hakuV1AsyncResource;
     this.scheduler = scheduler;
   }
 
@@ -95,12 +101,14 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
       ApplicationAsyncResource applicationAsyncResource,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
-      KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+      KoodistoCachedAsyncResource koodistoCachedAsyncResource,
+      TarjontaAsyncResource hakuV1AsyncResource) {
     this(
         applicationAsyncResource,
         oppijanumerorekisteriAsyncResource,
         valintaTulosServiceAsyncResource,
         koodistoCachedAsyncResource,
+        hakuV1AsyncResource,
         newThread());
   }
 
@@ -200,7 +208,17 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
 
     List<ErillishakuRivi> poistettavat =
         rivit.stream().filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
-    passivoiHakemukset(poistettavat);
+
+    Observable<Boolean> passivointi =
+        Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid())).switchMap(hk -> {
+            if(StringUtils.isBlank(hk.getAtaruLomakeAvain())) {
+                return Observable.just(true);
+            } else {
+                return passivoiHakemukset(poistettavat);
+            }
+        });
+
+
 
     Observable<String> maksuntilojenTallennus =
         maksutilojenTallennus(auditSession, haku, lisattavatTaiKeskeneraiset);
@@ -210,9 +228,10 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             auditSession, haku, lisattavatTaiKeskeneraiset, poistettavat);
 
     Observable.combineLatest(
+            passivointi,
             maksuntilojenTallennus,
             vastaanotonJaValinnantuloksenTallennus,
-            (m, poikkeukset) -> poikkeukset)
+            (passivointiOnnistui, m, poikkeukset) -> poikkeukset)
         .subscribe(
             poikkeukset -> {
               Set<String> epaonnistuneet =
@@ -274,15 +293,18 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             });
   }
 
-  private void passivoiHakemukset(List<ErillishakuRivi> poistettavat) {
+  private Observable<Boolean> passivoiHakemukset(List<ErillishakuRivi> poistettavat) {
     if (!poistettavat.isEmpty()) {
       List<String> hakemusOidit =
           poistettavat.stream().map(ErillishakuRivi::getHakemusOid).collect(Collectors.toList());
-      applicationAsyncResource
-          .changeStateOfApplicationsToPassive(
-              hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä")
-          .timeout(1, MINUTES)
-          .blockingFirst();
+
+      return applicationAsyncResource
+              .changeStateOfApplicationsToPassive(
+                      hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä")
+              .timeout(1, MINUTES)
+          .map(resp -> true);
+    } else {
+      return Observable.just(true);
     }
   }
 
