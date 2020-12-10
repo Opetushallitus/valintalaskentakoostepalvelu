@@ -29,6 +29,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +45,9 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource
 
   @Autowired
   public ValintaperusteetAsyncResourceImpl(
+      @Qualifier("ValintaperusteetCasInterceptor") AbstractPhaseInterceptor casInterceptor,
       @Qualifier("ValintaperusteetHttpClient") HttpClient httpClient) {
-    super(TimeUnit.HOURS.toMillis(1L));
+    super(TimeUnit.HOURS.toMillis(1L), casInterceptor);
     this.httpClient = httpClient;
   }
 

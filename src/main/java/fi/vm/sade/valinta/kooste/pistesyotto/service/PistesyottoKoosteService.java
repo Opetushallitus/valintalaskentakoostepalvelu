@@ -161,7 +161,8 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
                     getValintaperusteet(hakemus),
                     valintapisteAsyncResource.getValintapisteet(
                         Collections.singletonList(hakemusOid), auditSession),
-                    valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid),
+                    Observable.fromFuture(
+                        valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid)),
                     suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(
                         hakemus.getPersonOid()),
                     Observable.fromFuture(
@@ -238,8 +239,8 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
       ApplicationAdditionalDataDTO pistetietoDTO,
       Optional<String> ifUnmodifiedSince,
       AuditSession auditSession) {
-    return valintalaskentaValintakoeAsyncResource
-        .haeHakemukselle(pistetietoDTO.getOid())
+    return Observable.fromFuture(
+            valintalaskentaValintakoeAsyncResource.haeHakemukselle(pistetietoDTO.getOid()))
         .flatMap(
             vo -> {
               String hakuOid = vo.getHakuOid();

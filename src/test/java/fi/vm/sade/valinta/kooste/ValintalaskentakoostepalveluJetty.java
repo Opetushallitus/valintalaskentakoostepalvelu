@@ -87,6 +87,16 @@ public class ValintalaskentakoostepalveluJetty {
     SpringProfile.setProfile("test");
     mockUserHomeWithCommonProperties();
     int maxTriesToStart = 10;
+    MockOpintopolkuCasAuthenticationFilter.clear();
+    UrlConfiguration.getInstance()
+        .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
+        .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
+        .addOverride(
+            "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl",
+            Integraatiopalvelimet.mockServer.getUrl())
+        .addOverride(
+            "valintalaskentakoostepalvelu.valintaperusteet-service.baseurl",
+            Integraatiopalvelimet.mockServer.getUrl());
     if (server.isStopped()) {
       int startTriesLeft = maxTriesToStart;
       boolean startSucceeded = false;
@@ -108,16 +118,6 @@ public class ValintalaskentakoostepalveluJetty {
             "Could not get the server started with " + maxTriesToStart + " attempts.");
       }
     }
-    MockOpintopolkuCasAuthenticationFilter.clear();
-    UrlConfiguration.getInstance()
-        .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
-        .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
-        .addOverride(
-            "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl",
-            Integraatiopalvelimet.mockServer.getUrl())
-        .addOverride(
-            "valintalaskentakoostepalvelu.valintaperusteet-service.baseurl",
-            Integraatiopalvelimet.mockServer.getUrl());
   }
 
   private static void startServer() {

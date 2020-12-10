@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
 public interface ValintalaskentaAsyncResource {
   Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid);
 
-  Observable<ValinnanvaiheDTO> lisaaTuloksia(
+  CompletableFuture<ValinnanvaiheDTO> lisaaTuloksia(
       String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
 
   Observable<String> laskeJaSijoittele(

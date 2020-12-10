@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.mocks;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import io.reactivex.Observable;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -34,13 +33,13 @@ public class MockValintalaskentaValintakoeAsyncResource
   }
 
   @Override
-  public Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(
+  public CompletableFuture<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(
       String hakukohdeOid, List<String> valintakoeOid) {
-    return Observable.just(hakemusOsallistuminen.get());
+    return CompletableFuture.completedFuture(hakemusOsallistuminen.get());
   }
 
   @Override
-  public Observable<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid) {
+  public CompletableFuture<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid) {
     throw new UnsupportedOperationException("Not implemented yet.");
   }
 
@@ -51,8 +50,8 @@ public class MockValintalaskentaValintakoeAsyncResource
   }
 
   @Override
-  public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(
+  public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(
       Collection<String> hakukohdeOids) {
-    return Observable.just(osallistumistiedot.get());
+    return CompletableFuture.completedFuture(osallistumistiedot.get());
   }
 }

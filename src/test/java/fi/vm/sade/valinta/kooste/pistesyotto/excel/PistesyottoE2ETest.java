@@ -98,7 +98,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     mockToReturnString(
         GET,
-        "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/1.2.246.562.5.85532589612",
+        "/valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/1.2.246.562.5.85532589612",
         IOUtils.toString(
             new ClassPathResource("pistesyotto/List_ValintakoeOsallistuminenDTO.json")
                 .getInputStream()));

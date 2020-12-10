@@ -99,6 +99,20 @@ public class CasInterceptors {
         casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
+  @Bean(name = "ValintaperusteetCasInterceptor")
+  @Autowired
+  public AbstractPhaseInterceptor<Message> getValintaperusteetCasInterceptor(
+      @Qualifier("CasHttpClient") HttpClient casHttpClient,
+      CookieManager cookieManager,
+      @Value("${cas.service.valintaperusteet-service}") String targetService,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
+          String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
+          String appClientPassword) {
+    return getCasInterceptor(
+        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+  }
+
   @Bean(name = "SeurantaRestClientCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getSeurantaRestClientCasInterceptor(
