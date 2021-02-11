@@ -94,6 +94,7 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("cas.service.organisaatio-service", "");
     p0.setProperty("cas.service.valintalaskenta-service", "");
     p0.setProperty("cas.service.valintaperusteet-service", "");
+    p0.setProperty("cas.service.valintapiste-service", "");
     p0.setProperty("cas.service.dokumenttipalvelu", "");
     p0.setProperty(
         "valintalaskentakoostepalvelu.swagger.basepath", "/valintalaskentakoostepalvelu/resources");
@@ -181,6 +182,11 @@ public class KoosteTestProfileConfiguration {
 
   @Bean(name = "ValintaperusteetApplicationSession")
   public ApplicationSession getValintaperusteetApplicationSession() {
+    return APPLICATION_SESSION;
+  }
+
+  @Bean(name = "ValintapisteServiceApplicationSession")
+  public ApplicationSession getValintapisteServiceApplicationSession() {
     return APPLICATION_SESSION;
   }
 

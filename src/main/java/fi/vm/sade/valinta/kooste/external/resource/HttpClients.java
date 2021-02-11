@@ -251,13 +251,46 @@ public class HttpClients {
     return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
   }
 
+  @Bean(name = "ValintapisteServiceInternalHttpClient")
+  @Autowired
+  public java.net.http.HttpClient getValintapisteServiceInternalHttpClient(
+      CookieManager cookieManager) {
+    return defaultHttpClientBuilder(cookieManager).build();
+  }
+
+  @Bean(name = "ValintapisteServiceApplicationSession")
+  @Autowired
+  public ApplicationSession getValintapisteServiceApplicationSession(
+      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+      @Qualifier("ValintapisteServiceInternalHttpClient")
+          java.net.http.HttpClient applicationHttpClient,
+      CookieManager cookieManager,
+      @Value("${cas.service.valintapiste-service}") String service,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    return new ApplicationSession(
+        applicationHttpClient,
+        cookieManager,
+        CALLER_ID,
+        Duration.ofSeconds(10),
+        new CasSession(
+            casHttpClient,
+            Duration.ofSeconds(10),
+            CALLER_ID,
+            URI.create(ticketsUrl),
+            username,
+            password),
+        service,
+        "JSESSIONID");
+  }
+
   @Bean(name = "ValintapisteServiceHttpClient")
   @Autowired
-  public HttpClient getValintapisteServiceHttpClient(CookieManager cookieManager) {
-    return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(),
-        null,
-        DateDeserializer.gsonBuilder().create());
+  public HttpClient getValintapisteServiceHttpClient(
+      @Qualifier("ValintapisteServiceInternalHttpClient") java.net.http.HttpClient client,
+      @Qualifier("ValintapisteServiceApplicationSession") ApplicationSession applicationSession) {
+    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
   }
 
   @Bean(name = "ValintalaskentaValintakoeHttpClient")
