@@ -282,7 +282,7 @@ public class HttpClients {
             username,
             password),
         service,
-        "JSESSIONID");
+        "ring-session");
   }
 
   @Bean(name = "ValintapisteServiceHttpClient")
