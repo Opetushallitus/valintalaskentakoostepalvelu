@@ -304,12 +304,13 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
     final Entity<ValinnanvaiheDTO> entity = Entity.entity(vaihe, MediaType.APPLICATION_JSON_TYPE);
     HashMap<String, String> query = new HashMap<>();
     query.put("tarjoajaOid", tarjoajaOid);
+
     return this.httpclient.postJson(
         getUrl("valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid, query),
         Duration.ofMinutes(5),
         vaihe,
-        new TypeToken<List<ValinnanvaiheDTO>>() {}.getType(),
-        new TypeToken<List<ValinnanvaiheDTO>>() {}.getType());
+        new TypeToken<ValinnanvaiheDTO>() {}.getType(),
+        new TypeToken<ValinnanvaiheDTO>() {}.getType());
     /*return postAsObservableLazily(
     getUrl(
         "valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe",
