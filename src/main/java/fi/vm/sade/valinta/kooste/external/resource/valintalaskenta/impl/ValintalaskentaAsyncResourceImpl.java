@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -301,23 +300,14 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   @Override
   public CompletableFuture<ValinnanvaiheDTO> lisaaTuloksia(
       String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe) {
-    final Entity<ValinnanvaiheDTO> entity = Entity.entity(vaihe, MediaType.APPLICATION_JSON_TYPE);
     HashMap<String, String> query = new HashMap<>();
     query.put("tarjoajaOid", tarjoajaOid);
-
     return this.httpclient.postJson(
         getUrl("valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid, query),
         Duration.ofMinutes(5),
         vaihe,
         new TypeToken<ValinnanvaiheDTO>() {}.getType(),
         new TypeToken<ValinnanvaiheDTO>() {}.getType());
-    /*return postAsObservableLazily(
-    getUrl(
-        "valintalaskenta-laskenta-service.valintalaskentakoostepalvelu.hakukohde.valinnanvaihe",
-        hakukohdeOid),
-    ValinnanvaiheDTO.class,
-    entity,
-    (webclient) -> webclient.query("tarjoajaOid", tarjoajaOid));*/
   }
 
   public Observable<String> pollaa(int pollInterval, Object result, String uuid, String pollKey) {
