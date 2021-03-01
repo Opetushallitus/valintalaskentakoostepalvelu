@@ -12,7 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde")
+@Path("/valintalaskenta-laskenta-service/resources/hakukohde")
 public interface HakukohdeResource {
 
   @GET
