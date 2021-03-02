@@ -205,6 +205,7 @@ public abstract class AbstractPistesyottoKoosteService {
               if (puuttuvatLisatiedot.isEmpty()) {
                 return Observable.just(lisatiedot);
               }
+
               prosessi.inkrementoiKokonaistyota();
               Function<Valintapisteet, Valintapisteet> populateNameAndOppijaOID =
                   v -> {
@@ -218,8 +219,9 @@ public abstract class AbstractPistesyottoKoosteService {
                         v.getPisteet());
                   };
 
-              return valintapisteAsyncResource
-                  .getValintapisteet(puuttuvatLisatiedot, auditSession)
+              return Observable.fromFuture(
+                      valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
+                          new ArrayList<>(puuttuvatLisatiedot), auditSession))
                   .map(
                       v ->
                           v.valintapisteet.stream()

@@ -259,9 +259,10 @@ public class OppijanSuorituksetProxyResource {
 
     // final Map<String, Map<String, String>> allData = new HashMap<>();
     Observable<PisteetWithLastModified> valintapisteet =
-        valintapisteAsyncResource.getValintapisteet(
-            allHakemus.stream().map(h -> h.getHakemus().getOid()).collect(Collectors.toList()),
-            auditSession);
+        Observable.fromFuture(
+            valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
+                allHakemus.stream().map(h -> h.getHakemus().getOid()).collect(Collectors.toList()),
+                auditSession));
     Observable<HakuV1RDTO> hakuV1RDTOObservable =
         Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
     Observable.combineLatest(
@@ -338,7 +339,9 @@ public class OppijanSuorituksetProxyResource {
 
     // final Map<String, Map<String, String>> allData = new HashMap<>();
     Observable<PisteetWithLastModified> valintapisteet =
-        valintapisteAsyncResource.getValintapisteet(hakemusOids, auditSession);
+        Observable.fromFuture(
+            valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
+                hakemusOids, auditSession));
     Observable<List<HakemusWrapper>> ataruHakemukset =
         Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids));
     Observable<HakuV1RDTO> hakuV1RDTOObservable =
@@ -414,8 +417,9 @@ public class OppijanSuorituksetProxyResource {
     Observable<ParametritDTO> parametritObservable =
         Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid));
     Observable<PisteetWithLastModified> valintapisteetObservable =
-        valintapisteAsyncResource.getValintapisteet(
-            Collections.singletonList(hakemusOid), auditSession);
+        Observable.fromFuture(
+            valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
+                Collections.singletonList(hakemusOid), auditSession));
 
     return Observable.combineLatest(
         valintapisteetObservable,
@@ -451,8 +455,9 @@ public class OppijanSuorituksetProxyResource {
     Observable<List<HakemusWrapper>> hakemuksetObservable =
         applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids);
     Observable<List<Valintapisteet>> valintapisteetObservable =
-        valintapisteAsyncResource
-            .getValintapisteet(hakemusOids, auditSession)
+        Observable.fromFuture(
+                valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
+                    hakemusOids, auditSession))
             .map(f -> f.valintapisteet);
     Observable<ParametritDTO> parametritObservable =
         Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid));
