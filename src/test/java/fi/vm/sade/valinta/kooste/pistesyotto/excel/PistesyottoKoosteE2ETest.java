@@ -89,6 +89,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
   private static final ValintaperusteDTO kielikoeFi = new ValintaperusteDTO();
 
@@ -107,7 +108,6 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         "ROLE_APP_HAKEMUS_READ_UPDATE_1.2.246.562.10.00000000001");
   }
 
-  @Ignore
   @Test
   public void testKoostaaTyhjatPisteteidotJosParametriEiLoydy() throws Exception { // P
 
@@ -154,7 +154,6 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     assertEquals(210, tulokset.getValintapisteet().size());
   }
 
-  @Ignore
   @Test
   public void testKoostaaPistetiedotHakemuksille() throws Exception {
 
@@ -230,7 +229,6 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
             .intValue());
   }
 
-  @Ignore
   @Test
   public void testTallentaaKoostetutPistetiedotHakukohteelle() throws Exception {
     HttpResourceBuilder.WebClientExposingHttpResource http =
@@ -283,7 +281,6 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     }
   }
 
-  @Ignore
   @Test
   public void testTallentaaKoostetutPistetiedotJosEiKielikokeita() throws Exception {
     ApplicationAdditionalDataDTO applicationAdditionaData =
