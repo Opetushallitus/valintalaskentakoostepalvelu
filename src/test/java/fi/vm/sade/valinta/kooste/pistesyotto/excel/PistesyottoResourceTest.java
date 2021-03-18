@@ -991,11 +991,12 @@ public class PistesyottoResourceTest {
 
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
-                      .getValintapisteetWithHakemusOidsAsFuture(
-                              Mockito.anyList(), Mockito.any(AuditSession.class)))
-              .thenReturn(
-                      CompletableFuture.completedFuture(new PisteetWithLastModified(
-                              Optional.empty(), asValintapisteet(additionalDataResultByOid))));
+                  .getValintapisteetWithHakemusOidsAsFuture(
+                      Mockito.anyList(), Mockito.any(AuditSession.class)))
+          .thenReturn(
+              CompletableFuture.completedFuture(
+                  new PisteetWithLastModified(
+                      Optional.empty(), asValintapisteet(additionalDataResultByOid))));
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
                   .getValintapisteetWithHakemusOidsAsFuture(
@@ -1128,11 +1129,12 @@ public class PistesyottoResourceTest {
 
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
-                      .getValintapisteetWithHakemusOidsAsFuture(
-                              Mockito.anyList(), Mockito.any(AuditSession.class)))
-              .thenReturn(
-                      CompletableFuture.completedFuture(new PisteetWithLastModified(
-                              Optional.empty(), asValintapisteet(combinedResults))));
+                  .getValintapisteetWithHakemusOidsAsFuture(
+                      Mockito.anyList(), Mockito.any(AuditSession.class)))
+          .thenReturn(
+              CompletableFuture.completedFuture(
+                  new PisteetWithLastModified(
+                      Optional.empty(), asValintapisteet(combinedResults))));
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
                   .putValintapisteet(
@@ -1553,12 +1555,12 @@ public class PistesyottoResourceTest {
 
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
-                      .getValintapisteetWithHakemusOidsAsFuture(
-                              Mockito.anyList(), Mockito.any(AuditSession.class)))
-              .thenReturn(
-                      CompletableFuture.completedFuture(
-                              new PisteetWithLastModified(
-                                      Optional.empty(), asValintapisteet(combinedResults))));
+                  .getValintapisteetWithHakemusOidsAsFuture(
+                      Mockito.anyList(), Mockito.any(AuditSession.class)))
+          .thenReturn(
+              CompletableFuture.completedFuture(
+                  new PisteetWithLastModified(
+                      Optional.empty(), asValintapisteet(combinedResults))));
 
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
@@ -1737,10 +1739,11 @@ public class PistesyottoResourceTest {
 
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
-                      .getValintapisteetWithHakemusOidsAsFuture(
-                              Mockito.anyList(), Mockito.any(AuditSession.class)))
-              .thenReturn(
-                      CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), Collections.emptyList())));
+                  .getValintapisteetWithHakemusOidsAsFuture(
+                      Mockito.anyList(), Mockito.any(AuditSession.class)))
+          .thenReturn(
+              CompletableFuture.completedFuture(
+                  new PisteetWithLastModified(Optional.empty(), Collections.emptyList())));
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
                   .getValintapisteetWithHakemusOidsAsFuture(
