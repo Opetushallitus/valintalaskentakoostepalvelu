@@ -23,7 +23,6 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
-import io.reactivex.Observable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -244,9 +244,11 @@ public class OppijanSuorituksetProxyResourceTest {
             Collections.emptyList());
 
     Mockito.when(
-            Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.any(), Mockito.any()))
+            Mocks.getValintapisteAsyncResource()
+                .getValintapisteetWithHakemusOidsAsFuture(Mockito.anyList(), Mockito.any()))
         .thenReturn(
-            Observable.just(new PisteetWithLastModified(Optional.empty(), singletonList(v))));
+            CompletableFuture.completedFuture(
+                new PisteetWithLastModified(Optional.empty(), singletonList(v))));
 
     MockTarjontaAsyncService.setMockHaku(expectedHaku);
     MockApplicationAsyncResource.setResultByOid(Collections.singletonList(expectedWrapper));
@@ -281,8 +283,10 @@ public class OppijanSuorituksetProxyResourceTest {
             .collect(Collectors.toList());
 
     Mockito.when(
-            Mocks.getValintapisteAsyncResource().getValintapisteet(Mockito.any(), Mockito.any()))
-        .thenReturn(Observable.just(new PisteetWithLastModified(Optional.empty(), v)));
+            Mocks.getValintapisteAsyncResource()
+                .getValintapisteetWithHakemusOidsAsFuture(Mockito.anyList(), Mockito.any()))
+        .thenReturn(
+            CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), v)));
 
     MockTarjontaAsyncService.setMockHaku(expectedHaku);
     MockApplicationAsyncResource.setResultByOid(expectedWrappers);
