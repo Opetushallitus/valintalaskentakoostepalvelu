@@ -15,7 +15,7 @@ public class ValintatapajonoRiviAsJonosijaConverter {
     j.setEtunimi(hakemus.getEtunimi());
     j.setSukunimi(hakemus.getSukunimi());
     j.setHakemusOid(hakemus.getOid());
-    j.setHakijaOid(hakemus.getPersonOid());
+    j.setHakijaOid(hakemus.getApplicationPersonOid());
     j.setJonosija(rivi.asJonosija());
     j.setMuokattu(false);
     j.setHarkinnanvarainen(false);
