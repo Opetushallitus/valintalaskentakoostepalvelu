@@ -241,7 +241,10 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
 
   @Override
   public String getApplicationPersonOid() {
-    return getPersonOid();
+    if (hakemus == null) {
+      return null;
+    }
+    return hakemus.getPersonOid();
   }
 
   @Override
