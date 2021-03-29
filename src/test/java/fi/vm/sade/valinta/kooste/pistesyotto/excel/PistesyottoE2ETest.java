@@ -55,7 +55,6 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,7 +156,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         POST, "/valintapiste-service/api/pisteet-with-hakemusoids", pisteetFromValintaPisteService);
   }
 
-  @Ignore
   @Test
   public void tuonnissaKirjoitetaanSuoritusrekisteriinjaValintaPisteServiceen() throws Throwable {
     final Semaphore suoritusCounter = new Semaphore(0);
@@ -204,7 +202,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     }
   }
 
-  @Ignore
   @Test
   public void tuontiOnnistuuKayttajalleJollaOnOikeudetHakukohteeseen() throws Throwable {
     final Semaphore suoritusCounter = new Semaphore(0);

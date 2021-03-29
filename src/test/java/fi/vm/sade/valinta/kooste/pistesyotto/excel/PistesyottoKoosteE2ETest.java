@@ -86,10 +86,8 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
   private static final ValintaperusteDTO kielikoeFi = new ValintaperusteDTO();
 

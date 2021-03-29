@@ -258,6 +258,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
+  @Profile("default")
   @Bean(name = "ValintapisteServiceApplicationSession")
   @Autowired
   public ApplicationSession getValintapisteServiceApplicationSession(
