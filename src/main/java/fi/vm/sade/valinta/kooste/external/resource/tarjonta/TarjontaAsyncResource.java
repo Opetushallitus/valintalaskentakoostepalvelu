@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValintaperusteetDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,5 +32,5 @@ public interface TarjontaAsyncResource {
 
   CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid);
 
-  CompletableFuture<HakukohdeValintaperusteetV1RDTO> findValintaperusteetByOid(String hakukohdeOid);
+  CompletableFuture<HakukohdeValintaperusteetDTO> findValintaperusteetByOid(String hakukohdeOid);
 }

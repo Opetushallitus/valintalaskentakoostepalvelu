@@ -9,7 +9,6 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.ErrorV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.GenericSearchParamsV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KomoV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
@@ -19,13 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Koulutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHaku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHakukohde;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaKoulutus;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaToteutus;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultRyhmaliitos;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.*;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
@@ -271,13 +264,13 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   }
 
   @Override
-  public CompletableFuture<HakukohdeValintaperusteetV1RDTO> findValintaperusteetByOid(
+  public CompletableFuture<HakukohdeValintaperusteetDTO> findValintaperusteetByOid(
       String hakukohdeOid) {
     return this.client
-        .<ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>>getJson(
+        .<ResultV1RDTO<HakukohdeValintaperusteetDTO>>getJson(
             urlConfiguration.url("tarjonta-service.hakukohde.valintaperusteet", hakukohdeOid),
             Duration.ofMinutes(5),
-            new TypeToken<ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>>() {}.getType())
+            new TypeToken<ResultV1RDTO<HakukohdeValintaperusteetDTO>>() {}.getType())
         .thenApplyAsync(ResultV1RDTO::getResult);
   }
 

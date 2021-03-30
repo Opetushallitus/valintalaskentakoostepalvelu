@@ -5,7 +5,6 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdekoodiDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohteenValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.MonikielinenTekstiDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -15,8 +14,11 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Koulutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Valintakoe;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.IterableUtil;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -279,10 +281,19 @@ public class SuoritaHakukohdeImportKomponentti {
       avainArvo.setArvo(kielikoetunniste);
       importTyyppi.getValintaperuste().add(avainArvo);
 
-      HakukohdeValintaperusteetV1RDTO valintaperusteet =
+      HakukohdeValintaperusteetDTO valintaperusteet =
           tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
 
       if (valintaperusteet != null) {
+
+        importTyyppi.setValintakoe(new ArrayList<>());
+        for (ValintakoeDTO valintakoeDTO : valintaperusteet.getValintakokeet()) {
+          HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
+          v.setOid(valintakoeDTO.getOid());
+          v.setTyyppiUri(valintakoeDTO.getTyyppiUri());
+          importTyyppi.getValintakoe().add(v);
+        }
+
         avainArvo = new AvainArvoDTO();
         avainArvo.setAvain("paasykoe_min");
         avainArvo.setArvo(valintaperusteet.getPaasykoeMin().toString());
