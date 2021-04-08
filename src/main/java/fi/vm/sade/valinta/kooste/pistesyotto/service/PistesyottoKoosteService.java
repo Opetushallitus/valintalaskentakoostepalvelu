@@ -159,8 +159,9 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
             hakemus ->
                 Observable.zip(
                     getValintaperusteet(hakemus),
-                    valintapisteAsyncResource.getValintapisteet(
-                        Collections.singletonList(hakemusOid), auditSession),
+                    Observable.fromFuture(
+                        valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
+                            Collections.singletonList(hakemusOid), auditSession)),
                     Observable.fromFuture(
                         valintalaskentaValintakoeAsyncResource.haeHakemukselle(hakemusOid)),
                     suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(
