@@ -30,8 +30,8 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
   }
 
   @Override
-  public CompletableFuture<OrganisaatioTyyppiHierarkia>
-      haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid) {
+  public CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(
+      String organisaatioOid) {
     return CompletableFuture.completedFuture(hierarkiaRef.get());
   }
 

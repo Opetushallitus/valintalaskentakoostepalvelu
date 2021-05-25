@@ -41,12 +41,12 @@ public class OrganisaatioAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public CompletableFuture<OrganisaatioTyyppiHierarkia>
-      haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(String organisaatioOid) {
+  public CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(
+      String organisaatioOid) {
     Map<String, String> parameters = new HashMap<>();
     parameters.put("oid", organisaatioOid);
     parameters.put("aktiiviset", Boolean.toString(true));
-    parameters.put("suunnitellut", Boolean.toString(false));
+    parameters.put("suunnitellut", Boolean.toString(true));
     parameters.put("lakkautetut", Boolean.toString(true));
     String url = getUrl("organisaatio-service.organisaatio.hierarkia.tyyppi", parameters);
 

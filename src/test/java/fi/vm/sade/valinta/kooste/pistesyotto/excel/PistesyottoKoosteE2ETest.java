@@ -603,7 +603,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
             "aktiiviset",
             "true",
             "suunnitellut",
-            "false",
+            "true",
             "lakkautetut",
             "true"));
   }
