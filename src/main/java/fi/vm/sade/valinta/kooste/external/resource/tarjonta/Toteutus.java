@@ -43,8 +43,8 @@ public class Toteutus {
   public Toteutus(KoutaToteutus dto) {
     this.oid = dto.oid;
     this.koulutusOid = dto.koulutusOid;
-    this.alkamiskausiUri = null; // TODO
-    this.alkamisvuosi = null;
+    this.alkamiskausiUri = dto.getKoulutuksenAlkamiskausi();
+    this.alkamisvuosi = dto.getKoulutuksenAlkamisvuosi();
     this.opetuskielet =
         dto.metadata.opetus.opetuskieliKoodiUrit.stream()
             .flatMap(
@@ -70,9 +70,6 @@ public class Toteutus {
                   }
                 })
             .collect(Collectors.toSet());
-    this.osaamisalaUris =
-        dto.metadata.osaamisalat.stream()
-            .map(osaamisala -> osaamisala.koodi)
-            .collect(Collectors.toSet());
+    this.osaamisalaUris = dto.getOsaamisalaUris();
   }
 }
