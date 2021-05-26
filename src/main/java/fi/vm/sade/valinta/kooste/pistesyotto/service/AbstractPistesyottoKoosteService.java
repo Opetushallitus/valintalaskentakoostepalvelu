@@ -581,7 +581,7 @@ public abstract class AbstractPistesyottoKoosteService {
               Optional<String> tarjoajaOid = hakukohde.getTarjoajaOids().stream().findFirst();
               if (tarjoajaOid.isPresent()) {
                 return organisaatioAsyncResource
-                    .haeOrganisaationTyyppiHierarkiaSisaltaenLakkautetut(tarjoajaOid.get())
+                    .haeOrganisaationTyyppiHierarkia(tarjoajaOid.get())
                     .thenCompose(
                         hierarkia -> {
                           if (hierarkia == null) {
