@@ -99,6 +99,35 @@ public class CasInterceptors {
         casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
+  @Bean(name = "OppijantunnistusCasInterceptor")
+  @Autowired
+  public AbstractPhaseInterceptor<Message> getOppijantunnistusCasInterceptor(
+      @Qualifier("CasHttpClient") HttpClient casHttpClient,
+      CookieManager cookieManager,
+      @Value("${cas.service.oppijan-tunnistus}") String targetService,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
+          String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
+          String appClientPassword) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    return new CasKoosteInterceptor(
+        new ApplicationSession(
+            HttpClients.defaultHttpClientBuilder(cookieManager).build(),
+            cookieManager,
+            CALLER_ID,
+            Duration.ofSeconds(10),
+            new CasSession(
+                casHttpClient,
+                Duration.ofSeconds(10),
+                CALLER_ID,
+                URI.create(ticketsUrl),
+                appClientUsername,
+                appClientPassword),
+            targetService,
+            "ring-session"),
+        true);
+  }
+
   @Bean(name = "ValintaperusteetCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getValintaperusteetCasInterceptor(
