@@ -52,6 +52,7 @@ cas.service.organisaatio-service=https://${host.virkailija}/organisaatio-service
 cas.service.ryhmasahkoposti-service=https://${host.virkailija}/ryhmasahkoposti-service/j_spring_cas_security_check
 cas.service.valintalaskentakoostepalvelu=https://${host.virkailija}/valintalaskentakoostepalvelu
 cas.service.valintalaskenta-service=https://${host.virkailija}/valintalaskenta-laskenta-service/j_spring_cas_security_check
+cas.service.oppijan-tunnistus=https://${host.virkailija}/oppijan-tunnistus/auth/cas
 cas.service.valintaperusteet-service=https://${host.virkailija}/valintaperusteet-service/j_spring_cas_security_check
 cas.service.viestintapalvelu=https://${host.virkailija}/viestintapalvelu/j_spring_cas_security_check
 cas.service.suoritusrekisteri=https://${host.virkailija}/suoritusrekisteri/j_spring_cas_security_check

@@ -10,8 +10,10 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource
     implements OppijantunnistusAsyncResource {
@@ -19,8 +21,9 @@ public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource
       LoggerFactory.getLogger(OppijantunnistusAsyncResourceImpl.class);
   private static final MediaType EML_TYPE = new MediaType("message", "rfc822");
 
-  public OppijantunnistusAsyncResourceImpl() {
-    super(TimeUnit.MINUTES.toMillis(20));
+  public OppijantunnistusAsyncResourceImpl(
+      @Qualifier("OppijantunnistusCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
+    super(TimeUnit.MINUTES.toMillis(20), casInterceptor);
   }
 
   @Override
