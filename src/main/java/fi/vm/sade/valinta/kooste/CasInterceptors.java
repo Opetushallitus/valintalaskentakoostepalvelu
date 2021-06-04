@@ -109,8 +109,23 @@ public class CasInterceptors {
           String appClientUsername,
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
           String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    return new CasKoosteInterceptor(
+        new ApplicationSession(
+            HttpClients.defaultHttpClientBuilder(cookieManager).build(),
+            cookieManager,
+            CALLER_ID,
+            Duration.ofSeconds(10),
+            new CasSession(
+                casHttpClient,
+                Duration.ofSeconds(10),
+                CALLER_ID,
+                URI.create(ticketsUrl),
+                appClientUsername,
+                appClientPassword),
+            targetService,
+            "ring-session"),
+        true);
   }
 
   @Bean(name = "ValintaperusteetCasInterceptor")
