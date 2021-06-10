@@ -683,6 +683,9 @@ public class HakemuksetConverterUtil {
   }
 
   private boolean hakukaudella(Haku haku, SuoritusJaArvosanatWrapper s) {
+    if (haku.isKoutaHaku())
+      return true; // TODO: Saako Koutan hakujen kanssa huomioida myös sellaiset suoritukset jotka
+    // eivät ole hakukaudella?
     DateTime valmistuminen = s.getValmistuminenAsDateTime();
     int hakuvuosi = haku.hakukausiVuosi;
     DateTime kStart = new DateTime(hakuvuosi, 1, 1, 0, 0).minus(1);

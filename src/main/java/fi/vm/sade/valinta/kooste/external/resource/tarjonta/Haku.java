@@ -83,4 +83,9 @@ public class Haku {
   public boolean isHakemuspalvelu() {
     return this.ataruLomakeAvain != null;
   }
+
+  public boolean isKoutaHaku() {
+    if (this.oid.startsWith("1.2.246.562.29.") && this.oid.length() >= 35) return true;
+    else return false;
+  }
 }
