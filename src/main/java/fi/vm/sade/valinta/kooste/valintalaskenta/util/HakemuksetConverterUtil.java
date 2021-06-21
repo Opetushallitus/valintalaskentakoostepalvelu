@@ -237,28 +237,28 @@ public class HakemuksetConverterUtil {
     if (ofNullable(haku.getKohdejoukkoUri())
         .filter(u -> u.startsWith("haunkohdejoukko_12"))
         .isPresent()) {
+      Boolean ensikertalainen = oppija.isEnsikertalainen();
       if (oppija.isEnsikertalainen() == null) {
         if (!hakijallaOnHenkilotunnus) {
-          return; // Henkilötunnuksettomilla hakijoilla ensikertalaisuuden tiedon puuttuminen on
-          // laillinen tila
+          ensikertalainen = true;
+        } else {
+          LOG.error(
+              "Hakijalta {} (hakemusOid={}) puuttui ensikertalaisuustieto hakukohteen {} laskennassa.",
+              hakemusDTO.getHakijaOid(),
+              hakemusDTO.getHakemusoid(),
+              hakukohdeOid);
+          throw new RuntimeException(
+              "Hakijalta "
+                  + hakemusDTO.getHakijaOid()
+                  + " (hakemusOid="
+                  + hakemusDTO.getHakemusoid()
+                  + ") puuttui ensikertalaisuustieto hakukohteen "
+                  + hakukohdeOid
+                  + " laskennassa.");
         }
-        LOG.error(
-            "Hakijalta {} (hakemusOid={}) puuttui ensikertalaisuustieto hakukohteen {} laskennassa.",
-            hakemusDTO.getHakijaOid(),
-            hakemusDTO.getHakemusoid(),
-            hakukohdeOid);
-        throw new RuntimeException(
-            "Hakijalta "
-                + hakemusDTO.getHakijaOid()
-                + " (hakemusOid="
-                + hakemusDTO.getHakemusoid()
-                + ") puuttui ensikertalaisuustieto hakukohteen "
-                + hakukohdeOid
-                + " laskennassa.");
       }
       merge.put(
-          ENSIKERTALAINEN,
-          new AvainArvoDTO(ENSIKERTALAINEN, String.valueOf(oppija.isEnsikertalainen())));
+          ENSIKERTALAINEN, new AvainArvoDTO(ENSIKERTALAINEN, String.valueOf(ensikertalainen)));
     }
   }
 
