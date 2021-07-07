@@ -591,6 +591,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     "Laskennan tuloksien haku epäonnistui virheeseen, yritetään uudelleen.", error);
                 return valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid, executor);
               } else {
+                LOG.info("Saatiin laskennan tulokset hakukohteelle " + hakukohdeOid);
                 return CompletableFuture.completedFuture(result);
               }
             })
