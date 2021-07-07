@@ -19,11 +19,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
@@ -84,7 +80,7 @@ public class JalkiohjauskirjeetKomponentti {
           String hakukohdeOid = hakutoive.getHakukohdeOid();
           List<SyotettyArvoDTO> arvot =
               syotetytArvot
-                  .get(hakukohdeOid)
+                  .getOrDefault(hakukohdeOid, Maps.newHashMap())
                   .getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
           Map<String, Object> tulokset =
               KirjeetUtil.getTuloksetMap(

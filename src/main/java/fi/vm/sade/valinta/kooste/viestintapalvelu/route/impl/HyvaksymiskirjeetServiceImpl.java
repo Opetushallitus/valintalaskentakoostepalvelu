@@ -682,10 +682,14 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
     CompletableFuture<Map<String, Koodi>> postinumerotF =
         koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
+    /*
     CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF =
         hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
+
+     */
+    Map<String, Map<String, List<SyotettyArvoDTO>>> syotetytArvot = new HashMap<>();
     return CompletableFuture.allOf(
-            maatjavaltiot1F, postinumerotF, hakijatF, hakemuksetF, hakukohteetF, syotetytArvotF)
+            maatjavaltiot1F, postinumerotF, hakijatF, hakemuksetF, hakukohteetF)
         .thenApplyAsync(
             v ->
                 JalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(
@@ -694,7 +698,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     jalkiohjauskirjeDTO.getKielikoodi(),
                     hakijatF.join(),
                     hakemuksetF.join(),
-                    syotetytArvotF.join(),
+                    syotetytArvot,
                     hakukohteetF.join(),
                     jalkiohjauskirjeDTO.getHakuOid(),
                     jalkiohjauskirjeDTO.getTemplateName(),
