@@ -584,8 +584,17 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
       String hakukohdeOid, Executor executor) {
     return this.valintalaskentaAsyncResource
         .laskennantulokset(hakukohdeOid, executor)
-        .exceptionally(
-            t -> this.valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid, executor).join())
+        .handle(
+            (result, error) -> {
+              if (error != null) {
+                LOG.error(
+                    "Laskennan tuloksien haku epäonnistui virheeseen, yritetään uudelleen.", error);
+                return valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid, executor);
+              } else {
+                return CompletableFuture.completedFuture(result);
+              }
+            })
+        .thenCompose(Function.identity())
         .thenApplyAsync(
             valinnanvaiheet ->
                 valinnanvaiheet.stream()
