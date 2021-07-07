@@ -89,7 +89,7 @@ public class HyvaksymiskirjeetKomponentti {
         for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
           List<SyotettyArvoDTO> arvot =
               syotetytArvot
-                  .get(hakutoive.getHakukohdeOid())
+                  .getOrDefault(hakutoive.getHakukohdeOid(), Maps.newHashMap())
                   .getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
           Map<String, Object> tulokset =
               KirjeetUtil.getTuloksetMap(

@@ -45,11 +45,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -633,15 +629,19 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     CompletableFuture<String> vakiosisaltoF =
         this.haeHakukohteenVakiosisalto(
             hyvaksymiskirjeDTO.getSisalto(), hyvaksymiskirjeDTO.getHakukohdeOid());
+    /*
     CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF =
         hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
+
+     */
+    Map<String, Map<String, List<SyotettyArvoDTO>>> syotetytArvot = new HashMap<>();
     return CompletableFuture.allOf(
             maatjavaltiot1F,
             postinumerotF,
             haunParametritF,
             hakijatF,
             hakemuksetF,
-            syotetytArvotF,
+            // syotetytArvotF,
             hakukohteetF,
             osoitteetF,
             vakiosisaltoF)
@@ -654,7 +654,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     hakukohteetF.join(),
                     hakijatF.join(),
                     hakemuksetF.join(),
-                    syotetytArvotF.join(),
+                    syotetytArvot,
                     hyvaksymiskirjeDTO.getHakukohdeOid(),
                     hyvaksymiskirjeDTO.getHakuOid(),
                     Optional.ofNullable(asiointikieli),
