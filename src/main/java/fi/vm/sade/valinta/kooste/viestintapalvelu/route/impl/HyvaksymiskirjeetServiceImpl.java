@@ -584,6 +584,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
       String hakukohdeOid, Executor executor) {
     return this.valintalaskentaAsyncResource
         .laskennantulokset(hakukohdeOid, executor)
+        .exceptionally(
+            t -> this.valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid, executor).join())
         .thenApplyAsync(
             valinnanvaiheet ->
                 valinnanvaiheet.stream()
@@ -601,7 +603,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
   private CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>>
       hakijoidenSyotetytArvot(List<HakijaDTO> hakijat) {
-    Executor executor = createExecutorService(2, "syotetytArvotByHakukohde");
+    Executor executor = createExecutorService(1, "syotetytArvotByHakukohde");
     return CompletableFutureUtil.sequence(
         hakijat.stream()
             .flatMap(hakija -> hakija.getHakutoiveet().stream())
