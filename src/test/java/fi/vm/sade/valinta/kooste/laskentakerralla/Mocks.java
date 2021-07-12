@@ -7,12 +7,14 @@ import static org.mockito.Mockito.spy;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.KoskiService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
@@ -46,6 +48,7 @@ public class Mocks {
   static KoskiService koskiService = mock(KoskiService.class);
   static HakemuksetConverterUtil hakemuksetConverterUtil =
       new HakemuksetConverterUtil("9999-12-31");
+  static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource = new MockOppijanumerorekisteriAsyncResource();
   static LaskentaActorSystem laskentaActorSystem =
       spy(
           new LaskentaActorSystem(
@@ -66,7 +69,8 @@ public class Mocks {
                   tarjontaAsyncResource,
                   valintapisteAsyncResource,
                   koskiService,
-                  hakemuksetConverterUtil),
+                  hakemuksetConverterUtil,
+                  oppijanumerorekisteriAsyncResource),
               8));
 
   public static void resetMocks() {

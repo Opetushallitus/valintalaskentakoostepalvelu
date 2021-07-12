@@ -14,6 +14,8 @@ import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloViiteDto;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -32,15 +34,10 @@ import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -72,6 +69,7 @@ public class LaskentaActorFactory {
   private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
   private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
   private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
+  private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final TarjontaAsyncResource tarjontaAsyncResource;
   private final KoskiService koskiService;
   private final HakemuksetConverterUtil hakemuksetConverterUtil;
@@ -89,7 +87,8 @@ public class LaskentaActorFactory {
       TarjontaAsyncResource tarjontaAsyncResource,
       ValintapisteAsyncResource valintapisteAsyncResource,
       KoskiService koskiService,
-      HakemuksetConverterUtil hakemuksetConverterUtil) {
+      HakemuksetConverterUtil hakemuksetConverterUtil,
+      OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource) {
     this.splittaus = splittaus;
     this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
     this.applicationAsyncResource = applicationAsyncResource;
@@ -101,6 +100,7 @@ public class LaskentaActorFactory {
     this.valintapisteAsyncResource = valintapisteAsyncResource;
     this.koskiService = koskiService;
     this.hakemuksetConverterUtil = hakemuksetConverterUtil;
+    this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
   }
 
   private Pair<String, Collection<String>> headAndTail(Collection<String> c) {
@@ -606,21 +606,38 @@ public class LaskentaActorFactory {
               () -> applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
               retryHakemuksetAndOppijat);
     }
+    CompletableFuture<List<HenkiloViiteDto>> henkiloViitteet = hakemukset.thenComposeAsync(hws -> {
+      Set<String> oppijaOids =
+        hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toSet());
+      if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
+        return CompletableFuture.completedFuture(oppijaOids.stream().map(oid -> new HenkiloViiteDto(oid, oid)).collect(Collectors.toList()));
+      } else {
+        return createResurssiFuture(
+          tunniste,
+          "oppijanumerorekisteri-service.s2s.duplicatesByPersonOids",
+          () -> oppijanumerorekisteriAsyncResource.haeHenkiloOidDuplikaatit(oppijaOids),
+          retryHakemuksetAndOppijat);
+      }
+    });
 
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
-        hakemukset.thenComposeAsync(
+      henkiloViitteet.thenComposeAsync(
             hws -> {
+              Map<String, String> masterToOriginal = hws.stream().collect(Collectors.toMap(HenkiloViiteDto::getMasterOid, HenkiloViiteDto::getHenkiloOid));
               List<String> oppijaOids =
-                  hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList());
+                new ArrayList<>(masterToOriginal.keySet());
               LOG.info(
                   "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
-                  oppijaOids.toString(),
+                  oppijaOids,
                   hakukohdeOid);
               return createResurssiFuture(
                   tunniste,
                   "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
                   () -> suoritusrekisteriAsyncResource.getSuorituksetByOppijas(oppijaOids, hakuOid),
-                  retryHakemuksetAndOppijat);
+                  retryHakemuksetAndOppijat).thenApply(oppijat -> {
+                    oppijat.forEach(oppija -> oppija.setOppijanumero(masterToOriginal.get(oppija.getOppijanumero())));
+                    return oppijat;
+              });
             });
 
     CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet =
