@@ -48,7 +48,8 @@ public class Mocks {
   static KoskiService koskiService = mock(KoskiService.class);
   static HakemuksetConverterUtil hakemuksetConverterUtil =
       new HakemuksetConverterUtil("9999-12-31");
-  static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource = new MockOppijanumerorekisteriAsyncResource();
+  static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
+      new MockOppijanumerorekisteriAsyncResource();
   static LaskentaActorSystem laskentaActorSystem =
       spy(
           new LaskentaActorSystem(

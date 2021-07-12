@@ -68,7 +68,8 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
 
   @Override
   public CompletableFuture<List<HenkiloViiteDto>> haeHenkiloOidDuplikaatit(Set<String> personOids) {
-    return CompletableFuture.completedFuture(personOids.stream().map(oid -> new HenkiloViiteDto(oid, oid)).collect(Collectors.toList()));
+    return CompletableFuture.completedFuture(
+        personOids.stream().map(oid -> new HenkiloViiteDto(oid, oid)).collect(Collectors.toList()));
   }
 
   public static HenkiloPerustietoDto toHenkiloPerustietoDto(HenkiloCreateDTO proto) {
