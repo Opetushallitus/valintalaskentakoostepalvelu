@@ -86,7 +86,8 @@ public class ValintalaskentaTest {
   private final KoskiService koskiService = mock(KoskiService.class);
   private final HakemuksetConverterUtil hakemuksetConverterUtil =
       new HakemuksetConverterUtil("9999-12-31");
-  static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource = new MockOppijanumerorekisteriAsyncResource();
+  static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
+      new MockOppijanumerorekisteriAsyncResource();
   private final LaskentaActorSystem laskentaActorSystem =
       new LaskentaActorSystem(
           seurantaAsyncResource,

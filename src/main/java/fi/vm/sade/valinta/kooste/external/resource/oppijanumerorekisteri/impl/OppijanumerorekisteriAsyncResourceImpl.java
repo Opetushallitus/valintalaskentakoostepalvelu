@@ -47,16 +47,16 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
         Entity.entity(gson().toJson(henkiloPrototyypit), MediaType.APPLICATION_JSON_TYPE),
         ACCEPT_JSON);
   }
+
   public CompletableFuture<List<HenkiloViiteDto>> haeHenkiloOidDuplikaatit(Set<String> personOids) {
     String url = getUrl("oppijanumerorekisteri-service.s2s.duplicatesByPersonOids");
-    CompletableFuture<List<HenkiloViiteDto>> fut = this.client.postJson(
-      url,
-      Duration.ofHours(1),
-      personOids,
-      new TypeToken<Set<String>>() {
-      }.getType(),
-      new TypeToken<List<HenkiloViiteDto>>() {
-      }.getType());
+    CompletableFuture<List<HenkiloViiteDto>> fut =
+        this.client.postJson(
+            url,
+            Duration.ofHours(1),
+            personOids,
+            new TypeToken<Set<String>>() {}.getType(),
+            new TypeToken<List<HenkiloViiteDto>>() {}.getType());
     return fut;
   }
 

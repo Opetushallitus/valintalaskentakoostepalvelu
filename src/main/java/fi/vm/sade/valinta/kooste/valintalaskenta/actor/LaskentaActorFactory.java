@@ -34,7 +34,6 @@ import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
-import io.reactivex.Completable;
 import io.reactivex.Observable;
 import java.math.BigDecimal;
 import java.util.*;
@@ -606,38 +605,53 @@ public class LaskentaActorFactory {
               () -> applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid),
               retryHakemuksetAndOppijat);
     }
-    CompletableFuture<List<HenkiloViiteDto>> henkiloViitteet = hakemukset.thenComposeAsync(hws -> {
-      Set<String> oppijaOids =
-        hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toSet());
-      if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
-        return CompletableFuture.completedFuture(oppijaOids.stream().map(oid -> new HenkiloViiteDto(oid, oid)).collect(Collectors.toList()));
-      } else {
-        return createResurssiFuture(
-          tunniste,
-          "oppijanumerorekisteri-service.s2s.duplicatesByPersonOids",
-          () -> oppijanumerorekisteriAsyncResource.haeHenkiloOidDuplikaatit(oppijaOids),
-          retryHakemuksetAndOppijat);
-      }
-    });
+    CompletableFuture<List<HenkiloViiteDto>> henkiloViitteet =
+        hakemukset.thenComposeAsync(
+            hws -> {
+              Set<String> oppijaOids =
+                  hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toSet());
+              if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
+                return CompletableFuture.completedFuture(
+                    oppijaOids.stream()
+                        .map(oid -> new HenkiloViiteDto(oid, oid))
+                        .collect(Collectors.toList()));
+              } else {
+                return createResurssiFuture(
+                    tunniste,
+                    "oppijanumerorekisteri-service.s2s.duplicatesByPersonOids",
+                    () -> oppijanumerorekisteriAsyncResource.haeHenkiloOidDuplikaatit(oppijaOids),
+                    retryHakemuksetAndOppijat);
+              }
+            });
 
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
-      henkiloViitteet.thenComposeAsync(
+        henkiloViitteet.thenComposeAsync(
             hws -> {
-              Map<String, String> masterToOriginal = hws.stream().collect(Collectors.toMap(HenkiloViiteDto::getMasterOid, HenkiloViiteDto::getHenkiloOid));
-              List<String> oppijaOids =
-                new ArrayList<>(masterToOriginal.keySet());
+              Map<String, String> masterToOriginal =
+                  hws.stream()
+                      .collect(
+                          Collectors.toMap(
+                              HenkiloViiteDto::getMasterOid, HenkiloViiteDto::getHenkiloOid));
+              List<String> oppijaOids = new ArrayList<>(masterToOriginal.keySet());
               LOG.info(
                   "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
                   oppijaOids,
                   hakukohdeOid);
               return createResurssiFuture(
-                  tunniste,
-                  "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
-                  () -> suoritusrekisteriAsyncResource.getSuorituksetByOppijas(oppijaOids, hakuOid),
-                  retryHakemuksetAndOppijat).thenApply(oppijat -> {
-                    oppijat.forEach(oppija -> oppija.setOppijanumero(masterToOriginal.get(oppija.getOppijanumero())));
-                    return oppijat;
-              });
+                      tunniste,
+                      "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
+                      () ->
+                          suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+                              oppijaOids, hakuOid),
+                      retryHakemuksetAndOppijat)
+                  .thenApply(
+                      oppijat -> {
+                        oppijat.forEach(
+                            oppija ->
+                                oppija.setOppijanumero(
+                                    masterToOriginal.get(oppija.getOppijanumero())));
+                        return oppijat;
+                      });
             });
 
     CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet =
