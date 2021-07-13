@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
@@ -34,6 +35,32 @@ public class KoodistoAsyncResourceImpl implements KoodistoAsyncResource {
     query.put("onlyValidKoodis", true);
     return this.client.getJson(
         this.urlConfiguration.url("koodisto-service.json.oid.koodi", koodistoUri, query),
+        Duration.ofMinutes(1),
+        new TypeToken<List<Koodi>>() {}.getType());
+  }
+
+  @Override
+  public CompletableFuture<List<Koodi>> ylakoodit(String koodiUri) {
+    String[] parts = koodiUri.split("#");
+    Map<String, String> parameters = new HashMap<>();
+    if (parts.length > 1) {
+      parameters.put("koodiVersio", parts[1]);
+    }
+    return this.client.getJson(
+        this.urlConfiguration.url("koodisto-service.json.koodi.ylakoodit", parts[0], parameters),
+        Duration.ofMinutes(1),
+        new TypeToken<List<Koodi>>() {}.getType());
+  }
+
+  @Override
+  public CompletableFuture<List<Koodi>> alakoodit(String koodiUri) {
+    String[] parts = koodiUri.split("#");
+    Map<String, String> parameters = new HashMap<>();
+    if (parts.length > 1) {
+      parameters.put("koodiVersio", parts[1]);
+    }
+    return this.client.getJson(
+        this.urlConfiguration.url("koodisto-service.json.koodi.alakoodit", parts[0], parameters),
         Duration.ofMinutes(1),
         new TypeToken<List<Koodi>>() {}.getType());
   }

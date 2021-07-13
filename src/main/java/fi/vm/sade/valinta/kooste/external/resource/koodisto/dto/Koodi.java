@@ -4,6 +4,7 @@ import java.util.List;
 
 public class Koodi {
 
+  private String koodiUri;
   private String koodiArvo;
   private String tila;
   private int versio;
@@ -55,5 +56,9 @@ public class Koodi {
 
   public String getKoodistoUri() {
     return koodisto.getKoodistoUri();
+  }
+
+  public String getKoodiUri() {
+    return koodiUri;
   }
 }

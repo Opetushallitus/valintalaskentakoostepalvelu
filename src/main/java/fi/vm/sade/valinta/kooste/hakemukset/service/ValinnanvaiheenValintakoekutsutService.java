@@ -76,11 +76,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                 Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
                     .flatMap(
                         haku -> {
-                          if (haku.getAtaruLomakeAvain() == null) {
-                            return Observable.fromFuture(
-                                applicationAsyncResource.getApplicationsByOidsWithPOST(
-                                    hakuOid, new ArrayList<>(hakukohdeOidit)));
-                          } else {
+                          if (haku.isHakemuspalvelu()) {
                             return Observable.fromIterable(hakukohdeOidit)
                                 .flatMap(
                                     hakukohdeOid ->
@@ -91,6 +87,10 @@ public class ValinnanvaiheenValintakoekutsutService {
                                 .distinct(HakemusWrapper::getOid)
                                 .toList()
                                 .toObservable();
+                          } else {
+                            return Observable.fromFuture(
+                                applicationAsyncResource.getApplicationsByOidsWithPOST(
+                                    hakuOid, new ArrayList<>(hakukohdeOidit)));
                           }
                         })
                     .subscribe(

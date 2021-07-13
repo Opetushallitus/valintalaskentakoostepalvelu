@@ -7,7 +7,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -15,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -136,7 +136,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         this.smallBatchExecutor,
         prosessi -> {
           CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF =
-              hakemuksetByOids(hakuOid, hakemusOids);
+              tarjontaAsyncResource
+                  .haeHaku(hakuOid)
+                  .thenComposeAsync(haku -> hakemuksetByOids(haku, hakemusOids));
           CompletableFuture<List<HakijaDTO>> hakijatF =
               hakijatByHakemusOids(hakuOid, hakemusOids)
                   .thenComposeAsync(
@@ -174,29 +176,34 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
   public ProsessiId jalkiohjauskirjeetHakemuksille(
       JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids) {
     String hakuOid = jalkiohjauskirjeDTO.getHakuOid();
-    boolean isKkHaku = isKkHaku(hakuOid);
     return this.yhdenKirjeeranProsessi(
         this.smallBatchExecutor,
-        prosessi -> {
-          CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF =
-              hakemuksetByOids(hakuOid, hakemusOids);
-          CompletableFuture<List<HakijaDTO>> hakijatF =
-              hakijatByHakemusOids(hakuOid, hakemusOids)
-                  .thenComposeAsync(
-                      hakijat ->
-                          hakemuksetF.thenApplyAsync(
-                              hakemukset ->
-                                  hylatytHakijat(
-                                      hakijat, hakemukset, jalkiohjauskirjeDTO.getKielikoodi())));
-          return muodostaJalkiohjauskirjeet(
-              prosessi,
-              hakijatF,
-              hakemuksetF,
-              jalkiohjauskirjeDTO,
-              false,
-              isKkHaku,
-              Collections.singletonList(ContentStructureType.letter));
-        },
+        prosessi ->
+            tarjontaAsyncResource
+                .haeHaku(hakuOid)
+                .thenComposeAsync(
+                    haku -> {
+                      CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF =
+                          hakemuksetByOids(haku, hakemusOids);
+                      CompletableFuture<List<HakijaDTO>> hakijatF =
+                          hakijatByHakemusOids(hakuOid, hakemusOids)
+                              .thenComposeAsync(
+                                  hakijat ->
+                                      hakemuksetF.thenApplyAsync(
+                                          hakemukset ->
+                                              hylatytHakijat(
+                                                  hakijat,
+                                                  hakemukset,
+                                                  jalkiohjauskirjeDTO.getKielikoodi())));
+                      return muodostaJalkiohjauskirjeet(
+                          prosessi,
+                          hakijatF,
+                          hakemuksetF,
+                          jalkiohjauskirjeDTO,
+                          false,
+                          haku.isKorkeakouluhaku(),
+                          Collections.singletonList(ContentStructureType.letter));
+                    }),
         String.format(
             "Aloitetaan jälkiohjauskirjeiden muodostaminen %d hakemukselle", hakemusOids.size()),
         String.format(
@@ -289,11 +296,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
           CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF =
               kaikkiHakijatF.thenComposeAsync(
                   hakijat ->
-                      hakemuksetByOids(
-                          hakuOid,
-                          hakijat.stream()
-                              .map(HakijaDTO::getHakemusOid)
-                              .collect(Collectors.toList())));
+                      tarjontaAsyncResource
+                          .haeHaku(hakuOid)
+                          .thenComposeAsync(
+                              haku ->
+                                  hakemuksetByOids(
+                                      haku,
+                                      hakijat.stream()
+                                          .map(HakijaDTO::getHakemusOid)
+                                          .collect(Collectors.toList()))));
           CompletableFuture<List<HakijaDTO>> hakijatF =
               kaikkiHakijatF.thenComposeAsync(
                   hakijat ->
@@ -324,35 +335,40 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
   @Override
   public ProsessiId jalkiohjauskirjeetHaulle(JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
     String hakuOid = jalkiohjauskirjeDTO.getHakuOid();
-    boolean isKkHaku = isKkHaku(hakuOid);
     String asiointikieli = jalkiohjauskirjeDTO.getKielikoodi();
     return this.yhdenKirjeeranProsessi(
         this.bigBatchExecutor,
-        prosessi -> {
-          CompletableFuture<List<HakijaDTO>> kaikkiHakijatF =
-              valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(hakuOid);
-          CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF =
-              kaikkiHakijatF.thenComposeAsync(
-                  hakijat ->
-                      hakemuksetByOids(
-                          hakuOid,
-                          hakijat.stream()
-                              .map(HakijaDTO::getHakemusOid)
-                              .collect(Collectors.toList())));
-          CompletableFuture<List<HakijaDTO>> hakijatF =
-              kaikkiHakijatF.thenComposeAsync(
-                  hakijat ->
-                      hakemuksetF.thenApplyAsync(
-                          hakemukset -> hylatytHakijat(hakijat, hakemukset, asiointikieli)));
-          return muodostaJalkiohjauskirjeet(
-              prosessi,
-              hakijatF,
-              hakemuksetF,
-              jalkiohjauskirjeDTO,
-              true,
-              isKkHaku,
-              getContentStructureTypesForHaunJalkiohjauskirjeet(isKkHaku));
-        },
+        prosessi ->
+            tarjontaAsyncResource
+                .haeHaku(hakuOid)
+                .thenComposeAsync(
+                    haku -> {
+                      CompletableFuture<List<HakijaDTO>> kaikkiHakijatF =
+                          valintaTulosServiceAsyncResource.getHakijatIlmanKoulutuspaikkaa(hakuOid);
+                      CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF =
+                          kaikkiHakijatF.thenComposeAsync(
+                              hakijat ->
+                                  hakemuksetByOids(
+                                      haku,
+                                      hakijat.stream()
+                                          .map(HakijaDTO::getHakemusOid)
+                                          .collect(Collectors.toList())));
+                      CompletableFuture<List<HakijaDTO>> hakijatF =
+                          kaikkiHakijatF.thenComposeAsync(
+                              hakijat ->
+                                  hakemuksetF.thenApplyAsync(
+                                      hakemukset ->
+                                          hylatytHakijat(hakijat, hakemukset, asiointikieli)));
+                      return muodostaJalkiohjauskirjeet(
+                          prosessi,
+                          hakijatF,
+                          hakemuksetF,
+                          jalkiohjauskirjeDTO,
+                          true,
+                          haku.isKorkeakouluhaku(),
+                          getContentStructureTypesForHaunJalkiohjauskirjeet(
+                              haku.isKorkeakouluhaku()));
+                    }),
         String.format(
             "Aloitetaan haun %s jälkiohjauskirjeiden muodostaminen asiointikielelle %s",
             hakuOid, asiointikieli),
@@ -389,11 +405,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             CompletableFuture<Map<String, HakemusWrapper>> hakemuksetF =
                 hakijatF.thenComposeAsync(
                     hakijat ->
-                        hakemuksetByOids(
-                            hakuOid,
-                            hakijat.stream()
-                                .map(HakijaDTO::getHakemusOid)
-                                .collect(Collectors.toList())));
+                        tarjontaAsyncResource
+                            .haeHaku(hakuOid)
+                            .thenComposeAsync(
+                                haku ->
+                                    hakemuksetByOids(
+                                        haku,
+                                        hakijat.stream()
+                                            .map(HakijaDTO::getHakemusOid)
+                                            .collect(Collectors.toList()))));
             CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF =
                 hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
             CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF =
@@ -556,25 +576,21 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         .haeHaku(hakuOid)
         .thenComposeAsync(
             haku ->
-                haku.getAtaruLomakeAvain() == null
-                    ? applicationAsyncResource.getApplicationsByOidsWithPOST(
-                        hakuOid, Collections.singletonList(hakukohdeOid))
-                    : ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                haku.isHakemuspalvelu()
+                    ? ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid)
+                    : applicationAsyncResource.getApplicationsByOidsWithPOST(
+                        hakuOid, Collections.singletonList(hakukohdeOid)))
         .thenApplyAsync(
             hakemukset ->
                 hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
   }
 
   private CompletableFuture<Map<String, HakemusWrapper>> hakemuksetByOids(
-      String hakuOid, List<String> hakemusOids) {
-    return tarjontaAsyncResource
-        .haeHaku(hakuOid)
-        .thenComposeAsync(
-            haku ->
-                haku.getAtaruLomakeAvain() == null
-                    ? applicationAsyncResource.getApplicationsByhakemusOidsInParts(
-                        hakuOid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS)
-                    : ataruAsyncResource.getApplicationsByOids(hakemusOids))
+      Haku haku, List<String> hakemusOids) {
+    return (haku.isHakemuspalvelu()
+            ? ataruAsyncResource.getApplicationsByOids(hakemusOids)
+            : applicationAsyncResource.getApplicationsByhakemusOidsInParts(
+                haku.oid, hakemusOids, ApplicationAsyncResource.DEFAULT_KEYS))
         .thenApplyAsync(
             hakemukset ->
                 hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h)));
@@ -819,12 +835,21 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         .haeHakukohde(hakukohdeOid)
         .thenComposeAsync(
             hakukohde ->
-                viestintapalveluAsyncResource.haeKirjepohja(
-                    hakukohde.getHakuOid(),
-                    hakukohde.getTarjoajaOids().iterator().next(),
-                    "hyvaksymiskirje",
-                    KirjeetHakukohdeCache.getOpetuskieli(hakukohde.getOpetusKielet()),
-                    hakukohde.getOid()))
+                CompletableFutureUtil.sequence(
+                        hakukohde.toteutusOids.stream()
+                            .map(tarjontaAsyncResource::haeToteutus)
+                            .collect(Collectors.toList()))
+                    .thenComposeAsync(
+                        toteutukset ->
+                            viestintapalveluAsyncResource.haeKirjepohja(
+                                hakukohde.hakuOid,
+                                hakukohde.tarjoajaOids.iterator().next(),
+                                "hyvaksymiskirje",
+                                KirjeetHakukohdeCache.getOpetuskieli(
+                                    toteutukset.stream()
+                                        .flatMap(toteutus -> toteutus.opetuskielet.stream())
+                                        .collect(Collectors.toList())),
+                                hakukohde.oid)))
         .thenComposeAsync(
             kirjepohjat ->
                 kirjepohjat.stream()
@@ -918,12 +943,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
               }
               return Observable.empty();
             });
-  }
-
-  private boolean isKkHaku(String hakuOid) {
-    HakuV1RDTO hakuDTO = tarjontaAsyncResource.haeHaku(hakuOid).join();
-    boolean isKkHaku = hakuDTO.getKohdejoukkoUri().startsWith("haunkohdejoukko_12");
-    return isKkHaku;
   }
 
   private List<ContentStructureType> getContentStructureTypesForHaunJalkiohjauskirjeet(

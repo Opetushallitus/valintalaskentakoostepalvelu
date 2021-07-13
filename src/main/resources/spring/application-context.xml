@@ -195,54 +195,6 @@
 				<ref bean="ophRequestHeaders"/>
 			</jaxrs-client:outInterceptors>
 		</jaxrs-client:client>
-		<jaxrs-client:client id="TarjontaServiceRestClient"
-							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
-							 serviceClass="fi.vm.sade.tarjonta.service.resources.HakukohdeResource"
-							 inheritHeaders="true">
-			<jaxrs-client:providers>
-				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
-				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-			</jaxrs-client:providers>
-			<jaxrs-client:outInterceptors>
-				<ref bean="ophRequestHeaders"/>
-			</jaxrs-client:outInterceptors>
-		</jaxrs-client:client>
-        <jaxrs-client:client id="TarjontaServiceKomotoRestClient"
-							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
-							 serviceClass="fi.vm.sade.tarjonta.service.resources.KomotoResource"
-							 inheritHeaders="true">
-			<jaxrs-client:providers>
-				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
-				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-			</jaxrs-client:providers>
-			<jaxrs-client:outInterceptors>
-				<ref bean="ophRequestHeaders"/>
-			</jaxrs-client:outInterceptors>
-		</jaxrs-client:client>
-		<jaxrs-client:client id="TarjontaHakuResourceRestClient"
-							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
-							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource"
-							 inheritHeaders="true">
-			<jaxrs-client:providers>
-				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
-				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-			</jaxrs-client:providers>
-			<jaxrs-client:outInterceptors>
-				<ref bean="ophRequestHeaders"/>
-			</jaxrs-client:outInterceptors>
-		</jaxrs-client:client>
-		<jaxrs-client:client id="HakukohdeV1ResourceClient"
-							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
-							 serviceClass="fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper"
-							 inheritHeaders="true">
-			<jaxrs-client:providers>
-				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-			</jaxrs-client:providers>
-			<jaxrs-client:outInterceptors>
-				<ref bean="ophRequestHeaders"/>
-			</jaxrs-client:outInterceptors>
-		</jaxrs-client:client>
 		<jaxws:client id="tarjontaServiceClient"
 					  serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
 					  address="${valintalaskentakoostepalvelu.tarjontaService.url}">

@@ -1,13 +1,13 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import java.util.Date;
 
 public interface PaivamaaraSource {
 
-  Date lukuvuosi(HakuV1RDTO haku, String hakukohdeOid);
+  Date lukuvuosi(Haku haku, String hakukohdeOid);
 
-  Date poimintapaivamaara(HakuV1RDTO haku);
+  Date poimintapaivamaara(Haku haku);
 
-  Date valintapaivamaara(HakuV1RDTO haku);
+  Date valintapaivamaara(Haku haku);
 }

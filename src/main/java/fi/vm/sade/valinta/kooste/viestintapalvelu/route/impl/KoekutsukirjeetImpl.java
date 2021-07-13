@@ -9,9 +9,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
@@ -37,7 +37,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,10 +71,11 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
   @Override
   public void koekutsukirjeetHakemuksille(
       KirjeProsessi prosessi, KoekutsuDTO koekutsu, Collection<String> hakemusOids) {
-    ((StringUtils.isEmpty(koekutsu.getHaku().getAtaruLomakeAvain()))
-            ? applicationAsyncResource.getApplicationsByHakemusOids(Lists.newArrayList(hakemusOids))
-            : Observable.fromFuture(
-                ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids))))
+    (koekutsu.getHaku().isHakemuspalvelu()
+            ? Observable.fromFuture(
+                ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids)))
+            : applicationAsyncResource.getApplicationsByHakemusOids(
+                Lists.newArrayList(hakemusOids)))
         .subscribeOn(Schedulers.newThread())
         .subscribe(
             koekutsukirjeiksi(prosessi, koekutsu),
@@ -93,10 +93,10 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
     final Observable<List<ValintakoeDTO>> valintakokeetObservable =
         valintakoeResource.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
     final Observable<List<HakemusWrapper>> hakemuksetObservable =
-        ((StringUtils.isEmpty(koekutsu.getHaku().getAtaruLomakeAvain()))
+        (!koekutsu.getHaku().isHakemuspalvelu()
             ? Observable.fromFuture(
                 applicationAsyncResource.getApplicationsByOid(
-                    koekutsu.getHaku().getOid(), koekutsu.getHakukohdeOid()))
+                    koekutsu.getHaku().oid, koekutsu.getHakukohdeOid()))
             : Observable.fromFuture(
                 ataruAsyncResource.getApplicationsByHakukohde(koekutsu.getHakukohdeOid())));
 
@@ -165,18 +165,18 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
   }
 
   private Stream<HakemusWrapper> getHakukohteenUlkopuolisetHakemukset(
-      List<HakemusWrapper> hakemukset, Set<String> osallistujienHakemusOidit, HakuV1RDTO haku) {
+      List<HakemusWrapper> hakemukset, Set<String> osallistujienHakemusOidit, Haku haku) {
     Set<String> hakemusOids =
         hakemukset.stream().map(HakemusWrapper::getOid).collect(Collectors.toSet());
     Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
     hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
     if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
-      return ((StringUtils.isEmpty(haku.getAtaruLomakeAvain()))
-              ? applicationAsyncResource.getApplicationsByHakemusOids(
-                  Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat))
-              : Observable.fromFuture(
+      return (haku.isHakemuspalvelu()
+              ? Observable.fromFuture(
                   ataruAsyncResource.getApplicationsByOids(
-                      Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat))))
+                      Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat)))
+              : applicationAsyncResource.getApplicationsByHakemusOids(
+                  Lists.newArrayList(hakukohteenUlkopuolisetKoekutsuttavat)))
           .timeout(30, SECONDS).blockingFirst().stream();
     } else {
       return Stream.empty();
@@ -268,7 +268,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
         LetterBatch letterBatch =
             koekutsukirjeetKomponentti.valmistaKoekutsukirjeet(
                 hakemukset,
-                koekutsu.getHaku().getOid(),
+                koekutsu.getHaku().oid,
                 koekutsu.getHakukohdeOid(),
                 hakemusOidJaHakijanMuutHakutoiveOids,
                 koekutsu.getLetterBodyText(),

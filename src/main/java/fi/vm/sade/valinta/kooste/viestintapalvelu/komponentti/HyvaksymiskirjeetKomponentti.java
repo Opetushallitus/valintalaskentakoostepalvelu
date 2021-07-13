@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ public class HyvaksymiskirjeetKomponentti {
                 ? hyvaksytynHakutoiveenHakukohdeOid(hakija)
                 : hakukohdeOidFromRequest;
         MetaHakukohde hyvaksyttyMeta = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-        Teksti koulu = hyvaksyttyMeta.getTarjoajaNimi();
+        List<Teksti> koulu = hyvaksyttyMeta.getTarjoajaNimet();
         Teksti koulutus = hyvaksyttyMeta.getHakukohdeNimi();
         String preferoituKielikoodi = asiointikieli.orElse(hyvaksyttyMeta.getOpetuskieli());
         String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
@@ -132,7 +133,12 @@ public class HyvaksymiskirjeetKomponentti {
         replacements.put("tulokset", tulosList);
         replacements.put(
             "koulu",
-            koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)));
+            koulu.stream()
+                .map(
+                    t ->
+                        t.getTeksti(
+                            preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)))
+                .collect(Collectors.joining(" - ")));
         Optional<Osoite> hakijapalveluidenOsoite =
             hakukohdeJaHakijapalveluidenOsoite.get(hakukohdeOid);
         if (hakijapalveluidenOsoite != null) {
@@ -159,7 +165,12 @@ public class HyvaksymiskirjeetKomponentti {
                 preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
         replacements.put(
             "tarjoaja",
-            koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)));
+            koulu.stream()
+                .map(
+                    t ->
+                        t.getTeksti(
+                            preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)))
+                .collect(Collectors.joining(" - ")));
         replacements.put(
             "ohjeetUudelleOpiskelijalle", hyvaksyttyMeta.getOhjeetUudelleOpiskelijalle());
         replacements.put("syntymaaika", hakemus.getSyntymaaika());

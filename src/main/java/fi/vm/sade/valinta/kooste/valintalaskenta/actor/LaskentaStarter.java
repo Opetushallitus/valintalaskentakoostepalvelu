@@ -2,10 +2,10 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import akka.actor.ActorRef;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -60,7 +60,7 @@ public class LaskentaStarter {
   public void fetchLaskentaParams(
       ActorRef laskennanKaynnistajaActor,
       final String uuid,
-      final BiConsumer<HakuV1RDTO, LaskentaActorParams> startActor) {
+      final BiConsumer<Haku, LaskentaActorParams> startActor) {
     seurantaAsyncResource
         .laskenta(uuid)
         .subscribe(
@@ -126,8 +126,8 @@ public class LaskentaStarter {
       String hakuOid,
       Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit,
       LaskentaDto laskenta,
-      BiConsumer<HakuV1RDTO, LaskentaActorParams> startActor) {
-    AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
+      BiConsumer<Haku, LaskentaActorParams> startActor) {
+    AtomicReference<Haku> hakuRef = new AtomicReference<>();
     AtomicReference<LaskentaActorParams> parametritRef = new AtomicReference<>();
     SynkronoituLaskuri counter =
         SynkronoituLaskuri.builder()

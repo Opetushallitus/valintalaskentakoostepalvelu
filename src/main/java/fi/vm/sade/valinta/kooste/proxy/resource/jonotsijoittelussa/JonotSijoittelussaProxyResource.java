@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa;
 
 import com.google.gson.Gson;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -52,8 +51,7 @@ public class JonotSijoittelussaProxyResource {
     final Observable<List<JonoDto>> laskennanJonot =
         valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid);
     final Observable<Map<String, List<ValintatapajonoDTO>>> valintaperusteidenJonot =
-        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
-            .map(HakuV1RDTO::getHakukohdeOids)
+        Observable.fromFuture(tarjontaAsyncResource.haunHakukohteet(hakuOid))
             .switchMap(valintaperusteetAsyncResource::haeValintatapajonotSijoittelulle);
     Observable.combineLatest(
             laskennanJonot,

@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
@@ -17,7 +16,6 @@ public class Mocks {
   private static Mocks MOCKS;
 
   @Autowired private ViestintapalveluAsyncResource viestintapalveluAsyncResource;
-  @Autowired private HakukohdeResource hakukohdeResource;
   @Autowired private KoodistoAsyncResource koodistoAsyncResource;
   @Autowired private OhjausparametritAsyncResource ohjausparametritAsyncResource;
   @Autowired private ValintapisteAsyncResource valintapisteAsyncResource;
@@ -43,15 +41,10 @@ public class Mocks {
     return MOCKS.koodistoAsyncResource;
   }
 
-  public static HakukohdeResource getHakukohdeResource() {
-    return MOCKS.hakukohdeResource;
-  }
-
   public static void reset() {
     Mockito.reset(
         getValintapisteAsyncResource(),
         getViestintapalveluAsyncResource(),
-        getKoodistoAsyncResource(),
-        getHakukohdeResource());
+        getKoodistoAsyncResource());
   }
 }

@@ -15,7 +15,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetJarjestyskriteeriDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -24,6 +23,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.Ohjausparame
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -116,8 +118,19 @@ public class ValintalaskentaTest {
   private final String uuid = "uuid";
   private final String hakuOid = "hakuOid";
   private final String ataruHakuOid = "1.2.246.562.29.805206009510";
-  private final HakuV1RDTO hakuDTO = new HakuV1RDTO();
-  private final HakuV1RDTO ataruHakuDTO = new HakuV1RDTO();
+  private final Haku hakuDTO =
+      new Haku(hakuOid, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null);
+  private final Haku ataruHakuDTO =
+      new Haku(
+          ataruHakuOid,
+          new HashMap<>(),
+          new HashSet<>(),
+          "ataru-lomake-avain",
+          null,
+          null,
+          null,
+          null,
+          null);
   private final Oppija oppijaFromSure1 = new Oppija();
   private final Oppija anonOppijaFromSure = new Oppija();
   private final List<String> hakemusOids = new ArrayList<>();
@@ -141,9 +154,6 @@ public class ValintalaskentaTest {
   public void setUpTestData() {
     hakemus.setPersonOid("personOid");
     hakemusOids.add(hakemus.getOid());
-    hakuDTO.setOid(hakuOid);
-    ataruHakuDTO.setOid(ataruHakuOid);
-    ataruHakuDTO.setAtaruLomakeAvain("ataru-lomake-avain");
     String personOid1 = "1.2.246.562.24.86368188549";
     ataruHakemus.setHakemusOid("ataruHakemusOid");
     ataruHakemus.setPersonOid(personOid1);

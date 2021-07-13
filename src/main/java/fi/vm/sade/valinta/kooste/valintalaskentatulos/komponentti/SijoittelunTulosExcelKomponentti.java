@@ -6,21 +6,37 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.sijoittelu.tulos.dto.*;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakijaryhmaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.TilaHistoriaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
-import fi.vm.sade.valinta.kooste.util.*;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.util.HakemusUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.excel.Highlight;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,7 +60,7 @@ public class SijoittelunTulosExcelKomponentti {
       List<HakemusWrapper> hakemuksetList,
       List<Lukuvuosimaksu> lukuvuosimaksut,
       HakukohdeDTO hakukohde,
-      HakuV1RDTO hakuDTO,
+      Haku hakuDTO,
       List<ValintatietoValinnanvaiheDTO> valinnanVaiheet) {
     Map<String, Koodi> countryCodes =
         koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
@@ -52,7 +68,7 @@ public class SijoittelunTulosExcelKomponentti {
         koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
     Map<String, HakemusWrapper> hakemukset =
         hakemuksetList.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
-    boolean isKkHaku = hakuDTO.getKohdejoukkoUri().startsWith("haunkohdejoukko_12");
+    boolean isKkHaku = hakuDTO.isKorkeakouluhaku();
     if (hakukohde == null) {
       LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
       throw new SijoittelultaEiSisaltoaPoikkeus(
@@ -195,7 +211,7 @@ public class SijoittelunTulosExcelKomponentti {
                     + "Haku = %s , hakukohde = %s , valintatapajono = %s , hakemukset.size() = %d , distinctHakemuksetFromAllQueues.size() = %d",
                 hDto.getHakijaOid(),
                 hDto.getHakemusOid(),
-                hakuDTO.getOid(),
+                hakuDTO.oid,
                 hakukohdeOid,
                 hDto.getValintatapajonoOid(),
                 hakemukset.size(),

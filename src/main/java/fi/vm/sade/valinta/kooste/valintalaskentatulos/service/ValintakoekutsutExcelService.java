@@ -3,13 +3,13 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +73,7 @@ public class ValintakoekutsutExcelService {
 
   public void luoExcel(
       DokumenttiProsessi prosessi,
-      HakuV1RDTO haku,
+      Haku haku,
       String hakukohdeOid,
       List<String> valintakoeTunnisteet,
       Set<String> hakemusOids) {
@@ -94,7 +93,7 @@ public class ValintakoekutsutExcelService {
       prosessi.setKokonaistyo(9); // 7 + luonti + dokumenttipalveluun vienti
       final boolean useWhitelist =
           !Optional.ofNullable(hakemusOids).orElse(Collections.emptySet()).isEmpty();
-      final AtomicReference<HakukohdeV1RDTO> hakukohdeRef = new AtomicReference<>();
+      final AtomicReference<Hakukohde> hakukohdeRef = new AtomicReference<>();
       final AtomicReference<List<HakemusOsallistuminenDTO>> tiedotHakukohteelleRef =
           new AtomicReference<>();
       final AtomicReference<Map<String, ValintakoeDTO>> valintakokeetRef = new AtomicReference<>();
@@ -114,9 +113,8 @@ public class ValintakoekutsutExcelService {
               .setSuoritaJokaKerta(prosessi::inkrementoiTehtyjaToita)
               .setSynkronoituToiminto(
                   () -> {
-                    String hakuNimi = new Teksti(haku.getNimi()).getTeksti();
-                    String hakukohdeNimi =
-                        new Teksti(hakukohdeRef.get().getHakukohteenNimi()).getTeksti();
+                    String hakuNimi = new Teksti(haku.nimi).getTeksti();
+                    String hakukohdeNimi = new Teksti(hakukohdeRef.get().nimi).getTeksti();
                     try {
                       InputStream filedata =
                           valintakoeKutsuExcelKomponentti.luoTuloksetXlsMuodossa(
@@ -227,9 +225,9 @@ public class ValintakoekutsutExcelService {
                             .build();
 
                 if (onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
-                  if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
+                  if (haku.isHakemuspalvelu()) {
                     Observable.fromFuture(
-                            applicationResource.getApplicationsByOid(haku.getOid(), hakukohdeOid))
+                            ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
                         .subscribe(
                             hakemukset -> {
                               lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
@@ -240,7 +238,7 @@ public class ValintakoekutsutExcelService {
                             poikkeuskasittelija);
                   } else {
                     Observable.fromFuture(
-                            ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                            applicationResource.getApplicationsByOid(haku.oid, hakukohdeOid))
                         .subscribe(
                             hakemukset -> {
                               lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
@@ -289,14 +287,14 @@ public class ValintakoekutsutExcelService {
   }
 
   private void haeHakemuksia(
-      HakuV1RDTO haku,
+      Haku haku,
       Set<String> hakemusOids,
       PoikkeusKasittelijaSovitin poikkeuskasittelija,
       Consumer<List<HakemusWrapper>> lisaaHakemuksiaAtomisestiHakemuksetReferenssiin,
       SynkronoituLaskuri laskuri) {
-    if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
-      applicationResource
-          .getApplicationsByOids(hakemusOids)
+    if (haku.isHakemuspalvelu()) {
+      Observable.fromFuture(
+              ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids)))
           .subscribe(
               hakemukset -> {
                 lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
@@ -304,8 +302,8 @@ public class ValintakoekutsutExcelService {
               },
               poikkeuskasittelija);
     } else {
-      Observable.fromFuture(
-              ataruAsyncResource.getApplicationsByOids(Lists.newArrayList(hakemusOids)))
+      applicationResource
+          .getApplicationsByOids(hakemusOids)
           .subscribe(
               hakemukset -> {
                 lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);

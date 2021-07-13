@@ -297,7 +297,9 @@ public class HyvaksymiskirjeetKomponenttiTest {
         new HashMap<>(),
         ImmutableMap.of(HAKUKOHDE_OID, ofNullable(osoite)),
         ImmutableMap.of(
-            HAKUKOHDE_OID, new MetaHakukohde(ORGANIZATION_OID, new Teksti(), new Teksti())),
+            HAKUKOHDE_OID,
+            new MetaHakukohde(
+                ORGANIZATION_OID, new Teksti(), Collections.singletonList(new Teksti()))),
         ImmutableList.of(hakija),
         ImmutableMap.of(
             HAKEMUS_OID,

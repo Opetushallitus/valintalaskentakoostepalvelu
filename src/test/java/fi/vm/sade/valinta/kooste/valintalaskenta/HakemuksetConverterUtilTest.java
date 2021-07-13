@@ -17,10 +17,10 @@ import com.github.npathai.hamcrestopt.OptionalMatchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,20 +53,20 @@ public class HakemuksetConverterUtilTest {
 
   @Rule public ExpectedException expected = ExpectedException.none();
 
-  private static final HakuV1RDTO haku = new HakuV1RDTO();
-
-  static {
-    haku.setHakukausiUri("kausi_k#1");
-    haku.setHakukausiVuosi(2015);
-    haku.setKohdejoukkoUri(HakemuksetConverterUtil.KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO + "#1");
-  }
-
-  private static final HakuV1RDTO haku_syksy = new HakuV1RDTO();
-
-  static {
-    haku_syksy.setHakukausiUri("kausi_s#1");
-    haku_syksy.setHakukausiVuosi(2015);
-  }
+  private static final Haku haku =
+      new Haku(
+          "hakuoid",
+          new HashMap<>(),
+          new HashSet<>(),
+          null,
+          "haunkohdejoukko_11#1",
+          "kausi_k#1",
+          2015,
+          null,
+          null);
+  private static final Haku haku_syksy =
+      new Haku(
+          "hakuoid", new HashMap<>(), new HashSet<>(), null, null, "kausi_s#1", 2015, null, null);
 
   private static final String HAKEMUS1_OID = "1.2.246.562.11.1";
   private static final String HAKEMUS2_OID = "1.2.246.562.11.2";
@@ -2904,8 +2905,17 @@ public class HakemuksetConverterUtilTest {
   @Test
   public void testaaEnsikertalaisuusOppijaTiedoista() {
     {
-      HakuV1RDTO haku = new HakuV1RDTO();
-      haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
+      Haku haku =
+          new Haku(
+              "hakuoid",
+              new HashMap<>(),
+              new HashSet<>(),
+              null,
+              "haunkohdejoukko_12#1",
+              null,
+              null,
+              null,
+              null);
       HakemusDTO hakemus = new HakemusDTO();
       Oppija oppija = new Oppija();
       oppija.setEnsikertalainen(true);
@@ -2923,8 +2933,17 @@ public class HakemuksetConverterUtilTest {
     }
 
     {
-      HakuV1RDTO haku = new HakuV1RDTO();
-      haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
+      Haku haku =
+          new Haku(
+              "hakuoid",
+              new HashMap<>(),
+              new HashSet<>(),
+              null,
+              "haunkohdejoukko_12#1",
+              null,
+              null,
+              null,
+              null);
       HakemusDTO hakemus = new HakemusDTO();
       Oppija oppija = new Oppija();
       oppija.setEnsikertalainen(false);

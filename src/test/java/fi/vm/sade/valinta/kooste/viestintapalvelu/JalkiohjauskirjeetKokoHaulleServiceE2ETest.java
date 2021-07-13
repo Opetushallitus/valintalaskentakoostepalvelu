@@ -21,8 +21,13 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoodiUrisV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusAmmatillinenPerustutkintoAlk2018V1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.koulutus.KoulutusV1RDTO;
+import fi.vm.sade.tarjonta.shared.types.TarjontaTila;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
@@ -34,6 +39,7 @@ import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
@@ -80,6 +86,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setAsiointikieli(KieliUtil.RUOTSI)
                 .setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
+    mockKoulutusKutsu();
     mockHakukohde1Kutsu();
     mockHaku1Kutsu();
     mockValintalaskentaKutsu();
@@ -106,6 +114,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setAsiointikieli(KieliUtil.RUOTSI)
                 .setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
+    mockKoulutusKutsu();
     mockHakukohde1Kutsu();
     mockHaku1Kutsu();
     mockValintalaskentaKutsu();
@@ -132,6 +142,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setAsiointikieli(KieliUtil.ENGLANTI)
                 .setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
+    mockKoulutusKutsu();
     mockHakukohde1Kutsu();
     mockHaku1Kutsu();
     mockValintalaskentaKutsu();
@@ -162,6 +174,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setVainSahkoinenViestinta(true)
                 .setSahkoposti("testi@sahkoposti.fi")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
+    mockKoulutusKutsu();
     mockHakukohde1Kutsu();
     mockHaku1Kutsu();
     mockValintalaskentaKutsu();
@@ -190,6 +204,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setVainSahkoinenViestinta(true)
                 .setSahkoposti("testi@sahkoposti.fi")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
+    mockKoulutusKutsu();
     mockHakukohde1Kutsu();
     mockHaku1KutsuToinenAste();
     mockValintalaskentaKutsu();
@@ -218,6 +234,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setVainSahkoinenViestinta(false)
                 .setSahkoposti("testi@sahkoposti.fi")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
+    mockKoulutusKutsu();
     mockHakukohde1Kutsu();
     mockHaku1KutsuToinenAste();
     mockValintalaskentaKutsu();
@@ -246,6 +264,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
                 .setVainSahkoinenViestinta(true)
                 .setSahkoposti("testi@sahkoposti.fi")
                 .buildHakuappHakemus()));
+    mockOrganisaatioKutsut();
+    mockKoulutusKutsu();
     mockHakukohde1Kutsu();
     mockHaku1KutsuToinenAste();
     mockValintalaskentaKutsu();
@@ -308,22 +328,46 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     mockToReturnJson(GET, "/valinta-tulos-service/haku/HAKU1/ilmanHyvaksyntaa", hp);
   }
 
+  private void mockOrganisaatioKutsut() {
+    Organisaatio t1 = new Organisaatio();
+    Organisaatio t2 = new Organisaatio();
+    t1.setOid("T1");
+    t2.setOid("T2");
+    mockToReturnJson(GET, "/organisaatio-service/rest/organisaatio/T1", t1);
+    mockToReturnJson(GET, "/organisaatio-service/rest/organisaatio/T2", t2);
+  }
+
+  private void mockKoulutusKutsu() {
+    KoulutusV1RDTO koulutus = new KoulutusAmmatillinenPerustutkintoAlk2018V1RDTO();
+    koulutus.setOid("koulutusoid");
+    KoodiUrisV1RDTO opetuskielet = new KoodiUrisV1RDTO();
+    opetuskielet.setUris(new HashMap<>());
+    koulutus.setOpetuskielis(opetuskielet);
+    mockToReturnJson(GET, "/tarjonta-service/rest/v1/koulutus/koulutusoid", new Result(koulutus));
+  }
+
   private void mockHakukohde1Kutsu() {
     HakukohdeV1RDTO hk = new HakukohdeV1RDTO();
+    hk.setTila(TarjontaTila.JULKAISTU);
     hk.setOpetusKielet(Sets.newHashSet("FI"));
     hk.setTarjoajaOids(Sets.newHashSet("T1", "T2"));
+    hk.setHakukohdeKoulutusOids(Collections.singletonList("koulutusoid"));
+    hk.setPohjakoulutusvaatimus("");
+    hk.setValintakokeet(Collections.emptyList());
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1", new Result(hk));
   }
 
   private void mockHaku1Kutsu() {
     HakuV1RDTO haku = new HakuV1RDTO();
     haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
+    haku.setTarjoajaOids(new String[] {});
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
   }
 
   private void mockHaku1KutsuToinenAste() {
     HakuV1RDTO haku = new HakuV1RDTO();
     haku.setKohdejoukkoUri("haunkohdejoukko_11");
+    haku.setTarjoajaOids(new String[] {});
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1", new Result(haku));
   }
 

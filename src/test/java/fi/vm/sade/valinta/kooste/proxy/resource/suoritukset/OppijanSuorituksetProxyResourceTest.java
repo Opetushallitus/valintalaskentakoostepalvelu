@@ -5,14 +5,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
@@ -229,9 +230,10 @@ public class OppijanSuorituksetProxyResourceTest {
         GSON.fromJson(
             classpathResourceAsString(oppijanHakemusFile), new TypeToken<Hakemus>() {}.getType());
 
-    HakuV1RDTO expectedHaku =
-        GSON.fromJson(
-            classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {}.getType());
+    Haku expectedHaku =
+        new Haku(
+            GSON.<HakuV1RDTO>fromJson(
+                classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {}.getType()));
 
     HakemusWrapper expectedWrapper = new HakuappHakemusWrapper(expectedHakemus);
 
@@ -271,9 +273,10 @@ public class OppijanSuorituksetProxyResourceTest {
     List<HakemusWrapper> expectedWrappers =
         expectedHakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
 
-    HakuV1RDTO expectedHaku =
-        GSON.fromJson(
-            classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {}.getType());
+    Haku expectedHaku =
+        new Haku(
+            GSON.<HakuV1RDTO>fromJson(
+                classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {}.getType()));
     List<Valintapisteet> v =
         expectedWrappers.stream()
             .map(

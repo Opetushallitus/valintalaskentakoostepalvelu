@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT_JSON;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishaunTuontiServiceTest.PERSON_1_OID;
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishaunTuontiServiceTest.getDummyHaku;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHenkiloOidilla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuSyntymaAjalla;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
@@ -41,6 +42,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -75,8 +77,15 @@ public class ErillishaunTuontiServiceTest {
   public static TarjontaAsyncResource mockTarjonta() {
     final TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
     when(tarjontaAsyncResource.haeHaku(Mockito.any()))
-        .thenReturn(CompletableFuture.completedFuture(new HakuV1RDTO()));
+        .thenReturn(CompletableFuture.completedFuture(getDummyHaku()));
     return tarjontaAsyncResource;
+  }
+
+  public static Haku getDummyHaku() {
+    HakuV1RDTO dto = new HakuV1RDTO();
+    dto.setTarjoajaOids(new String[0]);
+    Haku haku = new Haku(dto);
+    return haku;
   }
 
   public static final class Autotaytto extends ErillisHakuTuontiTestCase {
@@ -386,7 +395,7 @@ class ErillisHakuTuontiTestCase {
   public static TarjontaAsyncResource mockTarjonta() {
     final TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
     when(tarjontaAsyncResource.haeHaku(Mockito.any()))
-        .thenReturn(CompletableFuture.completedFuture(new HakuV1RDTO()));
+        .thenReturn(CompletableFuture.completedFuture(getDummyHaku()));
     return tarjontaAsyncResource;
   }
 

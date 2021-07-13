@@ -7,5 +7,9 @@ import java.util.concurrent.CompletableFuture;
 public interface KoodistoAsyncResource {
   CompletableFuture<List<Koodi>> haeKoodisto(String koodistoUri);
 
+  CompletableFuture<List<Koodi>> ylakoodit(String koodiUri);
+
+  CompletableFuture<List<Koodi>> alakoodit(String koodiUri);
+
   CompletableFuture<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri);
 }

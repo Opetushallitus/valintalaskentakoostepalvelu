@@ -5,13 +5,13 @@ import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
 
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
-import fi.vm.sade.valinta.kooste.spec.tarjonta.TarjontaSpec;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
@@ -20,6 +20,8 @@ import io.reactivex.Observable;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.client.Entity;
@@ -162,7 +164,16 @@ public class OsoitetarratServiceTest {
                   .build()
                   .build()));
       MockTarjontaAsyncService.setMockHaku(
-          new TarjontaSpec.HakuBuilder(HAKU1, "AtaruLomakeAvain").build());
+          new Haku(
+              HAKU1,
+              new HashMap<>(),
+              new HashSet<>(),
+              "AtaruLomakeAvain",
+              null,
+              null,
+              null,
+              null,
+              null));
       MockAtaruAsyncResource.setByHakukohdeResult(
           Collections.singletonList(
               MockAtaruAsyncResource.getAtaruHakemusWrapper(

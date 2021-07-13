@@ -4,6 +4,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import io.reactivex.Observable;
 import java.util.Collection;
+import java.util.Set;
 import javax.ws.rs.ForbiddenException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class MockAuthorityCheckService extends AuthorityCheckService {
 
   @Override
   public boolean isAuthorizedForAnyParentOid(
-      String[] organisaatioOids,
+      Set<String> organisaatioOids,
       Collection<? extends GrantedAuthority> userRoles,
       Collection<String> requiredRoles) {
     return true;

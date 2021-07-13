@@ -55,7 +55,7 @@ public class LaskentaKerrallaE2ETest {
         "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/.*",
         Collections.singletonList(valintaperusteet().build()));
     mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/.*", new ParametriDTO());
-    mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/.*", new HakuV1RDTO());
+    mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/.*", new Result(new HakuV1RDTO()));
     mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat.*", Arrays.asList());
     mockToReturnJson(GET, "/haku-app/applications/listfull.*", Arrays.asList());
     MockServer fakeValintalaskenta = new MockServer();
@@ -93,6 +93,14 @@ public class LaskentaKerrallaE2ETest {
       Assert.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
     } catch (InterruptedException e) {
       Assert.fail();
+    }
+  }
+
+  public static class Result<T> {
+    private T result;
+
+    public Result(T result) {
+      this.result = result;
     }
   }
 }

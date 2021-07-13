@@ -8,9 +8,11 @@ import static fi.vm.sade.valinta.kooste.util.KieliUtil.normalisoiKielikoodi;
 import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 
 public class Teksti {
@@ -97,6 +99,21 @@ public class Teksti {
 
   public static String getTeksti(final Map<String, String> n) {
     return new Teksti(n).getTeksti();
+  }
+
+  public static String getTeksti(final Map<String, String> n, String normalisoituKielikoodi) {
+    return new Teksti(n).getTeksti(normalisoituKielikoodi);
+  }
+
+  public static String getTeksti(List<Map<String, String>> ns, String sep) {
+    return ns.stream().map(Teksti::getTeksti).collect(Collectors.joining(sep));
+  }
+
+  public static String getTeksti(
+      List<Map<String, String>> ns, String sep, String normalisoituKielikoodi) {
+    return ns.stream()
+        .map(n -> getTeksti(n, normalisoituKielikoodi))
+        .collect(Collectors.joining(sep));
   }
 
   public static Teksti ehdollisenHyvaksymisenEhto(HakutoiveenValintatapajonoDTO valintatapajono) {

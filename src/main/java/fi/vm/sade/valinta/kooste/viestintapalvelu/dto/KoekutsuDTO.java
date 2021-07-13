@@ -1,13 +1,13 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 
 public class KoekutsuDTO {
   private final String letterBodyText;
   private final String tarjoajaOid;
   private final String tag;
   private final String hakukohdeOid;
-  private final HakuV1RDTO haku;
+  private final Haku haku;
   private final String templateName;
 
   public KoekutsuDTO() {
@@ -24,7 +24,7 @@ public class KoekutsuDTO {
       String tarjoajaOid,
       String tag,
       String hakukohdeOid,
-      HakuV1RDTO haku,
+      Haku haku,
       String templateName) {
     this.letterBodyText = letterBodyText;
     this.tarjoajaOid = tarjoajaOid;
@@ -42,7 +42,7 @@ public class KoekutsuDTO {
     return hakukohdeOid;
   }
 
-  public HakuV1RDTO getHaku() {
+  public Haku getHaku() {
     return haku;
   }
 

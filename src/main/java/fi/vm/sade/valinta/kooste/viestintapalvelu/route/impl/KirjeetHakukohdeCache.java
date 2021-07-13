@@ -5,7 +5,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -15,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,11 +25,15 @@ import org.springframework.stereotype.Component;
 public class KirjeetHakukohdeCache {
   private final Cache<String, CompletableFuture<MetaHakukohde>> metaHakukohdeCache;
   private final TarjontaAsyncResource tarjontaAsyncResource;
+  private final OrganisaatioAsyncResource organisaatioAsyncResource;
 
   @Autowired
-  public KirjeetHakukohdeCache(TarjontaAsyncResource tarjontaAsyncResource) {
+  public KirjeetHakukohdeCache(
+      TarjontaAsyncResource tarjontaAsyncResource,
+      OrganisaatioAsyncResource organisaatioAsyncResource) {
     metaHakukohdeCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build();
     this.tarjontaAsyncResource = tarjontaAsyncResource;
+    this.organisaatioAsyncResource = organisaatioAsyncResource;
   }
 
   public MetaHakukohde haeHakukohde(String hakukohdeOid) {
@@ -69,16 +76,34 @@ public class KirjeetHakukohdeCache {
   private CompletableFuture<MetaHakukohde> fetchMetaHakukohde(String hakukohdeOid) {
     return this.tarjontaAsyncResource
         .haeHakukohde(hakukohdeOid)
-        .thenApplyAsync(
-            hakukohde -> {
-              Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
-              return new MetaHakukohde(
-                  hakukohde.getTarjoajaOids().iterator().next(),
-                  hakukohdeNimi,
-                  new Teksti(hakukohde.getTarjoajaNimet()),
-                  hakukohdeNimi.getKieli(),
-                  getOpetuskieli(hakukohde.getOpetusKielet()),
-                  hakukohde.getOhjeetUudelleOpiskelijalle());
-            });
+        .thenComposeAsync(
+            hakukohde ->
+                CompletableFutureUtil.sequence(
+                        hakukohde.toteutusOids.stream()
+                            .map(tarjontaAsyncResource::haeToteutus)
+                            .collect(Collectors.toList()))
+                    .thenComposeAsync(
+                        toteutukset ->
+                            CompletableFutureUtil.sequence(
+                                    hakukohde.tarjoajaOids.stream()
+                                        .map(organisaatioAsyncResource::haeOrganisaatio)
+                                        .collect(Collectors.toList()))
+                                .thenApplyAsync(
+                                    tarjoajat -> {
+                                      Teksti hakukohdeNimi = new Teksti(hakukohde.nimi);
+                                      return new MetaHakukohde(
+                                          hakukohde.tarjoajaOids.iterator().next(),
+                                          hakukohdeNimi,
+                                          tarjoajat.stream()
+                                              .map(t -> new Teksti(t.getNimi()))
+                                              .collect(Collectors.toList()),
+                                          hakukohdeNimi.getKieli(),
+                                          getOpetuskieli(
+                                              toteutukset.stream()
+                                                  .flatMap(
+                                                      toteutus -> toteutus.opetuskielet.stream())
+                                                  .collect(Collectors.toList())),
+                                          hakukohde.ohjeetUudelleOpiskelijalle);
+                                    })));
   }
 }

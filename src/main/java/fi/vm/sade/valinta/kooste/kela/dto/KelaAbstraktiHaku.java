@@ -1,7 +1,13 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.kela.komponentti.*;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.HenkilotietoSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.OppilaitosSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.TilaSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.TutkinnontasoSource;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -11,15 +17,15 @@ public abstract class KelaAbstraktiHaku {
   public static final String SUKUNIMI = "sukunimi";
   public static final String ETUNIMET = "Etunimet";
 
-  private final HakuV1RDTO haku;
+  private final Haku haku;
   private final PaivamaaraSource paivamaaraSource;
 
-  public KelaAbstraktiHaku(HakuV1RDTO haku, PaivamaaraSource paivamaaraSource) {
+  public KelaAbstraktiHaku(Haku haku, PaivamaaraSource paivamaaraSource) {
     this.haku = haku;
     this.paivamaaraSource = paivamaaraSource;
   }
 
-  public HakuV1RDTO getHaku() {
+  public Haku getHaku() {
     return haku;
   }
 

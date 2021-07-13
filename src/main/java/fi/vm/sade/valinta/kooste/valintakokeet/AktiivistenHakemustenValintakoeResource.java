@@ -23,7 +23,6 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,21 +102,20 @@ public class AktiivistenHakemustenValintakoeResource {
 
     return Observable.fromFuture(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
         .flatMap(
-            hakukohde ->
-                Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakukohde.getHakuOid())))
+            hakukohde -> Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakukohde.hakuOid)))
         .flatMap(
             haku -> {
-              if (StringUtils.isEmpty(haku.getAtaruLomakeAvain())) {
-                return applicationAsyncResource
-                    .getApplicationsByHakemusOids(kaikkiOsallistumistenHakemusOidit)
+              if (haku.isHakemuspalvelu()) {
+                return Observable.fromFuture(
+                        ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit))
                     .map(
                         hakemukset ->
                             hakemukset.stream()
                                 .map(HakemusWrapper::getOid)
                                 .collect(Collectors.toSet()));
               } else {
-                return Observable.fromFuture(
-                        ataruAsyncResource.getApplicationsByOids(kaikkiOsallistumistenHakemusOidit))
+                return applicationAsyncResource
+                    .getApplicationsByHakemusOids(kaikkiOsallistumistenHakemusOidit)
                     .map(
                         hakemukset ->
                             hakemukset.stream()

@@ -1,17 +1,18 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
-import java.util.Collection;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import java.util.List;
 
 public class KelaLuontiJaHaut {
   private final KelaLuonti luonti;
-  private final Collection<Haku> haut;
+  private final List<Haku> haut;
 
-  public KelaLuontiJaHaut(KelaLuonti kelaLuonti, Collection<Haku> haut) {
+  public KelaLuontiJaHaut(KelaLuonti kelaLuonti, List<Haku> haut) {
     this.luonti = kelaLuonti;
     this.haut = haut;
   }
 
-  public Collection<Haku> getHaut() {
+  public List<Haku> getHaut() {
     return haut;
   }
 

@@ -20,7 +20,6 @@ import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -199,12 +198,10 @@ public class SijoitteluAktivointiResource {
     Observable.fromFuture(tarjontaResource.haeHaku(hakuOid))
         .subscribe(
             haku -> {
-              String[] organisaatioOids = haku.getTarjoajaOids();
-
               boolean isAuthorizedForHaku =
                   containsOphRole(userRoles)
                       || authorityCheckService.isAuthorizedForAnyParentOid(
-                          organisaatioOids,
+                          haku.tarjoajaOids,
                           userRoles,
                           Collections.singleton("ROLE_APP_SIJOITTELU_CRUD"));
 
@@ -215,7 +212,7 @@ public class SijoitteluAktivointiResource {
                 String msg =
                     String.format(
                         "Käyttäjällä ei oikeutta haun %s haun tarjoajiin %s tai niiden yläorganisaatioihin.",
-                        hakuOid, Arrays.toString(organisaatioOids));
+                        hakuOid, String.join(", ", haku.tarjoajaOids));
                 LOG.error(msg);
                 asyncResponse.resume(new ForbiddenException(msg));
               }
