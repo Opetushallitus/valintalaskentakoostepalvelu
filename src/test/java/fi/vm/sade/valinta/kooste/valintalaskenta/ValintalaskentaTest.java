@@ -21,6 +21,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -32,6 +33,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithL
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.KoskiService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
@@ -84,6 +86,8 @@ public class ValintalaskentaTest {
   private final KoskiService koskiService = mock(KoskiService.class);
   private final HakemuksetConverterUtil hakemuksetConverterUtil =
       new HakemuksetConverterUtil("9999-12-31");
+  static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
+      new MockOppijanumerorekisteriAsyncResource();
   private final LaskentaActorSystem laskentaActorSystem =
       new LaskentaActorSystem(
           seurantaAsyncResource,
@@ -103,7 +107,8 @@ public class ValintalaskentaTest {
               tarjontaAsyncResource,
               valintapisteAsyncResource,
               koskiService,
-              hakemuksetConverterUtil),
+              hakemuksetConverterUtil,
+              oppijanumerorekisteriAsyncResource),
           8);
   private final String hakukohde1Oid = "h1";
   private final String hakukohde2Oid = "h2";

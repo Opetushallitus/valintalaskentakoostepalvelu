@@ -7,11 +7,13 @@ import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloViiteDto;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import io.reactivex.Observable;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -44,6 +46,18 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
         new GenericType<List<HenkiloPerustietoDto>>() {}.getType(),
         Entity.entity(gson().toJson(henkiloPrototyypit), MediaType.APPLICATION_JSON_TYPE),
         ACCEPT_JSON);
+  }
+
+  public CompletableFuture<List<HenkiloViiteDto>> haeHenkiloOidDuplikaatit(Set<String> personOids) {
+    String url = getUrl("oppijanumerorekisteri-service.s2s.duplicatesByPersonOids");
+    CompletableFuture<List<HenkiloViiteDto>> fut =
+        this.client.postJson(
+            url,
+            Duration.ofHours(1),
+            personOids,
+            new TypeToken<Set<String>>() {}.getType(),
+            new TypeToken<List<HenkiloViiteDto>>() {}.getType());
+    return fut;
   }
 
   public CompletableFuture<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
