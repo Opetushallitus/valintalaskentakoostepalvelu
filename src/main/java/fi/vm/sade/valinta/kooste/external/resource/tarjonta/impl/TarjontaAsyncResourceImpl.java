@@ -43,13 +43,16 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   private final UrlConfiguration urlConfiguration = UrlConfiguration.getInstance();
   private final HttpClient client;
   private final HttpClient koutaClient;
+  private final HttpClient hakukohderyhmapalveluClient;
 
   @Autowired
   public TarjontaAsyncResourceImpl(
       @Qualifier("TarjontaHttpClient") HttpClient client,
-      @Qualifier("KoutaHttpClient") HttpClient koutaClient) {
+      @Qualifier("KoutaHttpClient") HttpClient koutaClient,
+      @Qualifier("HakukohderyhmapalveluHttpClient") HttpClient hakukohderyhmapalveluClient) {
     this.client = client;
     this.koutaClient = koutaClient;
+    this.hakukohderyhmapalveluClient = hakukohderyhmapalveluClient;
   }
 
   @Override
@@ -239,27 +242,13 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
 
   @Override
   public CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
-    Map<String, String> tarjontaParameters = new HashMap<>();
-    tarjontaParameters.put("hakuOid", hakuOid);
-    CompletableFuture<ResultSearch> tarjontaF =
-        this.client.getJson(
-            urlConfiguration.url("tarjonta-service.hakukohde.search", tarjontaParameters),
-            Duration.ofMinutes(5),
-            new TypeToken<ResultSearch>() {}.getType());
-    Map<String, String> koutaParameters = new HashMap<>();
-    koutaParameters.put("haku", hakuOid);
-    CompletableFuture<Set<KoutaHakukohde>> koutaF =
-        this.koutaClient.getJson(
-            urlConfiguration.url("kouta-internal.hakukohde.search", koutaParameters),
-            Duration.ofSeconds(10),
-            new TypeToken<Set<KoutaHakukohde>>() {}.getType());
+    CompletableFuture<ResultSearch> tarjontaF = this.findTarjontaHakukohteetForHaku(hakuOid);
+    CompletableFuture<Set<KoutaHakukohde>> koutaF = this.findKoutaHakukohteetForHaku(hakuOid);
     return tarjontaF.thenComposeAsync(
         r ->
             r.getResult().getTulokset().isEmpty()
                 ? koutaF.thenApplyAsync(
-                    hakukohteet ->
-                        hakukohteet.stream()
-                            .collect(Collectors.toMap(hk -> hk.oid, hk -> Collections.emptyList())))
+                    hakukohteet -> this.findHakukohderyhmasForHakukohteet(hakukohteet).join())
                 : CompletableFuture.completedFuture(resultSearchToHakukohdeRyhmaMap(r)));
   }
 
@@ -272,6 +261,45 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
             Duration.ofMinutes(5),
             new TypeToken<ResultV1RDTO<HakukohdeValintaperusteetDTO>>() {}.getType())
         .thenApplyAsync(ResultV1RDTO::getResult);
+  }
+
+  private CompletableFuture<ResultSearch> findTarjontaHakukohteetForHaku(String hakuOid) {
+    Map<String, String> tarjontaParameters = new HashMap<>();
+    tarjontaParameters.put("hakuOid", hakuOid);
+    return this.client.getJson(
+        urlConfiguration.url("tarjonta-service.hakukohde.search", tarjontaParameters),
+        Duration.ofMinutes(5),
+        new TypeToken<ResultSearch>() {}.getType());
+  }
+
+  private CompletableFuture<Set<KoutaHakukohde>> findKoutaHakukohteetForHaku(String hakuOid) {
+    Map<String, String> koutaParameters = new HashMap<>();
+    koutaParameters.put("haku", hakuOid);
+    return this.koutaClient.getJson(
+        urlConfiguration.url("kouta-internal.hakukohde.search", koutaParameters),
+        Duration.ofSeconds(10),
+        new TypeToken<Set<KoutaHakukohde>>() {}.getType());
+  }
+
+  private CompletableFuture<Map<String, List<String>>> findHakukohderyhmasForHakukohteet(
+      Set<KoutaHakukohde> hakukohdes) {
+    List<String> hakukohdeOids = hakukohdes.stream().map(hk -> hk.oid).collect(Collectors.toList());
+    Type inputType = new TypeToken<List<String>>() {}.getType();
+    Type outputType = new TypeToken<List<HakukohderyhmaHakukohde>>() {}.getType();
+    return this.hakukohderyhmapalveluClient
+        .<List<String>, List<HakukohderyhmaHakukohde>>postJson(
+            urlConfiguration.url("hakukohderyhmapalvelu.hakukohderyhma.search-by-hakukohteet"),
+            Duration.ofMinutes(5),
+            hakukohdeOids,
+            inputType,
+            outputType)
+        .thenApplyAsync(
+            r ->
+                r.stream()
+                    .collect(
+                        Collectors.toMap(
+                            HakukohderyhmaHakukohde::getOid,
+                            HakukohderyhmaHakukohde::getHakukohderyhmat)));
   }
 
   public static Map<String, List<String>> resultSearchToHakukohdeRyhmaMap(ResultSearch result) {
