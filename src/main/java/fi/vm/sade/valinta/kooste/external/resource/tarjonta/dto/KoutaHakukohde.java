@@ -26,6 +26,18 @@ public class KoutaHakukohde {
     this.pohjakoulutusvaatimusKoodiUrit = null;
   }
 
+  public KoutaHakukohde(String oid) {
+    this.oid = oid;
+    this.tila = null;
+    this.nimi = null;
+    this.hakuOid = null;
+    this.tarjoajat = null;
+    this.toteutusOid = null;
+    this.aloituspaikat = null;
+    this.valintakokeet = null;
+    this.pohjakoulutusvaatimusKoodiUrit = null;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
