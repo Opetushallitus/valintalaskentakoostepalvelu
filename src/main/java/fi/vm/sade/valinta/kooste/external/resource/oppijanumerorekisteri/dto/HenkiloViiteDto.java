@@ -24,4 +24,9 @@ public class HenkiloViiteDto {
   public void setMasterOid(String masterOid) {
     this.masterOid = masterOid;
   }
+
+  @Override
+  public String toString() {
+    return "henkiloOid: " + henkiloOid + ", masterOid: " + masterOid;
+  }
 }

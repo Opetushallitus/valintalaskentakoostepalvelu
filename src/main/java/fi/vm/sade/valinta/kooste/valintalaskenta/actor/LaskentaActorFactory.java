@@ -616,6 +616,7 @@ public class LaskentaActorFactory {
                         .map(oid -> new HenkiloViiteDto(oid, oid))
                         .collect(Collectors.toList()));
               } else {
+                LOG.info("Getting duplicates for personOids: {}", oppijaOids);
                 return createResurssiFuture(
                     tunniste,
                     "oppijanumerorekisteri-service.s2s.duplicatesByPersonOids",
@@ -627,6 +628,7 @@ public class LaskentaActorFactory {
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
         henkiloViitteet.thenComposeAsync(
             hws -> {
+              LOG.info("Got  henkiloViittees: {}", hws);
               Map<String, String> masterToOriginal =
                   hws.stream()
                       .collect(
