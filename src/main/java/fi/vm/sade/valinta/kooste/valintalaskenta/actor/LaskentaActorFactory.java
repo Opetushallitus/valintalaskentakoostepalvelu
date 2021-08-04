@@ -610,25 +610,16 @@ public class LaskentaActorFactory {
             hws -> {
               Set<String> oppijaOids =
                   hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toSet());
-              if (StringUtils.isNotEmpty(haku.getAtaruLomakeAvain())) {
-                return CompletableFuture.completedFuture(
-                    oppijaOids.stream()
-                        .map(oid -> new HenkiloViiteDto(oid, oid))
-                        .collect(Collectors.toList()));
-              } else {
-                LOG.info("Getting duplicates for personOids: {}", oppijaOids);
-                return createResurssiFuture(
-                    tunniste,
-                    "oppijanumerorekisteri-service.s2s.duplicatesByPersonOids",
-                    () -> oppijanumerorekisteriAsyncResource.haeHenkiloOidDuplikaatit(oppijaOids),
-                    retryHakemuksetAndOppijat);
-              }
+              return CompletableFuture.completedFuture(
+                  oppijaOids.stream()
+                      .map(oid -> new HenkiloViiteDto(oid, oid))
+                      .collect(Collectors.toList()));
             });
 
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
         henkiloViitteet.thenComposeAsync(
             hws -> {
-              LOG.info("Got  henkiloViittees: {}", hws);
+              LOG.info("Got henkiloViittees: {}", hws);
               Map<String, String> masterToOriginal =
                   hws.stream()
                       .collect(
