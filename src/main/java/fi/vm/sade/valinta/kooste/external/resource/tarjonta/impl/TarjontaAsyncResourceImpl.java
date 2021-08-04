@@ -298,7 +298,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
                 r.stream()
                     .collect(
                         Collectors.toMap(
-                            HakukohderyhmaHakukohde::getOid,
+                            HakukohderyhmaHakukohde::getHakukohdeOid,
                             HakukohderyhmaHakukohde::getHakukohderyhmat)));
   }
 

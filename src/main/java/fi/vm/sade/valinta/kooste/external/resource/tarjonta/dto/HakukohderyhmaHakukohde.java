@@ -3,15 +3,17 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto;
 import java.util.List;
 
 public class HakukohderyhmaHakukohde {
+  /** Hakukohteen oid */
   public String oid;
+
   public List<String> hakukohderyhmat;
 
-  public HakukohderyhmaHakukohde(String oid, List<String> hakukohderyhmat) {
-    this.oid = oid;
+  public HakukohderyhmaHakukohde(String hakukohdeOid, List<String> hakukohderyhmat) {
+    this.oid = hakukohdeOid;
     this.hakukohderyhmat = hakukohderyhmat;
   }
 
-  public String getOid() {
+  public String getHakukohdeOid() {
     return oid;
   }
 
