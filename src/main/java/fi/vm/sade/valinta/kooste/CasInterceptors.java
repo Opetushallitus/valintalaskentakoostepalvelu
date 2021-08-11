@@ -52,6 +52,13 @@ public class CasInterceptors {
     return new CasKoosteInterceptor(applicationSession, true);
   }
 
+  @Bean(name = "SijoitteluServiceRestClientCasInterceptor")
+  @Autowired
+  public AbstractPhaseInterceptor<Message> getSijoitteluServiceRestClientCasInterceptor(
+      @Qualifier("SijoitteluServiceApplicationSession") ApplicationSession applicationSession) {
+    return new CasKoosteInterceptor(applicationSession, true);
+  }
+
   @Bean(name = "AuthenticationServiceRestClientCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getAuthenticationServiceRestClientCasInterceptor(

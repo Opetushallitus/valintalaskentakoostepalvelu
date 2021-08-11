@@ -234,6 +234,11 @@ public class KoosteTestProfileConfiguration {
     return INTERCEPTOR;
   }
 
+  @Bean(name = "SijoitteluServiceRestClientCasInterceptor")
+  public AbstractPhaseInterceptor<Message> getSijoitteluServiceRestClientCasInterceptor() {
+    return INTERCEPTOR;
+  }
+
   @Bean(name = "adminDokumenttipalveluRestClientCasInterceptor")
   public AbstractPhaseInterceptor<Message> getAdminDokumenttipalveluRestClientCasInterceptor() {
     return INTERCEPTOR;
