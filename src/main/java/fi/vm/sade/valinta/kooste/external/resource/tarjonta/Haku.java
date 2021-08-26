@@ -88,4 +88,8 @@ public class Haku {
     if (this.oid.startsWith("1.2.246.562.29.") && this.oid.length() >= 35) return true;
     else return false;
   }
+
+  public String getAtaruLomakeAvain() {
+    return ataruLomakeAvain;
+  }
 }
