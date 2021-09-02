@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import io.reactivex.Observable;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,12 +51,14 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
 
   public CompletableFuture<List<HenkiloViiteDto>> haeHenkiloOidDuplikaatit(Set<String> personOids) {
     String url = getUrl("oppijanumerorekisteri-service.s2s.duplicatesByPersonOids");
+    Map<String, Set<String>> henkiloSearchParams = new HashMap<>();
+    henkiloSearchParams.put("henkiloOids", personOids);
     CompletableFuture<List<HenkiloViiteDto>> fut =
         this.client.postJson(
             url,
             Duration.ofHours(1),
-            personOids,
-            new TypeToken<Set<String>>() {}.getType(),
+            henkiloSearchParams,
+            new TypeToken<Map<String, Set<String>>>() {}.getType(),
             new TypeToken<List<HenkiloViiteDto>>() {}.getType());
     return fut;
   }
