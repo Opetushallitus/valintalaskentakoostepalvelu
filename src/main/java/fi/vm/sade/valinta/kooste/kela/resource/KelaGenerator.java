@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.kela.resource;
 
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.KomotoResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakuFiltteri;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
@@ -20,9 +19,7 @@ import org.springframework.stereotype.Component;
 @Configurable
 public class KelaGenerator {
 
-  @Autowired private HakukohdeResource hakukohdeResource;
-
-  @Autowired private KomotoResource komotoResource;
+  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
 
   @Autowired(required = false)
   private KelaRoute kelaRoute;
@@ -48,7 +45,7 @@ public class KelaGenerator {
             hakuTietue.getHakuOids(),
             aineistonNimi,
             organisaationNimi,
-            new KelaCache(hakukohdeResource, komotoResource),
+            new KelaCache(tarjontaAsyncResource),
             kelaProsessi));
     dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
     return kelaProsessi.toProsessiId();

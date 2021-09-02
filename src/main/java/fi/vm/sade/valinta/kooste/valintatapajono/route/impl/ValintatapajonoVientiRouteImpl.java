@@ -1,13 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
@@ -35,8 +34,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
   private final ApplicationResource applicationResource;
   private final AtaruAsyncResource ataruAsyncResource;
   private final DokumenttiAsyncResource dokumenttiAsyncResource;
-  private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
-  private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
+  private final TarjontaAsyncResource tarjontaAsyncResource;
   private final HakukohdeResource hakukohdeResource;
 
   @Autowired
@@ -44,14 +42,12 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
       ApplicationResource applicationResource,
       AtaruAsyncResource ataruAsyncResource,
       DokumenttiAsyncResource dokumenttiAsyncResource,
-      HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
-      HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
+      TarjontaAsyncResource tarjontaAsyncResource,
       HakukohdeResource hakukohdeResource) {
     this.applicationResource = applicationResource;
     this.ataruAsyncResource = ataruAsyncResource;
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
-    this.hakukohdeTarjonnalta = hakukohdeTarjonnalta;
-    this.hakuTarjonnalta = hakuTarjonnalta;
+    this.tarjontaAsyncResource = tarjontaAsyncResource;
     this.hakukohdeResource = hakukohdeResource;
   }
 
@@ -90,12 +86,13 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             + 1);
                 String hakuOid = hakuOid(exchange);
                 String hakukohdeOid = hakukohdeOid(exchange);
-                HakuV1RDTO haku = hakuTarjonnalta.getHaku(hakuOid);
-                String hakuNimi = new Teksti(haku.getNimi()).getTeksti();
+                Haku haku = tarjontaAsyncResource.haeHaku(hakuOid).get(5, TimeUnit.MINUTES);
+                String hakuNimi = new Teksti(haku.nimi).getTeksti();
                 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-                HakukohdeDTO hnimi = hakukohdeTarjonnalta.haeHakukohdeNimi(hakukohdeOid);
+                Hakukohde hakukohde =
+                    tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
+                String hakukohdeNimi = new Teksti(hakukohde.nimi).getTeksti();
                 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-                String hakukohdeNimi = new Teksti(hnimi.getHakukohdeNimi()).getTeksti();
                 String valintatapajonoOid = valintatapajonoOid(exchange);
                 if (hakukohdeOid == null || hakuOid == null || valintatapajonoOid == null) {
                   LOG.error(
@@ -111,7 +108,12 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                 }
                 final List<HakemusWrapper> hakemukset;
                 try {
-                  if (haku.getAtaruLomakeAvain() == null) {
+                  if (haku.isHakemuspalvelu()) {
+                    hakemukset =
+                        ataruAsyncResource
+                            .getApplicationsByHakukohde(hakukohdeOid)
+                            .get(1, TimeUnit.MINUTES);
+                  } else {
                     hakemukset =
                         applicationResource
                             .getApplicationsByOid(
@@ -122,11 +124,6 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             .stream()
                             .map(HakuappHakemusWrapper::new)
                             .collect(Collectors.toList());
-                  } else {
-                    hakemukset =
-                        ataruAsyncResource
-                            .getApplicationsByHakukohde(hakukohdeOid)
-                            .get(1, TimeUnit.MINUTES);
                   }
                   LOG.debug("Saatiin hakemukset {}", hakemukset.size());
                   dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();

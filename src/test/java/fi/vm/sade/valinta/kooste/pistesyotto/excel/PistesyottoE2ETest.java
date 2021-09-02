@@ -20,9 +20,11 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.shared.types.TarjontaTila;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
@@ -142,6 +144,11 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     mockTarjontaHakuCall();
     mockOrganisaatioKutsu();
 
+    Organisaatio organisaatio = new Organisaatio();
+    organisaatio.setOid("1.2.3.44444.5");
+    organisaatio.setNimi(new HashMap<String, String>());
+    mockToReturnJson(GET, "/organisaatio-service/rest/organisaatio/1.2.3.44444.5", organisaatio);
+
     mockToReturnJson(
         PUT,
         "/dokumenttipalvelu-service/resources/dokumentit/tallenna",
@@ -214,6 +221,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
     mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest);
+    mockKoutaOrganisaatioHakuCall();
 
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createHttpResource(resourcesAddress + "/pistesyotto/tuonti");
@@ -248,6 +256,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     String hakukohdeOidFromUiRequest = "1.2.246.562.5.85532589612";
     mockTarjontaOrganisaatioHakuCall(kayttajanOrganisaatioOid, hakukohdeOidFromUiRequest + ".666");
+    mockKoutaOrganisaatioHakuCall();
 
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createHttpResource(resourcesAddress + "/pistesyotto/tuonti");
@@ -318,10 +327,15 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
         ImmutableMap.of("organisationOid", kayttajanOrganisaatioOid));
   }
 
+  private void mockKoutaOrganisaatioHakuCall() {
+    mockToReturnString(GET, "/kouta-internal/hakukohde/search", "[]");
+  }
+
   private void mockTarjontaHakuCall() {
     HakuV1RDTO haku = new HakuV1RDTO();
     haku.setOid("testioidi1");
     haku.setHakukohdeOids(singletonList("1.2.246.562.5.85532589612"));
+    haku.setTarjoajaOids(new String[] {});
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/testioidi1", new Result(haku));
   }
 
@@ -396,7 +410,11 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
     hakukohdeDTO.setHakuOid("testioidi1");
     hakukohdeDTO.setOid("1.2.246.562.5.85532589612");
+    hakukohdeDTO.setTila(TarjontaTila.JULKAISTU);
     hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
+    hakukohdeDTO.setHakukohdeKoulutusOids(Collections.emptyList());
+    hakukohdeDTO.setPohjakoulutusvaatimus("");
+    hakukohdeDTO.setValintakokeet(Collections.emptyList());
     mockToReturnJson(
         GET,
         "/tarjonta-service/rest/v1/hakukohde/1.2.246.562.5.85532589612",

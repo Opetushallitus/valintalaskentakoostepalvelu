@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.tarjonta.route.impl;
 
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,23 +12,14 @@ public class TarjontaRouteImpl extends SpringRouteBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(TarjontaRouteImpl.class);
 
   private LinjakoodiKomponentti linjakoodiKomponentti;
-  private HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeNimiTarjonnaltaKomponentti;
-  private HaeHakuTarjonnaltaKomponentti hakuTarjonnaltaKomponentti;
 
   @Autowired
-  public TarjontaRouteImpl(
-      HaeHakuTarjonnaltaKomponentti hakuTarjonnaltaKomponentti,
-      LinjakoodiKomponentti linjakoodiKomponentti,
-      HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeNimiTarjonnaltaKomponentti) {
-    this.hakuTarjonnaltaKomponentti = hakuTarjonnaltaKomponentti;
+  public TarjontaRouteImpl(LinjakoodiKomponentti linjakoodiKomponentti) {
     this.linjakoodiKomponentti = linjakoodiKomponentti;
-    this.hakukohdeNimiTarjonnaltaKomponentti = hakukohdeNimiTarjonnaltaKomponentti;
   }
 
   @Override
   public void configure() throws Exception {
-    from("direct:tarjontaHakuReitti").bean(hakuTarjonnaltaKomponentti);
-    from("direct:tarjontaNimiReitti").bean(hakukohdeNimiTarjonnaltaKomponentti);
     from("direct:linjakoodiReitti").bean(linjakoodiKomponentti);
   }
 }

@@ -5,8 +5,9 @@ import static java.util.Arrays.asList;
 
 import com.codepoetics.protonpack.Indexed;
 import com.codepoetics.protonpack.StreamUtils;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
@@ -33,8 +34,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ValintalaskennanTulosExcel {
   public static XSSFWorkbook luoExcel(
-      HakuV1RDTO haku,
-      final HakukohdeV1RDTO hakukohdeDTO,
+      Haku haku,
+      Hakukohde hakukohdeDTO,
+      List<Organisaatio> tarjoajat,
       List<ValintatietoValinnanvaiheDTO> valinnanVaiheet,
       final List<HakemusWrapper> hakemukset) {
     final Map<String, HakemusWrapper> hakemusByOid =
@@ -59,9 +61,14 @@ public class ValintalaskennanTulosExcel {
               final ValintatietoValintatapajonoDTO jono = jonoSheet.jono;
 
               setColumnWidths(sheet);
-              addRow(sheet, "Haku", getTeksti(haku.getNimi()));
-              addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimet()));
-              addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohteenNimet()));
+              addRow(sheet, "Haku", getTeksti(haku.nimi));
+              addRow(
+                  sheet,
+                  "Tarjoaja",
+                  getTeksti(
+                      tarjoajat.stream().map(Organisaatio::getNimi).collect(Collectors.toList()),
+                      " - "));
+              addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.nimi));
               addRow(sheet, "Vaihe", vaihe.getNimi());
               addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt()));
               addRow(sheet, "Jono", jono.getNimi());

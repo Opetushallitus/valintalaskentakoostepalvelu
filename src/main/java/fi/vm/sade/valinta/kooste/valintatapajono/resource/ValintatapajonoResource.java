@@ -4,7 +4,6 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 import fi.vm.sade.auditlog.User;
 import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
@@ -193,8 +192,12 @@ public class ValintatapajonoResource {
 
   private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
     try {
-      return HakukohdeHelper.tarjoajaOid(
-          tarjontaResource.haeHakukohde(hakukohdeOid).get(1, MINUTES));
+      return tarjontaResource
+          .haeHakukohde(hakukohdeOid)
+          .get(1, MINUTES)
+          .tarjoajaOids
+          .iterator()
+          .next();
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new RuntimeException(e);
     }

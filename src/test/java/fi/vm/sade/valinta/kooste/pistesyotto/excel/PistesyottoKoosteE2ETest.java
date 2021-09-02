@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpHandler;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.shared.types.TarjontaTila;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
@@ -296,6 +297,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     mockTarjontaHakukohdeCall();
     mockValintakoe();
     mockTarjontaHakukohdeRyhmaCall();
+    mockKoutaHakukohdeSearchCall();
 
     Hakemus hakemusHakuAppista = new Hakemus();
     hakemusHakuAppista.setAdditionalInfo(applicationAdditionaData.getAdditionalData());
@@ -394,6 +396,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     mockTarjontaHakukohdeCall();
     mockValintakoe();
     mockTarjontaHakukohdeRyhmaCall();
+    mockKoutaHakukohdeSearchCall();
 
     Hakemus hakemusHakuAppista = new Hakemus();
     hakemusHakuAppista.setAdditionalInfo(applicationAdditionalDataDto.getAdditionalData());
@@ -451,6 +454,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     mockTarjontaHakukohdeCall();
     mockValintakoe();
     mockTarjontaHakukohdeRyhmaCall();
+    mockKoutaHakukohdeSearchCall();
 
     Hakemus hakemusHakuAppista = new Hakemus();
     hakemusHakuAppista.setAdditionalInfo(applicationAdditionalDataDto.getAdditionalData());
@@ -556,7 +560,11 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
     hakukohdeDTO.setHakuOid("testihaku");
     hakukohdeDTO.setOid("testihakukohde");
+    hakukohdeDTO.setTila(TarjontaTila.JULKAISTU);
     hakukohdeDTO.setTarjoajaOids(ImmutableSet.of("1.2.3.44444.5"));
+    hakukohdeDTO.setHakukohdeKoulutusOids(Collections.emptyList());
+    hakukohdeDTO.setPohjakoulutusvaatimus("");
+    hakukohdeDTO.setValintakokeet(Collections.emptyList());
     mockToReturnJson(
         GET, "/tarjonta-service/rest/v1/hakukohde/testihakukohde", new Result<>(hakukohdeDTO));
   }
@@ -565,6 +573,10 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     String s =
         "{\"result\": {\"tulokset\": [{\"tulokset\": [{\"oid\": \"1.2.246.562.20.50849071738\",\"ryhmaliitokset\": [{\"ryhmaOid\": \"1.2.246.562.28.77463971187\"},{\"ryhmaOid\": \"1.2.246.562.28.10942030083\"},{\"ryhmaOid\": \"1.2.246.562.28.92529355477\"}]},{\"oid\": \"1.2.246.562.20.52702700353\",\"ryhmaliitokset\": []}]}],\"tuloksia\": 1}}";
     mockToReturnString(GET, "/tarjonta-service/rest/v1/hakukohde/search", s);
+  }
+
+  private void mockKoutaHakukohdeSearchCall() {
+    mockToReturnString(GET, "/kouta-internal/hakukohde/search", "[]");
   }
 
   private void mockOrganisaatioKutsu() {

@@ -8,21 +8,17 @@ import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationGroup
 import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationOidsFromSecurityRoles;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
-import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import io.reactivex.Observable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.ForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,35 +50,23 @@ public class AuthorityCheckService {
         return Observable.error(
             new RuntimeException("Unauthorized. User has no organization OIDS"));
       }
-      Observable<List<ResultOrganization>> searchByOrganizationOids =
+      CompletableFuture<Set<String>> searchByOrganizationOids =
           Optional.of(organizationOids)
               .filter(oids -> !oids.isEmpty())
               .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids)
-              .orElse(Observable.just(Collections.emptyList()));
+              .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
-      Observable<List<ResultOrganization>> searchByOrganizationGroupOids =
+      CompletableFuture<Set<String>> searchByOrganizationGroupOids =
           Optional.of(organizationGroupOids)
               .filter(oids -> !oids.isEmpty())
               .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
-              .orElse(Observable.just(Collections.emptyList()));
+              .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
-      return Observable.combineLatest(
-          searchByOrganizationOids,
-          searchByOrganizationGroupOids,
-          (orgs, groupOrgs) -> {
-            Set<String> hakukohdeOidSet1 =
-                orgs.stream()
-                    .flatMap(o -> o.getTulokset().stream())
-                    .map(ResultHakukohde::getOid)
-                    .collect(Collectors.toSet());
-            Set<String> hakukohdeOidSet2 =
-                groupOrgs.stream()
-                    .flatMap(o -> o.getTulokset().stream())
-                    .map(ResultHakukohde::getOid)
-                    .collect(Collectors.toSet());
-
-            return (oid) -> Sets.union(hakukohdeOidSet1, hakukohdeOidSet2).contains(oid);
-          });
+      return Observable.fromFuture(
+          searchByOrganizationOids.thenComposeAsync(
+              byOrgs ->
+                  searchByOrganizationGroupOids.thenApplyAsync(
+                      byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid))));
     }
   }
 
@@ -96,11 +80,7 @@ public class AuthorityCheckService {
 
     boolean isAuthorized =
         Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
-            .map(
-                haku -> {
-                  String[] organisaatioOids = haku.getTarjoajaOids();
-                  return isAuthorizedForAnyParentOid(organisaatioOids, userRoles, requiredRoles);
-                })
+            .map(haku -> isAuthorizedForAnyParentOid(haku.tarjoajaOids, userRoles, requiredRoles))
             .timeout(2, MINUTES)
             .blockingFirst();
 
@@ -114,7 +94,7 @@ public class AuthorityCheckService {
   }
 
   public boolean isAuthorizedForAnyParentOid(
-      String[] organisaatioOids,
+      Set<String> organisaatioOids,
       Collection<? extends GrantedAuthority> userRoles,
       Collection<String> requiredRoles) {
     try {
@@ -136,7 +116,7 @@ public class AuthorityCheckService {
       String msg =
           String.format(
               "Organisaatioiden %s parentOids -haku epäonnistui",
-              Arrays.toString(organisaatioOids));
+              String.join(", ", organisaatioOids));
       LOG.error(msg, e);
       throw new ForbiddenException(msg);
     }
@@ -165,7 +145,7 @@ public class AuthorityCheckService {
                     return false;
                   } else {
                     return isAuthorizedForAnyParentOid(
-                        new String[] {vastuuorganisaatioOid}, userRoles, requiredRoles);
+                        Collections.singleton(vastuuorganisaatioOid), userRoles, requiredRoles);
                   }
                 })
             .timeout(2, MINUTES)
