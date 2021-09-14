@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
-import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import fi.vm.sade.sijoittelu.domain.SijoitteluajonTila;
@@ -10,8 +9,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.ws.rs.core.MediaType;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,8 +24,12 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource
   private static final int MAX_POLL_INTERVALL_IN_SECONDS = 30;
   private static final int ADDED_WAIT_PER_POLL_IN_SECONDS = 3;
 
-  public SijoitteleAsyncResourceImpl() {
-    super(MINUTES.toMillis(50));
+  @Autowired
+  public SijoitteleAsyncResourceImpl(
+      @Qualifier("SijoitteluServiceRestClientCasInterceptor")
+          AbstractPhaseInterceptor casInterceptor) {
+    super(TimeUnit.HOURS.toMillis(1), casInterceptor);
+    LOGGER.info("CAS-INTERCEPTOR: {}", casInterceptor.toString());
   }
 
   @Override
@@ -45,7 +51,7 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource
               .timeout(30, SECONDS)
               .blockingFirst();
     } catch (Exception e) {
-      LOGGER.info(String.format("(Haku %s) sijoittelun rajapintakutsu epäonnistui", hakuOid), e);
+      LOGGER.error(String.format("(Haku %s) sijoittelun rajapintakutsu epäonnistui", hakuOid), e);
     }
     // Jos rajapinta palauttaa -1 tai kutsu epäonnistuu, uutta sijoitteluajoa ei luotu. Ei aloiteta
     // pollausta.
@@ -89,13 +95,13 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource
           return;
         }
         if (SijoitteluajonTila.VIRHE.toString().equals(status)) {
-          LOGGER.info("#### Sijoittelu {} haulle {} päättyi virheeseen", sijoitteluajoId, hakuOid);
+          LOGGER.error("#### Sijoittelu {} haulle {} päättyi virheeseen", sijoitteluajoId, hakuOid);
           failureCallback.accept(new Exception());
           done.set(true);
           return;
         }
       } catch (Exception e) {
-        LOGGER.info(
+        LOGGER.error(
             String.format("Sijoittelussa %s haulle %s tapahtui virhe", sijoitteluajoId, hakuOid),
             e);
         failureCallback.accept(e);

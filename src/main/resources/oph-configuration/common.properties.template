@@ -47,6 +47,7 @@ cas.sendRenew=false
 cas.service.dokumenttipalvelu=https://${host.virkailija}/dokumenttipalvelu-service/j_spring_cas_security_check
 cas.service.seuranta=https://${host.virkailija}/seuranta-service/j_spring_cas_security_check
 cas.service.haku-service=https://${host.virkailija}/haku-app/j_spring_cas_security_check
+cas.service.sijoittelu-service=https://${host.virkailija}/sijoittelu-service/j_spring_cas_security_check
 cas.service.ataru=https://${host.virkailija}/lomake-editori/auth/cas
 cas.service.valintapiste-service=https://${host.virkailija}/valintapiste-service/auth/cas
 cas.service.koodisto-service=https://${host.virkailija}/koodisto-service/j_spring_cas_security_check

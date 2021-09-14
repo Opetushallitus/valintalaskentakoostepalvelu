@@ -78,6 +78,13 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
+  @Bean(name = "SijoitteluServiceInternalHttpClient")
+  @Autowired
+  public java.net.http.HttpClient getSijoitteluServiceInternalHttpClient(
+      CookieManager cookieManager) {
+    return defaultHttpClientBuilder(cookieManager).build();
+  }
+
   @Profile("default")
   @Bean(name = "HakuAppApplicationSession")
   @Autowired
@@ -88,6 +95,33 @@ public class HttpClients {
       @Value("${cas.service.haku-service}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String password) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    return new ApplicationSession(
+        applicationHttpClient,
+        cookieManager,
+        CALLER_ID,
+        Duration.ofSeconds(10),
+        new CasSession(
+            casHttpClient,
+            Duration.ofSeconds(10),
+            CALLER_ID,
+            URI.create(ticketsUrl),
+            username,
+            password),
+        service,
+        "JSESSIONID");
+  }
+
+  @Bean(name = "SijoitteluServiceApplicationSession")
+  @Autowired
+  public ApplicationSession getSijoitteluServiceApplicationSession(
+      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+      @Qualifier("SijoitteluServiceInternalHttpClient")
+          java.net.http.HttpClient applicationHttpClient,
+      CookieManager cookieManager,
+      @Value("${cas.service.sijoittelu-service}") String service,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.sijoittelu}") String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.sijoittelu}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new ApplicationSession(
         applicationHttpClient,

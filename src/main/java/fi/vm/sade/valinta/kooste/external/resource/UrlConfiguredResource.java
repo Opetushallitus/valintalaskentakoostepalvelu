@@ -17,8 +17,11 @@ import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class UrlConfiguredResource implements HttpResource {
+  private static final Logger LOGGER = LoggerFactory.getLogger(UrlConfiguredResource.class);
   public static final String VALINTALASKENTAKOOSTEPALVELU_CALLER_ID =
       "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
   public final HttpResource wrappedHttpResource;
@@ -39,6 +42,7 @@ public abstract class UrlConfiguredResource implements HttpResource {
         new HttpResourceBuilder(VALINTALASKENTAKOOSTEPALVELU_CALLER_ID)
             .gson(createGson())
             .timeoutMillis(timeoutMillis);
+
     if (casInterceptor != null) {
       builder.jaxrsClientFactoryBean(
           installCasFilter(casInterceptor, HttpResource.getJaxrsClientFactoryBean()));
