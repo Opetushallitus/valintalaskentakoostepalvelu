@@ -2,11 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHakukohde;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Hakukohde {
@@ -80,7 +76,7 @@ public class Hakukohde {
     this.nimi = new HashMap<>();
     dto.nimi.forEach((kieli, nimi) -> this.nimi.put("kieli_" + kieli, nimi));
     this.hakuOid = dto.hakuOid;
-    this.tarjoajaOids = dto.tarjoajat;
+    this.tarjoajaOids = Set.of(dto.tarjoaja);
     this.toteutusOids = Collections.singleton(dto.toteutusOid);
     this.hakukohteetUri = null;
     this.pohjakoulutusvaatimusUrit = dto.pohjakoulutusvaatimusKoodiUrit;
