@@ -8,7 +8,7 @@ public class KoutaHakukohde {
   public final String tila;
   public final Map<String, String> nimi;
   public final String hakuOid;
-  public final Set<String> tarjoajat;
+  public final String tarjoaja;
   public final String toteutusOid;
   public final Integer aloituspaikat;
   public final Set<KoutaValintakoe> valintakokeet;
@@ -19,7 +19,7 @@ public class KoutaHakukohde {
     this.tila = null;
     this.nimi = null;
     this.hakuOid = null;
-    this.tarjoajat = null;
+    this.tarjoaja = null;
     this.toteutusOid = null;
     this.aloituspaikat = null;
     this.valintakokeet = null;

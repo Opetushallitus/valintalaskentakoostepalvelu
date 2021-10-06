@@ -203,7 +203,8 @@ public class SuoritaHakukohdeImportKomponentti {
           String koulutusUri =
               IterableUtil.singleton(
                   koulutukset.stream()
-                          .map(koulutus -> koulutus.koulutusUri)
+                          .map(koulutus -> koulutus.koulutusUrit)
+                          .flatMap(koulutusUrit -> koulutusUrit.stream())
                           .filter(Objects::nonNull)
                           .distinct()
                       ::iterator);
