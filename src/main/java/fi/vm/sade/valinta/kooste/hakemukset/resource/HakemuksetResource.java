@@ -75,9 +75,10 @@ public class HakemuksetResource {
         additionalAuditInfo);
 
     LOG.warn(
-        "Aloitetaan hakemusten listaaminen valinnanvaiheelle {} haussa {}",
+        "Aloitetaan hakemusten listaaminen valinnanvaiheelle {} haussa {}, käyttäjä {}",
         valinnanvaiheOid,
-        hakuOid);
+        hakuOid,
+        userOid);
     Long started = System.currentTimeMillis();
 
     authorityCheckService
