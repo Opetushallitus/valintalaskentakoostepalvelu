@@ -63,6 +63,8 @@ public class HakemuksetResource {
     additionalAuditInfo.put("hakuOid", hakuOid);
     additionalAuditInfo.put("ValinnanvaiheOid", valinnanvaiheOid);
 
+    String userOid = AuthorizationUtil.createAuditSession(request).getPersonOid();
+
     AuditLog.log(
         KoosteAudit.AUDIT,
         AuthorizationUtil.createAuditSession(request).asAuditUser(),
@@ -85,7 +87,8 @@ public class HakemuksetResource {
                 "ROLE_APP_HAKEMUS_READ",
                 "ROLE_APP_HAKEMUS_CRUD",
                 "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD"))
+                "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+            userOid)
         .subscribe(
             authCheck -> {
               valinnanvaiheenValintakoekutsutService.hae(

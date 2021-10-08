@@ -37,11 +37,15 @@ public class AuthorityCheckService {
   @Autowired private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 
   public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
-      Collection<String> roles) {
+      Collection<String> roles, String temporaryBypassAuthCheckUserOid) {
     final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
     final Set<String> organizationOids = parseOrganizationOidsFromSecurityRoles(authorities);
     boolean isRootAuthority = organizationOids.stream().anyMatch(oid -> isRootOrganizationOID(oid));
     if (isRootAuthority) {
+      return Observable.just((oid) -> true);
+    } else if ("1.2.246.562.24.71042076610".equals(temporaryBypassAuthCheckUserOid)
+        || "1.2.246.562.24.97206563590".equals(temporaryBypassAuthCheckUserOid)) {
+      LOG.warn("Temporarily skipping authority check for user " + temporaryBypassAuthCheckUserOid);
       return Observable.just((oid) -> true);
     } else {
       final Set<String> organizationGroupOids =

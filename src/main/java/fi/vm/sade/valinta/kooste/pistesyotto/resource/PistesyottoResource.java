@@ -117,7 +117,8 @@ public class PistesyottoResource {
                     "ROLE_APP_HAKEMUS_READ",
                     "ROLE_APP_HAKEMUS_CRUD",
                     "ROLE_APP_HAKEMUS_LISATIETORU",
-                    "ROLE_APP_HAKEMUS_LISATIETOCRUD")),
+                    "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+                ""),
             pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid, auditSession),
             (authorityCheck, pistetiedotHakukohteittain) -> {
               Set<String> hakutoiveOids = pistetiedotHakukohteittain.getHakukohteittain().keySet();
@@ -199,7 +200,8 @@ public class PistesyottoResource {
                         "ROLE_APP_HAKEMUS_READ_UPDATE",
                         "ROLE_APP_HAKEMUS_CRUD",
                         "ROLE_APP_HAKEMUS_LISATIETORU",
-                        "ROLE_APP_HAKEMUS_LISATIETOCRUD")),
+                        "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+                    ""),
                 hakemusO,
                 (authorityCheck, hakemus) -> {
                   Collection<String> hakutoiveOids = hakemus.getHakutoiveOids();
@@ -262,7 +264,8 @@ public class PistesyottoResource {
                 "ROLE_APP_HAKEMUS_READ",
                 "ROLE_APP_HAKEMUS_CRUD",
                 "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD"))
+                "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+            "")
         .switchMap(
             authorityCheck -> {
               if (authorityCheck.test(hakukohdeOid)) {
@@ -338,7 +341,8 @@ public class PistesyottoResource {
                 "ROLE_APP_HAKEMUS_READ_UPDATE",
                 "ROLE_APP_HAKEMUS_CRUD",
                 "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD"))
+                "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+            "")
         .flatMap(
             authorityCheck -> {
               if (authorityCheck.test(hakukohdeOid)) {
@@ -434,7 +438,8 @@ public class PistesyottoResource {
                 "ROLE_APP_HAKEMUS_READ",
                 "ROLE_APP_HAKEMUS_CRUD",
                 "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD"))
+                "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+            "")
         .flatMap(
             authorityCheck -> {
               if (authorityCheck.test(hakukohdeOid)) {
@@ -493,7 +498,8 @@ public class PistesyottoResource {
                       "ROLE_APP_HAKEMUS_READ_UPDATE",
                       "ROLE_APP_HAKEMUS_CRUD",
                       "ROLE_APP_HAKEMUS_LISATIETORU",
-                      "ROLE_APP_HAKEMUS_LISATIETOCRUD"))
+                      "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+                  "")
               .flatMap(
                   authorityCheck -> {
                     if (authorityCheck.test(hakukohdeOid)) {
@@ -634,7 +640,8 @@ public class PistesyottoResource {
                     "ROLE_APP_HAKEMUS_READ_UPDATE",
                     "ROLE_APP_HAKEMUS_CRUD",
                     "ROLE_APP_HAKEMUS_LISATIETORU",
-                    "ROLE_APP_HAKEMUS_LISATIETOCRUD"))
+                    "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+                "")
             .subscribe(
                 authorityCheck -> {
                   LOG.info(

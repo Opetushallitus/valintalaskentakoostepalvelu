@@ -149,7 +149,7 @@ public class ValintalaskentaKerrallaResource {
         authorityCheckObservable = Observable.empty();
       } else {
         authorityCheckObservable =
-            authorityCheckService.getAuthorityCheckForRoles(valintalaskentaAllowedRoles);
+            authorityCheckService.getAuthorityCheckForRoles(valintalaskentaAllowedRoles, "");
       }
 
       valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(

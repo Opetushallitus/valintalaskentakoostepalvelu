@@ -14,7 +14,7 @@ public class MockAuthorityCheckService extends AuthorityCheckService {
 
   @Override
   public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
-      Collection<String> roles) {
+      Collection<String> roles, String tempBypass) {
     return Observable.just((oid) -> true);
   }
 
