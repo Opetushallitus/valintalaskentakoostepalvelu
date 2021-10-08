@@ -44,7 +44,8 @@ public class AuthorityCheckService {
     if (isRootAuthority) {
       return Observable.just((oid) -> true);
     } else if ("1.2.246.562.24.71042076610".equals(temporaryBypassAuthCheckUserOid)
-        || "1.2.246.562.24.97206563590".equals(temporaryBypassAuthCheckUserOid)) {
+        || "1.2.246.562.24.97206563590".equals(temporaryBypassAuthCheckUserOid)
+        || "1.2.246.562.24.20752206459".equals(temporaryBypassAuthCheckUserOid)) {
       LOG.warn("Temporarily skipping authority check for user " + temporaryBypassAuthCheckUserOid);
       return Observable.just((oid) -> true);
     } else {
