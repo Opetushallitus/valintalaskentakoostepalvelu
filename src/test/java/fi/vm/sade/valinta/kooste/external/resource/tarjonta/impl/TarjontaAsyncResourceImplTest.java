@@ -1,8 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
 import static java.util.Collections.emptyList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,7 +9,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohderyhmaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
@@ -27,7 +29,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class TarjontaAsyncResourceImplTest {
   private static final String TARJONTA_URL =
       "http://test/tarjonta-service/rest/v1/hakukohde/search";
-  private static final String KOUTA_URL = "http://test/kouta-internal/hakukohde/search";
+  private static final String TARJONTA_HAKU_URL = "http://test/tarjonta-service/rest/v1/haku/";
+  private static final String KOUTA_URL = "http://test/kouta-internal/hakukohde/search/1.2.3.4";
   private static final String HKR_URL = "http://test/search/by-hakukohteet";
 
   private final HttpClient tarjontaClient = mock(HttpClient.class);
@@ -48,6 +51,8 @@ public class TarjontaAsyncResourceImplTest {
               return KOUTA_URL;
             case "hakukohderyhmapalvelu.hakukohderyhma.search-by-hakukohteet":
               return HKR_URL;
+            case "tarjonta-service.haku.hakuoid":
+              return TARJONTA_HAKU_URL;
             default:
               return null;
           }
@@ -102,7 +107,7 @@ public class TarjontaAsyncResourceImplTest {
     expected.put("1.2.246.562.20.2", Arrays.asList("1.2.246.562.28.1", "1.2.246.562.28.3"));
 
     CompletableFuture<Map<String, List<String>>> actual =
-        tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes("1.2.246.562.10.1");
+        tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes("1.2.246.562.29.00000000000000000800");
 
     assertEquals(expected, actual.join());
   }
@@ -145,5 +150,13 @@ public class TarjontaAsyncResourceImplTest {
             .fromJson(json, new TypeToken<ResultSearch>() {}.getType());
     Map<String, List<String>> res = TarjontaAsyncResourceImpl.resultSearchToHakukohdeRyhmaMap(a);
     assertEquals(0, res.size());
+  }
+
+  @Test
+  public void doesNotBreakFromNullResponseWhenFetchingHaku() {
+    when(tarjontaClient.getJson(eq(TARJONTA_HAKU_URL), any(Duration.class), any()))
+        .thenReturn(CompletableFuture.completedFuture(new ResultV1RDTO<HakuV1RDTO>(null)));
+    CompletableFuture<Haku> response = tarjontaAsyncResource.haeHaku("1.2.3.4");
+    assertNotNull(response);
   }
 }
