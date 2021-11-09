@@ -13,6 +13,7 @@ public class KoutaHakukohde {
   public final Integer aloituspaikat;
   public final Set<KoutaValintakoe> valintakokeet;
   public final Set<String> pohjakoulutusvaatimusKoodiUrit;
+  public final String uudenOpiskelijanUrl;
 
   private KoutaHakukohde() {
     this.oid = null;
@@ -24,6 +25,7 @@ public class KoutaHakukohde {
     this.aloituspaikat = null;
     this.valintakokeet = null;
     this.pohjakoulutusvaatimusKoodiUrit = null;
+    this.uudenOpiskelijanUrl = null;
   }
 
   @Override

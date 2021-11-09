@@ -83,7 +83,7 @@ public class Hakukohde {
     this.valintojenAloituspaikat = dto.aloituspaikat;
     this.valintakokeet =
         dto.valintakokeet.stream().map(Valintakoe::new).collect(Collectors.toSet());
-    this.ohjeetUudelleOpiskelijalle = null;
+    this.ohjeetUudelleOpiskelijalle = dto.uudenOpiskelijanUrl;
   }
 
   public enum Tila {
