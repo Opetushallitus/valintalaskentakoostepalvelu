@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource;
 
 import com.google.gson.Gson;
 import fi.vm.sade.javautils.cas.ApplicationSession;
+import fi.vm.sade.valinta.kooste.util.RetryUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,11 @@ public class HttpClient {
     this.client = client;
     this.session = session;
     this.gson = gson;
+  }
+
+  public <O> CompletableFuture<O> getJsonWithRetry(String url, Duration timeout, Type outputType) {
+    Supplier<CompletableFuture<O>> supplier = () -> this.getJson(url, timeout, outputType, null);
+    return RetryUtil.executeWithRetry(supplier, url, 2, 3);
   }
 
   public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {

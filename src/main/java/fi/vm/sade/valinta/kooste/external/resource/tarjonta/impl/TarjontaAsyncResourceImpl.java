@@ -99,7 +99,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
                       Map<String, String> koutaParameters = new HashMap<>();
                       koutaParameters.put("tarjoaja", organizationOid);
                       return this.koutaClient
-                          .<Set<KoutaHakukohde>>getJson(
+                          .<Set<KoutaHakukohde>>getJsonWithRetry(
                               urlConfiguration.url(
                                   "kouta-internal.hakukohde.search", koutaParameters),
                               Duration.ofSeconds(10),
@@ -133,7 +133,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   @Override
   public CompletableFuture<Haku> haeHaku(String hakuOid) {
     CompletableFuture<KoutaHaku> koutaF =
-        this.koutaClient.getJson(
+        this.koutaClient.getJsonWithRetry(
             urlConfiguration.url("kouta-internal.haku.hakuoid", hakuOid),
             Duration.ofSeconds(10),
             new TypeToken<KoutaHaku>() {}.getType());
@@ -155,7 +155,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
                 new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {}.getType())
             .thenApplyAsync(ResultV1RDTO::getResult);
     CompletableFuture<KoutaHakukohde> koutaF =
-        this.koutaClient.getJson(
+        this.koutaClient.getJsonWithRetry(
             urlConfiguration.url("kouta-internal.hakukohde.hakukohdeoid", hakukohdeOid),
             Duration.ofSeconds(10),
             new TypeToken<KoutaHakukohde>() {}.getType());
@@ -171,7 +171,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
     HashMap<String, String> koutaParameters = new HashMap<>();
     koutaParameters.put("haku", hakuOid);
     CompletableFuture<Set<KoutaHakukohde>> koutaF =
-        this.koutaClient.getJson(
+        this.koutaClient.getJsonWithRetry(
             urlConfiguration.url("kouta-internal.hakukohde.search", koutaParameters),
             Duration.ofSeconds(10),
             new TypeToken<Set<KoutaHakukohde>>() {}.getType());
@@ -195,7 +195,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
                 new TypeToken<ResultV1RDTO<KoulutusV1RDTO>>() {}.getType())
             .thenApplyAsync(ResultV1RDTO::getResult);
     CompletableFuture<KoutaToteutus> koutaF =
-        this.koutaClient.getJson(
+        this.koutaClient.getJsonWithRetry(
             urlConfiguration.url("kouta-internal.toteutus.toteutusoid", toteutusOid),
             Duration.ofMinutes(5),
             new TypeToken<KoutaToteutus>() {}.getType());
@@ -216,7 +216,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
                 new TypeToken<ResultV1RDTO<KomoV1RDTO>>() {}.getType())
             .thenApplyAsync(ResultV1RDTO::getResult);
     CompletableFuture<KoutaKoulutus> koutaF =
-        this.koutaClient.getJson(
+        this.koutaClient.getJsonWithRetry(
             urlConfiguration.url("kouta-internal.koulutus.koulutusoid", koulutusOid),
             Duration.ofMinutes(5),
             new TypeToken<KoutaKoulutus>() {}.getType());
@@ -249,7 +249,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
     Map<String, String> koutaParameters = new HashMap<>();
     koutaParameters.put("haku", hakuOid);
     CompletableFuture<Set<KoutaHakukohde>> koutaF =
-        this.koutaClient.getJson(
+        this.koutaClient.getJsonWithRetry(
             urlConfiguration.url("kouta-internal.hakukohde.search", koutaParameters),
             Duration.ofSeconds(10),
             new TypeToken<Set<KoutaHakukohde>>() {}.getType());
