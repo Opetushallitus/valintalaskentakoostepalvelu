@@ -37,6 +37,15 @@ public class HttpClient {
     this.gson = gson;
   }
 
+  public <O> CompletableFuture<O> getJsonWithRetry(String url, Duration timeout, Type outputType) {
+    CompletableFuture<O> resultFuture = this.getJson(url, timeout, outputType, null);
+    resultFuture.thenApply(CompletableFuture::completedFuture).exceptionally(t -> {
+      LOG.error("Retrying after call to {} errored: {}", url, t);
+      return this.getJson(url, timeout, outputType, null);
+    }).thenCompose(Function.identity());
+    return resultFuture;
+  }
+
   public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
     return this.getJson(url, timeout, outputType, null);
   }
