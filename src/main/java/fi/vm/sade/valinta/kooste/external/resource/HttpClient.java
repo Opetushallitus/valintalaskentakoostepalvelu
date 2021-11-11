@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource;
 
 import com.google.gson.Gson;
 import fi.vm.sade.javautils.cas.ApplicationSession;
+import fi.vm.sade.valinta.kooste.util.RetryUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,8 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import fi.vm.sade.valinta.kooste.util.RetryUtil;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
