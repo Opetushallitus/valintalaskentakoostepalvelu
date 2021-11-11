@@ -75,7 +75,7 @@ public class TarjontaAsyncResourceImplTest {
     KoutaHakukohde hk2 = Mockito.mock(KoutaHakukohde.class);
     ReflectionTestUtils.setField(hk1, "oid", "1.2.246.562.20.1");
     ReflectionTestUtils.setField(hk2, "oid", "1.2.246.562.20.2");
-    when(koutaClient.getJson(
+    when(koutaClient.getJsonWithRetry(
             eq(KOUTA_URL),
             any(Duration.class),
             eq(new TypeToken<Set<KoutaHakukohde>>() {}.getType())))
