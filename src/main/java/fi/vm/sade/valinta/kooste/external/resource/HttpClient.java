@@ -16,6 +16,9 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.function.Supplier;
+
+import fi.vm.sade.valinta.kooste.util.RetryUtil;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +41,8 @@ public class HttpClient {
   }
 
   public <O> CompletableFuture<O> getJsonWithRetry(String url, Duration timeout, Type outputType) {
-    CompletableFuture<O> resultFuture = this.getJson(url, timeout, outputType, null);
-    resultFuture.thenApply(CompletableFuture::completedFuture).exceptionally(t -> {
-      LOG.error("Retrying after call to {} errored: {}", url, t);
-      return this.getJson(url, timeout, outputType, null);
-    }).thenCompose(Function.identity());
-    return resultFuture;
+    Supplier<CompletableFuture<O>> supplier = () -> this.getJson(url, timeout, outputType, null);
+    return RetryUtil.executeWithRetry(supplier, url, 2, 3);
   }
 
   public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
