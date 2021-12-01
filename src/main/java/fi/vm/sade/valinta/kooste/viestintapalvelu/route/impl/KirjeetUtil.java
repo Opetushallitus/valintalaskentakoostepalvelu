@@ -68,7 +68,10 @@ public class KirjeetUtil {
             hakutoive.getEnsikertalaisuusHakijaryhmanAlimmatHyvaksytytPisteet();
         Pisteet jononPisteet =
             KirjeetUtil.asPisteetData(
-                numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet, valintatapajono.getJonosija());
+                numeerisetPisteet,
+                alinHyvaksyttyPistemaara,
+                ensikertalaisenMinimipisteet,
+                valintatapajono.getJonosija());
 
         String varasijaTeksti =
             varasijanumeroTeksti(valintatapajono, preferoitukielikoodi).orElse(null);
