@@ -34,12 +34,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class KirjeetUtil {
   private static final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
-  private static final Logger LOG = LoggerFactory.getLogger(KirjeetUtil.class);
 
   static {
     tilaToPrioriteetti.put(HARKINNANVARAISESTI_HYVAKSYTTY, 1);
@@ -68,7 +65,7 @@ public class KirjeetUtil {
             hakutoive.getEnsikertalaisuusHakijaryhmanAlimmatHyvaksytytPisteet();
         Pisteet jononPisteet =
             KirjeetUtil.asPisteetData(
-                numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet, valintatapajono.getJonosija());
+                numeerisetPisteet, alinHyvaksyttyPistemaara, ensikertalaisenMinimipisteet);
 
         String varasijaTeksti =
             varasijanumeroTeksti(valintatapajono, preferoitukielikoodi).orElse(null);
@@ -274,18 +271,12 @@ public class KirjeetUtil {
   public static Pisteet asPisteetData(
       BigDecimal numeerisetPisteet,
       BigDecimal alinHyvaksyttyPistemaara,
-      BigDecimal ensikertalaisenMinimipisteet,
-      Integer jonosija) {
-    String kkPiste = null;
+      BigDecimal ensikertalaisenMinimipisteet) {
+    String kkPiste = suomennaNumero(notNegative(numeerisetPisteet), null);
     String kkMinimi = suomennaNumero(notNegative(alinHyvaksyttyPistemaara), null);
     String kkEnskertMinimi = suomennaNumero(notNegative(ensikertalaisenMinimipisteet), null);
-    if (numeerisetPisteet != null && jonosija != null) {
-      if (!(jonosija * (-1) == numeerisetPisteet.intValue())) {
-        kkPiste = suomennaNumero(numeerisetPisteet, null);
-      }
-    }
-    Pisteet pisteetResult = new Pisteet(kkPiste, kkMinimi, kkEnskertMinimi);
-    LOG.info("Pisteet: " + pisteetResult);
-    return pisteetResult;
+    // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
+    // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
+    return new Pisteet(kkPiste, kkMinimi, kkEnskertMinimi);
   }
 }
