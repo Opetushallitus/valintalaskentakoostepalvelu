@@ -10,7 +10,8 @@ import org.apache.commons.lang.time.FastDateFormat;
 
 public class Formatter {
   public static final FastDateFormat PVMFORMATTER = FastDateFormat.getInstance("dd.MM.yyyy HH:mm");
-  public static final DecimalFormat NUMERO_FORMAATTI = (DecimalFormat)NumberFormat.getInstance(new Locale("FI"));
+  public static final DecimalFormat NUMERO_FORMAATTI =
+      (DecimalFormat) NumberFormat.getInstance(new Locale("FI"));
   public static final String ARVO_EROTIN = " / ";
   public static final String ARVO_VALI = " ";
   public static final String ARVO_VAKIO = "-";

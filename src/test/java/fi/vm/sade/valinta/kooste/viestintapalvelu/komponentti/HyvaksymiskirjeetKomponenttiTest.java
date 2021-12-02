@@ -15,7 +15,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
@@ -72,7 +71,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
     LetterBatch batch = mkTestLetterBatch(-36, 2);
     assertLetterBatchCorrect(batch, "-36 / 2", "2", true, false);
   }
-
 
   @Test
   public void testLaskennanKanssaPisteetTulevatMukaan() {
