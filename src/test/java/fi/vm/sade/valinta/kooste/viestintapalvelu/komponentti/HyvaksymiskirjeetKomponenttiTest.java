@@ -15,6 +15,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
@@ -67,6 +68,13 @@ public class HyvaksymiskirjeetKomponenttiTest {
   private final String HAKIJA_OID = "hakijaOid";
 
   @Test
+  public void testNegatiivisetPisteetTulevatMukaanJosEivatOleJonosijanKaanteisluku() {
+    LetterBatch batch = mkTestLetterBatch(-36, 2);
+    assertLetterBatchCorrect(batch, "-36 / 2", "2", true, false);
+  }
+
+
+  @Test
   public void testLaskennanKanssaPisteetTulevatMukaan() {
     LetterBatch batch = mkTestLetterBatch(1, 2);
     assertLetterBatchCorrect(batch, "1 / 2", "2", true, false);
@@ -76,31 +84,31 @@ public class HyvaksymiskirjeetKomponenttiTest {
   public void testIlmanLaskentaaPisteitaEiOtetaMukaan() {
     // Ilman laskentaa saadut pisteet indikoivat negatiivisina jonosijoja
     LetterBatch batch = mkTestLetterBatch(-1, -2);
-    assertLetterBatchCorrect(batch, "−1 / −2", null, true, false);
+    assertLetterBatchCorrect(batch, "-1 / -2", null, true, false);
   }
 
   @Test
   public void testNollaPistettaJonossaEiOtetaMukaan() {
     LetterBatch batch = mkTestLetterBatch(0, -2);
-    assertLetterBatchCorrect(batch, "0 / −2", null, true, false);
+    assertLetterBatchCorrect(batch, "0 / -2", null, true, false);
   }
 
   @Test
   public void testKorkeakoulunMassaAjoMukaanIPostiin1() {
     LetterBatch batch = mkTestLetterBatch(0, -2, false, false, true);
-    assertLetterBatchCorrect(batch, "0 / −2", null, true, true);
+    assertLetterBatchCorrect(batch, "0 / -2", null, true, true);
   }
 
   @Test
   public void testKorkeakoulunMassaAjoMukaanIPostiin2() {
     LetterBatch batch = mkTestLetterBatch(0, -2, true, false, true);
-    assertLetterBatchCorrect(batch, "0 / −2", null, true, true);
+    assertLetterBatchCorrect(batch, "0 / -2", null, true, true);
   }
 
   @Test
   public void testKorkeakoulunMassaAjoEiMukaanIPostiin() {
     LetterBatch batch = mkTestLetterBatch(0, -2, true, true, true);
-    assertLetterBatchCorrect(batch, "0 / −2", null, true, true);
+    assertLetterBatchCorrect(batch, "0 / -2", null, true, true);
   }
 
   private void assertLetterBatchCorrect(
