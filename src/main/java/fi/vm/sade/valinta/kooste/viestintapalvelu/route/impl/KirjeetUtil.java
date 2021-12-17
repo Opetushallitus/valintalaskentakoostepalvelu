@@ -288,7 +288,6 @@ public class KirjeetUtil {
       }
     }
     Pisteet pisteetResult = new Pisteet(kkPiste, kkMinimi, kkEnskertMinimi);
-    LOG.info("Pisteet: " + pisteetResult);
     return pisteetResult;
   }
 }
