@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -9,7 +10,8 @@ import org.apache.commons.lang.time.FastDateFormat;
 
 public class Formatter {
   public static final FastDateFormat PVMFORMATTER = FastDateFormat.getInstance("dd.MM.yyyy HH:mm");
-  public static final NumberFormat NUMERO_FORMAATTI = NumberFormat.getInstance(new Locale("FI"));
+  public static final DecimalFormat NUMERO_FORMAATTI =
+      (DecimalFormat) NumberFormat.getInstance(new Locale("FI"));
   public static final String ARVO_EROTIN = " / ";
   public static final String ARVO_VALI = " ";
   public static final String ARVO_VAKIO = "-";
@@ -17,6 +19,7 @@ public class Formatter {
   static {
     NUMERO_FORMAATTI.setMinimumFractionDigits(0);
     NUMERO_FORMAATTI.setMaximumFractionDigits(Integer.MAX_VALUE);
+    NUMERO_FORMAATTI.setNegativePrefix("-");
   }
 
   public static String suomennaNumero(BigDecimal arvo) {
