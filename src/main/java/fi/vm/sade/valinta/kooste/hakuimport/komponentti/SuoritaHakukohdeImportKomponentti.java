@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValinta
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.IterableUtil;
+import fi.vm.sade.valinta.kooste.util.StreamUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -238,12 +239,20 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.setTila(hakukohde.tila.name());
       importTyyppi.setValinnanAloituspaikat(
           Objects.requireNonNullElse(hakukohde.valintojenAloituspaikat, 0));
+
+      List<HakukohteenValintakoeDTO> valintakoeDTOs = new ArrayList<>();
       for (Valintakoe valintakoe : hakukohde.valintakokeet) {
         HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
         v.setOid(valintakoe.id);
         v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
-        importTyyppi.getValintakoe().add(v);
+        valintakoeDTOs.add(v);
       }
+
+      List<HakukohteenValintakoeDTO> uniqueValintakokeet =
+          valintakoeDTOs.stream()
+              .filter(StreamUtils.distinctByKey(HakukohteenValintakoeDTO::getTyyppiUri))
+              .collect(Collectors.toList());
+      importTyyppi.setValintakoe(uniqueValintakokeet);
 
       String hakukohdeKoodiTunniste = hakukohde.oid.replace(".", "_");
 
