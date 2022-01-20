@@ -18,7 +18,6 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValinta
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.IterableUtil;
-import fi.vm.sade.valinta.kooste.util.StreamUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -248,9 +247,16 @@ public class SuoritaHakukohdeImportKomponentti {
         valintakoeDTOs.add(v);
       }
 
+      /*List<HakukohteenValintakoeDTO> uniqueValintakokeet =
+      valintakoeDTOs.stream()
+          .filter(StreamUtils.distinctByKey(HakukohteenValintakoeDTO::getTyyppiUri))
+          .collect(Collectors.toList());*/
       List<HakukohteenValintakoeDTO> uniqueValintakokeet =
           valintakoeDTOs.stream()
-              .filter(StreamUtils.distinctByKey(HakukohteenValintakoeDTO::getTyyppiUri))
+              .collect(Collectors.groupingBy(HakukohteenValintakoeDTO::getTyyppiUri))
+              .values()
+              .stream()
+              .map(v -> v.get(0))
               .collect(Collectors.toList());
       importTyyppi.setValintakoe(uniqueValintakokeet);
 
@@ -294,6 +300,7 @@ public class SuoritaHakukohdeImportKomponentti {
       HakukohdeValintaperusteetDTO valintaperusteet =
           tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
 
+      // Tänne mennään vain jos tiedot löytyvät vanhasta tarjonnasta
       if (valintaperusteet != null) {
 
         importTyyppi.setValintakoe(new ArrayList<>());
