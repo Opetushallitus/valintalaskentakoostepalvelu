@@ -246,11 +246,7 @@ public class SuoritaHakukohdeImportKomponentti {
         v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
         valintakoeDTOs.add(v);
       }
-
-      /*List<HakukohteenValintakoeDTO> uniqueValintakokeet =
-      valintakoeDTOs.stream()
-          .filter(StreamUtils.distinctByKey(HakukohteenValintakoeDTO::getTyyppiUri))
-          .collect(Collectors.toList());*/
+      
       List<HakukohteenValintakoeDTO> uniqueValintakokeet =
           valintakoeDTOs.stream()
               .collect(Collectors.groupingBy(HakukohteenValintakoeDTO::getTyyppiUri))
