@@ -238,12 +238,23 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.setTila(hakukohde.tila.name());
       importTyyppi.setValinnanAloituspaikat(
           Objects.requireNonNullElse(hakukohde.valintojenAloituspaikat, 0));
+
+      List<HakukohteenValintakoeDTO> valintakoeDTOs = new ArrayList<>();
       for (Valintakoe valintakoe : hakukohde.valintakokeet) {
         HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
         v.setOid(valintakoe.id);
         v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
-        importTyyppi.getValintakoe().add(v);
+        valintakoeDTOs.add(v);
       }
+      
+      List<HakukohteenValintakoeDTO> uniqueValintakokeet =
+          valintakoeDTOs.stream()
+              .collect(Collectors.groupingBy(HakukohteenValintakoeDTO::getTyyppiUri))
+              .values()
+              .stream()
+              .map(v -> v.get(0))
+              .collect(Collectors.toList());
+      importTyyppi.setValintakoe(uniqueValintakokeet);
 
       String hakukohdeKoodiTunniste = hakukohde.oid.replace(".", "_");
 
@@ -285,6 +296,7 @@ public class SuoritaHakukohdeImportKomponentti {
       HakukohdeValintaperusteetDTO valintaperusteet =
           tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
 
+      // Tänne mennään vain jos tiedot löytyvät vanhasta tarjonnasta
       if (valintaperusteet != null) {
 
         importTyyppi.setValintakoe(new ArrayList<>());
