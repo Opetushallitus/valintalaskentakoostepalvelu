@@ -61,7 +61,8 @@ public class ValintalaskennanTulosExcelTest {
           new HashSet<>(),
           null,
           Collections.emptySet(),
-          null);
+          null,
+          false);
   private final Organisaatio tarjoaja = new Organisaatio();
 
   {

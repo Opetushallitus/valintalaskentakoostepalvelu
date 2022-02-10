@@ -17,6 +17,7 @@ public class Hakukohde {
   public final Integer valintojenAloituspaikat;
   public final Set<Valintakoe> valintakokeet;
   public final String ohjeetUudelleOpiskelijalle;
+  public final boolean isKoutaHakukohde;
 
   public Hakukohde(
       String oid,
@@ -29,7 +30,8 @@ public class Hakukohde {
       Set<String> pohjakoulutusvaatimusUrit,
       Integer valintojenAloituspaikat,
       Set<Valintakoe> valintakokeet,
-      String ohjeetUudelleOpiskelijalle) {
+      String ohjeetUudelleOpiskelijalle,
+      boolean isKoutaHakukohde) {
     this.oid = oid;
     this.tila = tila;
     this.nimi = nimi;
@@ -41,6 +43,7 @@ public class Hakukohde {
     this.valintojenAloituspaikat = valintojenAloituspaikat;
     this.valintakokeet = valintakokeet;
     this.ohjeetUudelleOpiskelijalle = ohjeetUudelleOpiskelijalle;
+    this.isKoutaHakukohde = isKoutaHakukohde;
   }
 
   public Hakukohde(HakukohdeV1RDTO dto) {
@@ -59,6 +62,7 @@ public class Hakukohde {
     this.valintakokeet =
         dto.getValintakokeet().stream().map(Valintakoe::new).collect(Collectors.toSet());
     this.ohjeetUudelleOpiskelijalle = dto.getOhjeetUudelleOpiskelijalle();
+    this.isKoutaHakukohde = false;
   }
 
   public Hakukohde(KoutaHakukohde dto) {
@@ -84,6 +88,7 @@ public class Hakukohde {
     this.valintakokeet =
         dto.valintakokeet.stream().map(Valintakoe::new).collect(Collectors.toSet());
     this.ohjeetUudelleOpiskelijalle = dto.uudenOpiskelijanUrl;
+    this.isKoutaHakukohde = true;
   }
 
   public enum Tila {

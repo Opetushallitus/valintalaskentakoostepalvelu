@@ -239,22 +239,24 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.setValinnanAloituspaikat(
           Objects.requireNonNullElse(hakukohde.valintojenAloituspaikat, 0));
 
-      List<HakukohteenValintakoeDTO> valintakoeDTOs = new ArrayList<>();
-      for (Valintakoe valintakoe : hakukohde.valintakokeet) {
-        HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
-        v.setOid(valintakoe.id);
-        v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
-        valintakoeDTOs.add(v);
-      }
+      if (hakukohde.isKoutaHakukohde) {
+        List<HakukohteenValintakoeDTO> valintakoeDTOs = new ArrayList<>();
+        for (Valintakoe valintakoe : hakukohde.valintakokeet) {
+          HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
+          v.setOid(valintakoe.id);
+          v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
+          valintakoeDTOs.add(v);
+        }
 
-      List<HakukohteenValintakoeDTO> uniqueValintakokeet =
-          valintakoeDTOs.stream()
-              .collect(Collectors.groupingBy(HakukohteenValintakoeDTO::getTyyppiUri))
-              .values()
-              .stream()
-              .map(v -> v.get(0))
-              .collect(Collectors.toList());
-      importTyyppi.setValintakoe(uniqueValintakokeet);
+        List<HakukohteenValintakoeDTO> uniqueValintakokeet =
+            valintakoeDTOs.stream()
+                .collect(Collectors.groupingBy(HakukohteenValintakoeDTO::getTyyppiUri))
+                .values()
+                .stream()
+                .map(v -> v.get(0))
+                .collect(Collectors.toList());
+        importTyyppi.setValintakoe(uniqueValintakokeet);
+      }
 
       String hakukohdeKoodiTunniste = hakukohde.oid.replace(".", "_");
 
@@ -293,11 +295,9 @@ public class SuoritaHakukohdeImportKomponentti {
       avainArvo.setArvo(kielikoetunniste);
       importTyyppi.getValintaperuste().add(avainArvo);
 
-      HakukohdeValintaperusteetDTO valintaperusteet =
-          tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
-
-      // Tänne mennään vain jos tiedot löytyvät vanhasta tarjonnasta
-      if (valintaperusteet != null) {
+      if (!hakukohde.isKoutaHakukohde) {
+        HakukohdeValintaperusteetDTO valintaperusteet =
+            tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
 
         importTyyppi.setValintakoe(new ArrayList<>());
         for (ValintakoeDTO valintakoeDTO : valintaperusteet.getValintakokeet()) {

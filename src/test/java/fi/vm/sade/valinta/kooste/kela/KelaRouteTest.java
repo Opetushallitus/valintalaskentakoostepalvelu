@@ -91,7 +91,8 @@ public class KelaRouteTest extends CamelTestSupport {
         new HashSet<>(),
         null,
         Collections.emptySet(),
-        null);
+        null,
+        false);
   }
 
   private List<ValintaTulosServiceDto> createHakijat() {
