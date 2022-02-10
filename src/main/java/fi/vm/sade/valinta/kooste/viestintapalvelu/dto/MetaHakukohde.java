@@ -12,7 +12,7 @@ public class MetaHakukohde {
   private final String hakukohteenKieli;
   private final String opetuskieli;
   private final String tarjoajaOid;
-  private final String ohjeetUudelleOpiskelijalle;
+  private final Teksti ohjeetUudelleOpiskelijalle;
 
   public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, List<Teksti> tarjoajaNimet) {
     this(tarjoajaOid, hakukohdeNimi, tarjoajaNimet, null, null, null);
@@ -24,7 +24,7 @@ public class MetaHakukohde {
       List<Teksti> tarjoajaNimet,
       String hakukohteenKieli,
       String opetuskieli,
-      String ohjeetUudelleOpiskelijalle) {
+      Teksti ohjeetUudelleOpiskelijalle) {
     this.hakukohdeNimi = hakukohdeNimi;
     this.tarjoajaNimet = tarjoajaNimet;
     this.hakukohteenKieli = hakukohteenKieli;
@@ -72,7 +72,7 @@ public class MetaHakukohde {
     return hakukohteenKieli;
   }
 
-  public String getOhjeetUudelleOpiskelijalle() {
+  public Teksti getOhjeetUudelleOpiskelijalle() {
     return ohjeetUudelleOpiskelijalle;
   }
 
