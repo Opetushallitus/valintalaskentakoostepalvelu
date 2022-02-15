@@ -80,7 +80,8 @@ public class AktiivistenHakemustenValintakoeResourceTest {
           new HashSet<>(),
           null,
           Collections.emptySet(),
-          null);
+          null,
+          false);
   private final Haku hakuDTOEditori =
       new Haku(
           hakuOid,

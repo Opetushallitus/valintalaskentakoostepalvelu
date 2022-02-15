@@ -58,7 +58,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
             new HashSet<>(),
             null,
             Collections.emptySet(),
-            null));
+            null,
+            false));
   }
 
   @Override
