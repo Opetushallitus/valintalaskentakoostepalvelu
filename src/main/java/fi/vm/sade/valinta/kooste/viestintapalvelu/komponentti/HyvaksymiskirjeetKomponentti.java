@@ -172,9 +172,13 @@ public class HyvaksymiskirjeetKomponentti {
                         t.getTeksti(
                             preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)))
                 .collect(Collectors.joining(" - ")));
-        replacements.put(
-            "ohjeetUudelleOpiskelijalle",
-            ohjeetUudelleOpiskelijalle.getTeksti(preferoituKielikoodi));
+        if (ohjeetUudelleOpiskelijalle != null) {
+          replacements.put(
+              "ohjeetUudelleOpiskelijalle",
+              ohjeetUudelleOpiskelijalle.getTeksti(preferoituKielikoodi));
+        } else {
+          replacements.put("ohjeetUudelleOpiskelijalle", null);
+        }
         replacements.put("syntymaaika", hakemus.getSyntymaaika());
 
         String sahkoposti = hakemus.getSahkopostiOsoite();
