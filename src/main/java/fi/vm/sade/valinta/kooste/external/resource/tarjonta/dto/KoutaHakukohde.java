@@ -13,7 +13,7 @@ public class KoutaHakukohde {
   public final Integer aloituspaikat;
   public final Set<KoutaValintakoe> valintakokeet;
   public final Set<String> pohjakoulutusvaatimusKoodiUrit;
-  public final String uudenOpiskelijanUrl;
+  public final Map<String, String> uudenOpiskelijanUrl;
 
   private KoutaHakukohde() {
     this.oid = null;

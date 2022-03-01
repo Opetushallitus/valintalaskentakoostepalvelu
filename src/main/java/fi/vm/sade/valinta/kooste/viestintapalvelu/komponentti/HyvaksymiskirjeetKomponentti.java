@@ -78,6 +78,7 @@ public class HyvaksymiskirjeetKomponentti {
         Teksti koulutus = hyvaksyttyMeta.getHakukohdeNimi();
         String preferoituKielikoodi = asiointikieli.orElse(hyvaksyttyMeta.getOpetuskieli());
         String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
+        Teksti ohjeetUudelleOpiskelijalle = hyvaksyttyMeta.getOhjeetUudelleOpiskelijalle();
         final String hakemusOid = hakija.getHakemusOid();
         final HakemusWrapper hakemus =
             Objects.requireNonNull(
@@ -171,8 +172,13 @@ public class HyvaksymiskirjeetKomponentti {
                         t.getTeksti(
                             preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)))
                 .collect(Collectors.joining(" - ")));
-        replacements.put(
-            "ohjeetUudelleOpiskelijalle", hyvaksyttyMeta.getOhjeetUudelleOpiskelijalle());
+        if (ohjeetUudelleOpiskelijalle != null) {
+          replacements.put(
+              "ohjeetUudelleOpiskelijalle",
+              ohjeetUudelleOpiskelijalle.getTeksti(preferoituKielikoodi));
+        } else {
+          replacements.put("ohjeetUudelleOpiskelijalle", null);
+        }
         replacements.put("syntymaaika", hakemus.getSyntymaaika());
 
         String sahkoposti = hakemus.getSahkopostiOsoite();

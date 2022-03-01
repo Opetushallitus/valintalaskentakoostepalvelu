@@ -91,6 +91,8 @@ public class KirjeetHakukohdeCache {
                                 .thenApplyAsync(
                                     tarjoajat -> {
                                       Teksti hakukohdeNimi = new Teksti(hakukohde.nimi);
+                                      Teksti ohjeetUudelleOpiskelijalle =
+                                          new Teksti(hakukohde.ohjeetUudelleOpiskelijalle);
                                       return new MetaHakukohde(
                                           hakukohde.tarjoajaOids.iterator().next(),
                                           hakukohdeNimi,
@@ -103,7 +105,7 @@ public class KirjeetHakukohdeCache {
                                                   .flatMap(
                                                       toteutus -> toteutus.opetuskielet.stream())
                                                   .collect(Collectors.toList())),
-                                          hakukohde.ohjeetUudelleOpiskelijalle);
+                                          ohjeetUudelleOpiskelijalle);
                                     })));
   }
 }

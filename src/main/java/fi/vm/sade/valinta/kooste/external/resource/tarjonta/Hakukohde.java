@@ -16,7 +16,7 @@ public class Hakukohde {
   public final Set<String> pohjakoulutusvaatimusUrit;
   public final Integer valintojenAloituspaikat;
   public final Set<Valintakoe> valintakokeet;
-  public final String ohjeetUudelleOpiskelijalle;
+  public Map<String, String> ohjeetUudelleOpiskelijalle;
   public final boolean isKoutaHakukohde;
 
   public Hakukohde(
@@ -30,7 +30,7 @@ public class Hakukohde {
       Set<String> pohjakoulutusvaatimusUrit,
       Integer valintojenAloituspaikat,
       Set<Valintakoe> valintakokeet,
-      String ohjeetUudelleOpiskelijalle,
+      Map<String, String> ohjeetUudelleOpiskelijalle,
       boolean isKoutaHakukohde) {
     this.oid = oid;
     this.tila = tila;
@@ -61,7 +61,11 @@ public class Hakukohde {
     this.valintojenAloituspaikat = dto.getValintojenAloituspaikatLkm();
     this.valintakokeet =
         dto.getValintakokeet().stream().map(Valintakoe::new).collect(Collectors.toSet());
-    this.ohjeetUudelleOpiskelijalle = dto.getOhjeetUudelleOpiskelijalle();
+    if (dto.getOhjeetUudelleOpiskelijalle() != null) {
+      this.ohjeetUudelleOpiskelijalle.put("kieli_fi", dto.getOhjeetUudelleOpiskelijalle());
+      this.ohjeetUudelleOpiskelijalle.put("kieli_sv", dto.getOhjeetUudelleOpiskelijalle());
+      this.ohjeetUudelleOpiskelijalle.put("kieli_en", dto.getOhjeetUudelleOpiskelijalle());
+    }
     this.isKoutaHakukohde = false;
   }
 
@@ -87,7 +91,10 @@ public class Hakukohde {
     this.valintojenAloituspaikat = dto.aloituspaikat;
     this.valintakokeet =
         dto.valintakokeet.stream().map(Valintakoe::new).collect(Collectors.toSet());
-    this.ohjeetUudelleOpiskelijalle = dto.uudenOpiskelijanUrl;
+    this.ohjeetUudelleOpiskelijalle = new HashMap<>();
+    dto.uudenOpiskelijanUrl.forEach(
+        (kieli, uudenOpiskelijanUrl) ->
+            this.ohjeetUudelleOpiskelijalle.put("kieli_" + kieli, uudenOpiskelijanUrl));
     this.isKoutaHakukohde = true;
   }
 
