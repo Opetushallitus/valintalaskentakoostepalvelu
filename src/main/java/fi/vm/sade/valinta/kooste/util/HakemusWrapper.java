@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakutoive;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import java.util.Collection;
@@ -102,4 +103,6 @@ public abstract class HakemusWrapper {
       Valintapisteet valintapisteet,
       Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
       boolean shouldUseApplicationPersonOid);
+
+  public abstract List<AtaruHakutoive> ataruHakutoiveet();
 }

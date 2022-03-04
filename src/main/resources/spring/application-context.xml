@@ -353,6 +353,10 @@
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl" />
 
+		<!-- Harkinnanvaraisuus Async -->
+		<bean
+				class="fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl.HarkinnanvaraisuusAsyncResourceImpl" />
+
 		<!-- Ohjausparametrit Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.impl.OhjausparametritAsyncResourceImpl" />
@@ -383,6 +387,8 @@
 		<bean id="OmatSivutHakemusResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.hakemus.OmatSivutHakemusResource"/>
 
+		<bean id="HarkinnanvaraisuusResource" class="fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusResource"/>
+		
 		<bean id="OppijanSuorituksetProxyResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.suoritukset.OppijanSuorituksetProxyResource"/>
 		<bean id="ValintaTulosServiceProxyResource"
@@ -431,6 +437,7 @@
 				<ref bean="ViestintapalveluProxyResource"/>
 				<ref bean="SessionResource"/>
 				<ref bean="HakemuksetResource"/>
+				<ref bean="HarkinnanvaraisuusResource"/>
 				<ref bean="AktiivistenHakemustenValintakoeResource"/>
 			</jaxrs:serviceBeans>
 			<jaxrs:providers>

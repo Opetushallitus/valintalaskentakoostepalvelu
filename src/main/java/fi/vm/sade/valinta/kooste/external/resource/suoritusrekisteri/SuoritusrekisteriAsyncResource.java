@@ -21,6 +21,9 @@ public interface SuoritusrekisteriAsyncResource {
 
   Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid);
 
+  CompletableFuture<List<Oppija>> getSuorituksetForOppijasWithoutEnsikertalaisuus(
+      List<String> opiskelijaOids);
+
   Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(List<String> opiskelijaOids);
 
   CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus);
