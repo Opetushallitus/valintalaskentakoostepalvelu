@@ -93,6 +93,10 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
               .collect(Collectors.toList());
       result = new HakemuksenHarkinnanvaraisuus(hakemus.getOid(), hts);
     } else {
+      LOG.info(
+          "Käytetään hakemukselle {} atarun harkinnanvaraisuustietoja: {}",
+          hakemus.getOid(),
+          hakemus.ataruHakutoiveet());
       List<HakutoiveenHarkinnanvaraisuus> hts =
           hakemus.ataruHakutoiveet().stream()
               .map(
@@ -101,6 +105,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                           ht.getHakukohdeOid(), ht.getHarkinnanvaraisuus()))
               .collect(Collectors.toList());
       result = new HakemuksenHarkinnanvaraisuus(hakemus.getOid(), hts);
+      LOG.info("Tulos hakemukselle {}: {}", hakemus.getOid(), result);
     }
     return result;
   }
@@ -111,11 +116,16 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
     LOG.info("Haetaan harkinnanvaraisuustiedot vain atarusta hakemuksille: {}", hakemusOids);
     CompletableFuture<List<HakemusWrapper>> hakemukset =
         ataruAsyncResource.getApplicationsByOids(hakemusOids);
-    return hakemukset.thenApply(
-        h ->
-            h.stream()
-                .map(hakemus -> syncHarkinnanvaraisuusForHakemus(hakemus, null))
-                .collect(Collectors.toList()));
+    try {
+      return hakemukset.thenApply(
+          h ->
+              h.stream()
+                  .map(hakemus -> syncHarkinnanvaraisuusForHakemus(hakemus, null))
+                  .collect(Collectors.toList()));
+    } catch (Exception e) {
+      LOG.error("Virhe haettaessa harkinnanvaraisuustietoja:", e);
+      return CompletableFuture.failedFuture(e);
+    }
   }
 
   // WIP

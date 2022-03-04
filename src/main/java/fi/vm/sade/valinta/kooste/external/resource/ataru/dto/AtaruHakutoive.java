@@ -60,6 +60,9 @@ public class AtaruHakutoive {
   }
 
   public HarkinnanvaraisuudenSyy getHarkinnanvaraisuus() {
+    if (harkinnanvaraisuus == null) {
+      return HarkinnanvaraisuudenSyy.NONE;
+    }
     return harkinnanvaraisuus;
   }
 

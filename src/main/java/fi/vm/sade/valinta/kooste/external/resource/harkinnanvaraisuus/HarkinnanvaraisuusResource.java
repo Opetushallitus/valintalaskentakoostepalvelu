@@ -41,7 +41,7 @@ public class HarkinnanvaraisuusResource {
   @Produces("application/json")
   @ApiOperation(
       value = "Hakemusten harkinnanvaraisuustiedot") // response fixme response = ???.class
-  public void hakemuksetValinnanvaiheelle(
+  public void hakemuksetHarkinnanvaraisuustiedot(
       List<String> hakemusOids,
       @Suspended AsyncResponse asyncResponse,
       @Context HttpServletRequest request) {
@@ -52,6 +52,11 @@ public class HarkinnanvaraisuusResource {
     CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> result =
         harkinnanvaraisuusAsyncResource.getHarkinnanvaraisuudetForHakemuksesOnlyFromAtaru(
             hakemusOids);
-    result.thenApply(r -> asyncResponse.resume(Response.ok(result)));
+    result
+        .thenApply(asyncResponse::resume)
+        .exceptionally(
+            e ->
+                asyncResponse.resume(
+                    Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build()));
   }
 }
