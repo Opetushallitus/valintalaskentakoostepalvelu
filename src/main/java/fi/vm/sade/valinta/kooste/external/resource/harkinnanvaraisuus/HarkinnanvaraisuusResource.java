@@ -41,7 +41,7 @@ public class HarkinnanvaraisuusResource {
   @Produces("application/json")
   @ApiOperation(
       value = "Hakemusten harkinnanvaraisuustiedot") // response fixme response = ???.class
-  public void hakemuksetHarkinnanvaraisuustiedot(
+  public void hakemustenHarkinnanvaraisuustiedot(
       List<String> hakemusOids,
       @Suspended AsyncResponse asyncResponse,
       @Context HttpServletRequest request) {

@@ -115,7 +115,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
       getHarkinnanvaraisuudetForHakemuksesOnlyFromAtaru(List<String> hakemusOids) {
     LOG.info("Haetaan harkinnanvaraisuustiedot vain atarusta hakemuksille: {}", hakemusOids);
     CompletableFuture<List<HakemusWrapper>> hakemukset =
-        ataruAsyncResource.getApplicationsByOids(hakemusOids);
+        ataruAsyncResource.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids);
     try {
       return hakemukset.thenApply(
           h ->

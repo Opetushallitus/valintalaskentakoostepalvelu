@@ -27,8 +27,4 @@ public class HakutoiveenHarkinnanvaraisuus {
   public void setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy harkinnanvaraisuudenSyy) {
     this.harkinnanvaraisuudenSyy = harkinnanvaraisuudenSyy;
   }
-
-  public Boolean isHarkinnanvarainenHakutoive() {
-    return HarkinnanvaraisuudenSyy.NONE.equals(harkinnanvaraisuudenSyy);
-  }
 }
