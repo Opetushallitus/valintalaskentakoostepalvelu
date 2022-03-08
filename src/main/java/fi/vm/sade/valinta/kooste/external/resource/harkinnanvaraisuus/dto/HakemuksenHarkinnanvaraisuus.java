@@ -5,6 +5,7 @@ import java.util.List;
 public class HakemuksenHarkinnanvaraisuus {
 
   private String hakemusOid;
+  private String henkiloOid;
   private List<HakutoiveenHarkinnanvaraisuus> hakutoiveet;
 
   public HakemuksenHarkinnanvaraisuus(
@@ -19,6 +20,14 @@ public class HakemuksenHarkinnanvaraisuus {
 
   public void setHakemusOid(String hakemusOid) {
     this.hakemusOid = hakemusOid;
+  }
+
+  public String getHenkiloOid() {
+    return henkiloOid;
+  }
+
+  public void setHenkiloOid(String henkiloOid) {
+    this.henkiloOid = henkiloOid;
   }
 
   public List<HakutoiveenHarkinnanvaraisuus> getHakutoiveet() {

@@ -104,7 +104,6 @@ public class Suoritus {
   }
 
   public boolean isYksilollistettyMaAi() {
-    this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false");
     return this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false").equals("true");
   }
 

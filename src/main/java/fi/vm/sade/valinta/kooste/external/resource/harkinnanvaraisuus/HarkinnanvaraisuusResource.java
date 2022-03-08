@@ -50,13 +50,14 @@ public class HarkinnanvaraisuusResource {
     // todo auditlog
 
     CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> result =
-        harkinnanvaraisuusAsyncResource.getHarkinnanvaraisuudetForHakemuksesOnlyFromAtaru(
-            hakemusOids);
+        harkinnanvaraisuusAsyncResource.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
     result
         .thenApply(asyncResponse::resume)
         .exceptionally(
-            e ->
-                asyncResponse.resume(
-                    Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build()));
+            e -> {
+              LOG.error("Hakemusten harkinnanvaraisuustietojen haku epäonnistui: ", e);
+              return asyncResponse.resume(
+                  Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
+            });
   }
 }
