@@ -110,6 +110,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
   public CompletableFuture<List<Oppija>> getSuorituksetForOppijasWithoutEnsikertalaisuus(
       List<String> opiskelijaOids) {
     Map<String, String> parameters = new HashMap<>();
+    parameters.put("ensikertalaisuudet", "false");
     String url = getUrl("suoritusrekisteri.oppijat", parameters);
     return batchedPostOppijasFuture(opiskelijaOids, url);
   }
