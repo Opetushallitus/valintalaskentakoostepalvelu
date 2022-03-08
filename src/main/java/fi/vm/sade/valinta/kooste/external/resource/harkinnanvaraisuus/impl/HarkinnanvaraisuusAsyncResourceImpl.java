@@ -140,6 +140,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
   private Oppija findOppijaForHakija(
       String oidFromHakemus, List<Oppija> oppijas, List<HenkiloViiteDto> henkiloviittees) {
     List<String> aliakset = new ArrayList<>();
+    aliakset.add(oidFromHakemus);
     List<HenkiloViiteDto> hakijanViitteet =
         henkiloviittees.stream()
             .filter(hv -> List.of(hv.getHenkiloOid(), hv.getMasterOid()).contains(oidFromHakemus))

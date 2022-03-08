@@ -206,10 +206,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
         new HarkinnanvaraisuusAsyncResourceImpl(mockAtaru, mockSure, mockOnr);
 
     List<HenkiloViiteDto> onrResult =
-        List.of(
-            new HenkiloViiteDto(aliasForHenkiloOid1, henkiloOid1),
-            new HenkiloViiteDto(henkiloOid1, henkiloOid2),
-            new HenkiloViiteDto(henkiloOid2, henkiloOid2));
+        List.of(new HenkiloViiteDto(aliasForHenkiloOid1, henkiloOid1));
 
     when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
         .thenReturn(CompletableFuture.completedFuture(ataruResult));
