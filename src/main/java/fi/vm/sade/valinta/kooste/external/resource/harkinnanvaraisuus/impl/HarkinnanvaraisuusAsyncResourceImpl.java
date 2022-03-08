@@ -148,6 +148,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
         viite -> aliakset.addAll(List.of(viite.getHenkiloOid(), viite.getMasterOid())));
     Optional<Oppija> o =
         oppijas.stream().filter(oppija -> aliakset.contains(oppija.getOppijanumero())).findFirst();
+    LOG.info("Hakemukselle {} aliaksia yhteensä {}", oidFromHakemus, aliakset.size());
     return o.orElse(null);
   }
 
@@ -179,7 +180,11 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                 suor ->
                     viitteet.thenComposeAsync(
                         viit -> {
-                          LOG.info("synkataan harkinnanvaraisuudet {} hakemukselle ", hak.size());
+                          LOG.info(
+                              "synkataan harkinnanvaraisuudet {} hakemukselle, oppijoita {}, henkiloViitteita {}",
+                              hak.size(),
+                              suor.size(),
+                              viit.size());
                           List<HakemuksenHarkinnanvaraisuus> result =
                               hak.stream()
                                   .map(
