@@ -52,6 +52,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
   public void testHakemustenHarkinnanvaraisuudet()
       throws ExecutionException, InterruptedException, TimeoutException {
 
+    String leikkuriPvm = "2022-06-06";
+
     List<String> hakemusOids = new ArrayList<>();
     String hakemusOid1 = "1.2.246.562.11.00001010666";
     String hakemusOid2 = "1.2.246.562.11.00001010667";
@@ -96,7 +98,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
                     hakukohdeOid2, HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI)));
 
     HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(mockAtaru, mockSure, mockOnr);
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
 
     when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
         .thenReturn(CompletableFuture.completedFuture(ataruResult));
@@ -131,6 +133,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     // Luodaan kaksi hakemusta, toisella on suressa yksilöllistetty MA+AI ja toisella tavallinen
     // valmis peruskoulusuoritus.
+    String leikkuriPvm = "2022-06-06";
     List<String> hakemusOids = new ArrayList<>();
     String hakemusOid1 = "1.2.246.562.11.00001010666";
     String hakemusOid2 = "1.2.246.562.11.00001010667";
@@ -179,12 +182,14 @@ public class HarkinnavaraisuusAsyncResourceTest {
     pkSuoritusYksMatAi.setHenkiloOid(aliasForHenkiloOid1);
     pkSuoritusYksMatAi.setKomo(PK_KOMO);
     pkSuoritusYksMatAi.setTila("VALMIS");
+    pkSuoritusYksMatAi.setVahvistettu(true);
     pkSuoritusYksMatAi.setLahdeArvot(Map.of("foo", "true", "yksilollistetty_ma_ai", "true"));
 
     Suoritus pkSuoritusValmis = new Suoritus();
     pkSuoritusValmis.setHenkiloOid(henkiloOid2);
     pkSuoritusValmis.setKomo(PK_KOMO);
     pkSuoritusValmis.setTila("VALMIS");
+    pkSuoritusValmis.setVahvistettu(true);
     pkSuoritusValmis.setLahdeArvot(Map.of("foo", "true"));
 
     SuoritusJaArvosanat sa1 = new SuoritusJaArvosanat();
@@ -203,7 +208,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
     List<Oppija> sureResult = List.of(o1, o2);
 
     HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(mockAtaru, mockSure, mockOnr);
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
 
     List<HenkiloViiteDto> onrResult =
         List.of(new HenkiloViiteDto(aliasForHenkiloOid1, henkiloOid1));
@@ -230,5 +235,103 @@ public class HarkinnavaraisuusAsyncResourceTest {
                         .getHarkinnanvaraisuudenSyy()
                         .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
             .count());
+  }
+
+  @Test
+  public void testAtarutietojenYliajoSurenTiedoilla()
+      throws ExecutionException, InterruptedException, TimeoutException {
+
+    // Luodaan kaksi hakemusta, toisella on suressa yksilöllistetty MA+AI ja toisella tavallinen
+    // valmis peruskoulusuoritus.
+    String leikkuriPvm = "2022-06-06";
+
+    String hakemusOid1 = "1.2.246.562.11.00001010666";
+    String hakemusOid2 = "1.2.246.562.11.00001010667";
+    String hakukohdeOid1 = "1.2.246.562.20.42208535555";
+    String hakukohdeOid2 = "1.2.246.562.20.42208535556";
+    String hakukohdeOid3 = "1.2.246.562.20.42208535557";
+    String henkiloOid1 = "1.2.246.562.24.47613331111";
+    String aliasForHenkiloOid1 = "1.2.246.562.24.47613331112";
+    String henkiloOid2 = "1.2.246.562.24.47613332222";
+
+    Suoritus pkSuoritusYksMatAi = new Suoritus();
+    pkSuoritusYksMatAi.setHenkiloOid(aliasForHenkiloOid1);
+    pkSuoritusYksMatAi.setKomo(PK_KOMO);
+    pkSuoritusYksMatAi.setTila("VALMIS");
+    pkSuoritusYksMatAi.setVahvistettu(true);
+    pkSuoritusYksMatAi.setLahdeArvot(Map.of("foo", "true", "yksilollistetty_ma_ai", "true"));
+
+    Suoritus pkSuoritusValmis = new Suoritus();
+    pkSuoritusValmis.setHenkiloOid(henkiloOid2);
+    pkSuoritusValmis.setKomo(PK_KOMO);
+    pkSuoritusValmis.setTila("VALMIS");
+    pkSuoritusValmis.setVahvistettu(true);
+    pkSuoritusValmis.setLahdeArvot(Map.of("foo", "true"));
+
+    SuoritusJaArvosanat sa1 = new SuoritusJaArvosanat();
+    sa1.setSuoritus(pkSuoritusYksMatAi);
+    SuoritusJaArvosanat sa2 = new SuoritusJaArvosanat();
+    sa2.setSuoritus(pkSuoritusValmis);
+
+    Oppija o1 = new Oppija();
+    o1.setSuoritukset(List.of(sa1));
+    o1.setOppijanumero(aliasForHenkiloOid1);
+
+    Oppija o2 = new Oppija();
+    o2.setSuoritukset(List.of(sa2));
+    o2.setOppijanumero(henkiloOid2);
+
+    List<Oppija> sureResult = List.of(o1, o2);
+
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+
+    List<HenkiloViiteDto> onrResult =
+        List.of(new HenkiloViiteDto(aliasForHenkiloOid1, henkiloOid1));
+
+    when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(
+            List.of(henkiloOid1, henkiloOid2)))
+        .thenReturn(CompletableFuture.completedFuture(sureResult));
+    when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1, henkiloOid2)))
+        .thenReturn(CompletableFuture.completedFuture(onrResult));
+
+    HakemuksenHarkinnanvaraisuus hhv1 =
+        new HakemuksenHarkinnanvaraisuus(
+            hakemusOid1,
+            List.of(
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid1, HarkinnanvaraisuudenSyy.ATARU_OPPIMISVAIKEUDET),
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid2, HarkinnanvaraisuudenSyy.ATARU_OPPIMISVAIKEUDET)));
+    hhv1.setHenkiloOid(henkiloOid1);
+
+    HakemuksenHarkinnanvaraisuus hhv2 =
+        new HakemuksenHarkinnanvaraisuus(
+            hakemusOid2,
+            List.of(
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid1, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN),
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid3, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
+    hhv2.setHenkiloOid(henkiloOid2);
+
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
+        h.getSyncedHarkinnanvaraisuudes(List.of(hhv1, hhv2));
+
+    assertEquals(
+        1,
+        hhv.get().stream()
+            .filter(
+                hakemuksenHarkinnanvaraisuus ->
+                    hakemuksenHarkinnanvaraisuus
+                        .getHakutoiveet()
+                        .get(0)
+                        .getHarkinnanvaraisuudenSyy()
+                        .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
+            .count());
+    assertEquals(
+        1, hhv.get().stream().filter(hark -> hakemusOid1.equals(hark.getHakemusOid())).count());
+    assertEquals(
+        1, hhv.get().stream().filter(hark -> hakemusOid2.equals(hark.getHakemusOid())).count());
   }
 }
