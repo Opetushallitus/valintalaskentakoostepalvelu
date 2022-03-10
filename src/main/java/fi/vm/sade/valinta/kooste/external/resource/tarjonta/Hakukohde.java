@@ -92,9 +92,11 @@ public class Hakukohde {
     this.valintakokeet =
         dto.valintakokeet.stream().map(Valintakoe::new).collect(Collectors.toSet());
     this.ohjeetUudelleOpiskelijalle = new HashMap<>();
-    dto.uudenOpiskelijanUrl.forEach(
-        (kieli, uudenOpiskelijanUrl) ->
-            this.ohjeetUudelleOpiskelijalle.put("kieli_" + kieli, uudenOpiskelijanUrl));
+    if (dto.uudenOpiskelijanUrl != null) {
+      dto.uudenOpiskelijanUrl.forEach(
+          (kieli, uudenOpiskelijanUrl) ->
+              this.ohjeetUudelleOpiskelijalle.put("kieli_" + kieli, uudenOpiskelijanUrl));
+    }
     this.isKoutaHakukohde = true;
   }
 

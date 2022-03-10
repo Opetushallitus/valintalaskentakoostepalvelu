@@ -106,7 +106,7 @@ public class ValintatapajonoResource {
       @Suspended AsyncResponse asyncResponse,
       @Context HttpServletRequest request) {
     final User user = AuditLog.getUser(request);
-    asyncResponse.setTimeout(1L, MINUTES);
+    asyncResponse.setTimeout(5L, MINUTES);
     asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
@@ -167,7 +167,7 @@ public class ValintatapajonoResource {
       @Suspended AsyncResponse asyncResponse,
       @Context HttpServletRequest request) {
     final User user = AuditLog.getUser(request);
-    asyncResponse.setTimeout(1L, MINUTES);
+    asyncResponse.setTimeout(5L, MINUTES);
     asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
