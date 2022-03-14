@@ -70,8 +70,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
               sa ->
                   PK_KOMO.equals(sa.getSuoritus().getKomo())
                       && sa.getSuoritus().isYksilollistettyMaAi()
-                      && sa.getSuoritus().isVahvistettu()
-                      && "VALMIS".equals(sa.getSuoritus().getTila()));
+                      && sa.getSuoritus().isVahvistettu());
 
     } else {
       return false;
