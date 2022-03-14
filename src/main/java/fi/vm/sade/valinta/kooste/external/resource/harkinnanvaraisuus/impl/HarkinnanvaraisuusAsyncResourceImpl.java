@@ -36,7 +36,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
 
   @Autowired
   public HarkinnanvaraisuusAsyncResourceImpl(
-      @Value("${valintalaskentakoostepalvelu.harkinnanvaraisuus.paattely.leikkuripvm:2022-06-06}")
+      @Value("${valintalaskentakoostepalvelu.harkinnanvaraisuus.paattely.leikkuripvm:2022-02-02}")
           String suoritusValmisDeadlinePvm,
       AtaruAsyncResource ataruAsyncResource,
       SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
@@ -177,7 +177,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
 
   public CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> getHarkinnanvaraisuudetForHakemukses(
       List<String> hakemusOids) {
-    LOG.info("Haetaan harkinnanvaraisuudet hakemuksille: {}", hakemusOids);
+    LOG.info("Haetaan harkinnanvaraisuudet hakemuksille: {}, deadline {}", hakemusOids, suoritusValmisDeadline);
     CompletableFuture<List<HakemusWrapper>> hakemukset =
         ataruAsyncResource.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids);
 
