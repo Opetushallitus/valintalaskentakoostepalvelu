@@ -6,9 +6,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface HarkinnanvaraisuusAsyncResource {
 
-  CompletableFuture<List<HakemuksenHarkinnanvaraisuus>>
-      getHarkinnanvaraisuudetForHakemuksesOnlyFromAtaru(List<String> hakemusOids);
-
   CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> getHarkinnanvaraisuudetForHakemukses(
       List<String> hakemusOids);
 

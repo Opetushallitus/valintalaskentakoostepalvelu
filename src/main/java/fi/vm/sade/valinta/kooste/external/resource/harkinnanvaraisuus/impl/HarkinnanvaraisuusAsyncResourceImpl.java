@@ -126,6 +126,12 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
           hakemusOid,
           henkiloOidHakemukselta,
           oppijas.size());
+    } else {
+      LOG.info(
+          "Käsitellään hakemus {} henkilön {} sure-tiedoilla, suorituksia yhteensä {}",
+          hakemusOid,
+          oppijas.get(0).getOppijanumero(),
+          oppijas.get(0).getSuoritukset().size());
     }
     HakemuksenHarkinnanvaraisuus result = null;
     if (LocalDateTime.now().isAfter(suoritusValmisDeadline) && !hasValmisPeruskoulu(oppijas)) {
@@ -167,35 +173,6 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
             .map(hh -> hh.getHakukohdeOid() + " - " + hh.getHarkinnanvaraisuudenSyy())
             .collect(Collectors.toList()));
     return result;
-  }
-
-  // Vain atarusta tiedot hakeva toteutus, jota vasten voidaan kehittää valintalaskenta-ui:ta
-  public CompletableFuture<List<HakemuksenHarkinnanvaraisuus>>
-      getHarkinnanvaraisuudetForHakemuksesOnlyFromAtaru(List<String> hakemusOids) {
-    LOG.info("Haetaan harkinnanvaraisuustiedot vain atarusta hakemuksille: {}", hakemusOids);
-    CompletableFuture<List<HakemusWrapper>> hakemukset =
-        ataruAsyncResource.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids);
-    try {
-      return hakemukset.thenApply(
-          h ->
-              h.stream()
-                  .map(
-                      hakemus ->
-                          syncHarkinnanvaraisuusForHakemus(
-                              hakemus.getOid(),
-                              hakemus.getPersonOid(),
-                              hakemus.ataruHakutoiveet().stream()
-                                  .map(
-                                      ht ->
-                                          new HakutoiveenHarkinnanvaraisuus(
-                                              ht.getHakukohdeOid(), ht.getHarkinnanvaraisuus()))
-                                  .collect(Collectors.toList()),
-                              null))
-                  .collect(Collectors.toList()));
-    } catch (Exception e) {
-      LOG.error("Virhe haettaessa harkinnanvaraisuustietoja:", e);
-      return CompletableFuture.failedFuture(e);
-    }
   }
 
   private List<Oppija> findOppijasForHakija(
