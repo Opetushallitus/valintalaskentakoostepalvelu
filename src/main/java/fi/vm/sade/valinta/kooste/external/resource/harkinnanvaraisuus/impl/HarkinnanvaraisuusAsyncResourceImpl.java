@@ -63,6 +63,39 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
     }
   }
 
+  // todo ota huomioon myös muita pohjakoulutuskomoja
+  private Boolean hasValmisPeruskoulu(List<Oppija> oppijas) {
+    if (!oppijas.isEmpty()) {
+      return oppijas.stream()
+          .anyMatch(
+              oppija ->
+                  oppija.getSuoritukset().stream()
+                      .anyMatch(
+                          sa ->
+                              PK_KOMO.equals(sa.getSuoritus().getKomo())
+                                  && "VALMIS".equals(sa.getSuoritus().getTila())
+                                  && sa.getSuoritus().isVahvistettu()));
+    } else {
+      return false;
+    }
+  }
+
+  private Boolean hasYksilollistettyMatAi(List<Oppija> oppijas) {
+    if (!oppijas.isEmpty()) {
+      return oppijas.stream()
+          .anyMatch(
+              oppija ->
+                  oppija.getSuoritukset().stream()
+                      .anyMatch(
+                          sa ->
+                              PK_KOMO.equals(sa.getSuoritus().getKomo())
+                                  && sa.getSuoritus().isYksilollistettyMaAi()
+                                  && sa.getSuoritus().isVahvistettu()));
+    } else {
+      return false;
+    }
+  }
+
   private Boolean hasYksilollistettyMatAi(Oppija oppija) {
     if (oppija != null) {
       return oppija.getSuoritukset().stream()
@@ -81,21 +114,27 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
       String hakemusOid,
       String henkiloOidHakemukselta,
       List<HakutoiveenHarkinnanvaraisuus> tiedotAtarusta,
-      Oppija oppija) {
-    if (oppija == null) {
+      List<Oppija> oppijas) {
+    if (oppijas.isEmpty()) {
       LOG.warn(
           "Hakemuksen {} henkiloOidille {} ei löytynyt suresta Oppijaa!",
           hakemusOid,
           henkiloOidHakemukselta);
+    } else if (oppijas.size() > 1) {
+      LOG.warn(
+          "Hakemuksen {} henkiloOidille {} löytyi suresta yhteensä {} oppijaa!",
+          hakemusOid,
+          henkiloOidHakemukselta,
+          oppijas.size());
     }
     HakemuksenHarkinnanvaraisuus result = null;
-    if (LocalDateTime.now().isAfter(suoritusValmisDeadline) && !hasValmisPeruskoulu(oppija)) {
+    if (LocalDateTime.now().isAfter(suoritusValmisDeadline) && !hasValmisPeruskoulu(oppijas)) {
       LOG.info(
           "Hakemus {} on suren mukaan harkinnanvarainen, koska ei päättötodistusta", hakemusOid);
       tiedotAtarusta.forEach(
           ht -> ht.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA));
       result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);
-    } else if (hasYksilollistettyMatAi(oppija)) {
+    } else if (hasYksilollistettyMatAi(oppijas)) {
       LOG.info("Hakemuksella {} on suressa yksilollistetty MA_AI!", hakemusOid);
       tiedotAtarusta.forEach(
           ht -> ht.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI));
@@ -111,7 +150,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
           hh -> {
             if (hh.getHarkinnanvaraisuudenSyy()
                     .equals(HarkinnanvaraisuudenSyy.ATARU_EI_PAATTOTODISTUSTA)
-                && hasValmisPeruskoulu(oppija)) {
+                && hasValmisPeruskoulu(oppijas)) {
               LOG.info(
                   "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy valmis pohjakoulutus!",
                   hakemusOid,
@@ -159,6 +198,28 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
     }
   }
 
+  private List<Oppija> findOppijasForHakija(
+      String oidFromHakemus, List<Oppija> oppijas, List<HenkiloViiteDto> henkiloviittees) {
+    List<String> aliakset = new ArrayList<>();
+    aliakset.add(oidFromHakemus);
+    List<HenkiloViiteDto> hakijanViitteet =
+        henkiloviittees.stream()
+            .filter(hv -> List.of(hv.getHenkiloOid(), hv.getMasterOid()).contains(oidFromHakemus))
+            .collect(Collectors.toList());
+    hakijanViitteet.forEach(
+        viite -> aliakset.addAll(List.of(viite.getHenkiloOid(), viite.getMasterOid())));
+    List<Oppija> hakijanOppijat =
+        oppijas.stream()
+            .filter(oppija -> aliakset.contains(oppija.getOppijanumero()))
+            .collect(Collectors.toList());
+    LOG.info(
+        "Hakemukselle {} aliaksia yhteensä {}, oppijoita {}",
+        oidFromHakemus,
+        aliakset.size(),
+        hakijanOppijat.size());
+    return hakijanOppijat;
+  }
+
   private Oppija findOppijaForHakija(
       String oidFromHakemus, List<Oppija> oppijas, List<HenkiloViiteDto> henkiloviittees) {
     List<String> aliakset = new ArrayList<>();
@@ -169,15 +230,26 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
             .collect(Collectors.toList());
     hakijanViitteet.forEach(
         viite -> aliakset.addAll(List.of(viite.getHenkiloOid(), viite.getMasterOid())));
+    List<Oppija> hakijanOppijat =
+        oppijas.stream()
+            .filter(oppija -> aliakset.contains(oppija.getOppijanumero()))
+            .collect(Collectors.toList());
     Optional<Oppija> o =
         oppijas.stream().filter(oppija -> aliakset.contains(oppija.getOppijanumero())).findFirst();
-    LOG.info("Hakemukselle {} aliaksia yhteensä {}", oidFromHakemus, aliakset.size());
+    LOG.info(
+        "Hakemukselle {} aliaksia yhteensä {}, oppijoita {}",
+        oidFromHakemus,
+        aliakset.size(),
+        hakijanOppijat.size());
     return o.orElse(null);
   }
 
   public CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> getHarkinnanvaraisuudetForHakemukses(
       List<String> hakemusOids) {
-    LOG.info("Haetaan harkinnanvaraisuudet hakemuksille: {}, deadline {}", hakemusOids, suoritusValmisDeadline);
+    LOG.info(
+        "Haetaan harkinnanvaraisuudet hakemuksille: {}, deadline {}",
+        hakemusOids,
+        suoritusValmisDeadline);
     CompletableFuture<List<HakemusWrapper>> hakemukset =
         ataruAsyncResource.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids);
 
@@ -222,7 +294,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                                                               ht.getHakukohdeOid(),
                                                               ht.getHarkinnanvaraisuus()))
                                                   .collect(Collectors.toList()),
-                                              findOppijaForHakija(h.getPersonOid(), suor, viit)))
+                                              findOppijasForHakija(h.getPersonOid(), suor, viit)))
                                   .collect(Collectors.toList());
                           return CompletableFuture.completedFuture(result);
                         })));
@@ -255,7 +327,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                                       hh.getHakemusOid(),
                                       hh.getHenkiloOid(),
                                       hh.getHakutoiveet(),
-                                      findOppijaForHakija(hh.getHenkiloOid(), suor, viit)))
+                                      findOppijasForHakija(hh.getHenkiloOid(), suor, viit)))
                           .collect(Collectors.toList());
                   return CompletableFuture.completedFuture(result);
                 }));

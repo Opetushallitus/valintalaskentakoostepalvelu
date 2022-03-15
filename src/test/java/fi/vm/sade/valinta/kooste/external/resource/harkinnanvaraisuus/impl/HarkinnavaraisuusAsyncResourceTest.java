@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl;
 
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,85 +44,6 @@ public class HarkinnavaraisuusAsyncResourceTest {
   @Before
   public void init() {
     startShared();
-  }
-
-  @Test
-  public void testHakemustenHarkinnanvaraisuudet()
-      throws ExecutionException, InterruptedException, TimeoutException {
-
-    String leikkuriPvm = "2022-06-06";
-
-    List<String> hakemusOids = new ArrayList<>();
-    String hakemusOid1 = "1.2.246.562.11.00001010666";
-    String hakemusOid2 = "1.2.246.562.11.00001010667";
-    String hakukohdeOid1 = "1.2.246.562.20.42208535555";
-    String hakukohdeOid2 = "1.2.246.562.20.42208535556";
-
-    AtaruHakutoive hakutoive1 = new AtaruHakutoive();
-    hakutoive1.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
-    hakutoive1.setHakukohdeOid(hakukohdeOid1);
-    AtaruHakutoive hakutoive2 = new AtaruHakutoive();
-    hakutoive2.setHakukohdeOid(hakukohdeOid2);
-    hakutoive2.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.ATARU_SOSIAALISET_SYYT);
-
-    AtaruHakemus ataruh1 = new AtaruHakemus();
-    ataruh1.setHakemusOid(hakemusOid1);
-    ataruh1.setHakutoiveet(List.of(hakutoive1));
-    AtaruHakemus ataruh2 = new AtaruHakemus();
-    ataruh2.setHakemusOid(hakemusOid2);
-    ataruh2.setHakutoiveet(List.of(hakutoive2));
-
-    HakemusWrapper hw1 = new AtaruHakemusWrapper(ataruh1, new HenkiloPerustietoDto());
-    HakemusWrapper hw2 = new AtaruHakemusWrapper(ataruh2, new HenkiloPerustietoDto());
-
-    hakemusOids.add(hakemusOid1);
-    hakemusOids.add(hakemusOid2);
-
-    List<HakemusWrapper> ataruResult = new ArrayList<>();
-    ataruResult.add(hw1);
-    ataruResult.add(hw2);
-
-    HakemuksenHarkinnanvaraisuus expected1 =
-        new HakemuksenHarkinnanvaraisuus(
-            hakemusOid1,
-            List.of(
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid1, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
-    HakemuksenHarkinnanvaraisuus expected2 =
-        new HakemuksenHarkinnanvaraisuus(
-            hakemusOid2,
-            List.of(
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid2, HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI)));
-
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
-
-    when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
-        .thenReturn(CompletableFuture.completedFuture(ataruResult));
-    when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
-        .thenReturn(CompletableFuture.completedFuture(ataruResult));
-
-    List<HakemuksenHarkinnanvaraisuus> hhv =
-        h.getHarkinnanvaraisuudetForHakemuksesOnlyFromAtaru(hakemusOids).get(10, SECONDS);
-    assertTrue(
-        hhv.stream()
-            .anyMatch(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
-    assertTrue(
-        hhv.stream()
-            .anyMatch(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
   }
 
   @Test
