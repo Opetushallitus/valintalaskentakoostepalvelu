@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,14 +231,6 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
     CompletableFuture<List<HakemusWrapper>> hakemukset =
         ataruAsyncResource.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids);
 
-    CompletableFuture<List<Oppija>> suoritukset =
-        hakemukset.thenComposeAsync(
-            h -> {
-              LOG.info("Saatiin Atarusta {} hakemusta, haetaan suoritukset hakijoille", h.size());
-              return suoritusrekisteriAsyncResource.getSuorituksetForOppijasWithoutEnsikertalaisuus(
-                  h.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toList()));
-            });
-
     CompletableFuture<List<HenkiloViiteDto>> viitteet =
         hakemukset.thenComposeAsync(
             h -> {
@@ -245,6 +238,38 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
               return oppijanumerorekisteriAsyncResource.haeHenkiloOidDuplikaatit(
                   h.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toSet()));
             });
+
+    CompletableFuture<List<Oppija>> suoritukset =
+        hakemukset.thenComposeAsync(
+            h ->
+                viitteet.thenComposeAsync(
+                    v -> {
+                      {
+                        LOG.info(
+                            "Saatiin Atarusta {} hakemusta, haetaan suoritukset hakijoille",
+                            h.size());
+                        List<String> oids =
+                            h.stream()
+                                .map(HakemusWrapper::getPersonOid)
+                                .collect(Collectors.toList());
+                        List<String> aliases =
+                            v.stream()
+                                .map(viite -> List.of(viite.getHenkiloOid(), viite.getMasterOid()))
+                                .flatMap(List::stream)
+                                .collect(Collectors.toList());
+                        List<String> oidsToGet =
+                            Stream.of(oids, aliases)
+                                .flatMap(List::stream)
+                                .distinct()
+                                .collect(Collectors.toList());
+                        LOG.info(
+                            "Saatiin Atarusta {} hakemusta, haetaan suoritukset hakijoille, henkilos+aliases {}",
+                            h.size(),
+                            oidsToGet.size());
+                        return suoritusrekisteriAsyncResource
+                            .getSuorituksetForOppijasWithoutEnsikertalaisuus(oidsToGet);
+                      }
+                    }));
 
     return hakemukset.thenComposeAsync(
         hak ->

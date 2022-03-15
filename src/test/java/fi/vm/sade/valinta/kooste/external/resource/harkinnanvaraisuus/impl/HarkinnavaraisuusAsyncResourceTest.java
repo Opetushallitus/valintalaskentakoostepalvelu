@@ -135,7 +135,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
         .thenReturn(CompletableFuture.completedFuture(ataruResult));
     when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(
-            List.of(henkiloOid1, henkiloOid2)))
+            List.of(henkiloOid1, henkiloOid2, aliasForHenkiloOid1)))
         .thenReturn(CompletableFuture.completedFuture(sureResult));
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1, henkiloOid2)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
