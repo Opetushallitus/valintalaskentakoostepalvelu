@@ -588,6 +588,27 @@ public class HakemuksetConverterUtilTest {
 
   @Test
   public void
+      pohjakoulutusPeruskouluKeskeytynytJosVahvistettuPeruskoulunSuoritusKeskeytynytHakukaudellaAtaruhakemus() {
+    HakemusDTO h = new HakemusDTO();
+    h.setAvaimet(
+        new ArrayList<>() {
+          {
+            this.add(new AvainArvoDTO("base-education-2nd", PohjakoulutusToinenAste.PERUSKOULU));
+          }
+        });
+    List<SuoritusJaArvosanat> suoritukset =
+        new ArrayList<>() {
+          {
+            add(vahvistettuPerusopetusKeskeytynytHakukaudella);
+          }
+        };
+    Assert.assertEquals(
+        PohjakoulutusToinenAste.KESKEYTYNYT,
+        hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+  }
+
+  @Test
+  public void
       pohjakoulutusPeruskouluJosSekaVahvistettuPeruskoulunSuoritusKeskeytynytEttaKeskenHakukaudella() {
     HakemusDTO h = new HakemusDTO();
     h.setAvaimet(

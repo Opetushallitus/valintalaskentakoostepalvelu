@@ -52,6 +52,7 @@ public class HakemuksetConverterUtil {
   public static final String PERUSOPETUS_KIELI = "perusopetuksen_kieli";
   public static final String LUKIO_KIELI = "lukion_kieli";
   public static final String POHJAKOULUTUS = "POHJAKOULUTUS";
+  public static final String POHJAKOULUTUS_ATARU = "base-education-2nd";
   public static final String ENSIKERTALAINEN = "ensikertalainen";
   public static final String PREFERENCE_PREFIX = "preference";
   public static final String DISCRETIONARY_POSTFIX = "discretionary";
@@ -396,12 +397,22 @@ public class HakemuksetConverterUtil {
 
   public Optional<String> pohjakoulutus(
       Haku haku, HakemusDTO hakemusDTO, List<SuoritusJaArvosanat> suoritukset) {
-    Optional<String> pk =
+    Optional<String> hakuAppPk =
         hakemusDTO.getAvaimet().stream()
             .filter(a -> POHJAKOULUTUS.equals(a.getAvain()))
             .map(AvainArvoDTO::getArvo)
             .findFirst();
-    if (!pk.isPresent()) {
+    Optional<String> ataruPk =
+        hakemusDTO.getAvaimet().stream()
+            .filter(a -> POHJAKOULUTUS_ATARU.equals(a.getAvain()))
+            .map(AvainArvoDTO::getArvo)
+            .findFirst();
+    Optional<String> pk = hakuAppPk;
+    if (pk.isEmpty() && ataruPk.isPresent()) {
+      LOG.info("Ataruhakemuksen pohjakoulutus: {}", ataruPk.get());
+      pk = ataruPk;
+    }
+    if (pk.isEmpty()) {
       return empty();
     }
     String pohjakoulutusHakemukselta = pk.get();
