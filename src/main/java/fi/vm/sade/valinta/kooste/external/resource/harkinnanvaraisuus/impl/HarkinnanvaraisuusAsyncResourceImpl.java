@@ -53,20 +53,6 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
 
   public static final String PK_KOMO = "1.2.246.562.13.62959769647";
 
-  // todo ota huomioon myös muita pohjakoulutuskomoja
-  private Boolean hasValmisPeruskoulu(Oppija oppija) {
-    if (oppija != null) {
-      return oppija.getSuoritukset().stream()
-          .anyMatch(
-              sa ->
-                  PK_KOMO.equals(sa.getSuoritus().getKomo())
-                      && "VALMIS".equals(sa.getSuoritus().getTila())
-                      && sa.getSuoritus().isVahvistettu());
-    } else {
-      return false;
-    }
-  }
-
   private Boolean viimeisinPeruskoulusuoritusOnKeskeytynyt(List<Oppija> oppijas) {
     return oppijas.stream()
         .anyMatch(
@@ -82,7 +68,6 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
             });
   }
 
-  // todo ota huomioon myös muita pohjakoulutuskomoja
   private Boolean hasValmisPeruskoulu(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
       return oppijas.stream()
@@ -110,20 +95,6 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                               PK_KOMO.equals(sa.getSuoritus().getKomo())
                                   && sa.getSuoritus().isYksilollistettyMaAi()
                                   && sa.getSuoritus().isVahvistettu()));
-    } else {
-      return false;
-    }
-  }
-
-  private Boolean hasYksilollistettyMatAi(Oppija oppija) {
-    if (oppija != null) {
-      return oppija.getSuoritukset().stream()
-          .anyMatch(
-              sa ->
-                  PK_KOMO.equals(sa.getSuoritus().getKomo())
-                      && sa.getSuoritus().isYksilollistettyMaAi()
-                      && sa.getSuoritus().isVahvistettu());
-
     } else {
       return false;
     }
@@ -223,30 +194,6 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
         aliakset.size(),
         hakijanOppijat.size());
     return hakijanOppijat;
-  }
-
-  private Oppija findOppijaForHakija(
-      String oidFromHakemus, List<Oppija> oppijas, List<HenkiloViiteDto> henkiloviittees) {
-    List<String> aliakset = new ArrayList<>();
-    aliakset.add(oidFromHakemus);
-    List<HenkiloViiteDto> hakijanViitteet =
-        henkiloviittees.stream()
-            .filter(hv -> List.of(hv.getHenkiloOid(), hv.getMasterOid()).contains(oidFromHakemus))
-            .collect(Collectors.toList());
-    hakijanViitteet.forEach(
-        viite -> aliakset.addAll(List.of(viite.getHenkiloOid(), viite.getMasterOid())));
-    List<Oppija> hakijanOppijat =
-        oppijas.stream()
-            .filter(oppija -> aliakset.contains(oppija.getOppijanumero()))
-            .collect(Collectors.toList());
-    Optional<Oppija> o =
-        oppijas.stream().filter(oppija -> aliakset.contains(oppija.getOppijanumero())).findFirst();
-    LOG.info(
-        "Hakemukselle {} aliaksia yhteensä {}, oppijoita {}",
-        oidFromHakemus,
-        aliakset.size(),
-        hakijanOppijat.size());
-    return o.orElse(null);
   }
 
   public CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> getHarkinnanvaraisuudetForHakemukses(

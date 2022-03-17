@@ -259,8 +259,6 @@ public class HarkinnavaraisuusAsyncResourceTest {
   public void testViimeisinPkSuoritusOnKeskeytynytMakesHakemusHarkinnanvarainen()
       throws ExecutionException, InterruptedException, TimeoutException {
 
-    // Luodaan kaksi hakemusta, toisella on suressa yksilöllistetty MA+AI ja toisella tavallinen
-    // valmis peruskoulusuoritus.
     String leikkuriPvm = "2022-06-06";
     String hakemusOid2 = "1.2.246.562.11.00001010667";
     String hakukohdeOid2 = "1.2.246.562.20.42208535556";
