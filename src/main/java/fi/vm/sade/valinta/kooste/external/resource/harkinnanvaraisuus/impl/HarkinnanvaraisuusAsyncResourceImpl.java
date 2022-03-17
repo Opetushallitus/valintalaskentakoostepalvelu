@@ -9,10 +9,13 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.Oppijan
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloViiteDto;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -62,6 +65,21 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
     } else {
       return false;
     }
+  }
+
+  private Boolean viimeisinPeruskoulusuoritusOnKeskeytynyt(List<Oppija> oppijas) {
+    return oppijas.stream()
+        .anyMatch(
+            oppija -> {
+              List<Suoritus> pkSuoritukset =
+                  oppija.getSuoritukset().stream()
+                      .map(SuoritusJaArvosanat::getSuoritus)
+                      .filter(s -> PK_KOMO.equals(s.getKomo()) && s.isVahvistettu())
+                      .collect(Collectors.toList());
+              Optional<Suoritus> viimeisin =
+                  pkSuoritukset.stream().max(Comparator.comparing(Suoritus::getValmistuminen));
+              return viimeisin.map(s -> "KESKEYTYNYT".equals(s.getTila())).orElse(false);
+            });
   }
 
   // todo ota huomioon myös muita pohjakoulutuskomoja
@@ -135,9 +153,18 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
           oppijas.get(0).getSuoritukset().size());
     }
     HakemuksenHarkinnanvaraisuus result = null;
-    if (LocalDateTime.now().isAfter(suoritusValmisDeadline) && !hasValmisPeruskoulu(oppijas)) {
+    if (viimeisinPeruskoulusuoritusOnKeskeytynyt(oppijas)) {
       LOG.info(
-          "Hakemus {} on suren mukaan harkinnanvarainen, koska ei päättötodistusta", hakemusOid);
+          "Hakemus {} on suren mukaan harkinnanvarainen, koska oppijan viimeisin peruskoulusuoritus on keskeytynyt",
+          hakemusOid);
+      tiedotAtarusta.forEach(
+          ht -> ht.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA));
+      result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);
+    } else if (LocalDateTime.now().isAfter(suoritusValmisDeadline)
+        && !hasValmisPeruskoulu(oppijas)) {
+      LOG.info(
+          "Hakemus {} on suren mukaan harkinnanvarainen, koska suressa ei päättötodistusta ja deadline on ohitettu",
+          hakemusOid);
       tiedotAtarusta.forEach(
           ht -> ht.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA));
       result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);

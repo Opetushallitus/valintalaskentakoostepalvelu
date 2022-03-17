@@ -25,6 +25,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.Suorit
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -252,5 +253,88 @@ public class HarkinnavaraisuusAsyncResourceTest {
         1, hhv.get().stream().filter(hark -> hakemusOid1.equals(hark.getHakemusOid())).count());
     assertEquals(
         1, hhv.get().stream().filter(hark -> hakemusOid2.equals(hark.getHakemusOid())).count());
+  }
+
+  @Test
+  public void testViimeisinPkSuoritusOnKeskeytynytMakesHakemusHarkinnanvarainen()
+      throws ExecutionException, InterruptedException, TimeoutException {
+
+    // Luodaan kaksi hakemusta, toisella on suressa yksilöllistetty MA+AI ja toisella tavallinen
+    // valmis peruskoulusuoritus.
+    String leikkuriPvm = "2022-06-06";
+    String hakemusOid2 = "1.2.246.562.11.00001010667";
+    String hakukohdeOid2 = "1.2.246.562.20.42208535556";
+    String henkiloOid2 = "1.2.246.562.24.47613332222";
+
+    AtaruHakutoive hakutoive2 = new AtaruHakutoive();
+    hakutoive2.setHakukohdeOid(hakukohdeOid2);
+    hakutoive2.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.ATARU_SOSIAALISET_SYYT);
+
+    AtaruHakemus ataruh2 = new AtaruHakemus();
+    ataruh2.setHakemusOid(hakemusOid2);
+    ataruh2.setHakutoiveet(List.of(hakutoive2));
+    ataruh2.setPersonOid(henkiloOid2);
+
+    HenkiloPerustietoDto henkilo2 = new HenkiloPerustietoDto();
+    henkilo2.setOidHenkilo(henkiloOid2);
+
+    HakemusWrapper hw2 = new AtaruHakemusWrapper(ataruh2, henkilo2);
+
+    assertEquals(hw2.getPersonOid(), henkiloOid2);
+
+    List<HakemusWrapper> ataruResult = new ArrayList<>();
+    ataruResult.add(hw2);
+
+    Suoritus pkSuoritusKeskeytynyt = new Suoritus();
+    pkSuoritusKeskeytynyt.setHenkiloOid(henkiloOid2);
+    pkSuoritusKeskeytynyt.setKomo(PK_KOMO);
+    pkSuoritusKeskeytynyt.setTila("KESKEYTYNYT");
+    pkSuoritusKeskeytynyt.setValmistuminen("2022-03-03");
+    pkSuoritusKeskeytynyt.setVahvistettu(true);
+    pkSuoritusKeskeytynyt.setLahdeArvot(Map.of("foo", "true"));
+
+    Suoritus pkSuoritusAiempiKesken = new Suoritus();
+    pkSuoritusAiempiKesken.setHenkiloOid(henkiloOid2);
+    pkSuoritusAiempiKesken.setKomo(PK_KOMO);
+    pkSuoritusAiempiKesken.setTila("KESKEN");
+    pkSuoritusAiempiKesken.setValmistuminen("2021-03-03");
+    pkSuoritusAiempiKesken.setVahvistettu(true);
+    pkSuoritusAiempiKesken.setLahdeArvot(Map.of("foo", "true"));
+
+    SuoritusJaArvosanat sa2 = new SuoritusJaArvosanat();
+    sa2.setSuoritus(pkSuoritusKeskeytynyt);
+    SuoritusJaArvosanat sa2b = new SuoritusJaArvosanat();
+    sa2b.setSuoritus(pkSuoritusAiempiKesken);
+
+    Oppija o2 = new Oppija();
+    o2.setSuoritukset(List.of(sa2, sa2b));
+    o2.setOppijanumero(henkiloOid2);
+
+    List<Oppija> sureResult = List.of(o2);
+
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+
+    when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(List.of(hakemusOid2)))
+        .thenReturn(CompletableFuture.completedFuture(ataruResult));
+    when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(List.of(henkiloOid2)))
+        .thenReturn(CompletableFuture.completedFuture(sureResult));
+    when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid2)))
+        .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
+        h.getHarkinnanvaraisuudetForHakemukses(List.of(hakemusOid2));
+
+    assertEquals(
+        1,
+        hhv.get().stream()
+            .filter(
+                hakemuksenHarkinnanvaraisuus ->
+                    hakemuksenHarkinnanvaraisuus
+                        .getHakutoiveet()
+                        .get(0)
+                        .getHarkinnanvaraisuudenSyy()
+                        .equals(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA))
+            .count());
   }
 }
