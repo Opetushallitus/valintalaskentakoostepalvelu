@@ -61,6 +61,7 @@ public class Hakukohde {
     this.valintojenAloituspaikat = dto.getValintojenAloituspaikatLkm();
     this.valintakokeet =
         dto.getValintakokeet().stream().map(Valintakoe::new).collect(Collectors.toSet());
+    this.ohjeetUudelleOpiskelijalle = new HashMap<>();
     if (dto.getOhjeetUudelleOpiskelijalle() != null) {
       this.ohjeetUudelleOpiskelijalle.put("kieli_fi", dto.getOhjeetUudelleOpiskelijalle());
       this.ohjeetUudelleOpiskelijalle.put("kieli_sv", dto.getOhjeetUudelleOpiskelijalle());
