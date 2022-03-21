@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakutoive;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
@@ -599,6 +600,11 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
     setHakemusDTOvalintapisteet(valintapisteet, hakemusTyyppi);
 
     return hakemusTyyppi;
+  }
+
+  @Override
+  public List<AtaruHakutoive> ataruHakutoiveet() {
+    return null;
   }
 
   private Map<String, String> getHakutoiveet() {

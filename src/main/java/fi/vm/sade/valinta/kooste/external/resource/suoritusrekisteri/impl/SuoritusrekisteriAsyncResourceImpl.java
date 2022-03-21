@@ -107,6 +107,15 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
+  public CompletableFuture<List<Oppija>> getSuorituksetForOppijasWithoutEnsikertalaisuus(
+      List<String> opiskelijaOids) {
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("ensikertalaisuudet", "false");
+    String url = getUrl("suoritusrekisteri.oppijat", parameters);
+    return batchedPostOppijasFuture(opiskelijaOids, url);
+  }
+
+  @Override
   public Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(
       List<String> opiskelijaOids) {
     String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=false";

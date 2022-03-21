@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru.dto;
 
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuudenSyy;
+
 public class AtaruHakutoive {
   private String processingState;
   private String eligibilityState;
@@ -7,6 +9,7 @@ public class AtaruHakutoive {
   private String hakukohdeOid;
   private String languageRequirement;
   private String degreeRequirement;
+  private HarkinnanvaraisuudenSyy harkinnanvaraisuus;
 
   public String getProcessingState() {
     return processingState;
@@ -54,5 +57,16 @@ public class AtaruHakutoive {
 
   public void setDegreeRequirement(String degreeRequirement) {
     this.degreeRequirement = degreeRequirement;
+  }
+
+  public HarkinnanvaraisuudenSyy getHarkinnanvaraisuus() {
+    if (harkinnanvaraisuus == null) {
+      return HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN;
+    }
+    return harkinnanvaraisuus;
+  }
+
+  public void setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy harkinnanvaraisuus) {
+    this.harkinnanvaraisuus = harkinnanvaraisuus;
   }
 }

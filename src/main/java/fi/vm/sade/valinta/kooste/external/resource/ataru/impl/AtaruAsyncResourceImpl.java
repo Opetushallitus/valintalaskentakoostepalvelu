@@ -50,11 +50,11 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   private CompletableFuture<List<HakemusWrapper>> getApplications(
-      String hakukohdeOid, List<String> hakemusOids) {
+      String hakukohdeOid, List<String> hakemusOids, Boolean withHarkinnanvaraisuustieto) {
     if (hakukohdeOid == null && hakemusOids.isEmpty()) {
       return CompletableFuture.completedFuture(Collections.emptyList());
     }
-    return getApplicationsInChunks(hakukohdeOid, hakemusOids)
+    return getApplicationsInChunks(hakukohdeOid, hakemusOids, withHarkinnanvaraisuustieto)
         .thenComposeAsync(
             hakemukset -> {
               if (hakemukset.isEmpty()) {
@@ -85,10 +85,13 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   private CompletableFuture<List<AtaruHakemus>> getApplicationChunk(
-      String hakukohdeOid, List<String> hakemusOids) {
+      String hakukohdeOid, List<String> hakemusOids, Boolean withHarkinnanvaraisuustieto) {
     Map<String, String> query = new HashMap<>();
     if (hakukohdeOid != null) {
       query.put("hakukohdeOid", hakukohdeOid);
+    }
+    if (withHarkinnanvaraisuustieto) {
+      query.put("harkinnanvaraisuustiedotHakutoiveille", "true");
     }
     return this.client.postJson(
         this.urlConfiguration.url("ataru.applications.by-hakukohde", query),
@@ -99,13 +102,15 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   private CompletableFuture<List<AtaruHakemus>> getApplicationsInChunks(
-      String hakukohdeOid, List<String> hakemusOids) {
+      String hakukohdeOid, List<String> hakemusOids, Boolean withHarkinnanvaraisuustieto) {
     if (hakemusOids.isEmpty()) {
-      return getApplicationChunk(hakukohdeOid, hakemusOids);
+      return getApplicationChunk(hakukohdeOid, hakemusOids, withHarkinnanvaraisuustieto);
     } else {
       return CompletableFutureUtil.sequence(
               Lists.partition(hakemusOids, SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE).stream()
-                  .map(chunk -> getApplicationChunk(hakukohdeOid, chunk))
+                  .map(
+                      chunk ->
+                          getApplicationChunk(hakukohdeOid, chunk, withHarkinnanvaraisuustieto))
                   .collect(Collectors.toList()))
           .thenApplyAsync(
               chunks -> chunks.stream().flatMap(List::stream).collect(Collectors.toList()));
@@ -176,11 +181,17 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
 
   @Override
   public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
-    return getApplications(hakukohdeOid, Lists.newArrayList());
+    return getApplications(hakukohdeOid, Lists.newArrayList(), false);
   }
 
   @Override
   public CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
-    return getApplications(null, oids);
+    return getApplications(null, oids, false);
+  }
+
+  @Override
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(
+      List<String> oids) {
+    return getApplications(null, oids, true);
   }
 }

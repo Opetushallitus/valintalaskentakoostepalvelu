@@ -103,6 +103,8 @@ valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize={{ valintalaskentako
 # Päivämäärä, josta lähtien abien pohjakoulutus päätellään suoritusrekisteristä löytyvien lukiosuoritusten perusteella
 valintalaskentakoostepalvelu.abi.pohjakoulutus.paattely.leikkuripvm={{ valintalaskentakoostepalvelu_pohjakoulutus_paattely_leikkuripvm | default('2020-06-01') }}
 
+valintalaskentakoostepalvelu.harkinnanvaraisuus.paattely.leikkuripvm={{ suoritusrekisteri_koski_deadline_date | default('2022-06-06') }}
+
 #SEURANTA
 valintalaskentakoostepalvelu.seuranta.rest.url=https://${host.virkailija}/seuranta-service/resources
 

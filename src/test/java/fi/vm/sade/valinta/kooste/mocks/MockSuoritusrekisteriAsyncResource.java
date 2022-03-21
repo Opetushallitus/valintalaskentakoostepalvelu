@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import io.reactivex.Observable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -100,6 +101,12 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
       oppija = first.get();
     }
     return Observable.just(oppija);
+  }
+
+  @Override
+  public CompletableFuture<List<Oppija>> getSuorituksetForOppijasWithoutEnsikertalaisuus(
+      List<String> opiskelijaOids) {
+    return CompletableFuture.completedFuture(Collections.emptyList());
   }
 
   @Override

@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
+import java.util.Map;
+
 public class Suoritus {
   private String id;
   private String komo;
@@ -10,6 +12,7 @@ public class Suoritus {
   private String yksilollistaminen;
   private String suoritusKieli;
   private String source;
+  private Map<String, String> lahdeArvot;
   private boolean vahvistettu;
 
   public void setHenkiloOid(String henkiloOid) {
@@ -48,6 +51,10 @@ public class Suoritus {
     this.yksilollistaminen = yksilollistaminen;
   }
 
+  public void setLahdeArvot(Map<String, String> lahdeArvot) {
+    this.lahdeArvot = lahdeArvot;
+  }
+
   public String getHenkiloOid() {
     return henkiloOid;
   }
@@ -84,12 +91,20 @@ public class Suoritus {
     return yksilollistaminen;
   }
 
+  public Map<String, String> getLahdeArvot() {
+    return lahdeArvot;
+  }
+
   public boolean isVahvistettu() {
     return vahvistettu;
   }
 
   public void setVahvistettu(boolean vahvistettu) {
     this.vahvistettu = vahvistettu;
+  }
+
+  public boolean isYksilollistettyMaAi() {
+    return this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false").equals("true");
   }
 
   @Override
