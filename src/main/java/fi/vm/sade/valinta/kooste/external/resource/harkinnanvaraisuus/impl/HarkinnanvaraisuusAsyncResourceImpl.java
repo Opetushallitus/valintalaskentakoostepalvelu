@@ -100,6 +100,22 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
     }
   }
 
+  private Boolean hasPkSuoritusWithoutYksilollistettyMatAi(List<Oppija> oppijas) {
+    if (!oppijas.isEmpty()) {
+      return oppijas.stream()
+          .anyMatch(
+              oppija ->
+                  oppija.getSuoritukset().stream()
+                      .anyMatch(
+                          sa ->
+                              PK_KOMO.equals(sa.getSuoritus().getKomo())
+                                  && !sa.getSuoritus().isYksilollistettyMaAi()
+                                  && sa.getSuoritus().isVahvistettu()));
+    } else {
+      return false;
+    }
+  }
+
   private HakemuksenHarkinnanvaraisuus syncHarkinnanvaraisuusForHakemus(
       String hakemusOid,
       String henkiloOidHakemukselta,
@@ -163,7 +179,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
               hh.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
             }
             if (hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
-                && !hasYksilollistettyMatAi(oppijas)) {
+                && hasPkSuoritusWithoutYksilollistettyMatAi(oppijas)) {
               LOG.info(
                   "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy suoritus ilman yksilöllistettyä matematiikkaa ja äidinkieltä!",
                   hakemusOid,
