@@ -162,6 +162,14 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                   hh.getHakukohdeOid());
               hh.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
             }
+            if (hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
+                && !hasYksilollistettyMatAi(oppijas)) {
+              LOG.info(
+                  "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy suoritus ilman yksilöllistettyä matematiikkaa ja äidinkieltä!",
+                  hakemusOid,
+                  hh.getHakukohdeOid());
+              hh.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+            }
           });
       result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);
     }
