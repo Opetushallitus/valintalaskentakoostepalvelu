@@ -2417,7 +2417,7 @@ public class HakemuksetConverterUtilTest {
         true);
     assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(hakemus, "POHJAKOULUTUS"));
     assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
-    assertEquals("not 15:" + hakemus.getAvaimet(), 15, hakemus.getAvaimet().size());
+    assertEquals("not 16:" + hakemus.getAvaimet(), 16, hakemus.getAvaimet().size());
   }
 
   @Test
