@@ -705,7 +705,13 @@ public class HakemuksetConverterUtil {
 
   private boolean lisapistekoulutusHuomioidaan(Haku haku, SuoritusJaArvosanatWrapper s) {
     if (haku.isKoutaHaku()) {
-      int edellinenVuosi = haku.hakukausiVuosi - 1;
+      int edellinenVuosi;
+      if (haku.hakukausiVuosi != null) {
+        edellinenVuosi = haku.hakukausiVuosi - 1;
+      } else {
+        LOG.warn("Haulla {} ei ole hakukausiVuotta, käytetään nykyistä vuotta henkilöOidille {}", haku.oid, s.getSuoritusJaArvosanat().getSuoritus().getHenkiloOid());
+        edellinenVuosi = new DateTime().getYear() - 1;
+      }
       DateTime relevantStart = new DateTime(edellinenVuosi, 1, 1, 0, 0);
       return s.getValmistuminenAsDateTime().isAfter(relevantStart);
     } else {
