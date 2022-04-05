@@ -281,7 +281,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                   List<KelaHakijaRivi> rivit = Lists.newArrayList();
                   HakukohdeSource hakukohdeSource =
                       new HakukohdeSource() {
-                        Cache<String, AbstractHakukohde> hakukohdeCache = CacheBuilder.newBuilder().build();
+                        Cache<String, AbstractHakukohde> hakukohdeCache =
+                            CacheBuilder.newBuilder().build();
 
                         public AbstractHakukohde getHakukohdeByOid(String oid) {
                           try {

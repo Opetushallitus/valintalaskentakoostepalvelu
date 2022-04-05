@@ -82,7 +82,6 @@ public class KoutaHakukohdeDTO {
     public final String koodiUri;
     public final BigDecimal painokerroin;
 
-
     private PainotettuArvosana() {
       koodiUri = null;
       painokerroin = null;

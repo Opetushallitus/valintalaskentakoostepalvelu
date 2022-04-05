@@ -1,9 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.kouta;
 
+import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.KoutaHakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Valintakoe;
-import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.KoutaHakukohdeDTO;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,18 +10,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class KoutaHakukohde extends AbstractHakukohde {
-  protected KoutaHakukohde(String oid,
-                           Tila tila,
-                           Map<String, String> nimi,
-                           String hakuOid,
-                           Set<String> tarjoajaOids,
-                           Set<String> toteutusOids,
-                           String hakukohteetUri,
-                           Set<String> pohjakoulutusvaatimusUrit,
-                           Integer valintojenAloituspaikat,
-                           Set<Valintakoe> valintakokeet,
-                           Map<String, String> ohjeetUudelleOpiskelijalle) {
-    super(oid,
+  protected KoutaHakukohde(
+      String oid,
+      Tila tila,
+      Map<String, String> nimi,
+      String hakuOid,
+      Set<String> tarjoajaOids,
+      Set<String> toteutusOids,
+      String hakukohteetUri,
+      Set<String> pohjakoulutusvaatimusUrit,
+      Integer valintojenAloituspaikat,
+      Set<Valintakoe> valintakokeet,
+      Map<String, String> ohjeetUudelleOpiskelijalle) {
+    super(
+        oid,
         tila,
         nimi,
         hakuOid,
@@ -36,7 +37,8 @@ public class KoutaHakukohde extends AbstractHakukohde {
   }
 
   public KoutaHakukohde(KoutaHakukohdeDTO dto) {
-    super(dto.oid,
+    super(
+        dto.oid,
         parseTila(dto.tila),
         new HashMap<>(),
         dto.hakuOid,
