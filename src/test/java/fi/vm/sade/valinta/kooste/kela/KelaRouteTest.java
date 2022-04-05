@@ -10,7 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
@@ -79,8 +79,8 @@ public class KelaRouteTest extends CamelTestSupport {
   @Produce(uri = DIRECT_KELA)
   protected ProducerTemplate template;
 
-  private Hakukohde createHakukohdeDTO() {
-    return new Hakukohde(
+  private TarjontaHakukohde createHakukohdeDTO() {
+    return new TarjontaHakukohde(
         HAKUKOHDE1,
         null,
         new HashMap<>(),
@@ -91,8 +91,7 @@ public class KelaRouteTest extends CamelTestSupport {
         new HashSet<>(),
         null,
         Collections.emptySet(),
-        null,
-        false);
+        null);
   }
 
   private List<ValintaTulosServiceDto> createHakijat() {

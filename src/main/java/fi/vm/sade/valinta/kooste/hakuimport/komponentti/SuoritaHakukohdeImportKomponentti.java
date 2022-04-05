@@ -7,13 +7,9 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohteenValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.MonikielinenTekstiDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Koulutus;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Valintakoe;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
@@ -94,7 +90,7 @@ public class SuoritaHakukohdeImportKomponentti {
       @Body // @Property(OPH.HAKUKOHDEOID)
           String hakukohdeOid) {
     try {
-      Hakukohde hakukohde =
+      AbstractHakukohde hakukohde =
           tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
       Haku haku = tarjontaAsyncResource.haeHaku(hakukohde.hakuOid).get(5, TimeUnit.MINUTES);
       List<CompletableFuture<Toteutus>> toteutusFs =
@@ -239,7 +235,7 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.setValinnanAloituspaikat(
           Objects.requireNonNullElse(hakukohde.valintojenAloituspaikat, 0));
 
-      if (hakukohde.isKoutaHakukohde) {
+      if (hakukohde instanceof KoutaHakukohde) {
         List<HakukohteenValintakoeDTO> valintakoeDTOs = new ArrayList<>();
         for (Valintakoe valintakoe : hakukohde.valintakokeet) {
           HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
@@ -295,7 +291,7 @@ public class SuoritaHakukohdeImportKomponentti {
       avainArvo.setArvo(kielikoetunniste);
       importTyyppi.getValintaperuste().add(avainArvo);
 
-      if (!hakukohde.isKoutaHakukohde) {
+      if (hakukohde instanceof TarjontaHakukohde) {
         HakukohdeValintaperusteetDTO valintaperusteet =
             tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
 

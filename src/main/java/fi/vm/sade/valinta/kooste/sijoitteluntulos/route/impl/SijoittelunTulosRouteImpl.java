@@ -16,8 +16,8 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -187,7 +187,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 String tarjoajaNimi;
                 String preferoitukielikoodi = KieliUtil.SUOMI;
                 try {
-                  Hakukohde hakukohde =
+                  AbstractHakukohde hakukohde =
                       tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, MINUTES);
                   tarjoajaOid = hakukohde.tarjoajaOids.iterator().next();
                   Teksti hakukohdeTeksti = new Teksti(hakukohde.nimi);
