@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +16,9 @@ public class KoutaHakukohde {
   public final Set<KoutaValintakoe> valintakokeet;
   public final Set<String> pohjakoulutusvaatimusKoodiUrit;
   public final Map<String, String> uudenOpiskelijanUrl;
+  public final BigDecimal alinHyvaksyttyKeskiarvo;
+  public final List<PainotettuArvosana> painotetutArvosanat;
+  public final Set<KoutaValintakoe> valintaperusteValintakokeet;
 
   private KoutaHakukohde() {
     this.oid = null;
@@ -26,6 +31,9 @@ public class KoutaHakukohde {
     this.valintakokeet = null;
     this.pohjakoulutusvaatimusKoodiUrit = null;
     this.uudenOpiskelijanUrl = null;
+    this.alinHyvaksyttyKeskiarvo = null;
+    this.painotetutArvosanat = null;
+    this.valintaperusteValintakokeet = null;
   }
 
   @Override
@@ -46,10 +54,12 @@ public class KoutaHakukohde {
   public static class KoutaValintakoe {
     public final String id;
     public final String tyyppi;
+    public final BigDecimal vahimmaispisteet;
 
     private KoutaValintakoe() {
       this.id = null;
       this.tyyppi = null;
+      this.vahimmaispisteet = null;
     }
 
     @Override
@@ -65,6 +75,32 @@ public class KoutaHakukohde {
     @Override
     public int hashCode() {
       return id.hashCode();
+    }
+  }
+
+  public static class PainotettuArvosana {
+    public final String koodiUri;
+    public final BigDecimal painokerroin;
+
+
+    private PainotettuArvosana() {
+      koodiUri = null;
+      painokerroin = null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      PainotettuArvosana that = (PainotettuArvosana) o;
+
+      return koodiUri.equals(that.koodiUri);
+    }
+
+    @Override
+    public int hashCode() {
+      return koodiUri.hashCode();
     }
   }
 }
