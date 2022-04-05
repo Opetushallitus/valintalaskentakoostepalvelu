@@ -329,7 +329,8 @@ public abstract class AbstractPistesyottoKoosteService {
                                   .applicationAdditionalDataDTO)
                       .collect(Collectors.toList()));
             });
-    CompletableFuture<AbstractHakukohde> hakukohdeF = tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
+    CompletableFuture<AbstractHakukohde> hakukohdeF =
+        tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
     CompletableFuture<List<Organisaatio>> tarjoajatF =
         hakukohdeF.thenComposeAsync(
             hakukohde ->

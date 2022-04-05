@@ -6,12 +6,11 @@ import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.KoutaHakukohdeDTO;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class KoutaAsyncResourceImpl implements KoutaAsyncResource {
@@ -29,9 +28,7 @@ public class KoutaAsyncResourceImpl implements KoutaAsyncResource {
         this.koutaClient.getJson(
             urlConfiguration.url("kouta-internal.hakukohde.hakukohdeoid", hakukohdeOid),
             Duration.ofSeconds(10),
-            new TypeToken<KoutaHakukohdeDTO>() {
-            }.getType());
+            new TypeToken<KoutaHakukohdeDTO>() {}.getType());
     return koutaF.thenApplyAsync(KoutaHakukohde::new);
   }
-
 }

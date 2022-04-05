@@ -342,6 +342,9 @@
 		<!-- Tarjonta Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl" />
+		<!-- Kouta Async -->
+		<bean
+				class="fi.vm.sade.valinta.kooste.external.resource.kouta.impl.KoutaAsyncResourceImpl" />
 		<!-- Oppijantunnistus Async -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.impl.OppijantunnistusAsyncResourceImpl" />

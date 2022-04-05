@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ValintakoeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.KoutaHakukohdeDTO;
-
 import java.math.BigDecimal;
 
 public class Valintakoe {
