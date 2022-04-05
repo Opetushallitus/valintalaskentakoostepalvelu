@@ -7,7 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Toteutus;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
@@ -72,7 +72,7 @@ public class KoekutsukirjeetKomponentti {
       final List<Map<String, String>> customLetterContents = Collections.emptyList();
 
       // final HakukohdeNimiRDTO nimi;
-      Map<String, Hakukohde> hakukohteet;
+      Map<String, AbstractHakukohde> hakukohteet;
       try {
         Set<String> kaikkiMuutHakutoiveetOids =
             hakemusOidJaMuutHakukohdeOids.entrySet().stream()
@@ -91,7 +91,7 @@ public class KoekutsukirjeetKomponentti {
         throw e;
       }
 
-      Hakukohde hakukohde = hakukohteet.get(hakukohdeOid);
+      AbstractHakukohde hakukohde = hakukohteet.get(hakukohdeOid);
       List<Organisaatio> tarjoajat =
           CompletableFutureUtil.sequence(
                   hakukohde.tarjoajaOids.stream()

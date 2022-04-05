@@ -13,7 +13,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaHakukohde;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -49,8 +49,8 @@ import org.junit.Test;
 import org.springframework.util.StreamUtils;
 
 public class ValintalaskennanTulosExcelTest {
-  private final Hakukohde hakukohde =
-      new Hakukohde(
+  private final TarjontaHakukohde hakukohde =
+      new TarjontaHakukohde(
           "hakukohdeoid",
           null,
           map("fi", "Hakukohde 1"),
@@ -61,8 +61,7 @@ public class ValintalaskennanTulosExcelTest {
           new HashSet<>(),
           null,
           Collections.emptySet(),
-          null,
-          false);
+          null);
   private final Organisaatio tarjoaja = new Organisaatio();
 
   {

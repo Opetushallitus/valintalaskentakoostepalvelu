@@ -4,8 +4,8 @@ import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
@@ -89,7 +89,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                 Haku haku = tarjontaAsyncResource.haeHaku(hakuOid).get(5, TimeUnit.MINUTES);
                 String hakuNimi = new Teksti(haku.nimi).getTeksti();
                 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-                Hakukohde hakukohde =
+                AbstractHakukohde hakukohde =
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
                 String hakukohdeNimi = new Teksti(hakukohde.nimi).getTeksti();
                 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();

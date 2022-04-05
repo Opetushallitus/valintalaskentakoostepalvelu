@@ -1,11 +1,11 @@
-package fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto;
+package fi.vm.sade.valinta.kooste.external.resource.kouta.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class KoutaHakukohde {
+public class KoutaHakukohdeDTO {
   public final String oid;
   public final String tila;
   public final Map<String, String> nimi;
@@ -20,7 +20,7 @@ public class KoutaHakukohde {
   public final List<PainotettuArvosana> painotetutArvosanat;
   public final Set<KoutaValintakoe> valintaperusteValintakokeet;
 
-  private KoutaHakukohde() {
+  private KoutaHakukohdeDTO() {
     this.oid = null;
     this.tila = null;
     this.nimi = null;
@@ -41,7 +41,7 @@ public class KoutaHakukohde {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    KoutaHakukohde that = (KoutaHakukohde) o;
+    KoutaHakukohdeDTO that = (KoutaHakukohdeDTO) o;
 
     return oid.equals(that.oid);
   }

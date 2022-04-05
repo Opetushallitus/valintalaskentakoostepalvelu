@@ -17,8 +17,8 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -91,7 +91,7 @@ public class ErillishaunVientiService {
                         erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()));
               }
             });
-    Observable<Hakukohde> tarjontaHakukohdeObservable =
+    Observable<AbstractHakukohde> tarjontaHakukohdeObservable =
         Observable.fromFuture(hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid()));
     Observable<List<Organisaatio>> tarjoajatObservable =
         tarjontaHakukohdeObservable.flatMap(
@@ -159,7 +159,7 @@ public class ErillishaunVientiService {
       ErillishakuDTO erillishaku,
       Observable<List<HakemusWrapper>> hakemusObservable,
       Observable<Haku> hakuFuture,
-      Observable<Hakukohde> tarjontaHakukohdeObservable,
+      Observable<AbstractHakukohde> tarjontaHakukohdeObservable,
       Observable<List<Organisaatio>> tarjoajatObservable,
       Observable<List<Lukuvuosimaksu>> lukuvuosimaksuObs) {
     Observable<List<Valinnantulos>> valinnantulosObservable =
@@ -195,7 +195,7 @@ public class ErillishaunVientiService {
       final List<HakemusWrapper> hakemukset,
       final List<Lukuvuosimaksu> lukuvuosimaksus,
       final Haku haku,
-      final Hakukohde tarjontaHakukohde,
+      final AbstractHakukohde tarjontaHakukohde,
       final List<Organisaatio> tarjoajat,
       final List<Valinnantulos> valinnantulos) {
     LOG.info("Muodostetaan Excel valinnantuloksista!");
@@ -272,7 +272,7 @@ public class ErillishaunVientiService {
       final List<HakemusWrapper> hakemukset,
       final List<Lukuvuosimaksu> lukuvuosimaksus,
       final Haku haku,
-      final Hakukohde tarjontaHakukohde,
+      final AbstractHakukohde tarjontaHakukohde,
       final List<Organisaatio> tarjoajat) {
     LOG.info(
         "Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
