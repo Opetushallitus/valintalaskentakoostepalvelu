@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import org.apache.camel.Body;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +39,7 @@ public class SuoritaHakukohdeImportKomponentti {
   private static final Logger LOG =
       LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
   private static final int KOUTA_HAKUKOHDE_OID_LENGTH = 35;
+  private static final String NOLLA = "0.0";
 
   private TarjontaAsyncResource tarjontaAsyncResource;
   private KoutaAsyncResource koutaAsyncResource;
@@ -316,6 +316,14 @@ public class SuoritaHakukohdeImportKomponentti {
             .map(v -> v.get(0))
             .collect(Collectors.toList());
     importTyyppi.setValintakoe(uniqueValintakokeet);
+
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "painotettu_keskiarvo_hylkays_max",
+        hakukohde.alinHyvaksyttyKeskiarvo != null
+            ? hakukohde.alinHyvaksyttyKeskiarvo.toString()
+            : NOLLA);
+
     return importTyyppi;
   }
 
@@ -339,110 +347,84 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.getValintakoe().add(v);
     }
 
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("paasykoe_min");
-    avainArvo.setArvo(valintaperusteet.getPaasykoeMin().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("paasykoe_max");
-    avainArvo.setArvo(valintaperusteet.getPaasykoeMax().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("paasykoe_hylkays_min");
-    avainArvo.setArvo(valintaperusteet.getPaasykoeHylkaysMin().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("paasykoe_hylkays_max");
-    avainArvo.setArvo(valintaperusteet.getPaasykoeHylkaysMax().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("lisanaytto_min");
-    avainArvo.setArvo(valintaperusteet.getLisanayttoMin().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("lisanaytto_max");
-    avainArvo.setArvo(valintaperusteet.getLisanayttoMax().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("lisanaytto_hylkays_min");
-    avainArvo.setArvo(valintaperusteet.getLisanayttoHylkaysMin().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("lisanaytto_hylkays_max");
-    avainArvo.setArvo(valintaperusteet.getLisanayttoHylkaysMax().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("paasykoe_ja_lisanaytto_hylkays_min");
-    avainArvo.setArvo(valintaperusteet.getHylkaysMin().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("paasykoe_ja_lisanaytto_hylkays_max");
-    avainArvo.setArvo(valintaperusteet.getHylkaysMax().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("painotettu_keskiarvo_hylkays_min");
-    avainArvo.setArvo(valintaperusteet.getPainotettuKeskiarvoHylkaysMin().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("painotettu_keskiarvo_hylkays_max");
-    avainArvo.setArvo(valintaperusteet.getPainotettuKeskiarvoHylkaysMax().toString());
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("paasykoe_tunniste");
-    avainArvo.setArvo(
+    addAvainArvoToValintaperuste(
+        importTyyppi, "paasykoe_min", valintaperusteet.getPaasykoeMin().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi, "paasykoe_max", valintaperusteet.getPaasykoeMax().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi, "paasykoe_hylkays_min", valintaperusteet.getPaasykoeHylkaysMin().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi, "paasykoe_hylkays_max", valintaperusteet.getPaasykoeHylkaysMax().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi, "lisanaytto_min", valintaperusteet.getLisanayttoMin().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi, "lisanaytto_max", valintaperusteet.getLisanayttoMax().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "lisanaytto_hylkays_min",
+        valintaperusteet.getLisanayttoHylkaysMin().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "lisanaytto_hylkays_max",
+        valintaperusteet.getLisanayttoHylkaysMax().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "paasykoe_ja_lisanaytto_hylkays_min",
+        valintaperusteet.getHylkaysMin().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "paasykoe_ja_lisanaytto_hylkays_max",
+        valintaperusteet.getHylkaysMax().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "painotettu_keskiarvo_hylkays_min",
+        valintaperusteet.getPainotettuKeskiarvoHylkaysMin().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "painotettu_keskiarvo_hylkays_max",
+        valintaperusteet.getPainotettuKeskiarvoHylkaysMax().toString());
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "paasykoe_tunniste",
         valintaperusteet.getPaasykoeTunniste() != null
             ? valintaperusteet.getPaasykoeTunniste()
             : hakukohdeKoodiTunniste + "_paasykoe");
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("lisanaytto_tunniste");
-    avainArvo.setArvo(
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "lisanaytto_tunniste",
         valintaperusteet.getLisanayttoTunniste() != null
             ? valintaperusteet.getLisanayttoTunniste()
             : hakukohdeKoodiTunniste + "_lisanaytto");
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("lisapiste_tunniste");
-    avainArvo.setArvo(
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "lisapiste_tunniste",
         valintaperusteet.getLisapisteTunniste() != null
             ? valintaperusteet.getLisapisteTunniste()
             : hakukohdeKoodiTunniste + "_lisapiste");
-    importTyyppi.getValintaperuste().add(avainArvo);
-
-    avainArvo = new AvainArvoDTO();
-    avainArvo.setAvain("urheilija_lisapiste_tunniste");
-    avainArvo.setArvo(
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "urheilija_lisapiste_tunniste",
         valintaperusteet.getUrheilijaLisapisteTunniste() != null
             ? valintaperusteet.getUrheilijaLisapisteTunniste()
             : hakukohdeKoodiTunniste + "_urheilija_lisapiste");
-    importTyyppi.getValintaperuste().add(avainArvo);
 
     for (String avain : valintaperusteet.getPainokertoimet().keySet()) {
-      avainArvo = new AvainArvoDTO();
-      avainArvo.setAvain(avain);
-      avainArvo.setArvo(valintaperusteet.getPainokertoimet().get(avain));
-      importTyyppi.getValintaperuste().add(avainArvo);
+      addAvainArvoToValintaperuste(
+          importTyyppi, avain, valintaperusteet.getPainokertoimet().get(avain));
     }
 
     return importTyyppi;
   }
 
-  @NotNull
   private String getHakukohdeKoodiTunniste(AbstractHakukohde hakukohde) {
     return hakukohde.oid.replace(".", "_");
+  }
+
+  private void addAvainArvoToValintaperuste(
+      HakukohdeImportDTO importTyyppi, String avain, String arvo) {
+    AvainArvoDTO avainArvo = new AvainArvoDTO();
+    avainArvo.setAvain(avain);
+    avainArvo.setArvo(arvo);
+    importTyyppi.getValintaperuste().add(avainArvo);
   }
 }
