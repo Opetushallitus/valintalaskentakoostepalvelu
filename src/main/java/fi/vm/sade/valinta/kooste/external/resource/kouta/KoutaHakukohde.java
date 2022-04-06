@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.kouta;
 
 import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.KoutaHakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Valintakoe;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class KoutaHakukohde extends AbstractHakukohde {
+  public final Set<KoutaValintakoe> valintakokeet;
+
   protected KoutaHakukohde(
       String oid,
       Tila tila,
@@ -20,7 +21,7 @@ public class KoutaHakukohde extends AbstractHakukohde {
       String hakukohteetUri,
       Set<String> pohjakoulutusvaatimusUrit,
       Integer valintojenAloituspaikat,
-      Set<Valintakoe> valintakokeet,
+      Set<KoutaValintakoe> valintakokeet,
       Map<String, String> ohjeetUudelleOpiskelijalle) {
     super(
         oid,
@@ -32,8 +33,8 @@ public class KoutaHakukohde extends AbstractHakukohde {
         hakukohteetUri,
         pohjakoulutusvaatimusUrit,
         valintojenAloituspaikat,
-        valintakokeet,
         ohjeetUudelleOpiskelijalle);
+    this.valintakokeet = valintakokeet;
   }
 
   public KoutaHakukohde(KoutaHakukohdeDTO dto) {
@@ -47,9 +48,10 @@ public class KoutaHakukohde extends AbstractHakukohde {
         null,
         dto.pohjakoulutusvaatimusKoodiUrit,
         dto.aloituspaikat,
-        dto.valintakokeet.stream().map(Valintakoe::new).collect(Collectors.toSet()),
         new HashMap<>());
 
+    this.valintakokeet =
+        dto.valintakokeet.stream().map(KoutaValintakoe::new).collect(Collectors.toSet());
     dto.nimi.forEach((kieli, nimi) -> this.nimi.put("kieli_" + kieli, nimi));
     if (dto.uudenOpiskelijanUrl != null) {
       dto.uudenOpiskelijanUrl.forEach(

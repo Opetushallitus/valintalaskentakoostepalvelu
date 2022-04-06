@@ -13,7 +13,6 @@ public abstract class AbstractHakukohde {
   public final String hakukohteetUri;
   public final Set<String> pohjakoulutusvaatimusUrit;
   public final Integer valintojenAloituspaikat;
-  public final Set<Valintakoe> valintakokeet;
   public final Map<String, String> ohjeetUudelleOpiskelijalle;
 
   protected AbstractHakukohde(
@@ -26,7 +25,6 @@ public abstract class AbstractHakukohde {
       String hakukohteetUri,
       Set<String> pohjakoulutusvaatimusUrit,
       Integer valintojenAloituspaikat,
-      Set<Valintakoe> valintakokeet,
       Map<String, String> ohjeetUudelleOpiskelijalle) {
     this.oid = oid;
     this.tila = tila;
@@ -37,7 +35,6 @@ public abstract class AbstractHakukohde {
     this.hakukohteetUri = hakukohteetUri;
     this.pohjakoulutusvaatimusUrit = pohjakoulutusvaatimusUrit;
     this.valintojenAloituspaikat = valintojenAloituspaikat;
-    this.valintakokeet = valintakokeet;
     this.ohjeetUudelleOpiskelijalle = ohjeetUudelleOpiskelijalle;
   }
 

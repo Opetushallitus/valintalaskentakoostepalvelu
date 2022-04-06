@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaHakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaValintakoe;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValintaperusteetDTO;
@@ -300,7 +301,7 @@ public class SuoritaHakukohdeImportKomponentti {
     HakukohdeImportDTO importTyyppi = processCommonHakukohde(hakukohde);
 
     List<HakukohteenValintakoeDTO> valintakoeDTOs = new ArrayList<>();
-    for (Valintakoe valintakoe : hakukohde.valintakokeet) {
+    for (KoutaValintakoe valintakoe : hakukohde.valintakokeet) {
       HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
       v.setOid(valintakoe.id);
       v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
