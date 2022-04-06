@@ -10,13 +10,13 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaValintakoe;
+import fi.vm.sade.valinta.kooste.external.resource.kouta.PainotettuArvosana;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.IterableUtil;
-
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -40,6 +40,11 @@ public class SuoritaHakukohdeImportKomponentti {
   private static final String NOLLA = "0.0";
   private static final String PAASYKOE_TYYPPI_URI = "valintakokeentyyppi_1";
   private static final String LISANAYTTO_TYYPPI_URI = "valintakokeentyyppi_2";
+  private static final String PAINOKERROIN_POSTFIX = "_painokerroin";
+  private static final String A11KIELI = "A1";
+  private static final String A21KIELI = "A2";
+  private static final String B21KIELI = "B2";
+  private static final String B31KIELI = "B3";
 
   private TarjontaAsyncResource tarjontaAsyncResource;
   private KoutaAsyncResource koutaAsyncResource;
@@ -325,18 +330,44 @@ public class SuoritaHakukohdeImportKomponentti {
             : NOLLA);
 
     Optional<KoutaValintakoe> paasykoe = hakukohde.getValintakoeOfType(PAASYKOE_TYYPPI_URI);
-    paasykoe.ifPresent(pk ->
-        addAvainArvoToValintaperuste(
-            importTyyppi,
-            "paasykoe_hylkays_max",
-            pk.vahimmaispisteet.toString()));
+    paasykoe.ifPresent(
+        pk ->
+            addAvainArvoToValintaperuste(
+                importTyyppi, "paasykoe_hylkays_max", pk.vahimmaispisteet.toString()));
 
     Optional<KoutaValintakoe> lisanaytto = hakukohde.getValintakoeOfType(LISANAYTTO_TYYPPI_URI);
-    lisanaytto.ifPresent(pk ->
-        addAvainArvoToValintaperuste(
-            importTyyppi,
-            "lisanaytto_hylkays_max",
-            pk.vahimmaispisteet.toString()));
+    lisanaytto.ifPresent(
+        pk ->
+            addAvainArvoToValintaperuste(
+                importTyyppi, "lisanaytto_hylkays_max", pk.vahimmaispisteet.toString()));
+
+    Map<String, Koodi> koodiarvoKoodi =
+        koodistoAsyncResource.haeKoodisto(
+            KoodistoCachedAsyncResource.PAINOTETTAVAT_OPPIAINEET_LUKIOSSA);
+    Map<String, String> koodiUriKoodiArvo = new HashMap<>();
+    for (Koodi koodi : koodiarvoKoodi.values()) {
+      koodiUriKoodiArvo.put(koodi.getKoodiUri(), koodi.getKoodiArvo());
+    }
+
+    for (PainotettuArvosana arvosana : hakukohde.painotetutArvosanat) {
+      String koodiarvo = koodiUriKoodiArvo.get(arvosana.koodiUri);
+      addAvainArvoToValintaperuste(
+          importTyyppi, koodiarvo + PAINOKERROIN_POSTFIX, arvosana.painokerroin.toString());
+
+      String oppiaine = koodiarvo.split("_")[0];
+      if (oppiaine.equals(A11KIELI)
+          || oppiaine.equals(A21KIELI)
+          || oppiaine.equals(B21KIELI)
+          || oppiaine.equals(B31KIELI)) {
+        // koodiarvo is formatted A1_FI
+        String kieli = koodiarvo.split("_")[1];
+
+        String toinenKieli = oppiaine + "2" + kieli + PAINOKERROIN_POSTFIX;
+        addAvainArvoToValintaperuste(importTyyppi, toinenKieli, arvosana.painokerroin.toString());
+        String kolmasKieli = koodiarvo + "3" + kieli + PAINOKERROIN_POSTFIX;
+        addAvainArvoToValintaperuste(importTyyppi, kolmasKieli, arvosana.painokerroin.toString());
+      }
+    }
 
     return importTyyppi;
   }

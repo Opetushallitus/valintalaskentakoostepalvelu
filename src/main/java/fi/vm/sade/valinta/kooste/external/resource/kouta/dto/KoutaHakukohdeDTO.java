@@ -17,7 +17,7 @@ public class KoutaHakukohdeDTO {
   public final Set<String> pohjakoulutusvaatimusKoodiUrit;
   public final Map<String, String> uudenOpiskelijanUrl;
   public final BigDecimal alinHyvaksyttyKeskiarvo;
-  public final List<PainotettuArvosana> painotetutArvosanat;
+  public final List<PainotettuArvosanaDTO> painotetutArvosanat;
   public final Set<KoutaValintakoeDTO> valintaperusteValintakokeet;
 
   private KoutaHakukohdeDTO() {
@@ -49,57 +49,5 @@ public class KoutaHakukohdeDTO {
   @Override
   public int hashCode() {
     return oid.hashCode();
-  }
-
-  public static class KoutaValintakoe {
-    public final String id;
-    public final String tyyppi;
-    public final BigDecimal vahimmaispisteet;
-
-    private KoutaValintakoe() {
-      this.id = null;
-      this.tyyppi = null;
-      this.vahimmaispisteet = null;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-
-      KoutaValintakoe that = (KoutaValintakoe) o;
-
-      return id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-      return id.hashCode();
-    }
-  }
-
-  public static class PainotettuArvosana {
-    public final String koodiUri;
-    public final BigDecimal painokerroin;
-
-    private PainotettuArvosana() {
-      koodiUri = null;
-      painokerroin = null;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-
-      PainotettuArvosana that = (PainotettuArvosana) o;
-
-      return koodiUri.equals(that.koodiUri);
-    }
-
-    @Override
-    public int hashCode() {
-      return koodiUri.hashCode();
-    }
   }
 }

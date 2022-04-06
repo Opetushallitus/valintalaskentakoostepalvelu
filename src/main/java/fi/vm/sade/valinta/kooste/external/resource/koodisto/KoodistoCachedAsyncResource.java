@@ -26,6 +26,7 @@ public class KoodistoCachedAsyncResource {
   public static final String KIELI = "kieli";
   public static final String KUNTA = "kunta";
   public static final String HYVAKSYNNAN_EHDOT = "hyvaksynnanehdot";
+  public static final String PAINOTETTAVAT_OPPIAINEET_LUKIOSSA = "painotettavatoppiaineetlukiossa";
 
   private final KoodistoAsyncResource koodistoAsyncResource;
   private final Cache<String, CompletableFuture<Map<String, Koodi>>> koodistoCache =
