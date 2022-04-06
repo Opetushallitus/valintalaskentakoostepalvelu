@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TarjontaHakukohde extends AbstractHakukohde {
+  public final Set<TarjontaValintakoe> valintakokeet;
 
   public TarjontaHakukohde(
       String oid,
@@ -16,7 +17,7 @@ public class TarjontaHakukohde extends AbstractHakukohde {
       String hakukohteetUri,
       Set<String> pohjakoulutusvaatimusUrit,
       Integer valintojenAloituspaikat,
-      Set<Valintakoe> valintakokeet,
+      Set<TarjontaValintakoe> valintakokeet,
       Map<String, String> ohjeetUudelleOpiskelijalle) {
     super(
         oid,
@@ -28,8 +29,8 @@ public class TarjontaHakukohde extends AbstractHakukohde {
         hakukohteetUri,
         pohjakoulutusvaatimusUrit,
         valintojenAloituspaikat,
-        valintakokeet,
         ohjeetUudelleOpiskelijalle);
+    this.valintakokeet = valintakokeet;
   }
 
   public TarjontaHakukohde(HakukohdeV1RDTO dto) {
@@ -45,9 +46,10 @@ public class TarjontaHakukohde extends AbstractHakukohde {
             ? Collections.singleton(dto.getPohjakoulutusvaatimus())
             : new HashSet<>(),
         dto.getValintojenAloituspaikatLkm(),
-        dto.getValintakokeet().stream().map(Valintakoe::new).collect(Collectors.toSet()),
         new HashMap<>());
 
+    this.valintakokeet =
+        dto.getValintakokeet().stream().map(TarjontaValintakoe::new).collect(Collectors.toSet());
     if (dto.getOhjeetUudelleOpiskelijalle() != null) {
       this.ohjeetUudelleOpiskelijalle.put("kieli_fi", dto.getOhjeetUudelleOpiskelijalle());
       this.ohjeetUudelleOpiskelijalle.put("kieli_sv", dto.getOhjeetUudelleOpiskelijalle());

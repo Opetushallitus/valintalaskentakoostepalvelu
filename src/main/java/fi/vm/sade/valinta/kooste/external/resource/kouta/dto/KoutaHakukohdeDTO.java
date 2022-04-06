@@ -13,12 +13,12 @@ public class KoutaHakukohdeDTO {
   public final String tarjoaja;
   public final String toteutusOid;
   public final Integer aloituspaikat;
-  public final Set<KoutaValintakoe> valintakokeet;
+  public final Set<KoutaValintakoeDTO> valintakokeet;
   public final Set<String> pohjakoulutusvaatimusKoodiUrit;
   public final Map<String, String> uudenOpiskelijanUrl;
   public final BigDecimal alinHyvaksyttyKeskiarvo;
   public final List<PainotettuArvosana> painotetutArvosanat;
-  public final Set<KoutaValintakoe> valintaperusteValintakokeet;
+  public final Set<KoutaValintakoeDTO> valintaperusteValintakokeet;
 
   private KoutaHakukohdeDTO() {
     this.oid = null;
