@@ -3,14 +3,12 @@ package fi.vm.sade.valinta.kooste.external.resource.kouta;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.KoutaHakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class KoutaHakukohde extends AbstractHakukohde {
   public final Set<KoutaValintakoe> valintakokeet;
+  public final Set<KoutaValintakoe> valintaperusteValintakokeet;
   public final BigDecimal alinHyvaksyttyKeskiarvo;
 
   protected KoutaHakukohde(
@@ -25,6 +23,7 @@ public class KoutaHakukohde extends AbstractHakukohde {
       Integer valintojenAloituspaikat,
       Map<String, String> ohjeetUudelleOpiskelijalle,
       Set<KoutaValintakoe> valintakokeet,
+      Set<KoutaValintakoe> valintaperusteValintakokeet,
       BigDecimal alinHyvaksyttyKeskiarvo) {
     super(
         oid,
@@ -38,6 +37,7 @@ public class KoutaHakukohde extends AbstractHakukohde {
         valintojenAloituspaikat,
         ohjeetUudelleOpiskelijalle);
     this.valintakokeet = valintakokeet;
+    this.valintaperusteValintakokeet = valintaperusteValintakokeet;
     this.alinHyvaksyttyKeskiarvo = alinHyvaksyttyKeskiarvo;
   }
 
@@ -63,6 +63,20 @@ public class KoutaHakukohde extends AbstractHakukohde {
               this.ohjeetUudelleOpiskelijalle.put("kieli_" + kieli, uudenOpiskelijanUrl));
     }
     this.alinHyvaksyttyKeskiarvo = dto.alinHyvaksyttyKeskiarvo;
+    this.valintaperusteValintakokeet =
+        dto.valintaperusteValintakokeet.stream().map(KoutaValintakoe::new).collect(Collectors.toSet());
+  }
+
+  public Optional<KoutaValintakoe> getValintakoeOfType(String valintakoeTypeUri) {
+    return getValintakoeOfType(this.valintakokeet, valintakoeTypeUri)
+        .or(() -> getValintakoeOfType(this.valintaperusteValintakokeet, valintakoeTypeUri));
+  }
+
+  private static Optional<KoutaValintakoe> getValintakoeOfType(Collection<KoutaValintakoe> valintakokeet, String valintakoeTypeUri) {
+    return valintakokeet
+        .stream()
+        .filter(vk -> vk.valintakokeentyyppiUri.split("#")[0].equals(valintakoeTypeUri))
+        .findFirst();
   }
 
   private static Tila parseTila(String tila) {
