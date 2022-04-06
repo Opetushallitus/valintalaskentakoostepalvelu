@@ -7,6 +7,11 @@ import java.math.BigDecimal;
 public class KoutaValintakoe extends AbstractValintakoe {
   public final BigDecimal vahimmaispisteet;
 
+  public KoutaValintakoe(String oid, String tyyppiUri, BigDecimal vahimmaispisteet) {
+    super(oid, tyyppiUri);
+    this.vahimmaispisteet = vahimmaispisteet;
+  }
+
   public KoutaValintakoe(KoutaValintakoeDTO dto) {
     super(dto.getOid(), dto.getTyyppiUri());
     this.vahimmaispisteet = dto.getVahimmaispisteet();

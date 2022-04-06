@@ -305,20 +305,25 @@ public class SuoritaHakukohdeImportKomponentti {
         this.koutaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
     HakukohdeImportDTO importTyyppi = processCommonHakukohde(hakukohde);
 
-    List<HakukohteenValintakoeDTO> valintakoeDTOs = new ArrayList<>();
-    for (KoutaValintakoe valintakoe : hakukohde.valintakokeet) {
-      HakukohteenValintakoeDTO v = new HakukohteenValintakoeDTO();
-      v.setOid(valintakoe.id);
-      v.setTyyppiUri(valintakoe.valintakokeentyyppiUri);
-      valintakoeDTOs.add(v);
-    }
-
-    List<HakukohteenValintakoeDTO> uniqueValintakokeet =
-        valintakoeDTOs.stream()
-            .collect(Collectors.groupingBy(HakukohteenValintakoeDTO::getTyyppiUri))
+    List<String> valintakoetyypit =
+        koodistoAsyncResource
+            .haeKoodisto(KoodistoCachedAsyncResource.VALINTAKOKEEN_TYYPPI)
             .values()
             .stream()
-            .map(v -> v.get(0))
+            .map(Koodi::getKoodiUri)
+            .collect(Collectors.toList());
+    List<HakukohteenValintakoeDTO> uniqueValintakokeet =
+        valintakoetyypit
+            .stream()
+            .map(hakukohde::getValintakoeOfType)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(vk -> {
+              HakukohteenValintakoeDTO dto = new HakukohteenValintakoeDTO();
+              dto.setOid(vk.id);
+              dto.setTyyppiUri(vk.valintakokeentyyppiUri);
+              return dto;
+            })
             .collect(Collectors.toList());
     importTyyppi.setValintakoe(uniqueValintakokeet);
 

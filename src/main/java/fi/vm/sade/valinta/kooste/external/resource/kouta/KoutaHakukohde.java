@@ -12,14 +12,13 @@ public class KoutaHakukohde extends AbstractHakukohde {
   public final BigDecimal alinHyvaksyttyKeskiarvo;
   public final List<PainotettuArvosana> painotetutArvosanat;
 
-  protected KoutaHakukohde(
+  public KoutaHakukohde(
       String oid,
       Tila tila,
       Map<String, String> nimi,
       String hakuOid,
       Set<String> tarjoajaOids,
       Set<String> toteutusOids,
-      String hakukohteetUri,
       Set<String> pohjakoulutusvaatimusUrit,
       Integer valintojenAloituspaikat,
       Map<String, String> ohjeetUudelleOpiskelijalle,
@@ -34,7 +33,7 @@ public class KoutaHakukohde extends AbstractHakukohde {
         hakuOid,
         tarjoajaOids,
         toteutusOids,
-        hakukohteetUri,
+        null,
         pohjakoulutusvaatimusUrit,
         valintojenAloituspaikat,
         ohjeetUudelleOpiskelijalle);
