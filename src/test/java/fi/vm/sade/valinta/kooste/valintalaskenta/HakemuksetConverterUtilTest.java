@@ -588,6 +588,27 @@ public class HakemuksetConverterUtilTest {
 
   @Test
   public void
+      pohjakoulutusPeruskouluKeskeytynytJosVahvistettuPeruskoulunSuoritusKeskeytynytHakukaudellaAtaruhakemus() {
+    HakemusDTO h = new HakemusDTO();
+    h.setAvaimet(
+        new ArrayList<>() {
+          {
+            this.add(new AvainArvoDTO("base-education-2nd", PohjakoulutusToinenAste.PERUSKOULU));
+          }
+        });
+    List<SuoritusJaArvosanat> suoritukset =
+        new ArrayList<>() {
+          {
+            add(vahvistettuPerusopetusKeskeytynytHakukaudella);
+          }
+        };
+    Assert.assertEquals(
+        PohjakoulutusToinenAste.KESKEYTYNYT,
+        hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+  }
+
+  @Test
+  public void
       pohjakoulutusPeruskouluJosSekaVahvistettuPeruskoulunSuoritusKeskeytynytEttaKeskenHakukaudella() {
     HakemusDTO h = new HakemusDTO();
     h.setAvaimet(
@@ -2396,7 +2417,7 @@ public class HakemuksetConverterUtilTest {
         true);
     assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(hakemus, "POHJAKOULUTUS"));
     assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
-    assertEquals("not 15:" + hakemus.getAvaimet(), 15, hakemus.getAvaimet().size());
+    assertEquals("not 16:" + hakemus.getAvaimet(), 16, hakemus.getAvaimet().size());
   }
 
   @Test

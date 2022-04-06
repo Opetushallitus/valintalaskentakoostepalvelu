@@ -23,6 +23,7 @@ public class SuoritusJaArvosanatWrapper {
   public static final String POO_KOMO = "TODO perusopetuksenOppiaineenOppimäärä";
   public static final String VALMA_KOMO = "valma";
   public static final String TELMA_KOMO = "telma";
+  public static final String OPISTOVUOSI_KOMO = "vstoppivelvollisillesuunnattukoulutus";
   public static final String PK_LISAOPETUSTALOUS_KOMO = "1.2.246.562.5.2013061010184614853416";
   public static final String PK_AMMATTISTARTTI_KOMO = "1.2.246.562.5.2013112814572438136372";
   public static final String PK_VALMENTAVA = "1.2.246.562.5.2013112814572435755085";
@@ -135,6 +136,10 @@ public class SuoritusJaArvosanatWrapper {
     return POO_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
   }
 
+  public boolean isOpistovuosi() {
+    return OPISTOVUOSI_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+  }
+
   public boolean isLukio() {
     return LK_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
   }
@@ -196,6 +201,7 @@ public class SuoritusJaArvosanatWrapper {
         || isValmentava()
         || isAmmatilliseenValmistava()
         || isLukioonValmistava()
-        || isPerusopetuksenOppiaineenOppimaara();
+        || isPerusopetuksenOppiaineenOppimaara()
+        || isOpistovuosi();
   }
 }

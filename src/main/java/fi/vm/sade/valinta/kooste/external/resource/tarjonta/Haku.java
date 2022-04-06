@@ -2,11 +2,10 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHaku;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class Haku {
   public final String oid;
@@ -53,16 +52,37 @@ public class Haku {
   }
 
   public Haku(KoutaHaku dto) {
+
+    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
+
     this.oid = dto.oid;
     this.nimi = new HashMap<>();
     dto.nimi.forEach((kieli, nimi) -> this.nimi.put("kieli_" + kieli, nimi));
     this.tarjoajaOids = new HashSet<>();
     this.tarjoajaOids.add(dto.organisaatioOid);
     this.kohdejoukkoUri = dto.kohdejoukkoKoodiUri;
+
+    if (dto.hakuajat != null && !dto.hakuajat.isEmpty()) {
+      OptionalInt tuorein =
+          dto.hakuajat.stream()
+              .map(kh -> List.of(kh.alkaa, kh.paattyy))
+              .flatMap(Collection::stream)
+              .filter(Objects::nonNull)
+              .map(aikaleima -> DateTime.parse(aikaleima, fmt).getYear())
+              .mapToInt(v -> v)
+              .max();
+      if (tuorein.isPresent()) {
+        this.hakukausiVuosi = tuorein.getAsInt();
+      } else {
+        this.hakukausiVuosi = null;
+      }
+    } else {
+      this.hakukausiVuosi = null;
+    }
     this.hakukausiUri = null; // TODO
-    this.hakukausiVuosi = null;
-    this.koulutuksenAlkamiskausiUri = null; // TODO
-    this.koulutuksenAlkamisvuosi = null;
+
+    this.koulutuksenAlkamiskausiUri = dto.alkamiskausiKoodiUri;
+    this.koulutuksenAlkamisvuosi = Integer.parseInt(dto.alkamisvuosi);
     this.ataruLomakeAvain = dto.hakulomakeAtaruId;
   }
 

@@ -52,6 +52,7 @@ public class HakemuksetConverterUtil {
   public static final String PERUSOPETUS_KIELI = "perusopetuksen_kieli";
   public static final String LUKIO_KIELI = "lukion_kieli";
   public static final String POHJAKOULUTUS = "POHJAKOULUTUS";
+  public static final String POHJAKOULUTUS_ATARU = "base-education-2nd";
   public static final String ENSIKERTALAINEN = "ensikertalainen";
   public static final String PREFERENCE_PREFIX = "preference";
   public static final String DISCRETIONARY_POSTFIX = "discretionary";
@@ -396,12 +397,22 @@ public class HakemuksetConverterUtil {
 
   public Optional<String> pohjakoulutus(
       Haku haku, HakemusDTO hakemusDTO, List<SuoritusJaArvosanat> suoritukset) {
-    Optional<String> pk =
+    Optional<String> hakuAppPk =
         hakemusDTO.getAvaimet().stream()
             .filter(a -> POHJAKOULUTUS.equals(a.getAvain()))
             .map(AvainArvoDTO::getArvo)
             .findFirst();
-    if (!pk.isPresent()) {
+    Optional<String> ataruPk =
+        hakemusDTO.getAvaimet().stream()
+            .filter(a -> POHJAKOULUTUS_ATARU.equals(a.getAvain()))
+            .map(AvainArvoDTO::getArvo)
+            .findFirst();
+    Optional<String> pk = hakuAppPk;
+    if (pk.isEmpty() && ataruPk.isPresent()) {
+      LOG.info("Ataruhakemuksen pohjakoulutus: {}", ataruPk.get());
+      pk = ataruPk;
+    }
+    if (pk.isEmpty()) {
       return empty();
     }
     String pohjakoulutusHakemukselta = pk.get();
@@ -536,10 +547,14 @@ public class HakemuksetConverterUtil {
 
     Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemus, suoritukset);
     pohjakoulutus.ifPresent(pk -> tiedot.put(POHJAKOULUTUS, pk));
+
     pkPaattotodistusvuosi(hakemus, suoritukset)
         .ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
+
+    // fixme opetuskielet ataruhakemukselta
     pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
     lukioOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
+
     pohjakoulutus.ifPresent(pk -> tiedot.putAll(automaticDiscretionaryOptions(pk, haku, hakemus)));
     suoritustilat(predicates, suoritukset).entrySet().stream()
         .forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
@@ -633,7 +648,10 @@ public class HakemuksetConverterUtil {
                 lpk ->
                     suoritukset.stream()
                         .filter(s -> lpk.komoOid.equals(s.getSuoritus().getKomo()))
-                        .filter(s -> !(wrap(s).isKeskeytynyt() && !hakukaudella(haku, wrap(s))))
+                        .filter(
+                            s ->
+                                !(wrap(s).isKeskeytynyt()
+                                    && !lisapistekoulutusHuomioidaan(haku, wrap(s))))
                         .findFirst()
                         .map(s -> !wrap(s).isKeskeytynyt())
                         .orElse(
@@ -650,7 +668,10 @@ public class HakemuksetConverterUtil {
             suoritukset.stream()
                 .filter(s -> wrap(s).isPerusopetus() && (wrap(s).isValmis() || wrap(s).isKesken()))
                 .map(s -> wrap(s).getValmistuminenAsDateTime().getYear()),
-            hakemus.getAvaimet().stream()
+            hakemus
+                .getAvaimet()
+                .stream() // fixme, tämä tieto tarvitaan myös ataruhakemukselle, nykyisellä
+                // avaimella ei varmaan löydy
                 .filter(a -> PK_PAATTOTODISTUSVUOSI.equals(a.getAvain()))
                 .map(a -> Integer.valueOf(a.getArvo())))
         .findFirst();
@@ -682,10 +703,27 @@ public class HakemuksetConverterUtil {
         .findFirst();
   }
 
+  private boolean lisapistekoulutusHuomioidaan(Haku haku, SuoritusJaArvosanatWrapper s) {
+    if (haku.isKoutaHaku()) {
+      int edellinenVuosi;
+      if (haku.hakukausiVuosi != null) {
+        edellinenVuosi = haku.hakukausiVuosi - 1;
+      } else {
+        LOG.warn("Haulla {} ei ole hakukausiVuotta, käytetään nykyistä vuotta henkilöOidille {}", haku.oid, s.getSuoritusJaArvosanat().getSuoritus().getHenkiloOid());
+        edellinenVuosi = new DateTime().getYear() - 1;
+      }
+      DateTime relevantStart = new DateTime(edellinenVuosi, 1, 1, 0, 0);
+      return s.getValmistuminenAsDateTime().isAfter(relevantStart);
+    } else {
+      return hakukaudella(haku, s);
+    }
+  }
+
   private boolean hakukaudella(Haku haku, SuoritusJaArvosanatWrapper s) {
-    if (haku.isKoutaHaku())
+    if (haku.isKoutaHaku()) {
       return true; // TODO: Saako Koutan hakujen kanssa huomioida myös sellaiset suoritukset jotka
-    // eivät ole hakukaudella?
+      // eivät ole hakukaudella?
+    }
     DateTime valmistuminen = s.getValmistuminenAsDateTime();
     int hakuvuosi = haku.hakukausiVuosi;
     DateTime kStart = new DateTime(hakuvuosi, 1, 1, 0, 0).minus(1);
