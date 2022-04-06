@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.kouta;
 
 import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.KoutaHakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class KoutaHakukohde extends AbstractHakukohde {
   public final Set<KoutaValintakoe> valintakokeet;
+  public final BigDecimal alinHyvaksyttyKeskiarvo;
 
   protected KoutaHakukohde(
       String oid,
@@ -21,8 +23,9 @@ public class KoutaHakukohde extends AbstractHakukohde {
       String hakukohteetUri,
       Set<String> pohjakoulutusvaatimusUrit,
       Integer valintojenAloituspaikat,
+      Map<String, String> ohjeetUudelleOpiskelijalle,
       Set<KoutaValintakoe> valintakokeet,
-      Map<String, String> ohjeetUudelleOpiskelijalle) {
+      BigDecimal alinHyvaksyttyKeskiarvo) {
     super(
         oid,
         tila,
@@ -35,6 +38,7 @@ public class KoutaHakukohde extends AbstractHakukohde {
         valintojenAloituspaikat,
         ohjeetUudelleOpiskelijalle);
     this.valintakokeet = valintakokeet;
+    this.alinHyvaksyttyKeskiarvo = alinHyvaksyttyKeskiarvo;
   }
 
   public KoutaHakukohde(KoutaHakukohdeDTO dto) {
@@ -58,6 +62,7 @@ public class KoutaHakukohde extends AbstractHakukohde {
           (kieli, uudenOpiskelijanUrl) ->
               this.ohjeetUudelleOpiskelijalle.put("kieli_" + kieli, uudenOpiskelijanUrl));
     }
+    this.alinHyvaksyttyKeskiarvo = dto.alinHyvaksyttyKeskiarvo;
   }
 
   private static Tila parseTila(String tila) {
