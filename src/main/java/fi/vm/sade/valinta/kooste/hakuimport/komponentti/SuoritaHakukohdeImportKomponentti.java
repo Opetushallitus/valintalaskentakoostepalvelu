@@ -367,9 +367,9 @@ public class SuoritaHakukohdeImportKomponentti {
         // koodiarvo is formatted A1_FI
         String kieli = koodiarvo.split("_")[1];
 
-        String toinenKieli = oppiaine + "2" + kieli + PAINOKERROIN_POSTFIX;
+        String toinenKieli = oppiaine + "2_" + kieli + PAINOKERROIN_POSTFIX;
         addAvainArvoToValintaperuste(importTyyppi, toinenKieli, arvosana.painokerroin.toString());
-        String kolmasKieli = koodiarvo + "3" + kieli + PAINOKERROIN_POSTFIX;
+        String kolmasKieli = oppiaine + "3_" + kieli + PAINOKERROIN_POSTFIX;
         addAvainArvoToValintaperuste(importTyyppi, kolmasKieli, arvosana.painokerroin.toString());
       }
     }

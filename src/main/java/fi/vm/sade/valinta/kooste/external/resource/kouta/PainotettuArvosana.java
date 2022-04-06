@@ -7,6 +7,11 @@ public class PainotettuArvosana {
   public final String koodiUri;
   public final BigDecimal painokerroin;
 
+  public PainotettuArvosana(String koodiUri, BigDecimal painokerroin) {
+    this.koodiUri = koodiUri;
+    this.painokerroin = painokerroin;
+  }
+
   public PainotettuArvosana(PainotettuArvosanaDTO dto) {
     this.koodiUri = dto.getKoodiUri();
     this.painokerroin = dto.getPainokerroin();

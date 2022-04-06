@@ -32,6 +32,13 @@ public class SuoritaHakukohdeImportKomponenttiTest {
   private static final String KOUTA_HAKUKOHDE_OID = "1.2.246.562.20.00000000000000012725";
   private static final String HAKU_OID = "1.2.246.562.29.00000000000000005368";
 
+  private static Koodi fakeKoodi(String koodiArvo, String koodiUri) {
+    Koodi koodi = Mockito.mock(Koodi.class);
+    when(koodi.getKoodiArvo()).thenReturn(koodiArvo);
+    when(koodi.getKoodiUri()).thenReturn(koodiUri);
+    return koodi;
+  }
+
   @Before
   public void before() {
     koutaAsyncResource = Mockito.mock(KoutaAsyncResource.class);
@@ -40,15 +47,27 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     OrganisaatioAsyncResource organisaatioAsyncResource = Mockito.mock(OrganisaatioAsyncResource.class);
     TarjontaAsyncResource tarjontaAsyncResource = Mockito.mock(TarjontaAsyncResource.class);
 
-    Koodi paasykoeKoodi = Mockito.mock(Koodi.class);
-    when(paasykoeKoodi.getKoodiUri()).thenReturn("valintakokeentyyppi_1");
-    Koodi lisanayttoKoodi = Mockito.mock(Koodi.class);
-    when(lisanayttoKoodi.getKoodiUri()).thenReturn("valintakokeentyyppi_2");
-    Koodi haastatteluKoodi = Mockito.mock(Koodi.class);
-    when(haastatteluKoodi.getKoodiUri()).thenReturn("valintakokeentyyppi_6");
-
+    Map<String, Koodi> valintakokeenTyyppiKoodisto =
+        Map.of(
+            "1", fakeKoodi("1", "valintakokeentyyppi_1"),
+            "2", fakeKoodi("2", "valintakokeentyyppi_2"),
+            "6", fakeKoodi("6", "valintakokeentyyppi_6")
+        );
     when(koodistoAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.VALINTAKOKEEN_TYYPPI))
-        .thenReturn(Map.of("1", paasykoeKoodi, "2", lisanayttoKoodi, "6", haastatteluKoodi));
+        .thenReturn(valintakokeenTyyppiKoodisto);
+
+    Map<String, Koodi> painotettavatOppiaineetLukiossaKoodisto =
+        Map.of(
+            "MA", fakeKoodi("MA", "painotettavatoppiaineetlukiossa_ma"),
+            "BI", fakeKoodi("BI", "painotettavatoppiaineetlukiossa_bi"),
+            "A1_FI", fakeKoodi("A1_FI", "painotettavatoppiaineetlukiossa_a1fi"),
+            "A2_SV", fakeKoodi("A2_SV", "painotettavatoppiaineetlukiossa_a2sv"),
+            "B1_DE", fakeKoodi("B1_DE", "painotettavatoppiaineetlukiossa_b1de"),
+            "B2_FR", fakeKoodi("B2_FR", "painotettavatoppiaineetlukiossa_b2fr"),
+            "B3_EN", fakeKoodi("B3_EN", "painotettavatoppiaineetlukiossa_b3en")
+        );
+    when(koodistoAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.PAINOTETTAVAT_OPPIAINEET_LUKIOSSA))
+        .thenReturn(painotettavatOppiaineetLukiossaKoodisto);
 
     Organisaatio fakeOrganisaatio = new Organisaatio();
     fakeOrganisaatio.setNimi(Map.of("fi", "testikoulu"));
@@ -165,7 +184,55 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     assertEquals("valintakokeentyyppi_2#1", lisanaytto.getTyyppiUri());
     assertEquals("15", getValintaperusteArvo(result, "paasykoe_hylkays_max"));
     assertEquals("42", getValintaperusteArvo(result, "lisanaytto_hylkays_max"));
+  }
 
+  @Test
+  public void painotetutArvosanat() {
+    List<PainotettuArvosana> painotetutArvosanat =
+        List.of(
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_ma", BigDecimal.valueOf(2)),
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_bi", BigDecimal.valueOf(3))
+        );
+    KoutaHakukohde hakukohde = fakeHakukohde(new HashSet<>(), new HashSet<>(), painotetutArvosanat);
+    when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
+        .thenReturn(CompletableFuture.completedFuture(hakukohde));
+
+    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    assertEquals("2", getValintaperusteArvo(result, "MA_painokerroin"));
+    assertEquals("3", getValintaperusteArvo(result, "BI_painokerroin"));
+  }
+
+  @Test
+  public void painotetutKieltenArvosanat() {
+    List<PainotettuArvosana> painotetutArvosanat =
+        List.of(
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_a1fi", BigDecimal.valueOf(1)),
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_a2sv", BigDecimal.valueOf(2)),
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_b1de", BigDecimal.valueOf(3)),
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_b2fr", BigDecimal.valueOf(4)),
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_b3en", BigDecimal.valueOf(5))
+        );
+    KoutaHakukohde hakukohde = fakeHakukohde(new HashSet<>(), new HashSet<>(), painotetutArvosanat);
+    when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
+        .thenReturn(CompletableFuture.completedFuture(hakukohde));
+
+    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    assertEquals("1", getValintaperusteArvo(result, "A1_FI_painokerroin"));
+    assertEquals("1", getValintaperusteArvo(result, "A12_FI_painokerroin"));
+    assertEquals("1", getValintaperusteArvo(result, "A13_FI_painokerroin"));
+    assertEquals("2", getValintaperusteArvo(result, "A2_SV_painokerroin"));
+    assertEquals("2", getValintaperusteArvo(result, "A22_SV_painokerroin"));
+    assertEquals("2", getValintaperusteArvo(result, "A23_SV_painokerroin"));
+    assertEquals("3", getValintaperusteArvo(result, "B1_DE_painokerroin"));
+    assertEquals("4", getValintaperusteArvo(result, "B2_FR_painokerroin"));
+    assertEquals("4", getValintaperusteArvo(result, "B22_FR_painokerroin"));
+    assertEquals("4", getValintaperusteArvo(result, "B23_FR_painokerroin"));
+    assertEquals("5", getValintaperusteArvo(result, "B3_EN_painokerroin"));
+    assertEquals("5", getValintaperusteArvo(result, "B32_EN_painokerroin"));
+    assertEquals("5", getValintaperusteArvo(result, "B33_EN_painokerroin"));
+
+    assertThrows(NoSuchElementException.class, () -> getValintaperusteArvo(result, "B12_DE_painokerroin"));
+    assertThrows(NoSuchElementException.class, () -> getValintaperusteArvo(result, "B13_DE_painokerroin"));
   }
 
   private static KoutaHakukohde fakeHakukohde(Set<KoutaValintakoe> valintakokeet,
