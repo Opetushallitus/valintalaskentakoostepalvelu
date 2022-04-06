@@ -16,10 +16,8 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValinta
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.IterableUtil;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +38,8 @@ public class SuoritaHakukohdeImportKomponentti {
       LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
   private static final int KOUTA_HAKUKOHDE_OID_LENGTH = 35;
   private static final String NOLLA = "0.0";
+  private static final String PAASYKOE_TYYPPI_URI = "valintakokeentyyppi_1";
+  private static final String LISANAYTTO_TYYPPI_URI = "valintakokeentyyppi_2";
 
   private TarjontaAsyncResource tarjontaAsyncResource;
   private KoutaAsyncResource koutaAsyncResource;
@@ -323,6 +323,20 @@ public class SuoritaHakukohdeImportKomponentti {
         hakukohde.alinHyvaksyttyKeskiarvo != null
             ? hakukohde.alinHyvaksyttyKeskiarvo.toString()
             : NOLLA);
+
+    Optional<KoutaValintakoe> paasykoe = hakukohde.getValintakoeOfType(PAASYKOE_TYYPPI_URI);
+    paasykoe.ifPresent(pk ->
+        addAvainArvoToValintaperuste(
+            importTyyppi,
+            "paasykoe_hylkays_max",
+            pk.vahimmaispisteet.toString()));
+
+    Optional<KoutaValintakoe> lisanaytto = hakukohde.getValintakoeOfType(LISANAYTTO_TYYPPI_URI);
+    lisanaytto.ifPresent(pk ->
+        addAvainArvoToValintaperuste(
+            importTyyppi,
+            "lisanaytto_hylkays_max",
+            pk.vahimmaispisteet.toString()));
 
     return importTyyppi;
   }
