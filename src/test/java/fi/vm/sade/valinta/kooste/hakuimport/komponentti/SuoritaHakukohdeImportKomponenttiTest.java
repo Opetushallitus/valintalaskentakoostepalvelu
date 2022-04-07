@@ -1,8 +1,11 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohteenValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaAsyncResource;
@@ -14,17 +17,12 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 public class SuoritaHakukohdeImportKomponenttiTest {
   private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
@@ -43,16 +41,17 @@ public class SuoritaHakukohdeImportKomponenttiTest {
   public void before() {
     koutaAsyncResource = Mockito.mock(KoutaAsyncResource.class);
 
-    KoodistoCachedAsyncResource koodistoAsyncResource = Mockito.mock(KoodistoCachedAsyncResource.class);
-    OrganisaatioAsyncResource organisaatioAsyncResource = Mockito.mock(OrganisaatioAsyncResource.class);
+    KoodistoCachedAsyncResource koodistoAsyncResource =
+        Mockito.mock(KoodistoCachedAsyncResource.class);
+    OrganisaatioAsyncResource organisaatioAsyncResource =
+        Mockito.mock(OrganisaatioAsyncResource.class);
     TarjontaAsyncResource tarjontaAsyncResource = Mockito.mock(TarjontaAsyncResource.class);
 
     Map<String, Koodi> valintakokeenTyyppiKoodisto =
         Map.of(
             "1", fakeKoodi("1", "valintakokeentyyppi_1"),
             "2", fakeKoodi("2", "valintakokeentyyppi_2"),
-            "6", fakeKoodi("6", "valintakokeentyyppi_6")
-        );
+            "6", fakeKoodi("6", "valintakokeentyyppi_6"));
     when(koodistoAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.VALINTAKOKEEN_TYYPPI))
         .thenReturn(valintakokeenTyyppiKoodisto);
 
@@ -64,9 +63,9 @@ public class SuoritaHakukohdeImportKomponenttiTest {
             "A2_SV", fakeKoodi("A2_SV", "painotettavatoppiaineetlukiossa_a2sv"),
             "B1_DE", fakeKoodi("B1_DE", "painotettavatoppiaineetlukiossa_b1de"),
             "B2_FR", fakeKoodi("B2_FR", "painotettavatoppiaineetlukiossa_b2fr"),
-            "B3_EN", fakeKoodi("B3_EN", "painotettavatoppiaineetlukiossa_b3en")
-        );
-    when(koodistoAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.PAINOTETTAVAT_OPPIAINEET_LUKIOSSA))
+            "B3_EN", fakeKoodi("B3_EN", "painotettavatoppiaineetlukiossa_b3en"));
+    when(koodistoAsyncResource.haeKoodisto(
+            KoodistoCachedAsyncResource.PAINOTETTAVAT_OPPIAINEET_LUKIOSSA))
         .thenReturn(painotettavatOppiaineetLukiossaKoodisto);
 
     Organisaatio fakeOrganisaatio = new Organisaatio();
@@ -75,26 +74,26 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     when(organisaatioAsyncResource.haeOrganisaatio(any()))
         .thenReturn(CompletableFuture.completedFuture(fakeOrganisaatio));
 
-    Haku haku = new Haku(
-        "H0",
-        new HashMap<>(),
-        new HashSet<>(),
-        "AtaruLomakeAvain",
-        null,
-        null,
-        null,
-        null,
-        null
-    );
+    Haku haku =
+        new Haku(
+            "H0",
+            new HashMap<>(),
+            new HashSet<>(),
+            "AtaruLomakeAvain",
+            null,
+            null,
+            null,
+            null,
+            null);
     when(tarjontaAsyncResource.haeHaku(HAKU_OID))
         .thenReturn(CompletableFuture.completedFuture(haku));
 
-    suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti(
-        tarjontaAsyncResource,
-        koutaAsyncResource,
-        organisaatioAsyncResource,
-        koodistoAsyncResource
-    );
+    suoritaHakukohdeImportKomponentti =
+        new SuoritaHakukohdeImportKomponentti(
+            tarjontaAsyncResource,
+            koutaAsyncResource,
+            organisaatioAsyncResource,
+            koodistoAsyncResource);
   }
 
   @Test
@@ -103,7 +102,8 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
         .thenReturn(CompletableFuture.completedFuture(hakukohde));
 
-    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    HakukohdeImportDTO result =
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
 
     assertNotNull(result);
     assertEquals("tarjoaja-1-oid", result.getTarjoajaOid());
@@ -118,20 +118,25 @@ public class SuoritaHakukohdeImportKomponenttiTest {
   @Test
   public void importoiKoutaHakukohteenValintakokeet() {
     Set<KoutaValintakoe> valintakokeet = new HashSet<>();
-    valintakokeet.add(new KoutaValintakoe("paasykoe-1-oid", "valintakokeentyyppi_1#1", BigDecimal.valueOf(15)));
-    valintakokeet.add(new KoutaValintakoe("lisanaytto-1-oid", "valintakokeentyyppi_2#1", BigDecimal.valueOf(42)));
+    valintakokeet.add(
+        new KoutaValintakoe("paasykoe-1-oid", "valintakokeentyyppi_1#1", BigDecimal.valueOf(15)));
+    valintakokeet.add(
+        new KoutaValintakoe("lisanaytto-1-oid", "valintakokeentyyppi_2#1", BigDecimal.valueOf(42)));
     KoutaHakukohde hakukohde = fakeHakukohde(valintakokeet, new HashSet<>(), new ArrayList<>());
     when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
         .thenReturn(CompletableFuture.completedFuture(hakukohde));
 
-    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    HakukohdeImportDTO result =
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
 
     List<HakukohteenValintakoeDTO> valintakokeetResult = result.getValintakoe();
     assertEquals(2, valintakokeetResult.size());
-    HakukohteenValintakoeDTO paasykoe = findValintakoe(valintakokeetResult, "valintakokeentyyppi_1#1");
+    HakukohteenValintakoeDTO paasykoe =
+        findValintakoe(valintakokeetResult, "valintakokeentyyppi_1#1");
     assertEquals("paasykoe-1-oid", paasykoe.getOid());
     assertEquals("valintakokeentyyppi_1#1", paasykoe.getTyyppiUri());
-    HakukohteenValintakoeDTO lisanaytto = findValintakoe(valintakokeetResult, "valintakokeentyyppi_2#1");
+    HakukohteenValintakoeDTO lisanaytto =
+        findValintakoe(valintakokeetResult, "valintakokeentyyppi_2#1");
     assertEquals("lisanaytto-1-oid", lisanaytto.getOid());
     assertEquals("valintakokeentyyppi_2#1", lisanaytto.getTyyppiUri());
     assertEquals("15", getValintaperusteArvo(result, "paasykoe_hylkays_max"));
@@ -141,20 +146,28 @@ public class SuoritaHakukohdeImportKomponenttiTest {
   @Test
   public void kayttaaValintaperusteenHakukoetta() {
     Set<KoutaValintakoe> valintaperusteenValintakokeet = new HashSet<>();
-    valintaperusteenValintakokeet.add(new KoutaValintakoe("valintaperuste-paasykoe-1-oid", "valintakokeentyyppi_1#1", BigDecimal.valueOf(16)));
-    valintaperusteenValintakokeet.add(new KoutaValintakoe("valintaperuste-lisanaytto-1-oid", "valintakokeentyyppi_2#1", BigDecimal.valueOf(43)));
-    KoutaHakukohde hakukohde = fakeHakukohde(new HashSet<>(), valintaperusteenValintakokeet, new ArrayList<>());
+    valintaperusteenValintakokeet.add(
+        new KoutaValintakoe(
+            "valintaperuste-paasykoe-1-oid", "valintakokeentyyppi_1#1", BigDecimal.valueOf(16)));
+    valintaperusteenValintakokeet.add(
+        new KoutaValintakoe(
+            "valintaperuste-lisanaytto-1-oid", "valintakokeentyyppi_2#1", BigDecimal.valueOf(43)));
+    KoutaHakukohde hakukohde =
+        fakeHakukohde(new HashSet<>(), valintaperusteenValintakokeet, new ArrayList<>());
     when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
         .thenReturn(CompletableFuture.completedFuture(hakukohde));
 
-    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    HakukohdeImportDTO result =
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
 
     List<HakukohteenValintakoeDTO> valintakokeetResult = result.getValintakoe();
     assertEquals(2, valintakokeetResult.size());
-    HakukohteenValintakoeDTO paasykoe = findValintakoe(valintakokeetResult, "valintakokeentyyppi_1#1");
+    HakukohteenValintakoeDTO paasykoe =
+        findValintakoe(valintakokeetResult, "valintakokeentyyppi_1#1");
     assertEquals("valintaperuste-paasykoe-1-oid", paasykoe.getOid());
     assertEquals("valintakokeentyyppi_1#1", paasykoe.getTyyppiUri());
-    HakukohteenValintakoeDTO lisanaytto = findValintakoe(valintakokeetResult, "valintakokeentyyppi_2#1");
+    HakukohteenValintakoeDTO lisanaytto =
+        findValintakoe(valintakokeetResult, "valintakokeentyyppi_2#1");
     assertEquals("valintaperuste-lisanaytto-1-oid", lisanaytto.getOid());
     assertEquals("valintakokeentyyppi_2#1", lisanaytto.getTyyppiUri());
     assertEquals("16", getValintaperusteArvo(result, "paasykoe_hylkays_max"));
@@ -164,23 +177,33 @@ public class SuoritaHakukohdeImportKomponenttiTest {
   @Test
   public void kayttaaEnsisijaisestiHakukohteenKoetta() {
     Set<KoutaValintakoe> valintakokeet = new HashSet<>();
-    valintakokeet.add(new KoutaValintakoe("paasykoe-1-oid", "valintakokeentyyppi_1#1", BigDecimal.valueOf(15)));
-    valintakokeet.add(new KoutaValintakoe("lisanaytto-1-oid", "valintakokeentyyppi_2#1", BigDecimal.valueOf(42)));
+    valintakokeet.add(
+        new KoutaValintakoe("paasykoe-1-oid", "valintakokeentyyppi_1#1", BigDecimal.valueOf(15)));
+    valintakokeet.add(
+        new KoutaValintakoe("lisanaytto-1-oid", "valintakokeentyyppi_2#1", BigDecimal.valueOf(42)));
     Set<KoutaValintakoe> valintaperusteenValintakokeet = new HashSet<>();
-    valintaperusteenValintakokeet.add(new KoutaValintakoe("valintaperuste-paasykoe-1-oid", "valintakokeentyyppi_1#1", BigDecimal.valueOf(16)));
-    valintaperusteenValintakokeet.add(new KoutaValintakoe("valintaperuste-lisanaytto-1-oid", "valintakokeentyyppi_2#1", BigDecimal.valueOf(43)));
-    KoutaHakukohde hakukohde = fakeHakukohde(valintakokeet, valintaperusteenValintakokeet, new ArrayList<>());
+    valintaperusteenValintakokeet.add(
+        new KoutaValintakoe(
+            "valintaperuste-paasykoe-1-oid", "valintakokeentyyppi_1#1", BigDecimal.valueOf(16)));
+    valintaperusteenValintakokeet.add(
+        new KoutaValintakoe(
+            "valintaperuste-lisanaytto-1-oid", "valintakokeentyyppi_2#1", BigDecimal.valueOf(43)));
+    KoutaHakukohde hakukohde =
+        fakeHakukohde(valintakokeet, valintaperusteenValintakokeet, new ArrayList<>());
     when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
         .thenReturn(CompletableFuture.completedFuture(hakukohde));
 
-    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    HakukohdeImportDTO result =
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
 
     List<HakukohteenValintakoeDTO> valintakokeetResult = result.getValintakoe();
     assertEquals(2, valintakokeetResult.size());
-    HakukohteenValintakoeDTO paasykoe = findValintakoe(valintakokeetResult, "valintakokeentyyppi_1#1");
+    HakukohteenValintakoeDTO paasykoe =
+        findValintakoe(valintakokeetResult, "valintakokeentyyppi_1#1");
     assertEquals("paasykoe-1-oid", paasykoe.getOid());
     assertEquals("valintakokeentyyppi_1#1", paasykoe.getTyyppiUri());
-    HakukohteenValintakoeDTO lisanaytto = findValintakoe(valintakokeetResult, "valintakokeentyyppi_2#1");
+    HakukohteenValintakoeDTO lisanaytto =
+        findValintakoe(valintakokeetResult, "valintakokeentyyppi_2#1");
     assertEquals("lisanaytto-1-oid", lisanaytto.getOid());
     assertEquals("valintakokeentyyppi_2#1", lisanaytto.getTyyppiUri());
     assertEquals("15", getValintaperusteArvo(result, "paasykoe_hylkays_max"));
@@ -192,13 +215,13 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     List<PainotettuArvosana> painotetutArvosanat =
         List.of(
             new PainotettuArvosana("painotettavatoppiaineetlukiossa_ma", BigDecimal.valueOf(2)),
-            new PainotettuArvosana("painotettavatoppiaineetlukiossa_bi", BigDecimal.valueOf(3))
-        );
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_bi", BigDecimal.valueOf(3)));
     KoutaHakukohde hakukohde = fakeHakukohde(new HashSet<>(), new HashSet<>(), painotetutArvosanat);
     when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
         .thenReturn(CompletableFuture.completedFuture(hakukohde));
 
-    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    HakukohdeImportDTO result =
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
     assertEquals("2", getValintaperusteArvo(result, "MA_painokerroin"));
     assertEquals("3", getValintaperusteArvo(result, "BI_painokerroin"));
   }
@@ -211,13 +234,13 @@ public class SuoritaHakukohdeImportKomponenttiTest {
             new PainotettuArvosana("painotettavatoppiaineetlukiossa_a2sv", BigDecimal.valueOf(2)),
             new PainotettuArvosana("painotettavatoppiaineetlukiossa_b1de", BigDecimal.valueOf(3)),
             new PainotettuArvosana("painotettavatoppiaineetlukiossa_b2fr", BigDecimal.valueOf(4)),
-            new PainotettuArvosana("painotettavatoppiaineetlukiossa_b3en", BigDecimal.valueOf(5))
-        );
+            new PainotettuArvosana("painotettavatoppiaineetlukiossa_b3en", BigDecimal.valueOf(5)));
     KoutaHakukohde hakukohde = fakeHakukohde(new HashSet<>(), new HashSet<>(), painotetutArvosanat);
     when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
         .thenReturn(CompletableFuture.completedFuture(hakukohde));
 
-    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    HakukohdeImportDTO result =
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
     assertEquals("1", getValintaperusteArvo(result, "A1_FI_painokerroin"));
     assertEquals("1", getValintaperusteArvo(result, "A12_FI_painokerroin"));
     assertEquals("1", getValintaperusteArvo(result, "A13_FI_painokerroin"));
@@ -232,31 +255,37 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     assertEquals("5", getValintaperusteArvo(result, "B32_EN_painokerroin"));
     assertEquals("5", getValintaperusteArvo(result, "B33_EN_painokerroin"));
 
-    assertThrows(NoSuchElementException.class, () -> getValintaperusteArvo(result, "B12_DE_painokerroin"));
-    assertThrows(NoSuchElementException.class, () -> getValintaperusteArvo(result, "B13_DE_painokerroin"));
+    assertThrows(
+        NoSuchElementException.class, () -> getValintaperusteArvo(result, "B12_DE_painokerroin"));
+    assertThrows(
+        NoSuchElementException.class, () -> getValintaperusteArvo(result, "B13_DE_painokerroin"));
   }
 
   @Test
   public void lukioKoulutustyyppi() {
-    KoutaHakukohde hakukohde = fakeHakukohde(new HashSet<>(), new HashSet<>(), new ArrayList<>(), "koulutustyyppi_2");
+    KoutaHakukohde hakukohde =
+        fakeHakukohde(new HashSet<>(), new HashSet<>(), new ArrayList<>(), "koulutustyyppi_2");
     when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
         .thenReturn(CompletableFuture.completedFuture(hakukohde));
 
-    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+    HakukohdeImportDTO result =
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
 
     assertEquals("hakukohteet_000", result.getHakukohdekoodi().getKoodiUri());
   }
 
-  private static KoutaHakukohde fakeHakukohde(Set<KoutaValintakoe> valintakokeet,
-                                              Set<KoutaValintakoe> valintaperusteValintakokeet,
-                                              List<PainotettuArvosana> painotetutArvosanat) {
+  private static KoutaHakukohde fakeHakukohde(
+      Set<KoutaValintakoe> valintakokeet,
+      Set<KoutaValintakoe> valintaperusteValintakokeet,
+      List<PainotettuArvosana> painotetutArvosanat) {
     return fakeHakukohde(valintakokeet, valintaperusteValintakokeet, painotetutArvosanat, null);
   }
 
-  private static KoutaHakukohde fakeHakukohde(Set<KoutaValintakoe> valintakokeet,
-                                              Set<KoutaValintakoe> valintaperusteValintakokeet,
-                                              List<PainotettuArvosana> painotetutArvosanat,
-                                              String koulutustyyppikoodi) {
+  private static KoutaHakukohde fakeHakukohde(
+      Set<KoutaValintakoe> valintakokeet,
+      Set<KoutaValintakoe> valintaperusteValintakokeet,
+      List<PainotettuArvosana> painotetutArvosanat,
+      String koulutustyyppikoodi) {
     return new KoutaHakukohde(
         KOUTA_HAKUKOHDE_OID,
         AbstractHakukohde.Tila.JULKAISTU,
@@ -272,23 +301,20 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         BigDecimal.valueOf(8.5),
         painotetutArvosanat,
         "hakukohdekoodiuri",
-        koulutustyyppikoodi
-    );
+        koulutustyyppikoodi);
   }
 
   private static String getValintaperusteArvo(HakukohdeImportDTO importDTO, String avain) {
-    return importDTO
-        .getValintaperuste()
-        .stream()
+    return importDTO.getValintaperuste().stream()
         .filter(avainArvo -> avainArvo.getAvain().equals(avain))
         .findFirst()
         .get()
         .getArvo();
   }
 
-  private static HakukohteenValintakoeDTO findValintakoe(List<HakukohteenValintakoeDTO> valintakokeet, String tyyppiUri) {
-    return valintakokeet
-        .stream()
+  private static HakukohteenValintakoeDTO findValintakoe(
+      List<HakukohteenValintakoeDTO> valintakokeet, String tyyppiUri) {
+    return valintakokeet.stream()
         .filter(vk -> vk.getTyyppiUri().equals(tyyppiUri))
         .findFirst()
         .get();

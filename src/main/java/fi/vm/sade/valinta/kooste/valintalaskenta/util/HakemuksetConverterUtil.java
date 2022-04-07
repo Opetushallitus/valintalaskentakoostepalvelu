@@ -709,7 +709,10 @@ public class HakemuksetConverterUtil {
       if (haku.hakukausiVuosi != null) {
         edellinenVuosi = haku.hakukausiVuosi - 1;
       } else {
-        LOG.warn("Haulla {} ei ole hakukausiVuotta, käytetään nykyistä vuotta henkilöOidille {}", haku.oid, s.getSuoritusJaArvosanat().getSuoritus().getHenkiloOid());
+        LOG.warn(
+            "Haulla {} ei ole hakukausiVuotta, käytetään nykyistä vuotta henkilöOidille {}",
+            haku.oid,
+            s.getSuoritusJaArvosanat().getSuoritus().getHenkiloOid());
         edellinenVuosi = new DateTime().getYear() - 1;
       }
       DateTime relevantStart = new DateTime(edellinenVuosi, 1, 1, 0, 0);

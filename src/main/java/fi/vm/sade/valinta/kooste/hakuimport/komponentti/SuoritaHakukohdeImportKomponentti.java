@@ -308,7 +308,8 @@ public class SuoritaHakukohdeImportKomponentti {
     HakukohdeImportDTO importTyyppi = processCommonHakukohde(hakukohde);
 
     HakukohdekoodiDTO hakukohdekoodi = new HakukohdekoodiDTO();
-    if (hakukohde.koulutustyyppikoodi != null && hakukohde.koulutustyyppikoodi.equals(KOULUTUSTYYPPIKOODI_LUKIO)) {
+    if (hakukohde.koulutustyyppikoodi != null
+        && hakukohde.koulutustyyppikoodi.equals(KOULUTUSTYYPPIKOODI_LUKIO)) {
       hakukohdekoodi.setKoodiUri(HAKUKOHDEKOODI_LUKIO);
       importTyyppi.setHakukohdekoodi(hakukohdekoodi);
     } else if (hakukohde.hakukohdeKoodiUri != null) {
@@ -324,17 +325,17 @@ public class SuoritaHakukohdeImportKomponentti {
             .map(Koodi::getKoodiUri)
             .collect(Collectors.toList());
     List<HakukohteenValintakoeDTO> uniqueValintakokeet =
-        valintakoetyypit
-            .stream()
+        valintakoetyypit.stream()
             .map(hakukohde::getValintakoeOfType)
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .map(vk -> {
-              HakukohteenValintakoeDTO dto = new HakukohteenValintakoeDTO();
-              dto.setOid(vk.id);
-              dto.setTyyppiUri(vk.valintakokeentyyppiUri);
-              return dto;
-            })
+            .map(
+                vk -> {
+                  HakukohteenValintakoeDTO dto = new HakukohteenValintakoeDTO();
+                  dto.setOid(vk.id);
+                  dto.setTyyppiUri(vk.valintakokeentyyppiUri);
+                  return dto;
+                })
             .collect(Collectors.toList());
     importTyyppi.setValintakoe(uniqueValintakokeet);
 
