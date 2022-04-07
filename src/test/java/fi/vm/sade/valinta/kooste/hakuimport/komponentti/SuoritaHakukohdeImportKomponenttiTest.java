@@ -112,6 +112,7 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     assertEquals("JULKAISTU", result.getTila());
     assertEquals(20, result.getValinnanAloituspaikat());
     assertEquals("8.5", getValintaperusteArvo(result, "painotettu_keskiarvo_hylkays_max"));
+    assertEquals("hakukohdekoodiuri", result.getHakukohdekoodi().getKoodiUri());
   }
 
   @Test
@@ -235,9 +236,27 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     assertThrows(NoSuchElementException.class, () -> getValintaperusteArvo(result, "B13_DE_painokerroin"));
   }
 
+  @Test
+  public void lukioKoulutustyyppi() {
+    KoutaHakukohde hakukohde = fakeHakukohde(new HashSet<>(), new HashSet<>(), new ArrayList<>(), "koulutustyyppi_2");
+    when(koutaAsyncResource.haeHakukohde(KOUTA_HAKUKOHDE_OID))
+        .thenReturn(CompletableFuture.completedFuture(hakukohde));
+
+    HakukohdeImportDTO result = suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(KOUTA_HAKUKOHDE_OID);
+
+    assertEquals("hakukohteet_000", result.getHakukohdekoodi().getKoodiUri());
+  }
+
   private static KoutaHakukohde fakeHakukohde(Set<KoutaValintakoe> valintakokeet,
                                               Set<KoutaValintakoe> valintaperusteValintakokeet,
                                               List<PainotettuArvosana> painotetutArvosanat) {
+    return fakeHakukohde(valintakokeet, valintaperusteValintakokeet, painotetutArvosanat, null);
+  }
+
+  private static KoutaHakukohde fakeHakukohde(Set<KoutaValintakoe> valintakokeet,
+                                              Set<KoutaValintakoe> valintaperusteValintakokeet,
+                                              List<PainotettuArvosana> painotetutArvosanat,
+                                              String koulutustyyppikoodi) {
     return new KoutaHakukohde(
         KOUTA_HAKUKOHDE_OID,
         AbstractHakukohde.Tila.JULKAISTU,
@@ -251,7 +270,9 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         valintakokeet,
         valintaperusteValintakokeet,
         BigDecimal.valueOf(8.5),
-        painotetutArvosanat
+        painotetutArvosanat,
+        "hakukohdekoodiuri",
+        koulutustyyppikoodi
     );
   }
 

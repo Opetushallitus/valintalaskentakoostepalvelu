@@ -19,6 +19,8 @@ public class KoutaHakukohdeDTO {
   public final BigDecimal alinHyvaksyttyKeskiarvo;
   public final List<PainotettuArvosanaDTO> painotetutArvosanat;
   public final Set<KoutaValintakoeDTO> valintaperusteValintakokeet;
+  public final KoodiUriDTO hakukohde;
+  public final String koulutustyyppikoodi;
 
   private KoutaHakukohdeDTO() {
     this.oid = null;
@@ -34,6 +36,16 @@ public class KoutaHakukohdeDTO {
     this.alinHyvaksyttyKeskiarvo = null;
     this.painotetutArvosanat = null;
     this.valintaperusteValintakokeet = null;
+    this.hakukohde = null;
+    this.koulutustyyppikoodi = null;
+  }
+
+  public static class KoodiUriDTO {
+    public final String koodiUri;
+
+    private KoodiUriDTO(String koodiUri) {
+      this.koodiUri = koodiUri;
+    }
   }
 
   @Override

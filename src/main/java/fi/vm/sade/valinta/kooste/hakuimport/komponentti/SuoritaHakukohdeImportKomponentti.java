@@ -45,6 +45,8 @@ public class SuoritaHakukohdeImportKomponentti {
   private static final String A21KIELI = "A2";
   private static final String B21KIELI = "B2";
   private static final String B31KIELI = "B3";
+  private static final String KOULUTUSTYYPPIKOODI_LUKIO = "koulutustyyppi_2";
+  private static final String HAKUKOHDEKOODI_LUKIO = "hakukohteet_000";
 
   private TarjontaAsyncResource tarjontaAsyncResource;
   private KoutaAsyncResource koutaAsyncResource;
@@ -304,6 +306,15 @@ public class SuoritaHakukohdeImportKomponentti {
     KoutaHakukohde hakukohde =
         this.koutaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
     HakukohdeImportDTO importTyyppi = processCommonHakukohde(hakukohde);
+
+    HakukohdekoodiDTO hakukohdekoodi = new HakukohdekoodiDTO();
+    if (hakukohde.koulutustyyppikoodi != null && hakukohde.koulutustyyppikoodi.equals(KOULUTUSTYYPPIKOODI_LUKIO)) {
+      hakukohdekoodi.setKoodiUri(HAKUKOHDEKOODI_LUKIO);
+      importTyyppi.setHakukohdekoodi(hakukohdekoodi);
+    } else if (hakukohde.hakukohdeKoodiUri != null) {
+      hakukohdekoodi.setKoodiUri(hakukohde.hakukohdeKoodiUri);
+      importTyyppi.setHakukohdekoodi(hakukohdekoodi);
+    }
 
     List<String> valintakoetyypit =
         koodistoAsyncResource

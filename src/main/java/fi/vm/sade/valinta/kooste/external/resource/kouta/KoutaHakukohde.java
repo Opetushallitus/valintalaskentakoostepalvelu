@@ -11,6 +11,8 @@ public class KoutaHakukohde extends AbstractHakukohde {
   public final Set<KoutaValintakoe> valintaperusteValintakokeet;
   public final BigDecimal alinHyvaksyttyKeskiarvo;
   public final List<PainotettuArvosana> painotetutArvosanat;
+  public final String hakukohdeKoodiUri;
+  public final String koulutustyyppikoodi;
 
   public KoutaHakukohde(
       String oid,
@@ -25,7 +27,9 @@ public class KoutaHakukohde extends AbstractHakukohde {
       Set<KoutaValintakoe> valintakokeet,
       Set<KoutaValintakoe> valintaperusteValintakokeet,
       BigDecimal alinHyvaksyttyKeskiarvo,
-      List<PainotettuArvosana> painotetutArvosanat) {
+      List<PainotettuArvosana> painotetutArvosanat,
+      String hakukohdeKoodiUri,
+      String koulutustyyppikoodi) {
     super(
         oid,
         tila,
@@ -41,6 +45,8 @@ public class KoutaHakukohde extends AbstractHakukohde {
     this.valintaperusteValintakokeet = valintaperusteValintakokeet;
     this.alinHyvaksyttyKeskiarvo = alinHyvaksyttyKeskiarvo;
     this.painotetutArvosanat = painotetutArvosanat;
+    this.hakukohdeKoodiUri = hakukohdeKoodiUri;
+    this.koulutustyyppikoodi = koulutustyyppikoodi;
   }
 
   public KoutaHakukohde(KoutaHakukohdeDTO dto) {
@@ -71,6 +77,8 @@ public class KoutaHakukohde extends AbstractHakukohde {
             .collect(Collectors.toSet());
     this.painotetutArvosanat =
         dto.painotetutArvosanat.stream().map(PainotettuArvosana::new).collect(Collectors.toList());
+    this.hakukohdeKoodiUri = dto.hakukohde.koodiUri;
+    this.koulutustyyppikoodi = dto.koulutustyyppikoodi;
   }
 
   public Optional<KoutaValintakoe> getValintakoeOfType(String valintakoeTypeUri) {
