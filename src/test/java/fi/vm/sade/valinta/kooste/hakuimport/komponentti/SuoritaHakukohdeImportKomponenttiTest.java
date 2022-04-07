@@ -47,14 +47,6 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         Mockito.mock(OrganisaatioAsyncResource.class);
     TarjontaAsyncResource tarjontaAsyncResource = Mockito.mock(TarjontaAsyncResource.class);
 
-    Map<String, Koodi> valintakokeenTyyppiKoodisto =
-        Map.of(
-            "1", fakeKoodi("1", "valintakokeentyyppi_1"),
-            "2", fakeKoodi("2", "valintakokeentyyppi_2"),
-            "6", fakeKoodi("6", "valintakokeentyyppi_6"));
-    when(koodistoAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.VALINTAKOKEEN_TYYPPI))
-        .thenReturn(valintakokeenTyyppiKoodisto);
-
     Map<String, Koodi> painotettavatOppiaineetLukiossaKoodisto =
         Map.of(
             "MA", fakeKoodi("MA", "painotettavatoppiaineetlukiossa_ma"),

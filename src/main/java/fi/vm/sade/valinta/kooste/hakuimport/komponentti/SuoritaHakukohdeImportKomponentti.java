@@ -317,15 +317,8 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.setHakukohdekoodi(hakukohdekoodi);
     }
 
-    List<String> valintakoetyypit =
-        koodistoAsyncResource
-            .haeKoodisto(KoodistoCachedAsyncResource.VALINTAKOKEEN_TYYPPI)
-            .values()
-            .stream()
-            .map(Koodi::getKoodiUri)
-            .collect(Collectors.toList());
     List<HakukohteenValintakoeDTO> uniqueValintakokeet =
-        valintakoetyypit.stream()
+        Set.of(PAASYKOE_TYYPPI_URI, LISANAYTTO_TYYPPI_URI ).stream()
             .map(hakukohde::getValintakoeOfType)
             .filter(Optional::isPresent)
             .map(Optional::get)
