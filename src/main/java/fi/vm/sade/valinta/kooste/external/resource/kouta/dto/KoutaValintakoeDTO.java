@@ -3,24 +3,24 @@ package fi.vm.sade.valinta.kooste.external.resource.kouta.dto;
 import java.math.BigDecimal;
 
 public class KoutaValintakoeDTO {
-  private String oid;
-  private String tyyppiUri;
+  private String id;
+  private String tyyppi;
   private BigDecimal vahimmaispisteet;
 
-  public String getOid() {
-    return oid;
+  public String getId() {
+    return id;
   }
 
-  public void setOid(String oid) {
-    this.oid = oid;
+  public void setId(String id) {
+    this.id = id;
   }
 
-  public String getTyyppiUri() {
-    return tyyppiUri;
+  public String getTyyppi() {
+    return tyyppi;
   }
 
-  public void setTyyppiUri(String tyyppiUri) {
-    this.tyyppiUri = tyyppiUri;
+  public void setTyyppi(String tyyppi) {
+    this.tyyppi = tyyppi;
   }
 
   public BigDecimal getVahimmaispisteet() {
