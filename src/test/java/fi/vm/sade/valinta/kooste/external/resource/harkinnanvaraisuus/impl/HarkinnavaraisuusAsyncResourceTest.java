@@ -287,7 +287,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
     pkSuoritusKeskeytynyt.setHenkiloOid(henkiloOid2);
     pkSuoritusKeskeytynyt.setKomo(PK_KOMO);
     pkSuoritusKeskeytynyt.setTila("KESKEYTYNYT");
-    pkSuoritusKeskeytynyt.setValmistuminen("2022-03-03");
+    pkSuoritusKeskeytynyt.setValmistuminen("3.3.2022");
     pkSuoritusKeskeytynyt.setVahvistettu(true);
     pkSuoritusKeskeytynyt.setLahdeArvot(Map.of("foo", "true"));
 
@@ -295,7 +295,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
     pkSuoritusAiempiKesken.setHenkiloOid(henkiloOid2);
     pkSuoritusAiempiKesken.setKomo(PK_KOMO);
     pkSuoritusAiempiKesken.setTila("KESKEN");
-    pkSuoritusAiempiKesken.setValmistuminen("2021-03-03");
+    pkSuoritusAiempiKesken.setValmistuminen("6.6.2021");
     pkSuoritusAiempiKesken.setVahvistettu(true);
     pkSuoritusAiempiKesken.setLahdeArvot(Map.of("foo", "true"));
 
