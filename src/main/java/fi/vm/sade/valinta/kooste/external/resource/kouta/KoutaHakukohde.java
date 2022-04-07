@@ -77,7 +77,7 @@ public class KoutaHakukohde extends AbstractHakukohde {
             .collect(Collectors.toSet());
     this.painotetutArvosanat =
         dto.painotetutArvosanat.stream().map(PainotettuArvosana::new).collect(Collectors.toList());
-    this.hakukohdeKoodiUri = dto.hakukohde.koodiUri;
+    this.hakukohdeKoodiUri = dto.hakukohde != null ? dto.hakukohde.koodiUri : null;
     this.koulutustyyppikoodi = dto.koulutustyyppikoodi;
   }
 
