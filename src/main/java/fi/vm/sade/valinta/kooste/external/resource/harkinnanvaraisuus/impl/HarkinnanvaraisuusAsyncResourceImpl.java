@@ -21,6 +21,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
   private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
   private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final LocalDateTime suoritusValmisDeadline;
+
+  public static final org.joda.time.format.DateTimeFormatter VALMISTUMINEN_DTF =
+          DateTimeFormat.forPattern("dd.MM.yyyy");
 
   @Autowired
   public HarkinnanvaraisuusAsyncResourceImpl(
@@ -63,7 +68,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                       .filter(s -> PK_KOMO.equals(s.getKomo()) && s.isVahvistettu())
                       .collect(Collectors.toList());
               Optional<Suoritus> viimeisin =
-                  pkSuoritukset.stream().max(Comparator.comparing(Suoritus::getValmistuminen));
+                  pkSuoritukset.stream().max(Comparator.comparing(s -> VALMISTUMINEN_DTF.parseDateTime(s.getValmistuminen())));
               return viimeisin.map(s -> "KESKEYTYNYT".equals(s.getTila())).orElse(false);
             });
   }
