@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.ForbiddenException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -88,10 +89,9 @@ public class AuthorityCheckServiceTest {
     assertFalse(authorized2);
   }
 
-  /*
+  @Ignore("Causes possibly random failure in CI")
   @Test(expected = ForbiddenException.class)
   public void testCheckAuthorizationForHaku() {
     authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET);
   }
-  */
 }

@@ -340,16 +340,16 @@ public class SuoritaHakukohdeImportKomponentti {
             : NOLLA);
 
     Optional<KoutaValintakoe> paasykoe = hakukohde.getValintakoeOfType(PAASYKOE_TYYPPI_URI);
-    paasykoe.ifPresent(
-        pk ->
+    paasykoe.map(pk -> pk.vahimmaispisteet).ifPresent(
+        pisteet ->
             addAvainArvoToValintaperuste(
-                importTyyppi, "paasykoe_hylkays_max", pk.vahimmaispisteet.toString()));
+                importTyyppi, "paasykoe_hylkays_max", pisteet.toString()));
 
     Optional<KoutaValintakoe> lisanaytto = hakukohde.getValintakoeOfType(LISANAYTTO_TYYPPI_URI);
-    lisanaytto.ifPresent(
-        pk ->
+    lisanaytto.map(pk -> pk.vahimmaispisteet).ifPresent(
+        pisteet ->
             addAvainArvoToValintaperuste(
-                importTyyppi, "lisanaytto_hylkays_max", pk.vahimmaispisteet.toString()));
+                importTyyppi, "lisanaytto_hylkays_max", pisteet.toString()));
 
     Map<String, Koodi> koodiarvoKoodi =
         koodistoAsyncResource.haeKoodisto(
