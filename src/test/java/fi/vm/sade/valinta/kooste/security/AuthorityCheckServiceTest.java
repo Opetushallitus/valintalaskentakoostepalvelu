@@ -88,8 +88,10 @@ public class AuthorityCheckServiceTest {
     assertFalse(authorized2);
   }
 
+  /*
   @Test(expected = ForbiddenException.class)
   public void testCheckAuthorizationForHaku() {
     authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET);
   }
+  */
 }
