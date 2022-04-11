@@ -25,8 +25,8 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -122,7 +122,7 @@ public abstract class AbstractPistesyottoKoosteService {
       List<ApplicationAdditionalDataDTO> pistetiedot,
       List<HakukohdeJaValintakoeDTO> hakukohdeJaValintakoe,
       Haku haku,
-      Hakukohde hakukohdeDTO,
+      AbstractHakukohde hakukohdeDTO,
       List<Organisaatio> tarjoajat,
       Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
     String hakuNimi = new Teksti(haku.nimi).getTeksti();
@@ -329,7 +329,8 @@ public abstract class AbstractPistesyottoKoosteService {
                                   .applicationAdditionalDataDTO)
                       .collect(Collectors.toList()));
             });
-    CompletableFuture<Hakukohde> hakukohdeF = tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
+    CompletableFuture<AbstractHakukohde> hakukohdeF =
+        tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
     CompletableFuture<List<Organisaatio>> tarjoajatF =
         hakukohdeF.thenComposeAsync(
             hakukohde ->

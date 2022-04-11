@@ -6,8 +6,8 @@ import static java.util.Arrays.asList;
 import com.codepoetics.protonpack.Indexed;
 import com.codepoetics.protonpack.StreamUtils;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
@@ -35,7 +35,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class ValintalaskennanTulosExcel {
   public static XSSFWorkbook luoExcel(
       Haku haku,
-      Hakukohde hakukohdeDTO,
+      AbstractHakukohde hakukohdeDTO,
       List<Organisaatio> tarjoajat,
       List<ValintatietoValinnanvaiheDTO> valinnanVaiheet,
       final List<HakemusWrapper> hakemukset) {

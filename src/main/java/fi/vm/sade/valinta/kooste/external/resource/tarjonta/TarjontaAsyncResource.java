@@ -15,7 +15,7 @@ public interface TarjontaAsyncResource {
   CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
       Iterable<String> organizationOids);
 
-  CompletableFuture<Hakukohde> haeHakukohde(String hakukohdeOid);
+  CompletableFuture<AbstractHakukohde> haeHakukohde(String hakukohdeOid);
 
   CompletableFuture<Set<String>> haunHakukohteet(String hakuOid);
 

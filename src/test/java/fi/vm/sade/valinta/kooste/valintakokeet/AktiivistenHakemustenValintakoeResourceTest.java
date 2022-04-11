@@ -15,8 +15,8 @@ import static org.mockito.Mockito.when;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.ValintakoeOsallistuminenBuilder;
@@ -68,8 +68,8 @@ public class AktiivistenHakemustenValintakoeResourceTest {
   private ValintakoeOsallistuminenDTO ataruOsallistuminen3 =
       new ValintakoeOsallistuminenBuilder().setHakemusOid(ataruHakemus3.getOid()).build();
 
-  private final Hakukohde hakukohdeDTO =
-      new Hakukohde(
+  private final TarjontaHakukohde hakukohdeDTO =
+      new TarjontaHakukohde(
           hakukohdeOid,
           null,
           new HashMap<>(),
@@ -80,8 +80,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
           new HashSet<>(),
           null,
           Collections.emptySet(),
-          null,
-          false);
+          null);
   private final Haku hakuDTOEditori =
       new Haku(
           hakuOid,

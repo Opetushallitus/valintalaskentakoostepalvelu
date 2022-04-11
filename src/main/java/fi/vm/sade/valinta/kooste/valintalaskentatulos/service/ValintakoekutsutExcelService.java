@@ -8,8 +8,8 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -93,7 +93,7 @@ public class ValintakoekutsutExcelService {
       prosessi.setKokonaistyo(9); // 7 + luonti + dokumenttipalveluun vienti
       final boolean useWhitelist =
           !Optional.ofNullable(hakemusOids).orElse(Collections.emptySet()).isEmpty();
-      final AtomicReference<Hakukohde> hakukohdeRef = new AtomicReference<>();
+      final AtomicReference<AbstractHakukohde> hakukohdeRef = new AtomicReference<>();
       final AtomicReference<List<HakemusOsallistuminenDTO>> tiedotHakukohteelleRef =
           new AtomicReference<>();
       final AtomicReference<Map<String, ValintakoeDTO>> valintakokeetRef = new AtomicReference<>();

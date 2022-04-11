@@ -1,9 +1,11 @@
-package fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto;
+package fi.vm.sade.valinta.kooste.external.resource.kouta.dto;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class KoutaHakukohde {
+public class KoutaHakukohdeDTO {
   public final String oid;
   public final String tila;
   public final Map<String, String> nimi;
@@ -11,11 +13,16 @@ public class KoutaHakukohde {
   public final String tarjoaja;
   public final String toteutusOid;
   public final Integer aloituspaikat;
-  public final Set<KoutaValintakoe> valintakokeet;
+  public final Set<KoutaValintakoeDTO> valintakokeet;
   public final Set<String> pohjakoulutusvaatimusKoodiUrit;
   public final Map<String, String> uudenOpiskelijanUrl;
+  public final BigDecimal alinHyvaksyttyKeskiarvo;
+  public final List<PainotettuArvosanaDTO> painotetutArvosanat;
+  public final Set<KoutaValintakoeDTO> valintaperusteValintakokeet;
+  public final KoodiUriDTO hakukohde;
+  public final String koulutustyyppikoodi;
 
-  private KoutaHakukohde() {
+  private KoutaHakukohdeDTO() {
     this.oid = null;
     this.tila = null;
     this.nimi = null;
@@ -26,6 +33,19 @@ public class KoutaHakukohde {
     this.valintakokeet = null;
     this.pohjakoulutusvaatimusKoodiUrit = null;
     this.uudenOpiskelijanUrl = null;
+    this.alinHyvaksyttyKeskiarvo = null;
+    this.painotetutArvosanat = null;
+    this.valintaperusteValintakokeet = null;
+    this.hakukohde = null;
+    this.koulutustyyppikoodi = null;
+  }
+
+  public static class KoodiUriDTO {
+    public final String koodiUri;
+
+    private KoodiUriDTO(String koodiUri) {
+      this.koodiUri = koodiUri;
+    }
   }
 
   @Override
@@ -33,7 +53,7 @@ public class KoutaHakukohde {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    KoutaHakukohde that = (KoutaHakukohde) o;
+    KoutaHakukohdeDTO that = (KoutaHakukohdeDTO) o;
 
     return oid.equals(that.oid);
   }
@@ -41,30 +61,5 @@ public class KoutaHakukohde {
   @Override
   public int hashCode() {
     return oid.hashCode();
-  }
-
-  public static class KoutaValintakoe {
-    public final String id;
-    public final String tyyppi;
-
-    private KoutaValintakoe() {
-      this.id = null;
-      this.tyyppi = null;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-
-      KoutaValintakoe that = (KoutaValintakoe) o;
-
-      return id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-      return id.hashCode();
-    }
   }
 }

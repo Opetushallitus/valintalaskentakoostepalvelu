@@ -8,8 +8,8 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -160,7 +160,7 @@ public class ValintalaskentaExcelResource {
                             ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
                         : Observable.fromFuture(
                             applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid)));
-                CompletableFuture<Hakukohde> hakukohdeF =
+                CompletableFuture<AbstractHakukohde> hakukohdeF =
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid);
                 return Observable.zip(
                         Observable.fromFuture(hakukohdeF),
@@ -287,7 +287,7 @@ public class ValintalaskentaExcelResource {
   @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
   public void haeValintalaskentaTuloksetExcelMuodossa(
       @QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
-    Observable<Hakukohde> hakukohdeObservable =
+    Observable<AbstractHakukohde> hakukohdeObservable =
         Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
     Observable<List<Organisaatio>> tarjoajatObservable =
         hakukohdeObservable.flatMap(
