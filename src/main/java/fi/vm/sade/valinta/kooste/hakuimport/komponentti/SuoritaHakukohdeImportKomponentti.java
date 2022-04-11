@@ -318,7 +318,7 @@ public class SuoritaHakukohdeImportKomponentti {
     }
 
     List<HakukohteenValintakoeDTO> uniqueValintakokeet =
-        Set.of(PAASYKOE_TYYPPI_URI, LISANAYTTO_TYYPPI_URI ).stream()
+        Set.of(PAASYKOE_TYYPPI_URI, LISANAYTTO_TYYPPI_URI).stream()
             .map(hakukohde::getValintakoeOfType)
             .filter(Optional::isPresent)
             .map(Optional::get)
@@ -340,16 +340,20 @@ public class SuoritaHakukohdeImportKomponentti {
             : NOLLA);
 
     Optional<KoutaValintakoe> paasykoe = hakukohde.getValintakoeOfType(PAASYKOE_TYYPPI_URI);
-    paasykoe.map(pk -> pk.vahimmaispisteet).ifPresent(
-        pisteet ->
-            addAvainArvoToValintaperuste(
-                importTyyppi, "paasykoe_hylkays_max", pisteet.toString()));
+    paasykoe
+        .map(pk -> pk.vahimmaispisteet)
+        .ifPresent(
+            pisteet ->
+                addAvainArvoToValintaperuste(
+                    importTyyppi, "paasykoe_hylkays_max", pisteet.toString()));
 
     Optional<KoutaValintakoe> lisanaytto = hakukohde.getValintakoeOfType(LISANAYTTO_TYYPPI_URI);
-    lisanaytto.map(pk -> pk.vahimmaispisteet).ifPresent(
-        pisteet ->
-            addAvainArvoToValintaperuste(
-                importTyyppi, "lisanaytto_hylkays_max", pisteet.toString()));
+    lisanaytto
+        .map(pk -> pk.vahimmaispisteet)
+        .ifPresent(
+            pisteet ->
+                addAvainArvoToValintaperuste(
+                    importTyyppi, "lisanaytto_hylkays_max", pisteet.toString()));
 
     Map<String, Koodi> koodiarvoKoodi =
         koodistoAsyncResource.haeKoodisto(
@@ -361,15 +365,15 @@ public class SuoritaHakukohdeImportKomponentti {
 
     for (PainotettuArvosana arvosana : hakukohde.painotetutArvosanat) {
       String koodiarvo = koodiUriKoodiArvo.get(arvosana.koodiUri);
-      if (koodiarvo != null && !koodiarvo.isEmpty()){
+      if (koodiarvo != null && !koodiarvo.isEmpty()) {
         addAvainArvoToValintaperuste(
-                importTyyppi, koodiarvo + PAINOKERROIN_POSTFIX, arvosana.painokerroin.toString());
+            importTyyppi, koodiarvo + PAINOKERROIN_POSTFIX, arvosana.painokerroin.toString());
 
         String oppiaine = koodiarvo.split("_")[0];
         if (oppiaine.equals(A11KIELI)
-                || oppiaine.equals(A21KIELI)
-                || oppiaine.equals(B21KIELI)
-                || oppiaine.equals(B31KIELI)) {
+            || oppiaine.equals(A21KIELI)
+            || oppiaine.equals(B21KIELI)
+            || oppiaine.equals(B31KIELI)) {
           // koodiarvo is formatted A1_FI
           String kieli = koodiarvo.split("_")[1];
 
