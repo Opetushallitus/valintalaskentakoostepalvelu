@@ -555,8 +555,10 @@ public class HakemuksetConverterUtil {
 
     if (pohjakoulutus.isPresent()
         && pohjakoulutus.get().equals(PohjakoulutusToinenAste.YLIOPPILAS)) {
-      lukioOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
+      lukioOpetuskieliAtaru(hakemus, suoritukset)
+          .ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
     }
+    lukioOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
     pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
 
     pohjakoulutus.ifPresent(pk -> tiedot.putAll(automaticDiscretionaryOptions(pk, haku, hakemus)));
@@ -695,6 +697,19 @@ public class HakemuksetConverterUtil {
                         PERUSOPETUS_KIELI.equals(a.getAvain())
                             || (ATARU_POHJAKOULUTUS_KIELI.equals(a.getAvain())
                                 && a.getArvo() != null))
+                .map(a -> a.getArvo()))
+        .findFirst();
+  }
+
+  private Optional<String> lukioOpetuskieliAtaru(
+      HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+    return Stream.concat(
+            suoritukset.stream()
+                .filter(s -> wrap(s).isLukio() && (wrap(s).isValmis() || wrap(s).isKesken()))
+                .map(s -> wrap(s).getSuoritusJaArvosanat().getSuoritus().getSuoritusKieli())
+                .filter(s -> !StringUtils.isEmpty(s)),
+            hakemus.getAvaimet().stream()
+                .filter(a -> ATARU_POHJAKOULUTUS_KIELI.equals(a.getAvain()) && a.getArvo() != null)
                 .map(a -> a.getArvo()))
         .findFirst();
   }
