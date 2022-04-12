@@ -722,11 +722,7 @@ public class HakemuksetConverterUtil {
                 .map(s -> wrap(s).getSuoritusJaArvosanat().getSuoritus().getSuoritusKieli())
                 .filter(s -> !StringUtils.isEmpty(s)),
             hakemus.getAvaimet().stream()
-                .filter(
-                    a ->
-                        LUKIO_KIELI.equals(a.getAvain())
-                            || (ATARU_POHJAKOULUTUS_KIELI.equals(a.getAvain())
-                                && a.getArvo() != null))
+                .filter(a -> LUKIO_KIELI.equals(a.getAvain()))
                 .map(a -> a.getArvo()))
         .findFirst();
   }
