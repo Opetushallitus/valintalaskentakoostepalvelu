@@ -305,6 +305,7 @@ public class SuoritaHakukohdeImportKomponentti {
       throws ExecutionException, InterruptedException, TimeoutException {
     KoutaHakukohde hakukohde =
         this.koutaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
+    String hakukohdeKoodiTunniste = getHakukohdeKoodiTunniste(hakukohde);
     HakukohdeImportDTO importTyyppi = processCommonHakukohde(hakukohde);
 
     HakukohdekoodiDTO hakukohdekoodi = new HakukohdekoodiDTO();
@@ -384,6 +385,17 @@ public class SuoritaHakukohdeImportKomponentti {
         }
       }
     }
+
+    addAvainArvoToValintaperuste(
+        importTyyppi, "paasykoe_tunniste", hakukohdeKoodiTunniste + "_paasykoe");
+    addAvainArvoToValintaperuste(
+        importTyyppi, "lisanaytto_tunniste", hakukohdeKoodiTunniste + "_lisanaytto");
+    addAvainArvoToValintaperuste(
+        importTyyppi, "lisapiste_tunniste", hakukohdeKoodiTunniste + "_lisapiste");
+    addAvainArvoToValintaperuste(
+        importTyyppi,
+        "urheilija_lisapiste_tunniste",
+        hakukohdeKoodiTunniste + "_urheilija_lisapiste");
 
     return importTyyppi;
   }
