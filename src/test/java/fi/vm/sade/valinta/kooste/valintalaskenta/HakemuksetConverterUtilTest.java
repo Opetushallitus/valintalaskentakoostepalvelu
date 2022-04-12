@@ -1669,6 +1669,34 @@ public class HakemuksetConverterUtilTest {
   }
 
   @Test
+  public void suoritusvuosiAtaruhakemukselta() {
+    HakemusDTO hakemus = new HakemusDTO();
+    hakemus.setHakemusoid(HAKEMUS1_OID);
+    hakemus.setAvaimet(
+        new ArrayList<>() {
+          {
+            add(new AvainArvoDTO(hakemuksetConverterUtil.ATARU_POHJAKOULUTUS_VUOSI, "2019"));
+          }
+        });
+    Oppija oppija =
+        new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus()
+            .setSuoritusKieli("FI")
+            .setLukio()
+            .setVahvistettu(false)
+            .setMyontaja(HAKEMUS1_OID)
+            .setValmistuminen("1.1.2014")
+            .setKesken()
+            .build()
+            .build();
+
+    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+        false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
+    assertEquals(
+        "2019", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PK_PAATTOTODISTUSVUOSI));
+  }
+
+  @Test
   public void hakemukseltaKopioituMuokattuLukioKieli() {
     HakemusDTO hakemus = new HakemusDTO();
     hakemus.setHakemusoid(HAKEMUS1_OID);
