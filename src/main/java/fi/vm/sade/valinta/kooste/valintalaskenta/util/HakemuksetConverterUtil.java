@@ -50,6 +50,8 @@ public class HakemuksetConverterUtil {
   public static final String PK_PAATTOTODISTUSVUOSI = "PK_PAATTOTODISTUSVUOSI";
   public static final String LK_PAATTOTODISTUSVUOSI = "lukioPaattotodistusVuosi";
   public static final String PERUSOPETUS_KIELI = "perusopetuksen_kieli";
+  public static final String ATARU_POHJAKOULUTUS_KIELI = "pohjakoulutus_kieli";
+  public static final String ATARU_POHJAKOULUTUS_VUOSI = "pohjakoulutus_vuosi";
   public static final String LUKIO_KIELI = "lukion_kieli";
   public static final String POHJAKOULUTUS = "POHJAKOULUTUS";
   public static final String POHJAKOULUTUS_ATARU = "base-education-2nd";
@@ -551,9 +553,10 @@ public class HakemuksetConverterUtil {
     pkPaattotodistusvuosi(hakemus, suoritukset)
         .ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
 
-    // fixme opetuskielet ataruhakemukselta
+    if (pohjakoulutus.isPresent() && pohjakoulutus.get().equals(PohjakoulutusToinenAste.YLIOPPILAS)) {
+      lukioOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
+    }
     pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
-    lukioOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
 
     pohjakoulutus.ifPresent(pk -> tiedot.putAll(automaticDiscretionaryOptions(pk, haku, hakemus)));
     suoritustilat(predicates, suoritukset).entrySet().stream()
@@ -670,9 +673,8 @@ public class HakemuksetConverterUtil {
                 .map(s -> wrap(s).getValmistuminenAsDateTime().getYear()),
             hakemus
                 .getAvaimet()
-                .stream() // fixme, tämä tieto tarvitaan myös ataruhakemukselle, nykyisellä
-                // avaimella ei varmaan löydy
-                .filter(a -> PK_PAATTOTODISTUSVUOSI.equals(a.getAvain()))
+                .stream()
+                .filter(a -> PK_PAATTOTODISTUSVUOSI.equals(a.getAvain()) || (ATARU_POHJAKOULUTUS_VUOSI.equals(a.getAvain()) && a.getArvo() != null))
                 .map(a -> Integer.valueOf(a.getArvo())))
         .findFirst();
   }
@@ -685,7 +687,7 @@ public class HakemuksetConverterUtil {
                 .map(s -> wrap(s).getSuoritusJaArvosanat().getSuoritus().getSuoritusKieli())
                 .filter(s -> !StringUtils.isEmpty(s)),
             hakemus.getAvaimet().stream()
-                .filter(a -> PERUSOPETUS_KIELI.equals(a.getAvain()))
+                .filter(a -> PERUSOPETUS_KIELI.equals(a.getAvain()) || (ATARU_POHJAKOULUTUS_KIELI.equals(a.getAvain()) && a.getArvo() != null))
                 .map(a -> a.getArvo()))
         .findFirst();
   }
@@ -698,7 +700,7 @@ public class HakemuksetConverterUtil {
                 .map(s -> wrap(s).getSuoritusJaArvosanat().getSuoritus().getSuoritusKieli())
                 .filter(s -> !StringUtils.isEmpty(s)),
             hakemus.getAvaimet().stream()
-                .filter(a -> LUKIO_KIELI.equals(a.getAvain()))
+                .filter(a -> LUKIO_KIELI.equals(a.getAvain()) || (ATARU_POHJAKOULUTUS_KIELI.equals(a.getAvain()) && a.getArvo() != null))
                 .map(a -> a.getArvo()))
         .findFirst();
   }
