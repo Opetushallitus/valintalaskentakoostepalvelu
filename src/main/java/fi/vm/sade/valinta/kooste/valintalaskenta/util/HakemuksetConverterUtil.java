@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valinta.kooste.util.AtaruArvosanaParser;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -28,6 +29,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
 import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -187,6 +189,24 @@ public class HakemuksetConverterUtil {
     return hakemusDtot;
   }
 
+  private boolean hasPKVuosiBefore2018(List<AvainArvoDTO> vals) {
+    LOG.info("check, vals: {}", vals);
+    return vals.stream()
+        .anyMatch(
+            aa ->
+                PK_PAATTOTODISTUSVUOSI.equals(aa.getAvain())
+                    && Integer.parseInt(aa.getArvo()) < 2018);
+  }
+
+  private boolean containsLukioPohjakoulutus(List<AvainArvoDTO> vals) {
+    LOG.info("check, vals for lukio: {}", vals);
+    return vals.stream()
+        .anyMatch(
+            aa ->
+                POHJAKOULUTUS.equals(aa.getAvain())
+                    && PohjakoulutusToinenAste.YLIOPPILAS.equals(aa.getArvo()));
+  }
+
   public void mergeKeysOfOppijaAndHakemus(
       boolean hakijallaOnHenkilotunnus,
       Haku haku,
@@ -206,6 +226,7 @@ public class HakemuksetConverterUtil {
             hakemusDTO.getHakemusoid(),
             hakukohdeOid,
             errors);
+    LOG.info("Suren arvosanat: {}", surenArvosanat);
     Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta =
         toAvainMap(
             AmmatillisenKielikoetuloksetSurestaConverter.convert(
@@ -218,15 +239,45 @@ public class HakemuksetConverterUtil {
     merge.putAll(hakemuksenArvot);
     if (fetchEnsikertalaisuus)
       ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
-    merge.putAll(
+    Map<String, AvainArvoDTO> suoritustenTiedot =
         suoritustenTiedot(haku, hakemusDTO, oppija.getSuoritukset()).entrySet().stream()
             .collect(
                 Collectors.toMap(
-                    Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
+                    Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue())));
+
+    LOG.info("SuoritustenTiedot {}", suoritustenTiedot);
+    merge.putAll(suoritustenTiedot);
     merge.putAll(surenArvosanat);
+    LOG.info("Suren arvosanat {}", surenArvosanat);
+
+    List<AvainArvoDTO> suoritusValues = new ArrayList<>(suoritustenTiedot.values());
+    List<AvainArvoDTO> foo =
+        AtaruArvosanaParser.convertAtaruArvosanas(
+            hakemuksenArvot, containsLukioPohjakoulutus(suoritusValues));
+    Map<String, AvainArvoDTO> ataruArvosanat =
+        toAvainMap(foo, hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+
+    if (hasPKVuosiBefore2018(suoritusValues)) {
+
+      LOG.info(
+          "Käytetään hakemuksen arvosanoja hakemukselle {}: {}",
+          hakemusDTO.getHakemusoid(),
+          ataruArvosanat.values());
+      if (!surenArvosanat.isEmpty()) {
+        LOG.warn(
+            "Käytetään hakemukselle {} atarun arvosanoja, vaikka surestakin löytyi: {}",
+            hakemusDTO.getHakemusoid(),
+            surenArvosanat);
+      }
+      merge.putAll(ataruArvosanat);
+    }
+
     merge.putAll(ammatillisenKielikokeetSuresta);
     hakemusDTO.setAvaimet(
-        merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
+        merge.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .filter(val -> val != null && val.getAvain() != null && val.getArvo() != null)
+            .collect(Collectors.toList()));
   }
 
   private void ensikertalaisuus(
