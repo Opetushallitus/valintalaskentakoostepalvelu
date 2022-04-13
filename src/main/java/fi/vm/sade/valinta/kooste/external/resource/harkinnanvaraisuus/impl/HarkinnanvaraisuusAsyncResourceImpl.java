@@ -107,7 +107,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
     }
   }
 
-  private Boolean hasPkSuoritusWithoutYksilollistettyMatAi(List<Oppija> oppijas) {
+  private Boolean hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
       return oppijas.stream()
           .anyMatch(
@@ -116,6 +116,10 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                       .anyMatch(
                           sa ->
                               PK_KOMO.equals(sa.getSuoritus().getKomo())
+                                  && VALMISTUMINEN_DTF
+                                          .parseDateTime(sa.getSuoritus().getValmistuminen())
+                                          .getYear()
+                                      >= 2018
                                   && !sa.getSuoritus().isYksilollistettyMaAi()
                                   && sa.getSuoritus().isVahvistettu()));
     } else {
@@ -186,9 +190,10 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
               hh.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
             }
             if (hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
-                && hasPkSuoritusWithoutYksilollistettyMatAi(oppijas)) {
+                && hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(oppijas)) {
               LOG.info(
-                  "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy suoritus ilman yksilöllistettyä matematiikkaa ja äidinkieltä!",
+                  "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy 2018 "
+                      + "tai myöhäisempi suoritus ilman yksilöllistettyä matematiikkaa ja äidinkieltä!",
                   hakemusOid,
                   hh.getHakukohdeOid());
               hh.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);

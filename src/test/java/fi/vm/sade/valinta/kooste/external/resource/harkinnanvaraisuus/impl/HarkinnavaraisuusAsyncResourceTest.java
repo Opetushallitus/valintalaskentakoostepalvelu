@@ -335,4 +335,245 @@ public class HarkinnavaraisuusAsyncResourceTest {
                         .equals(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA))
             .count());
   }
+
+  @Test
+  public void testHakemuksenHarkinnanvaraisuusietoaEiYliajetaEnnen2018TallennetullaSureTiedolla()
+      throws ExecutionException, InterruptedException, TimeoutException {
+
+    String leikkuriPvm = "2022-06-06";
+    List<String> hakemusOids = new ArrayList<>();
+    String hakemusOid1 = "1.2.246.562.11.00001010666";
+    String hakukohdeOid1 = "1.2.246.562.20.42208535555";
+    String hakukohdeOid2 = "1.2.246.562.20.42208535556";
+    String henkiloOid1 = "1.2.246.562.24.47613331111";
+
+    AtaruHakutoive hakutoive1 = new AtaruHakutoive();
+    hakutoive1.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI);
+    hakutoive1.setHakukohdeOid(hakukohdeOid1);
+    AtaruHakutoive hakutoive2 = new AtaruHakutoive();
+    hakutoive2.setHakukohdeOid(hakukohdeOid2);
+    hakutoive2.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+
+    AtaruHakemus ataruh1 = new AtaruHakemus();
+    ataruh1.setHakemusOid(hakemusOid1);
+    ataruh1.setHakutoiveet(List.of(hakutoive1, hakutoive2));
+    ataruh1.setPersonOid(henkiloOid1);
+
+    HenkiloPerustietoDto henkilo1 = new HenkiloPerustietoDto();
+    henkilo1.setOidHenkilo(henkiloOid1);
+
+    HakemusWrapper hw1 = new AtaruHakemusWrapper(ataruh1, henkilo1);
+
+    assertEquals(hw1.getPersonOid(), henkiloOid1);
+
+    hakemusOids.add(hakemusOid1);
+
+    List<HakemusWrapper> ataruResult = new ArrayList<>();
+    ataruResult.add(hw1);
+
+    Suoritus pkSuoritusVanha = new Suoritus();
+    pkSuoritusVanha.setHenkiloOid(henkiloOid1);
+    pkSuoritusVanha.setKomo(PK_KOMO);
+    pkSuoritusVanha.setTila("VALMIS");
+    pkSuoritusVanha.setValmistuminen("6.6.2010");
+    pkSuoritusVanha.setVahvistettu(true);
+    pkSuoritusVanha.setLahdeArvot(Collections.emptyMap());
+
+    SuoritusJaArvosanat sa1 = new SuoritusJaArvosanat();
+    sa1.setSuoritus(pkSuoritusVanha);
+
+    Oppija o1 = new Oppija();
+    o1.setSuoritukset(List.of(sa1));
+    o1.setOppijanumero(henkiloOid1);
+
+    List<Oppija> sureResult = List.of(o1);
+
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+
+    List<HenkiloViiteDto> onrResult = Collections.emptyList();
+
+    when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
+        .thenReturn(CompletableFuture.completedFuture(ataruResult));
+    when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(List.of(henkiloOid1)))
+        .thenReturn(CompletableFuture.completedFuture(sureResult));
+    when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
+        .thenReturn(CompletableFuture.completedFuture(onrResult));
+
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
+        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+
+    assertEquals(
+        1,
+        hhv.get().stream()
+            .filter(
+                hakemuksenHarkinnanvaraisuus ->
+                    hakemuksenHarkinnanvaraisuus
+                        .getHakutoiveet()
+                        .get(0)
+                        .getHarkinnanvaraisuudenSyy()
+                        .equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI))
+            .count());
+  }
+
+  @Test
+  public void testHakemuksenHarkinnanvaraisuusietoaYliajetaanJosSuressa2018JalkeenTallennettuTieto()
+      throws ExecutionException, InterruptedException, TimeoutException {
+
+    String leikkuriPvm = "2022-06-06";
+    List<String> hakemusOids = new ArrayList<>();
+    String hakemusOid1 = "1.2.246.562.11.00001010666";
+    String hakukohdeOid1 = "1.2.246.562.20.42208535555";
+    String hakukohdeOid2 = "1.2.246.562.20.42208535556";
+    String henkiloOid1 = "1.2.246.562.24.47613331111";
+
+    AtaruHakutoive hakutoive1 = new AtaruHakutoive();
+    hakutoive1.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI);
+    hakutoive1.setHakukohdeOid(hakukohdeOid1);
+    AtaruHakutoive hakutoive2 = new AtaruHakutoive();
+    hakutoive2.setHakukohdeOid(hakukohdeOid2);
+    hakutoive2.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI);
+
+    AtaruHakemus ataruh1 = new AtaruHakemus();
+    ataruh1.setHakemusOid(hakemusOid1);
+    ataruh1.setHakutoiveet(List.of(hakutoive1, hakutoive2));
+    ataruh1.setPersonOid(henkiloOid1);
+
+    HenkiloPerustietoDto henkilo1 = new HenkiloPerustietoDto();
+    henkilo1.setOidHenkilo(henkiloOid1);
+
+    HakemusWrapper hw1 = new AtaruHakemusWrapper(ataruh1, henkilo1);
+
+    assertEquals(hw1.getPersonOid(), henkiloOid1);
+
+    hakemusOids.add(hakemusOid1);
+
+    List<HakemusWrapper> ataruResult = new ArrayList<>();
+    ataruResult.add(hw1);
+
+    Suoritus pkSuoritusValmis = new Suoritus();
+    pkSuoritusValmis.setHenkiloOid(henkiloOid1);
+    pkSuoritusValmis.setKomo(PK_KOMO);
+    pkSuoritusValmis.setTila("VALMIS");
+    pkSuoritusValmis.setValmistuminen("6.6.2019");
+    pkSuoritusValmis.setVahvistettu(true);
+    pkSuoritusValmis.setLahdeArvot(Map.of("foo", "true"));
+
+    SuoritusJaArvosanat sa1 = new SuoritusJaArvosanat();
+    sa1.setSuoritus(pkSuoritusValmis);
+
+    Oppija o1 = new Oppija();
+    o1.setSuoritukset(List.of(sa1));
+    o1.setOppijanumero(henkiloOid1);
+
+    List<Oppija> sureResult = List.of(o1);
+
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+
+    List<HenkiloViiteDto> onrResult = Collections.emptyList();
+
+    when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
+        .thenReturn(CompletableFuture.completedFuture(ataruResult));
+    when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(List.of(henkiloOid1)))
+        .thenReturn(CompletableFuture.completedFuture(sureResult));
+    when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
+        .thenReturn(CompletableFuture.completedFuture(onrResult));
+
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
+        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+
+    assertEquals(
+        1,
+        hhv.get().stream()
+            .filter(
+                hakemuksenHarkinnanvaraisuus ->
+                    hakemuksenHarkinnanvaraisuus
+                        .getHakutoiveet()
+                        .get(0)
+                        .getHarkinnanvaraisuudenSyy()
+                        .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN))
+            .count());
+  }
+
+  @Test
+  public void
+      testHakemuksenHarkinnanvaraisuusietoaYliajetaanJosSuressa2018JalkeenTallennettuTietoJaYksMatAi()
+          throws ExecutionException, InterruptedException, TimeoutException {
+
+    String leikkuriPvm = "2022-06-06";
+    List<String> hakemusOids = new ArrayList<>();
+    String hakemusOid1 = "1.2.246.562.11.00001010666";
+    String hakukohdeOid1 = "1.2.246.562.20.42208535555";
+    String hakukohdeOid2 = "1.2.246.562.20.42208535556";
+    String henkiloOid1 = "1.2.246.562.24.47613331111";
+
+    AtaruHakutoive hakutoive1 = new AtaruHakutoive();
+    hakutoive1.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+    hakutoive1.setHakukohdeOid(hakukohdeOid1);
+    AtaruHakutoive hakutoive2 = new AtaruHakutoive();
+    hakutoive2.setHakukohdeOid(hakukohdeOid2);
+    hakutoive2.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+
+    AtaruHakemus ataruh1 = new AtaruHakemus();
+    ataruh1.setHakemusOid(hakemusOid1);
+    ataruh1.setHakutoiveet(List.of(hakutoive1, hakutoive2));
+    ataruh1.setPersonOid(henkiloOid1);
+
+    HenkiloPerustietoDto henkilo1 = new HenkiloPerustietoDto();
+    henkilo1.setOidHenkilo(henkiloOid1);
+
+    HakemusWrapper hw1 = new AtaruHakemusWrapper(ataruh1, henkilo1);
+
+    assertEquals(hw1.getPersonOid(), henkiloOid1);
+
+    hakemusOids.add(hakemusOid1);
+
+    List<HakemusWrapper> ataruResult = new ArrayList<>();
+    ataruResult.add(hw1);
+
+    Suoritus pkSuoritusValmis = new Suoritus();
+    pkSuoritusValmis.setHenkiloOid(henkiloOid1);
+    pkSuoritusValmis.setKomo(PK_KOMO);
+    pkSuoritusValmis.setTila("VALMIS");
+    pkSuoritusValmis.setValmistuminen("6.6.2019");
+    pkSuoritusValmis.setVahvistettu(true);
+    pkSuoritusValmis.setLahdeArvot(Map.of("foo", "true", "yksilollistetty_ma_ai", "true"));
+
+    SuoritusJaArvosanat sa1 = new SuoritusJaArvosanat();
+    sa1.setSuoritus(pkSuoritusValmis);
+
+    Oppija o1 = new Oppija();
+    o1.setSuoritukset(List.of(sa1));
+    o1.setOppijanumero(henkiloOid1);
+
+    List<Oppija> sureResult = List.of(o1);
+
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+
+    List<HenkiloViiteDto> onrResult = Collections.emptyList();
+
+    when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
+        .thenReturn(CompletableFuture.completedFuture(ataruResult));
+    when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(List.of(henkiloOid1)))
+        .thenReturn(CompletableFuture.completedFuture(sureResult));
+    when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
+        .thenReturn(CompletableFuture.completedFuture(onrResult));
+
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
+        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+
+    assertEquals(
+        1,
+        hhv.get().stream()
+            .filter(
+                hakemuksenHarkinnanvaraisuus ->
+                    hakemuksenHarkinnanvaraisuus
+                        .getHakutoiveet()
+                        .get(0)
+                        .getHarkinnanvaraisuudenSyy()
+                        .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
+            .count());
+  }
 }
