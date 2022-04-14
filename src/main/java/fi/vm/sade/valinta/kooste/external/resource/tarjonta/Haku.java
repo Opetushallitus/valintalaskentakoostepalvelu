@@ -82,7 +82,8 @@ public class Haku {
     this.hakukausiUri = null; // TODO
 
     this.koulutuksenAlkamiskausiUri = dto.alkamiskausiKoodiUri;
-    this.koulutuksenAlkamisvuosi = Integer.parseInt(dto.alkamisvuosi);
+    this.koulutuksenAlkamisvuosi =
+        dto.alkamisvuosi != null ? Integer.parseInt(dto.alkamisvuosi) : null;
     this.ataruLomakeAvain = dto.hakulomakeAtaruId;
   }
 
