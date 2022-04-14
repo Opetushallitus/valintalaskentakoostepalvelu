@@ -128,8 +128,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
   }
 
   private void setHarkinnanvaraisuudenSyyForHakutoive(
-      HakutoiveenHarkinnanvaraisuus ht,
-      HarkinnanvaraisuudenSyy syy) {
+      HakutoiveenHarkinnanvaraisuus ht, HarkinnanvaraisuudenSyy syy) {
     if (ht.getHarkinnanvaraisuudenSyy() != HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN_HAKUKOHDE) {
       ht.setHarkinnanvaraisuudenSyy(syy);
     }
@@ -164,7 +163,9 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
           "Hakemus {} on suren mukaan harkinnanvarainen, koska oppijan viimeisin peruskoulusuoritus on keskeytynyt",
           hakemusOid);
       tiedotAtarusta.forEach(
-          ht -> setHarkinnanvaraisuudenSyyForHakutoive(ht, HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA));
+          ht ->
+              setHarkinnanvaraisuudenSyyForHakutoive(
+                  ht, HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA));
       result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);
     } else if (LocalDateTime.now().isAfter(suoritusValmisDeadline)
         && !hasValmisPeruskoulu(oppijas)) {
@@ -172,12 +173,15 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
           "Hakemus {} on suren mukaan harkinnanvarainen, koska suressa ei päättötodistusta ja deadline on ohitettu",
           hakemusOid);
       tiedotAtarusta.forEach(
-          ht -> setHarkinnanvaraisuudenSyyForHakutoive(ht, HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA));
+          ht ->
+              setHarkinnanvaraisuudenSyyForHakutoive(
+                  ht, HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA));
       result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);
     } else if (hasYksilollistettyMatAi(oppijas)) {
       LOG.info("Hakemuksella {} on suressa yksilollistetty MA_AI!", hakemusOid);
       tiedotAtarusta.forEach(
-          ht -> setHarkinnanvaraisuudenSyyForHakutoive(ht, HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI));
+          ht ->
+              setHarkinnanvaraisuudenSyyForHakutoive(ht, HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI));
       result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);
     } else {
       LOG.info(
@@ -195,7 +199,8 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                   "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy valmis pohjakoulutus!",
                   hakemusOid,
                   hh.getHakukohdeOid());
-              setHarkinnanvaraisuudenSyyForHakutoive(hh, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+              setHarkinnanvaraisuudenSyyForHakutoive(
+                  hh, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
             }
             if (hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
                 && hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(oppijas)) {
@@ -204,7 +209,8 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                       + "tai myöhäisempi suoritus ilman yksilöllistettyä matematiikkaa ja äidinkieltä!",
                   hakemusOid,
                   hh.getHakukohdeOid());
-              setHarkinnanvaraisuudenSyyForHakutoive(hh, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+              setHarkinnanvaraisuudenSyyForHakutoive(
+                  hh, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
             }
           });
       result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);

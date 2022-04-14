@@ -578,7 +578,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
   }
 
   @Test
-  public void testHarkinnanvaraisuuttaEiYliajetaJosHakukohdeEiOleHarkinnanvarainen() throws ExecutionException, InterruptedException {
+  public void testHarkinnanvaraisuuttaEiYliajetaJosHakukohdeEiOleHarkinnanvarainen()
+      throws ExecutionException, InterruptedException {
     String leikkuriPvm = "2022-06-06";
     String hakemusOid = "1.2.246.562.11.00001010667";
     String hakukohdeOid = "1.2.246.562.20.42208535556";
