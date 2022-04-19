@@ -275,30 +275,22 @@ public class HakemuksetConverterUtil {
     Map<String, AvainArvoDTO> merge = Maps.newHashMap();
     merge.putAll(hakemuksenArvot);
 
-    // fixme check if haku.isAmmatillinenJaLukio() is adequate
     if (haku.isHakemuspalvelu() && haku.isKoutaHaku() && haku.isAmmatillinenJaLukio()) {
       if (hakemuksenHarkinnanvaraisuus == null) {
         LOG.error(
             "Hakemuksen {} harkinnanvaraisuus on null, vaikka tieto pitäisi olla saatavilla!",
             hakemusDTO.getHakemusoid());
-      }
-      boolean hasHarkinnanvarainenMatAi;
-      if (hakemuksenHarkinnanvaraisuus != null) {
-        LOG.warn(
-            "Hakemus {} on harkinnanvarainen (yks_mat_ai). Pitäisköhän olla.",
-            hakemusDTO.getHakemusoid());
-        hasHarkinnanvarainenMatAi =
+      } else {
+        boolean hasHarkinnanvarainenMatAi =
             harkinnanvaraisuusAsyncResource.hasYksilollistettyMatAi(
                 hakemuksenHarkinnanvaraisuus, oppija);
-      } else {
-        LOG.warn("Hakemus ei oo harkinnanvarainen. Pitäisköhän olla.");
-        hasHarkinnanvarainenMatAi = false;
+
+        Map<String, AvainArvoDTO> harkinnanvaraisuustieto =
+            Map.of(
+                "yks_mat_ai",
+                new AvainArvoDTO("yks_mat_ai", String.valueOf(hasHarkinnanvarainenMatAi)));
+        merge.putAll(harkinnanvaraisuustieto);
       }
-      Map<String, AvainArvoDTO> harkinnanvaraisuustieto =
-          Map.of(
-              "yks_mat_ai",
-              new AvainArvoDTO("yks_mat_ai", String.valueOf(hasHarkinnanvarainenMatAi)));
-      merge.putAll(harkinnanvaraisuustieto);
     }
 
     if (fetchEnsikertalaisuus)
