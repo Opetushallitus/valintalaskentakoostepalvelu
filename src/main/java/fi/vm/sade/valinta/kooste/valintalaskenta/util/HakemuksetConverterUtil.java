@@ -190,21 +190,11 @@ public class HakemuksetConverterUtil {
   }
 
   private boolean hasPKVuosiBefore2018(List<AvainArvoDTO> vals) {
-    LOG.info("check, vals: {}", vals);
     return vals.stream()
         .anyMatch(
             aa ->
                 PK_PAATTOTODISTUSVUOSI.equals(aa.getAvain())
                     && Integer.parseInt(aa.getArvo()) < 2018);
-  }
-
-  private boolean containsLukioPohjakoulutus(List<AvainArvoDTO> vals) {
-    LOG.info("check, vals for lukio: {}", vals);
-    return vals.stream()
-        .anyMatch(
-            aa ->
-                POHJAKOULUTUS.equals(aa.getAvain())
-                    && PohjakoulutusToinenAste.YLIOPPILAS.equals(aa.getArvo()));
   }
 
   public void mergeKeysOfOppijaAndHakemus(
@@ -251,25 +241,31 @@ public class HakemuksetConverterUtil {
     LOG.info("Suren arvosanat {}", surenArvosanat);
 
     List<AvainArvoDTO> suoritusValues = new ArrayList<>(suoritustenTiedot.values());
-    List<AvainArvoDTO> foo =
-        AtaruArvosanaParser.convertAtaruArvosanas(
-            hakemuksenArvot, containsLukioPohjakoulutus(suoritusValues));
+
     Map<String, AvainArvoDTO> ataruArvosanat =
-        toAvainMap(foo, hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+        toAvainMap(
+            AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot),
+            hakemusDTO.getHakemusoid(),
+            hakukohdeOid,
+            errors);
 
     if (hasPKVuosiBefore2018(suoritusValues)) {
-
+      if (!surenArvosanat.isEmpty()) {
+        LOG.warn(
+            "Käytetään hakemukselle {} atarun arvosanoja {}, vaikka surestakin löytyi: {}. Osa tiedoista saatetaan yliajaa.",
+            hakemusDTO.getHakemusoid(),
+            ataruArvosanat,
+            surenArvosanat);
+      }
       LOG.info(
           "Käytetään hakemuksen arvosanoja hakemukselle {}: {}",
           hakemusDTO.getHakemusoid(),
           ataruArvosanat.values());
-      if (!surenArvosanat.isEmpty()) {
-        LOG.warn(
-            "Käytetään hakemukselle {} atarun arvosanoja, vaikka surestakin löytyi: {}",
-            hakemusDTO.getHakemusoid(),
-            surenArvosanat);
-      }
       merge.putAll(ataruArvosanat);
+    } else if (!ataruArvosanat.isEmpty()) {
+      LOG.warn(
+          "Ataruhakemuksella on arvosanoja, vaikka pohjakoulutusvuosi on 2018 tai sen jälkeen. Ei käytetä hakemuksen {} arvosanoja!",
+          hakemusDTO.getHakemusoid());
     }
 
     merge.putAll(ammatillisenKielikokeetSuresta);

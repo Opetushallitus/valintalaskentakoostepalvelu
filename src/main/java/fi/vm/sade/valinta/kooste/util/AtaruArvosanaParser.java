@@ -11,39 +11,34 @@ import org.slf4j.LoggerFactory;
 public class AtaruArvosanaParser {
   private static final Logger LOG = LoggerFactory.getLogger(AtaruArvosanaParser.class);
 
-  public static List<AvainArvoDTO> convertAtaruArvosanas(
-      Map<String, AvainArvoDTO> keyValues, boolean isLukio) {
+  public static List<AvainArvoDTO> convertAtaruArvosanas(Map<String, AvainArvoDTO> keyValues) {
+    // Toisen asteen ataruhakemuksilta löytyy tällä hetkellä vain peruskoulun arvosanoja
     String prefix = "PK_";
-    if (isLukio) {
-      prefix = "LK_";
-    }
+
     LOG.info("convertAtaruArvosanas: {}", keyValues);
     List<AvainArvoDTO> r = new ArrayList<>();
     for (Map.Entry<String, AvainArvoDTO> entry : keyValues.entrySet()) {
       String key = entry.getKey();
       if (key.startsWith("arvosana")) {
         try {
-          // String aineKey = key.split("-")[1].split("_")[0];
           String aineKey = StringUtils.substringBetween(key, "arvosana-", "_group");
           if (aineKey.equals("A")) {
             aineKey = "AI";
           }
-          String jarj = "";
+          String valSuffix = "";
           if (!key.endsWith("0")) {
-            jarj = "_VAL" + key.substring(key.length() - 1);
+            valSuffix = "_VAL" + key.substring(key.length() - 1);
           }
-          String aine = prefix + aineKey + jarj;
+          String aine = prefix + aineKey + valSuffix;
           String arvosana = StringUtils.substringAfterLast(entry.getValue().getArvo(), "-");
-          LOG.debug("key " + key + ", result " + aineKey + jarj);
+          LOG.debug("key " + key + ", result " + aineKey + valSuffix);
           r.add(new AvainArvoDTO(aine, arvosana));
 
         } catch (Exception e) {
-          LOG.error("Vikaan meni: " + e.getMessage());
+          LOG.error("Virhe {} parsittaessa ataruarvosanaa {} ", e.getMessage(), entry);
         }
       }
     }
-    LOG.info("result: {}", r);
-
     return r;
   }
 }
