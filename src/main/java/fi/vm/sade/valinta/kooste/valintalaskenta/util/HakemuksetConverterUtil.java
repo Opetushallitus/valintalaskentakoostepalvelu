@@ -197,15 +197,6 @@ public class HakemuksetConverterUtil {
                     && Integer.parseInt(aa.getArvo()) < 2018);
   }
 
-  private boolean containsLukioPohjakoulutus(List<AvainArvoDTO> vals) {
-    LOG.info("check, vals for lukio: {}", vals);
-    return vals.stream()
-        .anyMatch(
-            aa ->
-                POHJAKOULUTUS.equals(aa.getAvain())
-                    && PohjakoulutusToinenAste.YLIOPPILAS.equals(aa.getArvo()));
-  }
-
   public void mergeKeysOfOppijaAndHakemus(
       boolean hakijallaOnHenkilotunnus,
       Haku haku,
