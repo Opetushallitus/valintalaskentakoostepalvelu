@@ -358,4 +358,14 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                   return CompletableFuture.completedFuture(result);
                 }));
   }
+
+  @Override
+  public Boolean hasYksilollistettyMatAi(HakemuksenHarkinnanvaraisuus h, Oppija o) {
+    boolean isYksMatAi =
+        syncHarkinnanvaraisuusForHakemus(
+                h.getHakemusOid(), o.getOppijanumero(), h.getHakutoiveet(), List.of(o))
+            .hasYksilollistettyMatAi();
+    LOG.info("hasYksilollistettyMatAi? {} : {} ", h.getHakemusOid(), isYksMatAi);
+    return isYksMatAi;
+  }
 }

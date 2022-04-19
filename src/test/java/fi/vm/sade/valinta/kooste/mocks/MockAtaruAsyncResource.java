@@ -30,6 +30,12 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   }
 
   @Override
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(
+      String hakukohdeOid, boolean withHarkinnanvaraisuustieto) {
+    return CompletableFuture.completedFuture(byHakukohdeRes);
+  }
+
+  @Override
   public CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(List<String> oids) {
     return CompletableFuture.completedFuture(byOidsResult);
   }

@@ -12,11 +12,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import com.github.npathai.hamcrestopt.OptionalMatchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
@@ -52,6 +54,9 @@ import org.junit.rules.ExpectedException;
 public class HakemuksetConverterUtilTest {
 
   @Rule public ExpectedException expected = ExpectedException.none();
+
+  private final HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource =
+      mock(HarkinnanvaraisuusAsyncResource.class);
 
   private static final Haku haku =
       new Haku(
@@ -322,7 +327,8 @@ public class HakemuksetConverterUtilTest {
 
   @Before
   public void setup() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("9999-12-31");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
   }
 
   @Test
@@ -436,7 +442,8 @@ public class HakemuksetConverterUtilTest {
   @Test
   public void
       pohjakoulutusLukioJosHakemuksellaLukioJaLukioSuoritusKeskeytynytHakukaudellaJaLeikkuriPvmOnTulevaisuudessa() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("9999-12-31");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -460,7 +467,8 @@ public class HakemuksetConverterUtilTest {
   @Test
   public void
       pohjakoulutusPeruskouluJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaAbiturientti() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -478,7 +486,8 @@ public class HakemuksetConverterUtilTest {
   @Test
   public void
       pohjakoulutusLukioJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaEIAbiturientti() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -496,7 +505,8 @@ public class HakemuksetConverterUtilTest {
   @Test(expected = RuntimeException.class)
   public void
       pohjakoulutusHeittaaPoikkeuksenJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessa() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(

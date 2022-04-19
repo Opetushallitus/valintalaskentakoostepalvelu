@@ -64,6 +64,10 @@
   <bean id="ValinnanvaiheenValintakoekutsutService"
         class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
 
+  <!-- Harkinnanvaraisuus Async -->
+  <bean id="HarkinnanvaraisuusAsyncResource"
+        class="fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl.HarkinnanvaraisuusAsyncResourceImpl" />
+
   <bean class="fi.vm.sade.javautils.opintopolku_spring_security.OidProvider">
     <constructor-arg index="0" value="http://localhost"/>
     <constructor-arg index="1" value="1.2.246.562.10.00000000001"/>

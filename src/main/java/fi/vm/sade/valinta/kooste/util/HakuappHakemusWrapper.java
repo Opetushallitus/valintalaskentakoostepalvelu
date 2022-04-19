@@ -604,7 +604,7 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
 
   @Override
   public List<AtaruHakutoive> ataruHakutoiveet() {
-    return null;
+    return Collections.emptyList();
   }
 
   private Map<String, String> getHakutoiveet() {
