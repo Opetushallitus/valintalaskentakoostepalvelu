@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl;
 
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -575,5 +577,99 @@ public class HarkinnavaraisuusAsyncResourceTest {
                         .getHarkinnanvaraisuudenSyy()
                         .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
             .count());
+  }
+
+  @Test
+  public void suorituksenPerusteellaYksMatAi() {
+    String leikkuriPvm = "2022-06-06";
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    String hakukohdeOid = "1.2.246.562.20.88759381234";
+    String hakemusOid = "1.2.246.562.11.00001131111";
+    String henkiloOid1 = "1.2.246.562.24.47613331111";
+
+    Suoritus pkSuoritusValmis = new Suoritus();
+    pkSuoritusValmis.setHenkiloOid(henkiloOid1);
+    pkSuoritusValmis.setKomo(PK_KOMO);
+    pkSuoritusValmis.setTila("VALMIS");
+    pkSuoritusValmis.setValmistuminen("6.6.2019");
+    pkSuoritusValmis.setVahvistettu(true);
+    pkSuoritusValmis.setLahdeArvot(Map.of("yksilollistetty_ma_ai", "true"));
+
+    SuoritusJaArvosanat sa1 = new SuoritusJaArvosanat();
+    sa1.setSuoritus(pkSuoritusValmis);
+
+    Oppija o1 = new Oppija();
+    o1.setSuoritukset(List.of(sa1));
+    o1.setOppijanumero(henkiloOid1);
+
+    HakemuksenHarkinnanvaraisuus eiHark =
+        new HakemuksenHarkinnanvaraisuus(
+            hakemusOid,
+            List.of(
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
+
+    boolean isYksMatAi = h.hasYksilollistettyMatAi(eiHark, o1);
+    assertTrue(isYksMatAi);
+  }
+
+  @Test
+  public void suorituksenPerusteellaEiYksMatAi() {
+    String leikkuriPvm = "2022-06-06";
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    String hakukohdeOid = "1.2.246.562.20.88759381234";
+    String hakemusOid = "1.2.246.562.11.00001131111";
+    String henkiloOid1 = "1.2.246.562.24.47613331111";
+
+    Suoritus pkSuoritusValmis = new Suoritus();
+    pkSuoritusValmis.setHenkiloOid(henkiloOid1);
+    pkSuoritusValmis.setKomo(PK_KOMO);
+    pkSuoritusValmis.setTila("VALMIS");
+    pkSuoritusValmis.setValmistuminen("6.6.2019");
+    pkSuoritusValmis.setVahvistettu(true);
+    pkSuoritusValmis.setLahdeArvot(Collections.emptyMap());
+
+    SuoritusJaArvosanat sa1 = new SuoritusJaArvosanat();
+    sa1.setSuoritus(pkSuoritusValmis);
+
+    Oppija o1 = new Oppija();
+    o1.setSuoritukset(List.of(sa1));
+    o1.setOppijanumero(henkiloOid1);
+
+    HakemuksenHarkinnanvaraisuus eiHark =
+        new HakemuksenHarkinnanvaraisuus(
+            hakemusOid,
+            List.of(
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid, HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)));
+
+    boolean isYksMatAi = h.hasYksilollistettyMatAi(eiHark, o1);
+    assertFalse(isYksMatAi);
+  }
+
+  @Test
+  public void hakemuksenPerusteellaYksMatAi() {
+    String leikkuriPvm = "2022-06-06";
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    String hakukohdeOid = "1.2.246.562.20.88759381234";
+    String hakemusOid = "1.2.246.562.11.00001131111";
+    String henkiloOid1 = "1.2.246.562.24.47613331111";
+
+    Oppija o1 = new Oppija();
+    o1.setSuoritukset(Collections.emptyList());
+    o1.setOppijanumero(henkiloOid1);
+
+    HakemuksenHarkinnanvaraisuus eiHark =
+        new HakemuksenHarkinnanvaraisuus(
+            hakemusOid,
+            List.of(
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid, HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)));
+
+    boolean isYksMatAi = h.hasYksilollistettyMatAi(eiHark, o1);
+    assertTrue(isYksMatAi);
   }
 }
