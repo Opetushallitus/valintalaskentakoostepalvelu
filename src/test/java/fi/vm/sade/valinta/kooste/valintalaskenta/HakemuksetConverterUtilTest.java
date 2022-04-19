@@ -1668,6 +1668,128 @@ public class HakemuksetConverterUtilTest {
     assertEquals("SV", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PERUSOPETUS_KIELI));
   }
 
+  //        "birth-date": "25.03.1958",
+  //                "base-education-2nd": "6",
+  //                "arvosana-KO_group0": "arvosana-KO-8",
+  //                "oppiaine-valinnainen-kieli_group0": "",
+  //                "arvosana-valinnainen-kieli_group0": "",
+  //                "6a5e1a0f-f47e-479e-884a-765b85bd438c": "",
+  //                "first-name": "Taneli Testi",
+  //                "arvosana-FY_group0": "arvosana-FY-7",
+  //                "oppimaara-kieli-valinnainen-kieli_group0": "",
+  //                "oppimaara-kieli-A1_group0": "EN",
+  //                "arvosana-KE_group0": "arvosana-KE-6",
+  //                "oppimaara-a_group1": "suomi-aidinkielena",
+  //                "ssn": "250358-905P",
+  //                "preferred-name": "Taneli",
+  //                "home-town": "091",
+  //                "bc159ab3-2f23-41ca-8b05-4b8573d408e7": "2009",
+  //                "arvosana-A1_group0": "arvosana-A1-6",
+  //                "66a6855f-d807-4331-98ea-f14098281fc1": "",
+  //                "oppimaara-a-valinnainen-kieli_group0": "",
+  //                "arvosana-KU_group0": "arvosana-KU-6",
+  //                "arvosana-HI_group0": "arvosana-HI-8",
+  //                "postal-code": "00100",
+  //                "nationality_group0": "246",
+  //                "gender": "1",
+  //                "email": "hakija-32525045@oph.fi",
+  //                "oppimaara-a_group0": "suomi-aidinkielena",
+  //                "6c10a11a-ce87-4198-818a-e06c305c1880": "1",
+  //                "matematiikka-ja-aidinkieli-yksilollistetty_2": "1",
+  //                "pohjakoulutus_kieli": "fi",
+  //                "last-name": "Tiihonen-Testi",
+  //                "arvosana-KA_group0": "arvosana-KA-7",
+  //                "arvosana-TY_group0": "arvosana-TY-8",
+  //                "address": "Punkkapolku 899",
+  //                "arvosana-MU_group0": "arvosana-MU-7",
+  //                "66a6855f-d807-4331-98ea-f14098281fc1_1.2.246.562.20.00000000000000006443": "0",
+  //                "valintatuloksen-julkaisulupa": "Kyllä",
+  //                "asiointikieli": "1",
+  //                "koulutusmarkkinointilupa": "Kyllä",
+  //                "arvosana-GE_group0": "arvosana-GE-8",
+  //                "arvosana-TT_group0": "arvosana-TT-8",
+  //                "arvosana-A_group1": "arvosana-A-10",
+  //                "arvosana-YH_group0": "arvosana-YH-6",
+  //                "arvosana-LI_group0": "arvosana-LI-9",
+  //                "arvosana-A_group0": "arvosana-A-10",
+  //                "pohjakoulutus_vuosi": "2009",
+  //                "oppimaara-kieli-B1_group0": "SV",
+  //                "arvosana-BI_group0": "arvosana-BI-9",
+  //                "arvosana-B1_group0": "arvosana-B1-6",
+  //                "arvosana-MA_group0": "arvosana-MA-6"
+  @Test
+  public void arvosanatAtaruhakemukselta() {
+    HakemusDTO hakemus = new HakemusDTO();
+    hakemus.setHakemusoid(HAKEMUS1_OID);
+    hakemus.setAvaimet(
+        new ArrayList<>() {
+          {
+            add(new AvainArvoDTO(hakemuksetConverterUtil.ATARU_POHJAKOULUTUS_VUOSI, "2009"));
+            add(new AvainArvoDTO("arvosana-KO_group0", "arvosana-KO-8"));
+            add(new AvainArvoDTO("arvosana-FY_group0", "arvosana-FY-7"));
+            add(new AvainArvoDTO("arvosana-TT_group0", "arvosana-TT-8"));
+            add(new AvainArvoDTO("arvosana-MA_group0", "arvosana-MA-6"));
+            add(new AvainArvoDTO("arvosana-B1_group0", "arvosana-B1-6"));
+            add(new AvainArvoDTO("arvosana-BI_group0", "arvosana-BI-9"));
+            add(new AvainArvoDTO("arvosana-A_group0", "arvosana-A-10"));
+            add(new AvainArvoDTO("arvosana-A_group1", "arvosana-A-9"));
+            add(new AvainArvoDTO("arvosana-KO_group0", "arvosana-KO-8"));
+            add(new AvainArvoDTO("arvosana-KO_group0", "arvosana-KO-8"));
+            add(new AvainArvoDTO("arvosana-KO_group0", "arvosana-KO-8"));
+          }
+        });
+    Oppija oppija =
+        new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus()
+            .setSuoritusKieli("FI")
+            .setLukio()
+            .setVahvistettu(false)
+            .setMyontaja(HAKEMUS1_OID)
+            .setValmistuminen("1.1.2014")
+            .setKesken()
+            .build()
+            .build();
+    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+        false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
+    //    final String pk_arvosana = firstHakemusArvo(hakemus, "PK_AI").get();
+    //    final String pk_val_arvosana = firstHakemusArvo(hakemus, "PK_AI_VAL1").get();
+    //    assertEquals("10", pk_arvosana);
+    //    assertEquals("9", pk_val_arvosana);
+    assertEquals("10", firstHakemusArvo(hakemus, "PK_AI").orElse("notFound"));
+    assertEquals("9", firstHakemusArvo(hakemus, "PK_AI_VAL1").orElse("notFound"));
+    // assertFalse(hakemus.getAvaimet().stream().anyMatch(a -> a.getAvain().equals("PK_BI_VAL2")));
+    // assertFalse(hakemus.getAvaimet().stream().anyMatch(a -> a.getAvain().equals("PK_BI")));
+    assertEquals("8", firstHakemusArvo(hakemus, "PK_TT").orElse("notFound"));
+  }
+
+  @Test
+  public void suoritusvuosiAtaruhakemukselta() {
+    HakemusDTO hakemus = new HakemusDTO();
+    hakemus.setHakemusoid(HAKEMUS1_OID);
+    hakemus.setAvaimet(
+        new ArrayList<>() {
+          {
+            add(new AvainArvoDTO(hakemuksetConverterUtil.ATARU_POHJAKOULUTUS_VUOSI, "2019"));
+          }
+        });
+    Oppija oppija =
+        new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus()
+            .setSuoritusKieli("FI")
+            .setLukio()
+            .setVahvistettu(false)
+            .setMyontaja(HAKEMUS1_OID)
+            .setValmistuminen("1.1.2014")
+            .setKesken()
+            .build()
+            .build();
+
+    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+        false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
+    assertEquals(
+        "2019", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PK_PAATTOTODISTUSVUOSI));
+  }
+
   @Test
   public void hakemukseltaKopioituMuokattuLukioKieli() {
     HakemusDTO hakemus = new HakemusDTO();

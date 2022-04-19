@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
+import fi.vm.sade.valinta.kooste.util.AtaruArvosanaParser;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
@@ -28,6 +29,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
 import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +52,8 @@ public class HakemuksetConverterUtil {
   public static final String PK_PAATTOTODISTUSVUOSI = "PK_PAATTOTODISTUSVUOSI";
   public static final String LK_PAATTOTODISTUSVUOSI = "lukioPaattotodistusVuosi";
   public static final String PERUSOPETUS_KIELI = "perusopetuksen_kieli";
+  public static final String ATARU_POHJAKOULUTUS_KIELI = "pohjakoulutus_kieli";
+  public static final String ATARU_POHJAKOULUTUS_VUOSI = "pohjakoulutus_vuosi";
   public static final String LUKIO_KIELI = "lukion_kieli";
   public static final String POHJAKOULUTUS = "POHJAKOULUTUS";
   public static final String POHJAKOULUTUS_ATARU = "base-education-2nd";
@@ -185,6 +189,24 @@ public class HakemuksetConverterUtil {
     return hakemusDtot;
   }
 
+  private boolean hasPKVuosiBefore2018(List<AvainArvoDTO> vals) {
+    LOG.info("check, vals: {}", vals);
+    return vals.stream()
+        .anyMatch(
+            aa ->
+                PK_PAATTOTODISTUSVUOSI.equals(aa.getAvain())
+                    && Integer.parseInt(aa.getArvo()) < 2018);
+  }
+
+  private boolean containsLukioPohjakoulutus(List<AvainArvoDTO> vals) {
+    LOG.info("check, vals for lukio: {}", vals);
+    return vals.stream()
+        .anyMatch(
+            aa ->
+                POHJAKOULUTUS.equals(aa.getAvain())
+                    && PohjakoulutusToinenAste.YLIOPPILAS.equals(aa.getArvo()));
+  }
+
   public void mergeKeysOfOppijaAndHakemus(
       boolean hakijallaOnHenkilotunnus,
       Haku haku,
@@ -204,6 +226,7 @@ public class HakemuksetConverterUtil {
             hakemusDTO.getHakemusoid(),
             hakukohdeOid,
             errors);
+    LOG.info("Suren arvosanat: {}", surenArvosanat);
     Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta =
         toAvainMap(
             AmmatillisenKielikoetuloksetSurestaConverter.convert(
@@ -216,15 +239,45 @@ public class HakemuksetConverterUtil {
     merge.putAll(hakemuksenArvot);
     if (fetchEnsikertalaisuus)
       ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
-    merge.putAll(
+    Map<String, AvainArvoDTO> suoritustenTiedot =
         suoritustenTiedot(haku, hakemusDTO, oppija.getSuoritukset()).entrySet().stream()
             .collect(
                 Collectors.toMap(
-                    Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
+                    Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue())));
+
+    LOG.info("SuoritustenTiedot {}", suoritustenTiedot);
+    merge.putAll(suoritustenTiedot);
     merge.putAll(surenArvosanat);
+    LOG.info("Suren arvosanat {}", surenArvosanat);
+
+    List<AvainArvoDTO> suoritusValues = new ArrayList<>(suoritustenTiedot.values());
+    List<AvainArvoDTO> foo =
+        AtaruArvosanaParser.convertAtaruArvosanas(
+            hakemuksenArvot, containsLukioPohjakoulutus(suoritusValues));
+    Map<String, AvainArvoDTO> ataruArvosanat =
+        toAvainMap(foo, hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+
+    if (hasPKVuosiBefore2018(suoritusValues)) {
+
+      LOG.info(
+          "Käytetään hakemuksen arvosanoja hakemukselle {}: {}",
+          hakemusDTO.getHakemusoid(),
+          ataruArvosanat.values());
+      if (!surenArvosanat.isEmpty()) {
+        LOG.warn(
+            "Käytetään hakemukselle {} atarun arvosanoja, vaikka surestakin löytyi: {}",
+            hakemusDTO.getHakemusoid(),
+            surenArvosanat);
+      }
+      merge.putAll(ataruArvosanat);
+    }
+
     merge.putAll(ammatillisenKielikokeetSuresta);
     hakemusDTO.setAvaimet(
-        merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
+        merge.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .filter(val -> val != null && val.getAvain() != null && val.getArvo() != null)
+            .collect(Collectors.toList()));
   }
 
   private void ensikertalaisuus(
@@ -551,9 +604,13 @@ public class HakemuksetConverterUtil {
     pkPaattotodistusvuosi(hakemus, suoritukset)
         .ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
 
-    // fixme opetuskielet ataruhakemukselta
-    pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
+    if (pohjakoulutus.isPresent()
+        && pohjakoulutus.get().equals(PohjakoulutusToinenAste.YLIOPPILAS)) {
+      lukioOpetuskieliAtaru(hakemus, suoritukset)
+          .ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
+    }
     lukioOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
+    pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
 
     pohjakoulutus.ifPresent(pk -> tiedot.putAll(automaticDiscretionaryOptions(pk, haku, hakemus)));
     suoritustilat(predicates, suoritukset).entrySet().stream()
@@ -668,11 +725,12 @@ public class HakemuksetConverterUtil {
             suoritukset.stream()
                 .filter(s -> wrap(s).isPerusopetus() && (wrap(s).isValmis() || wrap(s).isKesken()))
                 .map(s -> wrap(s).getValmistuminenAsDateTime().getYear()),
-            hakemus
-                .getAvaimet()
-                .stream() // fixme, tämä tieto tarvitaan myös ataruhakemukselle, nykyisellä
-                // avaimella ei varmaan löydy
-                .filter(a -> PK_PAATTOTODISTUSVUOSI.equals(a.getAvain()))
+            hakemus.getAvaimet().stream()
+                .filter(
+                    a ->
+                        PK_PAATTOTODISTUSVUOSI.equals(a.getAvain())
+                            || (ATARU_POHJAKOULUTUS_VUOSI.equals(a.getAvain())
+                                && a.getArvo() != null))
                 .map(a -> Integer.valueOf(a.getArvo())))
         .findFirst();
   }
@@ -685,7 +743,24 @@ public class HakemuksetConverterUtil {
                 .map(s -> wrap(s).getSuoritusJaArvosanat().getSuoritus().getSuoritusKieli())
                 .filter(s -> !StringUtils.isEmpty(s)),
             hakemus.getAvaimet().stream()
-                .filter(a -> PERUSOPETUS_KIELI.equals(a.getAvain()))
+                .filter(
+                    a ->
+                        PERUSOPETUS_KIELI.equals(a.getAvain())
+                            || (ATARU_POHJAKOULUTUS_KIELI.equals(a.getAvain())
+                                && a.getArvo() != null))
+                .map(a -> a.getArvo()))
+        .findFirst();
+  }
+
+  private Optional<String> lukioOpetuskieliAtaru(
+      HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+    return Stream.concat(
+            suoritukset.stream()
+                .filter(s -> wrap(s).isLukio() && (wrap(s).isValmis() || wrap(s).isKesken()))
+                .map(s -> wrap(s).getSuoritusJaArvosanat().getSuoritus().getSuoritusKieli())
+                .filter(s -> !StringUtils.isEmpty(s)),
+            hakemus.getAvaimet().stream()
+                .filter(a -> ATARU_POHJAKOULUTUS_KIELI.equals(a.getAvain()) && a.getArvo() != null)
                 .map(a -> a.getArvo()))
         .findFirst();
   }
