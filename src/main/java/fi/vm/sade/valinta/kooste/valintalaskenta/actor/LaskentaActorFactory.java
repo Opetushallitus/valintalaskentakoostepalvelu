@@ -590,11 +590,14 @@ public class LaskentaActorFactory {
 
     CompletableFuture<List<HakemusWrapper>> hakemukset;
     if (haku.isHakemuspalvelu()) {
+      boolean haetaanHarkinnanvaraisuudet = haku.isAmmatillinenJaLukio() && haku.isKoutaHaku();
       hakemukset =
           createResurssiFuture(
               tunniste,
               "applicationAsyncResource.getApplications",
-              () -> ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid),
+              () ->
+                  ataruAsyncResource.getApplicationsByHakukohde(
+                      hakukohdeOid, haetaanHarkinnanvaraisuudet),
               retryHakemuksetAndOppijat);
     } else {
       hakemukset =

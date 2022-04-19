@@ -12,6 +12,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.common.collect.Maps;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.dto.HakemuksenHarkinnanvaraisuus;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.dto.HakutoiveenHarkinnanvaraisuus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
@@ -42,6 +45,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -62,11 +66,16 @@ public class HakemuksetConverterUtil {
 
   private final LocalDateTime abienPohjaKoulutusPaattelyLeikkuriPvm;
 
+  private final HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource;
+
+  @Autowired
   public HakemuksetConverterUtil(
       @Value("${valintalaskentakoostepalvelu.abi.pohjakoulutus.paattely.leikkuripvm:2020-06-01}")
-          String abienPohjaKoulutusPaattelyLeikkuriPvm) {
+          String abienPohjaKoulutusPaattelyLeikkuriPvm,
+      HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource) {
     this.abienPohjaKoulutusPaattelyLeikkuriPvm =
         LocalDate.parse(abienPohjaKoulutusPaattelyLeikkuriPvm).atStartOfDay();
+    this.harkinnanvaraisuusAsyncResource = harkinnanvaraisuusAsyncResource;
   }
 
   private void tryToMergeKeysOfOppijaAndHakemus(
@@ -77,7 +86,8 @@ public class HakemuksetConverterUtil {
       Map<String, Exception> errors,
       Map<String, Oppija> personOidToOppija,
       Map<String, Boolean> hasHetu,
-      HakemusDTO h) {
+      HakemusDTO h,
+      HakemuksenHarkinnanvaraisuus hakemuksenHarkinnanvaraisuus) {
     try {
       String personOid = h.getHakijaOid();
       if (personOidToOppija.containsKey(personOid)) {
@@ -90,7 +100,8 @@ public class HakemuksetConverterUtil {
             errors,
             oppija,
             h,
-            fetchEnsikertalaisuus);
+            fetchEnsikertalaisuus,
+            hakemuksenHarkinnanvaraisuus);
       } else {
         LOG.warn(
             String.format("BUG-2034 : Oppijatietoa ei löytynyt oppijanumerolla %s.", personOid));
@@ -111,6 +122,29 @@ public class HakemuksetConverterUtil {
       Boolean fetchEnsikertalaisuus,
       boolean shouldUseApplicationPersonOid) {
     ensurePersonOids(hakemukset, hakukohdeOid);
+
+    Map<String, HakemuksenHarkinnanvaraisuus> harkinnanvaraisuusByHakemus = new HashMap<>();
+    LOG.info("aaa {}", hakemukset);
+    if (haku.isKoutaHaku() && haku.isHakemuspalvelu() && haku.isAmmatillinenJaLukio()) {
+      List<HakemuksenHarkinnanvaraisuus> hhs =
+          hakemukset.stream()
+              .map(
+                  hakemus ->
+                      new HakemuksenHarkinnanvaraisuus(
+                          hakemus.getOid(),
+                          hakemus.ataruHakutoiveet().stream()
+                              .map(
+                                  ht ->
+                                      new HakutoiveenHarkinnanvaraisuus(
+                                          ht.getHakukohdeOid(), ht.getHarkinnanvaraisuus()))
+                              .collect(Collectors.toList())))
+              .collect(Collectors.toList());
+
+      for (HakemuksenHarkinnanvaraisuus h : hhs) {
+        harkinnanvaraisuusByHakemus.put(h.getHakemusOid(), h);
+      }
+    }
+
     List<HakemusDTO> hakemusDtot =
         hakemuksetToHakemusDTOs(
             hakukohdeOid,
@@ -129,6 +163,7 @@ public class HakemuksetConverterUtil {
         parametritDTO,
         fetchEnsikertalaisuus,
         hakemusDtot,
+        harkinnanvaraisuusByHakemus,
         hasHetu,
         errors);
   }
@@ -140,6 +175,7 @@ public class HakemuksetConverterUtil {
       ParametritDTO parametritDTO,
       Boolean fetchEnsikertalaisuus,
       List<HakemusDTO> hakemusDtot,
+      Map<String, HakemuksenHarkinnanvaraisuus> harkinnanvaraisuusByHakemus,
       Map<String, Boolean> hasHetu,
       Map<String, Exception> errors) {
     try {
@@ -160,7 +196,8 @@ public class HakemuksetConverterUtil {
                     errors,
                     personOidToOppija,
                     hasHetu,
-                    h));
+                    h,
+                    harkinnanvaraisuusByHakemus.get(h.getHakemusoid())));
       } else {
         LOG.warn(
             String.format(
@@ -194,6 +231,29 @@ public class HakemuksetConverterUtil {
       Oppija oppija,
       HakemusDTO hakemusDTO,
       Boolean fetchEnsikertalaisuus) {
+    mergeKeysOfOppijaAndHakemus(
+        hakijallaOnHenkilotunnus,
+        haku,
+        hakukohdeOid,
+        parametritDTO,
+        errors,
+        oppija,
+        hakemusDTO,
+        fetchEnsikertalaisuus,
+        null);
+  }
+
+  public void mergeKeysOfOppijaAndHakemus(
+      boolean hakijallaOnHenkilotunnus,
+      Haku haku,
+      String hakukohdeOid,
+      ParametritDTO parametritDTO,
+      Map<String, Exception> errors,
+      Oppija oppija,
+      HakemusDTO hakemusDTO,
+      Boolean fetchEnsikertalaisuus,
+      HakemuksenHarkinnanvaraisuus hakemuksenHarkinnanvaraisuus) {
+
     hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
     Map<String, AvainArvoDTO> hakemuksenArvot =
         toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
@@ -214,6 +274,33 @@ public class HakemuksetConverterUtil {
 
     Map<String, AvainArvoDTO> merge = Maps.newHashMap();
     merge.putAll(hakemuksenArvot);
+
+    // fixme check if haku.isAmmatillinenJaLukio() is adequate
+    if (haku.isHakemuspalvelu() && haku.isKoutaHaku() && haku.isAmmatillinenJaLukio()) {
+      if (hakemuksenHarkinnanvaraisuus == null) {
+        LOG.error(
+            "Hakemuksen {} harkinnanvaraisuus on null, vaikka tieto pitäisi olla saatavilla!",
+            hakemusDTO.getHakemusoid());
+      }
+      boolean hasHarkinnanvarainenMatAi;
+      if (hakemuksenHarkinnanvaraisuus != null) {
+        LOG.warn(
+            "Hakemus {} on harkinnanvarainen (yks_mat_ai). Pitäisköhän olla.",
+            hakemusDTO.getHakemusoid());
+        hasHarkinnanvarainenMatAi =
+            harkinnanvaraisuusAsyncResource.hasYksilollistettyMatAi(
+                hakemuksenHarkinnanvaraisuus, oppija);
+      } else {
+        LOG.warn("Hakemus ei oo harkinnanvarainen. Pitäisköhän olla.");
+        hasHarkinnanvarainenMatAi = false;
+      }
+      Map<String, AvainArvoDTO> harkinnanvaraisuustieto =
+          Map.of(
+              "yks_mat_ai",
+              new AvainArvoDTO("yks_mat_ai", String.valueOf(hasHarkinnanvarainenMatAi)));
+      merge.putAll(harkinnanvaraisuustieto);
+    }
+
     if (fetchEnsikertalaisuus)
       ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
     merge.putAll(

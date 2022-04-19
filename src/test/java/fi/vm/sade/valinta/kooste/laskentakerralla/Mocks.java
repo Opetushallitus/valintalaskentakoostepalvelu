@@ -6,6 +6,7 @@ import static org.mockito.Mockito.spy;
 
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -30,6 +31,8 @@ public class Mocks {
       mock(ValintalaskentaKerrallaRouteValvomo.class);
   static ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
   static AtaruAsyncResource ataruAsyncResource = mock(AtaruAsyncResource.class);
+  static HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource =
+      mock(HarkinnanvaraisuusAsyncResource.class);
   static ValintaperusteetAsyncResource valintaperusteetAsyncResource =
       mock(ValintaperusteetAsyncResource.class);
   static OhjausparametritAsyncResource ohjausparametritAsyncResource =
@@ -47,7 +50,7 @@ public class Mocks {
       mock(ValintapisteAsyncResource.class);
   static KoskiService koskiService = mock(KoskiService.class);
   static HakemuksetConverterUtil hakemuksetConverterUtil =
-      new HakemuksetConverterUtil("9999-12-31");
+      new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
   static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
       new MockOppijanumerorekisteriAsyncResource();
   static LaskentaActorSystem laskentaActorSystem =

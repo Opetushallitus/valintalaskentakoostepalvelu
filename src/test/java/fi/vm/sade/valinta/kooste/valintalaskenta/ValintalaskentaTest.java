@@ -19,6 +19,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -81,13 +82,16 @@ public class ValintalaskentaTest {
   private final LaskentaSeurantaAsyncResource seurantaAsyncResource =
       mock(LaskentaSeurantaAsyncResource.class);
   private final TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
+  private final HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource =
+      mock(HarkinnanvaraisuusAsyncResource.class);
+
   private final OhjausparametritAsyncResource ohjausparametritAsyncResource =
       mock(OhjausparametritAsyncResource.class);
   private final ValintapisteAsyncResource valintapisteAsyncResource =
       mock(ValintapisteAsyncResource.class);
   private final KoskiService koskiService = mock(KoskiService.class);
   private final HakemuksetConverterUtil hakemuksetConverterUtil =
-      new HakemuksetConverterUtil("9999-12-31");
+      new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
   static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
       new MockOppijanumerorekisteriAsyncResource();
   private final LaskentaActorSystem laskentaActorSystem =
@@ -387,13 +391,13 @@ public class ValintalaskentaTest {
   @Test
   public void onnistuneestaValintalaskennastaAtaruHaullePidetaanKirjaaSeurantapalveluun()
       throws InterruptedException {
-    when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid))
+    when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid, false))
         .thenReturn(
             CompletableFuture.completedFuture(
                 Collections.singletonList(
                     MockAtaruAsyncResource.getAtaruHakemusWrapper(
                         "1.2.246.562.11.00000000000000000063"))));
-    when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2))
+    when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2, false))
         .thenReturn(
             CompletableFuture.completedFuture(
                 Collections.singletonList(
@@ -428,8 +432,8 @@ public class ValintalaskentaTest {
     Thread.sleep(500);
 
     verify(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
-    verify(ataruAsyncResource).getApplicationsByHakukohde(ataruHakukohdeOid);
-    verify(ataruAsyncResource).getApplicationsByHakukohde(ataruHakukohdeOid2);
+    verify(ataruAsyncResource).getApplicationsByHakukohde(ataruHakukohdeOid, false);
+    verify(ataruAsyncResource).getApplicationsByHakukohde(ataruHakukohdeOid2, false);
     verify(seurantaAsyncResource)
         .merkkaaHakukohteenTila(uuid, ataruHakukohdeOid, HakukohdeTila.VALMIS, Optional.empty());
     verify(seurantaAsyncResource)
@@ -701,14 +705,14 @@ public class ValintalaskentaTest {
     final String ataruHakemusOid = "1.2.246.562.11.00000000000000000063";
     final List<String> ataruHakemusOids = new ArrayList<>();
     ataruHakemusOids.add(ataruHakemusOid);
-    when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid))
+    when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid, false))
         .thenReturn(
             CompletableFuture.failedFuture(
                 new RuntimeException(
                     getClass().getSimpleName()
                         + " : Ei saatu haettua hakemuksia kohteelle "
                         + ataruHakukohdeOid)));
-    when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2))
+    when(ataruAsyncResource.getApplicationsByHakukohde(ataruHakukohdeOid2, false))
         .thenReturn(
             CompletableFuture.completedFuture(
                 Collections.singletonList(
@@ -737,8 +741,8 @@ public class ValintalaskentaTest {
     laskentaActorSystem.suoritaValintalaskentaKerralla(ataruHakuDTO, null, laskentaJaHaku);
     Thread.sleep(500);
 
-    verify(ataruAsyncResource, times(2)).getApplicationsByHakukohde(ataruHakukohdeOid);
-    verify(ataruAsyncResource).getApplicationsByHakukohde(ataruHakukohdeOid2);
+    verify(ataruAsyncResource, times(2)).getApplicationsByHakukohde(ataruHakukohdeOid, false);
+    verify(ataruAsyncResource).getApplicationsByHakukohde(ataruHakukohdeOid2, false);
     verify(valintapisteAsyncResource, times(1))
         .getValintapisteetWithHakemusOidsAsFuture(eq(ataruHakemusOids), any(AuditSession.class));
     verify(seurantaAsyncResource)

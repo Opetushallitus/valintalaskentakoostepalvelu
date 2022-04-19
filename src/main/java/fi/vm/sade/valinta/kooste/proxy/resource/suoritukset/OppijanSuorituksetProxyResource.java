@@ -332,7 +332,8 @@ public class OppijanSuorituksetProxyResource {
             valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
                 hakemusOids, auditSession));
     Observable<List<HakemusWrapper>> ataruHakemukset =
-        Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids));
+        Observable.fromFuture(
+            ataruAsyncResource.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids));
     Observable<Haku> hakuV1RDTOObservable =
         Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid));
     Observable.combineLatest(
