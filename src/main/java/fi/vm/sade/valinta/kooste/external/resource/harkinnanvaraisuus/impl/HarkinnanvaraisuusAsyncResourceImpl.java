@@ -75,6 +75,22 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
             });
   }
 
+  private Boolean hasKeskenPeruskoulu(List<Oppija> oppijas) {
+    if (!oppijas.isEmpty()) {
+      return oppijas.stream()
+          .anyMatch(
+              oppija ->
+                  oppija.getSuoritukset().stream()
+                      .anyMatch(
+                          sa ->
+                              PK_KOMO.equals(sa.getSuoritus().getKomo())
+                                  && "KESKEN".equals(sa.getSuoritus().getTila())
+                                  && sa.getSuoritus().isVahvistettu()));
+    } else {
+      return false;
+    }
+  }
+
   private Boolean hasValmisPeruskoulu(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
       return oppijas.stream()
@@ -181,13 +197,21 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
       tiedotAtarusta.forEach(
           hh -> {
             if (hh.getHarkinnanvaraisuudenSyy()
-                    .equals(HarkinnanvaraisuudenSyy.ATARU_EI_PAATTOTODISTUSTA)
-                && hasValmisPeruskoulu(oppijas)) {
-              LOG.info(
-                  "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy valmis pohjakoulutus!",
-                  hakemusOid,
-                  hh.getHakukohdeOid());
-              hh.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+                .equals(HarkinnanvaraisuudenSyy.ATARU_EI_PAATTOTODISTUSTA)) {
+              if (hasValmisPeruskoulu(oppijas)) {
+                LOG.info(
+                    "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy valmis pohjakoulutus!",
+                    hakemusOid,
+                    hh.getHakukohdeOid());
+                hh.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+              } else if (LocalDateTime.now().isBefore(suoritusValmisDeadline)
+                  && hasKeskenPeruskoulu(oppijas)) {
+                LOG.info(
+                    "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy kesken-tilainen peruskoulusuoritus ja deadlinea ei ole ohitettu!",
+                    hakemusOid,
+                    hh.getHakukohdeOid());
+                hh.setHarkinnanvaraisuudenSyy(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
+              }
             }
             if (hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
                 && hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(oppijas)) {
