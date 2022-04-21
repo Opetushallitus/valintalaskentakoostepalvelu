@@ -32,10 +32,13 @@ public class AtaruArvosanaParser {
           String aine = prefix + aineKey + valSuffix;
           String arvosana = StringUtils.substringAfterLast(entry.getValue().getArvo(), "-");
           LOG.debug("key " + key + ", result " + aineKey + valSuffix);
+          Integer.parseInt(arvosana);
           r.add(new AvainArvoDTO(aine, arvosana));
-
         } catch (Exception e) {
-          LOG.error("Virhe {} parsittaessa ataruarvosanaa {} ", e.getMessage(), entry);
+          LOG.error(
+              "Virhe ({}) parsittaessa ataruarvosanaa {}. Jatketaan normaalisti, mutta tätä arvosanaa ei oteta huomioon.",
+              e.getMessage(),
+              entry);
         }
       }
     }
