@@ -15,7 +15,6 @@ public class AtaruArvosanaParser {
     // Toisen asteen ataruhakemuksilta löytyy tällä hetkellä vain peruskoulun arvosanoja
     String prefix = "PK_";
 
-    LOG.info("convertAtaruArvosanas: {}", keyValues);
     List<AvainArvoDTO> r = new ArrayList<>();
     for (Map.Entry<String, AvainArvoDTO> entry : keyValues.entrySet()) {
       String key = entry.getKey();
@@ -32,7 +31,7 @@ public class AtaruArvosanaParser {
           String aine = prefix + aineKey + valSuffix;
           String arvosana = StringUtils.substringAfterLast(entry.getValue().getArvo(), "-");
           LOG.debug("key " + key + ", result " + aineKey + valSuffix);
-          Integer.parseInt(arvosana);
+          Integer.parseInt(arvosana); // Just check that the arvosana correctly parses as Integer.
           r.add(new AvainArvoDTO(aine, arvosana));
         } catch (Exception e) {
           LOG.error(
