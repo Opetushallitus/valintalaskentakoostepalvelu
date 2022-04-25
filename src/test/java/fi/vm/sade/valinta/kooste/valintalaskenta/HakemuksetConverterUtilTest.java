@@ -12,11 +12,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.github.npathai.hamcrestopt.OptionalMatchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuudenSyy;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.dto.HakemuksenHarkinnanvaraisuus;
+import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.dto.HakutoiveenHarkinnanvaraisuus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
@@ -53,6 +59,9 @@ public class HakemuksetConverterUtilTest {
 
   @Rule public ExpectedException expected = ExpectedException.none();
 
+  private final HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource =
+      mock(HarkinnanvaraisuusAsyncResource.class);
+
   private static final Haku haku =
       new Haku(
           "hakuoid",
@@ -64,6 +73,19 @@ public class HakemuksetConverterUtilTest {
           2015,
           null,
           null);
+
+  private static final Haku ataruKoutaToisenAsteenHaku =
+      new Haku(
+          "1.2.246.562.29.00000000000000009999",
+          new HashMap<>(),
+          new HashSet<>(),
+          "abc123",
+          "haunkohdejoukko_11#1",
+          "kausi_k#1",
+          2015,
+          null,
+          null);
+
   private static final Haku haku_syksy =
       new Haku(
           "hakuoid", new HashMap<>(), new HashSet<>(), null, null, "kausi_s#1", 2015, null, null);
@@ -322,7 +344,8 @@ public class HakemuksetConverterUtilTest {
 
   @Before
   public void setup() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("9999-12-31");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
   }
 
   @Test
@@ -436,7 +459,8 @@ public class HakemuksetConverterUtilTest {
   @Test
   public void
       pohjakoulutusLukioJosHakemuksellaLukioJaLukioSuoritusKeskeytynytHakukaudellaJaLeikkuriPvmOnTulevaisuudessa() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("9999-12-31");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -460,7 +484,8 @@ public class HakemuksetConverterUtilTest {
   @Test
   public void
       pohjakoulutusPeruskouluJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaAbiturientti() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -478,7 +503,8 @@ public class HakemuksetConverterUtilTest {
   @Test
   public void
       pohjakoulutusLukioJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaEIAbiturientti() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -496,7 +522,8 @@ public class HakemuksetConverterUtilTest {
   @Test(expected = RuntimeException.class)
   public void
       pohjakoulutusHeittaaPoikkeuksenJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessa() {
-    hakemuksetConverterUtil = new HakemuksetConverterUtil("1970-01-01");
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -1884,6 +1911,162 @@ public class HakemuksetConverterUtilTest {
         false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
     assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
     assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
+    assertEquals("SV", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PERUSOPETUS_KIELI));
+  }
+
+  @Test
+  public void hakemukseltaTulevaHarkinnanvaraisuustietoLoytyyLahdearvoista() {
+
+    HakemusDTO hakemus = new HakemusDTO();
+    hakemus.setHakemusoid("1.2.246.562.11.00001138888");
+    String hakukohdeOid = "1.2.246.562.20.88759381234";
+    HakemuksenHarkinnanvaraisuus hark =
+        new HakemuksenHarkinnanvaraisuus(
+            hakemus.getHakemusoid(),
+            List.of(
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid, HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)));
+
+    hakemus.setAvaimet(
+        new ArrayList<>() {
+          {
+            add(new AvainArvoDTO("PK_PAATTOTODISTUSVUOSI", "2014"));
+            add(new AvainArvoDTO(hakemuksetConverterUtil.PERUSOPETUS_KIELI, "FI"));
+          }
+        });
+    Oppija oppija =
+        new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus()
+            .setSuoritusKieli("FI")
+            .setPerusopetus()
+            .setVahvistettu(true)
+            .setValmistuminen("1.1.2015")
+            .setValmis()
+            .build()
+            .suoritus()
+            .setSuoritusKieli("SV")
+            .setPerusopetus()
+            .setVahvistettu(true)
+            .setValmistuminen("1.2.2015")
+            .setValmis()
+            .build()
+            .build();
+
+    when(harkinnanvaraisuusAsyncResource.hasYksilollistettyMatAi(hark, oppija)).thenReturn(true);
+
+    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+        false,
+        ataruKoutaToisenAsteenHaku,
+        "",
+        new ParametritDTO(),
+        new HashMap<>(),
+        oppija,
+        hakemus,
+        true,
+        hark);
+    System.out.println("hakemuksen avaimet" + hakemus.getAvaimet());
+    assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
+    assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
+    assertEquals("true", getFirstHakemusArvo(hakemus, "yks_mat_ai"));
+
+    assertEquals("SV", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PERUSOPETUS_KIELI));
+  }
+
+  @Test
+  public void yksilollistettyMatAiOnFalseJosHakemuksellaTaiSuorituksessaEiTietoa() {
+
+    HakemusDTO hakemus = new HakemusDTO();
+    hakemus.setHakemusoid("1.2.246.562.11.00001138888");
+    String hakukohdeOid = "1.2.246.562.20.88759381234";
+    HakemuksenHarkinnanvaraisuus hark =
+        new HakemuksenHarkinnanvaraisuus(
+            hakemus.getHakemusoid(),
+            List.of(
+                new HakutoiveenHarkinnanvaraisuus(
+                    hakukohdeOid, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
+
+    hakemus.setAvaimet(
+        new ArrayList<>() {
+          {
+            add(new AvainArvoDTO("PK_PAATTOTODISTUSVUOSI", "2014"));
+            add(new AvainArvoDTO(hakemuksetConverterUtil.PERUSOPETUS_KIELI, "FI"));
+          }
+        });
+    Oppija oppija =
+        new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus()
+            .setSuoritusKieli("FI")
+            .setPerusopetus()
+            .setVahvistettu(true)
+            .setValmistuminen("1.1.2015")
+            .setValmis()
+            .build()
+            .suoritus()
+            .setSuoritusKieli("SV")
+            .setPerusopetus()
+            .setVahvistettu(true)
+            .setValmistuminen("1.2.2015")
+            .setValmis()
+            .build()
+            .build();
+
+    when(harkinnanvaraisuusAsyncResource.hasYksilollistettyMatAi(hark, oppija)).thenReturn(false);
+
+    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+        false,
+        ataruKoutaToisenAsteenHaku,
+        "",
+        new ParametritDTO(),
+        new HashMap<>(),
+        oppija,
+        hakemus,
+        true,
+        hark);
+    System.out.println("hakemuksen avaimet" + hakemus.getAvaimet());
+    assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
+    assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
+    assertEquals("false", getFirstHakemusArvo(hakemus, "yks_mat_ai"));
+    assertEquals("SV", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PERUSOPETUS_KIELI));
+  }
+
+  @Test
+  public void yksMatAiAvaintaEiAsetetaKaikilleHauille() {
+
+    HakemusDTO hakemus = new HakemusDTO();
+    hakemus.setHakemusoid("1.2.246.562.11.00001138888");
+    String hakukohdeOid = "1.2.246.562.20.88759381234";
+
+    hakemus.setAvaimet(
+        new ArrayList<>() {
+          {
+            add(new AvainArvoDTO("PK_PAATTOTODISTUSVUOSI", "2014"));
+            add(new AvainArvoDTO(hakemuksetConverterUtil.PERUSOPETUS_KIELI, "FI"));
+          }
+        });
+    Oppija oppija =
+        new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus()
+            .setSuoritusKieli("FI")
+            .setPerusopetus()
+            .setVahvistettu(true)
+            .setValmistuminen("1.1.2015")
+            .setValmis()
+            .build()
+            .suoritus()
+            .setSuoritusKieli("SV")
+            .setPerusopetus()
+            .setVahvistettu(true)
+            .setValmistuminen("1.2.2015")
+            .setValmis()
+            .build()
+            .build();
+
+    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+        false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
+    System.out.println("hakemuksen avaimet" + hakemus.getAvaimet());
+    assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
+    assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
+    assertFalse(hakemus.getAvaimet().stream().anyMatch(a -> "yks_mat_ai".equals(a.getAvain())));
     assertEquals("SV", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PERUSOPETUS_KIELI));
   }
 
