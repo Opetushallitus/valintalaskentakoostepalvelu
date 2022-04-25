@@ -309,11 +309,10 @@ public class OsoitetarratService {
       posti(laskuri, postiRef, poikkeuskasittelija);
 
       hakemusOids.stream()
-        .findFirst()
-        .filter(IsAtaruHakemusOid::isAtaruHakemusOid)
-        .map(any -> Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids)))
-        .orElseGet(() -> applicationAsyncResource
-          .getApplicationsByHakemusOids(hakemusOids))
+          .findFirst()
+          .filter(IsAtaruHakemusOid::isAtaruHakemusOid)
+          .map(any -> Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids)))
+          .orElseGet(() -> applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids))
           .subscribe(
               hakemukset -> {
                 haetutHakemuksetRef.set(hakemukset);
