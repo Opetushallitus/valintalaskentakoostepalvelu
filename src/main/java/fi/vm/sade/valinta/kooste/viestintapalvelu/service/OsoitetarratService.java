@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.IsAtaruHakemusOid;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -306,13 +307,13 @@ public class OsoitetarratService {
               .build();
       maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
       posti(laskuri, postiRef, poikkeuskasittelija);
-      applicationAsyncResource
-          .getApplicationsByHakemusOids(hakemusOids)
-          .flatMap(
-              hakemukset ->
-                  hakemukset.isEmpty()
-                      ? Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids))
-                      : Observable.just(hakemukset))
+
+      hakemusOids.stream()
+        .findFirst()
+        .filter(IsAtaruHakemusOid::isAtaruHakemusOid)
+        .map(any -> Observable.fromFuture(ataruAsyncResource.getApplicationsByOids(hakemusOids)))
+        .orElseGet(() -> applicationAsyncResource
+          .getApplicationsByHakemusOids(hakemusOids))
           .subscribe(
               hakemukset -> {
                 haetutHakemuksetRef.set(hakemukset);
