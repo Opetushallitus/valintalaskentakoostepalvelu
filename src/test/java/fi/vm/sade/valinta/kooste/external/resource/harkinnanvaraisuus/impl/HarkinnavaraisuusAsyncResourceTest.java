@@ -580,6 +580,76 @@ public class HarkinnavaraisuusAsyncResourceTest {
   }
 
   @Test
+  public void testHarkinnanvaraisuuttaEiYliajetaJosHakukohdeEiOleHarkinnanvarainen()
+      throws ExecutionException, InterruptedException {
+    String leikkuriPvm = "2022-06-06";
+    String hakemusOid = "1.2.246.562.11.00001010667";
+    String hakukohdeOid = "1.2.246.562.20.42208535556";
+    String henkiloOid = "1.2.246.562.24.47613332222";
+
+    AtaruHakutoive hakutoive = new AtaruHakutoive();
+    hakutoive.setHakukohdeOid(hakukohdeOid);
+    hakutoive.setHarkinnanvaraisuus(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN_HAKUKOHDE);
+
+    AtaruHakemus ataruh = new AtaruHakemus();
+    ataruh.setHakemusOid(hakemusOid);
+    ataruh.setHakutoiveet(List.of(hakutoive));
+    ataruh.setPersonOid(henkiloOid);
+
+    HenkiloPerustietoDto henkilo = new HenkiloPerustietoDto();
+    henkilo.setOidHenkilo(henkiloOid);
+
+    HakemusWrapper hw = new AtaruHakemusWrapper(ataruh, henkilo);
+
+    assertEquals(hw.getPersonOid(), henkiloOid);
+
+    List<HakemusWrapper> ataruResult = new ArrayList<>();
+    ataruResult.add(hw);
+
+    Suoritus pkSuoritusKeskeytynyt = new Suoritus();
+    pkSuoritusKeskeytynyt.setHenkiloOid(henkiloOid);
+    pkSuoritusKeskeytynyt.setKomo(PK_KOMO);
+    pkSuoritusKeskeytynyt.setTila("VALMIS");
+    pkSuoritusKeskeytynyt.setValmistuminen("3.3.2022");
+    pkSuoritusKeskeytynyt.setVahvistettu(true);
+    pkSuoritusKeskeytynyt.setLahdeArvot(Map.of("foo", "true", "yksilollistetty_ma_ai", "true"));
+
+    SuoritusJaArvosanat sa = new SuoritusJaArvosanat();
+    sa.setSuoritus(pkSuoritusKeskeytynyt);
+
+    Oppija o = new Oppija();
+    o.setSuoritukset(List.of(sa));
+    o.setOppijanumero(henkiloOid);
+
+    List<Oppija> sureResult = List.of(o);
+
+    HarkinnanvaraisuusAsyncResource h =
+        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+
+    when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(List.of(hakemusOid)))
+        .thenReturn(CompletableFuture.completedFuture(ataruResult));
+    when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(List.of(henkiloOid)))
+        .thenReturn(CompletableFuture.completedFuture(sureResult));
+    when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid)))
+        .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
+
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
+        h.getHarkinnanvaraisuudetForHakemukses(List.of(hakemusOid));
+
+    assertEquals(
+        1,
+        hhv.get().stream()
+            .filter(
+                hakemuksenHarkinnanvaraisuus ->
+                    hakemuksenHarkinnanvaraisuus
+                        .getHakutoiveet()
+                        .get(0)
+                        .getHarkinnanvaraisuudenSyy()
+                        .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN_HAKUKOHDE))
+            .count());
+  }
+
+  @Test
   public void
       hakemuksellaIlmoitettuEiTodistuksiaYliajetaanJosDeadlineaEiOhitettuJaSuressaKeskenTilainenPkSuoritus()
           throws ExecutionException, InterruptedException, TimeoutException {
