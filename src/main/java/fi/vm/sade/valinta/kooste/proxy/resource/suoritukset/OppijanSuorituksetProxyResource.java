@@ -329,6 +329,13 @@ public class OppijanSuorituksetProxyResource {
           respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
         });
 
+    LOG.info(
+        "getSuorituksetForAtaruOpiskelijas - query: hakuOid={} fetchEnsikertalaisuus={} shouldUseApplicationPersonOid={} hakemusOids={}",
+        hakuOid,
+        fetchEnsikertalaisuus,
+        shouldUseApplicationPersonOid,
+        hakemusOids);
+
     if (hakemusOids == null || hakemusOids.isEmpty()) {
       asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
       return;
