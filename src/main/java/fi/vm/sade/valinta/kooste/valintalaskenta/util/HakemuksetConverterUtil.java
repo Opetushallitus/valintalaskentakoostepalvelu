@@ -108,7 +108,9 @@ public class HakemuksetConverterUtil {
             hakemuksenHarkinnanvaraisuus);
       } else {
         LOG.warn(
-            String.format("BUG-2034 : Oppijatietoa ei löytynyt oppijanumerolla %s.", personOid));
+            String.format(
+                "BUG-2034 : Oppijatietoa ei löytynyt oppijanumerolla %s (Hakemus: {}).",
+                personOid, h.getHakemusoid()));
       }
     } catch (Exception e) {
       errors.put(h.getHakemusoid(), e);
@@ -536,10 +538,7 @@ public class HakemuksetConverterUtil {
             .findFirst();
     Optional<String> pk = hakuAppPk;
     if (pk.isEmpty() && ataruPk.isPresent()) {
-      LOG.info(
-          "Hakemuksen {} ataru-hakemuksen pohjakoulutus: {}",
-          hakemusDTO.getHakemusoid(),
-          ataruPk.get());
+      LOG.info("Ataru-hakemuksen {} pohjakoulutus: {}", hakemusDTO.getHakemusoid(), ataruPk.get());
       pk = ataruPk;
     }
     if (pk.isEmpty()) {
