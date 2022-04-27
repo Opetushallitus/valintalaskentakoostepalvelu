@@ -128,7 +128,6 @@ public class HakemuksetConverterUtil {
     ensurePersonOids(hakemukset, hakukohdeOid);
 
     Map<String, HakemuksenHarkinnanvaraisuus> harkinnanvaraisuusByHakemus = new HashMap<>();
-    LOG.info("aaa {}", hakemukset);
     if (haku.isKoutaHaku() && haku.isHakemuspalvelu() && haku.isAmmatillinenJaLukio()) {
       List<HakemuksenHarkinnanvaraisuus> hhs =
           hakemukset.stream()
@@ -276,7 +275,7 @@ public class HakemuksetConverterUtil {
             hakemusDTO.getHakemusoid(),
             hakukohdeOid,
             errors);
-    LOG.info("Suren arvosanat: {}", surenArvosanat);
+    LOG.info("Hakemuksen {} suren arvosanat {}", hakemusDTO.getHakemusoid(), surenArvosanat);
     Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta =
         toAvainMap(
             AmmatillisenKielikoetuloksetSurestaConverter.convert(
@@ -314,10 +313,10 @@ public class HakemuksetConverterUtil {
                 Collectors.toMap(
                     Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue())));
 
-    LOG.info("SuoritustenTiedot {}", suoritustenTiedot);
+    LOG.info("Hakemuksen {} suoritusten tiedot {}", hakemusDTO.getHakemusoid(), suoritustenTiedot);
     merge.putAll(suoritustenTiedot);
     merge.putAll(surenArvosanat);
-    LOG.info("Suren arvosanat {}", surenArvosanat);
+    LOG.info("Hakemuksen {} suren arvosanat {}", hakemusDTO.getHakemusoid(), surenArvosanat);
 
     List<AvainArvoDTO> suoritusValues = new ArrayList<>(suoritustenTiedot.values());
 
@@ -537,7 +536,10 @@ public class HakemuksetConverterUtil {
             .findFirst();
     Optional<String> pk = hakuAppPk;
     if (pk.isEmpty() && ataruPk.isPresent()) {
-      LOG.info("Ataruhakemuksen pohjakoulutus: {}", ataruPk.get());
+      LOG.info(
+          "Hakemuksen {} ataru-hakemuksen pohjakoulutus: {}",
+          hakemusDTO.getHakemusoid(),
+          ataruPk.get());
       pk = ataruPk;
     }
     if (pk.isEmpty()) {

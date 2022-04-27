@@ -278,7 +278,12 @@ public class OppijanSuorituksetProxyResource {
                       .collect(Collectors.toList());
 
               return resolveHakemusDTOs(
-                  haku, hakemukset, pisteet.valintapisteet, opiskelijaOids, fetchEnsikertalaisuus);
+                  haku,
+                  hakemukset,
+                  pisteet.valintapisteet,
+                  opiskelijaOids,
+                  fetchEnsikertalaisuus,
+                  false);
             })
         .flatMap(f -> f)
         .subscribe(
@@ -313,6 +318,8 @@ public class OppijanSuorituksetProxyResource {
       @PathParam("hakuOid") String hakuOid,
       final List<String> hakemusOids,
       @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
+      @DefaultValue("false") @QueryParam("shouldUseApplicationPersonOid")
+          Boolean shouldUseApplicationPersonOid,
       @Suspended final AsyncResponse asyncResponse) {
     final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
     asyncResponse.setTimeout(2L, MINUTES);
@@ -355,7 +362,12 @@ public class OppijanSuorituksetProxyResource {
                       .collect(Collectors.toList());
 
               return resolveHakemusDTOs(
-                  haku, hakemukset, pisteet.valintapisteet, personOids, fetchEnsikertalaisuus);
+                  haku,
+                  hakemukset,
+                  pisteet.valintapisteet,
+                  personOids,
+                  fetchEnsikertalaisuus,
+                  shouldUseApplicationPersonOid);
             })
         .flatMap(f -> f)
         .subscribe(
@@ -493,7 +505,8 @@ public class OppijanSuorituksetProxyResource {
       List<HakemusWrapper> hakemukset,
       List<Valintapisteet> valintapisteet,
       List<String> opiskelijaOids,
-      Boolean fetchEnsikertalaisuus) {
+      Boolean fetchEnsikertalaisuus,
+      Boolean shouldUseApplicationPersonOid) {
 
     Observable<ParametritDTO> parametritObservable =
         Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(haku.oid));
@@ -524,6 +537,23 @@ public class OppijanSuorituksetProxyResource {
         Observable.fromFuture(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.oid))
             .timeout(1, MINUTES)
             .blockingFirst();
+    return createHakemusDTOs(
+        haku, suoritukset, hakemukset, valintapisteet, parametrit, fetchEnsikertalaisuus, false);
+  }
+
+  private List<HakemusDTO> createHakemusDTOs(
+      Haku haku,
+      List<Oppija> suoritukset,
+      List<HakemusWrapper> hakemukset,
+      List<Valintapisteet> valintapisteet,
+      ParametritDTO parametrit,
+      Boolean fetchEnsikertalaisuus,
+      Boolean shouldUseApplicationPersonOid) {
+
+    Map<String, List<String>> hakukohdeRyhmasForHakukohdes =
+        Observable.fromFuture(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.oid))
+            .timeout(1, MINUTES)
+            .blockingFirst();
     return hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
         haku,
         "",
@@ -533,6 +563,6 @@ public class OppijanSuorituksetProxyResource {
         suoritukset,
         parametrit,
         fetchEnsikertalaisuus,
-        false);
+        shouldUseApplicationPersonOid);
   }
 }
