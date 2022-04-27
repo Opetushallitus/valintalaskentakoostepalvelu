@@ -105,4 +105,6 @@ public abstract class HakemusWrapper {
       boolean shouldUseApplicationPersonOid);
 
   public abstract List<AtaruHakutoive> ataruHakutoiveet();
+
+  public abstract List<String> getHuoltajienSahkopostiosoitteet();
 }
