@@ -274,6 +274,18 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
+  public List<String> getHuoltajienSahkopostiosoitteet() {
+    List<String> result = new ArrayList<>();
+    if (keyvalues.containsKey("guardian-email")) {
+      result.add(keyvalues.get("guardian-email"));
+    }
+    if (keyvalues.containsKey("guardian-email-secondary")) {
+      result.add(keyvalues.get("guardian-email-secondary"));
+    }
+    return result;
+  }
+
+  @Override
   public boolean isMaksuvelvollinen(String hakukohdeOid) {
     if (hakemus.getMaksuvelvollisuus().containsKey(hakukohdeOid)) {
       if (hakemus.getMaksuvelvollisuus().get(hakukohdeOid).equals("obligated")) {

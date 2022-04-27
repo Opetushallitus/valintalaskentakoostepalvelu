@@ -16,6 +16,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.HyvaksymiskirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import java.util.ArrayList;
@@ -57,7 +58,8 @@ public class HyvaksymiskirjeetKomponentti {
       String palautusPvm,
       String palautusAika,
       boolean sahkoinenMassaposti,
-      List<ContentStructureType> sisaltotyypit) {
+      List<ContentStructureType> sisaltotyypit,
+      HyvaksymiskirjeenVastaanottaja hyvaksymiskirjeenVastaanottaja) {
     try {
       assert (hakuOid != null);
       int kaikkiHyvaksytyt = hakukohteenHakijat.size();
@@ -181,19 +183,27 @@ public class HyvaksymiskirjeetKomponentti {
         }
         replacements.put("syntymaaika", hakemus.getSyntymaaika());
 
-        String sahkoposti = hakemus.getSahkopostiOsoite();
+        List<String> sahkopostit = new ArrayList<>();
+        if (hyvaksymiskirjeenVastaanottaja.equals(HyvaksymiskirjeenVastaanottaja.HUOLTAJAT)) {
+          List<String> huoltajienSahkopostit = hakemus.getHuoltajienSahkopostiosoitteet();
+          sahkopostit.addAll(huoltajienSahkopostit);
+        } else {
+          sahkopostit.add(hakemus.getSahkopostiOsoite());
+        }
         // boolean skipIPosti = sahkoinenMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
         boolean skipIPosti = true;
-        kirjeet.add(
-            new Letter(
-                osoite,
-                templateName,
-                preferoituKielikoodi,
-                replacements,
-                hakija.getHakijaOid(),
-                skipIPosti,
-                sahkoposti,
-                hakija.getHakemusOid()));
+        for (String sahkoposti : sahkopostit) {
+          kirjeet.add(
+              new Letter(
+                  osoite,
+                  templateName,
+                  preferoituKielikoodi,
+                  replacements,
+                  hakija.getHakijaOid(),
+                  skipIPosti,
+                  sahkoposti,
+                  hakija.getHakemusOid()));
+        }
 
         viesti.setFetchTarget(hakukohdeOid);
         viesti.setOrganizationOid(tarjoajaOid);

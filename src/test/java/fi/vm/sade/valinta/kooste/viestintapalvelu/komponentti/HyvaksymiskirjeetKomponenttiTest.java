@@ -25,6 +25,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.HyvaksymiskirjeenVastaanottaja;
 import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -330,6 +331,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
         PALAUTUS_PVM,
         PALAUTUS_AIKA,
         korkeakouluMassapostitus,
-        Collections.singletonList(ContentStructureType.letter));
+        Collections.singletonList(ContentStructureType.letter),
+        HyvaksymiskirjeenVastaanottaja.HAKIJA);
   }
 }
