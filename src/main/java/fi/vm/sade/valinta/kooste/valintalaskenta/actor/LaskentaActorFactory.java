@@ -610,12 +610,19 @@ public class LaskentaActorFactory {
     CompletableFuture<List<HenkiloViiteDto>> henkiloViitteet =
         hakemukset.thenComposeAsync(
             hws -> {
-              Set<String> oppijaOids =
+              /*              Set<String> oppijaOids =
                   hws.stream().map(HakemusWrapper::getPersonOid).collect(Collectors.toSet());
               return CompletableFuture.completedFuture(
                   oppijaOids.stream()
                       .map(oid -> new HenkiloViiteDto(oid, oid))
-                      .collect(Collectors.toList()));
+                      .collect(Collectors.toList()));*/
+              List<HenkiloViiteDto> viitteet =
+                  hws.stream()
+                      .map(
+                          hw ->
+                              new HenkiloViiteDto(hw.getApplicationPersonOid(), hw.getPersonOid()))
+                      .collect(Collectors.toList());
+              return CompletableFuture.completedFuture(viitteet);
             });
 
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
