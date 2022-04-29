@@ -276,11 +276,11 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   @Override
   public List<String> getHuoltajienSahkopostiosoitteet() {
     List<String> result = new ArrayList<>();
-    if (keyvalues.containsKey("guardian-email")) {
-      result.add(keyvalues.get("guardian-email"));
+    if (keyvalues.containsKey("guardian-email_0")) {
+      result.add(keyvalues.get("guardian-email_0"));
     }
-    if (keyvalues.containsKey("guardian-email-secondary")) {
-      result.add(keyvalues.get("guardian-email-secondary"));
+    if (keyvalues.containsKey("guardian-email-secondary_0")) {
+      result.add(keyvalues.get("guardian-email-secondary_0"));
     }
     return result;
   }
