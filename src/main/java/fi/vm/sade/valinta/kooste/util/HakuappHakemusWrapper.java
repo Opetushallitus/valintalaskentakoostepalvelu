@@ -607,6 +607,11 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
     return Collections.emptyList();
   }
 
+  @Override
+  public List<String> getHuoltajienSahkopostiosoitteet() {
+    return new ArrayList<>();
+  }
+
   private Map<String, String> getHakutoiveet() {
     if (hakutoiveet == null) {
       hakutoiveet = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);

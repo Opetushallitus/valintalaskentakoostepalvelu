@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.HyvaksymiskirjeenVastaanottaja;
 import java.util.List;
 
 public interface HyvaksymiskirjeetService {
@@ -16,7 +17,10 @@ public interface HyvaksymiskirjeetService {
 
   ProsessiId hyvaksymiskirjeetHakukohteelle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
 
-  ProsessiId hyvaksymiskirjeetHaulle(HyvaksymiskirjeDTO hyvaksymiskirjeDTO, String asiointikieli);
+  ProsessiId hyvaksymiskirjeetHaulle(
+      HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
+      String asiointikieli,
+      HyvaksymiskirjeenVastaanottaja hyvaksymiskirjeenVastaanottaja);
 
   ProsessiId jalkiohjauskirjeetHaulle(JalkiohjauskirjeDTO hyvaksymiskirjeDTO);
 

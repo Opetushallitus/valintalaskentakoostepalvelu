@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.HyvaksymiskirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
@@ -335,10 +336,14 @@ public class ViestintapalveluAktivointiResource {
           } else {
             LOG.info(
                 String.format(
-                    "Hyväksymiskirjeiden luonti aktivoitu haulle %s, vainTulosEmailinKieltaneet: %s, asiointikieli: %s",
-                    hakuOid, vainTulosEmailinKieltaneet, asiointikieli));
+                    "Hyväksymiskirjeiden luonti aktivoitu haulle %s, vainTulosEmailinKieltaneet: %s, asiointikieli: %s, templateName: %s",
+                    hakuOid, vainTulosEmailinKieltaneet, asiointikieli, templateName));
+            HyvaksymiskirjeenVastaanottaja hyvaksymiskirjeenVastaanottaja =
+                "hyvaksymiskirje_huoltajille".equals(templateName)
+                    ? HyvaksymiskirjeenVastaanottaja.HUOLTAJAT
+                    : HyvaksymiskirjeenVastaanottaja.HAKIJA;
             return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(
-                hyvaksymiskirjeDTO, asiointikieli);
+                hyvaksymiskirjeDTO, asiointikieli, hyvaksymiskirjeenVastaanottaja);
           }
         } else {
           LOG.info(
@@ -501,13 +506,15 @@ public class ViestintapalveluAktivointiResource {
       errorResponse(
           "HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.", asyncResponse);
     }
-    if (!("jalkiohjauskirje".equals(kirjeenTyyppi) || "hyvaksymiskirje".equals(kirjeenTyyppi))) {
+    if (!("jalkiohjauskirje".equals(kirjeenTyyppi)
+        || "hyvaksymiskirje".equals(kirjeenTyyppi)
+        || "hyvaksymiskirje_huoltajille".equals(kirjeenTyyppi))) {
       LOG.error(
-          "{} ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.",
+          "{} ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje', 'hyvaksymiskirje' tai 'hyvaksymiskirje_huoltajille'.",
           kirjeenTyyppi);
       errorResponse(
           kirjeenTyyppi
-              + " ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje' tai 'hyvaksymiskirje'.",
+              + " ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje', 'hyvaksymiskirje' tai 'hyvaksymiskirje_huoltajille'.",
           asyncResponse);
     }
     if (!("fi".equals(asiointikieli) || "sv".equals(asiointikieli) || "en".equals(asiointikieli))) {

@@ -121,6 +121,19 @@ public class ViestintapalveluProxyResource {
             .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "en")
             .map(this::haeRyhmasahkopostiId);
 
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleFi =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "fi")
+            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleSv =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "sv")
+            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleEn =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "en")
+            .map(this::haeRyhmasahkopostiId);
+
     Observable<LetterBatchCountDto> jalkiohjauskirjeFi =
         viestintapalveluAsyncResource
             .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "fi")
@@ -138,12 +151,17 @@ public class ViestintapalveluProxyResource {
             hyvaksymiskirjeFi,
             hyvaksymiskirjeSv,
             hyvaksymiskirjeEn,
+            hyvaksymiskirjeHuoltajilleFi,
+            hyvaksymiskirjeHuoltajilleSv,
+            hyvaksymiskirjeHuoltajilleEn,
             jalkiohjauskirjeFi,
             jalkiohjauskirjeSv,
             jalkiohjauskirjeEn,
-            (hFi, hSv, hEn, jFi, jSv, jEn) ->
+            (hFi, hSv, hEn, hhFi, hhSv, hhEn, jFi, jSv, jEn) ->
                 ImmutableMap.of(
                     "hyvaksymiskirje", ImmutableMap.of("fi", hFi, "sv", hSv, "en", hEn),
+                    "hyvaksymiskirje_huoltajille",
+                        ImmutableMap.of("fi", hhFi, "sv", hhSv, "en", hhEn),
                     "jalkiohjauskirje", ImmutableMap.of("fi", jFi, "sv", jSv, "en", jEn)))
         .subscribe(
             letterCount ->
