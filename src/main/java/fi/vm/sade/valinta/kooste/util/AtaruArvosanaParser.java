@@ -34,8 +34,25 @@ public class AtaruArvosanaParser {
           Integer.parseInt(arvosana); // Just check that the arvosana correctly parses as Integer.
           r.add(new AvainArvoDTO(aine, arvosana));
         } catch (Exception e) {
-          LOG.error(
+          LOG.warn(
               "Virhe ({}) parsittaessa ataruarvosanaa {}. Jatketaan normaalisti, mutta tätä arvosanaa ei oteta huomioon.",
+              e.getMessage(),
+              entry);
+        }
+      } else if (key.startsWith("oppimaara")) {
+        LOG.info("handling oppiaine: {}", entry);
+        // oppimaara-kieli-B1_group0
+        try {
+          String kieliKey = StringUtils.substringBetween(key, "oppimaara-kieli-", "_group");
+          String arvo = entry.getValue().getArvo();
+
+          if (kieliKey != null && !arvo.isEmpty()) {
+            String oppiaineKey = prefix + kieliKey + "_OPPIAINE";
+            r.add(new AvainArvoDTO(oppiaineKey, entry.getValue().getArvo()));
+          }
+        } catch (Exception e) {
+          LOG.warn(
+              "Virhe ({}) parsittaessa ataruoppiainetta {}. Jatketaan normaalisti, mutta tätä oppiainetietoa ei oteta huomioon.",
               e.getMessage(),
               entry);
         }

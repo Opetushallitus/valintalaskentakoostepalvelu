@@ -1695,6 +1695,13 @@ public class HakemuksetConverterUtilTest {
     assertEquals("SV", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PERUSOPETUS_KIELI));
   }
 
+  //                "oppimaara-kieli-valinnainen-kieli_group0": "",
+  //                "oppimaara-kieli-A1_group0": "EN",
+  //                "oppimaara-a_group0": "suomi-aidinkielena",
+  //                "oppimaara-kieli-B1_group0": "SV",
+  //                "oppimaara-a_group1": "suomi-aidinkielena",
+  //                "arvosana-A1_group0": "arvosana-A1-6",
+
   //        "birth-date": "25.03.1958",
   //                "base-education-2nd": "6",
   //                "arvosana-KO_group0": "arvosana-KO-8",
@@ -1778,15 +1785,38 @@ public class HakemuksetConverterUtilTest {
             .build();
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
-    //    final String pk_arvosana = firstHakemusArvo(hakemus, "PK_AI").get();
-    //    final String pk_val_arvosana = firstHakemusArvo(hakemus, "PK_AI_VAL1").get();
-    //    assertEquals("10", pk_arvosana);
-    //    assertEquals("9", pk_val_arvosana);
     assertEquals("10", firstHakemusArvo(hakemus, "PK_AI").orElse("notFound"));
     assertEquals("9", firstHakemusArvo(hakemus, "PK_AI_VAL1").orElse("notFound"));
-    // assertFalse(hakemus.getAvaimet().stream().anyMatch(a -> a.getAvain().equals("PK_BI_VAL2")));
-    // assertFalse(hakemus.getAvaimet().stream().anyMatch(a -> a.getAvain().equals("PK_BI")));
     assertEquals("8", firstHakemusArvo(hakemus, "PK_TT").orElse("notFound"));
+  }
+
+  @Test
+  public void oppiaineetAtaruhakemukselta() {
+    HakemusDTO hakemus = new HakemusDTO();
+    hakemus.setHakemusoid(HAKEMUS1_OID);
+    hakemus.setAvaimet(
+        new ArrayList<>() {
+          {
+            add(new AvainArvoDTO(hakemuksetConverterUtil.ATARU_POHJAKOULUTUS_VUOSI, "2009"));
+            add(new AvainArvoDTO("oppimaara-kieli-B1_group0", "SV"));
+            add(new AvainArvoDTO("oppimaara-kieli-A1_group0", "JA"));
+          }
+        });
+    Oppija oppija =
+        new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus()
+            .setSuoritusKieli("FI")
+            .setLukio()
+            .setVahvistettu(false)
+            .setMyontaja(HAKEMUS1_OID)
+            .setValmistuminen("1.1.2014")
+            .setKesken()
+            .build()
+            .build();
+    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+        false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
+    assertEquals("SV", firstHakemusArvo(hakemus, "PK_B1_OPPIAINE").orElse("notFound"));
+    assertEquals("JA", firstHakemusArvo(hakemus, "PK_A1_OPPIAINE").orElse("notFound"));
   }
 
   @Test
