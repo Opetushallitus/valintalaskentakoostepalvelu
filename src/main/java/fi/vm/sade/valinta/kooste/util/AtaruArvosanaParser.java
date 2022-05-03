@@ -19,16 +19,11 @@ public class AtaruArvosanaParser {
 
     List<AvainArvoDTO> r = new ArrayList<>();
 
-    List<AvainArvoDTO> valinnaisetKielet =
-        keyValues.values().stream()
-            .filter(dto -> dto.getAvain().contains("valinnainen-kieli"))
-            .collect(Collectors.toList());
-    // Map<String, List<AvainArvoDTO>> grouped =
-    // valinnaisetKielet.stream().collect(Collectors.groupingBy(dto ->
-    // dto.getAvain().substring(dto.getAvain().length() -1)));
     Map<String, List<AvainArvoDTO>> grouped =
         keyValues.values().stream()
-            .filter(dto -> dto.getAvain().contains("valinnainen-kieli"))
+            .filter(
+                dto ->
+                    dto.getAvain().contains("valinnainen-kieli") && !dto.getAvain().contains("-a-"))
             .collect(
                 Collectors.groupingBy(
                     dto -> dto.getAvain().substring(dto.getAvain().length() - 1)));
@@ -64,8 +59,13 @@ public class AtaruArvosanaParser {
                 .orElse("")
                 .toUpperCase();
 
+        String valSuffix = "";
+        if (!"0".equals(entry.getKey())) {
+          valSuffix = "_VAL" + (Integer.parseInt(entry.getKey()) + 1);
+        }
+
         if (!arvosana.isEmpty() && !kieli.isEmpty() && !aineKey.isEmpty()) {
-          String arvosanaKey = prefix + aineKey;
+          String arvosanaKey = prefix + aineKey + valSuffix;
           r.add(new AvainArvoDTO(arvosanaKey, arvosana));
           if ("0".equals(entry.getKey())) {
             String oppiaineKey = arvosanaKey + "_OPPIAINE";
