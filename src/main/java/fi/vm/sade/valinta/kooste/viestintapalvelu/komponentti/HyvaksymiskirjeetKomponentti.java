@@ -16,7 +16,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.HyvaksymiskirjeenVastaanottaja;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.KirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class HyvaksymiskirjeetKomponentti {
       String palautusAika,
       boolean sahkoinenMassaposti,
       List<ContentStructureType> sisaltotyypit,
-      HyvaksymiskirjeenVastaanottaja hyvaksymiskirjeenVastaanottaja) {
+      KirjeenVastaanottaja kirjeenVastaanottaja) {
     try {
       assert (hakuOid != null);
       int kaikkiHyvaksytyt = hakukohteenHakijat.size();
@@ -184,7 +184,7 @@ public class HyvaksymiskirjeetKomponentti {
         replacements.put("syntymaaika", hakemus.getSyntymaaika());
 
         List<String> sahkopostit = new ArrayList<>();
-        if (hyvaksymiskirjeenVastaanottaja.equals(HyvaksymiskirjeenVastaanottaja.HUOLTAJAT)) {
+        if (kirjeenVastaanottaja.equals(KirjeenVastaanottaja.HUOLTAJAT)) {
           List<String> huoltajienSahkopostit = hakemus.getHuoltajienSahkopostiosoitteet();
           sahkopostit.addAll(huoltajienSahkopostit);
         } else {

@@ -39,7 +39,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.HyvaksymiskirjeenVastaanottaja;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.KirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
@@ -161,7 +161,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
               null,
               false,
               Collections.singletonList(ContentStructureType.letter),
-              HyvaksymiskirjeenVastaanottaja.HAKIJA);
+              KirjeenVastaanottaja.HAKIJA);
         },
         String.format(
             "Aloitetaan hakukohteen %s hyväksymiskirjeiden muodostaminen %d hakemukselle",
@@ -204,7 +204,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                           jalkiohjauskirjeDTO,
                           false,
                           haku.isKorkeakouluhaku(),
-                          Collections.singletonList(ContentStructureType.letter));
+                          Collections.singletonList(ContentStructureType.letter),
+                          KirjeenVastaanottaja.HAKIJA);
                     }),
         String.format(
             "Aloitetaan jälkiohjauskirjeiden muodostaminen %d hakemukselle", hakemusOids.size()),
@@ -241,7 +242,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
               null,
               false,
               Collections.singletonList(ContentStructureType.letter),
-              HyvaksymiskirjeenVastaanottaja.HAKIJA);
+              KirjeenVastaanottaja.HAKIJA);
         },
         String.format("Aloitetaan hakukohteen %s jälkiohjauskirjeiden muodostaminen", hakukohdeOid),
         String.format("Hakukohteen %s jälkiohjauskirjeiden muodostaminen valmistui", hakukohdeOid),
@@ -280,7 +281,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
               null,
               false,
               Collections.singletonList(ContentStructureType.letter),
-              HyvaksymiskirjeenVastaanottaja.HAKIJA);
+              KirjeenVastaanottaja.HAKIJA);
         },
         String.format("Aloitetaan hakukohteen %s hyväksymiskirjeiden muodostaminen", hakukohdeOid),
         String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakukohdeOid),
@@ -292,7 +293,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
   public ProsessiId hyvaksymiskirjeetHaulle(
       HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
       String asiointikieli,
-      HyvaksymiskirjeenVastaanottaja hyvaksymiskirjeenVastaanottaja) {
+      KirjeenVastaanottaja kirjeenVastaanottaja) {
     String hakuOid = hyvaksymiskirjeDTO.getHakuOid();
     return this.yhdenKirjeeranProsessi(
         this.bigBatchExecutor,
@@ -326,7 +327,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
               asiointikieli,
               true,
               Arrays.asList(ContentStructureType.accessibleHtml),
-              hyvaksymiskirjeenVastaanottaja);
+              kirjeenVastaanottaja);
         },
         String.format(
             "Aloitetaan haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s",
@@ -340,7 +341,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
   }
 
   @Override
-  public ProsessiId jalkiohjauskirjeetHaulle(JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
+  public ProsessiId jalkiohjauskirjeetHaulle(
+      JalkiohjauskirjeDTO jalkiohjauskirjeDTO, KirjeenVastaanottaja kirjeenVastaanottaja) {
     String hakuOid = jalkiohjauskirjeDTO.getHakuOid();
     String asiointikieli = jalkiohjauskirjeDTO.getKielikoodi();
     return this.yhdenKirjeeranProsessi(
@@ -374,7 +376,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                           true,
                           haku.isKorkeakouluhaku(),
                           getContentStructureTypesForHaunJalkiohjauskirjeet(
-                              haku.isKorkeakouluhaku()));
+                              haku.isKorkeakouluhaku()),
+                          kirjeenVastaanottaja);
                     }),
         String.format(
             "Aloitetaan haun %s jälkiohjauskirjeiden muodostaminen asiointikielelle %s",
@@ -491,7 +494,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                             false,
                                                             Collections.singletonList(
                                                                 ContentStructureType.letter),
-                                                            HyvaksymiskirjeenVastaanottaja.HAKIJA))
+                                                            KirjeenVastaanottaja.HAKIJA))
                                             .thenComposeAsync(
                                                 letterBatch ->
                                                     letterBatchToViestintapalvelu(
@@ -645,7 +648,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
       String asiointikieli,
       boolean sahkoinenMassaposti,
       List<ContentStructureType> sisaltotyypit,
-      HyvaksymiskirjeenVastaanottaja hyvaksymiskirjeenVastaanottaja) {
+      KirjeenVastaanottaja kirjeenVastaanottaja) {
     CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF =
         hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
     CompletableFuture<Map<String, Koodi>> maatjavaltiot1F =
@@ -690,7 +693,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     parsePalautusAika(hyvaksymiskirjeDTO.getPalautusAika(), haunParametritF.join()),
                     sahkoinenMassaposti,
                     sisaltotyypit,
-                    hyvaksymiskirjeenVastaanottaja))
+                    kirjeenVastaanottaja))
         .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
   }
 
@@ -701,7 +704,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
       JalkiohjauskirjeDTO jalkiohjauskirjeDTO,
       boolean sahkoinenMassaposti,
       boolean isKkHaku,
-      List<ContentStructureType> sisaltotyypit) {
+      List<ContentStructureType> sisaltotyypit,
+      KirjeenVastaanottaja kirjeenVastaanottaja) {
     CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF =
         hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
     CompletableFuture<Map<String, Koodi>> maatjavaltiot1F =
@@ -728,7 +732,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     jalkiohjauskirjeDTO.getTag(),
                     sahkoinenMassaposti,
                     isKkHaku,
-                    sisaltotyypit))
+                    sisaltotyypit,
+                    kirjeenVastaanottaja))
         .thenComposeAsync(letterBatch -> letterBatchToViestintapalvelu(prosessi, letterBatch));
   }
 

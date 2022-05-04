@@ -7,7 +7,7 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukko
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.HyvaksymiskirjeenVastaanottaja;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.KirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -109,7 +109,7 @@ public class SijoittelunTulosHaulleResource {
           throw new IllegalArgumentException("Parametri letterBodyText on pakollinen");
         }
         return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(
-            hyvaksymiskirjeDTO, asiointikieli, HyvaksymiskirjeenVastaanottaja.HAKIJA);
+            hyvaksymiskirjeDTO, asiointikieli, KirjeenVastaanottaja.HAKIJA);
       } else {
         return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hyvaksymiskirjeDTO);
       }

@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.model.types;
 
-public enum HyvaksymiskirjeenVastaanottaja {
+public enum KirjeenVastaanottaja {
   HAKIJA,
   HUOLTAJAT
 }
