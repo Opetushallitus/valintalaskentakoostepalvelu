@@ -529,7 +529,13 @@ public class OppijanSuorituksetProxyResource {
         parametritObservable,
         (suoritukset, parametrit) ->
             createHakemusDTOs(
-                haku, suoritukset, hakemukset, valintapisteet, parametrit, fetchEnsikertalaisuus));
+                haku,
+                suoritukset,
+                hakemukset,
+                valintapisteet,
+                parametrit,
+                fetchEnsikertalaisuus,
+                shouldUseApplicationPersonOid));
   }
 
   private List<HakemusDTO> createHakemusDTOs(
