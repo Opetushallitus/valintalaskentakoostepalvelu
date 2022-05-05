@@ -546,10 +546,6 @@ public class OppijanSuorituksetProxyResource {
       ParametritDTO parametrit,
       Boolean fetchEnsikertalaisuus) {
 
-    Map<String, List<String>> hakukohdeRyhmasForHakukohdes =
-        Observable.fromFuture(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.oid))
-            .timeout(1, MINUTES)
-            .blockingFirst();
     return createHakemusDTOs(
         haku, suoritukset, hakemukset, valintapisteet, parametrit, fetchEnsikertalaisuus, false);
   }
