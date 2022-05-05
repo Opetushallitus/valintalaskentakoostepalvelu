@@ -270,14 +270,15 @@ public class HakemuksetConverterUtil {
     hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
     Map<String, AvainArvoDTO> hakemuksenArvot =
         toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+    List<AvainArvoDTO> convertedSureArvosanas = OppijaToAvainArvoDTOConverter.convert(
+            oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO);
+    LOG.info("Hakemuksen {} konvertoidut sure-arvosanat: {}", hakemusDTO.getHakemusoid(), convertedSureArvosanas);
     Map<String, AvainArvoDTO> surenArvosanat =
         toAvainMap(
-            OppijaToAvainArvoDTOConverter.convert(
-                oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO),
+            convertedSureArvosanas,
             hakemusDTO.getHakemusoid(),
             hakukohdeOid,
             errors);
-    LOG.info("Hakemuksen {} suren arvosanat {}", hakemusDTO.getHakemusoid(), surenArvosanat);
     Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta =
         toAvainMap(
             AmmatillisenKielikoetuloksetSurestaConverter.convert(
@@ -316,20 +317,23 @@ public class HakemuksetConverterUtil {
                     Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue())));
 
     LOG.info("Hakemuksen {} suoritusten tiedot {}", hakemusDTO.getHakemusoid(), suoritustenTiedot);
+    LOG.info("Hakemuksen {} suren arvosanat {}", hakemusDTO.getHakemusoid(), surenArvosanat);
     merge.putAll(suoritustenTiedot);
     merge.putAll(surenArvosanat);
-    LOG.info("Hakemuksen {} suren arvosanat {}", hakemusDTO.getHakemusoid(), surenArvosanat);
 
     List<AvainArvoDTO> suoritusValues = new ArrayList<>(suoritustenTiedot.values());
 
-    Map<String, AvainArvoDTO> ataruArvosanat =
-        toAvainMap(
-            AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot),
-            hakemusDTO.getHakemusoid(),
-            hakukohdeOid,
-            errors);
-
+    List<AvainArvoDTO> arvosanatHakemukselta = AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot);
+    LOG.info("Hakemuksen {} atarun arvosanat: {}", hakemusDTO.getHakemusoid(), arvosanatHakemukselta);
     if (hasPKVuosiBefore2018(suoritusValues)) {
+      Map<String, AvainArvoDTO> ataruArvosanat =
+              toAvainMap(
+                      AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot),
+                      hakemusDTO.getHakemusoid(),
+                      hakukohdeOid,
+                      errors);
+
+
       if (!surenArvosanat.isEmpty()) {
         LOG.warn(
             "Käytetään hakemukselle {} atarun arvosanoja {}, vaikka surestakin löytyi: {}. Osa tiedoista saatetaan yliajaa.",
@@ -342,7 +346,7 @@ public class HakemuksetConverterUtil {
           hakemusDTO.getHakemusoid(),
           ataruArvosanat.values());
       merge.putAll(ataruArvosanat);
-    } else if (!ataruArvosanat.isEmpty()) {
+    } else if (!arvosanatHakemukselta.isEmpty()) {
       LOG.warn(
           "Ataruhakemuksella on arvosanoja, vaikka pohjakoulutusvuosi on 2018 tai sen jälkeen. Ei käytetä hakemuksen {} arvosanoja!",
           hakemusDTO.getHakemusoid());
