@@ -140,7 +140,7 @@ public class AtaruArvosanaParser {
 
         String valSuffix = "";
         if (!"0".equals(entry.getKey())) {
-          valSuffix = "_VAL" + (Integer.parseInt(entry.getKey()) + 1);
+          valSuffix = "_VAL" + (Integer.parseInt(entry.getKey()));
         }
 
         if (!arvosana.isEmpty() && !kieli.isEmpty() && !aineKey.isEmpty()) {
