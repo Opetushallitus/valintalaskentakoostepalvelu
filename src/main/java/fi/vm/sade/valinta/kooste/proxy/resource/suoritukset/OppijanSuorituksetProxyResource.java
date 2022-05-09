@@ -363,10 +363,18 @@ public class OppijanSuorituksetProxyResource {
               }
               LOG.info("Hae suoritukset {} hakemukselle", hakemukset.size());
 
-              List<String> personOids =
-                  hakemukset.stream()
-                      .map(HakemusWrapper::getPersonOid)
-                      .collect(Collectors.toList());
+              List<String> personOids;
+              if (shouldUseApplicationPersonOid) {
+                personOids =
+                    hakemukset.stream()
+                        .map(HakemusWrapper::getApplicationPersonOid)
+                        .collect(Collectors.toList());
+              } else {
+                personOids =
+                    hakemukset.stream()
+                        .map(HakemusWrapper::getPersonOid)
+                        .collect(Collectors.toList());
+              }
 
               return resolveHakemusDTOs(
                   haku,
