@@ -228,7 +228,7 @@ public class SijoittelunTulosExcelKomponentti {
           Arrays.asList(
               hDto.getHakemusOid(),
               nimi,
-              hDto.getHakijaOid(),
+              wrapper.getPersonOid(),
               wrapper.getHenkilotunnus(),
               wrapper.getSyntymaaika(),
               wrapper.getSukupuoli(),
