@@ -125,6 +125,7 @@ public class SijoittelunTulosExcelKomponentti {
         Arrays.asList(
             "Hakemus",
             "Hakija",
+            "Oppijanumero",
             "Henkilötunnus",
             "Syntymäaika",
             "Sukupuoli",
@@ -227,6 +228,7 @@ public class SijoittelunTulosExcelKomponentti {
           Arrays.asList(
               hDto.getHakemusOid(),
               nimi,
+              hDto.getHakijaOid(),
               wrapper.getHenkilotunnus(),
               wrapper.getSyntymaaika(),
               wrapper.getSukupuoli(),
