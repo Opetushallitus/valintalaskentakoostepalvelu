@@ -270,15 +270,15 @@ public class HakemuksetConverterUtil {
     hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
     Map<String, AvainArvoDTO> hakemuksenArvot =
         toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
-    List<AvainArvoDTO> convertedSureArvosanas = OppijaToAvainArvoDTOConverter.convert(
+    List<AvainArvoDTO> convertedSureArvosanas =
+        OppijaToAvainArvoDTOConverter.convert(
             oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO);
-    LOG.info("Hakemuksen {} konvertoidut sure-arvosanat: {}", hakemusDTO.getHakemusoid(), convertedSureArvosanas);
+    LOG.info(
+        "Hakemuksen {} konvertoidut sure-arvosanat: {}",
+        hakemusDTO.getHakemusoid(),
+        convertedSureArvosanas);
     Map<String, AvainArvoDTO> surenArvosanat =
-        toAvainMap(
-            convertedSureArvosanas,
-            hakemusDTO.getHakemusoid(),
-            hakukohdeOid,
-            errors);
+        toAvainMap(convertedSureArvosanas, hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
     Map<String, AvainArvoDTO> ammatillisenKielikokeetSuresta =
         toAvainMap(
             AmmatillisenKielikoetuloksetSurestaConverter.convert(
@@ -323,16 +323,17 @@ public class HakemuksetConverterUtil {
 
     List<AvainArvoDTO> suoritusValues = new ArrayList<>(suoritustenTiedot.values());
 
-    List<AvainArvoDTO> arvosanatHakemukselta = AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot);
-    LOG.info("Hakemuksen {} atarun arvosanat: {}", hakemusDTO.getHakemusoid(), arvosanatHakemukselta);
+    List<AvainArvoDTO> arvosanatHakemukselta =
+        AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot);
+    LOG.info(
+        "Hakemuksen {} atarun arvosanat: {}", hakemusDTO.getHakemusoid(), arvosanatHakemukselta);
     if (hasPKVuosiBefore2018(suoritusValues)) {
       Map<String, AvainArvoDTO> ataruArvosanat =
-              toAvainMap(
-                      AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot),
-                      hakemusDTO.getHakemusoid(),
-                      hakukohdeOid,
-                      errors);
-
+          toAvainMap(
+              AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot),
+              hakemusDTO.getHakemusoid(),
+              hakukohdeOid,
+              errors);
 
       if (!surenArvosanat.isEmpty()) {
         LOG.warn(
