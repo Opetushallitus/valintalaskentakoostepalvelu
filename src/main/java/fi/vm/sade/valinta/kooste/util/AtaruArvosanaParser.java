@@ -45,6 +45,16 @@ public class AtaruArvosanaParser {
     return "XX";
   }
 
+  // Käsittelee tämänmuotoista dataa:
+  // "oppiaine-valinnainen-kieli_group1": "oppiaine-valinnainen-kieli-a2",
+  // "oppiaine-valinnainen-kieli_group0": "oppiaine-valinnainen-kieli-b2",
+  // "oppiaine-valinnainen-kieli_group2": "",
+  // "oppimaara-kieli-valinnainen-kieli_group1": "EN",
+  // "oppimaara-kieli-valinnainen-kieli_group0": "HE",
+  // "oppimaara-kieli-valinnainen-kieli_group2": "",
+  // "arvosana-valinnainen-kieli_group2": "",
+  // "arvosana-valinnainen-kieli_group1": "arvosana-valinnainen-kieli-6",
+  // "arvosana-valinnainen-kieli_group0": "arvosana-valinnainen-kieli-8"
   public static List<AvainArvoDTO> convertValinnaisetKielet(Map<String, AvainArvoDTO> keyValues) {
 
     List<AvainArvoDTO> r = new ArrayList<>();
@@ -58,7 +68,7 @@ public class AtaruArvosanaParser {
                 Collectors.groupingBy(
                     dto -> dto.getAvain().substring(dto.getAvain().length() - 1)));
 
-    Set<String> langs = new HashSet<>();
+    Set<String> langs = new HashSet<>(); // A2, B2 jne.
 
     grouped.forEach(
         (key, value) -> {
