@@ -17,57 +17,6 @@ public class AtaruArvosanaParser {
   // Toisen asteen ataruhakemuksilta löytyy tällä hetkellä vain peruskoulun arvosanoja
   private static final String prefix = "PK_";
 
-  // FI 	Suomi äidinkielenä 	1
-  // FI_2 	Suomi toisena kielenä 	1
-  // FI_SE 	Suomi saamenkielisille 	1
-  // FI_VK 	Suomi viittomakielisille 	1
-  // RI 	Romani äidinkielenä 	1
-  // SE 	Saame äidinkielenä 	1
-  // SV 	Ruotsi äidinkielenä 	1
-  // SV_2 	Ruotsi toisena kielenä 	1
-  // SV_VK 	Ruotsi viittomakielisille 	1
-  // VK 	Viittomakieli äidinkielenä 	1
-  // XX 	Muu oppilaan äidinkieli 	1
-
-  //  val aidinkieli = Map(
-  //    "AI1" -> "FI",
-  //    "AI2" -> "SV",
-  //    "AI3" -> "SE",
-  //    "AI4" -> "RI",
-  //    "AI5" -> "VK",
-  //    "AI6" -> "XX",
-  //    "AI7" -> "FI_2",
-  //    "AI8" -> "SV_2",
-  //    "AI9" -> "FI_SE",
-  //    "AI10" -> "XX",
-  //    "AI11" -> "FI_VK",
-  //    "AI12" -> "SV_VK",
-  //    "AIAI" -> "XX"
-  //  )
-
-  // :options          [{:label (:suomi-aidinkielena texts/translation-mapping)
-  //                           :value "suomi-aidinkielena"}
-  //                          {:label (:suomi-toisena-kielena texts/translation-mapping)
-  //                           :value "suomi-toisena-kielena"}
-  //                          {:label (:suomi-viittomakielisille texts/translation-mapping)
-  //                           :value "suomi-viittomakielisille"}
-  //                          {:label (:suomi-saamenkielisille texts/translation-mapping)
-  //                           :value "suomi-saamenkielisille"}
-  //                          {:label (:ruotsi-aidinkielena texts/translation-mapping)
-  //                           :value "ruotsi-aidinkielena"}
-  //                          {:label (:ruotsi-toisena-kielena texts/translation-mapping)
-  //                           :value "ruotsi-toisena-kielena"}
-  //                          {:label (:ruotsi-viittomakielisille texts/translation-mapping)
-  //                           :value "ruotsi-viittomakielisille"}
-  //                          {:label (:saame-aidinkielena texts/translation-mapping)
-  //                           :value "saame-aidinkielena"}
-  //                          {:label (:romani-aidinkielena texts/translation-mapping)
-  //                           :value "romani-aidinkielena"}
-  //                          {:label (:viittomakieli-aidinkielena texts/translation-mapping)
-  //                           :value "viittomakieli-aidinkielena"}
-  //                          {:label (:muu-oppilaan-aidinkieli texts/translation-mapping)
-  //                           :value "muu-oppilaan-aidinkieli"}]})
-
   public static String convertAtaruAidinkieliValue(String valueFromAtaru) {
     switch (valueFromAtaru) {
       case "suomi-aidinkielena":
