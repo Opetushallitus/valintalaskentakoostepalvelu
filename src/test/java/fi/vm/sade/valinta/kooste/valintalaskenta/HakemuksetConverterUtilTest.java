@@ -1837,6 +1837,27 @@ public class HakemuksetConverterUtilTest {
                 new AvainArvoDTO(
                     "arvosana-valinnainen-kieli_group0", "arvosana-valinnainen-kieli-7"));
             add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group0", "FR"));
+            add(
+                new AvainArvoDTO(
+                    "oppiaine-valinnainen-kieli_group1", "oppiaine-valinnainen-kieli-a2"));
+            add(
+                new AvainArvoDTO(
+                    "arvosana-valinnainen-kieli_group1", "arvosana-valinnainen-kieli-8"));
+            add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group1", "EN"));
+            add(
+                new AvainArvoDTO(
+                    "oppiaine-valinnainen-kieli_group2", "oppiaine-valinnainen-kieli-a2"));
+            add(
+                new AvainArvoDTO(
+                    "arvosana-valinnainen-kieli_group2", "arvosana-valinnainen-kieli-9"));
+            add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group2", "EN"));
+            add(
+                new AvainArvoDTO(
+                    "oppiaine-valinnainen-kieli_group3", "oppiaine-valinnainen-kieli-b2"));
+            add(
+                new AvainArvoDTO(
+                    "arvosana-valinnainen-kieli_group3", "arvosana-valinnainen-kieli-10"));
+            add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group3", "IHSM"));
           }
         });
     Oppija oppija =
@@ -1854,6 +1875,9 @@ public class HakemuksetConverterUtilTest {
         false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
     assertEquals("FR", firstHakemusArvo(hakemus, "PK_B2_OPPIAINE").orElse("notFound"));
     assertEquals("7", firstHakemusArvo(hakemus, "PK_B2").orElse("notFound"));
+    assertEquals("EN", firstHakemusArvo(hakemus, "PK_A2_OPPIAINE").orElse("notFound"));
+    assertEquals("8", firstHakemusArvo(hakemus, "PK_A2").orElse("notFound"));
+    assertEquals("9", firstHakemusArvo(hakemus, "PK_A2_VAL1").orElse("notFound"));
   }
 
   @Test

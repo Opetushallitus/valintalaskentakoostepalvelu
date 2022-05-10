@@ -329,11 +329,7 @@ public class HakemuksetConverterUtil {
         "Hakemuksen {} atarun arvosanat: {}", hakemusDTO.getHakemusoid(), arvosanatHakemukselta);
     if (hasPKVuosiBefore2018(suoritusValues)) {
       Map<String, AvainArvoDTO> ataruArvosanat =
-          toAvainMap(
-              AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot),
-              hakemusDTO.getHakemusoid(),
-              hakukohdeOid,
-              errors);
+          toAvainMap(arvosanatHakemukselta, hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
 
       if (!surenArvosanat.isEmpty()) {
         LOG.warn(

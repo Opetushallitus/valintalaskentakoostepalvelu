@@ -2,8 +2,10 @@ package fi.vm.sade.valinta.kooste.util;
 
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -106,59 +108,78 @@ public class AtaruArvosanaParser {
             .collect(
                 Collectors.groupingBy(
                     dto -> dto.getAvain().substring(dto.getAvain().length() - 1)));
-    for (Map.Entry<String, List<AvainArvoDTO>> entry : grouped.entrySet()) {
-      try {
-        LOG.info("Käsitellään valinnainen kieli: {}", entry);
 
-        // B2
-        if (entry.getValue().size() == 3) {
-          LOG.info("Sopivasti avain-arvoja!");
-        } else {
-          LOG.warn("Liian vähän avain-arvoja! {}", entry);
-        }
-        String aineKey =
-            entry.getValue().stream()
-                .filter(dto -> dto.getAvain().contains("oppiaine"))
-                .findFirst()
-                .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
-                .orElse("")
-                .toUpperCase();
-        String kieli =
-            entry.getValue().stream()
-                .filter(dto -> dto.getAvain().startsWith("oppimaara"))
-                .findFirst()
-                .map(AvainArvoDTO::getArvo)
-                .orElse("")
-                .toUpperCase();
-        String arvosana =
-            entry.getValue().stream()
-                .filter(dto -> dto.getAvain().startsWith("arvosana"))
-                .findFirst()
-                .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
-                .orElse("")
-                .toUpperCase();
+    Set<String> langs = new HashSet<>();
 
-        String valSuffix = "";
-        if (!"0".equals(entry.getKey())) {
-          valSuffix = "_VAL" + (Integer.parseInt(entry.getKey()));
-        }
-
-        if (!arvosana.isEmpty() && !kieli.isEmpty() && !aineKey.isEmpty()) {
-          String arvosanaKey = prefix + aineKey + valSuffix;
-          r.add(new AvainArvoDTO(arvosanaKey, arvosana));
-          if ("0".equals(entry.getKey())) {
-            String oppiaineKey = arvosanaKey + "_OPPIAINE";
-            r.add(
-                new AvainArvoDTO(
-                    oppiaineKey,
-                    kieli)); // fixme vältetään duplikaattiavainongelma, mutta tästä saattaa olla
-            // muuta harmia.
+    grouped.forEach(
+        (key, value) -> {
+          String lang =
+              value.stream()
+                  .filter(dto -> dto.getAvain().contains("oppiaine"))
+                  .findFirst()
+                  .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
+                  .orElse("")
+                  .toUpperCase();
+          if (!lang.isEmpty()) {
+            langs.add(lang);
           }
-        } else {
-          throw new RuntimeException("Tyhjä arvo!");
+        });
+
+    for (String lang : langs) {
+      int index = -1;
+      try {
+        List<Map.Entry<String, List<AvainArvoDTO>>> valuesForMatchingLangs =
+            grouped.entrySet().stream()
+                .filter(
+                    entry ->
+                        entry.getValue().stream()
+                            .filter(dto -> dto.getAvain().contains("oppiaine"))
+                            .findFirst()
+                            .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
+                            .orElse("")
+                            .toUpperCase()
+                            .equals(lang))
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toList());
+
+        LOG.info("Handling lang {} with dtos: {}", lang, valuesForMatchingLangs);
+
+        for (Map.Entry<String, List<AvainArvoDTO>> entry : valuesForMatchingLangs) {
+          index++;
+          LOG.info("Handling entry {}, index {}", entry, index);
+          String kieli =
+              entry.getValue().stream()
+                  .filter(dto -> dto.getAvain().startsWith("oppimaara"))
+                  .findFirst()
+                  .map(AvainArvoDTO::getArvo)
+                  .orElse("")
+                  .toUpperCase();
+          String arvosana =
+              entry.getValue().stream()
+                  .filter(dto -> dto.getAvain().startsWith("arvosana"))
+                  .findFirst()
+                  .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
+                  .orElse("")
+                  .toUpperCase();
+          String valSuffix = "";
+          if (index > 0) {
+            valSuffix = "_VAL" + index;
+          }
+
+          if (!arvosana.isEmpty() && !kieli.isEmpty() && !lang.isEmpty()) {
+            String arvosanaKey = prefix + lang + valSuffix;
+            r.add(new AvainArvoDTO(arvosanaKey, arvosana));
+            if (index == 0) {
+              String oppiaineKey = arvosanaKey + "_OPPIAINE";
+              r.add(new AvainArvoDTO(oppiaineKey, kieli));
+            }
+          } else {
+            LOG.warn("Tyhjä arvo kielelle {}: {}", lang, entry);
+          }
         }
+
       } catch (Exception e) {
-        LOG.error("Valinnaisen parsiminen ei onnistunut: {}", entry, e);
+        LOG.error("Valinnaisen parsiminen ei onnistunut: {}", lang, e);
       }
     }
 
