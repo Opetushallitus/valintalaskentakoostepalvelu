@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -55,7 +54,7 @@ public class ParametritResource {
     return Response.ok(resp).build();
   }
 
-  @POST
+  @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/hakukohderyhmat/{hakukohdeOid}")
   @ApiOperation(value = "Hakukohteen hakukohderyhmät", response = Response.class)
