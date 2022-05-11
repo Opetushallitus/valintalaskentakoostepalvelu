@@ -58,21 +58,46 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   @Override
   public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(
       Iterable<String> organizationGroupOids) {
-    Map<String, String[]> parameters = new HashMap<>();
-    parameters.put(
+
+    Map<String, String[]> tarjontaParams = new HashMap<>();
+    tarjontaParams.put(
         "organisaatioRyhmaOid",
         StreamSupport.stream(organizationGroupOids.spliterator(), false).toArray(String[]::new));
-    return this.client
-        .<ResultSearch>getJson(
-            urlConfiguration.url("tarjonta-service.hakukohde.search", parameters),
-            Duration.ofMinutes(5),
-            new TypeToken<ResultSearch>() {}.getType())
-        .thenApplyAsync(
-            r ->
-                r.getResult().getTulokset().stream()
-                    .flatMap(t -> t.getTulokset().stream())
-                    .map(ResultHakukohde::getOid)
-                    .collect(Collectors.toSet()));
+    CompletableFuture<Set<String>> fromTarjonta =
+        this.client
+            .<ResultSearch>getJson(
+                urlConfiguration.url("tarjonta-service.hakukohde.search", tarjontaParams),
+                Duration.ofMinutes(5),
+                new TypeToken<ResultSearch>() {}.getType())
+            .thenApplyAsync(
+                r ->
+                    r.getResult().getTulokset().stream()
+                        .flatMap(t -> t.getTulokset().stream())
+                        .map(ResultHakukohde::getOid)
+                        .collect(Collectors.toSet()));
+
+    CompletableFuture<List<List<String>>> fromHakukohderyhmapalvelu =
+        CompletableFutureUtil.sequence(
+            StreamSupport.stream(organizationGroupOids.spliterator(), false)
+                .map(
+                    hakukohderyhmaOid ->
+                        this.hakukohderyhmapalveluClient.<List<String>>getJson(
+                            urlConfiguration.url(
+                                "hakukohderyhmapalvelu.hakukohderyhman-hakukohteet",
+                                hakukohderyhmaOid),
+                            Duration.ofMinutes(1),
+                            new TypeToken<List<String>>() {}.getType()))
+                .collect(Collectors.toList()));
+
+    return fromTarjonta.thenCombine(
+        fromHakukohderyhmapalvelu,
+        (t, h) -> {
+          Set<String> result = new HashSet<>(t);
+          for (List<String> oids : h) {
+            result.addAll(oids);
+          }
+          return result;
+        });
   }
 
   @Override
