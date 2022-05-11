@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
@@ -31,8 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -44,6 +50,11 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   private final HttpClient koutaClient;
   private final HttpClient hakukohderyhmapalveluClient;
   private final Integer KOUTA_OID_LENGTH = 35;
+
+  private static final Logger LOG = LoggerFactory.getLogger(TarjontaAsyncResourceImpl.class);
+
+  private final Cache<String, CompletableFuture<List<String>>> hakukohderyhmanHakukohteetCache =
+      CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build();
 
   @Autowired
   public TarjontaAsyncResourceImpl(
@@ -79,14 +90,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
     CompletableFuture<List<List<String>>> fromHakukohderyhmapalvelu =
         CompletableFutureUtil.sequence(
             StreamSupport.stream(organizationGroupOids.spliterator(), false)
-                .map(
-                    hakukohderyhmaOid ->
-                        this.hakukohderyhmapalveluClient.<List<String>>getJson(
-                            urlConfiguration.url(
-                                "hakukohderyhmapalvelu.hakukohderyhman-hakukohteet",
-                                hakukohderyhmaOid),
-                            Duration.ofMinutes(1),
-                            new TypeToken<List<String>>() {}.getType()))
+                .map(this::hakukohderyhmanHakukohteet)
                 .collect(Collectors.toList()));
 
     return fromTarjonta.thenCombine(
@@ -98,6 +102,25 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
           }
           return result;
         });
+  }
+
+  private CompletableFuture<List<String>> hakukohderyhmanHakukohteet(String hakukohderyhmaOid) {
+    try {
+      return hakukohderyhmanHakukohteetCache.get(
+          hakukohderyhmaOid,
+          () ->
+              this.hakukohderyhmapalveluClient.getJson(
+                  urlConfiguration.url(
+                      "hakukohderyhmapalvelu.hakukohderyhman-hakukohteet", hakukohderyhmaOid),
+                  Duration.ofMinutes(1),
+                  new TypeToken<List<String>>() {}.getType()));
+    } catch (ExecutionException e) {
+      LOG.error(
+          "Hakukohderyhmän {} hakukohteiden haku epäonnistui: {}",
+          hakukohderyhmaOid,
+          e.getMessage());
+      return CompletableFuture.failedFuture(e);
+    }
   }
 
   @Override
