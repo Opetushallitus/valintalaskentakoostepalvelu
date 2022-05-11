@@ -165,6 +165,11 @@ public class KoosteTestProfileConfiguration {
     return APPLICATION_SESSION;
   }
 
+  @Bean(name = "HakukohderyhmapalveluApplicationSession")
+  public ApplicationSession getHakukohderyhmapalveluApplicationSession() {
+    return APPLICATION_SESSION;
+  }
+
   @Bean(name = "ViestintapalveluApplicationSession")
   public ApplicationSession getViestintapalveluApplicationSession() {
     return APPLICATION_SESSION;
