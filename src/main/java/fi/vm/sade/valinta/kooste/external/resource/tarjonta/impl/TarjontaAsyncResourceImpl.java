@@ -298,6 +298,15 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   }
 
   @Override
+  public CompletableFuture<List<String>> hakukohdeRyhmasForHakukohde(String hakukohdeOid) {
+    if (KOUTA_OID_LENGTH.equals(hakukohdeOid.length())) {
+      return findHakukohderyhmasForHakukohde(hakukohdeOid);
+    } else {
+      return CompletableFuture.completedFuture(Collections.emptyList());
+    }
+  }
+
+  @Override
   public CompletableFuture<HakukohdeValintaperusteetDTO> findValintaperusteetByOid(
       String hakukohdeOid) {
     return this.client
@@ -345,6 +354,13 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
                         Collectors.toMap(
                             HakukohderyhmaHakukohde::getHakukohdeOid,
                             HakukohderyhmaHakukohde::getHakukohderyhmat)));
+  }
+
+  private CompletableFuture<List<String>> findHakukohderyhmasForHakukohde(String hakukohdeOid) {
+    return this.hakukohderyhmapalveluClient.getJson(
+        urlConfiguration.url("hakukohderyhmapalvelu.hakukohteen-hakukohderyhmat", hakukohdeOid),
+        Duration.ofMinutes(1),
+        new TypeToken<List<String>>() {}.getType());
   }
 
   public static Map<String, List<String>> resultSearchToHakukohdeRyhmaMap(ResultSearch result) {

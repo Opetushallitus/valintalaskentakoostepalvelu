@@ -93,6 +93,11 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
+  public CompletableFuture<List<String>> hakukohdeRyhmasForHakukohde(String hakukohdeOid) {
+    return null;
+  }
+
+  @Override
   public CompletableFuture<HakukohdeValintaperusteetDTO> findValintaperusteetByOid(
       String hakukohdeOid) {
     return null;
