@@ -55,7 +55,8 @@ public class AtaruArvosanaParser {
   // "arvosana-valinnainen-kieli_group2": "",
   // "arvosana-valinnainen-kieli_group1": "arvosana-valinnainen-kieli-6",
   // "arvosana-valinnainen-kieli_group0": "arvosana-valinnainen-kieli-8"
-  public static List<AvainArvoDTO> convertValinnaisetKielet(Map<String, AvainArvoDTO> keyValues) {
+  public static List<AvainArvoDTO> convertValinnaisetKielet(
+      Map<String, AvainArvoDTO> keyValues, String hakemusOid) {
 
     List<AvainArvoDTO> r = new ArrayList<>();
 
@@ -136,18 +137,19 @@ public class AtaruArvosanaParser {
             LOG.warn("Tyhjä arvo kielelle {}: {}", lang, entry);
           }
         }
-
       } catch (Exception e) {
-        LOG.error("Valinnaisen parsiminen ei onnistunut: {}", lang, e);
+        LOG.error(
+            "Hakemuksen {} valinnaisen kielen parsiminen ei onnistunut: {}", hakemusOid, lang, e);
       }
     }
 
     return r;
   }
 
-  public static List<AvainArvoDTO> convertAtaruArvosanas(Map<String, AvainArvoDTO> keyValues) {
+  public static List<AvainArvoDTO> convertAtaruArvosanas(
+      Map<String, AvainArvoDTO> keyValues, String hakemusOid) {
     List<AvainArvoDTO> r = new ArrayList<>();
-    r.addAll(convertValinnaisetKielet(keyValues));
+    r.addAll(convertValinnaisetKielet(keyValues, hakemusOid));
     for (Map.Entry<String, AvainArvoDTO> entry : keyValues.entrySet()) {
       String key = entry.getKey();
       if (key.startsWith("arvosana") && !key.contains("valinnainen-kieli")) {
@@ -167,8 +169,9 @@ public class AtaruArvosanaParser {
           r.add(new AvainArvoDTO(aine, arvosana));
         } catch (Exception e) {
           LOG.warn(
-              "Virhe ({}) parsittaessa ataruarvosanaa {}. Jatketaan normaalisti, mutta tätä arvosanaa ei oteta huomioon.",
+              "Virhe ({}) parsittaessa hakemuksen {} ataruarvosanaa {}. Jatketaan normaalisti, mutta tätä arvosanaa ei oteta huomioon.",
               e.getMessage(),
+              hakemusOid,
               entry);
         }
       } else if (key.startsWith("oppimaara") && !key.contains("valinnainen-kieli")) {
@@ -189,8 +192,9 @@ public class AtaruArvosanaParser {
           }
         } catch (Exception e) {
           LOG.warn(
-              "Virhe ({}) parsittaessa ataruoppiainetta {}. Jatketaan normaalisti, mutta tätä oppiainetietoa ei oteta huomioon.",
+              "Virhe ({}) parsittaessa hakemuksen {} ataruoppiainetta {}. Jatketaan normaalisti, mutta tätä oppiainetietoa ei oteta huomioon.",
               e.getMessage(),
+              hakemusOid,
               entry);
         }
       }

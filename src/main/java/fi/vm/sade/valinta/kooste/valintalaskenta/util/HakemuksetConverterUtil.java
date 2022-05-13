@@ -324,7 +324,7 @@ public class HakemuksetConverterUtil {
     List<AvainArvoDTO> suoritusValues = new ArrayList<>(suoritustenTiedot.values());
 
     List<AvainArvoDTO> arvosanatHakemukselta =
-        AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot);
+        AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot, hakemusDTO.getHakemusoid());
     LOG.info(
         "Hakemuksen {} atarun arvosanat: {}", hakemusDTO.getHakemusoid(), arvosanatHakemukselta);
     if (hasPKVuosiBefore2018(suoritusValues)) {
