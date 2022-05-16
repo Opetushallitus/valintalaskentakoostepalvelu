@@ -154,6 +154,51 @@ public class HttpClients {
         defaultHttpClientBuilder(cookieManager).build(), null, TarjontaAsyncResourceImpl.getGson());
   }
 
+  @Bean(name = "HakukohderyhmapalveluInternalHttpClient")
+  @Autowired
+  public java.net.http.HttpClient getHakukohderyhmapalveluInternalHttpClient(
+      CookieManager cookieManager) {
+    return defaultHttpClientBuilder(cookieManager).build();
+  }
+
+  @Profile("default")
+  @Bean(name = "HakukohderyhmapalveluApplicationSession")
+  @Autowired
+  public ApplicationSession getHakukohderyhmapalveluApplicationSession(
+      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
+      @Qualifier("HakukohderyhmapalveluInternalHttpClient")
+          java.net.http.HttpClient applicatioHttpClient,
+      CookieManager cookieManager,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.hakukohderyhmapalvelu}")
+          String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.hakukohderyhmapalvelu}")
+          String password) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    String service = UrlConfiguration.getInstance().url("hakukohderyhmapalvelu.auth.login");
+    return new ApplicationSession(
+        applicatioHttpClient,
+        cookieManager,
+        CALLER_ID,
+        Duration.ofSeconds(10),
+        new CasSession(
+            casHttpClient,
+            Duration.ofSeconds(10),
+            CALLER_ID,
+            URI.create(ticketsUrl),
+            username,
+            password),
+        service,
+        "ring-session");
+  }
+
+  @Bean(name = "HakukohderyhmapalveluHttpClient")
+  @Autowired
+  public HttpClient getHakukohderyhmapalveluHttpClient(
+      @Qualifier("HakukohderyhmapalveluInternalHttpClient") java.net.http.HttpClient client,
+      @Qualifier("HakukohderyhmapalveluApplicationSession") ApplicationSession applicationSession) {
+    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+  }
+
   @Bean(name = "KoutaInternalHttpClient")
   @Autowired
   public java.net.http.HttpClient getKoutaInternalHttpClient(CookieManager cookieManager) {

@@ -32,5 +32,7 @@ public interface TarjontaAsyncResource {
 
   CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid);
 
+  CompletableFuture<List<String>> hakukohdeRyhmasForHakukohde(String hakukohdeOid);
+
   CompletableFuture<HakukohdeValintaperusteetDTO> findValintaperusteetByOid(String hakukohdeOid);
 }
