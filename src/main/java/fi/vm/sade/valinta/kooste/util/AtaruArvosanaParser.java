@@ -2,8 +2,11 @@ package fi.vm.sade.valinta.kooste.util;
 
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,14 +14,145 @@ import org.slf4j.LoggerFactory;
 public class AtaruArvosanaParser {
   private static final Logger LOG = LoggerFactory.getLogger(AtaruArvosanaParser.class);
 
-  public static List<AvainArvoDTO> convertAtaruArvosanas(Map<String, AvainArvoDTO> keyValues) {
-    // Toisen asteen ataruhakemuksilta löytyy tällä hetkellä vain peruskoulun arvosanoja
-    String prefix = "PK_";
+  // Toisen asteen ataruhakemuksilta löytyy tällä hetkellä vain peruskoulun arvosanoja
+  private static final String prefix = "PK_";
+
+  public static String convertAtaruAidinkieliValue(String valueFromAtaru) {
+    switch (valueFromAtaru) {
+      case "suomi-aidinkielena":
+        return "FI";
+      case "suomi-toisena-kielena":
+        return "FI_2";
+      case "suomi-viittomakielisille":
+        return "FI_VK";
+      case "suomi-saamenkielisille":
+        return "FI_SE";
+      case "ruotsi-aidinkielena":
+        return "SV";
+      case "ruotsi-toisena-kielena":
+        return "SV_2";
+      case "ruotsi-viittomakielisille":
+        return "SV_VK";
+      case "saame-aidinkielena":
+        return "SE";
+      case "romani-aidinkielena":
+        return "RI";
+      case "viittomakieli-aidinkielena":
+        return "VK";
+      case "muu-oppilaan-aidinkieli":
+        return "XX";
+    }
+    return "XX";
+  }
+
+  // Käsittelee tämänmuotoista dataa:
+  // "oppiaine-valinnainen-kieli_group1": "oppiaine-valinnainen-kieli-a2",
+  // "oppiaine-valinnainen-kieli_group0": "oppiaine-valinnainen-kieli-b2",
+  // "oppiaine-valinnainen-kieli_group2": "",
+  // "oppimaara-kieli-valinnainen-kieli_group1": "EN",
+  // "oppimaara-kieli-valinnainen-kieli_group0": "HE",
+  // "oppimaara-kieli-valinnainen-kieli_group2": "",
+  // "arvosana-valinnainen-kieli_group2": "",
+  // "arvosana-valinnainen-kieli_group1": "arvosana-valinnainen-kieli-6",
+  // "arvosana-valinnainen-kieli_group0": "arvosana-valinnainen-kieli-8"
+  public static List<AvainArvoDTO> convertValinnaisetKielet(
+      Map<String, AvainArvoDTO> keyValues, String hakemusOid) {
 
     List<AvainArvoDTO> r = new ArrayList<>();
+
+    Map<String, List<AvainArvoDTO>> grouped =
+        keyValues.values().stream()
+            .filter(
+                dto ->
+                    dto.getAvain().contains("valinnainen-kieli") && !dto.getAvain().contains("-a-"))
+            .collect(
+                Collectors.groupingBy(
+                    dto -> dto.getAvain().substring(dto.getAvain().length() - 1)));
+
+    Set<String> langs = new HashSet<>(); // A2, B2 jne.
+
+    grouped.forEach(
+        (key, value) -> {
+          String lang =
+              value.stream()
+                  .filter(dto -> dto.getAvain().contains("oppiaine"))
+                  .findFirst()
+                  .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
+                  .orElse("")
+                  .toUpperCase();
+          if (!lang.isEmpty()) {
+            langs.add(lang);
+          }
+        });
+
+    for (String lang : langs) {
+      int index = -1;
+      try {
+        List<Map.Entry<String, List<AvainArvoDTO>>> valuesForMatchingLangs =
+            grouped.entrySet().stream()
+                .filter(
+                    entry ->
+                        entry.getValue().stream()
+                            .filter(dto -> dto.getAvain().contains("oppiaine"))
+                            .findFirst()
+                            .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
+                            .orElse("")
+                            .toUpperCase()
+                            .equals(lang))
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toList());
+
+        LOG.info("Handling lang {} with dtos: {}", lang, valuesForMatchingLangs);
+
+        for (Map.Entry<String, List<AvainArvoDTO>> entry : valuesForMatchingLangs) {
+          index++;
+          LOG.info("Handling entry {}, index {}", entry, index);
+          String kieli =
+              entry.getValue().stream()
+                  .filter(dto -> dto.getAvain().startsWith("oppimaara"))
+                  .findFirst()
+                  .map(AvainArvoDTO::getArvo)
+                  .orElse("")
+                  .toUpperCase();
+          String arvosana =
+              entry.getValue().stream()
+                  .filter(dto -> dto.getAvain().startsWith("arvosana"))
+                  .findFirst()
+                  .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
+                  .orElse("")
+                  .toUpperCase();
+          String valSuffix = "";
+          if (index > 0) {
+            valSuffix = "_VAL" + index;
+          }
+
+          if (!arvosana.isEmpty() && !kieli.isEmpty() && !lang.isEmpty()) {
+            String arvosanaKey = prefix + lang + valSuffix;
+            r.add(new AvainArvoDTO(arvosanaKey, arvosana));
+            if (index == 0) {
+              String oppiaineKey = arvosanaKey + "_OPPIAINE";
+              r.add(new AvainArvoDTO(oppiaineKey, kieli));
+            }
+          } else {
+            LOG.warn("Tyhjä arvo kielelle {}: {}", lang, entry);
+          }
+        }
+      } catch (Exception e) {
+        LOG.error(
+            "Hakemuksen {} valinnaisen kielen parsiminen ei onnistunut: {}", hakemusOid, lang, e);
+      }
+    }
+
+    return r;
+  }
+
+  public static List<AvainArvoDTO> convertAtaruArvosanas(
+      Map<String, AvainArvoDTO> keyValues, String hakemusOid) {
+    List<AvainArvoDTO> r = new ArrayList<>();
+    r.addAll(convertValinnaisetKielet(keyValues, hakemusOid));
     for (Map.Entry<String, AvainArvoDTO> entry : keyValues.entrySet()) {
       String key = entry.getKey();
-      if (key.startsWith("arvosana")) {
+      if (key.startsWith("arvosana") && !key.contains("valinnainen-kieli")) {
         try {
           String aineKey = StringUtils.substringBetween(key, "arvosana-", "_group");
           if (aineKey.equals("A")) {
@@ -34,9 +168,33 @@ public class AtaruArvosanaParser {
           Integer.parseInt(arvosana); // Just check that the arvosana correctly parses as Integer.
           r.add(new AvainArvoDTO(aine, arvosana));
         } catch (Exception e) {
-          LOG.error(
-              "Virhe ({}) parsittaessa ataruarvosanaa {}. Jatketaan normaalisti, mutta tätä arvosanaa ei oteta huomioon.",
+          LOG.warn(
+              "Virhe ({}) parsittaessa hakemuksen {} ataruarvosanaa {}. Jatketaan normaalisti, mutta tätä arvosanaa ei oteta huomioon.",
               e.getMessage(),
+              hakemusOid,
+              entry);
+        }
+      } else if (key.startsWith("oppimaara") && !key.contains("valinnainen-kieli")) {
+        LOG.info("handling oppiaine: {}", entry);
+        // oppimaara-kieli-B1_group0
+        try {
+          String kieliKey = StringUtils.substringBetween(key, "oppimaara-kieli-", "_group");
+          boolean isAidinkieli = StringUtils.startsWith(key, "oppimaara-a_group");
+          String arvo = entry.getValue().getArvo();
+          if (isAidinkieli) {
+            kieliKey = "AI";
+            arvo = convertAtaruAidinkieliValue(arvo);
+          }
+          // Kerätään oppimäärätieto vain kerran, "group0"-loppuiselta avaimelta.
+          if (kieliKey != null && !arvo.isEmpty() && key.endsWith("0")) {
+            String oppiaineKey = prefix + kieliKey + "_OPPIAINE";
+            r.add(new AvainArvoDTO(oppiaineKey, arvo));
+          }
+        } catch (Exception e) {
+          LOG.warn(
+              "Virhe ({}) parsittaessa hakemuksen {} ataruoppiainetta {}. Jatketaan normaalisti, mutta tätä oppiainetietoa ei oteta huomioon.",
+              e.getMessage(),
+              hakemusOid,
               entry);
         }
       }
