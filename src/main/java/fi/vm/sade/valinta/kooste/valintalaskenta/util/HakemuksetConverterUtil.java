@@ -258,16 +258,14 @@ public class HakemuksetConverterUtil {
   }
 
   private Optional<String> getYoKieli(Oppija o) {
-    Optional<String> lukioKieli =
-        o.getSuoritukset().stream()
-            .filter(
-                s ->
-                    YO_KOMO.equals(s.getSuoritus().getKomo())
-                        && s.getSuoritus().isVahvistettu()
-                        && "VALMIS".equals(s.getSuoritus().getTila()))
-            .findFirst()
-            .map(sa -> sa.getSuoritus().getSuoritusKieli());
-    return lukioKieli;
+    return o.getSuoritukset().stream()
+        .filter(
+            s ->
+                YO_KOMO.equals(s.getSuoritus().getKomo())
+                    && s.getSuoritus().isVahvistettu()
+                    && "VALMIS".equals(s.getSuoritus().getTila()))
+        .findFirst()
+        .map(sa -> sa.getSuoritus().getSuoritusKieli());
   }
 
   public void mergeKeysOfOppijaAndHakemus(
@@ -322,10 +320,6 @@ public class HakemuksetConverterUtil {
       }
     }
 
-    LOG.info(
-        "YOKIELI Päätellään YO-tutkinnon kieli hakemukselle {}, suorituksia {}",
-        hakemusDTO.getHakemusoid(),
-        oppija.getSuoritukset().size());
     Optional<String> yoSuoritusKieli = getYoKieli(oppija);
     if (yoSuoritusKieli.isPresent()) {
       LOG.info(
