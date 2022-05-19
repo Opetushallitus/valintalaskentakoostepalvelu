@@ -258,22 +258,11 @@ public class HakemuksetConverterUtil {
         null);
   }
 
-  private Optional<String> getYoKieli(Oppija o) {
+  private Optional<String> getKieliForKomo(Oppija o, String komo) {
     return o.getSuoritukset().stream()
         .filter(
             s ->
-                YO_KOMO.equals(s.getSuoritus().getKomo())
-                    && s.getSuoritus().isVahvistettu()
-                    && "VALMIS".equals(s.getSuoritus().getTila()))
-        .findFirst()
-        .map(sa -> sa.getSuoritus().getSuoritusKieli());
-  }
-
-  private Optional<String> getAmmKieli(Oppija o) {
-    return o.getSuoritukset().stream()
-        .filter(
-            s ->
-                AM_KOMO.equals(s.getSuoritus().getKomo())
+                komo.equals(s.getSuoritus().getKomo())
                     && s.getSuoritus().isVahvistettu()
                     && "VALMIS".equals(s.getSuoritus().getTila()))
         .findFirst()
@@ -332,7 +321,7 @@ public class HakemuksetConverterUtil {
       }
     }
 
-    Optional<String> yoSuoritusKieli = getYoKieli(oppija);
+    Optional<String> yoSuoritusKieli = getKieliForKomo(oppija, YO_KOMO);
     if (yoSuoritusKieli.isPresent()) {
       LOG.info(
           "YOKIELI Löydettiin YO-suorituksen kieli hakemukselle {}: {}",
@@ -345,7 +334,7 @@ public class HakemuksetConverterUtil {
       LOG.info("YOKIELI Ei löydetty YO-kieltä hakemukselle {}", hakemusDTO.getHakemusoid());
     }
 
-    Optional<String> ammSuoritusKieli = getAmmKieli(oppija);
+    Optional<String> ammSuoritusKieli = getKieliForKomo(oppija, AM_KOMO);
     if (ammSuoritusKieli.isPresent()) {
       LOG.info(
           "AMMKIELI Löydettiin AMM-suorituksen kieli hakemukselle {}: {}",
