@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.AM_KOMO;
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.AM_TUTKINTO_KOMO;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.YO_KOMO;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
 import static java.util.Collections.emptyList;
@@ -335,15 +336,23 @@ public class HakemuksetConverterUtil {
     }
 
     Optional<String> ammSuoritusKieli = getKieliForKomo(oppija, AM_KOMO);
+    if (ammSuoritusKieli.isEmpty()) {
+      ammSuoritusKieli = getKieliForKomo(oppija, AM_TUTKINTO_KOMO);
+      if (ammSuoritusKieli.isPresent()) {
+        LOG.info(
+            "AMMKIELI Käytetään hakemukselle {} ammatillisen tutkinnon kieltä",
+            hakemusDTO.getHakemusoid());
+      }
+    }
     if (ammSuoritusKieli.isPresent()) {
       LOG.info(
           "AMMKIELI Löydettiin AMM-suorituksen kieli hakemukselle {}: {}",
           hakemusDTO.getHakemusoid(),
           ammSuoritusKieli.get());
-      Map<String, AvainArvoDTO> yoKieliTieto =
+      Map<String, AvainArvoDTO> ammKieliTieto =
           Map.of(
               "AMM_TUTKINTO_KIELI", new AvainArvoDTO("AMM_TUTKINTO_KIELI", ammSuoritusKieli.get()));
-      merge.putAll(yoKieliTieto);
+      merge.putAll(ammKieliTieto);
     } else {
       LOG.info("AMMKIELI Ei löydetty AMM-kieltä hakemukselle {}", hakemusDTO.getHakemusoid());
     }
