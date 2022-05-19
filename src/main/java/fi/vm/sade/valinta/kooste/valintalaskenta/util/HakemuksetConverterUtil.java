@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.YO_KOMO;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.sort;
@@ -256,6 +257,17 @@ public class HakemuksetConverterUtil {
         null);
   }
 
+  private Optional<String> getYoKieli(Oppija o) {
+    return o.getSuoritukset().stream()
+        .filter(
+            s ->
+                YO_KOMO.equals(s.getSuoritus().getKomo())
+                    && s.getSuoritus().isVahvistettu()
+                    && "VALMIS".equals(s.getSuoritus().getTila()))
+        .findFirst()
+        .map(sa -> sa.getSuoritus().getSuoritusKieli());
+  }
+
   public void mergeKeysOfOppijaAndHakemus(
       boolean hakijallaOnHenkilotunnus,
       Haku haku,
@@ -306,6 +318,19 @@ public class HakemuksetConverterUtil {
                 new AvainArvoDTO("yks_mat_ai", String.valueOf(hasHarkinnanvarainenMatAi)));
         merge.putAll(harkinnanvaraisuustieto);
       }
+    }
+
+    Optional<String> yoSuoritusKieli = getYoKieli(oppija);
+    if (yoSuoritusKieli.isPresent()) {
+      LOG.info(
+          "YOKIELI Löydettiin YO-suorituksen kieli hakemukselle {}: {}",
+          hakemusDTO.getHakemusoid(),
+          yoSuoritusKieli.get());
+      Map<String, AvainArvoDTO> yoKieliTieto =
+          Map.of("YO_TUTKINTO_KIELI", new AvainArvoDTO("YO_TUTKINTO_KIELI", yoSuoritusKieli.get()));
+      merge.putAll(yoKieliTieto);
+    } else {
+      LOG.info("YOKIELI Ei löydetty YO-kieltä hakemukselle {}", hakemusDTO.getHakemusoid());
     }
 
     if (fetchEnsikertalaisuus)
