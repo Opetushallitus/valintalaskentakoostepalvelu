@@ -189,7 +189,14 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
               urlConfiguration.url("kouta-internal.haku.hakuoid", hakuOid),
               Duration.ofSeconds(10),
               new TypeToken<KoutaHaku>() {}.getType());
-      return koutaF.thenApplyAsync(Haku::new);
+      return koutaF.thenApplyAsync(
+          hakuDto -> {
+            LOG.info(
+                "Saatiin KoutaHaku {}, tehdään hakumuunnos. Hakuajat: {}",
+                hakuDto,
+                hakuDto.hakuajat);
+            return new Haku(hakuDto);
+          });
     } else {
       return this.getTarjontaHaku(hakuOid).thenApplyAsync(Haku::new);
     }
