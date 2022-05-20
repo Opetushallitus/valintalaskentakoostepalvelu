@@ -65,7 +65,17 @@ public class Haku {
     if (dto.hakuajat != null && !dto.hakuajat.isEmpty()) {
       OptionalInt tuorein =
           dto.hakuajat.stream()
-              .map(kh -> List.of(kh.alkaa, kh.paattyy))
+              .map(
+                  kh -> {
+                    List<String> ajat = new ArrayList<>();
+                    if (kh.alkaa != null) {
+                      ajat.add(kh.alkaa);
+                    }
+                    if (kh.paattyy != null) {
+                      ajat.add(kh.paattyy);
+                    }
+                    return ajat;
+                  })
               .flatMap(Collection::stream)
               .filter(Objects::nonNull)
               .map(aikaleima -> DateTime.parse(aikaleima, fmt).getYear())
