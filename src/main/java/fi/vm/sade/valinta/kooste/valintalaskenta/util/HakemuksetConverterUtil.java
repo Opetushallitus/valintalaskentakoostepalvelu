@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -368,34 +369,52 @@ public class HakemuksetConverterUtil {
     LOG.info("Hakemuksen {} suoritusten tiedot {}", hakemusDTO.getHakemusoid(), suoritustenTiedot);
     LOG.info("Hakemuksen {} suren arvosanat {}", hakemusDTO.getHakemusoid(), surenArvosanat);
     merge.putAll(suoritustenTiedot);
-    merge.putAll(surenArvosanat);
 
     List<AvainArvoDTO> suoritusValues = new ArrayList<>(suoritustenTiedot.values());
 
     List<AvainArvoDTO> arvosanatHakemukselta =
         AtaruArvosanaParser.convertAtaruArvosanas(hakemuksenArvot, hakemusDTO.getHakemusoid());
-    LOG.info(
-        "Hakemuksen {} atarun arvosanat: {}", hakemusDTO.getHakemusoid(), arvosanatHakemukselta);
+
     if (hasPKVuosiBefore2018(suoritusValues)) {
       Map<String, AvainArvoDTO> ataruArvosanat =
           toAvainMap(arvosanatHakemukselta, hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
 
+      LOG.info(
+          "Käytetään hakemuksen arvosanoja hakemukselle {}: {}",
+          hakemusDTO.getHakemusoid(),
+          ataruArvosanat.values());
+      merge.putAll(ataruArvosanat);
       if (!surenArvosanat.isEmpty()) {
         LOG.warn(
             "Käytetään hakemukselle {} atarun arvosanoja {}, vaikka surestakin löytyi: {}. Osa tiedoista saatetaan yliajaa.",
             hakemusDTO.getHakemusoid(),
             ataruArvosanat,
             surenArvosanat);
+        Set<String> ataruArvosanaAvaimet =
+            ataruArvosanat.values().stream()
+                .map(AvainArvoDTO::getAvain)
+                .collect(Collectors.toSet());
+        Map<String, AvainArvoDTO> surenArvosanatJoitaEiAtarussa =
+            surenArvosanat.entrySet().stream()
+                .filter(entry -> !ataruArvosanaAvaimet.contains(entry.getValue().getAvain()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (surenArvosanatJoitaEiAtarussa.keySet().size() < surenArvosanat.keySet().size()) {
+          LOG.warn(
+              "Filtteröitiin hakemukselta {} osa surearvosanoista pois, koska ne saatiin jo atarusta! Arvosanoja ennen filtteröintiä {}, jälkeen {}",
+              hakemusDTO.getHakemusoid(),
+              surenArvosanat.keySet().size(),
+              surenArvosanatJoitaEiAtarussa.keySet().size());
+        }
+        merge.putAll(surenArvosanatJoitaEiAtarussa);
       }
-      LOG.info(
-          "Käytetään hakemuksen arvosanoja hakemukselle {}: {}",
-          hakemusDTO.getHakemusoid(),
-          ataruArvosanat.values());
-      merge.putAll(ataruArvosanat);
-    } else if (!arvosanatHakemukselta.isEmpty()) {
-      LOG.warn(
-          "Ataruhakemuksella on arvosanoja, vaikka pohjakoulutusvuosi on 2018 tai sen jälkeen. Ei käytetä hakemuksen {} arvosanoja!",
-          hakemusDTO.getHakemusoid());
+    } else {
+      if (!arvosanatHakemukselta.isEmpty()) {
+        LOG.warn(
+            "Ataruhakemuksella on arvosanoja, vaikka pohjakoulutusvuosi on 2018 tai sen jälkeen. Ei käytetä hakemuksen {} arvosanoja {}!",
+            hakemusDTO.getHakemusoid(),
+            arvosanatHakemukselta);
+      }
+      merge.putAll(surenArvosanat);
     }
 
     merge.putAll(ammatillisenKielikokeetSuresta);
