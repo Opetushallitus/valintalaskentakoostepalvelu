@@ -21,6 +21,7 @@ public class SuoritusJaArvosanatWrapper {
   public static final String LK_KOMO = "TODO lukio komo oid";
   public static final String AM_KOMO = "TODO ammatillinen komo oid";
   public static final String AM_TUTKINTO_KOMO = "ammatillinentutkinto komo oid";
+  public static final String AM_ERIKOISTUTKINTO_KOMO = "erikoisammattitutkinto komo oid";
   public static final String POO_KOMO = "TODO perusopetuksenOppiaineenOppimäärä";
   public static final String VALMA_KOMO = "valma";
   public static final String TELMA_KOMO = "telma";

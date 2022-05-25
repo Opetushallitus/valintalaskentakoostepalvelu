@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.AM_ERIKOISTUTKINTO_KOMO;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.AM_KOMO;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.AM_TUTKINTO_KOMO;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.YO_KOMO;
@@ -342,6 +343,13 @@ public class HakemuksetConverterUtil {
         LOG.info(
             "AMMKIELI Käytetään hakemukselle {} ammatillisen tutkinnon kieltä",
             hakemusDTO.getHakemusoid());
+      } else {
+        ammSuoritusKieli = getKieliForKomo(oppija, AM_ERIKOISTUTKINTO_KOMO);
+        if (ammSuoritusKieli.isPresent()) {
+          LOG.info(
+              "AMMKIELI Käytetään hakemukselle {} erikoisammattitutkinnon kieltä",
+              hakemusDTO.getHakemusoid());
+        }
       }
     }
     if (ammSuoritusKieli.isPresent()) {
