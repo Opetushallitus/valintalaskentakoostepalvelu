@@ -209,7 +209,9 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
       tiedotAtarusta.forEach(
           hh -> {
             if (hh.getHarkinnanvaraisuudenSyy()
-                .equals(HarkinnanvaraisuudenSyy.ATARU_EI_PAATTOTODISTUSTA)) {
+                    .equals(HarkinnanvaraisuudenSyy.ATARU_EI_PAATTOTODISTUSTA)
+                || hh.getHarkinnanvaraisuudenSyy()
+                    .equals(HarkinnanvaraisuudenSyy.ATARU_ULKOMAILLA_OPISKELTU)) {
               if (hasValmisPeruskoulu(oppijas)) {
                 LOG.info(
                     "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy valmis pohjakoulutus!",
