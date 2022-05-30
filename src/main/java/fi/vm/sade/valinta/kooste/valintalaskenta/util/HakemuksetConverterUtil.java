@@ -396,7 +396,11 @@ public class HakemuksetConverterUtil {
                 .collect(Collectors.toSet());
         Map<String, AvainArvoDTO> surenArvosanatJoitaEiAtarussa =
             surenArvosanat.entrySet().stream()
-                .filter(entry -> !ataruArvosanaAvaimet.contains(entry.getValue().getAvain()))
+                .filter(
+                    entry ->
+                        !ataruArvosanaAvaimet.contains(
+                            StringUtils.substringBefore(
+                                entry.getValue().getAvain(), "_SUORITETTU")))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (surenArvosanatJoitaEiAtarussa.keySet().size() < surenArvosanat.keySet().size()) {
           LOG.warn(
