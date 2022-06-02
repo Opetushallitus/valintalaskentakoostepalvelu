@@ -117,6 +117,7 @@ public class JalkiohjauskirjeetKomponentti {
         }
         Map<String, Object> replacements = Maps.newHashMap();
         replacements.put("tulokset", tulosList);
+        replacements.put("hakemusOid", hakemus.getOid());
         replacements.put("henkilotunnus", hakemus.getHenkilotunnus());
         replacements.put("syntymaaika", hakemus.getSyntymaaika());
         replacements.put("hakijaOid", hakija.getHakijaOid());
