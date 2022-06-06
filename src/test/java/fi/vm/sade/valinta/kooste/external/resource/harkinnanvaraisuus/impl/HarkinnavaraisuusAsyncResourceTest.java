@@ -882,7 +882,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
   @Test
   public void hakemuksenPerusteellaYksMatAi() {
-    String leikkuriPvm = "2022-06-06";
+    String leikkuriPvm = "2082-06-06";
     HarkinnanvaraisuusAsyncResource h =
         new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
     String hakukohdeOid = "1.2.246.562.20.88759381234";
