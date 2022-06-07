@@ -1981,6 +1981,63 @@ public class HakemuksetConverterUtilTest {
   }
 
   @Test
+  public void useitaB2kieliaAtaruHakemuksella() {
+    HakemusDTO hakemus = new HakemusDTO();
+    hakemus.setHakemusoid(HAKEMUS1_OID);
+    hakemus.setAvaimet(
+        new ArrayList<>() {
+          {
+            add(new AvainArvoDTO(hakemuksetConverterUtil.ATARU_POHJAKOULUTUS_VUOSI, "2008"));
+            add(
+                new AvainArvoDTO(
+                    "oppiaine-valinnainen-kieli_group0", "oppiaine-valinnainen-kieli-b2"));
+            add(
+                new AvainArvoDTO(
+                    "arvosana-valinnainen-kieli_group0", "arvosana-valinnainen-kieli-7"));
+            add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group0", "DE"));
+            add(
+                new AvainArvoDTO(
+                    "oppiaine-valinnainen-kieli_group1", "oppiaine-valinnainen-kieli-b2"));
+            add(
+                new AvainArvoDTO(
+                    "arvosana-valinnainen-kieli_group1", "arvosana-valinnainen-kieli-10"));
+            add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group1", "FR"));
+            add(
+                new AvainArvoDTO(
+                    "oppiaine-valinnainen-kieli_group2", "oppiaine-valinnainen-kieli-b2"));
+            add(
+                new AvainArvoDTO(
+                    "arvosana-valinnainen-kieli_group2", "arvosana-valinnainen-kieli-9"));
+            add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group2", "IT"));
+          }
+        });
+    Oppija oppija =
+        new SuoritusrekisteriSpec.OppijaBuilder()
+            .suoritus()
+            .setSuoritusKieli("FI")
+            .setLukio()
+            .setVahvistettu(false)
+            .setMyontaja(HAKEMUS1_OID)
+            .setValmistuminen("1.1.2014")
+            .setKesken()
+            .build()
+            .build();
+    Map<String, Exception> errors = new HashMap<>();
+
+    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+        false, haku, "", new ParametritDTO(), errors, oppija, hakemus, true);
+    assertTrue(errors.isEmpty());
+    assertEquals(
+        "2008", getFirstHakemusArvo(hakemus, hakemuksetConverterUtil.PK_PAATTOTODISTUSVUOSI));
+    assertEquals("7", firstHakemusArvo(hakemus, "PK_B2").orElse("notFound"));
+    assertEquals("DE", firstHakemusArvo(hakemus, "PK_B2_OPPIAINE").orElse("notFound"));
+    assertEquals("10", firstHakemusArvo(hakemus, "PK_B22").orElse("notFound"));
+    assertEquals("FR", firstHakemusArvo(hakemus, "PK_B22_OPPIAINE").orElse("notFound"));
+    assertEquals("9", firstHakemusArvo(hakemus, "PK_B23").orElse("notFound"));
+    assertEquals("IT", firstHakemusArvo(hakemus, "PK_B23_OPPIAINE").orElse("notFound"));
+  }
+
+  @Test
   public void hakemukseltaKopioituMuokattuLukioKieli() {
     HakemusDTO hakemus = new HakemusDTO();
     hakemus.setHakemusoid(HAKEMUS1_OID);
