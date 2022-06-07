@@ -87,7 +87,8 @@ public class AtaruArvosanaParser {
 
     for (String aineKey : langs) {
       int index = -1;
-      int A1index = 2;
+      int A1index = 2; // A12, A13 jne
+      int A2index = 0; // tavoitteena A2, A22, A23 jne
       try {
         List<Map.Entry<String, List<AvainArvoDTO>>> valuesForMatchingLangs =
             grouped.entrySet().stream()
@@ -134,6 +135,16 @@ public class AtaruArvosanaParser {
                 kieli,
                 prefix + langPrefix);
             A1index++;
+          } else if (aineKey.equals("A2")) {
+            A2index++;
+            if (A2index > 1) {
+              langPrefix = aineKey + A2index;
+              LOG.warn(
+                  "Muunnetaan hakemuksen {} valinnainen A2-kieli {} pakolliseksi avaimelle {}",
+                  hakemusOid,
+                  kieli,
+                  prefix + langPrefix);
+            }
           } else if (index > 0) {
             valSuffix = "_VAL" + index;
           }
@@ -141,7 +152,7 @@ public class AtaruArvosanaParser {
           if (!arvosana.isEmpty() && !kieli.isEmpty() && !aineKey.isEmpty()) {
             String arvosanaKey = prefix + langPrefix + valSuffix;
             r.add(new AvainArvoDTO(arvosanaKey, arvosana));
-            if (index == 0 || aineKey.equals("A1")) {
+            if (index == 0 || aineKey.equals("A1") || aineKey.equals("A2")) {
               String oppiaineKey = arvosanaKey + "_OPPIAINE";
               r.add(new AvainArvoDTO(oppiaineKey, kieli));
             }
