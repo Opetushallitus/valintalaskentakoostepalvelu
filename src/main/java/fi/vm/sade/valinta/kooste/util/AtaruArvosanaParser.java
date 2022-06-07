@@ -127,7 +127,7 @@ public class AtaruArvosanaParser {
           String langPrefix = aineKey;
 
           if (aineKey.equals("A1")) {
-            // Muunnetaan "valinnaninen a1-kieli" pakolliseksi, avain muotoon PK_A12, PK_A13 jne
+            // Muunnetaan "valinnainen a1-kieli" pakolliseksi, avain muotoon PK_A12, PK_A13 jne
             langPrefix = aineKey + A1index;
             LOG.warn(
                 "Muunnetaan hakemuksen {} valinnainen A1-kieli {} pakolliseksi avaimelle {}",
