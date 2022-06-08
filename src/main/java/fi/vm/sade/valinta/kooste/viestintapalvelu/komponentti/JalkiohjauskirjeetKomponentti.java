@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.ContentStructureType;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.KirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.SyotettyArvoDTO;
 import java.util.ArrayList;
@@ -50,7 +51,8 @@ public class JalkiohjauskirjeetKomponentti {
       @Property("tag") String tag,
       boolean sahkoinenMassaposti,
       boolean isKkHaku,
-      List<ContentStructureType> sisaltotyypit) {
+      List<ContentStructureType> sisaltotyypit,
+      KirjeenVastaanottaja kirjeenVastaanottaja) {
     final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
     if (kaikkiHyvaksymattomat == 0) {
       LOG.error(
@@ -122,18 +124,27 @@ public class JalkiohjauskirjeetKomponentti {
         replacements.put("syntymaaika", hakemus.getSyntymaaika());
         replacements.put("hakijaOid", hakija.getHakijaOid());
 
-        String sahkoposti = hakemus.getSahkopostiOsoite();
+        List<String> sahkopostit = new ArrayList<>();
+        if (kirjeenVastaanottaja.equals(KirjeenVastaanottaja.HUOLTAJAT)) {
+          List<String> huoltajienSahkopostit = hakemus.getHuoltajienSahkopostiosoitteet();
+          sahkopostit.addAll(huoltajienSahkopostit);
+        } else {
+          sahkopostit.add(hakemus.getSahkopostiOsoite());
+        }
         boolean skipIPosti = sahkoinenMassaposti && !sendIPosti(hakemus);
-        kirjeet.add(
-            new Letter(
-                osoite,
-                templateName,
-                preferoituKielikoodi,
-                replacements,
-                hakija.getHakijaOid(),
-                skipIPosti,
-                sahkoposti,
-                hakija.getHakemusOid()));
+        for (String sahkoposti : sahkopostit) {
+          kirjeet.add(
+              new Letter(
+                  osoite,
+                  templateName,
+                  preferoituKielikoodi,
+                  replacements,
+                  hakija.getHakijaOid(),
+                  skipIPosti,
+                  sahkoposti,
+                  hakija.getHakemusOid()));
+        }
+
         count++;
         if (count % 10000 == 0) {
           LOG.info("Luotu {}/{} kirjettä", count, kaikkiHyvaksymattomat);

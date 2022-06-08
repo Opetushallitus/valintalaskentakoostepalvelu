@@ -8,6 +8,8 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Ryhmasahkopo
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
 import io.reactivex.Observable;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -121,6 +123,19 @@ public class ViestintapalveluProxyResource {
             .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "en")
             .map(this::haeRyhmasahkopostiId);
 
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleFi =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "fi")
+            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleSv =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "sv")
+            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleEn =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "en")
+            .map(this::haeRyhmasahkopostiId);
+
     Observable<LetterBatchCountDto> jalkiohjauskirjeFi =
         viestintapalveluAsyncResource
             .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "fi")
@@ -134,17 +149,45 @@ public class ViestintapalveluProxyResource {
             .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "en")
             .map(this::haeRyhmasahkopostiId);
 
-    combineLatest(
+    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleFi =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "fi")
+            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleSv =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "sv")
+            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleEn =
+        viestintapalveluAsyncResource
+            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "en")
+            .map(this::haeRyhmasahkopostiId);
+
+    List<Observable<LetterBatchCountDto>> observables =
+        Arrays.asList(
             hyvaksymiskirjeFi,
             hyvaksymiskirjeSv,
             hyvaksymiskirjeEn,
+            hyvaksymiskirjeHuoltajilleFi,
+            hyvaksymiskirjeHuoltajilleSv,
+            hyvaksymiskirjeHuoltajilleEn,
             jalkiohjauskirjeFi,
             jalkiohjauskirjeSv,
             jalkiohjauskirjeEn,
-            (hFi, hSv, hEn, jFi, jSv, jEn) ->
+            jalkiohjauskirjeHuoltajilleFi,
+            jalkiohjauskirjeHuoltajilleSv,
+            jalkiohjauskirjeHuoltajilleEn);
+    combineLatest(
+            observables,
+            (args) ->
                 ImmutableMap.of(
-                    "hyvaksymiskirje", ImmutableMap.of("fi", hFi, "sv", hSv, "en", hEn),
-                    "jalkiohjauskirje", ImmutableMap.of("fi", jFi, "sv", jSv, "en", jEn)))
+                    "hyvaksymiskirje",
+                    ImmutableMap.of("fi", args[0], "sv", args[1], "en", args[2]),
+                    "hyvaksymiskirje_huoltajille",
+                    ImmutableMap.of("fi", args[3], "sv", args[4], "en", args[5]),
+                    "jalkiohjauskirje",
+                    ImmutableMap.of("fi", args[6], "sv", args[7], "en", args[8]),
+                    "jalkiohjauskirje_huoltajille",
+                    ImmutableMap.of("fi", args[9], "sv", args[10], "en", args[11])))
         .subscribe(
             letterCount ->
                 asyncResponse.resume(
