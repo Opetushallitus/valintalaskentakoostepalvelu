@@ -69,7 +69,7 @@ public class AtaruArvosanaParser {
                 Collectors.groupingBy(
                     dto -> dto.getAvain().substring(dto.getAvain().length() - 1)));
 
-    Set<String> langs = new HashSet<>(); // A2, B2 jne.
+    Set<String> langs = new HashSet<>(); // A1, A2, B2 jne.
 
     grouped.forEach(
         (key, value) -> {
@@ -85,8 +85,10 @@ public class AtaruArvosanaParser {
           }
         });
 
-    for (String lang : langs) {
+    for (String aineKey : langs) {
       int index = -1;
+      int A1index = 2; // A12, A13 jne
+      int A2B2index = 0; // tavoitteena A2, A22, A23 tai B2, B22, B23 jne
       try {
         List<Map.Entry<String, List<AvainArvoDTO>>> valuesForMatchingLangs =
             grouped.entrySet().stream()
@@ -98,11 +100,11 @@ public class AtaruArvosanaParser {
                             .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
                             .orElse("")
                             .toUpperCase()
-                            .equals(lang))
+                            .equals(aineKey))
                 .sorted(Map.Entry.comparingByKey())
                 .collect(Collectors.toList());
 
-        LOG.info("Handling lang {} with dtos: {}", lang, valuesForMatchingLangs);
+        LOG.info("Handling aineKey {} with dtos: {}", aineKey, valuesForMatchingLangs);
 
         for (Map.Entry<String, List<AvainArvoDTO>> entry : valuesForMatchingLangs) {
           index++;
@@ -122,24 +124,51 @@ public class AtaruArvosanaParser {
                   .orElse("")
                   .toUpperCase();
           String valSuffix = "";
-          if (index > 0) {
+          String langPrefix = aineKey;
+
+          if (aineKey.equals("A1")) {
+            // Muunnetaan "valinnainen a1-kieli" pakolliseksi, avain muotoon PK_A12, PK_A13 jne
+            langPrefix = aineKey + A1index;
+            LOG.warn(
+                "Muunnetaan hakemuksen {} valinnainen A1-kieli {} pakolliseksi avaimelle {}",
+                hakemusOid,
+                kieli,
+                prefix + langPrefix);
+            A1index++;
+          } else if (aineKey.equals("A2") || aineKey.equals("B2")) {
+            A2B2index++;
+            if (A2B2index > 1) {
+              langPrefix = aineKey + A2B2index;
+              LOG.warn(
+                  "Muunnetaan hakemuksen {} valinnainen kieli {} pakolliseksi avaimelle {}",
+                  hakemusOid,
+                  kieli,
+                  prefix + langPrefix);
+            }
+          } else if (index > 0) {
             valSuffix = "_VAL" + index;
           }
 
-          if (!arvosana.isEmpty() && !kieli.isEmpty() && !lang.isEmpty()) {
-            String arvosanaKey = prefix + lang + valSuffix;
+          if (!arvosana.isEmpty() && !kieli.isEmpty() && !aineKey.isEmpty()) {
+            String arvosanaKey = prefix + langPrefix + valSuffix;
             r.add(new AvainArvoDTO(arvosanaKey, arvosana));
-            if (index == 0) {
+            if (index == 0
+                || aineKey.equals("A1")
+                || aineKey.equals("A2")
+                || aineKey.equals("B2")) {
               String oppiaineKey = arvosanaKey + "_OPPIAINE";
               r.add(new AvainArvoDTO(oppiaineKey, kieli));
             }
           } else {
-            LOG.warn("Tyhjä arvo kielelle {}: {}", lang, entry);
+            LOG.warn("Tyhjä arvo kielelle {}: {}", aineKey, entry);
           }
         }
       } catch (Exception e) {
         LOG.error(
-            "Hakemuksen {} valinnaisen kielen parsiminen ei onnistunut: {}", hakemusOid, lang, e);
+            "Hakemuksen {} valinnaisen kielen parsiminen ei onnistunut: {}",
+            hakemusOid,
+            aineKey,
+            e);
       }
     }
 
