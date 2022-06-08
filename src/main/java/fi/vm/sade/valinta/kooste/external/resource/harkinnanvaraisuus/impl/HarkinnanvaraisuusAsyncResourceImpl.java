@@ -75,7 +75,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
             });
   }
 
-  private Boolean hasKeskenPeruskoulu(List<Oppija> oppijas) {
+  private Boolean hasPeruskouluWithTilas(List<Oppija> oppijas, List<String> tilas) {
     if (!oppijas.isEmpty()) {
       return oppijas.stream()
           .anyMatch(
@@ -84,23 +84,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                       .anyMatch(
                           sa ->
                               PK_KOMO.equals(sa.getSuoritus().getKomo())
-                                  && "KESKEN".equals(sa.getSuoritus().getTila())
-                                  && sa.getSuoritus().isVahvistettu()));
-    } else {
-      return false;
-    }
-  }
-
-  private Boolean hasValmisPeruskoulu(List<Oppija> oppijas) {
-    if (!oppijas.isEmpty()) {
-      return oppijas.stream()
-          .anyMatch(
-              oppija ->
-                  oppija.getSuoritukset().stream()
-                      .anyMatch(
-                          sa ->
-                              PK_KOMO.equals(sa.getSuoritus().getKomo())
-                                  && "VALMIS".equals(sa.getSuoritus().getTila())
+                                  && tilas.contains(sa.getSuoritus().getTila())
                                   && sa.getSuoritus().isVahvistettu()));
     } else {
       return false;
@@ -184,7 +168,8 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                   ht, HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA));
       result = new HakemuksenHarkinnanvaraisuus(hakemusOid, tiedotAtarusta);
     } else if (LocalDateTime.now().isAfter(suoritusValmisDeadline)
-        && !hasValmisPeruskoulu(oppijas)) {
+        && !hasPeruskouluWithTilas(oppijas, List.of("VALMIS"))
+        && hasPeruskouluWithTilas(oppijas, List.of("KESKEN", "KESKEYTYNYT"))) {
       LOG.info(
           "Hakemus {} on suren mukaan harkinnanvarainen, koska suressa ei päättötodistusta ja deadline on ohitettu",
           hakemusOid);
@@ -212,7 +197,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                     .equals(HarkinnanvaraisuudenSyy.ATARU_EI_PAATTOTODISTUSTA)
                 || hh.getHarkinnanvaraisuudenSyy()
                     .equals(HarkinnanvaraisuudenSyy.ATARU_ULKOMAILLA_OPISKELTU)) {
-              if (hasValmisPeruskoulu(oppijas)) {
+              if (hasPeruskouluWithTilas(oppijas, List.of("VALMIS"))) {
                 LOG.info(
                     "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy valmis pohjakoulutus!",
                     hakemusOid,
@@ -220,7 +205,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                 setHarkinnanvaraisuudenSyyForHakutoive(
                     hh, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
               } else if (LocalDateTime.now().isBefore(suoritusValmisDeadline)
-                  && hasKeskenPeruskoulu(oppijas)) {
+                  && hasPeruskouluWithTilas(oppijas, List.of("KESKEN"))) {
                 LOG.info(
                     "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy kesken-tilainen peruskoulusuoritus ja deadlinea ei ole ohitettu!",
                     hakemusOid,
