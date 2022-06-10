@@ -1800,8 +1800,8 @@ public class HakemuksetConverterUtilTest {
                     "oppiaine-valinnainen-kieli_group3", "oppiaine-valinnainen-kieli-b2"));
             add(
                 new AvainArvoDTO(
-                    "arvosana-valinnainen-kieli_group3", "arvosana-valinnainen-kieli-10"));
-            add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group3", "IHSM"));
+                    "arvosana-valinnainen-kieli_group3", "arvosana-valinnainen-kieli-HYVAKSYTTY"));
+            add(new AvainArvoDTO("oppimaara-kieli-valinnainen-kieli_group3", "TU"));
           }
         });
     Oppija oppija =
@@ -1823,6 +1823,7 @@ public class HakemuksetConverterUtilTest {
     assertEquals("DE", firstHakemusArvo(hakemus, "PK_A22_OPPIAINE").orElse("notFound"));
     assertEquals("8", firstHakemusArvo(hakemus, "PK_A2").orElse("notFound"));
     assertEquals("9", firstHakemusArvo(hakemus, "PK_A22").orElse("notFound"));
+    assertEquals("notFound", firstHakemusArvo(hakemus, "PK_B22").orElse("notFound"));
   }
 
   @Test
