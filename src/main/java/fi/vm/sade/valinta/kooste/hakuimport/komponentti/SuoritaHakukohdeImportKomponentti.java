@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValinta
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.IterableUtil;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -341,20 +342,16 @@ public class SuoritaHakukohdeImportKomponentti {
             : NOLLA);
 
     Optional<KoutaValintakoe> paasykoe = hakukohde.getValintakoeOfType(PAASYKOE_TYYPPI_URI);
-    paasykoe
-        .map(pk -> pk.vahimmaispisteet)
-        .ifPresent(
-            pisteet ->
-                addAvainArvoToValintaperuste(
-                    importTyyppi, "paasykoe_hylkays_max", pisteet.toString()));
+    BigDecimal paasykoeHylkaysMax =
+        paasykoe.map(pk -> pk.vahimmaispisteet).orElse(new BigDecimal("0.0"));
+    addAvainArvoToValintaperuste(
+        importTyyppi, "paasykoe_hylkays_max", paasykoeHylkaysMax.toString());
 
     Optional<KoutaValintakoe> lisanaytto = hakukohde.getValintakoeOfType(LISANAYTTO_TYYPPI_URI);
-    lisanaytto
-        .map(pk -> pk.vahimmaispisteet)
-        .ifPresent(
-            pisteet ->
-                addAvainArvoToValintaperuste(
-                    importTyyppi, "lisanaytto_hylkays_max", pisteet.toString()));
+    BigDecimal lisanayttoHylkaysMax =
+        lisanaytto.map(pk -> pk.vahimmaispisteet).orElse(new BigDecimal("0.0"));
+    addAvainArvoToValintaperuste(
+        importTyyppi, "lisanaytto_hylkays_max", lisanayttoHylkaysMax.toString());
 
     Map<String, Koodi> koodiarvoKoodi =
         koodistoAsyncResource.haeKoodisto(
