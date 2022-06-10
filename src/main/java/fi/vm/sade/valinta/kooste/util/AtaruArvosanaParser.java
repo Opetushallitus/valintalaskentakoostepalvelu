@@ -123,6 +123,7 @@ public class AtaruArvosanaParser {
                   .map(dto -> StringUtils.substringAfterLast(dto.getArvo(), "-"))
                   .orElse("")
                   .toUpperCase();
+          Integer.parseInt(arvosana); // Just check that the arvosana correctly parses as Integer.
           String valSuffix = "";
           String langPrefix = aineKey;
 
