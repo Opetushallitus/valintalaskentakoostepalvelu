@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
@@ -57,6 +56,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.camel.Exchange;
@@ -179,7 +179,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
               @Override
               public void process(Exchange exchange) {
                 SijoittelunTulosProsessi prosessi = prosessi(exchange);
-                String hakukohdeOid = exchange.getIn().getBody(HakukohdeTyyppi.class).getOid();
+                String hakukohdeOid = exchange.getIn().getBody(String.class);
+                LOG.info("configureTaulukkolaskenta hakukohdeOid: " + hakukohdeOid);
                 String hakuOid = hakuOid(exchange);
                 String tarjoajaOid = StringUtils.EMPTY;
                 AuditSession auditSession = auditSession(exchange);
@@ -204,6 +205,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                               .map(Organisaatio::getNimi)
                               .collect(Collectors.toList()),
                           " - ");
+                  hakuOid = hakukohde.hakuOid;
                 } catch (Exception e) {
                   hakukohdeNimi = "Nimetön hakukohde " + hakukohdeOid;
                   tarjoajaNimi = "Nimetön tarjoaja " + tarjoajaOid;
@@ -369,8 +371,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
               @Override
               public void process(Exchange exchange) {
                 SijoittelunTulosProsessi prosessi = prosessi(exchange);
-                HakukohdeTyyppi hakukohde = exchange.getIn().getBody(HakukohdeTyyppi.class);
-                String hakukohdeOid = hakukohde.getOid();
+                String hakukohdeOid = exchange.getIn().getBody(String.class);
+                LOG.info("configureOsoitetarrat hakukohdeOid: " + hakukohdeOid);
                 StopWatch stopWatch =
                     new StopWatch("Hakukohteen " + hakukohdeOid + " osoitetarrojen muodostus");
                 stopWatch.start("Tiedot tarjonnasta");
@@ -582,17 +584,22 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                           new Varoitus(
                               hakuOid,
                               "Haetaan tarjonnalta kaikki hakukohteet! Varoitus, pyyntö saattaa kestää pitkään!"));
-                  Collection<HakukohdeTyyppi> hakukohteet =
-                      hakukohteetTarjonnalta.haeHakukohteetTarjonnalta(hakuOid);
-                  if (hakukohteet == null || hakukohteet.isEmpty()) {
+                  Set<String> hakukohdeOids =
+                      tarjontaAsyncResource.haunHakukohteet(hakuOid).get(1, TimeUnit.MINUTES);
+                  if (hakukohdeOids == null || hakukohdeOids.isEmpty()) {
                     throw kasittelePoikkeus(
                         Poikkeus.TARJONTA,
                         exchange,
                         new RuntimeException("Tarjonnalta ei saatu hakukohteita haulle"),
                         Poikkeus.hakuOid(hakuOid));
+                  } else {
+                    LOG.info(
+                        "configureHakukohteidenHaku : saatiin tarjonnalta {} hakukohdeOidia haulle {}",
+                        hakukohdeOids.size(),
+                        hakuOid);
                   }
-                  exchange.getOut().setBody(hakukohteet);
-                  dokumenttiprosessi(exchange).setKokonaistyo(hakukohteet.size());
+                  exchange.getOut().setBody(hakukohdeOids);
+                  dokumenttiprosessi(exchange).setKokonaistyo(hakukohdeOids.size());
                 } catch (Exception e) {
                   LOG.error("Hakukohteiden haku epäonnistui!", e);
                   throw kasittelePoikkeus(Poikkeus.TARJONTA, exchange, e);
