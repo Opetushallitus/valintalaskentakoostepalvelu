@@ -362,7 +362,7 @@ public class SuoritaHakukohdeImportKomponentti {
     }
 
     for (PainotettuArvosana arvosana : hakukohde.painotetutArvosanat) {
-      String koodiarvo = koodiUriKoodiArvo.get(arvosana.koodiUri);
+      String koodiarvo = koodiUriKoodiArvo.get(StringUtils.substringBefore(arvosana.koodiUri, "#"));
       if (koodiarvo != null && !koodiarvo.isEmpty()) {
         addAvainArvoToValintaperuste(
             importTyyppi, koodiarvo + PAINOKERROIN_POSTFIX, arvosana.painokerroin.toString());
