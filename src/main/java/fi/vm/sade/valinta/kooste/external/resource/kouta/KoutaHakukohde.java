@@ -96,6 +96,7 @@ public class KoutaHakukohde extends AbstractHakukohde {
   private static Tila parseTila(String tila) {
     switch (tila) {
       case "julkaistu":
+      case "arkistoitu":
         return Tila.JULKAISTU;
       case "tallennettu":
         return Tila.LUONNOS;
