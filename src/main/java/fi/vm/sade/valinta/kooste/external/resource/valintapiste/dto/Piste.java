@@ -6,7 +6,8 @@ public class Piste {
   private Osallistuminen osallistuminen;
   private String tallettaja;
 
-  public Piste() {}
+  public Piste() {
+  }
 
   public Piste(String tunniste, String arvo, Osallistuminen osallistuminen, String tallettaja) {
     this.tunniste = tunniste;

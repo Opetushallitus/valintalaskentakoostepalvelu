@@ -29,12 +29,11 @@ public class ErillishaunTuontiHelper {
 
   private static final Logger LOG = LoggerFactory.getLogger(ErillishaunTuontiHelper.class);
 
-  public static final List<HakemuksenTila> VAIN_HAKEMUKSENTILALLISET_TILAT =
-      Arrays.asList(HakemuksenTila.HYLATTY, HakemuksenTila.VARALLA, HakemuksenTila.PERUUNTUNUT);
+  public static final List<HakemuksenTila> VAIN_HAKEMUKSENTILALLISET_TILAT = Arrays.asList(HakemuksenTila.HYLATTY,
+      HakemuksenTila.VARALLA, HakemuksenTila.PERUUNTUNUT);
 
   public static boolean isUusi(ErillishakuRivi rivi) {
-    return StringUtils.isEmpty(rivi.getVastaanottoTila())
-        && StringUtils.isEmpty(rivi.getIlmoittautumisTila());
+    return StringUtils.isEmpty(rivi.getVastaanottoTila()) && StringUtils.isEmpty(rivi.getIlmoittautumisTila());
   }
 
   public static boolean isKesken(ErillishakuRivi rivi) {
@@ -42,27 +41,20 @@ public class ErillishaunTuontiHelper {
   }
 
   public static List<ErillishakuRivi> autoTaytto(final List<ErillishakuRivi> rivit) {
-    // jos hakemuksentila on hylatty, varalla, peruuntunut tai kesken niin autotaytetaan loput tilat
+    // jos hakemuksentila on hylatty, varalla, peruuntunut tai kesken niin
+    // autotaytetaan loput tilat
     // KESKEN, EI_TEHTY
 
-    return rivit.stream()
-        .map(
-            rivi -> {
-              if ((VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi))
-                      && !isUusi(rivi)
-                      && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN
-                          .name()
-                          .equals(rivi.getVastaanottoTila()))
-                  || isKesken(rivi)) {
-                return ErillishakuRiviBuilder.fromRivi(rivi)
-                    .vastaanottoTila("KESKEN")
-                    .ilmoittautumisTila("EI_TEHTY")
-                    .build();
-              } else {
-                return rivi;
-              }
-            })
-        .collect(Collectors.toList());
+    return rivit.stream().map(rivi -> {
+      if ((VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi)) && !isUusi(rivi)
+          && !ValintatuloksenTila.OTTANUT_VASTAAN_TOISEN_PAIKAN.name().equals(rivi.getVastaanottoTila()))
+          || isKesken(rivi)) {
+        return ErillishakuRiviBuilder.fromRivi(rivi).vastaanottoTila("KESKEN").ilmoittautumisTila("EI_TEHTY")
+            .build();
+      } else {
+        return rivi;
+      }
+    }).collect(Collectors.toList());
   }
 
   public static HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
@@ -97,93 +89,68 @@ public class ErillishaunTuontiHelper {
     }
   }
 
-  public static ErillishakuRivi etsiHenkiloaVastaavaRivi(
-      HenkiloPerustietoDto henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
-    Optional<ErillishakuRivi> riviOidinMukaan =
-        kaikkiLisattavatTaiKeskeneraiset.stream()
-            .filter(
-                r ->
-                    StringUtils.isNotBlank(r.getPersonOid())
-                        && r.getPersonOid().equals(henkilo.getOidHenkilo()))
-            .findFirst();
+  public static ErillishakuRivi etsiHenkiloaVastaavaRivi(HenkiloPerustietoDto henkilo,
+      List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
+    Optional<ErillishakuRivi> riviOidinMukaan = kaikkiLisattavatTaiKeskeneraiset.stream().filter(
+        r -> StringUtils.isNotBlank(r.getPersonOid()) && r.getPersonOid().equals(henkilo.getOidHenkilo()))
+        .findFirst();
     if (riviOidinMukaan.isPresent()) {
       return riviOidinMukaan.get();
     }
-    Optional<ErillishakuRivi> riviHetunMukaan =
-        kaikkiLisattavatTaiKeskeneraiset.stream()
-            .filter(
-                r ->
-                    StringUtils.isNotBlank(r.getHenkilotunnus())
-                        && r.getHenkilotunnus().equals(henkilo.getHetu()))
-            .findFirst();
+    Optional<ErillishakuRivi> riviHetunMukaan = kaikkiLisattavatTaiKeskeneraiset.stream().filter(
+        r -> StringUtils.isNotBlank(r.getHenkilotunnus()) && r.getHenkilotunnus().equals(henkilo.getHetu()))
+        .findFirst();
     if (riviHetunMukaan.isPresent()) {
       ErillishakuRivi loytynyt = riviHetunMukaan.get();
-      if (StringUtils.isNotBlank(loytynyt.getPersonOid())
-          && StringUtils.isNotBlank(henkilo.getOidHenkilo())
+      if (StringUtils.isNotBlank(loytynyt.getPersonOid()) && StringUtils.isNotBlank(henkilo.getOidHenkilo())
           && !loytynyt.getPersonOid().equals(henkilo.getOidHenkilo())) {
-        LOG.warn(
-            String.format(
-                "Henkilölle %s hetun mukaan löytyneellä rivillä %s on eri henkilöoid (%s vs %s)",
-                henkilo, loytynyt, henkilo.getOidHenkilo(), loytynyt.getPersonOid()));
+        LOG.warn(String.format("Henkilölle %s hetun mukaan löytyneellä rivillä %s on eri henkilöoid (%s vs %s)",
+            henkilo, loytynyt, henkilo.getOidHenkilo(), loytynyt.getPersonOid()));
       }
       return loytynyt;
     }
-    Optional<ErillishakuRivi> riviSyntymaajanSukupuolenJaNimenMukaan =
-        kaikkiLisattavatTaiKeskeneraiset.stream()
-            .filter(r -> r.formatSyntymaAikaAsDate() != null)
-            .filter(r -> r.getSukupuoli() != null && henkilo.getSukupuoli() != null)
-            .filter(r -> r.getEtunimi() != null && henkilo.getEtunimet() != null)
-            .filter(r -> r.getSukunimi() != null && henkilo.getSukunimi() != null)
-            .filter(
-                r ->
-                    HakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate())
-                            .equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
-                        && r.getSukupuoli()
-                            .equals(Sukupuoli.toSukupuoliEnum(henkilo.getSukupuoli()))
-                        && r.getEtunimi().equals(henkilo.getEtunimet())
-                        && r.getSukunimi().equals(henkilo.getSukunimi()))
-            .findFirst();
+    Optional<ErillishakuRivi> riviSyntymaajanSukupuolenJaNimenMukaan = kaikkiLisattavatTaiKeskeneraiset.stream()
+        .filter(r -> r.formatSyntymaAikaAsDate() != null)
+        .filter(r -> r.getSukupuoli() != null && henkilo.getSukupuoli() != null)
+        .filter(r -> r.getEtunimi() != null && henkilo.getEtunimet() != null)
+        .filter(r -> r.getSukunimi() != null && henkilo.getSukunimi() != null)
+        .filter(r -> HakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate())
+            .equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
+            && r.getSukupuoli().equals(Sukupuoli.toSukupuoliEnum(henkilo.getSukupuoli()))
+            && r.getEtunimi().equals(henkilo.getEtunimet())
+            && r.getSukunimi().equals(henkilo.getSukunimi()))
+        .findFirst();
     if (riviSyntymaajanSukupuolenJaNimenMukaan.isPresent()) {
       return riviSyntymaajanSukupuolenJaNimenMukaan.get();
     }
     throw new HenkilonRivinPaattelyEpaonnistuiException(
-        "Ei löytynyt "
-            + kaikkiLisattavatTaiKeskeneraiset.size()
-            + " tuodusta rivistä henkilöä "
-            + henkilo);
+        "Ei löytynyt " + kaikkiLisattavatTaiKeskeneraiset.size() + " tuodusta rivistä henkilöä " + henkilo);
   }
 
-  public static ErillishakuRivi riviWithHenkiloData(
-      HenkiloPerustietoDto henkilo, List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
+  public static ErillishakuRivi riviWithHenkiloData(HenkiloPerustietoDto henkilo,
+      List<ErillishakuRivi> kaikkiLisattavatTaiKeskeneraiset) {
     ErillishakuRivi rivi = etsiHenkiloaVastaavaRivi(henkilo, kaikkiLisattavatTaiKeskeneraiset);
     return riviWithHenkiloData(henkilo, rivi);
   }
 
   /**
-   * @implNote Uses {@link HenkiloPerustietoDto#kutsumanimi} to populate {@link
-   *     ErillishakuRivi#etunimi}
+   * @implNote Uses {@link HenkiloPerustietoDto#kutsumanimi} to populate
+   *           {@link ErillishakuRivi#etunimi}
    */
-  public static ErillishakuRivi riviWithHenkiloData(
-      HenkiloPerustietoDto henkilo, ErillishakuRivi rivi) {
+  public static ErillishakuRivi riviWithHenkiloData(HenkiloPerustietoDto henkilo, ErillishakuRivi rivi) {
     String aidinkieli = kielisyysToString(henkilo.getAidinkieli());
     String asiointikieli = kielisyysToString(henkilo.getAsiointiKieli());
     String sukupuoli = henkilo.getSukupuoli();
-    return ErillishakuRiviBuilder.fromRivi(rivi)
-        .sukunimi(henkilo.getSukunimi())
-        .etunimi(henkilo.getEtunimet())
-        .henkilotunnus(henkilo.getHetu())
-        .sahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()))
+    return ErillishakuRiviBuilder.fromRivi(rivi).sukunimi(henkilo.getSukunimi()).etunimi(henkilo.getEtunimet())
+        .henkilotunnus(henkilo.getHetu()).sahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()))
         .syntymaAika(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
-        .sukupuoli(
-            isNotBlank(sukupuoli) ? Sukupuoli.toSukupuoliEnum(sukupuoli) : rivi.getSukupuoli())
+        .sukupuoli(isNotBlank(sukupuoli) ? Sukupuoli.toSukupuoliEnum(sukupuoli) : rivi.getSukupuoli())
         .personOid(henkilo.getOidHenkilo())
         .aidinkieli(isNotBlank(aidinkieli) ? aidinkieli : rivi.getAidinkieli())
-        .asiointikieli(isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli())
-        .build();
+        .asiointikieli(isNotBlank(asiointikieli) ? asiointikieli : rivi.getAsiointikieli()).build();
   }
 
-  public static HakemusPrototyyppi createHakemusprototyyppi(
-      ErillishakuRivi rivi, String kotikunta) {
+  public static HakemusPrototyyppi createHakemusprototyyppi(ErillishakuRivi rivi, String kotikunta) {
     HakemusPrototyyppi hakemus = new HakemusPrototyyppi();
     hakemus.setAidinkieli(rivi.getAidinkieli());
     hakemus.setAsiointikieli(rivi.getAsiointikieli());
@@ -215,61 +182,26 @@ public class ErillishaunTuontiHelper {
     }
   }
 
-  public static final Function<ErillishaunHakijaDTO, Boolean> ainoastaanHakemuksenTilaPaivitys =
-      erillishakuRivi ->
-          erillishakuRivi.getValintatuloksenTila() == null
-              && erillishakuRivi.getIlmoittautumisTila() == null;
+  public static final Function<ErillishaunHakijaDTO, Boolean> ainoastaanHakemuksenTilaPaivitys = erillishakuRivi -> erillishakuRivi
+      .getValintatuloksenTila() == null && erillishakuRivi.getIlmoittautumisTila() == null;
 
-  public static ErillishaunHakijaDTO toErillishaunHakijaDTO(
-      ErillishakuDTO haku, ErillishakuRivi rivi) {
-    return new ErillishaunHakijaDTO(
-        haku.getValintatapajonoOid(),
-        rivi.getHakemusOid(),
-        haku.getHakukohdeOid(),
-        rivi.isJulkaistaankoTiedot(),
-        rivi.getPersonOid(),
-        haku.getHakuOid(),
-        haku.getTarjoajaOid(),
-        valintatuloksenTila(rivi),
-        rivi.getEhdollisestiHyvaksyttavissa(),
-        ilmoittautumisTila(rivi),
-        hakemuksenTila(rivi),
-        rivi.getEtunimi(),
-        rivi.getSukunimi(),
-        of(
-            rivi.isPoistetaankoRivi()
-                || StringUtils.isBlank(rivi.getHakemuksenTila())
-                || isKesken(rivi)),
-        rivi.getHyvaksymiskirjeLahetetty(),
-        Lists.newArrayList(),
-        rivi.getEhdollisenHyvaksymisenEhtoKoodi(),
-        rivi.getEhdollisenHyvaksymisenEhtoFI(),
-        rivi.getEhdollisenHyvaksymisenEhtoSV(),
+  public static ErillishaunHakijaDTO toErillishaunHakijaDTO(ErillishakuDTO haku, ErillishakuRivi rivi) {
+    return new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), rivi.getHakemusOid(), haku.getHakukohdeOid(),
+        rivi.isJulkaistaankoTiedot(), rivi.getPersonOid(), haku.getHakuOid(), haku.getTarjoajaOid(),
+        valintatuloksenTila(rivi), rivi.getEhdollisestiHyvaksyttavissa(), ilmoittautumisTila(rivi),
+        hakemuksenTila(rivi), rivi.getEtunimi(), rivi.getSukunimi(),
+        of(rivi.isPoistetaankoRivi() || StringUtils.isBlank(rivi.getHakemuksenTila()) || isKesken(rivi)),
+        rivi.getHyvaksymiskirjeLahetetty(), Lists.newArrayList(), rivi.getEhdollisenHyvaksymisenEhtoKoodi(),
+        rivi.getEhdollisenHyvaksymisenEhtoFI(), rivi.getEhdollisenHyvaksymisenEhtoSV(),
         rivi.getEhdollisenHyvaksymisenEhtoEN());
   }
 
-  public static ErillishaunHakijaDTO toPoistettavaErillishaunHakijaDTO(
-      ErillishakuDTO haku, ErillishakuRivi rivi) {
-    return new ErillishaunHakijaDTO(
-        haku.getValintatapajonoOid(),
-        rivi.getHakemusOid(),
-        haku.getHakukohdeOid(),
-        rivi.isJulkaistaankoTiedot(),
-        rivi.getPersonOid(),
-        haku.getHakuOid(),
-        haku.getTarjoajaOid(),
-        valintatuloksenTila(rivi),
-        false,
-        null,
-        null,
-        rivi.getEtunimi(),
-        rivi.getSukunimi(),
-        of(true),
-        rivi.getHyvaksymiskirjeLahetetty(),
-        Lists.newArrayList(),
-        rivi.getEhdollisenHyvaksymisenEhtoKoodi(),
-        rivi.getEhdollisenHyvaksymisenEhtoFI(),
-        rivi.getEhdollisenHyvaksymisenEhtoSV(),
+  public static ErillishaunHakijaDTO toPoistettavaErillishaunHakijaDTO(ErillishakuDTO haku, ErillishakuRivi rivi) {
+    return new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), rivi.getHakemusOid(), haku.getHakukohdeOid(),
+        rivi.isJulkaistaankoTiedot(), rivi.getPersonOid(), haku.getHakuOid(), haku.getTarjoajaOid(),
+        valintatuloksenTila(rivi), false, null, null, rivi.getEtunimi(), rivi.getSukunimi(), of(true),
+        rivi.getHyvaksymiskirjeLahetetty(), Lists.newArrayList(), rivi.getEhdollisenHyvaksymisenEhtoKoodi(),
+        rivi.getEhdollisenHyvaksymisenEhtoFI(), rivi.getEhdollisenHyvaksymisenEhtoSV(),
         rivi.getEhdollisenHyvaksymisenEhtoEN());
   }
 }

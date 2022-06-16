@@ -15,10 +15,14 @@ public class Mocks {
 
   private static Mocks MOCKS;
 
-  @Autowired private ViestintapalveluAsyncResource viestintapalveluAsyncResource;
-  @Autowired private KoodistoAsyncResource koodistoAsyncResource;
-  @Autowired private OhjausparametritAsyncResource ohjausparametritAsyncResource;
-  @Autowired private ValintapisteAsyncResource valintapisteAsyncResource;
+  @Autowired
+  private ViestintapalveluAsyncResource viestintapalveluAsyncResource;
+  @Autowired
+  private KoodistoAsyncResource koodistoAsyncResource;
+  @Autowired
+  private OhjausparametritAsyncResource ohjausparametritAsyncResource;
+  @Autowired
+  private ValintapisteAsyncResource valintapisteAsyncResource;
 
   @PostConstruct
   public void init() {
@@ -42,9 +46,6 @@ public class Mocks {
   }
 
   public static void reset() {
-    Mockito.reset(
-        getValintapisteAsyncResource(),
-        getViestintapalveluAsyncResource(),
-        getKoodistoAsyncResource());
+    Mockito.reset(getValintapisteAsyncResource(), getViestintapalveluAsyncResource(), getKoodistoAsyncResource());
   }
 }

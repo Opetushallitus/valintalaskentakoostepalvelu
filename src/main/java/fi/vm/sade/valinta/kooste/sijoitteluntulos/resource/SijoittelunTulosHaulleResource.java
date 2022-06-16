@@ -27,7 +27,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
-/** @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa. */
+/**
+ * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia
+ *                     odotellessa.
+ */
 @Controller("SijoittelunTulosHaulleResource")
 @Path("sijoitteluntuloshaulle")
 @PreAuthorize("isAuthenticated()")
@@ -35,7 +38,8 @@ import org.springframework.stereotype.Controller;
 public class SijoittelunTulosHaulleResource {
   private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosHaulleResource.class);
 
-  @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+  @Autowired
+  private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
   @Autowired(required = false)
   private SijoittelunTulosTaulukkolaskentaRoute sijoittelunTulosTaulukkolaskentaRoute;
@@ -43,30 +47,24 @@ public class SijoittelunTulosHaulleResource {
   @Autowired(required = false)
   private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
 
-  @Autowired private HyvaksymiskirjeetService hyvaksymiskirjeetService;
+  @Autowired
+  private HyvaksymiskirjeetService hyvaksymiskirjeetService;
 
-  @Context private HttpServletRequest httpServletRequestJaxRS;
+  @Context
+  private HttpServletRequest httpServletRequestJaxRS;
 
   @POST
   @Path("/osoitetarrat")
   @Consumes("application/json")
   @Produces("application/json")
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = Response.class)
+  @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+  @ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
   public ProsessiId osoitetarratKokoHaulle(@QueryParam("hakuOid") String hakuOid) {
     try {
-      SijoittelunTulosProsessi prosessi =
-          new SijoittelunTulosProsessi(
-              null, // ei asiointikielirajausta
-              "osoitetarrat",
-              "Luo osoitetarrat haulle",
-              null,
-              Arrays.asList("osoitetarrat", "haulle"));
-      sijoittelunTulosOsoitetarratRoute.osoitetarratHaulle(
-          prosessi, hakuOid, "latest", SecurityContextHolder.getContext().getAuthentication());
+      SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(null, // ei asiointikielirajausta
+          "osoitetarrat", "Luo osoitetarrat haulle", null, Arrays.asList("osoitetarrat", "haulle"));
+      sijoittelunTulosOsoitetarratRoute.osoitetarratHaulle(prosessi, hakuOid, "latest",
+          SecurityContextHolder.getContext().getAuthentication());
       dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
       return prosessi.toProsessiId();
     } catch (Exception e) {
@@ -82,34 +80,19 @@ public class SijoittelunTulosHaulleResource {
   @Path("/hyvaksymiskirjeet")
   @Consumes("application/json")
   @Produces("application/json")
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = Response.class)
-  public ProsessiId hyvaksymiskirjeetKokoHaulle(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("letterBodyText") String letterBodyText,
-      @QueryParam("asiointikieli") String asiointikieli) {
+  @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+  @ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
+  public ProsessiId hyvaksymiskirjeetKokoHaulle(@QueryParam("hakuOid") String hakuOid,
+      @QueryParam("letterBodyText") String letterBodyText, @QueryParam("asiointikieli") String asiointikieli) {
     try {
-      HyvaksymiskirjeDTO hyvaksymiskirjeDTO =
-          new HyvaksymiskirjeDTO(
-              null,
-              letterBodyText,
-              "hyvaksymiskirje",
-              hakuOid,
-              null,
-              hakuOid,
-              null,
-              null,
-              null,
-              false);
+      HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(null, letterBodyText, "hyvaksymiskirje",
+          hakuOid, null, hakuOid, null, null, null, false);
       if (asiointikieli != null) {
         if (letterBodyText == null) {
           throw new IllegalArgumentException("Parametri letterBodyText on pakollinen");
         }
-        return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(
-            hyvaksymiskirjeDTO, asiointikieli, KirjeenVastaanottaja.HAKIJA);
+        return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulle(hyvaksymiskirjeDTO, asiointikieli,
+            KirjeenVastaanottaja.HAKIJA);
       } else {
         return hyvaksymiskirjeetService.hyvaksymiskirjeetHaulleHakukohteittain(hyvaksymiskirjeDTO);
       }
@@ -126,24 +109,14 @@ public class SijoittelunTulosHaulleResource {
   @Path("/taulukkolaskennat")
   @Consumes("application/json")
   @Produces("application/json")
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = Response.class)
+  @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+  @ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
   public ProsessiId taulukkolaskennatKokoHaulle(@QueryParam("hakuOid") String hakuOid) {
     try {
-      SijoittelunTulosProsessi prosessi =
-          new SijoittelunTulosProsessi(
-              null, // ei asiointikielirajausta
-              "taulukkolaskennat",
-              "Luo taulukkolaskennat haulle",
-              null,
-              Arrays.asList("taulukkolaskennat", "haulle"));
-      sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(
-          prosessi,
-          hakuOid,
-          "latest",
+      SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(null, // ei asiointikielirajausta
+          "taulukkolaskennat", "Luo taulukkolaskennat haulle", null,
+          Arrays.asList("taulukkolaskennat", "haulle"));
+      sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(prosessi, hakuOid, "latest",
           AuthorizationUtil.createAuditSession(httpServletRequestJaxRS),
           SecurityContextHolder.getContext().getAuthentication());
       dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);

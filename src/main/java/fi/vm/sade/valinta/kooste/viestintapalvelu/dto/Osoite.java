@@ -19,24 +19,13 @@ public class Osoite implements Serializable {
   private String numero;
   private String www;
 
-  @JsonIgnore private Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
+  @JsonIgnore
+  private Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
 
-  public Osoite(
-      String firstName,
-      String lastName,
-      String addressline,
-      String addressline2,
-      String addressline3,
-      String postalCode,
-      String city,
-      String region,
-      String country,
-      String countryCode,
-      Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt,
-      String organisaationimi,
-      String numero,
-      String email,
-      String www) {
+  public Osoite(String firstName, String lastName, String addressline, String addressline2, String addressline3,
+      String postalCode, String city, String region, String country, String countryCode,
+      Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt, String organisaationimi,
+      String numero, String email, String www) {
     this.numero = numero;
     this.email = email;
     this.firstName = firstName;
@@ -49,8 +38,7 @@ public class Osoite implements Serializable {
     this.region = region;
     this.country = country;
     this.countryCode = countryCode;
-    this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt =
-        ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
+    this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
     this.organisaationimi = organisaationimi;
     this.www = www;
   }

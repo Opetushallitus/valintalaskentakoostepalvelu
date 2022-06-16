@@ -16,21 +16,17 @@ public class JatkuvasijoitteluJaahyTest {
     final long jaahy = TimeUnit.HOURS.toMillis(2L);
     ConcurrentHashMap<String, Long> ajossaHakuOids = new ConcurrentHashMap<>();
     ajossaHakuOids.put("hk1", System.currentTimeMillis());
-    ajossaHakuOids.forEach(
-        (hakuOid, activationTime) -> {
-          DateTime activated = new DateTime(activationTime);
-          DateTime expires = new DateTime(activationTime).plusMillis((int) jaahy);
-          boolean vanheneekoNyt = expires.isBeforeNow() || expires.isEqualNow();
-          LOG.info(
-              "Aktivoitu {} ja vanhenee {} vanheneeko nyt {}",
-              Formatter.paivamaara(activated.toDate()),
-              Formatter.paivamaara(expires.toDate()),
-              vanheneekoNyt);
-          //
-          if (vanheneekoNyt) {
-            LOG.info("Jaahy haulle {} vanhentui", hakuOid);
-            ajossaHakuOids.remove(hakuOid);
-          }
-        });
+    ajossaHakuOids.forEach((hakuOid, activationTime) -> {
+      DateTime activated = new DateTime(activationTime);
+      DateTime expires = new DateTime(activationTime).plusMillis((int) jaahy);
+      boolean vanheneekoNyt = expires.isBeforeNow() || expires.isEqualNow();
+      LOG.info("Aktivoitu {} ja vanhenee {} vanheneeko nyt {}", Formatter.paivamaara(activated.toDate()),
+          Formatter.paivamaara(expires.toDate()), vanheneekoNyt);
+      //
+      if (vanheneekoNyt) {
+        LOG.info("Jaahy haulle {} vanhentui", hakuOid);
+        ajossaHakuOids.remove(hakuOid);
+      }
+    });
   }
 }

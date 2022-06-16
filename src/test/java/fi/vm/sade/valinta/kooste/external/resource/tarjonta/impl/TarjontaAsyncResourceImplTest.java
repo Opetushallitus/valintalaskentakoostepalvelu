@@ -27,8 +27,7 @@ import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class TarjontaAsyncResourceImplTest {
-  private static final String TARJONTA_URL =
-      "http://test/tarjonta-service/rest/v1/hakukohde/search";
+  private static final String TARJONTA_URL = "http://test/tarjonta-service/rest/v1/hakukohde/search";
   private static final String TARJONTA_HAKU_URL = "http://test/tarjonta-service/rest/v1/haku/";
   private static final String KOUTA_URL = "http://test/kouta-internal/hakukohde/search/1.2.3.4";
   private static final String HKR_URL = "http://test/search/by-hakukohteet";
@@ -37,27 +36,26 @@ public class TarjontaAsyncResourceImplTest {
   private final HttpClient koutaClient = mock(HttpClient.class);
   private final HttpClient hakukohderyhmapalveluClient = mock(HttpClient.class);
 
-  private final TarjontaAsyncResourceImpl tarjontaAsyncResource =
-      new TarjontaAsyncResourceImpl(tarjontaClient, koutaClient, hakukohderyhmapalveluClient);
+  private final TarjontaAsyncResourceImpl tarjontaAsyncResource = new TarjontaAsyncResourceImpl(tarjontaClient,
+      koutaClient, hakukohderyhmapalveluClient);
 
-  private final UrlConfiguration urlConfiguration =
-      new UrlConfiguration() {
-        @Override
-        public String url(String key, Object... params) {
-          switch (key) {
-            case "tarjonta-service.hakukohde.search":
-              return TARJONTA_URL;
-            case "kouta-internal.hakukohde.search":
-              return KOUTA_URL;
-            case "hakukohderyhmapalvelu.hakukohderyhma.search-by-hakukohteet":
-              return HKR_URL;
-            case "tarjonta-service.haku.hakuoid":
-              return TARJONTA_HAKU_URL;
-            default:
-              return null;
-          }
-        }
-      };
+  private final UrlConfiguration urlConfiguration = new UrlConfiguration() {
+    @Override
+    public String url(String key, Object... params) {
+      switch (key) {
+        case "tarjonta-service.hakukohde.search":
+          return TARJONTA_URL;
+        case "kouta-internal.hakukohde.search":
+          return KOUTA_URL;
+        case "hakukohderyhmapalvelu.hakukohderyhma.search-by-hakukohteet":
+          return HKR_URL;
+        case "tarjonta-service.haku.hakuoid":
+          return TARJONTA_HAKU_URL;
+        default:
+          return null;
+      }
+    }
+  };
 
   @Before
   public void init() throws IOException {
@@ -66,38 +64,29 @@ public class TarjontaAsyncResourceImplTest {
   }
 
   private void setMocks() {
-    when(tarjontaClient.getJson(
-            eq(TARJONTA_URL), any(Duration.class), eq(new TypeToken<ResultSearch>() {}.getType())))
-        .thenReturn(
-            CompletableFuture.completedFuture(new ResultSearch(new ResultTulos(emptyList()))));
+    when(tarjontaClient.getJson(eq(TARJONTA_URL), any(Duration.class), eq(new TypeToken<ResultSearch>() {
+    }.getType()))).thenReturn(CompletableFuture.completedFuture(new ResultSearch(new ResultTulos(emptyList()))));
     Mockito.mock(KoutaHakukohde.class);
     KoutaHakukohde hk1 = Mockito.mock(KoutaHakukohde.class);
     KoutaHakukohde hk2 = Mockito.mock(KoutaHakukohde.class);
     ReflectionTestUtils.setField(hk1, "oid", "1.2.246.562.20.1");
     ReflectionTestUtils.setField(hk2, "oid", "1.2.246.562.20.2");
-    when(koutaClient.getJson(
-            eq(KOUTA_URL),
-            any(Duration.class),
-            eq(new TypeToken<Set<KoutaHakukohde>>() {}.getType())))
-        .thenReturn(CompletableFuture.completedFuture(Set.of(hk1, hk2)));
+    when(koutaClient.getJson(eq(KOUTA_URL), any(Duration.class), eq(new TypeToken<Set<KoutaHakukohde>>() {
+    }.getType()))).thenReturn(CompletableFuture.completedFuture(Set.of(hk1, hk2)));
 
-    HakukohderyhmaHakukohde hkr1 =
-        new HakukohderyhmaHakukohde(
-            "1.2.246.562.20.1", Arrays.asList("1.2.246.562.28.1", "1.2.246.562.28.2"));
+    HakukohderyhmaHakukohde hkr1 = new HakukohderyhmaHakukohde("1.2.246.562.20.1",
+        Arrays.asList("1.2.246.562.28.1", "1.2.246.562.28.2"));
 
-    HakukohderyhmaHakukohde hkr2 =
-        new HakukohderyhmaHakukohde(
-            "1.2.246.562.20.2", Arrays.asList("1.2.246.562.28.1", "1.2.246.562.28.3"));
+    HakukohderyhmaHakukohde hkr2 = new HakukohderyhmaHakukohde("1.2.246.562.20.2",
+        Arrays.asList("1.2.246.562.28.1", "1.2.246.562.28.3"));
 
-    when(hakukohderyhmapalveluClient.postJson(
-            eq(HKR_URL),
-            any(Duration.class),
-            or(
-                eq(Arrays.asList("1.2.246.562.20.2", "1.2.246.562.20.1")),
+    when(hakukohderyhmapalveluClient
+        .postJson(eq(HKR_URL), any(Duration.class),
+            or(eq(Arrays.asList("1.2.246.562.20.2", "1.2.246.562.20.1")),
                 eq(Arrays.asList("1.2.246.562.20.1", "1.2.246.562.20.2"))),
-            eq(new TypeToken<List<String>>() {}.getType()),
-            eq(new TypeToken<List<HakukohderyhmaHakukohde>>() {}.getType())))
-        .thenReturn(CompletableFuture.completedFuture(Arrays.asList(hkr1, hkr2)));
+            eq(new TypeToken<List<String>>() {
+            }.getType()), eq(new TypeToken<List<HakukohderyhmaHakukohde>>() {
+            }.getType()))).thenReturn(CompletableFuture.completedFuture(Arrays.asList(hkr1, hkr2)));
   }
 
   @Test
@@ -106,20 +95,18 @@ public class TarjontaAsyncResourceImplTest {
     expected.put("1.2.246.562.20.1", Arrays.asList("1.2.246.562.28.1", "1.2.246.562.28.2"));
     expected.put("1.2.246.562.20.2", Arrays.asList("1.2.246.562.28.1", "1.2.246.562.28.3"));
 
-    CompletableFuture<Map<String, List<String>>> actual =
-        tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes("1.2.246.562.29.00000000000000000800");
+    CompletableFuture<Map<String, List<String>>> actual = tarjontaAsyncResource
+        .hakukohdeRyhmasForHakukohdes("1.2.246.562.29.00000000000000000800");
 
     assertEquals(expected, actual.join());
   }
 
   @Test
   public void testHakukohdeRyhmasForHakukohdesParsesCorrectly() {
-    String json =
-        "{\"result\": {\"tulokset\": [{\"tulokset\": [{\"oid\": \"oid1\",\"ryhmaliitokset\": [{\"ryhmaOid\": \"ryhmaoid1\"},{\"ryhmaOid\": \"ryhmaoid2\"},{\"ryhmaOid\": \"ryhmaoid3\"}]},{\"oid\": \"oid2\",\"ryhmaliitokset\": []}]}],\"tuloksia\": 1}}";
+    String json = "{\"result\": {\"tulokset\": [{\"tulokset\": [{\"oid\": \"oid1\",\"ryhmaliitokset\": [{\"ryhmaOid\": \"ryhmaoid1\"},{\"ryhmaOid\": \"ryhmaoid2\"},{\"ryhmaOid\": \"ryhmaoid3\"}]},{\"oid\": \"oid2\",\"ryhmaliitokset\": []}]}],\"tuloksia\": 1}}";
 
-    ResultSearch a =
-        TarjontaAsyncResourceImpl.getGson()
-            .fromJson(json, new TypeToken<ResultSearch>() {}.getType());
+    ResultSearch a = TarjontaAsyncResourceImpl.getGson().fromJson(json, new TypeToken<ResultSearch>() {
+    }.getType());
     Map<String, List<String>> res = TarjontaAsyncResourceImpl.resultSearchToHakukohdeRyhmaMap(a);
     assertEquals(2, res.size());
     assertEquals(3, res.get("oid1").size());
@@ -128,12 +115,10 @@ public class TarjontaAsyncResourceImplTest {
 
   @Test
   public void testMissingRyhma() {
-    String json =
-        "{\"result\": {\"tulokset\": [{\"tulokset\": [{\"oid\": \"oid1\"}, {\"oid\": \"oid2\"}]}]}}";
+    String json = "{\"result\": {\"tulokset\": [{\"tulokset\": [{\"oid\": \"oid1\"}, {\"oid\": \"oid2\"}]}]}}";
 
-    ResultSearch a =
-        TarjontaAsyncResourceImpl.getGson()
-            .fromJson(json, new TypeToken<ResultSearch>() {}.getType());
+    ResultSearch a = TarjontaAsyncResourceImpl.getGson().fromJson(json, new TypeToken<ResultSearch>() {
+    }.getType());
     Map<String, List<String>> res = TarjontaAsyncResourceImpl.resultSearchToHakukohdeRyhmaMap(a);
     assertEquals(2, res.size());
     assertEquals(0, res.get("oid1").size());
@@ -142,12 +127,10 @@ public class TarjontaAsyncResourceImplTest {
 
   @Test
   public void testError() {
-    String json =
-        "{\"accessRights\":{},\"result\":{\"tulokset\":[],\"tuloksia\":0},\"status\":\"OK\"}";
+    String json = "{\"accessRights\":{},\"result\":{\"tulokset\":[],\"tuloksia\":0},\"status\":\"OK\"}";
 
-    ResultSearch a =
-        TarjontaAsyncResourceImpl.getGson()
-            .fromJson(json, new TypeToken<ResultSearch>() {}.getType());
+    ResultSearch a = TarjontaAsyncResourceImpl.getGson().fromJson(json, new TypeToken<ResultSearch>() {
+    }.getType());
     Map<String, List<String>> res = TarjontaAsyncResourceImpl.resultSearchToHakukohdeRyhmaMap(a);
     assertEquals(0, res.size());
   }

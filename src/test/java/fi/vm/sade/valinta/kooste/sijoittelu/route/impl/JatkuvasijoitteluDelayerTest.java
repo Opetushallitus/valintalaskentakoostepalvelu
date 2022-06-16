@@ -23,8 +23,8 @@ public class JatkuvasijoitteluDelayerTest {
   @Test
   public void testJatkuvasijoitteluDelayerPlusSecond() {
     DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayQueue = new DelayQueue<DelayedSijoittelu>();
-    jatkuvaSijoitteluDelayQueue.add(
-        new DelayedSijoittelu("hk", DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(1L)));
+    jatkuvaSijoitteluDelayQueue
+        .add(new DelayedSijoittelu("hk", DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(1L)));
     Assert.assertNull(jatkuvaSijoitteluDelayQueue.poll());
   }
 
@@ -33,16 +33,16 @@ public class JatkuvasijoitteluDelayerTest {
     String COMING = "hk1";
     String LATE = "hk2";
     DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayQueue = new DelayQueue<DelayedSijoittelu>();
-    jatkuvaSijoitteluDelayQueue.add(
-        new DelayedSijoittelu(COMING, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(1L)));
-    jatkuvaSijoitteluDelayQueue.add(
-        new DelayedSijoittelu(LATE, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(-1L)));
+    jatkuvaSijoitteluDelayQueue
+        .add(new DelayedSijoittelu(COMING, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(1L)));
+    jatkuvaSijoitteluDelayQueue
+        .add(new DelayedSijoittelu(LATE, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(-1L)));
     Assert.assertTrue(jatkuvaSijoitteluDelayQueue.poll().getHakuOid().equals(LATE));
     jatkuvaSijoitteluDelayQueue.clear();
-    jatkuvaSijoitteluDelayQueue.add(
-        new DelayedSijoittelu(LATE, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(-1L)));
-    jatkuvaSijoitteluDelayQueue.add(
-        new DelayedSijoittelu(COMING, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(1L)));
+    jatkuvaSijoitteluDelayQueue
+        .add(new DelayedSijoittelu(LATE, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(-1L)));
+    jatkuvaSijoitteluDelayQueue
+        .add(new DelayedSijoittelu(COMING, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(1L)));
     Assert.assertTrue(jatkuvaSijoitteluDelayQueue.poll().getHakuOid().equals(LATE));
   }
 
@@ -50,10 +50,10 @@ public class JatkuvasijoitteluDelayerTest {
   public void testJatkuvasijoitteluDelayerRemoving() {
     String NOW1 = "hk1";
     String NOW2 = "hk2";
-    DelayedSijoittelu DNOW1 =
-        new DelayedSijoittelu(NOW1, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
-    DelayedSijoittelu DNOW2 =
-        new DelayedSijoittelu(NOW2, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
+    DelayedSijoittelu DNOW1 = new DelayedSijoittelu(NOW1,
+        DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
+    DelayedSijoittelu DNOW2 = new DelayedSijoittelu(NOW2,
+        DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
     DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayQueue = new DelayQueue<DelayedSijoittelu>();
     jatkuvaSijoitteluDelayQueue.add(DNOW1);
     jatkuvaSijoitteluDelayQueue.add(DNOW2);
@@ -71,12 +71,12 @@ public class JatkuvasijoitteluDelayerTest {
     String NOW1 = "hk1";
     String NOW2 = "hk2";
     String NOW3 = "hk3";
-    DelayedSijoittelu DNOW1 =
-        new DelayedSijoittelu(NOW1, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
-    DelayedSijoittelu DNOW2 =
-        new DelayedSijoittelu(NOW2, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
-    DelayedSijoittelu DNOW3 =
-        new DelayedSijoittelu(NOW3, DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
+    DelayedSijoittelu DNOW1 = new DelayedSijoittelu(NOW1,
+        DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
+    DelayedSijoittelu DNOW2 = new DelayedSijoittelu(NOW2,
+        DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
+    DelayedSijoittelu DNOW3 = new DelayedSijoittelu(NOW3,
+        DateTime.now().getMillis() + TimeUnit.SECONDS.toMillis(0L));
     DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayQueue = new DelayQueue<DelayedSijoittelu>();
     jatkuvaSijoitteluDelayQueue.add(DNOW1);
     jatkuvaSijoitteluDelayQueue.add(DNOW2);

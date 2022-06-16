@@ -15,39 +15,26 @@ import org.springframework.stereotype.Component;
 
 @Component("haeHakukohteenHakemuksetKomponentti")
 public class HaeHakukohteenHakemuksetKomponentti {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(HaeHakukohteenHakemuksetKomponentti.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HaeHakukohteenHakemuksetKomponentti.class);
 
   private ApplicationResource applicationResource;
   private String applicationResourceUrl;
 
   @Autowired
-  public HaeHakukohteenHakemuksetKomponentti(
-      ApplicationResource applicationResource,
+  public HaeHakukohteenHakemuksetKomponentti(ApplicationResource applicationResource,
       @Value("${valintalaskentakoostepalvelu.hakemus.rest.url:''}") String applicationResourceUrl) {
     this.applicationResourceUrl = applicationResourceUrl;
     this.applicationResource = applicationResource;
   }
 
-  public List<SuppeaHakemus> haeHakukohteenHakemukset(
-      @Property(OPH.HAKUKOHDEOID) String hakukohdeOid) {
-    LOG.info(
-        "Haetaan HakemusList osoitteesta {}/applications?aoOid={}&start=0&rows={}",
-        new Object[] {applicationResourceUrl, hakukohdeOid, Integer.MAX_VALUE});
-    HakemusList hakemusList =
-        applicationResource.findApplications(
-            null,
-            ApplicationResource.ACTIVE_AND_INCOMPLETE,
-            null,
-            null,
-            null,
-            hakukohdeOid,
-            0,
-            ApplicationResource.MAX);
+  public List<SuppeaHakemus> haeHakukohteenHakemukset(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid) {
+    LOG.info("Haetaan HakemusList osoitteesta {}/applications?aoOid={}&start=0&rows={}",
+        new Object[] { applicationResourceUrl, hakukohdeOid, Integer.MAX_VALUE });
+    HakemusList hakemusList = applicationResource.findApplications(null, ApplicationResource.ACTIVE_AND_INCOMPLETE,
+        null, null, null, hakukohdeOid, 0, ApplicationResource.MAX);
     if (hakemusList == null || hakemusList.getResults() == null) { // ||
       // hakemusList.getResults().isEmpty()
-      throw new HakemuspalveluException(
-          "Hakemuspalvelu ei palauttanut hakemuksia hakukohteelle " + hakukohdeOid);
+      throw new HakemuspalveluException("Hakemuspalvelu ei palauttanut hakemuksia hakukohteelle " + hakukohdeOid);
     }
     LOG.info("Haettiin {} kpl hakemuksia", hakemusList.getResults().size());
     return hakemusList.getResults();

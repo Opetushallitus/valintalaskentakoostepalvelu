@@ -1,8 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
 /**
- * @Deprecated Dokumenttien tila siirretaan seurantapalveluun etta koostepalvelusta saadaan tilaton,
- * eli koosteen tila DTO on poistumassa kaytosta
+ * @Deprecated Dokumenttien tila siirretaan seurantapalveluun etta
+ *             koostepalvelusta saadaan tilaton, eli koosteen tila DTO on
+ *             poistumassa kaytosta
  */
 @Deprecated
 public class Varoitus {

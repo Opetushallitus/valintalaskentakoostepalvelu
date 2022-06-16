@@ -40,11 +40,9 @@ import org.slf4j.LoggerFactory;
 public class KoekutsukirjeetTest {
   static final Logger LOG = LoggerFactory.getLogger(KoekutsukirjeetTest.class);
   public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); // 5sec
-  final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-  final HttpResourceBuilder.WebClientExposingHttpResource koekutsukirjeResource =
-      new HttpResourceBuilder(getClass().getName())
-          .address(root + "/viestintapalvelu/koekutsukirjeet/aktivoi")
+  final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+  final HttpResourceBuilder.WebClientExposingHttpResource koekutsukirjeResource = new HttpResourceBuilder(
+      getClass().getName()).address(root + "/viestintapalvelu/koekutsukirjeet/aktivoi")
           .buildExposingWebClientDangerously();
 
   @Before
@@ -65,72 +63,32 @@ public class KoekutsukirjeetTest {
       HAKUKOHDEDTO1.setOpetuskielet(Arrays.asList("FI", "SV"));
       Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString()))
           .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
-      ViestintapalveluAsyncResource viestintapalveluAsyncResource =
-          Mocks.getViestintapalveluAsyncResource();
-      ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor =
-          ArgumentCaptor.forClass(LetterBatch.class);
+      ViestintapalveluAsyncResource viestintapalveluAsyncResource = Mocks.getViestintapalveluAsyncResource();
+      ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);
       Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class)))
           .thenReturn(new CompletableFuture<>());
-      MockValintaperusteetAsyncResource.setHakukohdeResult(
-          Arrays.asList(
-              hakukohdeJaValintakoe()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .addValintakoe(TUNNISTE1)
-                  .build()));
-      MockValintaperusteetAsyncResource.setValintakokeetResult(
-          Arrays.asList(
-              valintakoe()
-                  .setTunniste(TUNNISTE1)
-                  .setSelvitettyTunniste(SELVITETTY_TUNNISTE1)
-                  .build()));
-      MockValintalaskentaValintakoeAsyncResource.setResult(
-          Arrays.asList(
-              osallistuminen()
-                  .setHakemusOid(HAKEMUS1)
-                  .hakutoive()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .valinnanvaihe()
-                  .valintakoe()
-                  .setOsallistuu()
-                  .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
-                  .build()
-                  .build()
-                  .build()
-                  .build(),
-              osallistuminen()
-                  .setHakemusOid(HAKEMUS2)
-                  .hakutoive()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .valinnanvaihe()
-                  .valintakoe()
-                  .setOsallistuu()
-                  .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
-                  .build()
-                  .build()
-                  .build()
-                  .build()));
+      MockValintaperusteetAsyncResource.setHakukohdeResult(Arrays
+          .asList(hakukohdeJaValintakoe().setHakukohdeOid(HAKUKOHDE1).addValintakoe(TUNNISTE1).build()));
+      MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays
+          .asList(valintakoe().setTunniste(TUNNISTE1).setSelvitettyTunniste(SELVITETTY_TUNNISTE1).build()));
+      MockValintalaskentaValintakoeAsyncResource.setResult(Arrays.asList(
+          osallistuminen().setHakemusOid(HAKEMUS1).hakutoive().setHakukohdeOid(HAKUKOHDE1).valinnanvaihe()
+              .valintakoe().setOsallistuu().setValintakoeTunniste(SELVITETTY_TUNNISTE1).build().build()
+              .build().build(),
+          osallistuminen().setHakemusOid(HAKEMUS2).hakutoive().setHakukohdeOid(HAKUKOHDE1).valinnanvaihe()
+              .valintakoe().setOsallistuu().setValintakoeTunniste(SELVITETTY_TUNNISTE1).build().build()
+              .build().build()));
 
-      MockApplicationAsyncResource.setResult(
-          Arrays.asList(hakemus().setOid(HAKEMUS1).addHakutoive(HAKUKOHDE1).build()));
-      MockApplicationAsyncResource.setResultByOid(
-          Arrays.asList(hakemus().setOid(HAKEMUS2).addHakutoive(HAKUKOHDE2).build()));
+      MockApplicationAsyncResource
+          .setResult(Arrays.asList(hakemus().setOid(HAKEMUS1).addHakutoive(HAKUKOHDE1).build()));
+      MockApplicationAsyncResource
+          .setResultByOid(Arrays.asList(hakemus().setOid(HAKEMUS2).addHakutoive(HAKUKOHDE2).build()));
 
-      Response r =
-          koekutsukirjeResource
-              .getWebClient()
-              .query("hakuOid", "H0")
-              .query("hakukohdeOid", HAKUKOHDE1)
-              .query("tarjoajaOid", "T0")
-              .query("templateName", "tmpl")
-              .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
-              .post(
-                  Entity.json(
-                      new DokumentinLisatiedot(
-                          Collections.emptyList(),
-                          "tag",
-                          "Letterbodytext",
-                          "FI",
-                          Collections.emptyList())));
+      Response r = koekutsukirjeResource.getWebClient().query("hakuOid", "H0").query("hakukohdeOid", HAKUKOHDE1)
+          .query("tarjoajaOid", "T0").query("templateName", "tmpl")
+          .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
+          .post(Entity.json(new DokumentinLisatiedot(Collections.emptyList(), "tag", "Letterbodytext", "FI",
+              Collections.emptyList())));
       Assert.assertEquals(200, r.getStatus());
 
       Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1))
@@ -138,8 +96,7 @@ public class KoekutsukirjeetTest {
       LetterBatch batch = letterBatchArgumentCaptor.getValue();
       Assert.assertEquals(
           "Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.",
-          2,
-          batch.getLetters().size());
+          2, batch.getLetters().size());
       LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));
     } finally {
       MockTarjontaAsyncService.clear();
@@ -161,92 +118,37 @@ public class KoekutsukirjeetTest {
       HAKUKOHDEDTO1.setOpetuskielet(Arrays.asList("FI", "SV"));
       Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString()))
           .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
-      ViestintapalveluAsyncResource viestintapalveluAsyncResource =
-          Mocks.getViestintapalveluAsyncResource();
-      ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor =
-          ArgumentCaptor.forClass(LetterBatch.class);
+      ViestintapalveluAsyncResource viestintapalveluAsyncResource = Mocks.getViestintapalveluAsyncResource();
+      ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);
       Mockito.when(viestintapalveluAsyncResource.vieLetterBatch(Mockito.any(LetterBatch.class)))
           .thenReturn(new CompletableFuture<>());
-      MockValintaperusteetAsyncResource.setHakukohdeResult(
-          Arrays.asList(
-              hakukohdeJaValintakoe()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .addValintakoe(TUNNISTE1)
-                  .build()));
-      MockValintaperusteetAsyncResource.setValintakokeetResult(
-          Arrays.asList(
-              valintakoe()
-                  .setTunniste(TUNNISTE1)
-                  .setSelvitettyTunniste(SELVITETTY_TUNNISTE1)
-                  .build()));
-      MockValintalaskentaValintakoeAsyncResource.setResult(
-          Arrays.asList(
-              osallistuminen()
-                  .setHakemusOid(HAKEMUS1)
-                  .hakutoive()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .valinnanvaihe()
-                  .valintakoe()
-                  .setOsallistuu()
-                  .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
-                  .build()
-                  .build()
-                  .build()
-                  .build(),
-              osallistuminen()
-                  .setHakemusOid(HAKEMUS2)
-                  .hakutoive()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .valinnanvaihe()
-                  .valintakoe()
-                  .setOsallistuu()
-                  .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
-                  .build()
-                  .build()
-                  .build()
-                  .build()));
+      MockValintaperusteetAsyncResource.setHakukohdeResult(Arrays
+          .asList(hakukohdeJaValintakoe().setHakukohdeOid(HAKUKOHDE1).addValintakoe(TUNNISTE1).build()));
+      MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays
+          .asList(valintakoe().setTunniste(TUNNISTE1).setSelvitettyTunniste(SELVITETTY_TUNNISTE1).build()));
+      MockValintalaskentaValintakoeAsyncResource.setResult(Arrays.asList(
+          osallistuminen().setHakemusOid(HAKEMUS1).hakutoive().setHakukohdeOid(HAKUKOHDE1).valinnanvaihe()
+              .valintakoe().setOsallistuu().setValintakoeTunniste(SELVITETTY_TUNNISTE1).build().build()
+              .build().build(),
+          osallistuminen().setHakemusOid(HAKEMUS2).hakutoive().setHakukohdeOid(HAKUKOHDE1).valinnanvaihe()
+              .valintakoe().setOsallistuu().setValintakoeTunniste(SELVITETTY_TUNNISTE1).build().build()
+              .build().build()));
 
       MockAtaruAsyncResource.setByHakukohdeResult(
-          Arrays.asList(
-              new HakemusSpec.AtaruHakemusBuilder(HAKEMUS1, "PersonOid1", "Hetu1")
-                  .setHakutoiveet(Arrays.asList(HAKUKOHDE1))
-                  .setSuomalainenPostinumero("00100")
-                  .build()));
-      MockAtaruAsyncResource.setByOidsResult(
-          Arrays.asList(
-              new HakemusSpec.AtaruHakemusBuilder(HAKEMUS2, "PersonOid1", "Hetu1")
-                  .setHakutoiveet(Arrays.asList(HAKUKOHDE2))
-                  .setSuomalainenPostinumero("00100")
-                  .build()));
+          Arrays.asList(new HakemusSpec.AtaruHakemusBuilder(HAKEMUS1, "PersonOid1", "Hetu1")
+              .setHakutoiveet(Arrays.asList(HAKUKOHDE1)).setSuomalainenPostinumero("00100").build()));
+      MockAtaruAsyncResource
+          .setByOidsResult(Arrays.asList(new HakemusSpec.AtaruHakemusBuilder(HAKEMUS2, "PersonOid1", "Hetu1")
+              .setHakutoiveet(Arrays.asList(HAKUKOHDE2)).setSuomalainenPostinumero("00100").build()));
 
       MockTarjontaAsyncService.setMockHaku(
-          new Haku(
-              "H0",
-              new HashMap<>(),
-              new HashSet<>(),
-              "AtaruLomakeAvain",
-              null,
-              null,
-              null,
-              null,
-              null));
+          new Haku("H0", new HashMap<>(), new HashSet<>(), "AtaruLomakeAvain", null, null, null, null, null));
 
-      Response r =
-          koekutsukirjeResource
-              .getWebClient()
-              .query("hakuOid", "H0")
-              .query("hakukohdeOid", HAKUKOHDE1)
-              .query("tarjoajaOid", "T0")
-              .query("templateName", "tmpl")
-              .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
-              .post(
-                  Entity.json(
-                      new DokumentinLisatiedot(
-                          Collections.emptyList(),
-                          "tag",
-                          "Letterbodytext",
-                          "FI",
-                          Collections.emptyList())));
+      Response r = koekutsukirjeResource.getWebClient().query("hakuOid", "H0").query("hakukohdeOid", HAKUKOHDE1)
+          .query("tarjoajaOid", "T0").query("templateName", "tmpl")
+          .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
+          .post(Entity.json(new DokumentinLisatiedot(Collections.emptyList(), "tag", "Letterbodytext", "FI",
+              Collections.emptyList())));
       Assert.assertEquals(200, r.getStatus());
 
       Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1))
@@ -254,8 +156,7 @@ public class KoekutsukirjeetTest {
       LetterBatch batch = letterBatchArgumentCaptor.getValue();
       Assert.assertEquals(
           "Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.",
-          2,
-          batch.getLetters().size());
+          2, batch.getLetters().size());
       LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));
     } finally {
       MockTarjontaAsyncService.clear();

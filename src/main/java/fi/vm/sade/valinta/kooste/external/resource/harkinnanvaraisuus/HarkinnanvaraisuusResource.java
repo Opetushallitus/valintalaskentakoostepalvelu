@@ -36,78 +36,55 @@ import org.springframework.stereotype.Controller;
 public class HarkinnanvaraisuusResource {
   private static final Logger LOG = LoggerFactory.getLogger(HarkinnanvaraisuusResource.class);
 
-  @Autowired private HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource;
+  @Autowired
+  private HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource;
 
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+  @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   @POST
   @Path("/hakemuksille")
   @Consumes("application/json")
   @Produces("application/json")
   @ApiOperation(value = "Hakemusten harkinnanvaraisuustiedot")
-  public void hakemustenHarkinnanvaraisuustiedot(
-      List<String> hakemusOids,
-      @Suspended AsyncResponse asyncResponse,
+  public void hakemustenHarkinnanvaraisuustiedot(List<String> hakemusOids, @Suspended AsyncResponse asyncResponse,
       @Context HttpServletRequest request) {
     asyncResponse.setTimeout(1, TimeUnit.HOURS);
 
     String targetOids = String.join(",", hakemusOids);
-    AuditLog.log(
-        KoosteAudit.AUDIT,
-        AuthorizationUtil.createAuditSession(request).asAuditUser(),
+    AuditLog.log(KoosteAudit.AUDIT, AuthorizationUtil.createAuditSession(request).asAuditUser(),
         ValintaperusteetOperation.HAKEMUS, // fixme, sharedutils
         ValintaResource.HAKEMUKSET, // fixme, sharedutils
-        targetOids,
-        Changes.EMPTY,
-        Collections.emptyMap());
+        targetOids, Changes.EMPTY, Collections.emptyMap());
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> result =
-        harkinnanvaraisuusAsyncResource.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
-    result
-        .thenApply(asyncResponse::resume)
-        .exceptionally(
-            e -> {
-              LOG.error("Hakemusten harkinnanvaraisuustietojen haku epäonnistui: ", e);
-              return asyncResponse.resume(
-                  Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
-            });
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> result = harkinnanvaraisuusAsyncResource
+        .getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+    result.thenApply(asyncResponse::resume).exceptionally(e -> {
+      LOG.error("Hakemusten harkinnanvaraisuustietojen haku epäonnistui: ", e);
+      return asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
+    });
   }
 
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+  @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   @POST
   @Path("/atarutiedoille")
   @Consumes("application/json")
   @Produces("application/json")
   @ApiOperation(value = "Synkatut harkinnanvaraisuudet atarutiedoille")
-  public void hakemustenHarkinnanvaraisuustiedotAtarutiedoille(
-      List<HakemuksenHarkinnanvaraisuus> atarutiedot,
-      @Suspended AsyncResponse asyncResponse,
-      @Context HttpServletRequest request) {
+  public void hakemustenHarkinnanvaraisuustiedotAtarutiedoille(List<HakemuksenHarkinnanvaraisuus> atarutiedot,
+      @Suspended AsyncResponse asyncResponse, @Context HttpServletRequest request) {
     asyncResponse.setTimeout(1, TimeUnit.HOURS);
 
-    String targetOids =
-        atarutiedot.stream()
-            .map(HakemuksenHarkinnanvaraisuus::getHakemusOid)
-            .collect(Collectors.joining(","));
-    AuditLog.log(
-        KoosteAudit.AUDIT,
-        AuthorizationUtil.createAuditSession(request).asAuditUser(),
+    String targetOids = atarutiedot.stream().map(HakemuksenHarkinnanvaraisuus::getHakemusOid)
+        .collect(Collectors.joining(","));
+    AuditLog.log(KoosteAudit.AUDIT, AuthorizationUtil.createAuditSession(request).asAuditUser(),
         ValintaperusteetOperation.HAKEMUS, // fixme, sharedutils
         ValintaResource.HAKEMUKSET, // fixme, sharedutils
-        targetOids,
-        Changes.EMPTY,
-        Collections.emptyMap());
+        targetOids, Changes.EMPTY, Collections.emptyMap());
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> result =
-        harkinnanvaraisuusAsyncResource.getSyncedHarkinnanvaraisuudes(atarutiedot);
-    result
-        .thenApply(asyncResponse::resume)
-        .exceptionally(
-            e -> {
-              LOG.error("Hakemusten harkinnanvaraisuustietojen haku epäonnistui: ", e);
-              return asyncResponse.resume(
-                  Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
-            });
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> result = harkinnanvaraisuusAsyncResource
+        .getSyncedHarkinnanvaraisuudes(atarutiedot);
+    result.thenApply(asyncResponse::resume).exceptionally(e -> {
+      LOG.error("Hakemusten harkinnanvaraisuustietojen haku epäonnistui: ", e);
+      return asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
+    });
   }
 }

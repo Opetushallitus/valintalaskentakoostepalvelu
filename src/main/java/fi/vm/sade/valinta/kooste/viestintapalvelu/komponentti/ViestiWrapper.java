@@ -2,7 +2,10 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.gson.GsonBuilder;
 
-/** Wrapper olio debuggaukseen. Serialisoi viestin ainoastaan jos debug tulostetaan. */
+/**
+ * Wrapper olio debuggaukseen. Serialisoi viestin ainoastaan jos debug
+ * tulostetaan.
+ */
 public class ViestiWrapper {
   private final Object viesti;
 

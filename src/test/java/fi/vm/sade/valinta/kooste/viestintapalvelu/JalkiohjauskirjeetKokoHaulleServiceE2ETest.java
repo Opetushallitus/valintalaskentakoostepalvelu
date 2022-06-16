@@ -53,8 +53,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   @BeforeClass
   public static void init() {
     startShared();
-    MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
-        "ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
+    MockOpintopolkuCasAuthenticationFilter
+        .setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
   }
 
   public static class Result<T> {
@@ -72,19 +72,11 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   @Test
   public void testJalkiohjauskirjeetYksiHylatty() throws Exception {
     mockYksiHylattyKutsu();
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
         Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A123")
+            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A123")
                 .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A321")
+            hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
     mockOrganisaatioKutsut();
     mockKoulutusKutsu();
@@ -100,19 +92,11 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   @Test
   public void testJalkiohjauskirjeetMolemmatHylatty() throws Exception {
     mockMolemmatHylattyKutsu();
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
         Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A123")
+            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A123")
                 .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A321")
+            hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
     mockOrganisaatioKutsut();
     mockKoulutusKutsu();
@@ -128,19 +112,11 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   @Test
   public void testJalkiohjauskirjeetSuodataAsiointikielella() throws Exception {
     mockMolemmatHylattyKutsu();
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
         Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A123")
+            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A123")
                 .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.ENGLANTI)
-                .setHenkilotunnus("010111A321")
+            hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.ENGLANTI).setHenkilotunnus("010111A321")
                 .buildHakuappHakemus()));
     mockOrganisaatioKutsut();
     mockKoulutusKutsu();
@@ -156,24 +132,11 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   @Test
   public void testJalkiohjauskirjeetMolemmilleVainSahkopostia() throws Exception {
     mockMolemmatHylattyKutsu();
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A123")
-                .setVainSahkoinenViestinta(true)
-                .setSahkoposti("testi2@sahkoposti.fi")
-                .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A321")
-                .setVainSahkoinenViestinta(true)
-                .setSahkoposti("testi@sahkoposti.fi")
-                .buildHakuappHakemus()));
+    mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
+        hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A123")
+            .setVainSahkoinenViestinta(true).setSahkoposti("testi2@sahkoposti.fi").buildHakuappHakemus(),
+        hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A321")
+            .setVainSahkoinenViestinta(true).setSahkoposti("testi@sahkoposti.fi").buildHakuappHakemus()));
     mockOrganisaatioKutsut();
     mockKoulutusKutsu();
     mockHakukohde1Kutsu();
@@ -188,22 +151,11 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   @Test
   public void testJalkiohjauskirjeetLahetaIPostiToiselle() throws Exception {
     mockMolemmatHylattyKutsu();
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A123")
-                .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A321")
-                .setVainSahkoinenViestinta(true)
-                .setSahkoposti("testi@sahkoposti.fi")
-                .buildHakuappHakemus()));
+    mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
+        hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A123")
+            .buildHakuappHakemus(),
+        hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A321")
+            .setVainSahkoinenViestinta(true).setSahkoposti("testi@sahkoposti.fi").buildHakuappHakemus()));
     mockOrganisaatioKutsut();
     mockKoulutusKutsu();
     mockHakukohde1Kutsu();
@@ -218,22 +170,11 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   @Test
   public void testJalkiohjauskirjeetLahetaIPostiMolemmille() throws Exception {
     mockMolemmatHylattyKutsu();
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A123")
-                .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A321")
-                .setVainSahkoinenViestinta(false)
-                .setSahkoposti("testi@sahkoposti.fi")
-                .buildHakuappHakemus()));
+    mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
+        hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A123")
+            .buildHakuappHakemus(),
+        hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A321")
+            .setVainSahkoinenViestinta(false).setSahkoposti("testi@sahkoposti.fi").buildHakuappHakemus()));
     mockOrganisaatioKutsut();
     mockKoulutusKutsu();
     mockHakukohde1Kutsu();
@@ -248,22 +189,11 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   @Test
   public void testJalkiohjauskirjeetIPostiToinenAste() throws Exception {
     mockMolemmatHylattyKutsu();
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A123")
-                .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setHenkilotunnus("010111A321")
-                .setVainSahkoinenViestinta(true)
-                .setSahkoposti("testi@sahkoposti.fi")
-                .buildHakuappHakemus()));
+    mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
+        hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A123")
+            .buildHakuappHakemus(),
+        hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setHenkilotunnus("010111A321")
+            .setVainSahkoinenViestinta(true).setSahkoposti("testi@sahkoposti.fi").buildHakuappHakemus()));
     mockOrganisaatioKutsut();
     mockKoulutusKutsu();
     mockHakukohde1Kutsu();
@@ -279,13 +209,11 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     LetterResponse letterResponse = new LetterResponse();
     letterResponse.setBatchId("testBatchId");
     letterResponse.setStatus(LetterResponse.STATUS_SUCCESS);
-    mockToReturnJsonAndCheckBody(
-        POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse, regex);
+    mockToReturnJsonAndCheckBody(POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse, regex);
 
     LetterBatchStatusDto letterStatus = new LetterBatchStatusDto();
     letterStatus.setStatus("ready");
-    mockToReturnJson(
-        GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
+    mockToReturnJson(GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
   }
 
   private void mockYksiHylattyKutsu() {
@@ -372,43 +300,35 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
   }
 
   private void mockValintalaskentaKutsu() {
-    mockToReturnJson(
-        GET,
-        "/valintalaskenta-laskenta-service/resources/hakukohde/HAKUKOHDE1/valinnanvaihe",
+    mockToReturnJson(GET, "/valintalaskenta-laskenta-service/resources/hakukohde/HAKUKOHDE1/valinnanvaihe",
         Collections.emptyList());
   }
 
   private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
-    HttpResourceBuilder.WebClientExposingHttpResource http =
-        new HttpResourceBuilder(getClass().getName())
-            .address(resourcesAddress + "/viestintapalvelu/jalkiohjauskirjeet/aktivoi")
-            .buildExposingWebClientDangerously();
-    WebClient client =
-        http.getWebClient()
-            .query("hakuOid", HAKU1)
-            .query("templateName", "jalkiohjauskirje")
-            .query("tag", "testTag");
-    DokumentinLisatiedot lisatiedot =
-        new DokumentinLisatiedot(null, "testTag", "letterBodyText", asiointikieli, null);
+    HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder(getClass().getName())
+        .address(resourcesAddress + "/viestintapalvelu/jalkiohjauskirjeet/aktivoi")
+        .buildExposingWebClientDangerously();
+    WebClient client = http.getWebClient().query("hakuOid", HAKU1).query("templateName", "jalkiohjauskirje")
+        .query("tag", "testTag");
+    DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot(null, "testTag", "letterBodyText", asiointikieli,
+        null);
     Response response = client.post(Entity.json(lisatiedot));
     Assert.assertEquals(200, response.getStatus());
     return response.readEntity(ProsessiId.class);
   }
 
   private void pollAndAssertDokumenttiProsessi(ProsessiId dokumenttiId) {
-    Prosessi valmisProsessi =
-        DokumenttiProsessiPoller.pollDokumenttiProsessi(
-            resourcesAddress, dokumenttiId, Prosessi::valmis);
+    Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(resourcesAddress, dokumenttiId,
+        Prosessi::valmis);
     Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
     Assert.assertEquals(false, valmisProsessi.keskeytetty);
   }
 
   private void mockKoodisto() throws IOException {
-    final String maatjavaltiot1 =
-        IOUtils.toString(new ClassPathResource("/koodisto/maatjavaltiot1.json").getInputStream());
+    final String maatjavaltiot1 = IOUtils
+        .toString(new ClassPathResource("/koodisto/maatjavaltiot1.json").getInputStream());
     mockToReturnString(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", maatjavaltiot1);
-    final String posti =
-        IOUtils.toString(new ClassPathResource("/koodisto/posti.json").getInputStream());
+    final String posti = IOUtils.toString(new ClassPathResource("/koodisto/posti.json").getInputStream());
     mockToReturnString(GET, "/koodisto-service/rest/json/posti/koodi", posti);
   }
 }

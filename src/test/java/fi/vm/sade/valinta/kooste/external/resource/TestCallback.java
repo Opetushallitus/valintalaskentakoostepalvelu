@@ -18,44 +18,30 @@ public class TestCallback {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestCallback.class);
 
-  private static HttpResource httpResource =
-      new HttpResourceBuilder(TestCallback.class.getName()).build();
+  private static HttpResource httpResource = new HttpResourceBuilder(TestCallback.class.getName()).build();
 
   @Test
   public void testListOfHakemuksetCallback() throws IOException {
-    GsonResponseCallback<List<Hakemus>> cb =
-        new GsonResponseCallback<List<Hakemus>>(
-            httpResource.gson(),
-            "",
-            obj -> {
-              LOG.error("SUCCESS {}", obj);
-            },
-            poikkeus -> {
-              LOG.error("POIKKEUS {}", poikkeus);
-            },
-            new TypeToken<List<Hakemus>>() {}.getType());
+    GsonResponseCallback<List<Hakemus>> cb = new GsonResponseCallback<List<Hakemus>>(httpResource.gson(), "",
+        obj -> {
+          LOG.error("SUCCESS {}", obj);
+        }, poikkeus -> {
+          LOG.error("POIKKEUS {}", poikkeus);
+        }, new TypeToken<List<Hakemus>>() {
+        }.getType());
 
-    cb.completed(
-        javax.ws.rs.core.Response.ok(new ClassPathResource("listfull.json").getInputStream())
-            .build());
+    cb.completed(javax.ws.rs.core.Response.ok(new ClassPathResource("listfull.json").getInputStream()).build());
   }
 
   @Test
   public void testLaskentaDtoCallback() throws IOException {
 
-    GsonResponseCallback<LaskentaDto> cb2 =
-        new GsonResponseCallback<LaskentaDto>(
-            httpResource.gson(),
-            "",
-            obj -> {
-              LOG.error("SUCCESS {}", obj);
-            },
-            poikkeus -> {
-              LOG.error("POIKKEUS {}", poikkeus);
-            },
-            new TypeToken<LaskentaDto>() {}.getType());
-    cb2.completed(
-        javax.ws.rs.core.Response.ok(new ClassPathResource("resetoi.json").getInputStream())
-            .build());
+    GsonResponseCallback<LaskentaDto> cb2 = new GsonResponseCallback<LaskentaDto>(httpResource.gson(), "", obj -> {
+      LOG.error("SUCCESS {}", obj);
+    }, poikkeus -> {
+      LOG.error("POIKKEUS {}", poikkeus);
+    }, new TypeToken<LaskentaDto>() {
+    }.getType());
+    cb2.completed(javax.ws.rs.core.Response.ok(new ClassPathResource("resetoi.json").getInputStream()).build());
   }
 }

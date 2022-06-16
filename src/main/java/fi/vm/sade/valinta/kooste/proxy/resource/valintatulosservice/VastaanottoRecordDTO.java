@@ -102,8 +102,7 @@ public class VastaanottoRecordDTO {
     Assert.notNull(value, name + " may not be null");
   }
 
-  public static VastaanottoRecordDTO of(
-      Valintatulos valintatulos, String muokkaaja, String selite) {
+  public static VastaanottoRecordDTO of(Valintatulos valintatulos, String muokkaaja, String selite) {
     try {
       VastaanottoRecordDTO v = new VastaanottoRecordDTO();
       v.setValintatapajonoOid(valintatulos.getValintatapajonoOid());
@@ -116,17 +115,13 @@ public class VastaanottoRecordDTO {
       v.setSelite(selite);
       return v;
     } catch (IllegalArgumentException e) {
-      LOG.error(
-          String.format(
-              "Problem when creating %s from valintatulos %s",
-              VastaanottoRecordDTO.class.getSimpleName(), valintatulos),
-          e);
+      LOG.error(String.format("Problem when creating %s from valintatulos %s",
+          VastaanottoRecordDTO.class.getSimpleName(), valintatulos), e);
       throw e;
     }
   }
 
-  public static VastaanottoRecordDTO of(
-      ErillishaunHakijaDTO hakija, String muokkaaja, String selite) {
+  public static VastaanottoRecordDTO of(ErillishaunHakijaDTO hakija, String muokkaaja, String selite) {
     try {
       VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
       dto.setValintatapajonoOid(hakija.getValintatapajonoOid());
@@ -139,11 +134,8 @@ public class VastaanottoRecordDTO {
       dto.setTila(hakija.getValintatuloksenTila());
       return dto;
     } catch (IllegalArgumentException e) {
-      LOG.error(
-          String.format(
-              "Problem when creating %s from erillishaun hakija %s",
-              VastaanottoRecordDTO.class.getSimpleName(), hakija),
-          e);
+      LOG.error(String.format("Problem when creating %s from erillishaun hakija %s",
+          VastaanottoRecordDTO.class.getSimpleName(), hakija), e);
       throw e;
     }
   }

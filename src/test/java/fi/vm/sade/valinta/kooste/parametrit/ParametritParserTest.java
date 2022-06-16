@@ -82,9 +82,8 @@ public class ParametritParserTest {
   }
 
   private void setOphUser() {
-    Authentication authentication =
-        new UsernamePasswordAuthenticationToken(
-            "test", "test", Arrays.asList(new SimpleGrantedAuthority("ROLE_" + ROOTOID)));
+    Authentication authentication = new UsernamePasswordAuthenticationToken("test", "test",
+        Arrays.asList(new SimpleGrantedAuthority("ROLE_" + ROOTOID)));
     SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 

@@ -7,7 +7,8 @@ public class KansalaisuusDto implements Serializable {
 
   private String kansalaisuusKoodi;
 
-  public KansalaisuusDto() {}
+  public KansalaisuusDto() {
+  }
 
   public KansalaisuusDto(String kansalaisuusKoodi) {
     this.kansalaisuusKoodi = kansalaisuusKoodi;
@@ -23,8 +24,10 @@ public class KansalaisuusDto implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
 
     KansalaisuusDto that = (KansalaisuusDto) o;
 

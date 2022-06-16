@@ -69,8 +69,7 @@ public class OsoiteBuilder {
 
   public OsoiteBuilder setUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt(
       Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt) {
-    this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt =
-        ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
+    this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
     return this;
   }
 
@@ -95,21 +94,8 @@ public class OsoiteBuilder {
   }
 
   public Osoite createOsoite() {
-    return new Osoite(
-        firstName,
-        lastName,
-        addressline,
-        addressline2,
-        addressline3,
-        postalCode,
-        city,
-        region,
-        country,
-        countryCode,
-        ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt,
-        organisaationimi,
-        numero,
-        email,
-        www);
+    return new Osoite(firstName, lastName, addressline, addressline2, addressline3, postalCode, city, region,
+        country, countryCode, ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt, organisaationimi,
+        numero, email, www);
   }
 }

@@ -50,12 +50,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource
-    implements ValintaTulosServiceAsyncResource {
+    implements
+    ValintaTulosServiceAsyncResource {
   private final HttpClient client;
 
   @Autowired
-  public ValintaTulosServiceAsyncResourceImpl(
-      @Qualifier("ValintaTulosServiceHttpClient") HttpClient client) {
+  public ValintaTulosServiceAsyncResourceImpl(@Qualifier("ValintaTulosServiceHttpClient") HttpClient client) {
     super(TimeUnit.MINUTES.toMillis(30));
     this.client = client;
   }
@@ -65,8 +65,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource
         .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonSerializer())
         .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonDeserializer())
         .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonDeserializer())
-        .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonSerializer())
-        .create();
+        .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonSerializer()).create();
   }
 
   @Override
@@ -76,152 +75,129 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource
 
   @Override
   public Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid) {
-    return getAsObservableLazily(
-        getUrl("valinta-tulos-service.haku.hakuoid", hakuOid),
-        new GenericType<List<ValintaTulosServiceDto>>() {}.getType());
+    return getAsObservableLazily(getUrl("valinta-tulos-service.haku.hakuoid", hakuOid),
+        new GenericType<List<ValintaTulosServiceDto>>() {
+        }.getType());
   }
 
   @Override
-  public Observable<List<Muutoshistoria>> getMuutoshistoria(
-      String hakemusOid, String valintatapajonoOid) {
-    return getAsObservableLazily(
-        getUrl("valinta-tulos-service.muutoshistoria", hakemusOid, valintatapajonoOid),
-        new GenericType<List<Muutoshistoria>>() {}.getType());
+  public Observable<List<Muutoshistoria>> getMuutoshistoria(String hakemusOid, String valintatapajonoOid) {
+    return getAsObservableLazily(getUrl("valinta-tulos-service.muutoshistoria", hakemusOid, valintatapajonoOid),
+        new GenericType<List<Muutoshistoria>>() {
+        }.getType());
   }
 
   @Override
   public Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid) {
-    return getStringAsObservableLazily(
-        getUrl("valinta-tulos-service.haku.hakuoid.hakemus", hakuOid, hakemusOid));
+    return getStringAsObservableLazily(getUrl("valinta-tulos-service.haku.hakuoid.hakemus", hakuOid, hakemusOid));
   }
 
   @Override
-  public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(
-      String hakuOid, String hakukohdeOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
-            getUrl("valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
-            Duration.ofMinutes(30),
-            new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType())
-        .thenApplyAsync(HakijaPaginationObject::getResults);
+  public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
+    return this.client.<HakijaPaginationObject>getJson(
+        getUrl("valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
+        Duration.ofMinutes(30), new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {
+        }.getType()).thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
-            getUrl("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
-            Duration.ofMinutes(30),
-            new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType())
-        .thenApplyAsync(HakijaPaginationObject::getResults);
+    return this.client.<HakijaPaginationObject>getJson(getUrl("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
+        Duration.ofMinutes(30), new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {
+        }.getType()).thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
     return this.client.getJson(
         getUrl("valinta-tulos-service.haku.sijoitteluajo.latest.hakemus", hakuOid, hakemusOid),
-        Duration.ofMinutes(30),
-        new com.google.gson.reflect.TypeToken<HakijaDTO>() {}.getType());
+        Duration.ofMinutes(30), new com.google.gson.reflect.TypeToken<HakijaDTO>() {
+        }.getType());
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
-            getUrl("valinta-tulos-service.haku.hakukohde.hakijat", hakuOid, hakukohdeOid),
-            Duration.ofMinutes(30),
-            new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType())
-        .thenApplyAsync(HakijaPaginationObject::getResults);
+    return this.client.<HakijaPaginationObject>getJson(
+        getUrl("valinta-tulos-service.haku.hakukohde.hakijat", hakuOid, hakukohdeOid), Duration.ofMinutes(30),
+        new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {
+        }.getType()).thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
     return this.client
-        .<HakijaPaginationObject>getJson(
-            getUrl("valinta-tulos-service.haku.ilmanhyvaksyntaa", hakuOid),
-            Duration.ofMinutes(30),
-            new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {}.getType())
+        .<HakijaPaginationObject>getJson(getUrl("valinta-tulos-service.haku.ilmanhyvaksyntaa", hakuOid),
+            Duration.ofMinutes(30), new com.google.gson.reflect.TypeToken<HakijaPaginationObject>() {
+            }.getType())
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
     return getAsObservableLazily(
-        getUrl(
-            "valinta-tulos-service.virkailija.valintatulos.haku.hakukohde", hakuOid, hakukohdeOid),
-        new GenericType<List<Valintatulos>>() {}.getType());
+        getUrl("valinta-tulos-service.virkailija.valintatulos.haku.hakukohde", hakuOid, hakukohdeOid),
+        new GenericType<List<Valintatulos>>() {
+        }.getType());
   }
 
   @Override
-  public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(
-      String hakukohdeOid, AuditSession session) {
+  public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, AuditSession session) {
     return postAsObservableLazily(
-        getUrl(
-            "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "read", hakukohdeOid),
-        new GenericType<List<Lukuvuosimaksu>>() {}.getType(),
-        Entity.json(of("auditSession", session)));
+        getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "read", hakukohdeOid),
+        new GenericType<List<Lukuvuosimaksu>>() {
+        }.getType(), Entity.json(of("auditSession", session)));
   }
 
   @Override
-  public Observable<String> saveLukuvuosimaksut(
-      String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
+  public Observable<String> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session,
+      List<LukuvuosimaksuMuutos> muutokset) {
     return postAsObservableLazily(
-        getUrl(
-            "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "write", hakukohdeOid),
-        Void.class,
-        Entity.json(of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session)));
+        getUrl("valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu", "write", hakukohdeOid),
+        Void.class, Entity.json(of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session)));
   }
 
   @Override
-  public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(
-      String hakuOid, String hakukohdeOid) {
+  public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid) {
     return getAsObservableLazily(
-        getUrl(
-            "valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde",
-            hakuOid,
+        getUrl("valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde", hakuOid,
             hakukohdeOid),
-        new GenericType<List<Valintatulos>>() {}.getType());
+        new GenericType<List<Valintatulos>>() {
+        }.getType());
   }
 
   @Override
-  public Observable<List<Valintatulos>> findValintatuloksetByHakemus(
-      String hakuOid, String hakemusOid) {
+  public Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid) {
     return getAsObservableLazily(
         getUrl("valinta-tulos-service.virkailija.valintatulos.haku.hakemus", hakuOid, hakemusOid),
-        new GenericType<List<Valintatulos>>() {}.getType());
+        new GenericType<List<Valintatulos>>() {
+        }.getType());
   }
 
   @Override
-  public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(
-      String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
+  public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid,
+      String hakukohdeOid, Set<String> hakemusOids) {
     return postAsObservableLazily(
-        getUrl(
-            "valinta-tulos-service.virkailija.myohastyneet.haku.hakukohde", hakuOid, hakukohdeOid),
-        new GenericType<List<VastaanottoAikarajaMennytDTO>>() {}.getType(),
-        Entity.json(hakemusOids));
+        getUrl("valinta-tulos-service.virkailija.myohastyneet.haku.hakukohde", hakuOid, hakukohdeOid),
+        new GenericType<List<VastaanottoAikarajaMennytDTO>>() {
+        }.getType(), Entity.json(hakemusOids));
   }
 
   @Override
-  public Observable<List<TilaHakijalleDto>> findTilahakijalle(
-      String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids) {
+  public Observable<List<TilaHakijalleDto>> findTilahakijalle(String hakuOid, String hakukohdeOid,
+      String valintatapajonoOid, Set<String> hakemusOids) {
     return postAsObservableLazily(
-        getUrl(
-            "valinta-tulos-service.virkailija.tilahakijalle.haku.hakukohde.valintatapajono",
-            hakuOid,
-            hakukohdeOid,
-            valintatapajonoOid),
-        new GenericType<List<TilaHakijalleDto>>() {}.getType(),
-        Entity.json(hakemusOids));
+        getUrl("valinta-tulos-service.virkailija.tilahakijalle.haku.hakukohde.valintatapajono", hakuOid,
+            hakukohdeOid, valintatapajonoOid),
+        new GenericType<List<TilaHakijalleDto>>() {
+        }.getType(), Entity.json(hakemusOids));
   }
 
   @Override
-  public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(
-      AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
-    return postAsObservableLazily(
-        getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid),
-        new TypeToken<List<ValintatulosUpdateStatus>>() {}.getType(),
-        Entity.entity(
-            gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset)),
+  public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession,
+      String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
+    return postAsObservableLazily(getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid),
+        new TypeToken<List<ValintatulosUpdateStatus>>() {
+        }.getType(), Entity.entity(gson().toJson(new ValinnantulosRequest(auditSession, valinnantulokset)),
             MediaType.APPLICATION_JSON),
         client -> {
           client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -233,12 +209,11 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(
-      AuditSession auditSession, String valintatapajonoOid) {
-    return getAsObservableLazily(
-        getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid),
-        new GenericType<List<Valinnantulos>>() {}.getType(),
-        client -> {
+  public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(AuditSession auditSession,
+      String valintatapajonoOid) {
+    return getAsObservableLazily(getUrl("valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid),
+        new GenericType<List<Valinnantulos>>() {
+        }.getType(), client -> {
           client.accept(MediaType.APPLICATION_JSON_TYPE);
           client.query("sessionId", auditSession.getSessionId());
           client.query("uid", auditSession.getUid());
@@ -250,16 +225,11 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(
-      String hakuOid, String hakukohdeOid) {
+  public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
     return getAsObservableLazily(
-        getUrl(
-            "valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde",
-            hakuOid,
-            "latest",
-            hakukohdeOid),
-        new TypeToken<HakukohdeDTO>() {}.getType(),
-        client -> {
+        getUrl("valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde", hakuOid, "latest", hakukohdeOid),
+        new TypeToken<HakukohdeDTO>() {
+        }.getType(), client -> {
           client.accept(MediaType.WILDCARD_TYPE);
           return client;
         });
@@ -267,18 +237,16 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource
 
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
     @Override
-    public JsonElement serialize(
-        OffsetDateTime dateTime, Type type, JsonSerializationContext jsonSerializationContext) {
-      return new JsonPrimitive(
-          DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(
-              dateTime.atZoneSameInstant(ZoneId.of("Europe/Helsinki"))));
+    public JsonElement serialize(OffsetDateTime dateTime, Type type,
+        JsonSerializationContext jsonSerializationContext) {
+      return new JsonPrimitive(DateTimeFormatter.ISO_OFFSET_DATE_TIME
+          .format(dateTime.atZoneSameInstant(ZoneId.of("Europe/Helsinki"))));
     }
   }
 
   private static class OffsetDateTimeJsonDeserializer implements JsonDeserializer<OffsetDateTime> {
     @Override
-    public OffsetDateTime deserialize(
-        JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public OffsetDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
         throws JsonParseException {
       return OffsetDateTime.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(json.getAsString()));
     }
@@ -299,8 +267,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends UrlConfiguredResource
 
   private static class VtsDateTimeJsonSerializer implements JsonSerializer<DateTime> {
     @Override
-    public JsonElement serialize(
-        DateTime dateTime, Type type, JsonSerializationContext jsonSerializationContext) {
+    public JsonElement serialize(DateTime dateTime, Type type, JsonSerializationContext jsonSerializationContext) {
       return new JsonPrimitive(ISODateTimeFormat.dateTime().print(dateTime));
     }
   }

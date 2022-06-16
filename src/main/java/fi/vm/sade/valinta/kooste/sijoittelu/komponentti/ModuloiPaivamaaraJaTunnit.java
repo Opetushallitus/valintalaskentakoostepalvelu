@@ -13,23 +13,16 @@ public class ModuloiPaivamaaraJaTunnit {
     if (now.isBefore(start.minusHours(1))) {
       LOG.error(
           "Yritettiin moduloida seuraavaa suoritusaikaa vaikka aloitusaika ei ole viela tapahtunut! Aloituspvm {} mutta nyt on {}",
-          Formatter.paivamaara(start.toDate()),
-          Formatter.paivamaara(now.toDate()));
+          Formatter.paivamaara(start.toDate()), Formatter.paivamaara(now.toDate()));
       throw new RuntimeException(
           "Yritettiin moduloida seuraavaa suoritusaikaa vaikka aloitusaika ei ole viela tapahtunut!");
     }
-    int tavoiteTunti =
-        seuraavaAskel(start.getHourOfDay(), now.getHourOfDay(), moduloitavaTuntiMaara);
+    int tavoiteTunti = seuraavaAskel(start.getHourOfDay(), now.getHourOfDay(), moduloitavaTuntiMaara);
     if (now.getHourOfDay() == tavoiteTunti && now.getMinuteOfHour() > start.getMinuteOfHour()) {
       tavoiteTunti += moduloitavaTuntiMaara;
     }
-    return new DateTime(
-            now.getYear(),
-            now.getMonthOfYear(),
-            now.getDayOfMonth(),
-            start.getHourOfDay(),
-            start.getMinuteOfHour())
-        .plusHours(tavoiteTunti - start.getHourOfDay());
+    return new DateTime(now.getYear(), now.getMonthOfYear(), now.getDayOfMonth(), start.getHourOfDay(),
+        start.getMinuteOfHour()).plusHours(tavoiteTunti - start.getHourOfDay());
   }
 
   public static int seuraavaAskel(int alkuPiste, int tavoiteAlue, int askel) {

@@ -16,53 +16,33 @@ public class HakijapalveluTest {
   @Test
   public void testParsingForFinnishFromFinnish() throws Exception {
     HakutoimistoDTO hakutoimisto = hakutoimistoFi();
-    assertCorrectAddress(
-        Hakijapalvelu.osoite(hakutoimisto, KieliUtil.SUOMI),
-        "Hakutoimisto",
-        "Testitie 1",
-        "Helsinki",
-        "http://www.foo.fi");
+    assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.SUOMI), "Hakutoimisto", "Testitie 1",
+        "Helsinki", "http://www.foo.fi");
   }
 
   @Test
   public void testParsingForEnglishFromFiAndEn() throws Exception {
     HakutoimistoDTO hakutoimisto = hakutoimistoFiAndEn();
-    assertCorrectAddress(
-        Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI),
-        "Admission services",
-        "Testitie 1, 00100, Helsinki, Finland",
-        StringUtils.EMPTY,
-        "http://www.foo.fi");
+    assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI), "Admission services",
+        "Testitie 1, 00100, Helsinki, Finland", StringUtils.EMPTY, "http://www.foo.fi");
   }
 
   @Test
   public void testParsingForEnglishFromFinnish() throws Exception {
     HakutoimistoDTO hakutoimisto = hakutoimistoFi();
-    assertCorrectAddress(
-        Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI),
-        "Hakutoimisto",
-        "Testitie 1",
-        "Helsinki",
-        "http://www.foo.fi");
+    assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI), "Hakutoimisto", "Testitie 1",
+        "Helsinki", "http://www.foo.fi");
   }
 
   @Test
   public void testFallbackToFinnishWhenParsingForEnglishWithNoAddress() throws Exception {
     HakutoimistoDTO hakutoimisto = hakutoimistoFiAndEnWithNoAddress();
-    assertCorrectAddress(
-        Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI),
-        "Admission services",
-        "Testitie 1",
-        "Helsinki",
-        "http://www.foo.com");
+    assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI), "Admission services", "Testitie 1",
+        "Helsinki", "http://www.foo.com");
   }
 
-  private void assertCorrectAddress(
-      Optional<Osoite> osoiteOpt,
-      String nimi,
-      String katuosoite,
-      String postitoimipaikka,
-      String www) {
+  private void assertCorrectAddress(Optional<Osoite> osoiteOpt, String nimi, String katuosoite,
+      String postitoimipaikka, String www) {
     assertTrue(osoiteOpt.isPresent());
     Osoite osoite = osoiteOpt.get();
     assertEquals(nimi, osoite.getOrganisaationimi());
@@ -72,42 +52,30 @@ public class HakijapalveluTest {
   }
 
   private HakutoimistoDTO hakutoimistoFi() {
-    return new HakutoimistoDTO(
-        ImmutableMap.of("kieli_fi#1", "Hakutoimisto"),
+    return new HakutoimistoDTO(ImmutableMap.of("kieli_fi#1", "Hakutoimisto"),
         ImmutableMap.of("kieli_fi#1", yhteystiedot("Testitie 1", false)));
   }
 
   private HakutoimistoDTO hakutoimistoFiAndEn() {
-    return new HakutoimistoDTO(
-        ImmutableMap.of("kieli_fi#1", "Hakutoimisto", "kieli_en#1", "Admission services"),
-        ImmutableMap.of(
-            "kieli_fi#1", yhteystiedot("Testitie 1", false),
-            "kieli_en#1", yhteystiedot("Testitie 1, 00100, Helsinki, Finland", true)));
+    return new HakutoimistoDTO(ImmutableMap.of("kieli_fi#1", "Hakutoimisto", "kieli_en#1", "Admission services"),
+        ImmutableMap.of("kieli_fi#1", yhteystiedot("Testitie 1", false), "kieli_en#1",
+            yhteystiedot("Testitie 1, 00100, Helsinki, Finland", true)));
   }
 
   private HakutoimistoDTO hakutoimistoFiAndEnWithNoAddress() {
-    return new HakutoimistoDTO(
-        ImmutableMap.of("kieli_fi#1", "Hakutoimisto", "kieli_en#1", "Admission services"),
-        ImmutableMap.of(
-            "kieli_fi#1",
-            yhteystiedot("Testitie 1", false),
-            "kieli_en#1",
-            new HakutoimistoDTO.HakutoimistonYhteystiedotDTO(
-                null, null, "http://www.foo.com", "bar@foo.com", "01000700")));
+    return new HakutoimistoDTO(ImmutableMap.of("kieli_fi#1", "Hakutoimisto", "kieli_en#1", "Admission services"),
+        ImmutableMap.of("kieli_fi#1", yhteystiedot("Testitie 1", false), "kieli_en#1",
+            new HakutoimistoDTO.HakutoimistonYhteystiedotDTO(null, null, "http://www.foo.com",
+                "bar@foo.com", "01000700")));
   }
 
-  private HakutoimistoDTO.HakutoimistonYhteystiedotDTO yhteystiedot(
-      String katuosoite, boolean foreign) {
-    return new HakutoimistoDTO.HakutoimistonYhteystiedotDTO(
-        osoite(katuosoite, foreign),
-        osoite(katuosoite, foreign),
-        "http://www.foo.fi",
-        "bar@foo.fi",
-        "01000700");
+  private HakutoimistoDTO.HakutoimistonYhteystiedotDTO yhteystiedot(String katuosoite, boolean foreign) {
+    return new HakutoimistoDTO.HakutoimistonYhteystiedotDTO(osoite(katuosoite, foreign),
+        osoite(katuosoite, foreign), "http://www.foo.fi", "bar@foo.fi", "01000700");
   }
 
   private HakutoimistoDTO.OsoiteDTO osoite(String osoite, boolean foreign) {
-    return new HakutoimistoDTO.OsoiteDTO(
-        "1.2.3", osoite, foreign ? null : "posti_00100", foreign ? null : "HELSINKI");
+    return new HakutoimistoDTO.OsoiteDTO("1.2.3", osoite, foreign ? null : "posti_00100",
+        foreign ? null : "HELSINKI");
   }
 }

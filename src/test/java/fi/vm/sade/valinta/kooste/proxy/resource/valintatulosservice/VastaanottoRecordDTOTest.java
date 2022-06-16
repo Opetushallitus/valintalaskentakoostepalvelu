@@ -8,7 +8,8 @@ import org.junit.rules.ExpectedException;
 
 public class VastaanottoRecordDTOTest {
   private final VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
-  @Rule public final ExpectedException exception = ExpectedException.none();
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
 
   @Test
   public void acceptsNonNullValues() {

@@ -11,8 +11,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- * Abstrakti perustyyppi prosesseille. Poimii muun muassa prosessin luojan tiedot metatiedoiksi.
- * Valvomolle voi antaa minka tahansa olion prosessin kuvaukseksi joten kaytto on valinnaista.
+ * Abstrakti perustyyppi prosesseille. Poimii muun muassa prosessin luojan
+ * tiedot metatiedoiksi. Valvomolle voi antaa minka tahansa olion prosessin
+ * kuvaukseksi joten kaytto on valinnaista.
  */
 public class Prosessi implements Comparable<Prosessi>, Timestamped, ExceptionStack {
   private String id;
@@ -22,8 +23,7 @@ public class Prosessi implements Comparable<Prosessi>, Timestamped, ExceptionSta
   private Date createdAt;
   private String hakuOid;
   private AtomicBoolean wasFirst = new AtomicBoolean(true);
-  private Collection<String> exceptions =
-      Collections.synchronizedCollection(Lists.<String>newArrayList());
+  private Collection<String> exceptions = Collections.synchronizedCollection(Lists.<String>newArrayList());
 
   public Prosessi(String resurssi, String toiminto, String hakuOid) {
     this.id = UUID.randomUUID().toString();
@@ -96,6 +96,6 @@ public class Prosessi implements Comparable<Prosessi>, Timestamped, ExceptionSta
 
   @Override
   public String toString() {
-    return Arrays.toString(new Object[] {getResurssi(), getToiminto(), getCreatedAt()});
+    return Arrays.toString(new Object[] { getResurssi(), getToiminto(), getCreatedAt() });
   }
 }

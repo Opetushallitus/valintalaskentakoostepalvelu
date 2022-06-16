@@ -24,14 +24,13 @@ public class MockDokumentinSeurantaAsyncResource implements DokumentinSeurantaAs
   }
 
   @Override
-  public Observable<DokumenttiDto> paivitaDokumenttiId(
-      final String uuid, final String dokumenttiId) {
+  public Observable<DokumenttiDto> paivitaDokumenttiId(final String uuid, final String dokumenttiId) {
     return Observable.just(new DokumenttiDto(GENEERINEN_DOKUMENTTI_ID, null, null, null));
   }
 
   @Override
-  public Observable<DokumenttiDto> lisaaVirheilmoituksia(
-      final String uuid, final List<VirheilmoitusDto> virheilmoitukset) {
+  public Observable<DokumenttiDto> lisaaVirheilmoituksia(final String uuid,
+      final List<VirheilmoitusDto> virheilmoitukset) {
     return Observable.just(new DokumenttiDto(GENEERINEN_DOKUMENTTI_ID, null, null, null));
   }
 }

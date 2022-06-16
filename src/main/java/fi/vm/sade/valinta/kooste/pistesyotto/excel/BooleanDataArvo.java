@@ -8,12 +8,8 @@ public class BooleanDataArvo extends TilaDataArvo {
   private final String tunniste;
   private final String osallistuminenTunniste;
 
-  public BooleanDataArvo(
-      Map<String, String> konvertteri,
-      Map<String, String> tilaKonvertteri,
-      String tunniste,
-      String asetettuTila,
-      String osallistuminenTunniste) {
+  public BooleanDataArvo(Map<String, String> konvertteri, Map<String, String> tilaKonvertteri, String tunniste,
+      String asetettuTila, String osallistuminenTunniste) {
     super(tilaKonvertteri, asetettuTila);
     this.konvertteri = konvertteri;
     this.tunniste = tunniste;
@@ -33,9 +29,7 @@ public class BooleanDataArvo extends TilaDataArvo {
   }
 
   private boolean isAsetettu(String arvo) {
-    return StringUtils.isNotBlank(arvo)
-        && konvertteri.containsKey(arvo)
-        && !PistesyottoExcel.TYHJA.equals(arvo);
+    return StringUtils.isNotBlank(arvo) && konvertteri.containsKey(arvo) && !PistesyottoExcel.TYHJA.equals(arvo);
   }
 
   public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
@@ -50,11 +44,7 @@ public class BooleanDataArvo extends TilaDataArvo {
         }
       }
     }
-    return new PistesyottoArvo(
-        konvertoi(arvo),
-        lopullinenTila,
-        isValidi(arvo) && isValidiTila(tila),
-        tunniste,
+    return new PistesyottoArvo(konvertoi(arvo), lopullinenTila, isValidi(arvo) && isValidiTila(tila), tunniste,
         osallistuminenTunniste);
   }
 }

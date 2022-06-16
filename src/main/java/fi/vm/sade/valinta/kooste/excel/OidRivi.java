@@ -20,8 +20,7 @@ public class OidRivi extends Rivi {
   public OidRivi(String oid) {
     super(new Teksti(oid));
     if (oid == null) {
-      throw new RuntimeException(
-          "Exceliin yritettiin oid tarkistusta null oidille. Tarkista datan eheys.");
+      throw new RuntimeException("Exceliin yritettiin oid tarkistusta null oidille. Tarkista datan eheys.");
     }
     this.oidit = Sets.newHashSet(oid);
     this.kuuntelijat = Collections.emptyList();
@@ -52,12 +51,10 @@ public class OidRivi extends Rivi {
     return solut;
   }
 
-  public OidRivi(
-      List<String> oidit, Collection<OidKuuntelija> kuuntelijat, int vali, boolean keskitetty) {
+  public OidRivi(List<String> oidit, Collection<OidKuuntelija> kuuntelijat, int vali, boolean keskitetty) {
     super(tekstiSolut(oidit, vali, keskitetty));
     if (oidit == null || oidit.isEmpty()) {
-      throw new RuntimeException(
-          "Exceliin yritettiin oid tarkistusta null oidille. Tarkista datan eheys.");
+      throw new RuntimeException("Exceliin yritettiin oid tarkistusta null oidille. Tarkista datan eheys.");
     }
     this.oidit = Sets.newHashSet(oidit);
     if (this.oidit.size() != oidit.size()) {
@@ -93,23 +90,18 @@ public class OidRivi extends Rivi {
       String oidstr = Arrays.toString(oidit.toArray());
       throw new ExcelValidointiPoikkeus("Odotettiin oideja " + oidstr);
     }
-    ImmutableList<String> tekstit =
-        FluentIterable.from(soluja)
-            .filter(
-                new Predicate<Solu>() {
-                  public boolean apply(Solu input) {
-                    return !input.isTyhja();
-                  }
-                })
-            //
-            .transform(
-                new Function<Solu, String>() {
-                  @Override
-                  public String apply(Solu input) {
-                    return input.toTeksti().getTeksti();
-                  }
-                })
-            .toList();
+    ImmutableList<String> tekstit = FluentIterable.from(soluja).filter(new Predicate<Solu>() {
+      public boolean apply(Solu input) {
+        return !input.isTyhja();
+      }
+    })
+        //
+        .transform(new Function<Solu, String>() {
+          @Override
+          public String apply(Solu input) {
+            return input.toTeksti().getTeksti();
+          }
+        }).toList();
 
     if (!Sets.newHashSet(tekstit).equals(oidit)) {
       String oidstr = Arrays.toString(oidit.toArray());

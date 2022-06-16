@@ -24,11 +24,10 @@ public class KoutaAsyncResourceImpl implements KoutaAsyncResource {
 
   @Override
   public CompletableFuture<KoutaHakukohde> haeHakukohde(String hakukohdeOid) {
-    CompletableFuture<KoutaHakukohdeDTO> koutaF =
-        this.koutaClient.getJson(
-            urlConfiguration.url("kouta-internal.hakukohde.hakukohdeoid", hakukohdeOid),
-            Duration.ofSeconds(10),
-            new TypeToken<KoutaHakukohdeDTO>() {}.getType());
+    CompletableFuture<KoutaHakukohdeDTO> koutaF = this.koutaClient.getJson(
+        urlConfiguration.url("kouta-internal.hakukohde.hakukohdeoid", hakukohdeOid), Duration.ofSeconds(10),
+        new TypeToken<KoutaHakukohdeDTO>() {
+        }.getType());
     return koutaF.thenApplyAsync(KoutaHakukohde::new);
   }
 }

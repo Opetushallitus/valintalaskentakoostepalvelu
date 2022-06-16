@@ -27,13 +27,9 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
   private String passWord;
 
   @Autowired
-  public KelaFtpRouteImpl(
-      @Value("${kela.ftp.host}") final String host,
-      @Value("${kela.ftp.port}") final String port,
-      @Value("${kela.ftp.path}") final String path,
-      @Value("${kela.ftp.username}") final String userName,
-      @Value("${kela.ftp.password}") final String passWord,
-      DokumenttiAsyncResource dokumenttiAsyncResource) {
+  public KelaFtpRouteImpl(@Value("${kela.ftp.host}") final String host, @Value("${kela.ftp.port}") final String port,
+      @Value("${kela.ftp.path}") final String path, @Value("${kela.ftp.username}") final String userName,
+      @Value("${kela.ftp.password}") final String passWord, DokumenttiAsyncResource dokumenttiAsyncResource) {
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     this.host = host;
     this.port = Integer.parseInt(port);
@@ -58,54 +54,38 @@ public class KelaFtpRouteImpl implements KelaFtpRoute {
   @Override
   public Boolean aloitaKelaSiirto(String dokumenttiId)
       throws InterruptedException, ExecutionException, TimeoutException {
-    return dokumenttiAsyncResource
-        .lataa(dokumenttiId)
-        .thenApplyAsync(
-            response -> {
-              ChannelSftp channelSftp = new ChannelSftp();
-              try {
-                channelSftp = setupJsch();
-                channelSftp.connect();
-                byte[] kelaData = response.body().readAllBytes();
-                // Parsitaan tiedostonimi, jos ei löydy, käytetään oletusnimeä:
-                String headerValue =
-                    response.headers().firstValue("Content-Disposition").orElse("");
-                String fileName = "";
-                if (headerValue != null && !headerValue.isEmpty()) {
-                  fileName =
-                      headerValue.substring(
-                          headerValue.indexOf("\"") + 1, headerValue.lastIndexOf("\""));
-                  LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
-                } else {
-                  fileName = "DEFAULT_KELA_FILENAME" + System.currentTimeMillis();
-                  LOG.debug(
-                      "Kela-ftp siirron dokumenttinimeä ei saatu parsittua, käytetään oletusta: "
-                          + fileName);
-                }
+    return dokumenttiAsyncResource.lataa(dokumenttiId).thenApplyAsync(response -> {
+      ChannelSftp channelSftp = new ChannelSftp();
+      try {
+        channelSftp = setupJsch();
+        channelSftp.connect();
+        byte[] kelaData = response.body().readAllBytes();
+        // Parsitaan tiedostonimi, jos ei löydy, käytetään oletusnimeä:
+        String headerValue = response.headers().firstValue("Content-Disposition").orElse("");
+        String fileName = "";
+        if (headerValue != null && !headerValue.isEmpty()) {
+          fileName = headerValue.substring(headerValue.indexOf("\"") + 1, headerValue.lastIndexOf("\""));
+          LOG.debug("Kela-ftp siirron dokumenttinimi: " + fileName);
+        } else {
+          fileName = "DEFAULT_KELA_FILENAME" + System.currentTimeMillis();
+          LOG.debug("Kela-ftp siirron dokumenttinimeä ei saatu parsittua, käytetään oletusta: " + fileName);
+        }
 
-                LOG.debug("Aloitetaan Kela-ftpsiirto dokumentille: " + fileName);
-                channelSftp.cd(path);
-                channelSftp.put(new ByteArrayInputStream(kelaData), fileName);
+        LOG.debug("Aloitetaan Kela-ftpsiirto dokumentille: " + fileName);
+        channelSftp.cd(path);
+        channelSftp.put(new ByteArrayInputStream(kelaData), fileName);
 
-                LOG.info(
-                    "Kela-ftp siirto suoritettiin onnistuneesti. Dokumentti-id: "
-                        + dokumenttiId
-                        + ", tiedostonimi: "
-                        + fileName);
-                return true;
-              } catch (Exception e) {
-                LOG.error(
-                    "Kela-ftp siirron dokumentin haku epäonnistui dokumentille: "
-                        + dokumenttiId
-                        + " Syy: ",
-                    e);
-                return false;
-              } finally {
-                channelSftp.disconnect();
-                channelSftp.exit();
-                LOG.info("Kela-ftp yhteys suljettu.");
-              }
-            })
-        .get(1, TimeUnit.HOURS);
+        LOG.info("Kela-ftp siirto suoritettiin onnistuneesti. Dokumentti-id: " + dokumenttiId
+            + ", tiedostonimi: " + fileName);
+        return true;
+      } catch (Exception e) {
+        LOG.error("Kela-ftp siirron dokumentin haku epäonnistui dokumentille: " + dokumenttiId + " Syy: ", e);
+        return false;
+      } finally {
+        channelSftp.disconnect();
+        channelSftp.exit();
+        LOG.info("Kela-ftp yhteys suljettu.");
+      }
+    }).get(1, TimeUnit.HOURS);
   }
 }

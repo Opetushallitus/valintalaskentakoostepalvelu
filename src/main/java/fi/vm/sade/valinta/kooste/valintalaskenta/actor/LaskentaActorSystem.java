@@ -38,14 +38,13 @@ import org.springframework.stereotype.Service;
 import scala.concurrent.duration.FiniteDuration;
 
 @Service
-@ManagedResource(
-    objectName = "OPH:name=LaskentaActorSystem",
-    description = "LaskentaActorSystem mbean")
+@ManagedResource(objectName = "OPH:name=LaskentaActorSystem", description = "LaskentaActorSystem mbean")
 public class LaskentaActorSystem
-    implements ValintalaskentaKerrallaRouteValvomo,
-        ValintalaskentaKerrallaRoute,
-        LaskentaSupervisor,
-        ApplicationListener<ContextRefreshedEvent> {
+    implements
+    ValintalaskentaKerrallaRouteValvomo,
+    ValintalaskentaKerrallaRoute,
+    LaskentaSupervisor,
+    ApplicationListener<ContextRefreshedEvent> {
   private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorSystem.class);
 
   private final LaskentaActorFactory laskentaActorFactory;
@@ -57,16 +56,13 @@ public class LaskentaActorSystem
   private final LaskentaStarter laskentaStarter;
 
   @Autowired
-  public LaskentaActorSystem(
-      LaskentaSeurantaAsyncResource seurantaAsyncResource,
-      LaskentaStarter laskentaStarter,
+  public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaStarter laskentaStarter,
       LaskentaActorFactory laskentaActorFactory,
       @Value("${valintalaskentakoostepalvelu.maxWorkerCount:8}") int maxWorkers) {
     this.laskentaActorFactory = laskentaActorFactory;
     this.laskentaStarter = laskentaStarter;
     this.seurantaAsyncResource = seurantaAsyncResource;
-    this.actorSystem =
-        ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
+    this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
     laskennanKaynnistajaActor = actorSystem.actorOf(props(this, maxWorkers));
   }
 
@@ -96,14 +92,11 @@ public class LaskentaActorSystem
   }
 
   @Override
-  public void suoritaValintalaskentaKerralla(
-      final Haku haku,
-      final ParametritDTO parametritDTO,
+  public void suoritaValintalaskentaKerralla(final Haku haku, final ParametritDTO parametritDTO,
       final LaskentaStartParams laskentaStartParams) {
     AuditSession auditSession = laskentaStartParams.getAuditSession();
-    LaskentaActor laskentaActor =
-        laskentaActorFactory.createLaskentaActor(
-            auditSession, this, haku, new LaskentaActorParams(laskentaStartParams, parametritDTO));
+    LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(auditSession, this, haku,
+        new LaskentaActorParams(laskentaStartParams, parametritDTO));
     startLaskentaActor(laskentaStartParams, laskentaActor);
   }
 
@@ -122,41 +115,29 @@ public class LaskentaActorSystem
     LOG.trace("Ilmoitettu actor valmiiksi laskennalle (" + uuid + ")");
     LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
     if (actorWrapper == null) {
-      throw new IllegalStateException(
-          "Ei löytynyt valmiiksi merkattavaa actoria laskennalle " + uuid);
+      throw new IllegalStateException("Ei löytynyt valmiiksi merkattavaa actoria laskennalle " + uuid);
     }
     stopActor(uuid, actorWrapper.laskentaActor());
   }
 
   public void fetchAndStartLaskenta() {
-    seurantaAsyncResource
-        .otaSeuraavaLaskentaTyonAlle()
-        .subscribe(
-            this::startLaskentaIfWorkAvailable,
-            (Throwable t) -> {
-              LOG.warn("Uutta laskentaa ei saatu tyon alle seurannasta. Yritetään uudelleen.", t);
-              _fetchAndStartLaskentaRetry(); // FIXME kill me OK-152
-            });
+    seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle().subscribe(this::startLaskentaIfWorkAvailable,
+        (Throwable t) -> {
+          LOG.warn("Uutta laskentaa ei saatu tyon alle seurannasta. Yritetään uudelleen.", t);
+          _fetchAndStartLaskentaRetry(); // FIXME kill me OK-152
+        });
   }
 
   private void _fetchAndStartLaskentaRetry() {
-    seurantaAsyncResource
-        .otaSeuraavaLaskentaTyonAlle()
-        .subscribe(
-            this::startLaskentaIfWorkAvailable,
-            (Throwable t) -> {
-              String message = "Uutta laskentaa ei saatu tyon alle seurannasta.";
-              LOG.error(message, t);
-              actorSystem
-                  .scheduler()
-                  .scheduleOnce(
-                      FiniteDuration.create(5, TimeUnit.SECONDS),
-                      laskennanKaynnistajaActor,
-                      new WorkerAvailable(),
-                      actorSystem.dispatcher(),
-                      ActorRef.noSender());
-              throw new RuntimeException(message, t);
-            });
+    seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle().subscribe(this::startLaskentaIfWorkAvailable,
+        (Throwable t) -> {
+          String message = "Uutta laskentaa ei saatu tyon alle seurannasta.";
+          LOG.error(message, t);
+          actorSystem.scheduler().scheduleOnce(FiniteDuration.create(5, TimeUnit.SECONDS),
+              laskennanKaynnistajaActor, new WorkerAvailable(), actorSystem.dispatcher(),
+              ActorRef.noSender());
+          throw new RuntimeException(message, t);
+        });
   }
 
   private void startLaskentaIfWorkAvailable(Optional<String> uuid) {
@@ -165,14 +146,10 @@ public class LaskentaActorSystem
       laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
     } else {
       LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid.get());
-      laskentaStarter.fetchLaskentaParams(
-          laskennanKaynnistajaActor,
-          uuid.get(),
-          (haku, params) ->
-              startLaskentaActor(
-                  params.getLaskentaStartParams(),
-                  laskentaActorFactory.createLaskentaActor(
-                      params.getLaskentaStartParams().getAuditSession(), this, haku, params)));
+      laskentaStarter.fetchLaskentaParams(laskennanKaynnistajaActor, uuid.get(),
+          (haku, params) -> startLaskentaActor(params.getLaskentaStartParams(),
+              laskentaActorFactory.createLaskentaActor(params.getLaskentaStartParams().getAuditSession(),
+                  this, haku, params)));
     }
   }
 
@@ -180,14 +157,11 @@ public class LaskentaActorSystem
     String uuid = params.getUuid();
     String hakuOid = params.getHakuOid();
 
-    runningLaskentas.merge(
-        uuid,
-        new LaskentaActorWrapper(params, laskentaActor),
+    runningLaskentas.merge(uuid, new LaskentaActorWrapper(params, laskentaActor),
         (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
           LOG.warn(
               "\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###",
-              uuid,
-              hakuOid);
+              uuid, hakuOid);
           stopActor(uuid, oldValue.laskentaActor());
           return value;
         });
@@ -196,11 +170,7 @@ public class LaskentaActorSystem
       laskentaActor.start();
     } catch (Exception e) {
       runningLaskentas.remove(uuid);
-      LOG.error(
-          "\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###",
-          uuid,
-          hakuOid,
-          e);
+      LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid, e);
     }
   }
 

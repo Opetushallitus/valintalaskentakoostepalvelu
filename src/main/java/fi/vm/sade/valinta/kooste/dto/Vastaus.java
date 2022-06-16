@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 /**
- * Geneerinen vastaus viesti koostepalvelulta. Modaalisen dialogin esittämiseen erinäisistä
- * onnistumis/virhe skenaarioista!
+ * Geneerinen vastaus viesti koostepalvelulta. Modaalisen dialogin esittämiseen
+ * erinäisistä onnistumis/virhe skenaarioista!
  */
 public class Vastaus {
 
@@ -13,7 +13,8 @@ public class Vastaus {
   private String latausUrl;
   private Map<String, Object> lisatiedot;
 
-  private Vastaus() {}
+  private Vastaus() {
+  }
 
   private Vastaus(String latausUrl) {
     this.latausUrl = latausUrl;
@@ -41,8 +42,7 @@ public class Vastaus {
   }
 
   public static Vastaus laskennanSeuraus(String uudelleenOhjausUrl, boolean luotiinkoUusiLaskenta) {
-    return new Vastaus(
-        uudelleenOhjausUrl, ImmutableMap.of("luotiinkoUusiLaskenta", luotiinkoUusiLaskenta));
+    return new Vastaus(uudelleenOhjausUrl, ImmutableMap.of("luotiinkoUusiLaskenta", luotiinkoUusiLaskenta));
   }
 
   public static Vastaus virhe(String virheViesti) {

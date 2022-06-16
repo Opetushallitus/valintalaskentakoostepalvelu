@@ -6,7 +6,8 @@ public class OrganisaatioTyyppiHierarkia {
   private int numHits;
   private List<OrganisaatioTyyppi> organisaatiot;
 
-  public OrganisaatioTyyppiHierarkia() {}
+  public OrganisaatioTyyppiHierarkia() {
+  }
 
   public OrganisaatioTyyppiHierarkia(int numHits, List<OrganisaatioTyyppi> organisaatiot) {
     this.numHits = numHits;
@@ -31,11 +32,6 @@ public class OrganisaatioTyyppiHierarkia {
 
   @Override
   public String toString() {
-    return "OrganisaatioTyyppiHierarkia{"
-        + "numHits="
-        + numHits
-        + ", organisaatiot="
-        + organisaatiot
-        + '}';
+    return "OrganisaatioTyyppiHierarkia{" + "numHits=" + numHits + ", organisaatiot=" + organisaatiot + '}';
   }
 }

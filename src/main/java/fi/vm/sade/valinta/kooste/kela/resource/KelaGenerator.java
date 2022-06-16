@@ -19,34 +19,25 @@ import org.springframework.stereotype.Component;
 @Configurable
 public class KelaGenerator {
 
-  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
+  @Autowired
+  private TarjontaAsyncResource tarjontaAsyncResource;
 
   @Autowired(required = false)
   private KelaRoute kelaRoute;
 
-  @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+  @Autowired
+  private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
   public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue) {
     // tietoe ei ole viela saatavilla
-    if (hakuTietue == null
-        || hakuTietue.getHakuOids() == null
-        || hakuTietue.getHakuOids().isEmpty()) {
-      throw new RuntimeException(
-          "Vähintään yksi hakuOid on annettava Kela-dokumentin luontia varten.");
+    if (hakuTietue == null || hakuTietue.getHakuOids() == null || hakuTietue.getHakuOids().isEmpty()) {
+      throw new RuntimeException("Vähintään yksi hakuOid on annettava Kela-dokumentin luontia varten.");
     }
     String aineistonNimi = hakuTietue.getAineisto(); // "Toisen asteen vastaanottotiedot";
     String organisaationNimi = "OPH";
-    KelaProsessi kelaProsessi =
-        new KelaProsessi("Kela-dokumentin luonti", hakuTietue.getHakuOids());
-    kelaRoute.aloitaKelaLuonti(
-        kelaProsessi,
-        new KelaLuonti(
-            kelaProsessi.getId(),
-            hakuTietue.getHakuOids(),
-            aineistonNimi,
-            organisaationNimi,
-            new KelaCache(tarjontaAsyncResource),
-            kelaProsessi));
+    KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti", hakuTietue.getHakuOids());
+    kelaRoute.aloitaKelaLuonti(kelaProsessi, new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
+        aineistonNimi, organisaationNimi, new KelaCache(tarjontaAsyncResource), kelaProsessi));
     dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
     return kelaProsessi.toProsessiId();
   }
@@ -65,8 +56,7 @@ public class KelaGenerator {
       System.err.println("No hakuOids given.");
       return;
     }
-    final ApplicationContext context =
-        new ClassPathXmlApplicationContext("/spring/application-context.xml");
+    final ApplicationContext context = new ClassPathXmlApplicationContext("/spring/application-context.xml");
     KelaGenerator kelaGenerator = context.getBean(KelaGenerator.class);
     kelaGenerator.aktivoiKelaTiedostonluonti(args);
     return;

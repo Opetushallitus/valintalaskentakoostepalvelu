@@ -20,21 +20,11 @@ public class KelaHakijaRivi {
   private final String hakukohde;
   private final String syntymaaika; // 04.05.1965
 
-  public KelaHakijaRivi(
-      String hakemusOid, // <- seurattavuuden vuoksi hakemusOid mukaan
-      String siirtotunnus,
-      String etunimi,
-      String sukunimi,
-      String henkilotunnus,
-      Date lukuvuosi,
-      Date poimintapaivamaara,
-      Date valintapaivamaara,
-      String oppilaitosnumero,
-      String organisaatio,
-      String haku, // seurattavuuden vuoksi
-      String hakukohde,
-      String syntymaaika,
-      TasoJaLaajuusDTO tasoLaajuus) {
+  public KelaHakijaRivi(String hakemusOid, // <- seurattavuuden vuoksi hakemusOid mukaan
+      String siirtotunnus, String etunimi, String sukunimi, String henkilotunnus, Date lukuvuosi,
+      Date poimintapaivamaara, Date valintapaivamaara, String oppilaitosnumero, String organisaatio, String haku, // seurattavuuden
+      // vuoksi
+      String hakukohde, String syntymaaika, TasoJaLaajuusDTO tasoLaajuus) {
     this.hakemusOid = hakemusOid;
     this.hakuOid = haku;
     this.siirtotunnus = siirtotunnus;

@@ -13,6 +13,5 @@ public interface DokumentinSeurantaAsyncResource {
 
   Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId);
 
-  Observable<DokumenttiDto> lisaaVirheilmoituksia(
-      String uuid, List<VirheilmoitusDto> virheilmoitukset);
+  Observable<DokumenttiDto> lisaaVirheilmoituksia(String uuid, List<VirheilmoitusDto> virheilmoitukset);
 }

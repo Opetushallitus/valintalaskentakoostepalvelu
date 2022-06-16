@@ -58,8 +58,8 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   public void init() {
     startShared();
     mockParams();
-    MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
-        "ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
+    MockOpintopolkuCasAuthenticationFilter
+        .setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
   }
 
   public static class Result<T> {
@@ -82,11 +82,8 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     mockYksiHyvaksyttyKutsu();
     mockValintalaskentaKutsu();
 
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
+        Arrays.asList(hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
             hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus()));
 
     mockKoodisto();
@@ -97,36 +94,23 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   }
 
   @Test
-  public void ataruTestaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija()
-      throws IOException {
+  public void ataruTestaaHyvaksymiskirjeenLuontiaKokoHaulleYksiHyvaksyttyHakija() throws IOException {
     mockHakukohde1Kutsu();
     mockAtaruHakuKutsu();
     mockYksiHyvaksyttyKutsu();
     mockValintalaskentaKutsu();
 
-    mockToReturnJsonWithCookie(
-        GET, "/lomake-editori/auth/cas", Collections.emptyMap(), "ring-session", "session-uuid");
-    mockToReturnJson(
-        POST,
-        "/lomake-editori/api/external/valintalaskenta",
+    mockToReturnJsonWithCookie(GET, "/lomake-editori/auth/cas", Collections.emptyMap(), "ring-session",
+        "session-uuid");
+    mockToReturnJson(POST, "/lomake-editori/api/external/valintalaskenta",
         Arrays.asList(
-            new HakemusSpec.AtaruHakemusBuilder()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli("sv")
-                .setHakemusPersonOid("person1")
-                .setCountryOfResidence("246")
-                .getHakemus(),
-            new HakemusSpec.AtaruHakemusBuilder()
-                .setAsiointikieli("sv")
-                .setOid(HAKEMUS2)
-                .setHakemusPersonOid("person1")
-                .setCountryOfResidence("246")
-                .getHakemus()));
+            new HakemusSpec.AtaruHakemusBuilder().setOid(HAKEMUS1).setAsiointikieli("sv")
+                .setHakemusPersonOid("person1").setCountryOfResidence("246").getHakemus(),
+            new HakemusSpec.AtaruHakemusBuilder().setAsiointikieli("sv").setOid(HAKEMUS2)
+                .setHakemusPersonOid("person1").setCountryOfResidence("246").getHakemus()));
 
     // Sorry..
-    mockToReturnString(
-        POST,
-        "/oppijanumerorekisteri-service/henkilo/masterHenkilosByOidList",
+    mockToReturnString(POST, "/oppijanumerorekisteri-service/henkilo/masterHenkilosByOidList",
         "{\"person1\": {\"oidHenkilo\":\"person1\",\"hetu\":\"020202A0202\",\"etunimet\":\"Josefina Testi\",\"kutsumanimi\":\"Josefina\",\"sukunimi\":\"Andersson-Testi\",\"syntymaaika\":\"1990-01-01\",\"turvakielto\": false,\"aidinkieli\": null,\"asiointiKieli\": {\"kieliKoodi\":\"sv\"},\"kansalaisuus\": [{\"kansalaisuusKoodi\":\"246\"}],\"sukupuoli\":\"2\"}}");
 
     mockKoodisto();
@@ -144,11 +128,8 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     mockMolemmatHyvaksyttyKutsu();
     mockValintalaskentaKutsu();
 
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
+        Arrays.asList(hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
             hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus()));
 
     mockKoodisto();
@@ -165,11 +146,8 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     mockMolemmatHyvaksyttyKutsu();
     mockValintalaskentaKutsu();
 
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
+        Arrays.asList(hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
             hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.SUOMI).buildHakuappHakemus()));
 
     mockKoodisto();
@@ -182,30 +160,19 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   // skipIPosti
 
   @Test
-  public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleVainSahkoposti()
-      throws IOException {
+  public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleVainSahkoposti() throws IOException {
 
     mockHakukohde1Kutsu();
     mockKorkeakouluHaku1Kutsu();
     mockMolemmatHyvaksyttyKutsu();
     mockValintalaskentaKutsu();
 
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
         Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setVainSahkoinenViestinta(true)
-                .setSahkoposti("testi2@sahkoposti.fi")
-                .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setVainSahkoinenViestinta(true)
-                .setSahkoposti("testi@sahkoposti.fi")
-                .buildHakuappHakemus()));
+            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setVainSahkoinenViestinta(true)
+                .setSahkoposti("testi2@sahkoposti.fi").buildHakuappHakemus(),
+            hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setVainSahkoinenViestinta(true)
+                .setSahkoposti("testi@sahkoposti.fi").buildHakuappHakemus()));
 
     mockKoodisto();
 
@@ -215,25 +182,17 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   }
 
   @Test
-  public void testaaHyvaksymiskirjeenLuontiaKokoHaulleToiselleHakijalleEiIPostia()
-      throws IOException {
+  public void testaaHyvaksymiskirjeenLuontiaKokoHaulleToiselleHakijalleEiIPostia() throws IOException {
 
     mockHakukohde1Kutsu();
     mockKorkeakouluHaku1Kutsu();
     mockMolemmatHyvaksyttyKutsu();
     mockValintalaskentaKutsu();
 
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setVainSahkoinenViestinta(true)
-                .setSahkoposti("testi@sahkoposti.fi")
-                .buildHakuappHakemus()));
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
+        Arrays.asList(hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
+            hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setVainSahkoinenViestinta(true)
+                .setSahkoposti("testi@sahkoposti.fi").buildHakuappHakemus()));
 
     mockKoodisto();
 
@@ -243,25 +202,17 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   }
 
   @Test
-  public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleIPostia()
-      throws IOException {
+  public void testaaHyvaksymiskirjeenLuontiaKokoHaulleMolemmilleHakijoilleIPostia() throws IOException {
 
     mockHakukohde1Kutsu();
     mockKorkeakouluHaku1Kutsu();
     mockMolemmatHyvaksyttyKutsu();
     mockValintalaskentaKutsu();
 
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
-        Arrays.asList(
-            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setVainSahkoinenViestinta(false)
-                .setSahkoposti("testi@sahkoposti.fi")
-                .buildHakuappHakemus()));
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
+        Arrays.asList(hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).buildHakuappHakemus(),
+            hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setVainSahkoinenViestinta(false)
+                .setSahkoposti("testi@sahkoposti.fi").buildHakuappHakemus()));
 
     mockKoodisto();
 
@@ -278,22 +229,12 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     mockMolemmatHyvaksyttyKutsu();
     mockValintalaskentaKutsu();
 
-    mockToReturnJson(
-        POST,
-        "/haku-app/applications/list.*",
+    mockToReturnJson(POST, "/haku-app/applications/list.*",
         Arrays.asList(
-            hakemus()
-                .setOid(HAKEMUS1)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setVainSahkoinenViestinta(true)
-                .setSahkoposti("testi2@sahkoposti.fi")
-                .buildHakuappHakemus(),
-            hakemus()
-                .setOid(HAKEMUS2)
-                .setAsiointikieli(KieliUtil.RUOTSI)
-                .setVainSahkoinenViestinta(false)
-                .setSahkoposti("testi@sahkoposti.fi")
-                .buildHakuappHakemus()));
+            hakemus().setOid(HAKEMUS1).setAsiointikieli(KieliUtil.RUOTSI).setVainSahkoinenViestinta(true)
+                .setSahkoposti("testi2@sahkoposti.fi").buildHakuappHakemus(),
+            hakemus().setOid(HAKEMUS2).setAsiointikieli(KieliUtil.RUOTSI).setVainSahkoinenViestinta(false)
+                .setSahkoposti("testi@sahkoposti.fi").buildHakuappHakemus()));
 
     mockKoodisto();
 
@@ -303,16 +244,12 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   }
 
   private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {
-    HttpResourceBuilder.WebClientExposingHttpResource http =
-        new HttpResourceBuilder(getClass().getName())
-            .timeoutMillis(TimeUnit.SECONDS.toMillis(240L))
-            .address(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet")
-            .buildExposingWebClientDangerously();
-    WebClient client =
-        http.getWebClient()
-            .query("hakuOid", HAKU1)
-            .query("asiointikieli", asiointikieli)
-            .query("letterBodyText", "letterBodyText");
+    HttpResourceBuilder.WebClientExposingHttpResource http = new HttpResourceBuilder(getClass().getName())
+        .timeoutMillis(TimeUnit.SECONDS.toMillis(240L))
+        .address(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet")
+        .buildExposingWebClientDangerously();
+    WebClient client = http.getWebClient().query("hakuOid", HAKU1).query("asiointikieli", asiointikieli)
+        .query("letterBodyText", "letterBodyText");
     Response response = client.post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2)));
     Assert.assertEquals(200, response.getStatus());
     return response.readEntity(ProsessiId.class);
@@ -359,8 +296,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   }
 
   private void mockParams() {
-    mockToReturnJson(
-        GET, "/ohjausparametrit-service/api/v1/rest/parametri/HAKU1", new ParametritDTO());
+    mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/HAKU1", new ParametritDTO());
   }
 
   private void mockHakukohde1Kutsu() {
@@ -371,8 +307,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   }
 
   private void mockValintalaskentaKutsu() {
-    mockToReturnJson(
-        GET,
+    mockToReturnJson(GET,
         "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/HAKUKOHDE1/valinnanvaihe",
         Collections.emptyList());
   }
@@ -400,29 +335,25 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     LetterResponse letterResponse = new LetterResponse();
     letterResponse.setBatchId("testBatchId");
     letterResponse.setStatus(LetterResponse.STATUS_SUCCESS);
-    mockToReturnJsonAndCheckBody(
-        POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse, regex);
+    mockToReturnJsonAndCheckBody(POST, "/viestintapalvelu/api/v1/letter/async/letter", letterResponse, regex);
 
     LetterBatchStatusDto letterStatus = new LetterBatchStatusDto();
     letterStatus.setStatus("ready");
-    mockToReturnJson(
-        GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
+    mockToReturnJson(GET, "/viestintapalvelu/api/v1/letter/async/letter/status/testBatchId", letterStatus);
   }
 
   private void pollAndAssertDokumenttiProsessi(ProsessiId dokumenttiId) {
-    Prosessi valmisProsessi =
-        DokumenttiProsessiPoller.pollDokumenttiProsessi(
-            resourcesAddress, dokumenttiId, Prosessi::valmis);
+    Prosessi valmisProsessi = DokumenttiProsessiPoller.pollDokumenttiProsessi(resourcesAddress, dokumenttiId,
+        Prosessi::valmis);
     Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
     Assert.assertEquals(false, valmisProsessi.keskeytetty);
   }
 
   private void mockKoodisto() throws IOException {
-    final String maatjavaltiot1 =
-        IOUtils.toString(new ClassPathResource("/koodisto/maatjavaltiot1.json").getInputStream());
+    final String maatjavaltiot1 = IOUtils
+        .toString(new ClassPathResource("/koodisto/maatjavaltiot1.json").getInputStream());
     mockToReturnString(GET, "/koodisto-service/rest/json/maatjavaltiot1/koodi", maatjavaltiot1);
-    final String posti =
-        IOUtils.toString(new ClassPathResource("/koodisto/posti.json").getInputStream());
+    final String posti = IOUtils.toString(new ClassPathResource("/koodisto/posti.json").getInputStream());
     mockToReturnString(GET, "/koodisto-service/rest/json/posti/koodi", posti);
 
     Koodi suomiKoodi = new Koodi();
@@ -433,9 +364,6 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
     suomiKoodi.setKoodisto(koodisto);
 
-    mockToReturnJson(
-        GET,
-        "/koodisto-service/rest/json/relaatio/rinnasteinen/.*",
-        Lists.newArrayList(suomiKoodi));
+    mockToReturnJson(GET, "/koodisto-service/rest/json/relaatio/rinnasteinen/.*", Lists.newArrayList(suomiKoodi));
   }
 }

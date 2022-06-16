@@ -17,10 +17,8 @@ public class JaxrsConfiguration {
   public JacksonJsonProvider getJacksonJsonProvider() {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    objectMapper
-        .registerModule(new ValintaTulosServiceProxyResource.ValintaTulosServiceSerializersModule())
-        .registerModule(new JavaTimeModule())
-        .registerModule(new ParameterNamesModule())
+    objectMapper.registerModule(new ValintaTulosServiceProxyResource.ValintaTulosServiceSerializersModule())
+        .registerModule(new JavaTimeModule()).registerModule(new ParameterNamesModule())
         .registerModule(new Jdk8Module());
     return new JacksonJsonProvider(objectMapper);
   }

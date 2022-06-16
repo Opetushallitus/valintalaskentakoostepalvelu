@@ -9,7 +9,8 @@ public class ValintakoeDTO {
   private Osallistuminen osallistuminen;
   private String pisteet;
 
-  public ValintakoeDTO() {}
+  public ValintakoeDTO() {
+  }
 
   public ValintakoeDTO(String tunniste, Osallistuminen osallistuminen, String pisteet) {
     this.tunniste = tunniste;
@@ -43,20 +44,11 @@ public class ValintakoeDTO {
 
   @Override
   public String toString() {
-    return "ValintakoeDTO{"
-        + "tunniste='"
-        + tunniste
-        + '\''
-        + ", osallistuminen="
-        + osallistuminen
-        + ", pisteet='"
-        + pisteet
-        + '\''
-        + '}';
+    return "ValintakoeDTO{" + "tunniste='" + tunniste + '\'' + ", osallistuminen=" + osallistuminen + ", pisteet='"
+        + pisteet + '\'' + '}';
   }
 
   public enum Osallistuminen {
-    OSALLISTUI,
-    EI_OSALLISTUNUT
+    OSALLISTUI, EI_OSALLISTUNUT
   }
 }

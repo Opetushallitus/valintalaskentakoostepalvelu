@@ -23,21 +23,19 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Component;
 
 /**
- * Voi joutua refaktoroimaan sadantuhannen kanssa niin etta riveja luotaessa stream on auki
- * dokumenttipalveluun
+ * Voi joutua refaktoroimaan sadantuhannen kanssa niin etta riveja luotaessa
+ * stream on auki dokumenttipalveluun
  */
 @Component
 public class KelaDokumentinLuontiKomponenttiImpl {
 
-  public byte[] luo(
-      @Body Collection<TKUVAYHVA> rivit,
+  public byte[] luo(@Body Collection<TKUVAYHVA> rivit,
       //
       @Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
       //
       @Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi,
       //
-      @Property(PROPERTY_SIIRTOTUNNUS) String siirtotunnus)
-      throws Exception {
+      @Property(PROPERTY_SIIRTOTUNNUS) String siirtotunnus) throws Exception {
 
     int count = rivit.size();
 
@@ -48,27 +46,12 @@ public class KelaDokumentinLuontiKomponenttiImpl {
     }
 
     Date ajopvm = new Date();
-    streams.addFirst(
-        new ByteArrayInputStream(
-            addLineEnding(
-                new TKUVAALKU.Builder()
-                    .setAjopaivamaara(ajopvm)
-                    .setSiirtotunnus(siirtotunnus)
-                    .setAineistonnimi(aineistonNimi)
-                    .setOrganisaationimi(organisaationNimi)
-                    .build()
-                    .toByteArray(),
-                createBuffer())));
-    streams.addLast(
-        new ByteArrayInputStream(
-            addLineEnding(
-                new TKUVALOPPU.Builder()
-                    .setAjopaivamaara(ajopvm)
-                    .setSiirtotunnus(siirtotunnus)
-                    .setTietuelukumaara(count)
-                    .build()
-                    .toByteArray(),
-                createBuffer())));
+    streams.addFirst(new ByteArrayInputStream(addLineEnding(
+        new TKUVAALKU.Builder().setAjopaivamaara(ajopvm).setSiirtotunnus(siirtotunnus)
+            .setAineistonnimi(aineistonNimi).setOrganisaationimi(organisaationNimi).build().toByteArray(),
+        createBuffer())));
+    streams.addLast(new ByteArrayInputStream(addLineEnding(new TKUVALOPPU.Builder().setAjopaivamaara(ajopvm)
+        .setSiirtotunnus(siirtotunnus).setTietuelukumaara(count).build().toByteArray(), createBuffer())));
 
     InputStream input = new SequenceInputStream(Collections.enumeration(streams));
     return IOUtils.toByteArray(input);

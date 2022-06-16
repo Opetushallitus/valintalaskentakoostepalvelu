@@ -13,10 +13,8 @@ public class PistesyottoDataRivi extends DataRivi {
   private final Collection<PistesyottoDataRiviKuuntelija> kuuntelijat;
   private final Collection<PistesyottoDataArvo> dataArvot;
 
-  public PistesyottoDataRivi(
-      Collection<Collection<Arvo>> arvot,
-      Collection<PistesyottoDataRiviKuuntelija> kuuntelijat,
-      Collection<PistesyottoDataArvo> dataArvot) {
+  public PistesyottoDataRivi(Collection<Collection<Arvo>> arvot,
+      Collection<PistesyottoDataRiviKuuntelija> kuuntelijat, Collection<PistesyottoDataArvo> dataArvot) {
     super(arvot);
     this.kuuntelijat = kuuntelijat;
     this.dataArvot = dataArvot;

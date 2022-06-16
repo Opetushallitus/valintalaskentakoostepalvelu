@@ -22,16 +22,12 @@ public abstract class KoostepalveluRouteBuilder<T> extends SpringRouteBuilder {
   private final Cache<String, T> koostepalveluCache = configureCache();
 
   protected Cache<String, T> configureCache() {
-    return CacheBuilder.newBuilder()
-        .weakValues()
-        .expireAfterWrite(3, TimeUnit.HOURS)
-        .removalListener(
-            new RemovalListener<String, T>() {
-              public void onRemoval(RemovalNotification<String, T> notification) {
-                LOG.info("{} siivottu pois muistista", notification.getValue());
-              }
-            })
-        .build();
+    return CacheBuilder.newBuilder().weakValues().expireAfterWrite(3, TimeUnit.HOURS)
+        .removalListener(new RemovalListener<String, T>() {
+          public void onRemoval(RemovalNotification<String, T> notification) {
+            LOG.info("{} siivottu pois muistista", notification.getValue());
+          }
+        }).build();
   }
 
   protected Cache<String, T> getKoostepalveluCache() {
@@ -39,13 +35,9 @@ public abstract class KoostepalveluRouteBuilder<T> extends SpringRouteBuilder {
   }
 
   protected DefaultErrorHandlerBuilder deadLetterChannel() {
-    return deadLetterChannel(deadLetterChannelEndpoint())
-        .maximumRedeliveries(0)
-        .logExhaustedMessageHistory(true)
+    return deadLetterChannel(deadLetterChannelEndpoint()).maximumRedeliveries(0).logExhaustedMessageHistory(true)
         .logExhausted(true)
         // hide retry/handled stacktrace
-        .logStackTrace(false)
-        .logRetryStackTrace(false)
-        .logHandled(false);
+        .logStackTrace(false).logRetryStackTrace(false).logHandled(false);
   }
 }

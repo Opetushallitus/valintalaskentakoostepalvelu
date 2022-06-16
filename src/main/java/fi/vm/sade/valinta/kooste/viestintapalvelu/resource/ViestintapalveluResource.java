@@ -25,9 +25,6 @@ public interface ViestintapalveluResource {
   @GET
   @Produces(APPLICATION_JSON)
   @Path("/template/getHistory")
-  List<TemplateHistory> haeKirjepohja(
-      @QueryParam("oid") String oid,
-      @QueryParam("templateName") String templateName,
-      @QueryParam("languageCode") String languageCode,
-      @QueryParam("tag") String tag);
+  List<TemplateHistory> haeKirjepohja(@QueryParam("oid") String oid, @QueryParam("templateName") String templateName,
+      @QueryParam("languageCode") String languageCode, @QueryParam("tag") String tag);
 }

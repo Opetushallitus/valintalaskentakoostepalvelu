@@ -31,68 +31,39 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
   private final DokumenttiAsyncResource dokumenttiAsyncResource;
 
   @Autowired
-  public PistesyottoVientiService(
-      ValintapisteAsyncResource valintapisteAsyncResource,
+  public PistesyottoVientiService(ValintapisteAsyncResource valintapisteAsyncResource,
       ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource,
       ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-      ApplicationAsyncResource applicationAsyncResource,
-      AtaruAsyncResource ataruAsyncResource,
-      TarjontaAsyncResource tarjontaAsyncResource,
-      OhjausparametritAsyncResource ohjausparametritAsyncResource,
-      OrganisaatioAsyncResource organisaatioAsyncResource,
-      DokumenttiAsyncResource dokumenttiAsyncResource,
+      ApplicationAsyncResource applicationAsyncResource, AtaruAsyncResource ataruAsyncResource,
+      TarjontaAsyncResource tarjontaAsyncResource, OhjausparametritAsyncResource ohjausparametritAsyncResource,
+      OrganisaatioAsyncResource organisaatioAsyncResource, DokumenttiAsyncResource dokumenttiAsyncResource,
       SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
-    super(
-        applicationAsyncResource,
-        ataruAsyncResource,
-        valintapisteAsyncResource,
-        suoritusrekisteriAsyncResource,
-        tarjontaAsyncResource,
-        ohjausparametritAsyncResource,
-        organisaatioAsyncResource,
-        valintaperusteetAsyncResource,
-        valintalaskentaValintakoeAsyncResource);
+    super(applicationAsyncResource, ataruAsyncResource, valintapisteAsyncResource, suoritusrekisteriAsyncResource,
+        tarjontaAsyncResource, ohjausparametritAsyncResource, organisaatioAsyncResource,
+        valintaperusteetAsyncResource, valintalaskentaValintakoeAsyncResource);
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
   }
 
-  public void vie(
-      String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
-    PoikkeusKasittelijaSovitin poikkeuskasittelija =
-        new PoikkeusKasittelijaSovitin(
-            poikkeus -> {
-              LOG.error(
-                  String.format(
-                      "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
-                      auditSession.getPersonOid(), hakuOid, hakukohdeOid),
-                  poikkeus);
-              prosessi
-                  .getPoikkeukset()
-                  .add(
-                      new Poikkeus(
-                          Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
-            });
+  public void vie(String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
+    PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
+      LOG.error(String.format(
+          "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
+          auditSession.getPersonOid(), hakuOid, hakukohdeOid), poikkeus);
+      prosessi.getPoikkeukset()
+          .add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
+    });
     prosessi.inkrementoiKokonaistyota();
-    muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
-        .flatMap(
-            p -> {
-              PistesyottoExcel pistesyottoExcel = p.getLeft();
-              String id = UUID.randomUUID().toString();
-              Observable<Response> tallennus =
-                  dokumenttiAsyncResource.tallenna(
-                      id,
-                      "pistesyotto.xlsx",
-                      defaultExpirationDate().getTime(),
-                      prosessi.getTags(),
-                      "application/octet-stream",
-                      pistesyottoExcel.getExcel().vieXlsx());
-              return Observable.just(id).zipWith(tallennus, Pair::of);
-            })
-        .subscribe(
-            idWithResponse -> {
-              prosessi.inkrementoiTehtyjaToita();
-              prosessi.setDokumenttiId(idWithResponse.getLeft());
-            },
-            poikkeuskasittelija);
+    muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList()).flatMap(p -> {
+      PistesyottoExcel pistesyottoExcel = p.getLeft();
+      String id = UUID.randomUUID().toString();
+      Observable<Response> tallennus = dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx",
+          defaultExpirationDate().getTime(), prosessi.getTags(), "application/octet-stream",
+          pistesyottoExcel.getExcel().vieXlsx());
+      return Observable.just(id).zipWith(tallennus, Pair::of);
+    }).subscribe(idWithResponse -> {
+      prosessi.inkrementoiTehtyjaToita();
+      prosessi.setDokumenttiId(idWithResponse.getLeft());
+    }, poikkeuskasittelija);
   }
 
   protected Date defaultExpirationDate() {

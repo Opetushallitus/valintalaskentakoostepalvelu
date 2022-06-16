@@ -97,26 +97,9 @@ public class Template {
 
   @Override
   public String toString() {
-    return "Template [id="
-        + id
-        + ", timestamp="
-        + timestamp
-        + ", name="
-        + name
-        + ", language="
-        + language
-        + ", styles="
-        + styles
-        + ", storingOid="
-        + storingOid
-        + ", organizationOid="
-        + organizationOid
-        + ", contents="
-        + contents
-        + ", replacements="
-        + replacements
-        + ", templateVersio="
-        + templateVersio
+    return "Template [id=" + id + ", timestamp=" + timestamp + ", name=" + name + ", language=" + language
+        + ", styles=" + styles + ", storingOid=" + storingOid + ", organizationOid=" + organizationOid
+        + ", contents=" + contents + ", replacements=" + replacements + ", templateVersio=" + templateVersio
         + "]";
   }
 }

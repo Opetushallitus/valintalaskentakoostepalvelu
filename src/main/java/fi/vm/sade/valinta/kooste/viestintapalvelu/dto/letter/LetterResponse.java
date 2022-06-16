@@ -37,15 +37,7 @@ public class LetterResponse {
 
   @Override
   public String toString() {
-    return "LetterResponse{"
-        + "batchId='"
-        + batchId
-        + '\''
-        + ", status='"
-        + status
-        + '\''
-        + ", errors="
-        + errors
+    return "LetterResponse{" + "batchId='" + batchId + '\'' + ", status='" + status + '\'' + ", errors=" + errors
         + '}';
   }
 }

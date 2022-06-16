@@ -10,12 +10,8 @@ public class ResponseUtil {
     respondWithError(asyncResponse, error, Response.Status.INTERNAL_SERVER_ERROR);
   }
 
-  public static void respondWithError(
-      AsyncResponse asyncResponse, String error, Response.Status status) {
-    asyncResponse.resume(
-        Response.status(status)
-            .entity(ImmutableMap.of("error", error))
-            .type(MediaType.APPLICATION_JSON_TYPE)
-            .build());
+  public static void respondWithError(AsyncResponse asyncResponse, String error, Response.Status status) {
+    asyncResponse.resume(Response.status(status).entity(ImmutableMap.of("error", error))
+        .type(MediaType.APPLICATION_JSON_TYPE).build());
   }
 }

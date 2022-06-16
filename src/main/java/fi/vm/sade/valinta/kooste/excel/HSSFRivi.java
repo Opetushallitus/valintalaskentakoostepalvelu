@@ -9,7 +9,8 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 
 public class HSSFRivi {
 
-  private HSSFRivi() {}
+  private HSSFRivi() {
+  }
 
   private static List<Solu> soluiksi(HSSFRow row) {
     List<Solu> solut = Lists.newArrayList();

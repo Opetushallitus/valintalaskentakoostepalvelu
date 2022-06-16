@@ -13,16 +13,14 @@ import java.util.concurrent.Executor;
 public interface ValintalaskentaAsyncResource {
   Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid);
 
-  CompletableFuture<ValinnanvaiheDTO> lisaaTuloksia(
-      String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
+  CompletableFuture<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid,
+      ValinnanvaiheDTO vaihe);
 
-  Observable<String> laskeJaSijoittele(
-      String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot);
+  Observable<String> laskeJaSijoittele(String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot);
 
   CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
 
-  CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
-      String hakukohdeOid, Executor executor);
+  CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid, Executor executor);
 
   Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 

@@ -49,14 +49,8 @@ public class Teksti extends Solu {
     this.editoitava = false;
   }
 
-  public Teksti(
-      String teksti,
-      boolean tasausOikealle,
-      boolean tasausVasemmalle,
-      boolean lukittu,
-      int preferoituleveys,
-      int ulottuvuus,
-      boolean editoitava) {
+  public Teksti(String teksti, boolean tasausOikealle, boolean tasausVasemmalle, boolean lukittu,
+      int preferoituleveys, int ulottuvuus, boolean editoitava) {
     this.teksti = teksti;
     this.ulottuvuus = ulottuvuus;
     this.tasausOikealle = tasausOikealle;

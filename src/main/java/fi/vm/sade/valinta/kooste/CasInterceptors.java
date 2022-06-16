@@ -34,15 +34,11 @@ public class CasInterceptors {
   @Bean(name = "ryhmasahkopostiClientCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getRyhmasahkopostiClientCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.ryhmasahkoposti-service}") String targetService,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
-          String appClientUsername,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
-          String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
   @Bean(name = "HakemusServiceRestClientAsAdminCasInterceptor")
@@ -62,13 +58,11 @@ public class CasInterceptors {
   @Bean(name = "AuthenticationServiceRestClientCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getAuthenticationServiceRestClientCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.authentication-service}") String targetService,
       @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
       @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
   @Bean(name = "OppijanumerorekisteriServiceRestClientCasInterceptor")
@@ -81,150 +75,97 @@ public class CasInterceptors {
   @Bean(name = "adminDokumenttipalveluRestClientCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getAdminDokumenttipalveluRestClientCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.dokumenttipalvelu}") String targetService,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}")
-          String appClientUsername,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}")
-          String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}") String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}") String appClientPassword) {
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
   @Bean(name = "ValintalaskentaCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getValintalaskentaCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.valintalaskenta-service}") String targetService,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
-          String appClientUsername,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
-          String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
   @Bean(name = "OppijantunnistusCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getOppijantunnistusCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.oppijan-tunnistus}") String targetService,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
-          String appClientUsername,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
-          String appClientPassword) {
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new CasKoosteInterceptor(
-        new ApplicationSession(
-            HttpClients.defaultHttpClientBuilder(cookieManager).build(),
-            cookieManager,
-            CALLER_ID,
-            Duration.ofSeconds(10),
-            new CasSession(
-                casHttpClient,
-                Duration.ofSeconds(10),
-                CALLER_ID,
-                URI.create(ticketsUrl),
-                appClientUsername,
-                appClientPassword),
-            targetService,
-            "ring-session"),
+        new ApplicationSession(HttpClients.defaultHttpClientBuilder(cookieManager).build(), cookieManager,
+            CALLER_ID, Duration.ofSeconds(10), new CasSession(casHttpClient, Duration.ofSeconds(10),
+                CALLER_ID, URI.create(ticketsUrl), appClientUsername, appClientPassword),
+            targetService, "ring-session"),
         true);
   }
 
   @Bean(name = "ValintaperusteetCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getValintaperusteetCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.valintaperusteet-service}") String targetService,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
-          String appClientUsername,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
-          String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
   @Bean(name = "SeurantaRestClientCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getSeurantaRestClientCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.seuranta}") String targetService,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
-          String appClientUsername,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
-          String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
   @Bean(name = "SuoritusrekisteriRestClientCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getSuoritusrekisteriRestClientCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.suoritusrekisteri}") String targetService,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
-          String appClientUsername,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
-          String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
   @Bean(name = "koodiServiceCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getKoodiServiceCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.koodisto-service}") String targetService,
       @Value("${valintalaskentakoostepalvelu.app.username.to.koodisto}") String appClientUsername,
       @Value("${valintalaskentakoostepalvelu.app.password.to.koodisto}") String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
   @Bean(name = "OrganisaatioResourceClientCasInterceptor")
   @Autowired
   public AbstractPhaseInterceptor<Message> getOrganisaatioResourceClientCasInterceptor(
-      @Qualifier("CasHttpClient") HttpClient casHttpClient,
-      CookieManager cookieManager,
+      @Qualifier("CasHttpClient") HttpClient casHttpClient, CookieManager cookieManager,
       @Value("${cas.service.organisaatio-service}") String targetService,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}")
-          String appClientUsername,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}")
-          String appClientPassword) {
-    return getCasInterceptor(
-        casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword) {
+    return getCasInterceptor(casHttpClient, cookieManager, targetService, appClientUsername, appClientPassword);
   }
 
-  private AbstractPhaseInterceptor<Message> getCasInterceptor(
-      HttpClient casHttpClient,
-      CookieManager cookieManager,
-      String service,
-      String username,
-      String password) {
+  private AbstractPhaseInterceptor<Message> getCasInterceptor(HttpClient casHttpClient, CookieManager cookieManager,
+      String service, String username, String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new CasKoosteInterceptor(
-        new ApplicationSession(
-            HttpClients.defaultHttpClientBuilder(cookieManager).build(),
-            cookieManager,
-            CALLER_ID,
-            Duration.ofSeconds(10),
-            new CasSession(
-                casHttpClient,
-                Duration.ofSeconds(10),
-                CALLER_ID,
-                URI.create(ticketsUrl),
-                username,
-                password),
-            service,
-            CasInterceptors.JSESSIONID),
+        new ApplicationSession(HttpClients.defaultHttpClientBuilder(cookieManager).build(), cookieManager,
+            CALLER_ID, Duration.ofSeconds(10), new CasSession(casHttpClient, Duration.ofSeconds(10),
+                CALLER_ID, URI.create(ticketsUrl), username, password),
+            service, CasInterceptors.JSESSIONID),
         true);
   }
 }

@@ -40,20 +40,14 @@ public class ErillishakuRiviBuilder {
   private Boolean toisenAsteenSuoritus;
   private String toisenAsteenSuoritusmaa;
 
-  public ErillishakuRiviBuilder() {}
+  public ErillishakuRiviBuilder() {
+  }
 
   public static ErillishakuRiviBuilder fromRivi(ErillishakuRivi rivi) {
-    return new ErillishakuRiviBuilder()
-        .hakemusOid(rivi.getHakemusOid())
-        .sukunimi(rivi.getSukunimi())
-        .etunimi(rivi.getEtunimi())
-        .henkilotunnus(rivi.getHenkilotunnus())
-        .sahkoposti(rivi.getSahkoposti())
-        .syntymaAika(rivi.getSyntymaAika())
-        .sukupuoli(rivi.getSukupuoli())
-        .personOid(rivi.getPersonOid())
-        .aidinkieli(rivi.getAidinkieli())
-        .hakemuksenTila(rivi.getHakemuksenTila())
+    return new ErillishakuRiviBuilder().hakemusOid(rivi.getHakemusOid()).sukunimi(rivi.getSukunimi())
+        .etunimi(rivi.getEtunimi()).henkilotunnus(rivi.getHenkilotunnus()).sahkoposti(rivi.getSahkoposti())
+        .syntymaAika(rivi.getSyntymaAika()).sukupuoli(rivi.getSukupuoli()).personOid(rivi.getPersonOid())
+        .aidinkieli(rivi.getAidinkieli()).hakemuksenTila(rivi.getHakemuksenTila())
         .ehdollisestiHyvaksyttavissa(rivi.getEhdollisestiHyvaksyttavissa())
         .ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi())
         .ehdollisenHyvaksymisenEhtoFI(rivi.getEhdollisenHyvaksymisenEhtoFI())
@@ -62,23 +56,15 @@ public class ErillishakuRiviBuilder {
         .valinnantilanKuvauksenTekstiFI(rivi.getValinnantilanKuvauksenTekstiFI())
         .valinnantilanKuvauksenTekstiSV(rivi.getValinnantilanKuvauksenTekstiSV())
         .valinnantilanKuvauksenTekstiEN(rivi.getValinnantilanKuvauksenTekstiEN())
-        .hyvaksymiskirjeLahetetty(rivi.getHyvaksymiskirjeLahetetty())
-        .vastaanottoTila(rivi.getVastaanottoTila())
-        .ilmoittautumisTila(rivi.getIlmoittautumisTila())
-        .julkaistaankoTiedot(rivi.isJulkaistaankoTiedot())
-        .poistetaankoRivi(rivi.isPoistetaankoRivi())
-        .asiointikieli(rivi.getAsiointikieli())
-        .puhelinnumero(rivi.getPuhelinnumero())
-        .osoite(rivi.getOsoite())
-        .postinumero(rivi.getPostinumero())
-        .postitoimipaikka(rivi.getPostitoimipaikka())
-        .asuinmaa(rivi.getAsuinmaa())
-        .kansalaisuus(rivi.getKansalaisuus())
-        .kotikunta(rivi.getKotikunta())
+        .hyvaksymiskirjeLahetetty(rivi.getHyvaksymiskirjeLahetetty()).vastaanottoTila(rivi.getVastaanottoTila())
+        .ilmoittautumisTila(rivi.getIlmoittautumisTila()).julkaistaankoTiedot(rivi.isJulkaistaankoTiedot())
+        .poistetaankoRivi(rivi.isPoistetaankoRivi()).asiointikieli(rivi.getAsiointikieli())
+        .puhelinnumero(rivi.getPuhelinnumero()).osoite(rivi.getOsoite()).postinumero(rivi.getPostinumero())
+        .postitoimipaikka(rivi.getPostitoimipaikka()).asuinmaa(rivi.getAsuinmaa())
+        .kansalaisuus(rivi.getKansalaisuus()).kotikunta(rivi.getKotikunta())
         .toisenAsteenSuoritus(rivi.getToisenAsteenSuoritus())
         .toisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa())
-        .maksuvelvollisuus(rivi.getMaksuvelvollisuus())
-        .maksuntila(rivi.getMaksuntila());
+        .maksuvelvollisuus(rivi.getMaksuvelvollisuus()).maksuntila(rivi.getMaksuntila());
   }
 
   public ErillishakuRiviBuilder etunimi(String etunimi) {
@@ -136,8 +122,7 @@ public class ErillishakuRiviBuilder {
     return this;
   }
 
-  public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoKoodi(
-      String ehdollisenHyvaksymisenEhtoKoodi) {
+  public ErillishakuRiviBuilder ehdollisenHyvaksymisenEhtoKoodi(String ehdollisenHyvaksymisenEhtoKoodi) {
     this.ehdollisenHyvaksymisenEhtoKoodi = ehdollisenHyvaksymisenEhtoKoodi;
     return this;
   }
@@ -157,24 +142,21 @@ public class ErillishakuRiviBuilder {
     return this;
   }
 
-  public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiFI(
-      String valinnantilanKuvauksenTekstiFI) {
+  public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiFI(String valinnantilanKuvauksenTekstiFI) {
     if (valinnantilanKuvauksenTekstiFI != null) {
       this.valinnantilanKuvauksenTekstiFI = valinnantilanKuvauksenTekstiFI;
     }
     return this;
   }
 
-  public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiSV(
-      String valinnantilanKuvauksenTekstiSV) {
+  public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiSV(String valinnantilanKuvauksenTekstiSV) {
     if (valinnantilanKuvauksenTekstiSV != null) {
       this.valinnantilanKuvauksenTekstiSV = valinnantilanKuvauksenTekstiSV;
     }
     return this;
   }
 
-  public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiEN(
-      String valinnantilanKuvauksenTekstiEN) {
+  public ErillishakuRiviBuilder valinnantilanKuvauksenTekstiEN(String valinnantilanKuvauksenTekstiEN) {
     if (valinnantilanKuvauksenTekstiEN != null) {
       this.valinnantilanKuvauksenTekstiEN = valinnantilanKuvauksenTekstiEN;
     }
@@ -267,41 +249,12 @@ public class ErillishakuRiviBuilder {
   }
 
   public ErillishakuRivi build() {
-    return new ErillishakuRivi(
-        hakemusOid,
-        sukunimi,
-        etunimi,
-        henkilotunnus,
-        sahkoposti,
-        syntymaAika,
-        sukupuoli,
-        personOid,
-        aidinkieli,
-        hakemuksenTila,
-        ehdollisestiHyvaksyttavissa,
-        ehdollisenHyvaksymisenEhtoKoodi,
-        ehdollisenHyvaksymisenEhtoFI,
-        ehdollisenHyvaksymisenEhtoSV,
-        ehdollisenHyvaksymisenEhtoEN,
-        valinnantilanKuvauksenTekstiFI,
-        valinnantilanKuvauksenTekstiSV,
-        valinnantilanKuvauksenTekstiEN,
-        hyvaksymiskirjeLahetetty,
-        vastaanottoTila,
-        ilmoittautumisTila,
-        julkaistaankoTiedot,
-        poistetaankoRivi,
-        asiointikieli,
-        puhelinnumero,
-        osoite,
-        postinumero,
-        postitoimipaikka,
-        asuinmaa,
-        kansalaisuus,
-        kotikunta,
-        toisenAsteenSuoritus,
-        toisenAsteenSuoritusmaa,
-        maksuvelvollisuus,
-        maksuntila);
+    return new ErillishakuRivi(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, sukupuoli,
+        personOid, aidinkieli, hakemuksenTila, ehdollisestiHyvaksyttavissa, ehdollisenHyvaksymisenEhtoKoodi,
+        ehdollisenHyvaksymisenEhtoFI, ehdollisenHyvaksymisenEhtoSV, ehdollisenHyvaksymisenEhtoEN,
+        valinnantilanKuvauksenTekstiFI, valinnantilanKuvauksenTekstiSV, valinnantilanKuvauksenTekstiEN,
+        hyvaksymiskirjeLahetetty, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi,
+        asiointikieli, puhelinnumero, osoite, postinumero, postitoimipaikka, asuinmaa, kansalaisuus, kotikunta,
+        toisenAsteenSuoritus, toisenAsteenSuoritusmaa, maksuvelvollisuus, maksuntila);
   }
 }

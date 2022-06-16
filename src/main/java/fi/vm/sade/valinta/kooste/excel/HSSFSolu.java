@@ -6,7 +6,8 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 
 public class HSSFSolu {
-  private HSSFSolu() {}
+  private HSSFSolu() {
+  }
 
   public static Solu asSolu(HSSFCell cell) {
     if (CellType.NUMERIC.equals(cell.getCellTypeEnum())) {

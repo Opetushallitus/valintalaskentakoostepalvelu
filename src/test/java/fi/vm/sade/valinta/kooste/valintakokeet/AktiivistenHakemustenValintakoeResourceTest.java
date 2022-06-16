@@ -44,92 +44,60 @@ public class AktiivistenHakemustenValintakoeResourceTest {
   private HakemusWrapper hakemus2 = new HakemusSpec.HakemusBuilder().setOid("hakemus2").build();
   private HakemusWrapper hakemus3 = new HakemusSpec.HakemusBuilder().setOid("hakemus3").build();
 
-  private HakemusWrapper ataruHakemus1 =
-      new HakemusSpec.AtaruHakemusBuilder("ataruHakemus1", "personOid1", "hetu1").build();
-  private HakemusWrapper ataruHakemus2 =
-      new HakemusSpec.AtaruHakemusBuilder("ataruHakemus2", "personOid2", "hetu2").build();
-  private HakemusWrapper ataruHakemus3 =
-      new HakemusSpec.AtaruHakemusBuilder("ataruHakemus3", "personOid3", "hetu3").build();
+  private HakemusWrapper ataruHakemus1 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus1", "personOid1", "hetu1")
+      .build();
+  private HakemusWrapper ataruHakemus2 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus2", "personOid2", "hetu2")
+      .build();
+  private HakemusWrapper ataruHakemus3 = new HakemusSpec.AtaruHakemusBuilder("ataruHakemus3", "personOid3", "hetu3")
+      .build();
 
   private List<String> hakemusOids = Arrays.asList("hakemus1", "hakemus2", "hakemus3");
-  private List<String> ataruHakemusOids =
-      Arrays.asList("ataruHakemus1", "ataruHakemus2", "ataruHakemus3");
-  private ValintakoeOsallistuminenDTO osallistuminen1 =
-      new ValintakoeOsallistuminenBuilder().setHakemusOid(hakemus1.getOid()).build();
-  private ValintakoeOsallistuminenDTO osallistuminen2 =
-      new ValintakoeOsallistuminenBuilder().setHakemusOid(hakemus2.getOid()).build();
-  private ValintakoeOsallistuminenDTO osallistuminen3 =
-      new ValintakoeOsallistuminenBuilder().setHakemusOid(hakemus3.getOid()).build();
+  private List<String> ataruHakemusOids = Arrays.asList("ataruHakemus1", "ataruHakemus2", "ataruHakemus3");
+  private ValintakoeOsallistuminenDTO osallistuminen1 = new ValintakoeOsallistuminenBuilder()
+      .setHakemusOid(hakemus1.getOid()).build();
+  private ValintakoeOsallistuminenDTO osallistuminen2 = new ValintakoeOsallistuminenBuilder()
+      .setHakemusOid(hakemus2.getOid()).build();
+  private ValintakoeOsallistuminenDTO osallistuminen3 = new ValintakoeOsallistuminenBuilder()
+      .setHakemusOid(hakemus3.getOid()).build();
 
-  private ValintakoeOsallistuminenDTO ataruOsallistuminen1 =
-      new ValintakoeOsallistuminenBuilder().setHakemusOid(ataruHakemus1.getOid()).build();
-  private ValintakoeOsallistuminenDTO ataruOsallistuminen2 =
-      new ValintakoeOsallistuminenBuilder().setHakemusOid(ataruHakemus2.getOid()).build();
-  private ValintakoeOsallistuminenDTO ataruOsallistuminen3 =
-      new ValintakoeOsallistuminenBuilder().setHakemusOid(ataruHakemus3.getOid()).build();
+  private ValintakoeOsallistuminenDTO ataruOsallistuminen1 = new ValintakoeOsallistuminenBuilder()
+      .setHakemusOid(ataruHakemus1.getOid()).build();
+  private ValintakoeOsallistuminenDTO ataruOsallistuminen2 = new ValintakoeOsallistuminenBuilder()
+      .setHakemusOid(ataruHakemus2.getOid()).build();
+  private ValintakoeOsallistuminenDTO ataruOsallistuminen3 = new ValintakoeOsallistuminenBuilder()
+      .setHakemusOid(ataruHakemus3.getOid()).build();
 
-  private final TarjontaHakukohde hakukohdeDTO =
-      new TarjontaHakukohde(
-          hakukohdeOid,
-          null,
-          new HashMap<>(),
-          hakuOid,
-          Collections.emptySet(),
-          new HashSet<>(),
-          null,
-          new HashSet<>(),
-          null,
-          Collections.emptySet(),
-          null);
-  private final Haku hakuDTOEditori =
-      new Haku(
-          hakuOid,
-          new HashMap<>(),
-          new HashSet<>(),
-          ataruLomakeAvain,
-          null,
-          null,
-          null,
-          null,
-          null);
-  private final Haku hakuDTOHakuApp =
-      new Haku(hakuOid, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null);
+  private final TarjontaHakukohde hakukohdeDTO = new TarjontaHakukohde(hakukohdeOid, null, new HashMap<>(), hakuOid,
+      Collections.emptySet(), new HashSet<>(), null, new HashSet<>(), null, Collections.emptySet(), null);
+  private final Haku hakuDTOEditori = new Haku(hakuOid, new HashMap<>(), new HashSet<>(), ataruLomakeAvain, null,
+      null, null, null, null);
+  private final Haku hakuDTOHakuApp = new Haku(hakuOid, new HashMap<>(), new HashSet<>(), null, null, null, null,
+      null, null);
 
-  private final ValintalaskentaValintakoeAsyncResource valintakoeAsyncResource =
-      mock(ValintalaskentaValintakoeAsyncResource.class);
-  private final ApplicationAsyncResource applicationAsyncResource =
-      mock(ApplicationAsyncResource.class);
+  private final ValintalaskentaValintakoeAsyncResource valintakoeAsyncResource = mock(
+      ValintalaskentaValintakoeAsyncResource.class);
+  private final ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
   private final AtaruAsyncResource ataruAsyncResource = mock(AtaruAsyncResource.class);
   private final TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
-  private final AktiivistenHakemustenValintakoeResource resource =
-      new AktiivistenHakemustenValintakoeResource(
-          valintakoeAsyncResource,
-          applicationAsyncResource,
-          ataruAsyncResource,
-          tarjontaAsyncResource);
+  private final AktiivistenHakemustenValintakoeResource resource = new AktiivistenHakemustenValintakoeResource(
+      valintakoeAsyncResource, applicationAsyncResource, ataruAsyncResource, tarjontaAsyncResource);
   private Response responseReceivedInAsyncResponse;
 
   @Test
   public void vainApplicationAsyncResourcenPalauttamienHakemustenOsallistumisetPalautetaan() {
     AsyncResponse asyncResponse = mock(AsyncResponse.class);
-    when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
-        .thenReturn(
-            CompletableFuture.completedFuture(
-                Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
+    when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)).thenReturn(
+        CompletableFuture.completedFuture(Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
     when(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids))
         .thenReturn(Observable.just(Arrays.asList(hakemus1, hakemus3)));
     when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
         .thenReturn(CompletableFuture.completedFuture(hakukohdeDTO));
-    when(tarjontaAsyncResource.haeHaku(hakuOid))
-        .thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
+    when(tarjontaAsyncResource.haeHaku(hakuOid)).thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
 
-    when(asyncResponse.resume(any(Response.class)))
-        .thenAnswer(
-            (Answer<Boolean>)
-                invocation -> {
-                  responseReceivedInAsyncResponse = invocation.getArgument(0);
-                  return true;
-                });
+    when(asyncResponse.resume(any(Response.class))).thenAnswer((Answer<Boolean>) invocation -> {
+      responseReceivedInAsyncResponse = invocation.getArgument(0);
+      return true;
+    });
 
     resource.osallistumisetByHakutoive(hakukohdeOid, asyncResponse);
 
@@ -143,8 +111,8 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     verifyNoMoreInteractions(asyncResponse);
 
     assertEquals(OK.getStatusCode(), responseReceivedInAsyncResponse.getStatus());
-    List<ValintakoeOsallistuminenDTO> osallistumisetVastauksessa =
-        (List<ValintakoeOsallistuminenDTO>) responseReceivedInAsyncResponse.getEntity();
+    List<ValintakoeOsallistuminenDTO> osallistumisetVastauksessa = (List<ValintakoeOsallistuminenDTO>) responseReceivedInAsyncResponse
+        .getEntity();
     assertThat(osallistumisetVastauksessa, Matchers.hasSize(2));
     assertEquals(hakemus1.getOid(), osallistumisetVastauksessa.get(0).getHakemusOid());
     assertEquals(hakemus3.getOid(), osallistumisetVastauksessa.get(1).getHakemusOid());
@@ -153,24 +121,18 @@ public class AktiivistenHakemustenValintakoeResourceTest {
   @Test
   public void ataruVainApplicationAsyncResourcenPalauttamienHakemustenOsallistumisetPalautetaan() {
     AsyncResponse asyncResponse = mock(AsyncResponse.class);
-    when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
-        .thenReturn(
-            CompletableFuture.completedFuture(
-                Arrays.asList(ataruOsallistuminen1, ataruOsallistuminen2, ataruOsallistuminen3)));
+    when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)).thenReturn(CompletableFuture
+        .completedFuture(Arrays.asList(ataruOsallistuminen1, ataruOsallistuminen2, ataruOsallistuminen3)));
     when(ataruAsyncResource.getApplicationsByOids(ataruHakemusOids))
         .thenReturn(CompletableFuture.completedFuture(Arrays.asList(ataruHakemus1, ataruHakemus3)));
     when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
         .thenReturn(CompletableFuture.completedFuture(hakukohdeDTO));
-    when(tarjontaAsyncResource.haeHaku(hakuOid))
-        .thenReturn(CompletableFuture.completedFuture(hakuDTOEditori));
+    when(tarjontaAsyncResource.haeHaku(hakuOid)).thenReturn(CompletableFuture.completedFuture(hakuDTOEditori));
 
-    when(asyncResponse.resume(any(Response.class)))
-        .thenAnswer(
-            (Answer<Boolean>)
-                invocation -> {
-                  responseReceivedInAsyncResponse = invocation.getArgument(0);
-                  return true;
-                });
+    when(asyncResponse.resume(any(Response.class))).thenAnswer((Answer<Boolean>) invocation -> {
+      responseReceivedInAsyncResponse = invocation.getArgument(0);
+      return true;
+    });
 
     resource.osallistumisetByHakutoive(hakukohdeOid, asyncResponse);
 
@@ -184,8 +146,8 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     verifyNoMoreInteractions(asyncResponse);
 
     assertEquals(OK.getStatusCode(), responseReceivedInAsyncResponse.getStatus());
-    List<ValintakoeOsallistuminenDTO> osallistumisetVastauksessa =
-        (List<ValintakoeOsallistuminenDTO>) responseReceivedInAsyncResponse.getEntity();
+    List<ValintakoeOsallistuminenDTO> osallistumisetVastauksessa = (List<ValintakoeOsallistuminenDTO>) responseReceivedInAsyncResponse
+        .getEntity();
     assertThat(osallistumisetVastauksessa, Matchers.hasSize(2));
     assertEquals(ataruHakemus1.getOid(), osallistumisetVastauksessa.get(0).getHakemusOid());
     assertEquals(ataruHakemus3.getOid(), osallistumisetVastauksessa.get(1).getHakemusOid());
@@ -196,23 +158,16 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     AsyncResponse asyncResponse = mock(AsyncResponse.class);
     when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
         .thenReturn(CompletableFuture.completedFuture(hakukohdeDTO));
-    when(tarjontaAsyncResource.haeHaku(hakuOid))
-        .thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
-    when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
-        .thenReturn(
-            CompletableFuture.completedFuture(
-                Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
+    when(tarjontaAsyncResource.haeHaku(hakuOid)).thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
+    when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid)).thenReturn(
+        CompletableFuture.completedFuture(Arrays.asList(osallistuminen1, osallistuminen2, osallistuminen3)));
     RuntimeException applicationFetchException = new RuntimeException("Hakemusten haku kaatui!");
-    when(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids))
-        .thenThrow(applicationFetchException);
+    when(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)).thenThrow(applicationFetchException);
 
-    when(asyncResponse.resume(any(Response.class)))
-        .thenAnswer(
-            (Answer<Boolean>)
-                invocation -> {
-                  responseReceivedInAsyncResponse = invocation.getArgument(0);
-                  return true;
-                });
+    when(asyncResponse.resume(any(Response.class))).thenAnswer((Answer<Boolean>) invocation -> {
+      responseReceivedInAsyncResponse = invocation.getArgument(0);
+      return true;
+    });
 
     resource.osallistumisetByHakutoive(hakukohdeOid, asyncResponse);
 
@@ -225,8 +180,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     verifyNoMoreInteractions(applicationAsyncResource);
     verifyNoMoreInteractions(asyncResponse);
 
-    assertEquals(
-        INTERNAL_SERVER_ERROR.getStatusCode(), responseReceivedInAsyncResponse.getStatus());
+    assertEquals(INTERNAL_SERVER_ERROR.getStatusCode(), responseReceivedInAsyncResponse.getStatus());
     String responseContent = responseReceivedInAsyncResponse.getEntity().toString();
     assertThat(responseContent, containsString(applicationFetchException.getMessage()));
   }

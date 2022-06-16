@@ -5,13 +5,11 @@ import org.apache.commons.lang3.BooleanUtils;
 
 public class BooleanArvo extends MonivalintaArvo {
 
-  public BooleanArvo(
-      String arvo, Collection<String> valinnat, String tosi, String epatosi, String tyhja) {
+  public BooleanArvo(String arvo, Collection<String> valinnat, String tosi, String epatosi, String tyhja) {
     super(asString(asBoolean(arvo), tosi, epatosi, tyhja), valinnat);
   }
 
-  public BooleanArvo(
-      Boolean arvo, Collection<String> valinnat, String tosi, String epatosi, String tyhja) {
+  public BooleanArvo(Boolean arvo, Collection<String> valinnat, String tosi, String epatosi, String tyhja) {
     super(asString(arvo, tosi, epatosi, tyhja), valinnat);
   }
 

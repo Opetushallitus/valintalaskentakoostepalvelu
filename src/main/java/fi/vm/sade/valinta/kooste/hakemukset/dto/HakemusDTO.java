@@ -3,9 +3,7 @@ package fi.vm.sade.valinta.kooste.hakemukset.dto;
 import io.swagger.annotations.ApiModel;
 import java.util.List;
 
-@ApiModel(
-    value = "valinta.kooste.hakemukset.dto.HakemusDTO",
-    description = "Yhden hakemuksen tiedot")
+@ApiModel(value = "valinta.kooste.hakemukset.dto.HakemusDTO", description = "Yhden hakemuksen tiedot")
 public class HakemusDTO {
 
   private String hakemusOid;
@@ -102,36 +100,10 @@ public class HakemusDTO {
 
   @Override
   public String toString() {
-    return "HakemusDTO{"
-        + "hakemusOid='"
-        + hakemusOid
-        + '\''
-        + ", henkiloOid='"
-        + henkiloOid
-        + '\''
-        + ", etunimet='"
-        + etunimet
-        + '\''
-        + ", sukunimi='"
-        + sukunimi
-        + '\''
-        + ", kutsumanimi='"
-        + kutsumanimi
-        + '\''
-        + ", sahkoposti='"
-        + sahkoposti
-        + '\''
-        + ", katuosoite='"
-        + katuosoite
-        + '\''
-        + ", postinumero='"
-        + postinumero
-        + '\''
-        + ", postitoimipaikka='"
-        + postitoimipaikka
-        + '\''
-        + ", hakukohteet="
-        + hakukohteet
+    return "HakemusDTO{" + "hakemusOid='" + hakemusOid + '\'' + ", henkiloOid='" + henkiloOid + '\''
+        + ", etunimet='" + etunimet + '\'' + ", sukunimi='" + sukunimi + '\'' + ", kutsumanimi='" + kutsumanimi
+        + '\'' + ", sahkoposti='" + sahkoposti + '\'' + ", katuosoite='" + katuosoite + '\'' + ", postinumero='"
+        + postinumero + '\'' + ", postitoimipaikka='" + postitoimipaikka + '\'' + ", hakukohteet=" + hakukohteet
         + '}';
   }
 }

@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 /**
- * Paluuviesti koostepalvelun aktivoineelle clientille viestintapalvelun cache-osoitteeseen, eli
- * lopulliseen PDF:n.
+ * Paluuviesti koostepalvelun aktivoineelle clientille viestintapalvelun
+ * cache-osoitteeseen, eli lopulliseen PDF:n.
  */
 public class LatausUrl {
 

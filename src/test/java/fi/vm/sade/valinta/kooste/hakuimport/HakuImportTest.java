@@ -52,101 +52,71 @@ public class HakuImportTest extends CamelTestSupport {
     // globally
     // HakukohdeValintaperusteetV1RDTO obj = mapper.readValue(new File(
     // "user.json"), User.class);
-    HakukohdeValintaperusteetV1RDTO obj =
-        DateDeserializer.gsonBuilder()
-            .create()
-            .fromJson(
-                IOUtils.toString(
-                    new ClassPathResource("hakukohdeimport/data2/1.2.246.562.20.27059719875.json")
-                        .getInputStream()),
-                HakukohdeValintaperusteetV1RDTO.class);
+    HakukohdeValintaperusteetV1RDTO obj = DateDeserializer.gsonBuilder().create().fromJson(IOUtils.toString(
+        new ClassPathResource("hakukohdeimport/data2/1.2.246.562.20.27059719875.json").getInputStream()),
+        HakukohdeValintaperusteetV1RDTO.class);
     LOG.error("\r\n###\r\n### {}\r\n###", obj);
-    LOG.error(
-        "\r\n###\r\n### {}\r\n###", new GsonBuilder().setPrettyPrinting().create().toJson(obj));
+    LOG.error("\r\n###\r\n### {}\r\n###", new GsonBuilder().setPrettyPrinting().create().toJson(obj));
   }
 
   @Test
   public void testRoute() {
 
-    template.send(
-        new Processor() {
+    template.send(new Processor() {
 
-          @Override
-          public void process(Exchange exchange) {
-            exchange.setProperty("hakuOid", "hakuOid");
-            exchange.setProperty(
-                ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, new HakuImportProsessi("", ""));
-            exchange.getIn().setBody("hakuOid");
-          }
-          // )BodyAndProperty(new Object(), "hakuOid", "hakuOid");
+      @Override
+      public void process(Exchange exchange) {
+        exchange.setProperty("hakuOid", "hakuOid");
+        exchange.setProperty(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, new HakuImportProsessi("", ""));
+        exchange.getIn().setBody("hakuOid");
+      }
+      // )BodyAndProperty(new Object(), "hakuOid", "hakuOid");
 
-        });
+    });
   }
 
   protected RouteBuilder createRouteBuilder() {
     final String VIALLINEN_HAKUKOHDE = "throws";
-    PropertyPlaceholderDelegateRegistry registry =
-        (PropertyPlaceholderDelegateRegistry) context().getRegistry();
+    PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) context().getRegistry();
     JndiRegistry jndiRegistry = (JndiRegistry) registry.getRegistry();
     jndiRegistry.bind("hakuImportValvomo", Mockito.mock(ValvomoAdminService.class));
-    SuoritaHakuImportKomponentti suoritaHakuImportKomponentti =
-        new SuoritaHakuImportKomponentti() {
-          @Override
-          public Collection<String> suoritaHakukohdeImport(String hakuOid) {
-            return Arrays.asList(
-                VIALLINEN_HAKUKOHDE,
-                "1.2.246.562.20.27059719875",
-                VIALLINEN_HAKUKOHDE,
-                "1.2.246.562.20.27059719875");
-          }
-        };
-    ValintaperusteetAsyncResource valintaperusteetRestResource =
-        Mockito.mock(ValintaperusteetAsyncResource.class);
+    SuoritaHakuImportKomponentti suoritaHakuImportKomponentti = new SuoritaHakuImportKomponentti() {
+      @Override
+      public Collection<String> suoritaHakukohdeImport(String hakuOid) {
+        return Arrays.asList(VIALLINEN_HAKUKOHDE, "1.2.246.562.20.27059719875", VIALLINEN_HAKUKOHDE,
+            "1.2.246.562.20.27059719875");
+      }
+    };
+    ValintaperusteetAsyncResource valintaperusteetRestResource = Mockito.mock(ValintaperusteetAsyncResource.class);
     TarjontaAsyncResource tarjontaAsyncResource = Mockito.mock(TarjontaAsyncResource.class);
     KoutaAsyncResource koutaAsyncResource = Mockito.mock(KoutaAsyncResource.class);
-    OrganisaatioAsyncResource organisaatioAsyncResource =
-        Mockito.mock(OrganisaatioAsyncResource.class);
-    KoodistoCachedAsyncResource koodistoCachedAsyncResource =
-        Mockito.mock(KoodistoCachedAsyncResource.class);
+    OrganisaatioAsyncResource organisaatioAsyncResource = Mockito.mock(OrganisaatioAsyncResource.class);
+    KoodistoCachedAsyncResource koodistoCachedAsyncResource = Mockito.mock(KoodistoCachedAsyncResource.class);
     try {
-      HakukohdeValintaperusteetV1RDTO valintaperusteet =
-          new GsonBuilder()
-              .registerTypeAdapter(
-                  Date.class,
-                  (JsonDeserializer<Date>)
-                      (json, typeOfT, context) -> new Date(json.getAsJsonPrimitive().getAsLong()))
-              .create()
-              .fromJson(
-                  IOUtils.toString(
-                      new ClassPathResource("hakukohdeimport/data2/1.2.246.562.20.27059719875.json")
-                          .getInputStream()),
-                  HakukohdeValintaperusteetV1RDTO.class);
+      HakukohdeValintaperusteetV1RDTO valintaperusteet = new GsonBuilder()
+          .registerTypeAdapter(Date.class,
+              (JsonDeserializer<Date>) (json, typeOfT,
+                  context) -> new Date(json.getAsJsonPrimitive().getAsLong()))
+          .create()
+          .fromJson(IOUtils
+              .toString(new ClassPathResource("hakukohdeimport/data2/1.2.246.562.20.27059719875.json")
+                  .getInputStream()),
+              HakukohdeValintaperusteetV1RDTO.class);
       when(tarjontaAsyncResource.findValintaperusteetByOid(Mockito.anyString()))
-          .thenAnswer(
-              (Answer<CompletableFuture<HakukohdeValintaperusteetV1RDTO>>)
-                  invocationOnMock -> {
-                    if (invocationOnMock.getArgument(0).equals(VIALLINEN_HAKUKOHDE)) {
-                      return CompletableFuture.completedFuture(
-                          new HakukohdeValintaperusteetV1RDTO());
-                    } else {
-                      return CompletableFuture.completedFuture(valintaperusteet);
-                    }
-                  });
+          .thenAnswer((Answer<CompletableFuture<HakukohdeValintaperusteetV1RDTO>>) invocationOnMock -> {
+            if (invocationOnMock.getArgument(0).equals(VIALLINEN_HAKUKOHDE)) {
+              return CompletableFuture.completedFuture(new HakukohdeValintaperusteetV1RDTO());
+            } else {
+              return CompletableFuture.completedFuture(valintaperusteet);
+            }
+          });
     } catch (IOException ignored) {
     }
 
-    SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti =
-        new SuoritaHakukohdeImportKomponentti(
-            tarjontaAsyncResource,
-            koutaAsyncResource,
-            organisaatioAsyncResource,
-            koodistoCachedAsyncResource);
+    SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti = new SuoritaHakukohdeImportKomponentti(
+        tarjontaAsyncResource, koutaAsyncResource, organisaatioAsyncResource, koodistoCachedAsyncResource);
 
-    return new HakuImportRouteImpl(
-        1,
-        1,
-        suoritaHakuImportKomponentti,
-        valintaperusteetRestResource,
+    return new HakuImportRouteImpl(1, 1, suoritaHakuImportKomponentti, valintaperusteetRestResource,
         tarjontaJaKoodistoHakukohteenHakuKomponentti);
   }
 }

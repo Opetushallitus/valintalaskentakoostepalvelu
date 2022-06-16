@@ -31,23 +31,22 @@ public class GeneroiTilaKombinaatiot {
           for (IlmoittautumisTila it : andNull(IlmoittautumisTila.values())) {
             String errcode = validoi(ht, vt, it);
             if (errcode == null) {
-              oks.add(new Object[] {toString(ht), toString(vt), toString(it)});
+              oks.add(new Object[] { toString(ht), toString(vt), toString(it) });
             } else {
-              noks.add(new Object[] {toString(ht), toString(vt), toString(it), errcode});
+              noks.add(new Object[] { toString(ht), toString(vt), toString(it), errcode });
             }
           }
         }
       }
       List<Object[]> grid = Lists.newArrayList();
-      grid.add(new Object[] {"OKS " + oks.size() + ", NOKS " + noks.size()});
-      grid.add(new Object[] {"#########", "NOK", "#########"});
+      grid.add(new Object[] { "OKS " + oks.size() + ", NOKS " + noks.size() });
+      grid.add(new Object[] { "#########", "NOK", "#########" });
       grid.addAll(noks);
-      grid.add(new Object[] {""});
-      grid.add(new Object[] {"#########", "OK", "#########"});
+      grid.add(new Object[] { "" });
+      grid.add(new Object[] { "#########", "OK", "#########" });
       grid.addAll(oks);
 
-      IOUtils.copy(
-          ExcelExportUtil.exportGridAsXls(grid.toArray(new Object[][] {})),
+      IOUtils.copy(ExcelExportUtil.exportGridAsXls(grid.toArray(new Object[][] {})),
           new FileOutputStream("kombinaatiot.xls"));
     } catch (Exception e) {
       System.err.println("D: " + e.getMessage());

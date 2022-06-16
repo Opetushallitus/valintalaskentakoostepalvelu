@@ -31,72 +31,46 @@ public class ConverterMappingsTest {
 
   @Test
   public void testaaEligibilitiesOikeallaDatalla() throws JsonSyntaxException, IOException {
-    List<Hakemus> hakemukset =
-        new Gson()
-            .fromJson(
-                IOUtils.toString(
-                    new ClassPathResource("listfull2_eligibilities.json").getInputStream()),
-                new TypeToken<List<Hakemus>>() {}.getType());
-    Hakemus hakemus =
-        hakemukset.stream()
-            .filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid()))
-            .distinct()
-            .iterator()
-            .next();
+    List<Hakemus> hakemukset = new Gson().fromJson(
+        IOUtils.toString(new ClassPathResource("listfull2_eligibilities.json").getInputStream()),
+        new TypeToken<List<Hakemus>>() {
+        }.getType());
+    Hakemus hakemus = hakemukset.stream().filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid())).distinct()
+        .iterator().next();
     HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
-    HakemusDTO dto =
-        wrapper.toHakemusDto(
-            new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
-            Maps.newHashMap(),
-            false);
+    HakemusDTO dto = wrapper.toHakemusDto(
+        new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()), Maps.newHashMap(),
+        false);
     // LOG.error("\r\n{}", new GsonBuilder().setPrettyPrinting().create()
     // .toJson(dto));
     assertTrue(
-        dto.getAvaimet().stream()
-            .filter(
-                pari ->
-                    "preference1-Koulutus-id-eligibility".equals(pari.getAvain())
-                        && "NOT_CHECKED".equals(pari.getArvo()))
-            .distinct()
-            .iterator()
-            .hasNext());
+        dto.getAvaimet().stream().filter(pari -> "preference1-Koulutus-id-eligibility".equals(pari.getAvain())
+            && "NOT_CHECKED".equals(pari.getArvo())).distinct().iterator().hasNext());
   }
 
   @Test
-  public void testaaHakukohderyhmienLisaysOikeallaDatalla()
-      throws JsonSyntaxException, IOException {
-    List<Hakemus> hakemukset =
-        new Gson()
-            .fromJson(
-                IOUtils.toString(
-                    new ClassPathResource("listfull2_eligibilities.json").getInputStream()),
-                new TypeToken<List<Hakemus>>() {}.getType());
-    Hakemus hakemus =
-        hakemukset.stream()
-            .filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid()))
-            .distinct()
-            .iterator()
-            .next();
+  public void testaaHakukohderyhmienLisaysOikeallaDatalla() throws JsonSyntaxException, IOException {
+    List<Hakemus> hakemukset = new Gson().fromJson(
+        IOUtils.toString(new ClassPathResource("listfull2_eligibilities.json").getInputStream()),
+        new TypeToken<List<Hakemus>>() {
+        }.getType());
+    Hakemus hakemus = hakemukset.stream().filter(h -> "1.2.246.562.11.00000977230".equals(h.getOid())).distinct()
+        .iterator().next();
 
     ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
-    Map<String, List<String>> hakukohdeRyhmasForHakukohdes =
-        ImmutableMap.of("1.2.246.562.20.49132232288", a);
+    Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.49132232288", a);
 
     HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
-    HakemusDTO dto =
-        wrapper.toHakemusDto(
-            new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
-            hakukohdeRyhmasForHakukohdes,
-            false);
+    HakemusDTO dto = wrapper.toHakemusDto(
+        new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
+        hakukohdeRyhmasForHakukohdes, false);
     assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
   }
 
   @Test
   public void testaaEligibilitiesMappaustaNullArvoilla() {
     assertTrue(emptyMap().equals(Converter.mapEligibilityAndStatus(null, null)));
-    assertTrue(
-        Converter.mapEligibilityAndStatus(Arrays.asList(new Eligibility("", "", "", "")), null)
-            .isEmpty());
+    assertTrue(Converter.mapEligibilityAndStatus(Arrays.asList(new Eligibility("", "", "", "")), null).isEmpty());
     Map<String, String> m = Maps.newHashMap();
     m.put("preference1-Koulutus-id", "hk1");
     assertTrue(Converter.mapEligibilityAndStatus(null, m).isEmpty());
@@ -106,18 +80,15 @@ public class ConverterMappingsTest {
   public void testaaEligibilitiesMappaustaEiMatsaa() {
     Map<String, String> m = Maps.newHashMap();
     m.put("preference1-Koulutus-id", "hk1");
-    assertTrue(
-        Converter.mapEligibilityAndStatus(Arrays.asList(new Eligibility("", "", "", "")), m)
-            .isEmpty());
+    assertTrue(Converter.mapEligibilityAndStatus(Arrays.asList(new Eligibility("", "", "", "")), m).isEmpty());
   }
 
   @Test
   public void testaaEligibilitiesMappaustaMatsaa() {
     Map<String, String> m = Maps.newHashMap();
     m.put("preference1-Koulutus-id", "hk1");
-    Map<String, String> ans =
-        Converter.mapEligibilityAndStatus(
-            Arrays.asList(new Eligibility("hk1", "status1", "", "")), m);
+    Map<String, String> ans = Converter
+        .mapEligibilityAndStatus(Arrays.asList(new Eligibility("hk1", "status1", "", "")), m);
     assertFalse(ans.isEmpty());
     assertTrue(ans.size() == 1);
   }
@@ -126,9 +97,8 @@ public class ConverterMappingsTest {
   public void testaaEligibilitiesParsintaa() {
     Map<String, String> m = Maps.newHashMap();
     m.put("preference1-Koulutus-id", "hk1");
-    Map<String, String> ans =
-        Converter.mapEligibilityAndStatus(
-            Arrays.asList(new Eligibility("hk1", "AUTOMATICALLY_CHECKED_ELIGIBLE", "", "")), m);
+    Map<String, String> ans = Converter.mapEligibilityAndStatus(
+        Arrays.asList(new Eligibility("hk1", "AUTOMATICALLY_CHECKED_ELIGIBLE", "", "")), m);
     assertFalse(ans.isEmpty());
     assertTrue(ans.size() == 1);
     assertTrue(ans.entrySet().iterator().next().getValue().equals("ELIGIBLE"));
@@ -139,25 +109,19 @@ public class ConverterMappingsTest {
     Map<String, String> m = Maps.newHashMap();
     m.put("preference1-Koulutus-id", "hk1");
     m.put("preference2-Koulutus-id", "hk2");
-    Map<String, String> ans =
-        Converter.mapEligibilityAndStatus(
-            Arrays.asList(new Eligibility("hk1", "status1", "", "")), m);
+    Map<String, String> ans = Converter
+        .mapEligibilityAndStatus(Arrays.asList(new Eligibility("hk1", "status1", "", "")), m);
     assertFalse(ans.isEmpty());
     assertTrue(ans.size() == 1);
-    assertTrue(
-        ans.entrySet().iterator().next().getKey().equals("preference1-Koulutus-id-eligibility"));
+    assertTrue(ans.entrySet().iterator().next().getKey().equals("preference1-Koulutus-id-eligibility"));
   }
 
   @Test
   public void testaaEligibilitiesMappaustaMatsaakoKunYlimaaraisiaEligibilityja() {
     Map<String, String> m = Maps.newHashMap();
     m.put("preference1-Koulutus-id", "hk1");
-    Map<String, String> ans =
-        Converter.mapEligibilityAndStatus(
-            Arrays.asList(
-                new Eligibility("hk1", "status1", "", ""),
-                new Eligibility("hk2", "status2", "", "")),
-            m);
+    Map<String, String> ans = Converter.mapEligibilityAndStatus(
+        Arrays.asList(new Eligibility("hk1", "status1", "", ""), new Eligibility("hk2", "status2", "", "")), m);
     assertFalse(ans.isEmpty());
     assertTrue(ans.size() == 1);
     assertTrue(ans.entrySet().iterator().next().getValue().equals("status1"));
@@ -165,47 +129,30 @@ public class ConverterMappingsTest {
 
   @Test
   public void testaaArvosanaFiletrointi() throws JsonSyntaxException, IOException {
-    List<Hakemus> hakemukset =
-        new Gson()
-            .fromJson(
-                IOUtils.toString(
-                    new ClassPathResource("osaaminen_ilman_suorituksia.json").getInputStream()),
-                new TypeToken<List<Hakemus>>() {}.getType());
-    Hakemus hakemus =
-        hakemukset.stream()
-            .filter(h -> "1.2.246.562.11.00003000803".equals(h.getOid()))
-            .distinct()
-            .iterator()
-            .next();
+    List<Hakemus> hakemukset = new Gson().fromJson(
+        IOUtils.toString(new ClassPathResource("osaaminen_ilman_suorituksia.json").getInputStream()),
+        new TypeToken<List<Hakemus>>() {
+        }.getType());
+    Hakemus hakemus = hakemukset.stream().filter(h -> "1.2.246.562.11.00003000803".equals(h.getOid())).distinct()
+        .iterator().next();
     HakemusWrapper wrapper = new HakuappHakemusWrapper(hakemus);
-    HakemusDTO dto =
-        wrapper.toHakemusDto(
-            new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
-            Maps.newHashMap(),
-            false);
+    HakemusDTO dto = wrapper.toHakemusDto(
+        new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()), Maps.newHashMap(),
+        false);
 
-    final int prefixes =
-        dto.getAvaimet().stream()
-            .filter(a -> a.getAvain().startsWith("PK_") || a.getAvain().startsWith("LK_"))
-            .collect(toList())
-            .size();
+    final int prefixes = dto.getAvaimet().stream()
+        .filter(a -> a.getAvain().startsWith("PK_") || a.getAvain().startsWith("LK_")).collect(toList()).size();
 
-    final int paattoToditusVuosi =
-        dto.getAvaimet().stream()
-            .filter(h -> h.getAvain().equals("PK_PAATTOTODISTUSVUOSI"))
-            .collect(toList())
-            .size();
+    final int paattoToditusVuosi = dto.getAvaimet().stream()
+        .filter(h -> h.getAvain().equals("PK_PAATTOTODISTUSVUOSI")).collect(toList()).size();
 
     assertEquals(1, prefixes);
 
     // PK_PAATTOTODISTUSVUOSI
     assertEquals(paattoToditusVuosi, 1);
 
-    final AvainArvoDTO yleinen_kielitutkinto_sv =
-        dto.getAvaimet().stream()
-            .filter(a -> a.getAvain().equals("yleinen_kielitutkinto_sv"))
-            .findFirst()
-            .get();
+    final AvainArvoDTO yleinen_kielitutkinto_sv = dto.getAvaimet().stream()
+        .filter(a -> a.getAvain().equals("yleinen_kielitutkinto_sv")).findFirst().get();
 
     Assert.assertNotNull(yleinen_kielitutkinto_sv);
   }
@@ -215,27 +162,18 @@ public class ConverterMappingsTest {
     HakemusWrapper wrapper = getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063");
 
     ArrayList<String> a = Lists.newArrayList("ryhmaOid1", "ryhmaOid2");
-    Map<String, List<String>> hakukohdeRyhmasForHakukohdes =
-        ImmutableMap.of("1.2.246.562.20.90242725084", a);
+    Map<String, List<String>> hakukohdeRyhmasForHakukohdes = ImmutableMap.of("1.2.246.562.20.90242725084", a);
 
-    HakemusDTO dto =
-        wrapper.toHakemusDto(
-            new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
-            hakukohdeRyhmasForHakukohdes,
-            true);
+    HakemusDTO dto = wrapper.toHakemusDto(
+        new Valintapisteet(wrapper.getOid(), wrapper.getPersonOid(), "", "", emptyList()),
+        hakukohdeRyhmasForHakukohdes, true);
 
     assertEquals(wrapper.getOid(), dto.getHakemusoid());
 
     assertEquals(28, dto.getAvaimet().size());
 
-    assertEquals(
-        1,
-        dto.getHakukohteet().stream()
-            .filter(h -> "1.2.246.562.20.90242725084".equals(h.getOid()))
-            .distinct()
-            .iterator()
-            .next()
-            .getPrioriteetti());
+    assertEquals(1, dto.getHakukohteet().stream().filter(h -> "1.2.246.562.20.90242725084".equals(h.getOid()))
+        .distinct().iterator().next().getPrioriteetti());
 
     assertEquals(a, dto.getHakukohteet().get(0).getHakukohdeRyhmatOids());
 
@@ -252,29 +190,16 @@ public class ConverterMappingsTest {
   }
 
   private void assertAvainArvo(HakemusDTO hakemusDto, String expectedAvain, String expectedArvo) {
-    final List<AvainArvoDTO> avainArvoDtos =
-        hakemusDto.getAvaimet().stream()
-            .filter(avainArvo -> avainArvo.getAvain().equals(expectedAvain))
-            .distinct()
-            .collect(toList());
-    assertTrue(
-        "Expected to have AvainArvoDTO with avain " + expectedAvain + " but none found",
+    final List<AvainArvoDTO> avainArvoDtos = hakemusDto.getAvaimet().stream()
+        .filter(avainArvo -> avainArvo.getAvain().equals(expectedAvain)).distinct().collect(toList());
+    assertTrue("Expected to have AvainArvoDTO with avain " + expectedAvain + " but none found",
         avainArvoDtos.size() > 0);
-    assertEquals(
-        "HakemusDTO contained multiple AvainArvoDTOs with avain " + expectedAvain,
-        1,
+    assertEquals("HakemusDTO contained multiple AvainArvoDTOs with avain " + expectedAvain, 1,
         avainArvoDtos.size());
 
     final AvainArvoDTO avainArvoDto = avainArvoDtos.get(0);
     final String actualArvo = avainArvoDto.getArvo();
-    assertEquals(
-        "AvainArvoDTO with avain "
-            + expectedAvain
-            + " had invalid value, expected: "
-            + expectedArvo
-            + " but was: "
-            + actualArvo,
-        expectedArvo,
-        actualArvo);
+    assertEquals("AvainArvoDTO with avain " + expectedAvain + " had invalid value, expected: " + expectedArvo
+        + " but was: " + actualArvo, expectedArvo, actualArvo);
   }
 }

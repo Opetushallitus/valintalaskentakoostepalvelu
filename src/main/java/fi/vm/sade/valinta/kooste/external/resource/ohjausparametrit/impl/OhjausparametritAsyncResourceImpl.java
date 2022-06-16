@@ -19,10 +19,8 @@ public class OhjausparametritAsyncResourceImpl implements OhjausparametritAsyncR
   private final Duration requestTimeout;
 
   @Autowired
-  public OhjausparametritAsyncResourceImpl(
-      @Qualifier("OhjausparametritHttpClient") HttpClient client,
-      @Value("${valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds:20}")
-          int requestTimeoutSeconds) {
+  public OhjausparametritAsyncResourceImpl(@Qualifier("OhjausparametritHttpClient") HttpClient client,
+      @Value("${valintalaskentakoostepalvelu.ohjausparametrit.request.timeout.seconds:20}") int requestTimeoutSeconds) {
     this.client = client;
     this.urlConfiguration = UrlConfiguration.getInstance();
     this.requestTimeout = Duration.ofSeconds(requestTimeoutSeconds);
@@ -30,17 +28,13 @@ public class OhjausparametritAsyncResourceImpl implements OhjausparametritAsyncR
 
   @Override
   public CompletableFuture<ParametritDTO> haeHaunOhjausparametrit(String hakuOid) {
-    return this.client
-        .getResponse(
-            this.urlConfiguration.url("ohjausparametrit-service.parametri", hakuOid),
-            this.requestTimeout,
-            x -> x)
-        .thenApply(
-            response -> {
-              if (response.statusCode() == 404) {
-                return new ParametritDTO();
-              }
-              return this.client.parseJson(response, new TypeToken<ParametritDTO>() {}.getType());
-            });
+    return this.client.getResponse(this.urlConfiguration.url("ohjausparametrit-service.parametri", hakuOid),
+        this.requestTimeout, x -> x).thenApply(response -> {
+          if (response.statusCode() == 404) {
+            return new ParametritDTO();
+          }
+          return this.client.parseJson(response, new TypeToken<ParametritDTO>() {
+          }.getType());
+        });
   }
 }

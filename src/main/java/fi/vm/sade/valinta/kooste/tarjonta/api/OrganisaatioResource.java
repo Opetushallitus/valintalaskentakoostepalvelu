@@ -12,15 +12,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Kopio rajapinnasta fi.vm.sade.organisaatio.resource.OrganisaatioResource ilman metodia
- * searchBasic koska @QueryParam(empty) (eli @QueryParam("")) toimii vaan yhteen suuntaan.
+ * Kopio rajapinnasta fi.vm.sade.organisaatio.resource.OrganisaatioResource
+ * ilman metodia searchBasic koska @QueryParam(empty) (eli @QueryParam(""))
+ * toimii vaan yhteen suuntaan.
  */
 @Path("/organisaatio")
 public interface OrganisaatioResource {
 
   /**
-   * NOTE: USED BY SECURITY FRAMEWORK - DON'T CHANGE Find oids of organisaatio's parents, result
-   * oids start from root, ends to given oid itself, and are separated by '/'.
+   * NOTE: USED BY SECURITY FRAMEWORK - DON'T CHANGE Find oids of organisaatio's
+   * parents, result oids start from root, ends to given oid itself, and are
+   * separated by '/'.
    */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
@@ -35,25 +37,26 @@ public interface OrganisaatioResource {
   /**
    * Get list of Organisaatio oids mathching the query.
    *
-   * <p>Search terms:
+   * <p>
+   * Search terms:
    *
    * <ul>
-   *   <li>searchTerms=type=KOULUTUSTOIMIJA / OPPILAITOS / TOIMIPISTE == OrganisaatioTyyppi.name()
+   * <li>searchTerms=type=KOULUTUSTOIMIJA / OPPILAITOS / TOIMIPISTE ==
+   * OrganisaatioTyyppi.name()
    * </ul>
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-  public List<String> search(
-      @QueryParam("searchTerms") String searchTerms,
-      @QueryParam("count") int count,
-      @QueryParam("startIndex") int startIndex,
-      @QueryParam("lastModifiedBefore") Date lastModifiedBefore,
+  public List<String> search(@QueryParam("searchTerms") String searchTerms, @QueryParam("count") int count,
+      @QueryParam("startIndex") int startIndex, @QueryParam("lastModifiedBefore") Date lastModifiedBefore,
       @QueryParam("lastModifiedSince") Date lastModifiedSince);
 
   /**
    * Organisaatio DTO as JSON.
    *
-   * @param oid OID or Y-TUNNUS or VIRASTOTUNNUS or OPETUSPISTEKOODI or TOIMIPISTEKOODI
+   * @param oid
+   *          OID or Y-TUNNUS or VIRASTOTUNNUS or OPETUSPISTEKOODI or
+   *          TOIMIPISTEKOODI
    */
   @GET
   @Path("{oid}")
@@ -63,8 +66,6 @@ public interface OrganisaatioResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
   @Path("/{oid}/children")
-  public List<OrganisaatioRDTO> children(
-      @PathParam("oid") String oid,
-      @DefaultValue("false") @QueryParam("includeImage") boolean includeImage)
-      throws Exception;
+  public List<OrganisaatioRDTO> children(@PathParam("oid") String oid,
+      @DefaultValue("false") @QueryParam("includeImage") boolean includeImage) throws Exception;
 }

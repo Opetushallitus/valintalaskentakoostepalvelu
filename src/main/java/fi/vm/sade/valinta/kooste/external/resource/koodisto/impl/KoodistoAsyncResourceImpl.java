@@ -33,10 +33,9 @@ public class KoodistoAsyncResourceImpl implements KoodistoAsyncResource {
   public CompletableFuture<List<Koodi>> haeKoodisto(String koodistoUri) {
     HashMap<String, Boolean> query = new HashMap<>();
     query.put("onlyValidKoodis", true);
-    return this.client.getJson(
-        this.urlConfiguration.url("koodisto-service.json.oid.koodi", koodistoUri, query),
-        Duration.ofMinutes(1),
-        new TypeToken<List<Koodi>>() {}.getType());
+    return this.client.getJson(this.urlConfiguration.url("koodisto-service.json.oid.koodi", koodistoUri, query),
+        Duration.ofMinutes(1), new TypeToken<List<Koodi>>() {
+        }.getType());
   }
 
   @Override
@@ -48,8 +47,8 @@ public class KoodistoAsyncResourceImpl implements KoodistoAsyncResource {
     }
     return this.client.getJson(
         this.urlConfiguration.url("koodisto-service.json.koodi.ylakoodit", parts[0], parameters),
-        Duration.ofMinutes(1),
-        new TypeToken<List<Koodi>>() {}.getType());
+        Duration.ofMinutes(1), new TypeToken<List<Koodi>>() {
+        }.getType());
   }
 
   @Override
@@ -61,41 +60,34 @@ public class KoodistoAsyncResourceImpl implements KoodistoAsyncResource {
     }
     return this.client.getJson(
         this.urlConfiguration.url("koodisto-service.json.koodi.alakoodit", parts[0], parameters),
-        Duration.ofMinutes(1),
-        new TypeToken<List<Koodi>>() {}.getType());
+        Duration.ofMinutes(1), new TypeToken<List<Koodi>>() {
+        }.getType());
   }
 
   @Override
   public CompletableFuture<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri) {
     HashMap<String, Integer> query = new HashMap<>();
     query.put("koodiVersio", 1);
-    return this.client
-        .<List<Koodi>>getJson(
-            this.urlConfiguration.url("koodisto-service.json.koodi.rinnasteinen", koodiUri, query),
-            Duration.ofMinutes(1),
-            new TypeToken<List<Koodi>>() {}.getType())
-        .thenComposeAsync(
-            koodit -> {
-              Optional<Koodi> koodi =
-                  koodit.stream()
-                      .filter(k -> k.getKoodistoUri().equals("maatjavaltiot1"))
-                      .findFirst();
-              if (koodi.isPresent()) {
-                return CompletableFuture.completedFuture(koodi.get());
-              } else {
-                LOG.warn(
-                    String.format(
-                        "Could not find related maatjavaltiot1 koodi for %s, returning maatjavaltiot1_xxx instead",
-                        koodiUri));
-                return haeKoodi("maatjavaltiot1_xxx");
-              }
-            });
+    return this.client.<List<Koodi>>getJson(
+        this.urlConfiguration.url("koodisto-service.json.koodi.rinnasteinen", koodiUri, query),
+        Duration.ofMinutes(1), new TypeToken<List<Koodi>>() {
+        }.getType()).thenComposeAsync(koodit -> {
+          Optional<Koodi> koodi = koodit.stream().filter(k -> k.getKoodistoUri().equals("maatjavaltiot1"))
+              .findFirst();
+          if (koodi.isPresent()) {
+            return CompletableFuture.completedFuture(koodi.get());
+          } else {
+            LOG.warn(String.format(
+                "Could not find related maatjavaltiot1 koodi for %s, returning maatjavaltiot1_xxx instead",
+                koodiUri));
+            return haeKoodi("maatjavaltiot1_xxx");
+          }
+        });
   }
 
   private CompletableFuture<Koodi> haeKoodi(String koodiUri) {
-    return this.client.getJson(
-        this.urlConfiguration.url("koodisto-service.json.koodi", koodiUri),
-        Duration.ofMinutes(1),
-        new TypeToken<Koodi>() {}.getType());
+    return this.client.getJson(this.urlConfiguration.url("koodisto-service.json.koodi", koodiUri),
+        Duration.ofMinutes(1), new TypeToken<Koodi>() {
+        }.getType());
   }
 }

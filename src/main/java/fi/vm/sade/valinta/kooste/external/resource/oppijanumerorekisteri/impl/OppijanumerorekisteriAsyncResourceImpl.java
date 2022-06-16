@@ -28,24 +28,22 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResource
-    implements OppijanumerorekisteriAsyncResource {
+    implements
+    OppijanumerorekisteriAsyncResource {
   private final HttpClient client;
 
   @Autowired
   public OppijanumerorekisteriAsyncResourceImpl(
-      @Qualifier("OppijanumerorekisteriServiceRestClientCasInterceptor")
-          AbstractPhaseInterceptor casInterceptor,
+      @Qualifier("OppijanumerorekisteriServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
       @Qualifier("OppijanumerorekisteriHttpClient") HttpClient client) {
     super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     this.client = client;
   }
 
-  public Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(
-      List<HenkiloCreateDTO> henkiloPrototyypit) {
-    return postAsObservableLazily(
-        getUrl("oppijanumerorekisteri-service.s2s.henkilo.findOrCreateMultiple"),
-        new GenericType<List<HenkiloPerustietoDto>>() {}.getType(),
-        Entity.entity(gson().toJson(henkiloPrototyypit), MediaType.APPLICATION_JSON_TYPE),
+  public Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
+    return postAsObservableLazily(getUrl("oppijanumerorekisteri-service.s2s.henkilo.findOrCreateMultiple"),
+        new GenericType<List<HenkiloPerustietoDto>>() {
+        }.getType(), Entity.entity(gson().toJson(henkiloPrototyypit), MediaType.APPLICATION_JSON_TYPE),
         ACCEPT_JSON);
   }
 
@@ -53,33 +51,22 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
     String url = getUrl("oppijanumerorekisteri-service.s2s.duplicatesByPersonOids");
     Map<String, Set<String>> henkiloSearchParams = new HashMap<>();
     henkiloSearchParams.put("henkiloOids", personOids);
-    CompletableFuture<List<HenkiloViiteDto>> fut =
-        this.client.postJson(
-            url,
-            Duration.ofHours(1),
-            henkiloSearchParams,
-            new TypeToken<Map<String, Set<String>>>() {}.getType(),
-            new TypeToken<List<HenkiloViiteDto>>() {}.getType());
+    CompletableFuture<List<HenkiloViiteDto>> fut = this.client.postJson(url, Duration.ofHours(1),
+        henkiloSearchParams, new TypeToken<Map<String, Set<String>>>() {
+        }.getType(), new TypeToken<List<HenkiloViiteDto>>() {
+        }.getType());
     return fut;
   }
 
   public CompletableFuture<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
     String url = getUrl("oppijanumerorekisteri-service.henkilo.masterHenkilosByOidList");
-    return CompletableFutureUtil.sequence(
-            Lists.partition(personOids, 5000).stream()
-                .map(
-                    chunk ->
-                        this.client.<List<String>, Map<String, HenkiloPerustietoDto>>postJson(
-                            url,
-                            Duration.ofHours(1),
-                            chunk,
-                            new TypeToken<List<String>>() {}.getType(),
-                            new TypeToken<Map<String, HenkiloPerustietoDto>>() {}.getType()))
-                .collect(Collectors.toList()))
-        .thenApplyAsync(
-            chunks ->
-                chunks.stream()
-                    .flatMap(m -> m.entrySet().stream())
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    return CompletableFutureUtil.sequence(Lists.partition(personOids, 5000).stream()
+        .map(chunk -> this.client.<List<String>, Map<String, HenkiloPerustietoDto>>postJson(url,
+            Duration.ofHours(1), chunk, new TypeToken<List<String>>() {
+            }.getType(), new TypeToken<Map<String, HenkiloPerustietoDto>>() {
+            }.getType()))
+        .collect(Collectors.toList()))
+        .thenApplyAsync(chunks -> chunks.stream().flatMap(m -> m.entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
   }
 }

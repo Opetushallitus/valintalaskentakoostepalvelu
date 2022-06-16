@@ -12,14 +12,11 @@ public class DokumentinLisatiedot {
   private List<String> hakemusOids;
   private List<String> valintakoeTunnisteet;
 
-  public DokumentinLisatiedot() {}
+  public DokumentinLisatiedot() {
+  }
 
-  public DokumentinLisatiedot(
-      List<String> valintakoeTunnisteet,
-      String tag,
-      String letterBodyText,
-      String languageCode,
-      List<String> hakemusOids) {
+  public DokumentinLisatiedot(List<String> valintakoeTunnisteet, String tag, String letterBodyText,
+      String languageCode, List<String> hakemusOids) {
     this.tag = tag;
     this.letterBodyText = letterBodyText;
     this.languageCode = languageCode;

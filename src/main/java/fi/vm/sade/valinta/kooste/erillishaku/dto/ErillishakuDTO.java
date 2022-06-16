@@ -8,11 +8,7 @@ public class ErillishakuDTO {
   private final String valintatapajonoOid;
   private final Hakutyyppi hakutyyppi;
 
-  public ErillishakuDTO(
-      Hakutyyppi hakutyyppi,
-      String hakuOid,
-      String hakukohdeOid,
-      String tarjoajaOid,
+  public ErillishakuDTO(Hakutyyppi hakutyyppi, String hakuOid, String hakukohdeOid, String tarjoajaOid,
       String valintatapajonoOid) {
     this.hakutyyppi = hakutyyppi;
     this.hakuOid = hakuOid;

@@ -26,13 +26,8 @@ public class KelaLuonti {
     this.loppuPvm = null;
   }
 
-  public KelaLuonti(
-      String uuid,
-      Collection<String> hakuOids,
-      String aineistonNimi,
-      String organisaationNimi,
-      KelaCache cache,
-      KelaProsessi prosessi) {
+  public KelaLuonti(String uuid, Collection<String> hakuOids, String aineistonNimi, String organisaationNimi,
+      KelaCache cache, KelaProsessi prosessi) {
     this.uuid = uuid;
     this.hakuOids = hakuOids;
     this.aineistonNimi = aineistonNimi;
@@ -43,15 +38,8 @@ public class KelaLuonti {
     this.loppuPvm = null;
   }
 
-  public KelaLuonti(
-      String uuid,
-      Collection<String> hakuOids,
-      String aineistonNimi,
-      String organisaationNimi,
-      KelaCache cache,
-      KelaProsessi prosessi,
-      Date alkuPvm,
-      Date loppuPvm) {
+  public KelaLuonti(String uuid, Collection<String> hakuOids, String aineistonNimi, String organisaationNimi,
+      KelaCache cache, KelaProsessi prosessi, Date alkuPvm, Date loppuPvm) {
     this.uuid = uuid;
     this.hakuOids = hakuOids;
     this.aineistonNimi = aineistonNimi;

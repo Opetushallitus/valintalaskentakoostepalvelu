@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Säilöö guava cacheen prosessit softreferensseinä -- eli ei taetta että prosessi on muistissa
- * reitin päättymisen jälkeen
+ * Säilöö guava cacheen prosessit softreferensseinä -- eli ei taetta että
+ * prosessi on muistissa reitin päättymisen jälkeen
  */
 @Component
 public class DokumenttiProsessiKomponentti {
@@ -17,11 +17,9 @@ public class DokumenttiProsessiKomponentti {
   private final Cache<String, DokumenttiProsessi> prosessit;
 
   public DokumenttiProsessiKomponentti() {
-    this.prosessit =
-        CacheBuilder.newBuilder()
-            // soft valuet poistetaan ennen muistin loppumista
-            .softValues()
-            .build();
+    this.prosessit = CacheBuilder.newBuilder()
+        // soft valuet poistetaan ennen muistin loppumista
+        .softValues().build();
   }
 
   public DokumenttiProsessi haeProsessi(String id) {

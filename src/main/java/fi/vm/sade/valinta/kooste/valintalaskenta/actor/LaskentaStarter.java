@@ -46,191 +46,121 @@ public class LaskentaStarter {
   private final TarjontaAsyncResource tarjontaAsyncResource;
 
   @Autowired
-  public LaskentaStarter(
-      OhjausparametritAsyncResource ohjausparametritAsyncResource,
+  public LaskentaStarter(OhjausparametritAsyncResource ohjausparametritAsyncResource,
       ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-      LaskentaSeurantaAsyncResource seurantaAsyncResource,
-      TarjontaAsyncResource tarjontaAsyncResource) {
+      LaskentaSeurantaAsyncResource seurantaAsyncResource, TarjontaAsyncResource tarjontaAsyncResource) {
     this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
     this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
     this.seurantaAsyncResource = seurantaAsyncResource;
     this.tarjontaAsyncResource = tarjontaAsyncResource;
   }
 
-  public void fetchLaskentaParams(
-      ActorRef laskennanKaynnistajaActor,
-      final String uuid,
+  public void fetchLaskentaParams(ActorRef laskennanKaynnistajaActor, final String uuid,
       final BiConsumer<Haku, LaskentaActorParams> startActor) {
-    seurantaAsyncResource
-        .laskenta(uuid)
-        .subscribe(
-            (LaskentaDto laskenta) -> {
-              String hakuOid = laskenta.getHakuOid();
-              if (StringUtils.isBlank(hakuOid)) {
-                LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
-                throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
-              }
-              valintaperusteetAsyncResource
-                  .haunHakukohteet(hakuOid)
-                  .subscribe(
-                      (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                        Collection<HakukohdeJaOrganisaatio> hakukohdeOids =
-                            maskHakukohteet(hakuOid, hakukohdeViitteet, laskenta);
-                        if (!hakukohdeOids.isEmpty()) {
-                          fetchHakuInformation(
-                              laskennanKaynnistajaActor,
-                              hakuOid,
-                              hakukohdeOids,
-                              laskenta,
-                              startActor);
-                        } else {
-                          cancelLaskenta(
-                              laskennanKaynnistajaActor,
-                              "Haulla "
-                                  + laskenta.getUuid()
-                                  + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?",
-                              null,
-                              uuid);
-                        }
-                      },
-                      (Throwable t) ->
-                          cancelLaskenta(
-                              laskennanKaynnistajaActor,
-                              "Haun kohteiden haku epäonnistui haulle: " + uuid,
-                              Optional.empty(),
-                              uuid));
-            },
-            (Throwable t) ->
-                cancelLaskenta(
-                    laskennanKaynnistajaActor,
-                    "Laskennan haku epäonnistui ",
-                    Optional.of(t),
-                    uuid));
+    seurantaAsyncResource.laskenta(uuid).subscribe((LaskentaDto laskenta) -> {
+      String hakuOid = laskenta.getHakuOid();
+      if (StringUtils.isBlank(hakuOid)) {
+        LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
+        throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
+      }
+      valintaperusteetAsyncResource.haunHakukohteet(hakuOid)
+          .subscribe((List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
+            Collection<HakukohdeJaOrganisaatio> hakukohdeOids = maskHakukohteet(hakuOid, hakukohdeViitteet,
+                laskenta);
+            if (!hakukohdeOids.isEmpty()) {
+              fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta,
+                  startActor);
+            } else {
+              cancelLaskenta(laskennanKaynnistajaActor,
+                  "Haulla " + laskenta.getUuid()
+                      + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?",
+                  null, uuid);
+            }
+          }, (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor,
+              "Haun kohteiden haku epäonnistui haulle: " + uuid, Optional.empty(), uuid));
+    }, (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Laskennan haku epäonnistui ", Optional.of(t),
+        uuid));
   }
 
-  private static Collection<HakukohdeJaOrganisaatio> maskHakukohteet(
-      String hakuOid, List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta) {
+  private static Collection<HakukohdeJaOrganisaatio> maskHakukohteet(String hakuOid,
+      List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta) {
     LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
-    final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit =
-        hakukohdeViitteet != null
-            ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet)
-            : new ArrayList<>();
+    final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null
+        ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet)
+        : new ArrayList<>();
     final Maski maski = createMaskiFromLaskenta(laskenta);
 
     return maski.maskaa(haunHakukohdeOidit);
   }
 
-  private void fetchHakuInformation(
-      ActorRef laskennankaynnistajaActor,
-      String hakuOid,
-      Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit,
-      LaskentaDto laskenta,
+  private void fetchHakuInformation(ActorRef laskennankaynnistajaActor, String hakuOid,
+      Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, LaskentaDto laskenta,
       BiConsumer<Haku, LaskentaActorParams> startActor) {
     AtomicReference<Haku> hakuRef = new AtomicReference<>();
     AtomicReference<LaskentaActorParams> parametritRef = new AtomicReference<>();
-    SynkronoituLaskuri counter =
-        SynkronoituLaskuri.builder()
-            .setLaskurinAlkuarvo(2)
-            .setSynkronoituToiminto(() -> startActor.accept(hakuRef.get(), parametritRef.get()))
-            .build();
-    Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
-        .subscribe(
-            haku -> {
-              hakuRef.set(haku);
-              counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-            },
-            (Throwable t) ->
-                cancelLaskenta(
-                    laskennankaynnistajaActor,
-                    "Tarjontatietojen haku epäonnistui: ",
-                    Optional.of(t),
-                    laskenta.getUuid()));
+    SynkronoituLaskuri counter = SynkronoituLaskuri.builder().setLaskurinAlkuarvo(2)
+        .setSynkronoituToiminto(() -> startActor.accept(hakuRef.get(), parametritRef.get())).build();
+    Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).subscribe(haku -> {
+      hakuRef.set(haku);
+      counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+    }, (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Tarjontatietojen haku epäonnistui: ",
+        Optional.of(t), laskenta.getUuid()));
 
-    Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid))
-        .subscribe(
-            parametrit -> {
-              parametritRef.set(
-                  laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
-              counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-            },
-            (Throwable t) ->
-                cancelLaskenta(
-                    laskennankaynnistajaActor,
-                    "Ohjausparametrien luku epäonnistui: ",
-                    Optional.of(t),
-                    laskenta.getUuid()));
+    Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid)).subscribe(parametrit -> {
+      parametritRef.set(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
+      counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+    }, (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: ",
+        Optional.of(t), laskenta.getUuid()));
   }
 
   private static AuditSession koosteAuditSession(LaskentaDto laskenta) {
     final String userAgent = "-";
     final String inetAddress = "127.0.0.1";
-    AuditSession auditSession =
-        new AuditSession(laskenta.getUserOID(), Collections.emptyList(), userAgent, inetAddress);
+    AuditSession auditSession = new AuditSession(laskenta.getUserOID(), Collections.emptyList(), userAgent,
+        inetAddress);
     auditSession.setSessionId(laskenta.getUuid());
     auditSession.setPersonOid(laskenta.getUserOID());
     return auditSession;
   }
 
-  private static LaskentaActorParams laskentaActorParams(
-      String hakuOid,
-      LaskentaDto laskenta,
-      Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit,
-      ParametritDTO parametrit) {
-    return new LaskentaActorParams(
-        new LaskentaStartParams(
-            koosteAuditSession(laskenta),
-            laskenta.getUuid(),
-            hakuOid,
-            laskenta.isErillishaku(),
-            true,
-            LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
-            laskenta.getValinnanvaihe(),
-            laskenta.getValintakoelaskenta(),
-            haunHakukohdeOidit,
-            laskenta.getTyyppi()),
-        parametrit);
+  private static LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta,
+      Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {
+    return new LaskentaActorParams(new LaskentaStartParams(koosteAuditSession(laskenta), laskenta.getUuid(),
+        hakuOid, laskenta.isErillishaku(), true, LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
+        laskenta.getValinnanvaihe(), laskenta.getValintakoelaskenta(), haunHakukohdeOidit,
+        laskenta.getTyyppi()), parametrit);
   }
 
   private static List<HakukohdeJaOrganisaatio> publishedNonNulltoHakukohdeJaOrganisaatio(
       final List<HakukohdeViiteDTO> hakukohdeViitteet) {
-    return hakukohdeViitteet.stream()
-        .filter(Objects::nonNull)
-        .filter(h -> h.getOid() != null)
+    return hakukohdeViitteet.stream().filter(Objects::nonNull).filter(h -> h.getOid() != null)
         .filter(h -> h.getTila().equals("JULKAISTU"))
-        .map(h -> new HakukohdeJaOrganisaatio(h.getOid(), h.getTarjoajaOid()))
-        .collect(Collectors.toList());
+        .map(h -> new HakukohdeJaOrganisaatio(h.getOid(), h.getTarjoajaOid())).collect(Collectors.toList());
   }
 
-  private void cancelLaskenta(
-      ActorRef laskennanKaynnistajaActor, String msg, Optional<Throwable> t, String uuid) {
-    if (t.isPresent()) LOG.error(msg, t);
-    else LOG.error(msg);
+  private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, Optional<Throwable> t, String uuid) {
+    if (t.isPresent())
+      LOG.error(msg, t);
+    else
+      LOG.error(msg);
     LaskentaTila tila = LaskentaTila.VALMIS;
     HakukohdeTila hakukohdetila = HakukohdeTila.KESKEYTETTY;
-    Optional<IlmoitusDto> ilmoitusDtoOptional =
-        t.map(
-            poikkeus -> IlmoitusDto.virheilmoitus(msg, Arrays.toString(poikkeus.getStackTrace())));
-    seurantaAsyncResource
-        .merkkaaLaskennanTila(uuid, tila, hakukohdetila, ilmoitusDtoOptional)
-        .subscribe(
-            ok -> {},
-            fail ->
-                LOG.error(
-                    String.format(
-                        "(UUID = %s) Laskennan tilan (laskenta=%s, hakukohde=%s) merkkaaminen epaonnistui!",
-                        uuid, tila, hakukohdetila),
-                    fail));
+    Optional<IlmoitusDto> ilmoitusDtoOptional = t
+        .map(poikkeus -> IlmoitusDto.virheilmoitus(msg, Arrays.toString(poikkeus.getStackTrace())));
+    seurantaAsyncResource.merkkaaLaskennanTila(uuid, tila, hakukohdetila, ilmoitusDtoOptional).subscribe(ok -> {
+    }, fail -> LOG.error(
+        String.format("(UUID = %s) Laskennan tilan (laskenta=%s, hakukohde=%s) merkkaaminen epaonnistui!", uuid,
+            tila, hakukohdetila),
+        fail));
     laskennanKaynnistajaActor.tell(new LaskentaStarterActor.WorkerAvailable(), ActorRef.noSender());
   }
 
   private static Maski createMaskiFromLaskenta(final LaskentaDto laskenta) {
-    final List<String> hakukohdeOids =
-        laskenta.getHakukohteet().stream()
-            .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
-            .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
-            .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
-            .collect(Collectors.toList());
+    final List<String> hakukohdeOids = laskenta.getHakukohteet().stream()
+        .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
+        .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
+        .map(HakukohdeJaOrganisaatio::getHakukohdeOid).collect(Collectors.toList());
 
     return Maski.whitelist(hakukohdeOids);
   }

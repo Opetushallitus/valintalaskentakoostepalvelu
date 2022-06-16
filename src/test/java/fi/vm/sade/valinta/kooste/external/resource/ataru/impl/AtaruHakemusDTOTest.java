@@ -30,23 +30,19 @@ public class AtaruHakemusDTOTest {
     final String hakukohdeOid = "1.2.246.562.20.755368276710";
     final String hakuOid = "1.2.246.562.29.70000333388";
 
-    ClassPathXmlApplicationContext applicationContext =
-        new ClassPathXmlApplicationContext("/spring/application-context.xml");
+    ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+        "/spring/application-context.xml");
     AtaruAsyncResource ataruResource = applicationContext.getBean(AtaruAsyncResource.class);
-    List<HakemusWrapper> hakemusWrappers =
-        ataruResource.getApplicationsByOids(Collections.singletonList(hakemusOid)).get();
+    List<HakemusWrapper> hakemusWrappers = ataruResource
+        .getApplicationsByOids(Collections.singletonList(hakemusOid)).get();
     HakemusWrapper hakemusWrapper = hakemusWrappers.get(0);
-    HakemusDTO hakemusDto =
-        hakemusWrapper.toHakemusDto(new Valintapisteet(), Collections.emptyMap(), true);
+    HakemusDTO hakemusDto = hakemusWrapper.toHakemusDto(new Valintapisteet(), Collections.emptyMap(), true);
     assertEquals(hakemusOid, hakemusDto.getHakemusoid());
-    assertAvainArvo(
-        hakemusDto.getAvaimet(), "preference1-Koulutus-id", "1.2.246.562.20.755368276710");
+    assertAvainArvo(hakemusDto.getAvaimet(), "preference1-Koulutus-id", "1.2.246.562.20.755368276710");
     assertAvainArvo(hakemusDto.getAvaimet(), "preference1-Koulutus-id-eligibility", "NOT_CHECKED");
     assertAvainArvo(hakemusDto.getAvaimet(), "preference1-Koulutus-id-processing", "UNPROCESSED");
-    assertAvainArvo(
-        hakemusDto.getAvaimet(), "preference1-Koulutus-id-paymentObligation", "UNREVIEWED");
-    assertAvainArvo(
-        hakemusDto.getAvaimet(), "preference1-Koulutus-id-languageRequirement", "UNREVIEWED");
+    assertAvainArvo(hakemusDto.getAvaimet(), "preference1-Koulutus-id-paymentObligation", "UNREVIEWED");
+    assertAvainArvo(hakemusDto.getAvaimet(), "preference1-Koulutus-id-languageRequirement", "UNREVIEWED");
 
     List<HakukohdeDTO> hakukohdeDtos = hakemusDto.getHakukohteet();
     assertEquals(1, hakukohdeDtos.size());
@@ -61,14 +57,9 @@ public class AtaruHakemusDTOTest {
     assertEquals(0, hakukohdeDto.getValinnanvaihe().size());
   }
 
-  private void assertAvainArvo(
-      List<AvainArvoDTO> avaimet, String expectedAvain, String expectedArvo) {
-    assertTrue(
-        "HakemusDTO did not have avain " + expectedAvain + " with arvo " + expectedArvo,
-        avaimet.stream()
-            .anyMatch(
-                avainArvoDto ->
-                    avainArvoDto.getAvain().equals(expectedAvain)
-                        && avainArvoDto.getArvo().equals(expectedArvo)));
+  private void assertAvainArvo(List<AvainArvoDTO> avaimet, String expectedAvain, String expectedArvo) {
+    assertTrue("HakemusDTO did not have avain " + expectedAvain + " with arvo " + expectedArvo,
+        avaimet.stream().anyMatch(avainArvoDto -> avainArvoDto.getAvain().equals(expectedAvain)
+            && avainArvoDto.getArvo().equals(expectedArvo)));
   }
 }

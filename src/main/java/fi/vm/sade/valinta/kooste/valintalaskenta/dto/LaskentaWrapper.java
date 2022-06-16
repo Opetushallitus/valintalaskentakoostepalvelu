@@ -44,10 +44,8 @@ public class LaskentaWrapper {
       this.hakukohdeOid = extractHakukohdeOid(tyot);
       this.laskenta = extractLaskenta(tyot);
       this.hakijaryhmat = extractHakijaryhmat(tyot);
-      this.onkoLaskemattakinTehtyEliHakukohteelleEiOllutHakemuksiaTaiValintaperusteita =
-          isOnkoJokuDataJoukkoTyhja();
-      this.onkoOhitettavaEliValintaperusteetTaiHakemuksetTaiLisatiedotPuuttui =
-          isOnkoJokuDataJoukkoNullReferenssi();
+      this.onkoLaskemattakinTehtyEliHakukohteelleEiOllutHakemuksiaTaiValintaperusteita = isOnkoJokuDataJoukkoTyhja();
+      this.onkoOhitettavaEliValintaperusteetTaiHakemuksetTaiLisatiedotPuuttui = isOnkoJokuDataJoukkoNullReferenssi();
     }
   }
 
@@ -84,10 +82,8 @@ public class LaskentaWrapper {
   }
 
   public List<HakemusDTO> convertHakemuksetToHakemuksetDTO(TypeConverter converter) {
-    List<HakemusDTO> hx =
-        getHakemuksetLisatiedoilla().parallelStream()
-            .map(h -> converter.tryConvertTo(HakemusDTO.class, h))
-            .collect(Collectors.toList());
+    List<HakemusDTO> hx = getHakemuksetLisatiedoilla().parallelStream()
+        .map(h -> converter.tryConvertTo(HakemusDTO.class, h)).collect(Collectors.toList());
     return hx;
   }
 
@@ -96,15 +92,11 @@ public class LaskentaWrapper {
   }
 
   private boolean isOnkoJokuDataJoukkoTyhja() {
-    return (valintaperusteet != null && valintaperusteet.isEmpty())
-        || (hakemukset != null && hakemukset.isEmpty());
+    return (valintaperusteet != null && valintaperusteet.isEmpty()) || (hakemukset != null && hakemukset.isEmpty());
   }
 
   private boolean isOnkoJokuDataJoukkoNullReferenssi() {
-    return valintaperusteet == null
-        || hakemukset == null
-        || lisatiedot == null
-        || hakijaryhmat == null;
+    return valintaperusteet == null || hakemukset == null || lisatiedot == null || hakijaryhmat == null;
   }
 
   private String extractHakukohdeOid(List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
@@ -115,8 +107,7 @@ public class LaskentaWrapper {
     return tyot.iterator().next().getLaskenta();
   }
 
-  private List<ValintaperusteetDTO> extractValintaperusteet(
-      List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
+  private List<ValintaperusteetDTO> extractValintaperusteet(List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
     for (LaskentaJaValintaperusteetJaHakemukset v : tyot) {
       if (v.getValintaperusteet() != null) {
         return v.getValintaperusteet();
@@ -144,8 +135,7 @@ public class LaskentaWrapper {
     return null;
   }
 
-  private List<ApplicationAdditionalDataDTO> extractLisatiedot(
-      List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
+  private List<ApplicationAdditionalDataDTO> extractLisatiedot(List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
     for (LaskentaJaValintaperusteetJaHakemukset v : tyot) {
       if (v.getLisatiedot() != null) {
         return v.getLisatiedot();
@@ -155,20 +145,16 @@ public class LaskentaWrapper {
   }
 
   private List<Hakemus> getHakemuksetLisatiedoilla() {
-    final Map<String, ApplicationAdditionalDataDTO> appData =
-        lisatiedot.parallelStream()
-            .collect(Collectors.toMap(ApplicationAdditionalDataDTO::getOid, i -> i));
-    return hakemukset.parallelStream()
-        .map(
-            h -> {
-              Map<String, String> addData = appData.get(h.getOid()).getAdditionalData();
-              if (addData == null) {
-                LOG.warn("Lisatietoja ei saatu hakemukselle {}", h.getOid());
-                addData = Collections.emptyMap();
-              }
-              h.setAdditionalInfo(addData);
-              return h;
-            })
-        .collect(Collectors.toList());
+    final Map<String, ApplicationAdditionalDataDTO> appData = lisatiedot.parallelStream()
+        .collect(Collectors.toMap(ApplicationAdditionalDataDTO::getOid, i -> i));
+    return hakemukset.parallelStream().map(h -> {
+      Map<String, String> addData = appData.get(h.getOid()).getAdditionalData();
+      if (addData == null) {
+        LOG.warn("Lisatietoja ei saatu hakemukselle {}", h.getOid());
+        addData = Collections.emptyMap();
+      }
+      h.setAdditionalInfo(addData);
+      return h;
+    }).collect(Collectors.toList());
   }
 }

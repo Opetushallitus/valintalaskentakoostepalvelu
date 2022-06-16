@@ -12,8 +12,8 @@ public interface ValintatietoResource {
   @Path("hakukohde/{hakukohdeOid}")
   @Consumes("application/json")
   @Produces("application/json")
-  List<HakemusOsallistuminenDTO> haeValintatiedotHakukohteelle(
-      @PathParam("hakukohdeOid") String hakukohdeOid, List<String> valintakoeOid);
+  List<HakemusOsallistuminenDTO> haeValintatiedotHakukohteelle(@PathParam("hakukohdeOid") String hakukohdeOid,
+      List<String> valintakoeOid);
 
   @GET
   @Path("haku/{hakuOid}")

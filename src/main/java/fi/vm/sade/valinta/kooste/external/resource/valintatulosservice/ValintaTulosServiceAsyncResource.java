@@ -20,8 +20,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public interface ValintaTulosServiceAsyncResource {
-  DateTimeFormatter valintaTulosServiceCompatibleFormatter =
-      DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZoneUTC();
+  DateTimeFormatter valintaTulosServiceCompatibleFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+      .withZoneUTC();
 
   Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid);
 
@@ -33,25 +33,24 @@ public interface ValintaTulosServiceAsyncResource {
 
   Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, AuditSession session);
 
-  Observable<String> saveLukuvuosimaksut(
-      String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset);
+  Observable<String> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session,
+      List<LukuvuosimaksuMuutos> muutokset);
 
-  Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(
-      String hakuOid, String hakukohdeOid);
+  Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid);
 
   Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid);
 
-  Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(
-      String hakuOid, String hakukohdeOid, Set<String> hakemusOids);
+  Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid, String hakukohdeOid,
+      Set<String> hakemusOids);
 
-  Observable<List<TilaHakijalleDto>> findTilahakijalle(
-      String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids);
+  Observable<List<TilaHakijalleDto>> findTilahakijalle(String hakuOid, String hakukohdeOid, String valintatapajonoOid,
+      Set<String> hakemusOids);
 
-  Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(
-      AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset);
+  Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession,
+      String valintatapajonoOid, List<Valinnantulos> valinnantulokset);
 
-  Observable<List<Valinnantulos>> getErillishaunValinnantulokset(
-      AuditSession auditSession, String valintatapajonoOid);
+  Observable<List<Valinnantulos>> getErillishaunValinnantulokset(AuditSession auditSession,
+      String valintatapajonoOid);
 
   Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);
 

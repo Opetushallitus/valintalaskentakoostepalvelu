@@ -6,10 +6,10 @@ public class HenkiloValilehtiDTO {
   private String lastmodified;
   private Map<String, HakemuksenKoetulosYhteenveto> hakukohteittain;
 
-  public HenkiloValilehtiDTO() {}
+  public HenkiloValilehtiDTO() {
+  }
 
-  public HenkiloValilehtiDTO(
-      String lastmodified, Map<String, HakemuksenKoetulosYhteenveto> hakukohteittain) {
+  public HenkiloValilehtiDTO(String lastmodified, Map<String, HakemuksenKoetulosYhteenveto> hakukohteittain) {
     this.lastmodified = lastmodified;
     this.hakukohteittain = hakukohteittain;
   }

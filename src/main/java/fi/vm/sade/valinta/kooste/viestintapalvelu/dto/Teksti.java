@@ -53,8 +53,7 @@ public class Teksti {
   }
 
   public String getNonEmptyKieli() {
-    if (normalisoituKieliJaKoodi.containsKey(SUOMI)
-        && !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(SUOMI))) {
+    if (normalisoituKieliJaKoodi.containsKey(SUOMI) && !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(SUOMI))) {
       return SUOMI;
     } else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)
         && !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(RUOTSI))) {
@@ -109,17 +108,13 @@ public class Teksti {
     return ns.stream().map(Teksti::getTeksti).collect(Collectors.joining(sep));
   }
 
-  public static String getTeksti(
-      List<Map<String, String>> ns, String sep, String normalisoituKielikoodi) {
-    return ns.stream()
-        .map(n -> getTeksti(n, normalisoituKielikoodi))
-        .collect(Collectors.joining(sep));
+  public static String getTeksti(List<Map<String, String>> ns, String sep, String normalisoituKielikoodi) {
+    return ns.stream().map(n -> getTeksti(n, normalisoituKielikoodi)).collect(Collectors.joining(sep));
   }
 
   public static Teksti ehdollisenHyvaksymisenEhto(HakutoiveenValintatapajonoDTO valintatapajono) {
     Map<String, String> m = new HashMap<>();
-    if (valintatapajono.getTila().isHyvaksytty()
-        && valintatapajono.isEhdollisestiHyvaksyttavissa()) {
+    if (valintatapajono.getTila().isHyvaksytty() && valintatapajono.isEhdollisestiHyvaksyttavissa()) {
       m.put(SUOMI, valintatapajono.getEhdollisenHyvaksymisenEhtoFI());
       m.put(RUOTSI, valintatapajono.getEhdollisenHyvaksymisenEhtoSV());
       m.put(ENGLANTI, valintatapajono.getEhdollisenHyvaksymisenEhtoEN());

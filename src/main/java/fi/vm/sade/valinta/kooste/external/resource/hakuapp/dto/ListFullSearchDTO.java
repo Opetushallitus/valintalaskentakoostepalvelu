@@ -11,11 +11,7 @@ public class ListFullSearchDTO {
   private final List<String> keys;
 
   @JsonCreator
-  public ListFullSearchDTO(
-      String searchTerms,
-      List<String> aoOids,
-      List<String> asIds,
-      List<String> states,
+  public ListFullSearchDTO(String searchTerms, List<String> aoOids, List<String> asIds, List<String> states,
       List<String> keys) {
     this.searchTerms = searchTerms;
     this.aoOids = aoOids;

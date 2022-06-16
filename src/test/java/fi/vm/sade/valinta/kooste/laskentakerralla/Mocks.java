@@ -27,55 +27,33 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 
 public class Mocks {
   static OrganisaatioResource organisaatioResource = mock(OrganisaatioResource.class);
-  static ValintalaskentaKerrallaRouteValvomo valintalaskentaKerrallaRouteValvomo =
-      mock(ValintalaskentaKerrallaRouteValvomo.class);
+  static ValintalaskentaKerrallaRouteValvomo valintalaskentaKerrallaRouteValvomo = mock(
+      ValintalaskentaKerrallaRouteValvomo.class);
   static ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
   static AtaruAsyncResource ataruAsyncResource = mock(AtaruAsyncResource.class);
-  static HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource =
-      mock(HarkinnanvaraisuusAsyncResource.class);
-  static ValintaperusteetAsyncResource valintaperusteetAsyncResource =
-      mock(ValintaperusteetAsyncResource.class);
-  static OhjausparametritAsyncResource ohjausparametritAsyncResource =
-      mock(OhjausparametritAsyncResource.class);
-  static LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource =
-      mock(LaskentaSeurantaAsyncResource.class);
-  static ValintalaskentaAsyncResource valintalaskentaAsyncResource =
-      mock(ValintalaskentaAsyncResource.class);
-  static SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource =
-      mock(SuoritusrekisteriAsyncResource.class);
+  static HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource = mock(
+      HarkinnanvaraisuusAsyncResource.class);
+  static ValintaperusteetAsyncResource valintaperusteetAsyncResource = mock(ValintaperusteetAsyncResource.class);
+  static OhjausparametritAsyncResource ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
+  static LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource = mock(LaskentaSeurantaAsyncResource.class);
+  static ValintalaskentaAsyncResource valintalaskentaAsyncResource = mock(ValintalaskentaAsyncResource.class);
+  static SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
   static TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
-  static ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler =
-      mock(ValintalaskentaStatusExcelHandler.class);
-  static ValintapisteAsyncResource valintapisteAsyncResource =
-      mock(ValintapisteAsyncResource.class);
+  static ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler = mock(
+      ValintalaskentaStatusExcelHandler.class);
+  static ValintapisteAsyncResource valintapisteAsyncResource = mock(ValintapisteAsyncResource.class);
   static KoskiService koskiService = mock(KoskiService.class);
-  static HakemuksetConverterUtil hakemuksetConverterUtil =
-      new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
-  static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
-      new MockOppijanumerorekisteriAsyncResource();
-  static LaskentaActorSystem laskentaActorSystem =
-      spy(
-          new LaskentaActorSystem(
-              laskentaSeurantaAsyncResource,
-              new LaskentaStarter(
-                  ohjausparametritAsyncResource,
-                  valintaperusteetAsyncResource,
-                  laskentaSeurantaAsyncResource,
-                  tarjontaAsyncResource),
-              new LaskentaActorFactory(
-                  5,
-                  valintalaskentaAsyncResource,
-                  applicationAsyncResource,
-                  ataruAsyncResource,
-                  valintaperusteetAsyncResource,
-                  laskentaSeurantaAsyncResource,
-                  suoritusrekisteriAsyncResource,
-                  tarjontaAsyncResource,
-                  valintapisteAsyncResource,
-                  koskiService,
-                  hakemuksetConverterUtil,
-                  oppijanumerorekisteriAsyncResource),
-              8));
+  static HakemuksetConverterUtil hakemuksetConverterUtil = new HakemuksetConverterUtil("9999-12-31",
+      harkinnanvaraisuusAsyncResource);
+  static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource = new MockOppijanumerorekisteriAsyncResource();
+  static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource,
+      new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource,
+          laskentaSeurantaAsyncResource, tarjontaAsyncResource),
+      new LaskentaActorFactory(5, valintalaskentaAsyncResource, applicationAsyncResource, ataruAsyncResource,
+          valintaperusteetAsyncResource, laskentaSeurantaAsyncResource, suoritusrekisteriAsyncResource,
+          tarjontaAsyncResource, valintapisteAsyncResource, koskiService, hakemuksetConverterUtil,
+          oppijanumerorekisteriAsyncResource),
+      8));
 
   public static void resetMocks() {
     reset(valintalaskentaKerrallaRouteValvomo);

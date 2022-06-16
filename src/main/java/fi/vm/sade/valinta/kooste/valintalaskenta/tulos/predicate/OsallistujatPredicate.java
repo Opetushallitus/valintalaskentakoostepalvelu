@@ -32,8 +32,8 @@ public class OsallistujatPredicate implements Predicate<ValintakoeOsallistuminen
     this.valintakoeOids = null;
   }
 
-  public static java.util.function.Predicate<ValintakoeOsallistuminenDTO> osallistujat(
-      Collection<String> tunnisteet, String hakukohdeOid) {
+  public static java.util.function.Predicate<ValintakoeOsallistuminenDTO> osallistujat(Collection<String> tunnisteet,
+      String hakukohdeOid) {
     final Set<String> valintakoeTunnisteet = Sets.newHashSet(tunnisteet);
     return vk -> {
       for (HakutoiveDTO hakutoive : vk.getHakutoiveet()) {
@@ -47,8 +47,8 @@ public class OsallistujatPredicate implements Predicate<ValintakoeOsallistuminen
               // vain tarkasteltavista valintakokeista ollaan kiinnostuneita
               continue;
             }
-            if (fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.OSALLISTUU.equals(
-                valintakoe.getOsallistuminenTulos().getOsallistuminen())) {
+            if (fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.OSALLISTUU
+                .equals(valintakoe.getOsallistuminenTulos().getOsallistuminen())) {
               return true;
             }
           }
@@ -77,8 +77,8 @@ public class OsallistujatPredicate implements Predicate<ValintakoeOsallistuminen
               continue;
             }
           }
-          if (fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.OSALLISTUU.equals(
-              valintakoe.getOsallistuminenTulos().getOsallistuminen())) {
+          if (fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.OSALLISTUU
+              .equals(valintakoe.getOsallistuminenTulos().getOsallistuminen())) {
             return true;
           }
         }
@@ -87,13 +87,12 @@ public class OsallistujatPredicate implements Predicate<ValintakoeOsallistuminen
     return false;
   }
 
-  public static OsallistujatPredicate vainOsallistujat(
-      String hakukohdeOid, Collection<String> valintakoeOids) {
+  public static OsallistujatPredicate vainOsallistujat(String hakukohdeOid, Collection<String> valintakoeOids) {
     return new OsallistujatPredicate(hakukohdeOid, valintakoeOids);
   }
 
-  public static OsallistujatPredicate vainOsallistujatTunnisteella(
-      String hakukohdeOid, Collection<String> tunnisteet) {
+  public static OsallistujatPredicate vainOsallistujatTunnisteella(String hakukohdeOid,
+      Collection<String> tunnisteet) {
     return new OsallistujatPredicate(tunnisteet, hakukohdeOid);
   }
 }

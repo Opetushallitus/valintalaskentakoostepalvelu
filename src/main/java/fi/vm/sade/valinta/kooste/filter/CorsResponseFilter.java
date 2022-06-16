@@ -8,8 +8,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 public class CorsResponseFilter implements ContainerResponseFilter {
   @Override
-  public void filter(
-      ContainerRequestContext containerRequestContext, ContainerResponseContext responseContext)
+  public void filter(ContainerRequestContext containerRequestContext, ContainerResponseContext responseContext)
       throws IOException {
     MultivaluedMap<String, Object> headers = responseContext.getHeaders();
     headers.add("Access-Control-Allow-Origin", "*");

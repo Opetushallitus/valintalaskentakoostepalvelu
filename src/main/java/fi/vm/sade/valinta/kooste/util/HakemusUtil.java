@@ -27,10 +27,8 @@ public class HakemusUtil {
   private static final Map<String, String> VARASIJALLA = varasijallaTilat();
   private static final Map<String, String> VARASIJAT = varasijaTekstinTilat();
   private static final Map<String, String> EHDOLLINEN = ehdollinenTekstinTilat();
-  private static final Map<String, Map<IlmoittautumisTila, String>> ILMOITTAUTUMISTILAT =
-      ilmoittautumisTilat();
-  private static final Map<String, Map<ValintatuloksenTila, String>> VALINTATULOKSEN_TILAT =
-      valintatulostenTilat();
+  private static final Map<String, Map<IlmoittautumisTila, String>> ILMOITTAUTUMISTILAT = ilmoittautumisTilat();
+  private static final Map<String, Map<ValintatuloksenTila, String>> VALINTATULOKSEN_TILAT = valintatulostenTilat();
 
   private static Map<String, String> varasijallaTilat() {
     Map<String, String> m = Maps.newHashMap();
@@ -57,8 +55,7 @@ public class HakemusUtil {
   }
 
   private static Map<String, Map<ValintatuloksenTila, String>> valintatulostenTilat() {
-    Map<String, Map<ValintatuloksenTila, String>> kielet =
-        new HashMap<String, Map<ValintatuloksenTila, String>>();
+    Map<String, Map<ValintatuloksenTila, String>> kielet = new HashMap<String, Map<ValintatuloksenTila, String>>();
     Map<ValintatuloksenTila, String> fi = new HashMap<>();
     fi.put(VASTAANOTTANUT_SITOVASTI, "Vastaanottanut sitovasti");
     fi.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
@@ -77,8 +74,7 @@ public class HakemusUtil {
   }
 
   private static Map<String, Map<IlmoittautumisTila, String>> ilmoittautumisTilat() {
-    Map<String, Map<IlmoittautumisTila, String>> kielet =
-        new HashMap<String, Map<IlmoittautumisTila, String>>();
+    Map<String, Map<IlmoittautumisTila, String>> kielet = new HashMap<String, Map<IlmoittautumisTila, String>>();
 
     Map<IlmoittautumisTila, String> fi = new HashMap<IlmoittautumisTila, String>();
     fi.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
@@ -100,8 +96,7 @@ public class HakemusUtil {
   }
 
   private static Map<String, Map<HakemuksenTila, String>> valmistaTilat() {
-    Map<String, Map<HakemuksenTila, String>> kielet =
-        new HashMap<String, Map<HakemuksenTila, String>>();
+    Map<String, Map<HakemuksenTila, String>> kielet = new HashMap<String, Map<HakemuksenTila, String>>();
     Map<HakemuksenTila, String> fi = new HashMap<>();
     fi.put(HYLATTY, "Hylätty");
     fi.put(VARALLA, "Varalla");
@@ -164,11 +159,9 @@ public class HakemusUtil {
     return VARASIJAT.get(preferoitukielikoodi) + numero;
   }
 
-  public static String tilaConverter(
-      HakutoiveenValintatapajonoDTO valintatapajono, String preferoitukielikoodi) {
+  public static String tilaConverter(HakutoiveenValintatapajonoDTO valintatapajono, String preferoitukielikoodi) {
     if (valintatapajono.getTila() == HakemuksenTila.VARALLA) {
-      return HakemusUtil.varasijallaConverter(
-          valintatapajono.getVarasijanNumero(), preferoitukielikoodi);
+      return HakemusUtil.varasijallaConverter(valintatapajono.getVarasijanNumero(), preferoitukielikoodi);
     } else {
       return HakemusUtil.TILAT.get(preferoitukielikoodi).get(valintatapajono.getTila());
     }
@@ -212,13 +205,8 @@ public class HakemusUtil {
     }
   }
 
-  public static String tilaConverter(
-      HakemuksenTila tila,
-      String preferoitukielikoodi,
-      boolean harkinnanvarainen,
-      boolean ehdollinen,
-      boolean lisaaVarasijanNumero,
-      Integer varasijanNumero,
+  public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen,
+      boolean ehdollinen, boolean lisaaVarasijanNumero, Integer varasijanNumero,
       String ehdollisenHyvaksymisenEhto) {
     if (tila == null) {
       return StringUtils.EMPTY;
@@ -230,12 +218,7 @@ public class HakemusUtil {
     try {
       String baseTila = TILAT.get(preferoitukielikoodi).get(lopullinenTila);
       if (lisaaVarasijanNumero && VARALLA.equals(lopullinenTila) && varasijanNumero != null) {
-        return new StringBuilder()
-            .append(baseTila)
-            .append(" (")
-            .append(varasijanNumero)
-            .append(")")
-            .toString();
+        return new StringBuilder().append(baseTila).append(" (").append(varasijanNumero).append(")").toString();
       }
       if (lopullinenTila.isHyvaksytty() && ehdollinen) {
         if (!ehdollisenHyvaksymisenEhto.equals("")) {

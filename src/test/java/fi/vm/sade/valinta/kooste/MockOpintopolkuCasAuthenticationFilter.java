@@ -29,19 +29,12 @@ public class MockOpintopolkuCasAuthenticationFilter implements Filter {
     String key = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-key";
     String principal = "1.2.246.562.24.99999999999";
     String credentials = MockOpintopolkuCasAuthenticationFilter.class.getSimpleName() + "-creds";
-    casAuthenticationToken =
-        new CasAuthenticationToken(
-            key,
-            principal,
-            credentials,
-            Stream.of(roles).map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
-            new User(
-                MockOpintopolkuCasAuthenticationFilter.class.getSimpleName().toLowerCase(),
-                "salasana",
-                Collections.singletonList(new SimpleGrantedAuthority("rooli"))),
-            new AssertionImpl(
-                new AttributePrincipalImpl(
-                    MockOpintopolkuCasAuthenticationFilter.class.getSimpleName())));
+    casAuthenticationToken = new CasAuthenticationToken(key, principal, credentials,
+        Stream.of(roles).map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
+        new User(MockOpintopolkuCasAuthenticationFilter.class.getSimpleName().toLowerCase(), "salasana",
+            Collections.singletonList(new SimpleGrantedAuthority("rooli"))),
+        new AssertionImpl(
+            new AttributePrincipalImpl(MockOpintopolkuCasAuthenticationFilter.class.getSimpleName())));
   }
 
   @Override
@@ -56,8 +49,10 @@ public class MockOpintopolkuCasAuthenticationFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) {}
+  public void init(FilterConfig filterConfig) {
+  }
 
   @Override
-  public void destroy() {}
+  public void destroy() {
+  }
 }

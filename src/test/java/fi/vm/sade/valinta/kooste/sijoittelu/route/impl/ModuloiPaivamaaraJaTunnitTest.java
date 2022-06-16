@@ -39,10 +39,8 @@ public class ModuloiPaivamaaraJaTunnitTest {
       DateTime start = dateTime("02.10.2014 14:05");
       DateTime now = dateTime("05.10.2015 14:03");
 
-      assertEquals(
-          "05.10.2015 14:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
-      assertEquals(
-          "05.10.2015 14:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
+      assertEquals("05.10.2015 14:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
+      assertEquals("05.10.2015 14:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
     }
   }
 
@@ -59,12 +57,9 @@ public class ModuloiPaivamaaraJaTunnitTest {
       DateTime start = dateTime("02.10.2014 14:05");
       DateTime now = dateTime("05.10.2015 14:07");
 
-      assertEquals(
-          "05.10.2015 15:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
-      assertEquals(
-          "05.10.2015 16:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
-      assertEquals(
-          "05.10.2015 20:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
+      assertEquals("05.10.2015 15:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
+      assertEquals("05.10.2015 16:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
+      assertEquals("05.10.2015 20:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
     }
   }
 
@@ -74,12 +69,9 @@ public class ModuloiPaivamaaraJaTunnitTest {
       DateTime start = dateTime("02.10.2014 14:05");
       DateTime now = dateTime("05.10.2015 18:03");
 
-      assertEquals(
-          "05.10.2015 18:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
-      assertEquals(
-          "05.10.2015 18:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
-      assertEquals(
-          "05.10.2015 20:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
+      assertEquals("05.10.2015 18:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
+      assertEquals("05.10.2015 18:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
+      assertEquals("05.10.2015 20:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
     }
   }
 
@@ -89,8 +81,7 @@ public class ModuloiPaivamaaraJaTunnitTest {
       DateTime start = dateTime("02.10.2014 14:05");
       DateTime now = dateTime("05.10.2015 22:03");
 
-      assertEquals(
-          "06.10.2015 02:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
+      assertEquals("06.10.2015 02:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
     }
   }
 

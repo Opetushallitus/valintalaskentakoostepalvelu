@@ -59,26 +59,16 @@ public class HakemuksenKoetulosYhteenvetoTest {
     eiVaadiOsallistumista.setTunniste("ei_vaadi_osallistumista");
     eiVaadiOsallistumista.setOsallistuminenTunniste("ei_vaadi_osallistumista-OSALLISTUMINEN");
     eiVaadiOsallistumista.setVaatiiOsallistumisen(false);
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            Pair.of("hakukohdeOid", Arrays.asList(vaatiiOsallistumisen, eiVaadiOsallistumista)),
-            new ValintakoeOsallistuminenDTO(),
-            new Oppija(),
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        Pair.of("hakukohdeOid", Arrays.asList(vaatiiOsallistumisen, eiVaadiOsallistumista)),
+        new ValintakoeOsallistuminenDTO(), new Oppija(), new ParametritDTO());
     p.applicationAdditionalDataDTO.setAdditionalData(additionalData);
-    assertEquals(
-        "arvo_hakemuksella",
-        p.applicationAdditionalDataDTO.getAdditionalData().get("hakemuksella"));
-    assertEquals(
-        Osallistuminen.OSALLISTUI.toString(),
+    assertEquals("arvo_hakemuksella", p.applicationAdditionalDataDTO.getAdditionalData().get("hakemuksella"));
+    assertEquals(Osallistuminen.OSALLISTUI.toString(),
         p.osallistumistieto("hakukohdeOid", "vaatii_osallistumisen").osallistumistieto.toString());
-    assertEquals(
-        Osallistuminen.OSALLISTUI.toString(),
-        p.osallistumistieto("hakukohdeOid", "ei_vaadi_osallistumista")
-            .osallistumistieto
-            .toString());
+    assertEquals(Osallistuminen.OSALLISTUI.toString(),
+        p.osallistumistieto("hakukohdeOid", "ei_vaadi_osallistumista").osallistumistieto.toString());
   }
 
   @Test
@@ -96,19 +86,15 @@ public class HakemuksenKoetulosYhteenvetoTest {
     a.setArvio(arvio);
     kielikoesuoritus.setArvosanat(Collections.singletonList(a));
     oppija.setSuoritukset(Collections.singletonList(kielikoesuoritus));
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            new ValintakoeOsallistuminenDTO(),
-            oppija,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), new ValintakoeOsallistuminenDTO(),
+        oppija, new ParametritDTO());
     assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.OSALLISTUI.toString(),
+    assertEquals(Osallistuminen.OSALLISTUI.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
   }
 
@@ -141,23 +127,18 @@ public class HakemuksenKoetulosYhteenvetoTest {
     eriHakemuksenSuoritus.setArvosanat(Collections.singletonList(aSv));
 
     oppija.setSuoritukset(Arrays.asList(samanHakemuksenSuoritus, eriHakemuksenSuoritus));
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeSv)),
-            new ValintakoeOsallistuminenDTO(),
-            oppija,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeSv)), new ValintakoeOsallistuminenDTO(),
+        oppija, new ParametritDTO());
     assertEquals("false", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.OSALLISTUI.toString(),
+    assertEquals(Osallistuminen.OSALLISTUI.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
     assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_sv"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_sv-OSALLISTUMINEN"));
   }
 
@@ -190,23 +171,18 @@ public class HakemuksenKoetulosYhteenvetoTest {
     eriHakemuksenSuoritus.setArvosanat(Collections.singletonList(aSv));
 
     oppija.setSuoritukset(Arrays.asList(samanHakemuksenSuoritus, eriHakemuksenSuoritus));
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeSv)),
-            new ValintakoeOsallistuminenDTO(),
-            oppija,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeSv)), new ValintakoeOsallistuminenDTO(),
+        oppija, new ParametritDTO());
     assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.EI_OSALLISTUNUT.toString(),
+    assertEquals(Osallistuminen.EI_OSALLISTUNUT.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
     assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_sv"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_sv-OSALLISTUMINEN"));
   }
 
@@ -257,26 +233,19 @@ public class HakemuksenKoetulosYhteenvetoTest {
     h.setValinnanVaiheet(Collections.singletonList(vv));
     osallistuminen.setHakutoiveet(Collections.singletonList(h));
 
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            osallistuminen,
-            oppija,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), osallistuminen, oppija,
+        new ParametritDTO());
     assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
-    assertEquals(
-        Osallistumistieto.TOISELLA_HAKEMUKSELLA,
+    assertEquals(Osallistumistieto.TOISELLA_HAKEMUKSELLA,
         p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
-    assertEquals(
-        "organisaatioOid2",
-        p.osallistumistieto("hakukohdeOid", "kielikoe_fi").lahdeMyontajaOid.get());
+    assertEquals("organisaatioOid2", p.osallistumistieto("hakukohdeOid", "kielikoe_fi").lahdeMyontajaOid.get());
   }
 
   @Test
@@ -284,24 +253,19 @@ public class HakemuksenKoetulosYhteenvetoTest {
     ValintaperusteDTO syotettavissaKaikille = new ValintaperusteDTO();
     syotettavissaKaikille.setTunniste("syotettavissa_kaikille");
     syotettavissaKaikille.setSyotettavissaKaikille(true);
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(syotettavissaKaikille)),
-            null,
-            null,
-            new ParametritDTO());
-    assertEquals(
-        Osallistumistieto.OSALLISTUI,
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(syotettavissaKaikille)), null, null,
+        new ParametritDTO());
+    assertEquals(Osallistumistieto.OSALLISTUI,
         p.osallistumistieto("hakukohdeOid", "syotettavissa_kaikille").osallistumistieto);
   }
 
   @Test
-  public void testValintalaskennanAlkamisenJalkeenMyonnettyjaKielikoetuloksiaEiKayteta()
-      throws ParseException {
+  public void testValintalaskennanAlkamisenJalkeenMyonnettyjaKielikoetuloksiaEiKayteta() throws ParseException {
     ValintakoeOsallistuminenDTO osallistuminen = new ValintakoeOsallistuminenDTO();
     HakutoiveDTO h = new HakutoiveDTO();
     h.setHakukohdeOid("hakukohdeOid");
@@ -337,22 +301,17 @@ public class HakemuksenKoetulosYhteenvetoTest {
     ph_vls.setDateStart((new SimpleDateFormat("dd.MM.yyyy").parse("30.01.2000")));
     ohjausparametrit.setPH_VLS(ph_vls);
 
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            osallistuminen,
-            oppija,
-            ohjausparametrit);
-    assertEquals(
-        Osallistumistieto.OSALLISTUI,
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), osallistuminen, oppija,
+        ohjausparametrit);
+    assertEquals(Osallistumistieto.OSALLISTUI,
         p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
     assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
   }
 
@@ -372,19 +331,15 @@ public class HakemuksenKoetulosYhteenvetoTest {
     kielikoesuoritus.setArvosanat(Collections.singletonList(a));
     oppija.setSuoritukset(Collections.singletonList(kielikoesuoritus));
 
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            new ValintakoeOsallistuminenDTO(),
-            oppija,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), new ValintakoeOsallistuminenDTO(),
+        oppija, new ParametritDTO());
     assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
   }
 
@@ -419,36 +374,28 @@ public class HakemuksenKoetulosYhteenvetoTest {
 
     valintakoeOsallistuminenDTO.setHakutoiveet(Arrays.asList(hakutoiveDto, toinenHakutoiveDto));
 
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            valintakoeOsallistuminenDTO,
-            oppija,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), valintakoeOsallistuminenDTO, oppija,
+        new ParametritDTO());
 
-    assertEquals(
-        Osallistumistieto.OSALLISTUI,
+    assertEquals(Osallistumistieto.OSALLISTUI,
         p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
-    assertEquals(
-        Osallistumistieto.TOISESSA_HAKUTOIVEESSA,
+    assertEquals(Osallistumistieto.TOISESSA_HAKUTOIVEESSA,
         p.osallistumistieto("toinenHakukohdeOid", "kielikoe_fi").osallistumistieto);
 
     assertEquals("", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        "MERKITSEMATTA",
+    assertEquals("MERKITSEMATTA",
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
   }
 
   @Test
-  public void
-      testHyvaksyttyArvosanaEriHakemukseltaPiilottaaHylatynArvosananValintalaskennanJalkeenVaikkaSeOlisiUudempi() {
+  public void testHyvaksyttyArvosanaEriHakemukseltaPiilottaaHylatynArvosananValintalaskennanJalkeenVaikkaSeOlisiUudempi() {
     Oppija oppija = new Oppija();
 
     SuoritusJaArvosanat hyvaksyttySuoritus = new SuoritusJaArvosanat();
@@ -494,25 +441,18 @@ public class HakemuksenKoetulosYhteenvetoTest {
     h.setValinnanVaiheet(Collections.singletonList(vv));
     hylatynOsallistuminen.setHakutoiveet(Collections.singletonList(h));
 
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hylattyHakemusOid", "personOid", "etunimi",
-            // "sukunimi", new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            hylatynOsallistuminen,
-            oppija,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hylattyHakemusOid", "personOid", "etunimi",
+        // "sukunimi", new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), hylatynOsallistuminen, oppija,
+        new ParametritDTO());
     assertEquals("true", p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
-    assertEquals(
-        Osallistumistieto.TOISELLA_HAKEMUKSELLA,
+    assertEquals(Osallistumistieto.TOISELLA_HAKEMUKSELLA,
         p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
-    assertEquals(
-        "hyvaksyttyOrganisaatioOid",
+    assertEquals("hyvaksyttyOrganisaatioOid",
         p.osallistumistieto("hakukohdeOid", "kielikoe_fi").lahdeMyontajaOid.get());
   }
 
@@ -531,22 +471,17 @@ public class HakemuksenKoetulosYhteenvetoTest {
     h.setValinnanVaiheet(Collections.singletonList(vv));
     osallistuminen.setHakutoiveet(Collections.singletonList(h));
 
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            osallistuminen,
-            null,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), osallistuminen, null,
+        new ParametritDTO());
     assertTrue(p.applicationAdditionalDataDTO.getAdditionalData().containsKey("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
-    assertEquals(
-        Osallistumistieto.EI_KUTSUTTU,
+    assertEquals(Osallistumistieto.EI_KUTSUTTU,
         p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
   }
 
@@ -571,22 +506,16 @@ public class HakemuksenKoetulosYhteenvetoTest {
     vp.setVaatiiOsallistumisen(true);
     vp.setSyotettavissaKaikille(true);
 
-    HakemuksenKoetulosYhteenveto p =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(vp)),
-            osallistuminen,
-            null,
-            new ParametritDTO());
+    HakemuksenKoetulosYhteenveto p = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(vp)), osallistuminen, null, new ParametritDTO());
     assertTrue(p.applicationAdditionalDataDTO.getAdditionalData().containsKey("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.MERKITSEMATTA.toString(),
+    assertEquals(Osallistuminen.MERKITSEMATTA.toString(),
         p.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
-    assertEquals(
-        Osallistumistieto.OSALLISTUI,
+    assertEquals(Osallistumistieto.OSALLISTUI,
         p.osallistumistieto("hakukohdeOid", "kielikoe_fi").osallistumistieto);
   }
 
@@ -622,44 +551,28 @@ public class HakemuksenKoetulosYhteenvetoTest {
 
     oppija.setSuoritukset(Arrays.asList(todistusToinen, todistusTama));
 
-    HakemuksenKoetulosYhteenveto toinenEnsin =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            new ValintakoeOsallistuminenDTO(),
-            oppija,
-            new ParametritDTO());
-    assertEquals(
-        "true", toinenEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.OSALLISTUI.toString(),
-        toinenEnsin
-            .applicationAdditionalDataDTO
-            .getAdditionalData()
-            .get("kielikoe_fi-OSALLISTUMINEN"));
+    HakemuksenKoetulosYhteenveto toinenEnsin = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), new ValintakoeOsallistuminenDTO(),
+        oppija, new ParametritDTO());
+    assertEquals("true", toinenEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
+    assertEquals(Osallistuminen.OSALLISTUI.toString(),
+        toinenEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
 
     oppija.setSuoritukset(Arrays.asList(todistusTama, todistusToinen));
 
-    HakemuksenKoetulosYhteenveto tamaEnsin =
-        new HakemuksenKoetulosYhteenveto(
-            new Valintapisteet(
-                "hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
-            // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi", "sukunimi",
-            // new HashMap<>()),
-            Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)),
-            new ValintakoeOsallistuminenDTO(),
-            oppija,
-            new ParametritDTO());
-    assertEquals(
-        "true", tamaEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
-    assertEquals(
-        Osallistuminen.OSALLISTUI.toString(),
-        tamaEnsin
-            .applicationAdditionalDataDTO
-            .getAdditionalData()
-            .get("kielikoe_fi-OSALLISTUMINEN"));
+    HakemuksenKoetulosYhteenveto tamaEnsin = new HakemuksenKoetulosYhteenveto(
+        new Valintapisteet("hakemusOid", "personOid", "etunimi", "sukunimi", Collections.emptyList()),
+        // new ApplicationAdditionalDataDTO("hakemusOid", "personOid", "etunimi",
+        // "sukunimi",
+        // new HashMap<>()),
+        Pair.of("hakukohdeOid", Collections.singletonList(kielikoeFi)), new ValintakoeOsallistuminenDTO(),
+        oppija, new ParametritDTO());
+    assertEquals("true", tamaEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi"));
+    assertEquals(Osallistuminen.OSALLISTUI.toString(),
+        tamaEnsin.applicationAdditionalDataDTO.getAdditionalData().get("kielikoe_fi-OSALLISTUMINEN"));
   }
 }

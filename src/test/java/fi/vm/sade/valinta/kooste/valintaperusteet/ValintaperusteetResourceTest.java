@@ -23,15 +23,11 @@ public class ValintaperusteetResourceTest {
 
   private final String hakukohdeOid = "1.2.246.562.5.28143628072";
 
-  private final String root =
-      "http://localhost:"
-          + ValintaKoosteJetty.port
-          + "/valintalaskentakoostepalvelu/resources/V2valintaperusteet";
-  private final HttpResourceBuilder.WebClientExposingHttpResource
-      hakukohteenValintaperusteetResource =
-          new HttpResourceBuilder(getClass().getName())
-              .address(String.format("%s/hakukohde/%s/kayttaaValintalaskentaa", root, hakukohdeOid))
-              .buildExposingWebClientDangerously();
+  private final String root = "http://localhost:" + ValintaKoosteJetty.port
+      + "/valintalaskentakoostepalvelu/resources/V2valintaperusteet";
+  private final HttpResourceBuilder.WebClientExposingHttpResource hakukohteenValintaperusteetResource = new HttpResourceBuilder(
+      getClass().getName()).address(String.format("%s/hakukohde/%s/kayttaaValintalaskentaa", root, hakukohdeOid))
+          .buildExposingWebClientDangerously();
 
   @Before
   public void startServer() {
@@ -46,27 +42,23 @@ public class ValintaperusteetResourceTest {
 
   @Test
   public void onValinnanvaihtaEiValintalaskentaaMissaanJonossa() {
-    List<ValintaperusteetDTO> valintaperusteetDTOs =
-        createValintaperusteetDTOs(false, false, false, false);
+    List<ValintaperusteetDTO> valintaperusteetDTOs = createValintaperusteetDTOs(false, false, false, false);
     assertFalse(kayttaaValintalaskentaa(valintaperusteetDTOs));
   }
 
   @Test
   public void onValinnanvaihtaLaskentaaMuussaKuinViimeisessaVaiheessa() {
-    List<ValintaperusteetDTO> valintaperusteetDTOs =
-        createValintaperusteetDTOs(true, true, false, false);
+    List<ValintaperusteetDTO> valintaperusteetDTOs = createValintaperusteetDTOs(true, true, false, false);
     assertFalse(kayttaaValintalaskentaa(valintaperusteetDTOs));
   }
 
   @Test
   public void onValinnanvaihtaViimeisessaVaiheessaJonossaLaskenta() {
-    List<ValintaperusteetDTO> valintaperusteetDTOs =
-        createValintaperusteetDTOs(false, false, true, true);
+    List<ValintaperusteetDTO> valintaperusteetDTOs = createValintaperusteetDTOs(false, false, true, true);
     assertTrue(kayttaaValintalaskentaa(valintaperusteetDTOs));
   }
 
-  private List<ValintaperusteetDTO> createValintaperusteetDTOs(
-      boolean... kaytetaanValintalaskentaa) {
+  private List<ValintaperusteetDTO> createValintaperusteetDTOs(boolean... kaytetaanValintalaskentaa) {
     ValintaperusteetDTO peruste1 = new ValintaperusteetDTO();
     ValintaperusteetDTO peruste2 = new ValintaperusteetDTO();
 
@@ -79,14 +71,10 @@ public class ValintaperusteetResourceTest {
     vaihe1.setValinnanVaiheJarjestysluku(0);
     vaihe2.setValinnanVaiheJarjestysluku(1);
 
-    ValintatapajonoJarjestyskriteereillaDTO vaihe1jono1 =
-        new ValintatapajonoJarjestyskriteereillaDTO();
-    ValintatapajonoJarjestyskriteereillaDTO vaihe1jono2 =
-        new ValintatapajonoJarjestyskriteereillaDTO();
-    ValintatapajonoJarjestyskriteereillaDTO vaihe2jono1 =
-        new ValintatapajonoJarjestyskriteereillaDTO();
-    ValintatapajonoJarjestyskriteereillaDTO vaihe2jono2 =
-        new ValintatapajonoJarjestyskriteereillaDTO();
+    ValintatapajonoJarjestyskriteereillaDTO vaihe1jono1 = new ValintatapajonoJarjestyskriteereillaDTO();
+    ValintatapajonoJarjestyskriteereillaDTO vaihe1jono2 = new ValintatapajonoJarjestyskriteereillaDTO();
+    ValintatapajonoJarjestyskriteereillaDTO vaihe2jono1 = new ValintatapajonoJarjestyskriteereillaDTO();
+    ValintatapajonoJarjestyskriteereillaDTO vaihe2jono2 = new ValintatapajonoJarjestyskriteereillaDTO();
 
     vaihe1jono1.setKaytetaanValintalaskentaa(kaytetaanValintalaskentaa[0]);
     vaihe1jono2.setKaytetaanValintalaskentaa(kaytetaanValintalaskentaa[1]);

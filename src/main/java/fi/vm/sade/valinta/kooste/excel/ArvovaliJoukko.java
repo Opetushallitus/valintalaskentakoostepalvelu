@@ -12,22 +12,17 @@ public class ArvovaliJoukko {
   private final XSSFSheet sheet;
   private final XSSFDataValidationConstraint dvConstraint;
 
-  public ArvovaliJoukko(
-      Number min, Number max, XSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
+  public ArvovaliJoukko(Number min, Number max, XSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
     this.dvHelper = dvHelper;
     this.sheet = sheet;
 
-    this.dvConstraint =
-        (XSSFDataValidationConstraint)
-            dvHelper.createNumericConstraint(
-                ValidationType.DECIMAL, OperatorType.BETWEEN, min.toString(), max.toString());
+    this.dvConstraint = (XSSFDataValidationConstraint) dvHelper.createNumericConstraint(ValidationType.DECIMAL,
+        OperatorType.BETWEEN, min.toString(), max.toString());
   }
 
   public void addAddress(int row, int col) {
-    XSSFDataValidation validation =
-        (XSSFDataValidation)
-            dvHelper.createValidation(
-                dvConstraint, new org.apache.poi.ss.util.CellRangeAddressList(row, row, col, col));
+    XSSFDataValidation validation = (XSSFDataValidation) dvHelper.createValidation(dvConstraint,
+        new org.apache.poi.ss.util.CellRangeAddressList(row, row, col, col));
     // validation.setShowErrorBox(true);
     sheet.addValidationData(validation);
     validation.setSuppressDropDownArrow(false);

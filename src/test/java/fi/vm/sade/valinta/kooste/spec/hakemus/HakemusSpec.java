@@ -20,8 +20,7 @@ import java.util.stream.Collectors;
 public class HakemusSpec extends ConstantsSpec {
 
   public static class AdditionalDataBuilder {
-    private ApplicationAdditionalDataDTO applicationAdditionalDataDTO =
-        new ApplicationAdditionalDataDTO();
+    private ApplicationAdditionalDataDTO applicationAdditionalDataDTO = new ApplicationAdditionalDataDTO();
 
     public AdditionalDataBuilder() {
       applicationAdditionalDataDTO.setAdditionalData(Maps.newHashMap());
@@ -87,12 +86,8 @@ public class HakemusSpec extends ConstantsSpec {
     }
 
     public HakemusBuilder setVainSahkoinenViestinta(boolean vainSahkoinenViestinta) {
-      hakemus
-          .getAnswers()
-          .getLisatiedot()
-          .put(
-              HakuappHakemusWrapper.LUPA_SAHKOISEEN_VIESTINTAAN,
-              vainSahkoinenViestinta ? "true" : "false");
+      hakemus.getAnswers().getLisatiedot().put(HakuappHakemusWrapper.LUPA_SAHKOISEEN_VIESTINTAAN,
+          vainSahkoinenViestinta ? "true" : "false");
       return this;
     }
 
@@ -112,10 +107,7 @@ public class HakemusSpec extends ConstantsSpec {
     }
 
     public HakemusBuilder addHakutoive(String hakukohdeOid) {
-      hakemus
-          .getAnswers()
-          .getHakutoiveet()
-          .put("preference" + (index++) + "-Koulutus-id", hakukohdeOid);
+      hakemus.getAnswers().getHakutoiveet().put("preference" + (index++) + "-Koulutus-id", hakukohdeOid);
       return this;
     }
 
@@ -160,15 +152,11 @@ public class HakemusSpec extends ConstantsSpec {
     }
 
     public AtaruHakemusBuilder setHakutoiveet(List<String> oids) {
-      hakemus.setHakutoiveet(
-          oids.stream()
-              .map(
-                  oid -> {
-                    AtaruHakutoive hakutoive = new AtaruHakutoive();
-                    hakutoive.setHakukohdeOid(oid);
-                    return hakutoive;
-                  })
-              .collect(Collectors.toList()));
+      hakemus.setHakutoiveet(oids.stream().map(oid -> {
+        AtaruHakutoive hakutoive = new AtaruHakutoive();
+        hakutoive.setHakukohdeOid(oid);
+        return hakutoive;
+      }).collect(Collectors.toList()));
       return this;
     }
 

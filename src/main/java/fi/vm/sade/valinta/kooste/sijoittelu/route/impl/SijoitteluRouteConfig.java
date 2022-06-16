@@ -19,22 +19,12 @@ public class SijoitteluRouteConfig {
 
   @Bean
   public JatkuvaSijoitteluRouteImpl getJatkuvaSijoitteluRouteImpl(
-      @Value(
-              "timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}")
-          String jatkuvaSijoitteluTimer,
-      @Value(
-              "seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue")
-          String jatkuvaSijoitteluQueue,
-      SijoitteleAsyncResource sijoitteluAsyncResource,
-      SijoittelunSeurantaResource sijoittelunSeurantaResource,
-      @Qualifier("jatkuvaSijoitteluDelayedQueue")
-          DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
-    return new JatkuvaSijoitteluRouteImpl(
-        jatkuvaSijoitteluTimer,
-        jatkuvaSijoitteluQueue,
-        sijoitteluAsyncResource,
-        sijoittelunSeurantaResource,
-        jatkuvaSijoitteluDelayedQueue);
+      @Value("timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}") String jatkuvaSijoitteluTimer,
+      @Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
+      SijoitteleAsyncResource sijoitteluAsyncResource, SijoittelunSeurantaResource sijoittelunSeurantaResource,
+      @Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
+    return new JatkuvaSijoitteluRouteImpl(jatkuvaSijoitteluTimer, jatkuvaSijoitteluQueue, sijoitteluAsyncResource,
+        sijoittelunSeurantaResource, jatkuvaSijoitteluDelayedQueue);
   }
 
   @Bean(name = "jatkuvaSijoitteluDelayedQueue")
@@ -45,9 +35,8 @@ public class SijoitteluRouteConfig {
   @Bean
   public SijoitteluAktivointiRoute getSijoitteluAktivointiRoute(
       @Qualifier("javaDslCamelContext") CamelContext context,
-      @Value(SijoitteluAktivointiRoute.SIJOITTELU_REITTI) String sijoitteluAktivoi)
-      throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint(sijoitteluAktivoi), SijoitteluAktivointiRoute.class);
+      @Value(SijoitteluAktivointiRoute.SIJOITTELU_REITTI) String sijoitteluAktivoi) throws Exception {
+    return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(sijoitteluAktivoi),
+        SijoitteluAktivointiRoute.class);
   }
 }

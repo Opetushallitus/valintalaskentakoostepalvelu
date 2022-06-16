@@ -12,16 +12,8 @@ public class HyvaksymiskirjeDTO {
   private final String palautusAika;
   private final boolean vainTulosEmailinKieltaneet;
 
-  public HyvaksymiskirjeDTO(
-      String tarjoajaOid,
-      String sisalto,
-      String templateName,
-      String tag,
-      String hakukohdeOid,
-      String hakuOid,
-      Long sijoitteluajoId,
-      String palautusPvm,
-      String palautusAika,
+  public HyvaksymiskirjeDTO(String tarjoajaOid, String sisalto, String templateName, String tag, String hakukohdeOid,
+      String hakuOid, Long sijoitteluajoId, String palautusPvm, String palautusAika,
       boolean vainTulosEmailinKieltaneet) {
     this.tarjoajaOid = tarjoajaOid;
     this.sisalto = sisalto;

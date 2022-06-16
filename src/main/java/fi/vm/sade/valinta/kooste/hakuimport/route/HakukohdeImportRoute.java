@@ -12,8 +12,7 @@ import org.springframework.security.core.Authentication;
 public interface HakukohdeImportRoute {
   final String DIRECT_HAKUKOHDE_IMPORT = "direct:hakuimport_tarjonnasta_koostepalvelulle";
 
-  Future<Void> asyncAktivoiHakukohdeImport(
-      @Body String hakukohdeOid,
+  Future<Void> asyncAktivoiHakukohdeImport(@Body String hakukohdeOid,
       @Property(PROPERTY_VALVOMO_PROSESSI) HakuImportProsessi prosessi,
       @Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
 }

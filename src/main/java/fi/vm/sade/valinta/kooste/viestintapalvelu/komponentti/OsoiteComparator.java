@@ -6,7 +6,8 @@ import java.util.Comparator;
 public class OsoiteComparator implements Comparator<Osoite> {
   public static final OsoiteComparator ASCENDING = new OsoiteComparator();
 
-  private OsoiteComparator() {}
+  private OsoiteComparator() {
+  }
 
   @Override
   public int compare(Osoite o1, Osoite o2) {

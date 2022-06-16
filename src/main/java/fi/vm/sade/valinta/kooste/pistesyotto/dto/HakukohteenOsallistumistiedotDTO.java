@@ -25,29 +25,18 @@ public class HakukohteenOsallistumistiedotDTO {
 
   @JsonCreator
   public HakukohteenOsallistumistiedotDTO(
-      @JsonProperty("valintakokeidenOsallistumistiedot")
-          Map<String, KokeenOsallistumistietoDTO> valintakokeidenOsallistumistiedot) {
+      @JsonProperty("valintakokeidenOsallistumistiedot") Map<String, KokeenOsallistumistietoDTO> valintakokeidenOsallistumistiedot) {
     this.valintakokeidenOsallistumistiedot = valintakokeidenOsallistumistiedot;
   }
 
-  public HakukohteenOsallistumistiedotDTO(
-      HakutoiveDTO hakutoiveDTO,
-      Map<String, Pair<Suoritus, Arvosana>> kielikoetulokset,
-      String hakemusOid,
+  public HakukohteenOsallistumistiedotDTO(HakutoiveDTO hakutoiveDTO,
+      Map<String, Pair<Suoritus, Arvosana>> kielikoetulokset, String hakemusOid,
       List<HakutoiveDTO> kaikkiOsallistumisenHakutoiveet) {
-    this.valintakokeidenOsallistumistiedot =
-        hakutoiveDTO.getValinnanVaiheet().stream()
-            .flatMap(v -> v.getValintakokeet().stream())
-            .collect(
-                Collectors.toMap(
-                    k -> k.getValintakoeTunniste(),
-                    k ->
-                        new KokeenOsallistumistietoDTO(
-                            k,
-                            kielikoetulokset.get(k.getValintakoeTunniste()),
-                            hakemusOid,
-                            hakutoiveDTO.getHakukohdeOid(),
-                            kaikkiOsallistumisenHakutoiveet)));
+    this.valintakokeidenOsallistumistiedot = hakutoiveDTO.getValinnanVaiheet().stream()
+        .flatMap(v -> v.getValintakokeet().stream())
+        .collect(Collectors.toMap(k -> k.getValintakoeTunniste(),
+            k -> new KokeenOsallistumistietoDTO(k, kielikoetulokset.get(k.getValintakoeTunniste()),
+                hakemusOid, hakutoiveDTO.getHakukohdeOid(), kaikkiOsallistumisenHakutoiveet)));
   }
 
   public HakukohteenOsallistumistiedotDTO(ValintaperusteDTO v) {
@@ -56,17 +45,14 @@ public class HakukohteenOsallistumistiedotDTO {
   }
 
   public HakukohteenOsallistumistiedotDTO paivitaValintaperusteidenTiedolla(ValintaperusteDTO v) {
-    Map<String, KokeenOsallistumistietoDTO> m =
-        new HashMap<>(this.valintakokeidenOsallistumistiedot);
-    m.compute(
-        v.getTunniste(),
-        (tunniste, koe) -> {
-          if (koe == null) {
-            return new KokeenOsallistumistietoDTO(v);
-          } else {
-            return koe.paivitaValintaperusteidenTiedolla(v);
-          }
-        });
+    Map<String, KokeenOsallistumistietoDTO> m = new HashMap<>(this.valintakokeidenOsallistumistiedot);
+    m.compute(v.getTunniste(), (tunniste, koe) -> {
+      if (koe == null) {
+        return new KokeenOsallistumistietoDTO(v);
+      } else {
+        return koe.paivitaValintaperusteidenTiedolla(v);
+      }
+    });
     return new HakukohteenOsallistumistiedotDTO(m);
   }
 
@@ -81,15 +67,13 @@ public class HakukohteenOsallistumistiedotDTO {
     public final Optional<String> lahdeMyontajaOid;
 
     @JsonCreator
-    public KokeenOsallistumistietoDTO(
-        @JsonProperty("osallistumistieto") Osallistumistieto osallistumistieto,
+    public KokeenOsallistumistietoDTO(@JsonProperty("osallistumistieto") Osallistumistieto osallistumistieto,
         @JsonProperty("lahdeHakemusOid") Optional<String> lahdeHakemusOid,
         @JsonProperty("lahdeMyontajaOid") Optional<String> lahdeMyontajaOid) {
       if (osallistumistieto == Osallistumistieto.EI_KUTSUTTU
           && (lahdeHakemusOid.isPresent() || lahdeMyontajaOid.isPresent())) {
         throw new IllegalArgumentException(
-            String.format(
-                "Jos ei kutsuttu, lähdehakemusta ja -myöntäjää ei tule asettaa: %s, %s, %s",
+            String.format("Jos ei kutsuttu, lähdehakemusta ja -myöntäjää ei tule asettaa: %s, %s, %s",
                 osallistumistieto, lahdeHakemusOid, lahdeMyontajaOid));
       }
       this.osallistumistieto = osallistumistieto;
@@ -97,12 +81,8 @@ public class HakukohteenOsallistumistiedotDTO {
       this.lahdeMyontajaOid = lahdeMyontajaOid;
     }
 
-    public KokeenOsallistumistietoDTO(
-        ValintakoeDTO koe,
-        Pair<Suoritus, Arvosana> kielikoetulos,
-        String hakemusOid,
-        String tamanHakutoiveenOid,
-        List<HakutoiveDTO> kaikkiOsallistumisenHakutoiveet) {
+    public KokeenOsallistumistietoDTO(ValintakoeDTO koe, Pair<Suoritus, Arvosana> kielikoetulos, String hakemusOid,
+        String tamanHakutoiveenOid, List<HakutoiveDTO> kaikkiOsallistumisenHakutoiveet) {
       switch (koe.getOsallistuminenTulos().getOsallistuminen()) {
         case OSALLISTUU:
         case EI_VAADITA:
@@ -121,8 +101,8 @@ public class HakukohteenOsallistumistiedotDTO {
               this.lahdeHakemusOid = Optional.of(lahdeHakemusOid);
             }
             this.lahdeMyontajaOid = Optional.of(kielikoetulos.getRight().getSource());
-          } else if (sisaltaaOsallistumisenToisessaHakutoiveessa(
-              kaikkiOsallistumisenHakutoiveet, tamanHakutoiveenOid, koe)) {
+          } else if (sisaltaaOsallistumisenToisessaHakutoiveessa(kaikkiOsallistumisenHakutoiveet,
+              tamanHakutoiveenOid, koe)) {
             this.osallistumistieto = Osallistumistieto.TOISESSA_HAKUTOIVEESSA;
             this.lahdeHakemusOid = Optional.empty();
             this.lahdeMyontajaOid = Optional.empty();
@@ -138,35 +118,27 @@ public class HakukohteenOsallistumistiedotDTO {
           this.lahdeMyontajaOid = Optional.empty();
           break;
         default:
-          throw new RuntimeException(
-              String.format(
-                  "Odottamaton koeosallistumisen tila %s",
-                  koe.getOsallistuminenTulos().getOsallistuminen()));
+          throw new RuntimeException(String.format("Odottamaton koeosallistumisen tila %s",
+              koe.getOsallistuminenTulos().getOsallistuminen()));
       }
     }
 
-    private boolean sisaltaaOsallistumisenToisessaHakutoiveessa(
-        List<HakutoiveDTO> kaikkiOsallistumisenHakutoiveet,
-        String tamanHakutoiveenOid,
-        ValintakoeDTO tamaKoe) {
+    private boolean sisaltaaOsallistumisenToisessaHakutoiveessa(List<HakutoiveDTO> kaikkiOsallistumisenHakutoiveet,
+        String tamanHakutoiveenOid, ValintakoeDTO tamaKoe) {
       return kaikkiOsallistumisenHakutoiveet.stream()
           .filter(toive -> !tamanHakutoiveenOid.equals(toive.getHakukohdeOid()))
           .flatMap(toive -> toive.getValinnanVaiheet().stream())
           .flatMap(vaihe -> vaihe.getValintakokeet().stream())
-          .filter(
-              koeEriToiveelta ->
-                  koeEriToiveelta.getValintakoeTunniste().equals(tamaKoe.getValintakoeTunniste()))
-          .anyMatch(
-              samaKoeEriToiveelta ->
-                  Osallistuminen.OSALLISTUU.equals(
-                      samaKoeEriToiveelta.getOsallistuminenTulos().getOsallistuminen()));
+          .filter(koeEriToiveelta -> koeEriToiveelta.getValintakoeTunniste()
+              .equals(tamaKoe.getValintakoeTunniste()))
+          .anyMatch(samaKoeEriToiveelta -> Osallistuminen.OSALLISTUU
+              .equals(samaKoeEriToiveelta.getOsallistuminenTulos().getOsallistuminen()));
     }
 
     public KokeenOsallistumistietoDTO(ValintaperusteDTO v) {
-      this.osallistumistieto =
-          Boolean.TRUE.equals(v.getSyotettavissaKaikille())
-              ? Osallistumistieto.OSALLISTUI
-              : Osallistumistieto.EI_KUTSUTTU;
+      this.osallistumistieto = Boolean.TRUE.equals(v.getSyotettavissaKaikille())
+          ? Osallistumistieto.OSALLISTUI
+          : Osallistumistieto.EI_KUTSUTTU;
       this.lahdeHakemusOid = Optional.empty();
       this.lahdeMyontajaOid = Optional.empty();
     }

@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource {
 
-  private static AtomicReference<OrganisaatioTyyppiHierarkia> hierarkiaRef =
-      new AtomicReference<>();
+  private static AtomicReference<OrganisaatioTyyppiHierarkia> hierarkiaRef = new AtomicReference<>();
 
   public static void setOrganisaationTyyppiHierarkia(OrganisaatioTyyppiHierarkia hierarkia) {
     hierarkiaRef.set(hierarkia);
@@ -31,8 +30,7 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
   }
 
   @Override
-  public CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(
-      String organisaatioOid) {
+  public CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(String organisaatioOid) {
     return CompletableFuture.completedFuture(hierarkiaRef.get());
   }
 

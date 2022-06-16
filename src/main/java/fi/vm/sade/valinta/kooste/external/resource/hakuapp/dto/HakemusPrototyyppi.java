@@ -200,7 +200,10 @@ public class HakemusPrototyyppi {
     return syntymaAika.format(ErillishakuRivi.SYNTYMAAIKAFORMAT);
   }
 
-  /** @return ***HETU*** if {@link #henkilotunnus} is not empty, otherwise empty string */
+  /**
+   * @return ***HETU*** if {@link #henkilotunnus} is not empty, otherwise empty
+   *         string
+   */
   private String getCensoredHETUIfExists() {
     if (this.henkilotunnus != null && this.henkilotunnus.length() > 0) {
       return "***HETU***";
@@ -211,63 +214,14 @@ public class HakemusPrototyyppi {
 
   @Override
   public String toString() {
-    return "HakemusPrototyyppi{"
-        + "hakijaOid='"
-        + hakijaOid
-        + '\''
-        + ", etunimi='"
-        + etunimi
-        + '\''
-        + ", sukunimi='"
-        + sukunimi
-        + '\''
-        + ", henkilotunnus='"
-        + getCensoredHETUIfExists()
-        + '\''
-        + ", sahkoposti='"
-        + sahkoposti
-        + '\''
-        + ", syntymaAika='"
-        + syntymaAika
-        + '\''
-        + ", sukupuoli='"
-        + sukupuoli
-        + '\''
-        + ", aidinkieli='"
-        + aidinkieli
-        + '\''
-        + ", asiointikieli='"
-        + asiointikieli
-        + '\''
-        + ", puhelinnumero='"
-        + puhelinnumero
-        + '\''
-        + ", osoite='"
-        + osoite
-        + '\''
-        + ", postinumero='"
-        + postinumero
-        + '\''
-        + ", postitoimipaikka='"
-        + postitoimipaikka
-        + '\''
-        + ", asuinmaa='"
-        + asuinmaa
-        + '\''
-        + ", kansalaisuus='"
-        + kansalaisuus
-        + '\''
-        + ", kotikunta='"
-        + kotikunta
-        + '\''
-        + ", toisenAsteenSuoritus="
-        + toisenAsteenSuoritus
-        + ", toisenAsteenSuoritusmaa='"
-        + toisenAsteenSuoritusmaa
-        + '\''
-        + ", maksuvelvollisuus='"
-        + maksuvelvollisuus
-        + '\''
-        + '}';
+    return "HakemusPrototyyppi{" + "hakijaOid='" + hakijaOid + '\'' + ", etunimi='" + etunimi + '\''
+        + ", sukunimi='" + sukunimi + '\'' + ", henkilotunnus='" + getCensoredHETUIfExists() + '\''
+        + ", sahkoposti='" + sahkoposti + '\'' + ", syntymaAika='" + syntymaAika + '\'' + ", sukupuoli='"
+        + sukupuoli + '\'' + ", aidinkieli='" + aidinkieli + '\'' + ", asiointikieli='" + asiointikieli + '\''
+        + ", puhelinnumero='" + puhelinnumero + '\'' + ", osoite='" + osoite + '\'' + ", postinumero='"
+        + postinumero + '\'' + ", postitoimipaikka='" + postitoimipaikka + '\'' + ", asuinmaa='" + asuinmaa
+        + '\'' + ", kansalaisuus='" + kansalaisuus + '\'' + ", kotikunta='" + kotikunta + '\''
+        + ", toisenAsteenSuoritus=" + toisenAsteenSuoritus + ", toisenAsteenSuoritusmaa='"
+        + toisenAsteenSuoritusmaa + '\'' + ", maksuvelvollisuus='" + maksuvelvollisuus + '\'' + '}';
   }
 }

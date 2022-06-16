@@ -16,23 +16,18 @@ public class Sijoitus {
   private String varasija;
   private Pisteet pisteet;
 
-  public Sijoitus(
-      HakutoiveenValintatapajonoDTO valintatapajono,
-      String varasijaTeksti,
-      Pisteet pisteet,
+  public Sijoitus(HakutoiveenValintatapajonoDTO valintatapajono, String varasijaTeksti, Pisteet pisteet,
       String preferoituKielikoodi) {
     this.nimi = valintatapajono.getValintatapajonoNimi();
     this.tila = HakemusUtil.tilaConverter(valintatapajono, preferoituKielikoodi);
     this.hyvaksytty = valintatapajono.getTila().isHyvaksytty();
-    this.tilanKuvaus =
-        (valintatapajono.getTila() == HakemuksenTila.HYLATTY
-                || valintatapajono.getTila() == HakemuksenTila.PERUUNTUNUT)
+    this.tilanKuvaus = (valintatapajono.getTila() == HakemuksenTila.HYLATTY
+        || valintatapajono.getTila() == HakemuksenTila.PERUUNTUNUT)
             ? new Teksti(valintatapajono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, null)
             : null;
-    this.hyvaksymisenEhto =
-        Teksti.ehdollisenHyvaksymisenEhto(valintatapajono).getTeksti(preferoituKielikoodi, null);
-    this.oma =
-        Optional.ofNullable(valintatapajono.getHyvaksytty()).map(Object::toString).orElse(null);
+    this.hyvaksymisenEhto = Teksti.ehdollisenHyvaksymisenEhto(valintatapajono).getTeksti(preferoituKielikoodi,
+        null);
+    this.oma = Optional.ofNullable(valintatapajono.getHyvaksytty()).map(Object::toString).orElse(null);
     this.varasija = varasijaTeksti;
     this.pisteet = pisteet;
   }

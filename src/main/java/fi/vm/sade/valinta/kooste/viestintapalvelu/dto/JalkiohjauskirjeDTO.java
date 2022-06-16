@@ -8,12 +8,7 @@ public class JalkiohjauskirjeDTO {
   private final String hakuOid;
   private final String kielikoodi;
 
-  public JalkiohjauskirjeDTO(
-      String tarjoajaOid,
-      String sisalto,
-      String templateName,
-      String tag,
-      String hakuOid,
+  public JalkiohjauskirjeDTO(String tarjoajaOid, String sisalto, String templateName, String tag, String hakuOid,
       String kielikoodi) {
     this.tarjoajaOid = tarjoajaOid;
     this.sisalto = sisalto;

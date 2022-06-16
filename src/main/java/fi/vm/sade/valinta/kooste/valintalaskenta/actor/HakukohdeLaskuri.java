@@ -12,8 +12,7 @@ public class HakukohdeLaskuri extends Laskuri {
 
   public HakukohdeLaskuri(int hakukohteita) {
     super(hakukohteita);
-    this.duplicateChecker =
-        BloomFilter.create(Funnels.stringFunnel(Charset.forName("UTF-8")), hakukohteita);
+    this.duplicateChecker = BloomFilter.create(Funnels.stringFunnel(Charset.forName("UTF-8")), hakukohteita);
   }
 
   public boolean done(String hakukohdeOid) {
@@ -29,11 +28,8 @@ public class HakukohdeLaskuri extends Laskuri {
     int l = tiputaLaskuria();
     if (l < 0) {
       int yhteensa = getYhteensa();
-      LOG.error(
-          "Hakukohteita merkitty valmiiksi odotettua enemman! {}/{} eli ylimaaraisia merkintoja on {}",
-          (-l) + yhteensa,
-          yhteensa,
-          -l);
+      LOG.error("Hakukohteita merkitty valmiiksi odotettua enemman! {}/{} eli ylimaaraisia merkintoja on {}",
+          (-l) + yhteensa, yhteensa, -l);
       return false;
     }
     boolean ready = l == 0;

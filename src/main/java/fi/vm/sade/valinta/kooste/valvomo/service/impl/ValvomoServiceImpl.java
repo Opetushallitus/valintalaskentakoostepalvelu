@@ -38,10 +38,8 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
   }
 
   @Override
-  public void fail(
-      @Property(PROPERTY_VALVOMO_PROSESSI) T process,
-      @Property(Exchange.EXCEPTION_CAUGHT) Exception exception,
-      @Header("message") String message) {
+  public void fail(@Property(PROPERTY_VALVOMO_PROSESSI) T process,
+      @Property(Exchange.EXCEPTION_CAUGHT) Exception exception, @Header("message") String message) {
     StringBuffer buffer = newBufferWithDate("VIRHE");
     if (exception == null) {
       LOG.info("Process failed {}", process);
@@ -52,13 +50,8 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
     }
     if (exception != null && process instanceof ExceptionStack) {
       LOG.error("fail got exception", exception);
-      StringBuffer s =
-          new StringBuffer()
-              .append(message)
-              .append(": ")
-              .append(exception.getClass())
-              .append(": ")
-              .append(exception.getMessage());
+      StringBuffer s = new StringBuffer().append(message).append(": ").append(exception.getClass()).append(": ")
+          .append(exception.getMessage());
       if (!((ExceptionStack) process).addException(s.toString())) {
         // already in process buffer was not first
         return;
@@ -69,16 +62,13 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
 
   @Override
   public void finish(@Property(PROPERTY_VALVOMO_PROSESSI) T prosessi) {
-    processBuffer.add(
-        new ProsessiJaStatus<T>(
-            prosessi, newBufferWithDate("LOPETETTU").toString(), Status.FINISHED));
+    processBuffer
+        .add(new ProsessiJaStatus<T>(prosessi, newBufferWithDate("LOPETETTU").toString(), Status.FINISHED));
   }
 
   @Override
   public void start(@Property(PROPERTY_VALVOMO_PROSESSI) T prosessi) {
-    processBuffer.add(
-        new ProsessiJaStatus<T>(
-            prosessi, newBufferWithDate("ALOITETTU").toString(), Status.STARTED));
+    processBuffer.add(new ProsessiJaStatus<T>(prosessi, newBufferWithDate("ALOITETTU").toString(), Status.STARTED));
   }
 
   public ProsessiJaStatus<T> getAjossaOlevaProsessiJaStatus() {
@@ -94,8 +84,7 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
 
   @Override
   public Collection<T> getUusimmatProsessit() {
-    return Collections2.transform(
-        Lists.reverse(Lists.newArrayList(processBuffer)),
+    return Collections2.transform(Lists.reverse(Lists.newArrayList(processBuffer)),
         new Function<ProsessiJaStatus<T>, T>() {
           public T apply(ProsessiJaStatus<T> input) {
             return input.getProsessi();

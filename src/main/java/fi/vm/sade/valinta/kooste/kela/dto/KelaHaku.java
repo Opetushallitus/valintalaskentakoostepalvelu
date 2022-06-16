@@ -25,24 +25,16 @@ public class KelaHaku extends KelaAbstraktiHaku {
   private static final Logger LOG = LoggerFactory.getLogger(KelaHaku.class);
   private final Collection<ValintaTulosServiceDto> hakijat;
 
-  public KelaHaku(
-      Collection<ValintaTulosServiceDto> hakijat, Haku haku, PaivamaaraSource paivamaaraSource) {
+  public KelaHaku(Collection<ValintaTulosServiceDto> hakijat, Haku haku, PaivamaaraSource paivamaaraSource) {
     super(haku, paivamaaraSource);
     this.hakijat = hakijat;
   }
 
   @Override
-  public Collection<KelaHakijaRivi> createHakijaRivit(
-      Date alkuPvm,
-      Date loppuPvm,
-      String hakuOid,
-      KelaProsessi prosessi,
-      HenkilotietoSource henkilotietoSource,
-      HakukohdeSource hakukohdeSource,
-      LinjakoodiSource linjakoodiSource,
-      OppilaitosSource oppilaitosSource,
-      TutkinnontasoSource tutkinnontasoSource,
-      TilaSource tilaSource) {
+  public Collection<KelaHakijaRivi> createHakijaRivit(Date alkuPvm, Date loppuPvm, String hakuOid,
+      KelaProsessi prosessi, HenkilotietoSource henkilotietoSource, HakukohdeSource hakukohdeSource,
+      LinjakoodiSource linjakoodiSource, OppilaitosSource oppilaitosSource,
+      TutkinnontasoSource tutkinnontasoSource, TilaSource tilaSource) {
 
     Collection<KelaHakijaRivi> valitut = Lists.newArrayList();
     prosessi.setKokonaistyo(hakijat.size() - 1);
@@ -50,99 +42,56 @@ public class KelaHaku extends KelaAbstraktiHaku {
       prosessi.inkrementoiTehtyjaToita();
       hakija.getHakutoiveet().stream()
           .filter(h -> h != null && h.getValintatila() != null && h.getVastaanottotila() != null)
-          .filter(
-              hakutoive ->
-                  hakutoive.getValintatila().isHyvaksytty()
-                      && hakutoive.getVastaanottotila().isVastaanottanut())
-          .findFirst()
-          .ifPresent(
-              hakutoive -> {
-                HenkiloPerustietoDto henkilotiedot =
-                    henkilotietoSource.getByPersonOid(hakija.getHakijaOid());
-                String hakukohdeOid = hakutoive.getHakukohdeOid();
-                AbstractHakukohde hakuKohde = hakukohdeSource.getHakukohdeByOid(hakukohdeOid);
-                final String etunimi = henkilotiedot.getEtunimet();
-                final String sukunimi = henkilotiedot.getSukunimi();
-                final String henkilotunnus = henkilotiedot.getHetu();
-                final String syntymaaika =
-                    henkilotiedot.getSyntymaaika() == null
-                        ? ""
-                        : henkilotiedot.getSyntymaaika().toString();
-                final Date lukuvuosi = getPaivamaaraSource().lukuvuosi(getHaku(), hakukohdeOid);
-                final Date poimintapaivamaara = getPaivamaaraSource().poimintapaivamaara(getHaku());
+          .filter(hakutoive -> hakutoive.getValintatila().isHyvaksytty()
+              && hakutoive.getVastaanottotila().isVastaanottanut())
+          .findFirst().ifPresent(hakutoive -> {
+            HenkiloPerustietoDto henkilotiedot = henkilotietoSource.getByPersonOid(hakija.getHakijaOid());
+            String hakukohdeOid = hakutoive.getHakukohdeOid();
+            AbstractHakukohde hakuKohde = hakukohdeSource.getHakukohdeByOid(hakukohdeOid);
+            final String etunimi = henkilotiedot.getEtunimet();
+            final String sukunimi = henkilotiedot.getSukunimi();
+            final String henkilotunnus = henkilotiedot.getHetu();
+            final String syntymaaika = henkilotiedot.getSyntymaaika() == null
+                ? ""
+                : henkilotiedot.getSyntymaaika().toString();
+            final Date lukuvuosi = getPaivamaaraSource().lukuvuosi(getHaku(), hakukohdeOid);
+            final Date poimintapaivamaara = getPaivamaaraSource().poimintapaivamaara(getHaku());
 
-                Date valintapaivamaara =
-                    tilaSource.getVastaanottopvm(
-                        hakija.getHakemusOid(),
-                        hakuOid,
-                        hakukohdeOid,
-                        hakutoive.getValintatapajonoOid());
+            Date valintapaivamaara = tilaSource.getVastaanottopvm(hakija.getHakemusOid(), hakuOid,
+                hakukohdeOid, hakutoive.getValintatapajonoOid());
 
-                if (valintapaivamaara == null) {
-                  LOG.error(
-                      "ERROR vastaanottopaivamaaraa ei löytynyt (tila ei VASTAANOTTANUT_SITOVASTI tai EHDOLLISESTI_VASTAANOTTANUT) :"
-                          + hakutoive.getTarjoajaOid()
-                          + ":"
-                          + sukunimi
-                          + " "
-                          + etunimi
-                          + "("
-                          + henkilotunnus
-                          + ") hakukohde:"
-                          + hakukohdeOid
-                          + " ");
-                  return;
-                }
+            if (valintapaivamaara == null) {
+              LOG.error(
+                  "ERROR vastaanottopaivamaaraa ei löytynyt (tila ei VASTAANOTTANUT_SITOVASTI tai EHDOLLISESTI_VASTAANOTTANUT) :"
+                      + hakutoive.getTarjoajaOid() + ":" + sukunimi + " " + etunimi + "("
+                      + henkilotunnus + ") hakukohde:" + hakukohdeOid + " ");
+              return;
+            }
 
-                if (valintapaivamaara == null
-                    || valintapaivamaara.compareTo(alkuPvm) < 0
-                    || valintapaivamaara.compareTo(loppuPvm) >= 0) {
-                  return;
-                }
+            if (valintapaivamaara == null || valintapaivamaara.compareTo(alkuPvm) < 0
+                || valintapaivamaara.compareTo(loppuPvm) >= 0) {
+              return;
+            }
 
-                Iterator<String> i = hakuKohde.tarjoajaOids.iterator();
-                String organisaatioOid = i.hasNext() ? i.next() : null;
-                String oppilaitosnumero = "XXXXX";
+            Iterator<String> i = hakuKohde.tarjoajaOids.iterator();
+            String organisaatioOid = i.hasNext() ? i.next() : null;
+            String oppilaitosnumero = "XXXXX";
 
-                if (organisaatioOid == null || organisaatioOid.equalsIgnoreCase("undefined")) {
-                  LOG.error(
-                      "ERROR : tarjoaja :'"
-                          + hakutoive.getTarjoajaOid()
-                          + "':"
-                          + sukunimi
-                          + " "
-                          + etunimi
-                          + "("
-                          + henkilotunnus
-                          + ") hakukohde:"
-                          + hakukohdeOid
-                          + " "
-                          + " oppilaitosnumero will be marked as X");
-                } else {
-                  oppilaitosnumero = oppilaitosSource.getOppilaitosnumero(organisaatioOid);
-                }
+            if (organisaatioOid == null || organisaatioOid.equalsIgnoreCase("undefined")) {
+              LOG.error("ERROR : tarjoaja :'" + hakutoive.getTarjoajaOid() + "':" + sukunimi + " "
+                  + etunimi + "(" + henkilotunnus + ") hakukohde:" + hakukohdeOid + " "
+                  + " oppilaitosnumero will be marked as X");
+            } else {
+              oppilaitosnumero = oppilaitosSource.getOppilaitosnumero(organisaatioOid);
+            }
 
-                final TasoJaLaajuusDTO tutkinnontaso =
-                    tutkinnontasoSource.getTutkinnontaso(hakukohdeOid);
-                final String siirtotunnus = tutkinnontasoSource.getKoulutusaste(hakukohdeOid);
+            final TasoJaLaajuusDTO tutkinnontaso = tutkinnontasoSource.getTutkinnontaso(hakukohdeOid);
+            final String siirtotunnus = tutkinnontasoSource.getKoulutusaste(hakukohdeOid);
 
-                valitut.add(
-                    new KelaHakijaRivi(
-                        hakija.getHakemusOid(),
-                        siirtotunnus,
-                        etunimi,
-                        sukunimi,
-                        henkilotunnus,
-                        lukuvuosi,
-                        poimintapaivamaara,
-                        valintapaivamaara,
-                        oppilaitosnumero,
-                        organisaatioOid,
-                        hakuOid,
-                        hakukohdeOid,
-                        syntymaaika,
-                        tutkinnontaso));
-              });
+            valitut.add(new KelaHakijaRivi(hakija.getHakemusOid(), siirtotunnus, etunimi, sukunimi,
+                henkilotunnus, lukuvuosi, poimintapaivamaara, valintapaivamaara, oppilaitosnumero,
+                organisaatioOid, hakuOid, hakukohdeOid, syntymaaika, tutkinnontaso));
+          });
     }
     return valitut;
   }

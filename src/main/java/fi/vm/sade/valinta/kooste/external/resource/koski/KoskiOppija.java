@@ -31,8 +31,7 @@ public class KoskiOppija {
     this.henkilö = henkilö;
   }
 
-  public void poistaMuuntyyppisetOpiskeluoikeudetKuin(
-      Set<String> kiinnostavatOpiskeluoikeusTyypit) {
+  public void poistaMuuntyyppisetOpiskeluoikeudetKuin(Set<String> kiinnostavatOpiskeluoikeusTyypit) {
     setOpiskeluoikeudet(haeOpiskeluoikeudet(kiinnostavatOpiskeluoikeusTyypit));
   }
 
@@ -41,13 +40,11 @@ public class KoskiOppija {
       return null;
     }
     JsonArray tulos = new JsonArray();
-    opiskeluoikeudet.forEach(
-        opiskeluoikeus -> {
-          if (koskenOpiskeluoikeusTyypit.contains(
-              OpiskeluoikeusJsonUtil.tyypinKoodiarvo(opiskeluoikeus))) {
-            tulos.add(opiskeluoikeus);
-          }
-        });
+    opiskeluoikeudet.forEach(opiskeluoikeus -> {
+      if (koskenOpiskeluoikeusTyypit.contains(OpiskeluoikeusJsonUtil.tyypinKoodiarvo(opiskeluoikeus))) {
+        tulos.add(opiskeluoikeus);
+      }
+    });
     return tulos;
   }
 
@@ -66,19 +63,12 @@ public class KoskiOppija {
   }
 
   public static class OpiskeluoikeusJsonUtil {
-    private static final DateTimeFormatter OPISKELUOIKEUDEN_AIKALEIMA_FORMAT =
-        new DateTimeFormatterBuilder()
-            .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
-            .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
-            .toFormatter();
+    private static final DateTimeFormatter OPISKELUOIKEUDEN_AIKALEIMA_FORMAT = new DateTimeFormatterBuilder()
+        .appendPattern("yyyy-MM-dd'T'HH:mm:ss").appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
+        .toFormatter();
 
     public static String tyypinKoodiarvo(JsonElement opiskeluoikeus) {
-      return opiskeluoikeus
-          .getAsJsonObject()
-          .get("tyyppi")
-          .getAsJsonObject()
-          .get("koodiarvo")
-          .getAsString();
+      return opiskeluoikeus.getAsJsonObject().get("tyyppi").getAsJsonObject().get("koodiarvo").getAsString();
     }
 
     public static boolean onUudempiKuin(LocalDate leikkuriPvm, JsonElement opiskeluoikeus) {

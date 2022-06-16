@@ -20,7 +20,8 @@ public class OppilaitosKomponentti {
   private static final Logger LOG = LoggerFactory.getLogger(OppilaitosKomponentti.class);
   private static final String EMPTY_OPPILAITOSNRO_INDICATOR = "XXXXX";
 
-  @Autowired private OrganisaatioResource organisaatioProxy;
+  @Autowired
+  private OrganisaatioResource organisaatioProxy;
 
   public String haeOppilaitosnumero(String tarjoajaOid) {
     try {
@@ -34,7 +35,8 @@ public class OppilaitosKomponentti {
           // Tarjoaja org has oppilaitoskoodi so return it
           return organisaatio.getOppilaitosKoodi();
         } else {
-          // Tarjoaja org was not of type Oppilaitos so we need to check parents and children
+          // Tarjoaja org was not of type Oppilaitos so we need to check parents and
+          // children
           String oppilaitosNro = getOppilaitosnumeroFromParent(organisaatio);
 
           if (oppilaitosNro != null) {
@@ -48,10 +50,8 @@ public class OppilaitosKomponentti {
           }
 
           // Oppilaitosnumero not found from parents or children
-          LOG.error(
-              "Organisaatiopalvelu ei palauttanut yhteishaun oppilaitosnumeroa tarjoajalle "
-                  + tarjoajaOid
-                  + " eikä sen isäntä- tai lapsiorganisaatioille.");
+          LOG.error("Organisaatiopalvelu ei palauttanut yhteishaun oppilaitosnumeroa tarjoajalle "
+              + tarjoajaOid + " eikä sen isäntä- tai lapsiorganisaatioille.");
           return EMPTY_OPPILAITOSNRO_INDICATOR;
         }
       }
@@ -111,8 +111,7 @@ public class OppilaitosKomponentti {
 
   private List<OrganisaatioRDTO> getNonPassiveChildOrgs(String orgOid) throws Exception {
     try {
-      return organisaatioProxy.children(orgOid, false).stream()
-          .filter(o -> !"PASSIIVINEN".equals(o.getStatus()))
+      return organisaatioProxy.children(orgOid, false).stream().filter(o -> !"PASSIIVINEN".equals(o.getStatus()))
           .collect(Collectors.toList());
     } catch (ForbiddenException fe) { // Varhaiskasvatuksen organisaatioille palautuu tällaisia.
       return Collections.emptyList();

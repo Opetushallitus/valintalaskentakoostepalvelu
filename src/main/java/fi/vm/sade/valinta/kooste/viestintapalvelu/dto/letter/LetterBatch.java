@@ -116,8 +116,7 @@ public class LetterBatch {
   }
 
   private LetterBatch createSubBatch(List<Letter> lettersOfSubBatch) {
-    LetterBatch result =
-        new LetterBatch(lettersOfSubBatch, Collections.singletonList(ContentStructureType.letter));
+    LetterBatch result = new LetterBatch(lettersOfSubBatch, Collections.singletonList(ContentStructureType.letter));
     result.setLanguageCode(languageCode);
     result.setApplicationPeriod(applicationPeriod);
     result.setFetchTarget(fetchTarget);
@@ -140,31 +139,11 @@ public class LetterBatch {
 
   @Override
   public String toString() {
-    return "LetterBatch [letters="
-        + letters
-        + ", template="
-        + ", templateId="
-        + ", templateReplacements="
-        + templateReplacements
-        + ", templateName="
-        + templateName
-        + ", languageCode="
-        + languageCode
-        + ", storingOid="
-        + storingOid
-        + ", organizationOid="
-        + organizationOid
-        + ", applicationPeriod="
-        + applicationPeriod
-        + ", fetchTarget="
-        + fetchTarget
-        + ", tag="
-        + tag
-        + ", skipDokumenttipalvelu="
-        + skipDokumenttipalvelu
-        + ", contentStructureTypes="
-        + contentStructureTypes
-        + "]";
+    return "LetterBatch [letters=" + letters + ", template=" + ", templateId=" + ", templateReplacements="
+        + templateReplacements + ", templateName=" + templateName + ", languageCode=" + languageCode
+        + ", storingOid=" + storingOid + ", organizationOid=" + organizationOid + ", applicationPeriod="
+        + applicationPeriod + ", fetchTarget=" + fetchTarget + ", tag=" + tag + ", skipDokumenttipalvelu="
+        + skipDokumenttipalvelu + ", contentStructureTypes=" + contentStructureTypes + "]";
   }
 
   public boolean isIposti() {

@@ -13,34 +13,20 @@ import java.util.Map;
 public class AsyncResponseFilter implements SwaggerSpecFilter {
 
   @Override
-  public boolean isOperationAllowed(
-      Operation operation,
-      ApiDescription api,
-      Map<String, List<String>> params,
-      Map<String, String> cookies,
-      Map<String, List<String>> headers) {
+  public boolean isOperationAllowed(Operation operation, ApiDescription api, Map<String, List<String>> params,
+      Map<String, String> cookies, Map<String, List<String>> headers) {
     return true;
   }
 
   @Override
-  public boolean isParamAllowed(
-      Parameter parameter,
-      Operation operation,
-      ApiDescription api,
-      Map<String, List<String>> params,
-      Map<String, String> cookies,
-      Map<String, List<String>> headers) {
+  public boolean isParamAllowed(Parameter parameter, Operation operation, ApiDescription api,
+      Map<String, List<String>> params, Map<String, String> cookies, Map<String, List<String>> headers) {
     return true; // ?
   }
 
   @Override
-  public boolean isPropertyAllowed(
-      Model model,
-      Property property,
-      String propertyName,
-      Map<String, List<String>> params,
-      Map<String, String> cookies,
-      Map<String, List<String>> headers) {
+  public boolean isPropertyAllowed(Model model, Property property, String propertyName,
+      Map<String, List<String>> params, Map<String, String> cookies, Map<String, List<String>> headers) {
     return !property.getType().equals("AsyncResponse"); // ignoring AsyncResponse parameters
   }
 }

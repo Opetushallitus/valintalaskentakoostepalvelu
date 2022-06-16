@@ -18,15 +18,13 @@ public class SijoitteluRouteTest extends CamelTestSupport {
   @Produce(uri = SijoitteluAktivointiRoute.SIJOITTELU_REITTI)
   protected ProducerTemplate template;
 
-  private SijoitteleAsyncResource sijoitteluResource =
-      new SijoitteleAsyncResource() {
+  private SijoitteleAsyncResource sijoitteluResource = new SijoitteleAsyncResource() {
 
-        @Override
-        public void sijoittele(
-            String hakuOid, Consumer<String> successCallback, Consumer<Throwable> failureCallback) {
-          successCallback.accept("OK");
-        }
-      };
+    @Override
+    public void sijoittele(String hakuOid, Consumer<String> successCallback, Consumer<Throwable> failureCallback) {
+      successCallback.accept("OK");
+    }
+  };
 
   protected RouteBuilder createRouteBuilder() throws Exception {
     return new SijoitteluRouteImpl(sijoitteluResource);

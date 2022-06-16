@@ -35,14 +35,12 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(classes = LaskentaKerrallaContext.class)
-@TestExecutionListeners({
-  DependencyInjectionTestExecutionListener.class,
-  DirtiesContextTestExecutionListener.class
-})
+@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public class LaskentaKerrallaFailTest {
   private static final String LASKENTASEURANTA_ID = "laskentaseuranta.id";
 
-  @Autowired ValintalaskentaKerrallaResource valintalaskentaKerralla;
+  @Autowired
+  ValintalaskentaKerrallaResource valintalaskentaKerralla;
 
   @BeforeClass
   public static void resetMocks() {
@@ -54,15 +52,13 @@ public class LaskentaKerrallaFailTest {
     when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any()))
         .thenReturn(Observable.error(new Throwable("FAIL")));
     AtomicInteger seurantaCount = new AtomicInteger(0);
-    doAnswer(
-            invocation -> {
-              if (seurantaCount.getAndIncrement() < 1) return Observable.just(LASKENTASEURANTA_ID);
-              else {
-                return Observable.just(Optional.empty());
-              }
-            })
-        .when(Mocks.laskentaSeurantaAsyncResource)
-        .otaSeuraavaLaskentaTyonAlle();
+    doAnswer(invocation -> {
+      if (seurantaCount.getAndIncrement() < 1)
+        return Observable.just(LASKENTASEURANTA_ID);
+      else {
+        return Observable.just(Optional.empty());
+      }
+    }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle();
   }
 
   @Test
@@ -70,18 +66,8 @@ public class LaskentaKerrallaFailTest {
     MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(null);
     AsyncResponse asyncResponse = mock(AsyncResponse.class);
     try {
-      valintalaskentaKerralla.valintalaskentaHaulle(
-          "haku.oid",
-          false,
-          0,
-          false,
-          "haun nimi",
-          "nimi",
-          "valintaryhma.oid",
-          LaskentaTyyppi.HAKUKOHDE,
-          false,
-          new ArrayList(),
-          asyncResponse);
+      valintalaskentaKerralla.valintalaskentaHaulle("haku.oid", false, 0, false, "haun nimi", "nimi",
+          "valintaryhma.oid", LaskentaTyyppi.HAKUKOHDE, false, new ArrayList(), asyncResponse);
     } catch (Throwable t) {
     }
 

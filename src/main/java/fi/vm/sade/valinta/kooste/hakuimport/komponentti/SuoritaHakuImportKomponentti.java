@@ -17,12 +17,12 @@ public class SuoritaHakuImportKomponentti {
 
   private static final Logger LOG = LoggerFactory.getLogger(SuoritaHakuImportKomponentti.class);
 
-  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
+  @Autowired
+  private TarjontaAsyncResource tarjontaAsyncResource;
 
   public Collection<String> suoritaHakukohdeImport(@Property(OPH.HAKUOID) String hakuOid) {
     try {
-      Set<String> hakukohteet =
-          tarjontaAsyncResource.haunHakukohteet(hakuOid).get(60, TimeUnit.SECONDS);
+      Set<String> hakukohteet = tarjontaAsyncResource.haunHakukohteet(hakuOid).get(60, TimeUnit.SECONDS);
       LOG.info("Importoidaan hakukohteita yhteensä {} kpl", hakukohteet.size());
       return hakukohteet;
     } catch (Exception e) {

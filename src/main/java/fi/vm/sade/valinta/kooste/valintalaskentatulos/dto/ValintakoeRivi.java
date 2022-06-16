@@ -26,18 +26,9 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 
   private final HakemusWrapper wrapper;
 
-  public ValintakoeRivi(
-      String sukunimi,
-      String etunimet,
-      String postitoimipaikka,
-      String asuinmaaEnglanniksi,
-      HakemusWrapper wrapper,
-      String hakemusOid,
-      Date paivamaara,
-      Map<String, String> osallistumistiedot,
-      Osoite osoite,
-      Yhteystiedot yhteystiedot,
-      boolean osallistuuEdesYhteen) {
+  public ValintakoeRivi(String sukunimi, String etunimet, String postitoimipaikka, String asuinmaaEnglanniksi,
+      HakemusWrapper wrapper, String hakemusOid, Date paivamaara, Map<String, String> osallistumistiedot,
+      Osoite osoite, Yhteystiedot yhteystiedot, boolean osallistuuEdesYhteen) {
     this.sukunimi = StringUtils.trimToEmpty(sukunimi);
     this.etunimet = StringUtils.trimToEmpty(etunimet);
     this.asuinmaaEnglanniksi = asuinmaaEnglanniksi;
@@ -96,27 +87,12 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
     } else {
       pvm = StringUtils.EMPTY;
     }
-    rivi.addAll(
-        Arrays.asList(
-            sukunimi,
-            etunimet,
-            wrapper.getHenkilotunnus(),
-            wrapper.getSyntymaaika(),
-            wrapper.getSukupuoli(),
-            wrapper.getSuomalainenLahiosoite(),
-            wrapper.getSuomalainenPostinumero(),
-            postitoimipaikka,
-            wrapper.getUlkomainenLahiosoite(),
-            wrapper.getUlkomainenPostinumero(),
-            wrapper.getKaupunkiUlkomaa(),
-            asuinmaaEnglanniksi,
-            wrapper.getKansalaisuus(),
-            wrapper.getKansallinenId(),
-            wrapper.getPassinnumero(),
-            yhteystiedot.getSahkoposti(),
-            yhteystiedot.getPuhelinnumerotAsString(),
-            hakemusOid,
-            pvm));
+    rivi.addAll(Arrays.asList(sukunimi, etunimet, wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(),
+        wrapper.getSukupuoli(), wrapper.getSuomalainenLahiosoite(), wrapper.getSuomalainenPostinumero(),
+        postitoimipaikka, wrapper.getUlkomainenLahiosoite(), wrapper.getUlkomainenPostinumero(),
+        wrapper.getKaupunkiUlkomaa(), asuinmaaEnglanniksi, wrapper.getKansalaisuus(),
+        wrapper.getKansallinenId(), wrapper.getPassinnumero(), yhteystiedot.getSahkoposti(),
+        yhteystiedot.getPuhelinnumerotAsString(), hakemusOid, pvm));
     // boolean osallistuuEdesYhteen = false;
     for (String valintakoeOid : valintakoeOids) {
       String o = osallistumistiedot.get(valintakoeOid);
@@ -132,17 +108,7 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
   public ValintakoeRivi merge(ValintakoeRivi v) {
     Map<String, String> m = Maps.newHashMap(osallistumistiedot);
     m.putAll(v.getOsallistumistiedot());
-    return new ValintakoeRivi(
-        sukunimi,
-        etunimet,
-        postitoimipaikka,
-        asuinmaaEnglanniksi,
-        wrapper,
-        hakemusOid,
-        v.paivamaara,
-        m,
-        osoite,
-        yhteystiedot,
-        osallistuuEdesYhteen || v.osallistuuEdesYhteen);
+    return new ValintakoeRivi(sukunimi, etunimet, postitoimipaikka, asuinmaaEnglanniksi, wrapper, hakemusOid,
+        v.paivamaara, m, osoite, yhteystiedot, osallistuuEdesYhteen || v.osallistuuEdesYhteen);
   }
 }

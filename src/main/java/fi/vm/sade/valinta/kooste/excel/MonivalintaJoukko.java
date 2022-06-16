@@ -12,33 +12,25 @@ public class MonivalintaJoukko {
   private final XSSFSheet sheet;
   private final XSSFDataValidationConstraint dvConstraint;
 
-  public MonivalintaJoukko(
-      Collection<String> joukko, XSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
+  public MonivalintaJoukko(Collection<String> joukko, XSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
     this.joukko = joukko;
     this.dvHelper = dvHelper;
     this.sheet = sheet;
-    this.dvConstraint =
-        (XSSFDataValidationConstraint)
-            dvHelper.createExplicitListConstraint(joukko.toArray(new String[] {}));
+    this.dvConstraint = (XSSFDataValidationConstraint) dvHelper
+        .createExplicitListConstraint(joukko.toArray(new String[] {}));
   }
 
-  public MonivalintaJoukko(
-      Collection<String> joukko,
-      XSSFSheet sheet,
-      XSSFDataValidationHelper dvHelper,
+  public MonivalintaJoukko(Collection<String> joukko, XSSFSheet sheet, XSSFDataValidationHelper dvHelper,
       String formula) {
     this.joukko = joukko;
     this.dvHelper = dvHelper;
     this.sheet = sheet;
-    this.dvConstraint =
-        (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(formula);
+    this.dvConstraint = (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(formula);
   }
 
   public void addAddress(int row, int col) {
-    XSSFDataValidation validation =
-        (XSSFDataValidation)
-            dvHelper.createValidation(
-                dvConstraint, new org.apache.poi.ss.util.CellRangeAddressList(row, row, col, col));
+    XSSFDataValidation validation = (XSSFDataValidation) dvHelper.createValidation(dvConstraint,
+        new org.apache.poi.ss.util.CellRangeAddressList(row, row, col, col));
     sheet.addValidationData(validation);
     validation.setSuppressDropDownArrow(false);
   }

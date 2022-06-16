@@ -35,8 +35,8 @@ public class Converter {
   }
 
   /**
-   * Poistaa "Ei arvosanaa" -kentät hakemukselta. Tämän funkkarin voi poistaa kunhan
-   * hakemuspalveluun saadaan tehtyä filtteri näille kentille
+   * Poistaa "Ei arvosanaa" -kentät hakemukselta. Tämän funkkarin voi poistaa
+   * kunhan hakemuspalveluun saadaan tehtyä filtteri näille kentille
    */
   static String sanitizeArvo(String arvo) {
     if (arvo != null && EI_ARVOSANAA.equals(arvo)) {
@@ -49,15 +49,12 @@ public class Converter {
   static void setHakemusDTOvalintapisteet(Valintapisteet valintapisteet, HakemusDTO hakemusDto) {
     try {
       if (valintapisteet != null) {
-        Valintapisteet.toAdditionalData(valintapisteet)
-            .getAdditionalData()
-            .forEach(
-                (k, v) -> {
-                  AvainArvoDTO aa = new AvainArvoDTO();
-                  aa.setAvain(k);
-                  aa.setArvo(v);
-                  hakemusDto.getAvaimet().add(aa);
-                });
+        Valintapisteet.toAdditionalData(valintapisteet).getAdditionalData().forEach((k, v) -> {
+          AvainArvoDTO aa = new AvainArvoDTO();
+          aa.setAvain(k);
+          aa.setArvo(v);
+          hakemusDto.getAvaimet().add(aa);
+        });
       }
     } catch (Exception e) {
       LOG.error("Epäonnistuminen hakemuksen valintapisteiden asettamisessa", e);
@@ -65,39 +62,31 @@ public class Converter {
     }
   }
 
-  public static Map<String, String> mapEligibilityAndStatus(
-      List<Eligibility> eligibilities, Map<String, String> hakutoiveet) {
-    Map<String, String> eligibilityAndStatus =
-        Optional.ofNullable(eligibilities).orElse(Collections.emptyList()).stream()
-            .filter(Objects::nonNull)
-            // .map(e -> e.getAoId())
-            .collect(Collectors.toList())
-            .stream()
-            .collect(
-                Collectors.toMap(Eligibility::getAoId, Eligibility::getParsedEligibilityStatus));
+  public static Map<String, String> mapEligibilityAndStatus(List<Eligibility> eligibilities,
+      Map<String, String> hakutoiveet) {
+    Map<String, String> eligibilityAndStatus = Optional.ofNullable(eligibilities).orElse(Collections.emptyList())
+        .stream().filter(Objects::nonNull)
+        // .map(e -> e.getAoId())
+        .collect(Collectors.toList()).stream()
+        .collect(Collectors.toMap(Eligibility::getAoId, Eligibility::getParsedEligibilityStatus));
     return Optional.ofNullable(hakutoiveet).orElse(Collections.emptyMap()).entrySet().stream()
         // preference{x}-Koulutus-id eli esim preference2-Koulutus-id
-        .filter(
-            pair -> {
-              boolean b =
-                  pair.getKey().startsWith("preference") && pair.getKey().endsWith("-Koulutus-id");
-              LOG.debug("Matsaako {} {}", pair, b);
-              return b;
-            })
+        .filter(pair -> {
+          boolean b = pair.getKey().startsWith("preference") && pair.getKey().endsWith("-Koulutus-id");
+          LOG.debug("Matsaako {} {}", pair, b);
+          return b;
+        })
         // eligibility with aoId exists
-        .filter(
-            pair -> {
-              boolean b = eligibilityAndStatus.containsKey(pair.getValue());
-              LOG.debug("Matsaako key({}) == {}", pair.getValue(), b);
-              return b;
-            })
+        .filter(pair -> {
+          boolean b = eligibilityAndStatus.containsKey(pair.getValue());
+          LOG.debug("Matsaako key({}) == {}", pair.getValue(), b);
+          return b;
+        })
         // Maps
         // preference2-Koulutus-id = "1.2.246.562.20.645785477510"
         // To
         // preference2-Koulutus-id-eligibility = "UNKNOWN"
-        .collect(
-            Collectors.toMap(
-                pair -> pair.getKey() + "-eligibility",
-                pair -> eligibilityAndStatus.get(pair.getValue())));
+        .collect(Collectors.toMap(pair -> pair.getKey() + "-eligibility",
+            pair -> eligibilityAndStatus.get(pair.getValue())));
   }
 }

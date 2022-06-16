@@ -12,14 +12,13 @@ public class MemoizerTest {
   @Test
   public void testMemoize() throws Exception {
 
-    Function<Integer, Integer> calculation =
-        x -> {
-          try {
-            Thread.sleep(500);
-          } catch (InterruptedException e) {
-          }
-          return x * 2;
-        };
+    Function<Integer, Integer> calculation = x -> {
+      try {
+        Thread.sleep(500);
+      } catch (InterruptedException e) {
+      }
+      return x * 2;
+    };
 
     Function<Integer, Integer> memoized = Memoizer.memoize(calculation, 12, TimeUnit.HOURS);
     long start = System.currentTimeMillis();

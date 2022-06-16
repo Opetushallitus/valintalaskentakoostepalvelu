@@ -14,7 +14,8 @@ public class HakemusComparator implements Comparator<HakemusWrapper> {
     }
   }
 
-  private HakemusComparator() {}
+  private HakemusComparator() {
+  }
 
   public static HakemusComparator DEFAULT = new HakemusComparator();
 }

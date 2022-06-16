@@ -11,7 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/** Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti! Proxy provides retries! */
+/**
+ * Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti! Proxy
+ * provides retries!
+ */
 @Component
 public class LinjakoodiKomponentti {
   private static final Logger LOG = LoggerFactory.getLogger(LinjakoodiKomponentti.class);
@@ -26,16 +29,12 @@ public class LinjakoodiKomponentti {
   public String haeLinjakoodi(String hakukohdeNimiUri) {
     String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(hakukohdeNimiUri);
     Integer koodiVersio = TarjontaUriToKoodistoUtil.stripVersion(hakukohdeNimiUri);
-    SearchKoodisCriteriaType koodistoHaku =
-        TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
+    SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
 
     List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
     if (koodiTypes.isEmpty()) {
-      throw new KoodistoException(
-          "Koodisto palautti tyhjän koodijoukon urille "
-              + koodiUri
-              + " ja käytetylle versiolle "
-              + koodiVersio);
+      throw new KoodistoException("Koodisto palautti tyhjän koodijoukon urille " + koodiUri
+          + " ja käytetylle versiolle " + koodiVersio);
     }
     for (KoodiType koodi : koodiTypes) {
       String arvo = koodi.getKoodiArvo();
@@ -43,20 +42,15 @@ public class LinjakoodiKomponentti {
         if (arvo.length() == 3) {
           return arvo;
         } else {
-          LOG.error(
-              "Koodistosta palautui virheellinen arvo {} uri:lle {}, versio {}",
-              new Object[] {arvo, koodiUri, koodiVersio});
+          LOG.error("Koodistosta palautui virheellinen arvo {} uri:lle {}, versio {}",
+              new Object[] { arvo, koodiUri, koodiVersio });
         }
       } else {
-        LOG.error(
-            "Koodistosta palautui null arvo uri:lle {}, versio {}",
-            new Object[] {koodiUri, koodiVersio});
+        LOG.error("Koodistosta palautui null arvo uri:lle {}, versio {}",
+            new Object[] { koodiUri, koodiVersio });
       }
     }
     throw new KoodistoException(
-        "Koodistosta ei saatu arvoa urille "
-            + koodiUri
-            + " ja käytetylle versiolle "
-            + koodiVersio);
+        "Koodistosta ei saatu arvoa urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
   }
 }

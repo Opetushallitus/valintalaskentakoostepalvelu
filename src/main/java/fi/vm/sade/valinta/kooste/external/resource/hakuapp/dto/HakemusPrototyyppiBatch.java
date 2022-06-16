@@ -8,10 +8,7 @@ public class HakemusPrototyyppiBatch {
   private String tarjoajaOid;
   private Collection<HakemusPrototyyppi> hakemukset;
 
-  public HakemusPrototyyppiBatch(
-      String hakuOid,
-      String hakukohdeOid,
-      String tarjoajaOid,
+  public HakemusPrototyyppiBatch(String hakuOid, String hakukohdeOid, String tarjoajaOid,
       Collection<HakemusPrototyyppi> hakemusPrototyypit) {
     this.hakuOid = hakuOid;
     this.hakukohdeOid = hakukohdeOid;

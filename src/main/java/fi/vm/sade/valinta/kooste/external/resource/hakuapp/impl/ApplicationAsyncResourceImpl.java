@@ -37,16 +37,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ApplicationAsyncResourceImpl extends UrlConfiguredResource
-    implements ApplicationAsyncResource {
+public class ApplicationAsyncResourceImpl extends UrlConfiguredResource implements ApplicationAsyncResource {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
   private final HttpClient client;
 
   @Autowired
-  public ApplicationAsyncResourceImpl(
-      @Qualifier("HakuAppHttpClient") HttpClient client,
-      @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor")
-          AbstractPhaseInterceptor casInterceptor) {
+  public ApplicationAsyncResourceImpl(@Qualifier("HakuAppHttpClient") HttpClient client,
+      @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
     super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     this.client = client;
   }
@@ -56,46 +53,34 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public Observable<List<HakemusWrapper>> putApplicationPrototypes(
-      String hakuOid,
-      String hakukohdeOid,
-      String tarjoajaOid,
-      Collection<HakemusPrototyyppi> hakemusPrototyypit) {
+  public Observable<List<HakemusWrapper>> putApplicationPrototypes(String hakuOid, String hakukohdeOid,
+      String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
     String url = getUrl("haku-app.applications.syntheticapplication");
-    HakemusPrototyyppiBatch hakemusPrototyyppiBatch =
-        new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit);
-    Entity<String> entity =
-        Entity.entity(gson().toJson(hakemusPrototyyppiBatch), MediaType.APPLICATION_JSON);
-    return this.<String, List<Hakemus>>putAsObservableLazily(
-            url, new GenericType<List<Hakemus>>() {}.getType(), entity, ACCEPT_JSON)
-        .map(this::toHakemusWrapper);
+    HakemusPrototyyppiBatch hakemusPrototyyppiBatch = new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid,
+        tarjoajaOid, hakemusPrototyypit);
+    Entity<String> entity = Entity.entity(gson().toJson(hakemusPrototyyppiBatch), MediaType.APPLICATION_JSON);
+    return this.<String, List<Hakemus>>putAsObservableLazily(url, new GenericType<List<Hakemus>>() {
+    }.getType(), entity, ACCEPT_JSON).map(this::toHakemusWrapper);
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOid(
-      String hakuOid, String hakukohdeOid) {
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
     return getApplicationsByOids(hakuOid, Collections.singletonList(hakukohdeOid));
   }
 
   @Override
   public Observable<Set<String>> getApplicationOids(String hakuOid, String hakukohdeOid) {
-    ListFullSearchDTO s =
-        new ListFullSearchDTO(
-            "",
-            Collections.singletonList(hakukohdeOid),
-            Collections.singletonList(hakuOid),
-            Collections.emptyList(),
-            Collections.singletonList("oid"));
+    ListFullSearchDTO s = new ListFullSearchDTO("", Collections.singletonList(hakukohdeOid),
+        Collections.singletonList(hakuOid), Collections.emptyList(), Collections.singletonList("oid"));
     return this.<ListFullSearchDTO, List<HakemusOid>>postAsObservableLazily(
-            getUrl("haku-app.applications.listfull"),
-            new TypeToken<List<HakemusOid>>() {}.getType(),
-            Entity.entity(s, MediaType.APPLICATION_JSON_TYPE))
+        getUrl("haku-app.applications.listfull"), new TypeToken<List<HakemusOid>>() {
+        }.getType(), Entity.entity(s, MediaType.APPLICATION_JSON_TYPE))
         .map(lh -> lh.stream().map(HakemusOid::getOid).collect(Collectors.toSet()));
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(
-      String hakuOid, Collection<String> hakukohdeOids) {
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(String hakuOid,
+      Collection<String> hakukohdeOids) {
     HashMap<String, Object> query = new HashMap<>();
     query.put("appState", DEFAULT_STATES);
     query.put("rows", DEFAULT_ROW_LIMIT);
@@ -104,41 +89,33 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource
     String url = getUrl("haku-app.applications.listfull", query);
     LOG.info("Calling url {}", url);
 
-    return this.client
-        .<List<Hakemus>>getJson(
-            url,
-            Duration.ofHours(1),
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {}.getType())
-        .thenApplyAsync(
-            hs -> hs.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()));
+    return this.client.<List<Hakemus>>getJson(url, Duration.ofHours(1),
+        new com.google.gson.reflect.TypeToken<List<Hakemus>>() {
+        }.getType())
+        .thenApplyAsync(hs -> hs.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()));
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithPOST(
-      String hakuOid, List<String> hakukohdeOids) {
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid,
+      List<String> hakukohdeOids) {
     Map<String, List<String>> requestBody = new HashMap<>();
     requestBody.put("states", DEFAULT_STATES);
     requestBody.put("asIds", Collections.singletonList(hakuOid));
     requestBody.put("aoOids", hakukohdeOids);
     requestBody.put("keys", ApplicationAsyncResource.DEFAULT_KEYS);
-    return this.client
-        .<Map<String, List<String>>, List<Hakemus>>postJson(
-            getUrl("haku-app.applications.listfull"),
-            Duration.ofHours(1),
-            requestBody,
-            new com.google.gson.reflect.TypeToken<Map<String, List<String>>>() {}.getType(),
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {}.getType())
-        .thenApplyAsync(this::toHakemusWrapper);
+    return this.client.<Map<String, List<String>>, List<Hakemus>>postJson(getUrl("haku-app.applications.listfull"),
+        Duration.ofHours(1), requestBody, new com.google.gson.reflect.TypeToken<Map<String, List<String>>>() {
+        }.getType(), new com.google.gson.reflect.TypeToken<List<Hakemus>>() {
+        }.getType()).thenApplyAsync(this::toHakemusWrapper);
   }
 
   @Override
   public Observable<List<HakemusWrapper>> getApplicationsByHakemusOids(List<String> hakemusOids) {
-    return Observable.fromFuture(
-        getApplicationsByHakemusOids(null, hakemusOids, Collections.emptyList()));
+    return Observable.fromFuture(getApplicationsByHakemusOids(null, hakemusOids, Collections.emptyList()));
   }
 
-  private CompletableFuture<List<HakemusWrapper>> getApplicationsByHakemusOids(
-      String hakuOid, List<String> hakemusOids, List<String> keys) {
+  private CompletableFuture<List<HakemusWrapper>> getApplicationsByHakemusOids(String hakuOid,
+      List<String> hakemusOids, List<String> keys) {
     HashMap<String, Object> query = new HashMap<>();
     query.put("rows", DEFAULT_ROW_LIMIT);
     if (!keys.isEmpty()) {
@@ -146,59 +123,42 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource
       query.put("state", DEFAULT_STATES);
       query.put("keys", keys);
     }
-    return this.client
-        .<List<String>, List<Hakemus>>postJson(
-            getUrl("haku-app.applications.list", query),
-            Duration.ofHours(1),
-            hakemusOids,
-            new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {}.getType())
-        .thenApplyAsync(
-            hs ->
-                hs.stream()
-                    .filter(
-                        h ->
-                            StringUtils.isEmpty(h.getState())
-                                || DEFAULT_STATES.contains(h.getState()))
-                    .map(HakuappHakemusWrapper::new)
-                    .collect(Collectors.toList()));
+    return this.client.<List<String>, List<Hakemus>>postJson(getUrl("haku-app.applications.list", query),
+        Duration.ofHours(1), hakemusOids, new com.google.gson.reflect.TypeToken<List<String>>() {
+        }.getType(), new com.google.gson.reflect.TypeToken<List<Hakemus>>() {
+        }.getType())
+        .thenApplyAsync(hs -> hs.stream()
+            .filter(h -> StringUtils.isEmpty(h.getState()) || DEFAULT_STATES.contains(h.getState()))
+            .map(HakuappHakemusWrapper::new).collect(Collectors.toList()));
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(
-      String hakuOid, List<String> hakemusOids, List<String> keys) {
-    List<CompletableFuture<List<HakemusWrapper>>> fs =
-        Lists.partition(hakemusOids, DEFAULT_ROW_LIMIT).stream()
-            .map(oids -> getApplicationsByHakemusOids(hakuOid, oids, keys))
-            .collect(Collectors.toList());
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid,
+      List<String> hakemusOids, List<String> keys) {
+    List<CompletableFuture<List<HakemusWrapper>>> fs = Lists.partition(hakemusOids, DEFAULT_ROW_LIMIT).stream()
+        .map(oids -> getApplicationsByHakemusOids(hakuOid, oids, keys)).collect(Collectors.toList());
     return CompletableFuture.allOf(fs.toArray(new CompletableFuture[0]))
-        .thenApplyAsync(
-            v -> fs.stream().flatMap(f -> f.join().stream()).collect(Collectors.toList()));
+        .thenApplyAsync(v -> fs.stream().flatMap(f -> f.join().stream()).collect(Collectors.toList()));
   }
 
   @Override
   public Observable<List<HakemusWrapper>> getApplicationsByOids(Collection<String> hakemusOids) {
-    return this.<List<String>, List<Hakemus>>postAsObservableLazily(
-            getUrl("haku-app.applications.list"),
-            new GenericType<List<Hakemus>>() {}.getType(),
-            Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
-            webClient ->
-                webClient.query("rows", DEFAULT_ROW_LIMIT).accept(MediaType.APPLICATION_JSON_TYPE))
+    return this.<List<String>, List<Hakemus>>postAsObservableLazily(getUrl("haku-app.applications.list"),
+        new GenericType<List<Hakemus>>() {
+        }.getType(), Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
+        webClient -> webClient.query("rows", DEFAULT_ROW_LIMIT).accept(MediaType.APPLICATION_JSON_TYPE))
         .map(this::toHakemusWrapper);
   }
 
   @Override
   public Observable<HakemusWrapper> getApplication(String hakemusOid) {
-    return this.<Hakemus>getAsObservableLazily(
-            getUrl("haku-app.applications", hakemusOid), Hakemus.class)
+    return this.<Hakemus>getAsObservableLazily(getUrl("haku-app.applications", hakemusOid), Hakemus.class)
         .map(HakuappHakemusWrapper::new);
   }
 
   @Override
-  public Observable<Response> changeStateOfApplicationsToPassive(
-      List<String> hakemusOids, String reason) {
-    return postAsObservableLazily(
-        getUrl("haku-app.applications.state.passivate"),
+  public Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOids, String reason) {
+    return postAsObservableLazily(getUrl("haku-app.applications.state.passivate"),
         Entity.json(new ApplicationOidsAndReason(hakemusOids, reason)));
   }
 }

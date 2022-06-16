@@ -38,8 +38,7 @@ public class ExcelExportUtil {
     spanhighlights.visit(spanhighlight -> spanhighlight.setAlignment(CENTER));
     for (Entry<String, Object[][]> sheetAndGrid : grids.entrySet()) {
       XSSFSheet sheet = wb.createSheet(sheetAndGrid.getKey());
-      exportGridToSheet(
-          sheetAndGrid.getValue(), sheet, alignCenterStyles, spanhighlights, highlights);
+      exportGridToSheet(sheetAndGrid.getValue(), sheet, alignCenterStyles, spanhighlights, highlights);
     }
 
     ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
@@ -51,12 +50,8 @@ public class ExcelExportUtil {
     return bytesOut.toByteArray();
   }
 
-  private static void exportGridToSheet(
-      Object[][] grid,
-      XSSFSheet sheet,
-      OphXssfCellStyles spanStyles,
-      OphXssfCellStyles highlightSpanStyles,
-      OphXssfCellStyles highlightStyles) {
+  private static void exportGridToSheet(Object[][] grid, XSSFSheet sheet, OphXssfCellStyles spanStyles,
+      OphXssfCellStyles highlightSpanStyles, OphXssfCellStyles highlightStyles) {
     int numberOfcolumns = 0;
     // Create rows!
     short rowIndex = 0;
@@ -79,16 +74,14 @@ public class ExcelExportUtil {
           } else {
             spanStyles.apply(excelCell);
           }
-          sheet.addMergedRegion(
-              new CellRangeAddress(
-                  rowIndex, // first
-                  // row
-                  // (0-based)
-                  rowIndex, // last row (0-based)
-                  cellIndex, // first column (0-based)
-                  cellIndex + span.getSpanColumns() - 1 // last column
-                  // (0-based)
-                  ));
+          sheet.addMergedRegion(new CellRangeAddress(rowIndex, // first
+              // row
+              // (0-based)
+              rowIndex, // last row (0-based)
+              cellIndex, // first column (0-based)
+              cellIndex + span.getSpanColumns() - 1 // last column
+          // (0-based)
+          ));
           cellIndex += span.getSpanColumns();
         } else {
           // Normal cell

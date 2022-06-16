@@ -9,11 +9,8 @@ import org.joda.time.DateTime;
 
 public class SuoritusJaArvosanat implements Comparable<SuoritusJaArvosanat> {
 
-  private static final Map<String, Integer> tilaToPrioriteetti =
-      ImmutableMap.of(
-          "VALMIS", 1,
-          "KESKEN", 2,
-          "KESKEYTYNYT", 3);
+  private static final Map<String, Integer> tilaToPrioriteetti = ImmutableMap.of("VALMIS", 1, "KESKEN", 2,
+      "KESKEYTYNYT", 3);
 
   private Suoritus suoritus;
   private List<Arvosana> arvosanat = Lists.newArrayList();
@@ -36,20 +33,15 @@ public class SuoritusJaArvosanat implements Comparable<SuoritusJaArvosanat> {
 
   @Override
   public int compareTo(SuoritusJaArvosanat o) {
-    final int vahvistettu =
-        BooleanComparator.getTrueFirstComparator()
-            .compare(suoritus.isVahvistettu(), o.getSuoritus().isVahvistettu());
+    final int vahvistettu = BooleanComparator.getTrueFirstComparator().compare(suoritus.isVahvistettu(),
+        o.getSuoritus().isVahvistettu());
 
     if (vahvistettu == 0) {
-      final int tila =
-          tilaToPrioriteetti
-              .get(suoritus.getTila())
-              .compareTo(tilaToPrioriteetti.get(o.getSuoritus().getTila()));
+      final int tila = tilaToPrioriteetti.get(suoritus.getTila())
+          .compareTo(tilaToPrioriteetti.get(o.getSuoritus().getTila()));
       if (tila == 0) {
-        final DateTime current =
-            ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(suoritus.getValmistuminen());
-        final DateTime oDate =
-            ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(o.getSuoritus().getValmistuminen());
+        final DateTime current = ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(suoritus.getValmistuminen());
+        final DateTime oDate = ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(o.getSuoritus().getValmistuminen());
         return oDate.compareTo(current);
       } else {
         return tila;

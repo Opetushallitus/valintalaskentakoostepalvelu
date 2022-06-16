@@ -180,41 +180,11 @@ public class HenkiloPerustietoDto implements Serializable {
   @Override
   public String toString() {
     String overriddenHetu = hetu == null ? "null" : "***HETU***";
-    return "HenkiloPerustietoDto{"
-        + "oidHenkilo='"
-        + oidHenkilo
-        + '\''
-        + ", externalIds="
-        + externalIds
-        + ", identifications="
-        + identifications
-        + ", hetu='"
-        + overriddenHetu
-        + '\''
-        + ", etunimet='"
-        + etunimet
-        + '\''
-        + ", kutsumanimi='"
-        + kutsumanimi
-        + '\''
-        + ", sukunimi='"
-        + sukunimi
-        + '\''
-        + ", syntymaaika="
-        + syntymaaika
-        + ", aidinkieli="
-        + aidinkieli
-        + ", asiointiKieli="
-        + asiointiKieli
-        + ", kansalaisuus="
-        + kansalaisuus
-        + ", henkiloTyyppi="
-        + henkiloTyyppi
-        + ", sukupuoli='"
-        + sukupuoli
-        + '\''
-        + ", modified="
-        + modified
-        + '}';
+    return "HenkiloPerustietoDto{" + "oidHenkilo='" + oidHenkilo + '\'' + ", externalIds=" + externalIds
+        + ", identifications=" + identifications + ", hetu='" + overriddenHetu + '\'' + ", etunimet='"
+        + etunimet + '\'' + ", kutsumanimi='" + kutsumanimi + '\'' + ", sukunimi='" + sukunimi + '\''
+        + ", syntymaaika=" + syntymaaika + ", aidinkieli=" + aidinkieli + ", asiointiKieli=" + asiointiKieli
+        + ", kansalaisuus=" + kansalaisuus + ", henkiloTyyppi=" + henkiloTyyppi + ", sukupuoli='" + sukupuoli
+        + '\'' + ", modified=" + modified + '}';
   }
 }

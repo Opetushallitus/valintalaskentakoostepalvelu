@@ -21,8 +21,7 @@ public class DokumenttiProsessi extends Prosessi {
   private final List<String> tags;
   private final Collection<Poikkeus> poikkeukset = new CopyOnWriteArrayList<Poikkeus>();
   private final Collection<Varoitus> varoitukset = new CopyOnWriteArrayList<Varoitus>();
-  private final transient Collection<Poikkeus> poikkeuksetUudelleenYrityksessa =
-      new CopyOnWriteArrayList<Poikkeus>();
+  private final transient Collection<Poikkeus> poikkeuksetUudelleenYrityksessa = new CopyOnWriteArrayList<Poikkeus>();
 
   private DokumenttiProsessi() {
     this("", "", "", Arrays.asList());

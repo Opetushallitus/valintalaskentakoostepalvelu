@@ -19,22 +19,14 @@ public class HaeHaunHakemuksetKomponentti {
   public static final String ACTIVE = "ACTIVE";
   public static final String INCOMPLETE = "INCOMPLETE";
 
-  @Autowired private ApplicationResource applicationResource;
+  @Autowired
+  private ApplicationResource applicationResource;
 
   public List<SuppeaHakemus> haeHaunHakemukset(@Property(OPH.HAKUOID) String hakuOid) {
-    LOG.info(
-        "Haetaan HakemusList osoitteesta .../applications?asId={}&start=0&rows={}",
-        new Object[] {hakuOid, Integer.MAX_VALUE});
-    HakemusList hakemusList =
-        applicationResource.findApplications(
-            null,
-            Arrays.asList(ACTIVE, INCOMPLETE),
-            null,
-            null,
-            hakuOid,
-            null,
-            0,
-            ApplicationResource.MAX);
+    LOG.info("Haetaan HakemusList osoitteesta .../applications?asId={}&start=0&rows={}",
+        new Object[] { hakuOid, Integer.MAX_VALUE });
+    HakemusList hakemusList = applicationResource.findApplications(null, Arrays.asList(ACTIVE, INCOMPLETE), null,
+        null, hakuOid, null, 0, ApplicationResource.MAX);
 
     LOG.info("Haettiin {} kpl hakemuksia", hakemusList.getResults().size());
     return hakemusList.getResults();

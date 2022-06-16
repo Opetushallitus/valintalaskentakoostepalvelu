@@ -32,12 +32,6 @@ public class HakukohdeDTO {
 
   @Override
   public String toString() {
-    return "HakukohdeDTO{"
-        + "hakukohdeOid='"
-        + hakukohdeOid
-        + '\''
-        + ", valintakokeet="
-        + valintakokeet
-        + '}';
+    return "HakukohdeDTO{" + "hakukohdeOid='" + hakukohdeOid + '\'' + ", valintakokeet=" + valintakokeet + '}';
   }
 }

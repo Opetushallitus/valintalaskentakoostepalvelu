@@ -41,12 +41,9 @@ import org.springframework.core.io.ClassPathResource;
 
 public class HakemuksetResourceTest {
 
-  final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-  final HttpResourceBuilder.WebClientExposingHttpResource hakemuksetValinnanvaiheResource =
-      new HttpResourceBuilder(getClass().getName())
-          .address(root + "/hakemukset/valinnanvaihe")
-          .buildExposingWebClientDangerously();
+  final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+  final HttpResourceBuilder.WebClientExposingHttpResource hakemuksetValinnanvaiheResource = new HttpResourceBuilder(
+      getClass().getName()).address(root + "/hakemukset/valinnanvaihe").buildExposingWebClientDangerously();
 
   @Before
   public void startServer() {
@@ -59,28 +56,23 @@ public class HakemuksetResourceTest {
     v2.setSelvitettyTunniste("testikoeKaikkiKutsutaan");
     v2.setKutsutaankoKaikki(true);
     MockValintaperusteetAsyncResource.setHakukohdeResult(
-        Arrays.asList(
-            new HakukohdeJaValintakoeDTO("1.2.246.562.5.28143628072", Arrays.asList(v1, v2))));
-    MockValintalaskentaValintakoeAsyncResource.setResult(
-        Arrays.asList(
-            new ValintakoeOsallistuminenDTO() {
-              {
-                setHakutoiveet(
-                    Arrays.asList(
-                        new HakutoiveDTO() {
-                          {
-                            setHakukohdeOid("1.2.246.562.5.28143628072");
-                          }
-                        }));
-                setHakemusOid("1.2.246.562.11.00000015082");
-              }
-            }));
-    MockValintaperusteetAsyncResource.setHakukohteetValinnanvaiheelleResult(
-        Sets.newHashSet("1.2.246.562.5.28143628072"));
+        Arrays.asList(new HakukohdeJaValintakoeDTO("1.2.246.562.5.28143628072", Arrays.asList(v1, v2))));
+    MockValintalaskentaValintakoeAsyncResource.setResult(Arrays.asList(new ValintakoeOsallistuminenDTO() {
+      {
+        setHakutoiveet(Arrays.asList(new HakutoiveDTO() {
+          {
+            setHakukohdeOid("1.2.246.562.5.28143628072");
+          }
+        }));
+        setHakemusOid("1.2.246.562.11.00000015082");
+      }
+    }));
+    MockValintaperusteetAsyncResource
+        .setHakukohteetValinnanvaiheelleResult(Sets.newHashSet("1.2.246.562.5.28143628072"));
     ValintaperusteDTO v3 = new ValintaperusteDTO();
     v3.setTunniste("tunniste");
-    HakukohdeJaValintaperusteDTO v4 =
-        new HakukohdeJaValintaperusteDTO("1.2.246.562.5.28143628072", Lists.newArrayList(v3));
+    HakukohdeJaValintaperusteDTO v4 = new HakukohdeJaValintaperusteDTO("1.2.246.562.5.28143628072",
+        Lists.newArrayList(v3));
     MockValintaperusteetAsyncResource.setHakukohdeValintaperusteResult(Lists.newArrayList(v4));
     ValintaKoosteJetty.startShared();
   }
@@ -89,23 +81,17 @@ public class HakemuksetResourceTest {
   public void testHaeHakemukset() throws Exception {
 
     Mocks.reset();
-    String listFull =
-        IOUtils.toString(new ClassPathResource("listSingleApplication.json").getInputStream());
-    List<Hakemus> hakemukset =
-        hakemuksetValinnanvaiheResource
-            .gson()
-            .fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
-    List<HakemusWrapper> wrappers =
-        hakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
+    String listFull = IOUtils.toString(new ClassPathResource("listSingleApplication.json").getInputStream());
+    List<Hakemus> hakemukset = hakemuksetValinnanvaiheResource.gson().fromJson(listFull,
+        new TypeToken<List<Hakemus>>() {
+        }.getType());
+    List<HakemusWrapper> wrappers = hakemukset.stream().map(HakuappHakemusWrapper::new)
+        .collect(Collectors.toList());
     MockApplicationAsyncResource.setResult(wrappers);
     MockApplicationAsyncResource.setResultByOid(wrappers);
 
-    Response r =
-        hakemuksetValinnanvaiheResource
-            .getWebClient()
-            .query("hakuOid", "")
-            .query("valinnanvaiheOid", "")
-            .get();
+    Response r = hakemuksetValinnanvaiheResource.getWebClient().query("hakuOid", "").query("valinnanvaiheOid", "")
+        .get();
 
     assertEquals(200, r.getStatus());
 
@@ -118,21 +104,10 @@ public class HakemuksetResourceTest {
 
     System.out.println(prettyJsonString);
     assertEquals(1, je.getAsJsonArray().size());
-    assertEquals(
-        "tunniste",
-        je.getAsJsonArray()
-            .get(0)
-            .getAsJsonObject()
-            .get("hakukohteet")
-            .getAsJsonArray()
-            .get(0)
-            .getAsJsonObject()
-            .get("valintakokeet")
-            .getAsJsonArray()
-            .get(0)
-            .getAsJsonObject()
-            .get("tunniste")
-            .getAsString());
+    assertEquals("tunniste",
+        je.getAsJsonArray().get(0).getAsJsonObject().get("hakukohteet").getAsJsonArray().get(0)
+            .getAsJsonObject().get("valintakokeet").getAsJsonArray().get(0).getAsJsonObject()
+            .get("tunniste").getAsString());
   }
 
   @Test
@@ -141,19 +116,13 @@ public class HakemuksetResourceTest {
     MockValintaperusteetAsyncResource.setHakukohteetValinnanvaiheelleResult(Collections.emptySet());
     String hakuOid = "1.2.3";
     String valinnanvaiheOid = "4.5.6";
-    Response r =
-        hakemuksetValinnanvaiheResource
-            .getWebClient()
-            .query("hakuOid", hakuOid)
-            .query("valinnanvaiheOid", valinnanvaiheOid)
-            .get();
+    Response r = hakemuksetValinnanvaiheResource.getWebClient().query("hakuOid", hakuOid)
+        .query("valinnanvaiheOid", valinnanvaiheOid).get();
 
     assertEquals(HttpStatus.SC_BAD_REQUEST, r.getStatus());
-    assertThat(
-        IOUtils.toString((InputStream) r.getEntity(), "UTF-8"),
-        containsString(
-            String.format(
-                "Ei löytynyt yhtään hakukohdeoidia valintaryhmien perusteella haun %s valinnanvaiheelle %s",
-                hakuOid, valinnanvaiheOid)));
+    assertThat(IOUtils.toString((InputStream) r.getEntity(), "UTF-8"),
+        containsString(String.format(
+            "Ei löytynyt yhtään hakukohdeoidia valintaryhmien perusteella haun %s valinnanvaiheelle %s",
+            hakuOid, valinnanvaiheOid)));
   }
 }

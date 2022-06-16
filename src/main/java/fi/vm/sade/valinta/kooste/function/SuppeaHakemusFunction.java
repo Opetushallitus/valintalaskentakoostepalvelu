@@ -7,7 +7,8 @@ public class SuppeaHakemusFunction implements Function<SuppeaHakemus, String> {
 
   public static final SuppeaHakemusFunction TO_HAKEMUS_OIDS = new SuppeaHakemusFunction();
 
-  private SuppeaHakemusFunction() {}
+  private SuppeaHakemusFunction() {
+  }
 
   @Override
   public String apply(SuppeaHakemus input) {

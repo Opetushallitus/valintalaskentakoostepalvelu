@@ -1,3 +1,4 @@
 package fi.vm.sade.valinta.kooste.hakuimport.kouta;
 
-public class KoutaHakukohdeImporter {}
+public class KoutaHakukohdeImporter {
+}

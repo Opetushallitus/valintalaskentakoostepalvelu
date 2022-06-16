@@ -37,8 +37,8 @@ public class SuoritusJaArvosanatWrapper {
   public static final String HAKEMUS_OID_PREFIX = "1.2.246.562.11";
 
   public static final String SUORITUS_PVM_FORMAT = "dd.MM.yyyy";
-  public static final DateTimeFormatter ARVOSANA_PVM_FORMATTER =
-      DateTimeFormatter.ofPattern(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
+  public static final DateTimeFormatter ARVOSANA_PVM_FORMATTER = DateTimeFormatter
+      .ofPattern(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
 
   private static Map<String, String> createKomoToStringMapper() {
     Map<String, String> tmp = Maps.newHashMap();
@@ -58,13 +58,12 @@ public class SuoritusJaArvosanatWrapper {
   }
 
   private final SuoritusJaArvosanat suoritusJaArvosanat;
-  public static final org.joda.time.format.DateTimeFormatter VALMISTUMIS_DTF =
-      DateTimeFormat.forPattern("dd.MM.yyyy");
+  public static final org.joda.time.format.DateTimeFormatter VALMISTUMIS_DTF = DateTimeFormat
+      .forPattern("dd.MM.yyyy");
 
   public DateTime getValmistuminenAsDateTime() {
     if (suoritusJaArvosanat.getSuoritus().getValmistuminen() == null) {
-      LOG.error(
-          "Suorituksella ei ole valmistumispäivämäärää: {}",
+      LOG.error("Suorituksella ei ole valmistumispäivämäärää: {}",
           new Gson().toJson(suoritusJaArvosanat.getSuoritus()));
       throw new RuntimeException("Suorituksella ei ole valmistumispäivämäärää");
     }
@@ -81,9 +80,7 @@ public class SuoritusJaArvosanatWrapper {
 
   public boolean isItseIlmoitettu() {
     if (suoritusJaArvosanat.getSuoritus().getHenkiloOid() != null) {
-      return suoritusJaArvosanat
-          .getSuoritus()
-          .getHenkiloOid()
+      return suoritusJaArvosanat.getSuoritus().getHenkiloOid()
           .equals(suoritusJaArvosanat.getSuoritus().getSource());
     } else {
       return false;
@@ -96,8 +93,7 @@ public class SuoritusJaArvosanatWrapper {
   }
 
   public boolean onTaltaHakemukselta(HakemusDTO hakemus) {
-    return onHakemukselta()
-        && suoritusJaArvosanat.getSuoritus().getMyontaja().equals(hakemus.getHakemusoid());
+    return onHakemukselta() && suoritusJaArvosanat.getSuoritus().getMyontaja().equals(hakemus.getHakemusoid());
   }
 
   public boolean isValmis() {
@@ -113,8 +109,7 @@ public class SuoritusJaArvosanatWrapper {
   }
 
   public String komoToString() {
-    return Optional.ofNullable(
-            KOMO_TO_STRING_MAPPER.get(suoritusJaArvosanat.getSuoritus().getKomo()))
+    return Optional.ofNullable(KOMO_TO_STRING_MAPPER.get(suoritusJaArvosanat.getSuoritus().getKomo()))
         .orElse("Tuntematon suoritus " + suoritusJaArvosanat.getSuoritus().getKomo());
   }
 
@@ -196,14 +191,8 @@ public class SuoritusJaArvosanatWrapper {
   }
 
   public boolean isLisapistekoulutus() {
-    return isLisaopetus()
-        || isLisaopetusTalous()
-        || isValmaOrTelma()
-        || isAmmattistartti()
-        || isValmentava()
-        || isAmmatilliseenValmistava()
-        || isLukioonValmistava()
-        || isPerusopetuksenOppiaineenOppimaara()
+    return isLisaopetus() || isLisaopetusTalous() || isValmaOrTelma() || isAmmattistartti() || isValmentava()
+        || isAmmatilliseenValmistava() || isLukioonValmistava() || isPerusopetuksenOppiaineenOppimaara()
         || isOpistovuosi();
   }
 }

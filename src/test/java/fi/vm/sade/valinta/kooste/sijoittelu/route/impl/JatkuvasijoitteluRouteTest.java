@@ -24,24 +24,16 @@ import org.slf4j.LoggerFactory;
 /** @author jussija */
 public class JatkuvasijoitteluRouteTest extends CamelTestSupport {
   private static final Logger LOG = LoggerFactory.getLogger(JatkuvasijoitteluRouteTest.class);
-  private final DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue =
-      new DelayQueue<>();
-  private final SijoittelunSeurantaResource sijoittelunSeurantaResource =
-      Mockito.mock(SijoittelunSeurantaResource.class);
-  private final SijoitteleAsyncResource sijoitteluResource =
-      Mockito.mock(SijoitteleAsyncResource.class);
+  private final DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue = new DelayQueue<>();
+  private final SijoittelunSeurantaResource sijoittelunSeurantaResource = Mockito
+      .mock(SijoittelunSeurantaResource.class);
+  private final SijoitteleAsyncResource sijoitteluResource = Mockito.mock(SijoitteleAsyncResource.class);
   private final String jatkuvaSijoitteluTimer = "direct:jatkuvaSijoitteluTimer";
   private final String jatkuvaSijoitteluQueue = "direct:jatkuvaSijoitteluQueue";
-  private final ConcurrentHashMap<String, Long> ajossaHakuOids =
-      Mockito.spy(new ConcurrentHashMap<>());
-  private final JatkuvaSijoitteluRouteImpl jatkuvaSijoitteluRouteImpl =
-      new JatkuvaSijoitteluRouteImpl(
-          jatkuvaSijoitteluTimer,
-          jatkuvaSijoitteluQueue,
-          sijoitteluResource,
-          sijoittelunSeurantaResource,
-          jatkuvaSijoitteluDelayedQueue,
-          ajossaHakuOids);
+  private final ConcurrentHashMap<String, Long> ajossaHakuOids = Mockito.spy(new ConcurrentHashMap<>());
+  private final JatkuvaSijoitteluRouteImpl jatkuvaSijoitteluRouteImpl = new JatkuvaSijoitteluRouteImpl(
+      jatkuvaSijoitteluTimer, jatkuvaSijoitteluQueue, sijoitteluResource, sijoittelunSeurantaResource,
+      jatkuvaSijoitteluDelayedQueue, ajossaHakuOids);
 
   @Produce(uri = jatkuvaSijoitteluTimer)
   protected ProducerTemplate timerTemplate;
@@ -73,22 +65,15 @@ public class JatkuvasijoitteluRouteTest extends CamelTestSupport {
     DelayedSijoitteluExchange exchange = jatkuvaSijoitteluDelayedQueue.poll();
     Assert.assertFalse("exchange oli null", exchange == null);
     queueTemplate.send(exchange);
-    Assert.assertTrue(
-        "ei mennyt ajoon!",
-        ajossaHakuOids.entrySet().stream()
-            .filter(e -> HK.equals(e.getKey()))
-            .distinct()
-            .findFirst()
-            .isPresent());
+    Assert.assertTrue("ei mennyt ajoon!", ajossaHakuOids.entrySet().stream().filter(e -> HK.equals(e.getKey()))
+        .distinct().findFirst().isPresent());
     timerTemplate.send(new DefaultExchange(context()));
-    Assert.assertTrue(
-        "ei saa menna uudestaan tyojonoon koska oli ajossa",
+    Assert.assertTrue("ei saa menna uudestaan tyojonoon koska oli ajossa",
         jatkuvaSijoitteluRouteImpl.haeJonossaOlevatSijoittelut().isEmpty());
   }
 
   protected RouteBuilder createRouteBuilder() throws Exception {
-    PropertyPlaceholderDelegateRegistry registry =
-        (PropertyPlaceholderDelegateRegistry) context().getRegistry();
+    PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) context().getRegistry();
     JndiRegistry jndiRegistry = (JndiRegistry) registry.getRegistry();
     jndiRegistry.bind("jatkuvaSijoitteluDelayedQueue", jatkuvaSijoitteluDelayedQueue);
     return jatkuvaSijoitteluRouteImpl;

@@ -110,18 +110,13 @@ public class HyvaksymiskirjeetKomponenttiTest {
     assertLetterBatchCorrect(batch, "0 / -2", null, true, true);
   }
 
-  private void assertLetterBatchCorrect(
-      LetterBatch batch,
-      String omatPisteet,
-      String minimipisteet,
-      boolean skipIPosti,
-      boolean skipDokumenttipalvelu) {
+  private void assertLetterBatchCorrect(LetterBatch batch, String omatPisteet, String minimipisteet,
+      boolean skipIPosti, boolean skipDokumenttipalvelu) {
     assertEquals(TEMPLATE_NAME, batch.getTemplateName());
     assertEquals(LANGUAGE_CODE, batch.getLanguageCode());
     assertEquals(ORGANIZATION_OID, batch.getOrganizationOid());
     assertEquals(APPLICATION_PERIOD, batch.getApplicationPeriod());
-    assertEquals(
-        "FetchTarget was null, the default is used", HAKUKOHDE_OID, batch.getFetchTarget());
+    assertEquals("FetchTarget was null, the default is used", HAKUKOHDE_OID, batch.getFetchTarget());
     assertEquals(TAG, batch.getTag());
     assertEquals(skipDokumenttipalvelu, batch.isSkipDokumenttipalvelu());
 
@@ -134,17 +129,14 @@ public class HyvaksymiskirjeetKomponenttiTest {
     assertEquals(PALAUTUS_PVM, letter.getTemplateReplacements().get("palautusPvm"));
     assertEquals(PALAUTUS_AIKA, letter.getTemplateReplacements().get("palautusAika"));
     assertTrue(letter.getTemplateReplacements().containsKey("tulokset"));
-    assertEquals(
-        "Hakukohteella " + HAKUKOHDE_OID + " ei ole tarjojannimeä",
+    assertEquals("Hakukohteella " + HAKUKOHDE_OID + " ei ole tarjojannimeä",
         letter.getTemplateReplacements().get("koulu"));
     assertEquals("", letter.getTemplateReplacements().get("henkilotunnus"));
     assertEquals(null, letter.getTemplateReplacements().get("ohjeetUudelleOpiskelijalle"));
     assertEquals("", letter.getTemplateReplacements().get("syntymaaika"));
-    assertEquals(
-        "Hakukohteella " + ORGANIZATION_OID + " ei ole tarjojannimeä",
+    assertEquals("Hakukohteella " + ORGANIZATION_OID + " ei ole tarjojannimeä",
         letter.getTemplateReplacements().get("tarjoaja"));
-    assertEquals(
-        "Hakukohteella " + HAKUKOHDE_OID + " ei ole hakukohteennimeä",
+    assertEquals("Hakukohteella " + HAKUKOHDE_OID + " ei ole hakukohteennimeä",
         letter.getTemplateReplacements().get("koulutus"));
     assertNull(letter.getTemplateReplacements().get("hakukonde"));
     assertTrue(letter.getTemplateReplacements().containsKey("hakijapalveluidenOsoite"));
@@ -152,15 +144,14 @@ public class HyvaksymiskirjeetKomponenttiTest {
     assertNull(letter.getLetterContent());
     assertNull(letter.getEmailAddress());
     assertEquals(HAKIJA_OID, letter.getPersonOid());
-    assertTrue(
-        "Hakija OID has to be also available to template",
+    assertTrue("Hakija OID has to be also available to template",
         letter.getTemplateReplacements().containsKey("hakijaOid"));
     assertEquals(HAKIJA_OID, letter.getTemplateReplacements().get("hakijaOid"));
     assertEquals(HAKEMUS_OID, letter.getApplicationOid());
     assertEquals(skipIPosti, letter.isSkipIPosti());
 
-    List<Map<String, Object>> tulokset =
-        (List<Map<String, Object>>) letter.getTemplateReplacements().get("tulokset");
+    List<Map<String, Object>> tulokset = (List<Map<String, Object>>) letter.getTemplateReplacements()
+        .get("tulokset");
     assertEquals(1, tulokset.size());
     Map<String, Object> tulos = tulokset.get(0);
     assertEquals(14, tulos.size());
@@ -168,13 +159,10 @@ public class HyvaksymiskirjeetKomponenttiTest {
     assertEquals("1 / 1 ", tulos.get("hyvaksytyt"));
     assertEquals(omatPisteet + " ", tulos.get("omatPisteet"));
     assertEquals("", tulos.get("hylkayksenSyy"));
-    assertEquals(
-        "Hakukohteella " + HAKUKOHDE_OID + " ei ole tarjojannimeä", tulos.get("organisaationNimi"));
+    assertEquals("Hakukohteella " + HAKUKOHDE_OID + " ei ole tarjojannimeä", tulos.get("organisaationNimi"));
     assertTrue(tulos.containsKey("sijoitukset"));
     assertEquals("", tulos.get("alinHyvaksyttyPistemaara"));
-    assertEquals(
-        "Hakukohteella " + HAKUKOHDE_OID + " ei ole hakukohteennimeä",
-        tulos.get("hakukohteenNimi"));
+    assertEquals("Hakukohteella " + HAKUKOHDE_OID + " ei ole hakukohteennimeä", tulos.get("hakukohteenNimi"));
     assertEquals("", tulos.get("kaikkiHakeneet"));
     assertNull(tulos.get("hylkaysperuste"));
     assertEquals(PISTE_TIEDOT1, tulos.get("paasyJaSoveltuvuuskoe"));
@@ -193,8 +181,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
     assertEquals(minimipisteet, sijoitus.getPisteet().getMinimi());
     assertNull(sijoitus.getPisteet().getEnsikertMinimi());
 
-    Osoite hakijaPalveluidenOsoite =
-        (Osoite) letter.getTemplateReplacements().get("hakijapalveluidenOsoite");
+    Osoite hakijaPalveluidenOsoite = (Osoite) letter.getTemplateReplacements().get("hakijapalveluidenOsoite");
     assertEquals(OSOITE_ETUNIMI, hakijaPalveluidenOsoite.getFirstName());
     assertEquals(OSOITE_SUKUNIMI, hakijaPalveluidenOsoite.getLastName());
     assertEquals(OSOITE_ADDRESSLINE, hakijaPalveluidenOsoite.getAddressline());
@@ -218,120 +205,73 @@ public class HyvaksymiskirjeetKomponenttiTest {
     return mkTestLetterBatch(omatPisteet, minimipisteet, false, false, false);
   }
 
-  private LetterBatch mkTestLetterBatch(
-      int omatPisteet,
-      int minimipisteet,
-      boolean sahkoposti,
-      boolean sahkoinenAsiointi,
-      boolean korkeakouluMassapostitus) {
+  private LetterBatch mkTestLetterBatch(int omatPisteet, int minimipisteet, boolean sahkoposti,
+      boolean sahkoinenAsiointi, boolean korkeakouluMassapostitus) {
 
-    HakijaDTO hakija =
-        new HakijaDTO() {
+    HakijaDTO hakija = new HakijaDTO() {
+      {
+        setEtunimi("Etunimi");
+        setSukunimi("Etunimi");
+        setHakemusOid(HAKEMUS_OID);
+        setHakijaOid(HAKIJA_OID);
+        HakutoiveDTO h = new HakutoiveDTO() {
           {
-            setEtunimi("Etunimi");
-            setSukunimi("Etunimi");
-            setHakemusOid(HAKEMUS_OID);
-            setHakijaOid(HAKIJA_OID);
-            HakutoiveDTO h =
-                new HakutoiveDTO() {
-                  {
-                    setHakukohdeOid(HAKUKOHDE_OID);
-                    setHakutoive(1);
-                    setTarjoajaOid(ORGANIZATION_OID);
-                    setKaikkiJonotSijoiteltu(true);
-                    HakutoiveenValintatapajonoDTO j =
-                        new HakutoiveenValintatapajonoDTO() {
-                          {
-                            setValintatapajonoOid(VALINTATAPAJONO_OID);
-                            setTila(HakemuksenTila.HYVAKSYTTY);
-                            setHyvaksytty(1);
-                            setHakeneet(1);
-                            setPisteet(new BigDecimal(omatPisteet));
-                            setAlinHyvaksyttyPistemaara(new BigDecimal(minimipisteet));
-                            setValintatapajonoNimi(VALINTATAPAJONO_NIMI);
-                          }
-                        };
-                    setHakutoiveenValintatapajonot(Lists.newArrayList(j));
-                  }
-                };
-            setHakutoiveet(Sets.newTreeSet(ImmutableList.of(h)));
+            setHakukohdeOid(HAKUKOHDE_OID);
+            setHakutoive(1);
+            setTarjoajaOid(ORGANIZATION_OID);
+            setKaikkiJonotSijoiteltu(true);
+            HakutoiveenValintatapajonoDTO j = new HakutoiveenValintatapajonoDTO() {
+              {
+                setValintatapajonoOid(VALINTATAPAJONO_OID);
+                setTila(HakemuksenTila.HYVAKSYTTY);
+                setHyvaksytty(1);
+                setHakeneet(1);
+                setPisteet(new BigDecimal(omatPisteet));
+                setAlinHyvaksyttyPistemaara(new BigDecimal(minimipisteet));
+                setValintatapajonoNimi(VALINTATAPAJONO_NIMI);
+              }
+            };
+            setHakutoiveenValintatapajonot(Lists.newArrayList(j));
           }
         };
+        setHakutoiveet(Sets.newTreeSet(ImmutableList.of(h)));
+      }
+    };
 
-    Answers answers =
-        new Answers() {
-          {
-            if (!sahkoposti) {
-              setHenkilotiedot(
-                  ImmutableMap.of(
-                      "Postinumero", "00000",
-                      "lahiosoite", "Lähiosoite 1",
-                      "asuinmaa", "FIN"));
-            } else {
-              setHenkilotiedot(
-                  ImmutableMap.of(
-                      "Postinumero", "00000",
-                      "lahiosoite", "Lähiosoite 1",
-                      "asuinmaa", "FIN",
-                      "Sähköposti", "testi@testi.fi"));
-            }
-            setLisatiedot(
-                ImmutableMap.of("lupatiedot-sahkoinen-viestinta", "" + sahkoinenAsiointi));
-          }
-        };
+    Answers answers = new Answers() {
+      {
+        if (!sahkoposti) {
+          setHenkilotiedot(
+              ImmutableMap.of("Postinumero", "00000", "lahiosoite", "Lähiosoite 1", "asuinmaa", "FIN"));
+        } else {
+          setHenkilotiedot(ImmutableMap.of("Postinumero", "00000", "lahiosoite", "Lähiosoite 1", "asuinmaa",
+              "FIN", "Sähköposti", "testi@testi.fi"));
+        }
+        setLisatiedot(ImmutableMap.of("lupatiedot-sahkoinen-viestinta", "" + sahkoinenAsiointi));
+      }
+    };
 
-    Osoite osoite =
-        new OsoiteBuilder()
-            .setFirstName(OSOITE_ETUNIMI)
-            .setLastName(OSOITE_SUKUNIMI)
-            .setAddressline(OSOITE_ADDRESSLINE)
-            .setAddressline2(OSOITE_ADDRESSLINE2)
-            .setAddressline3(OSOITE_ADDRESSLINE3)
-            .setPostalCode(OSOITE_POSTAL_CODE)
-            .setCity(OSOITE_CITY)
-            .setRegion(OSOITE_REGION)
-            .setCountry(OSOITE_COUNTRY)
-            .setCountryCode(OSOITE_COUNTRY_CODE)
-            .createOsoite();
+    Osoite osoite = new OsoiteBuilder().setFirstName(OSOITE_ETUNIMI).setLastName(OSOITE_SUKUNIMI)
+        .setAddressline(OSOITE_ADDRESSLINE).setAddressline2(OSOITE_ADDRESSLINE2)
+        .setAddressline3(OSOITE_ADDRESSLINE3).setPostalCode(OSOITE_POSTAL_CODE).setCity(OSOITE_CITY)
+        .setRegion(OSOITE_REGION).setCountry(OSOITE_COUNTRY).setCountryCode(OSOITE_COUNTRY_CODE).createOsoite();
 
     SyotettyArvoDTO piste1 = new SyotettyArvoDTO();
     piste1.setArvo(PISTE_TIEDOT1);
     SyotettyArvoDTO piste2 = new SyotettyArvoDTO();
     piste2.setArvo(PISTE_TIEDOT2);
 
-    return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-        new HashMap<>(),
-        new HashMap<>(),
+    return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(new HashMap<>(), new HashMap<>(),
         ImmutableMap.of(HAKUKOHDE_OID, ofNullable(osoite)),
-        ImmutableMap.of(
-            HAKUKOHDE_OID,
-            new MetaHakukohde(
-                ORGANIZATION_OID, new Teksti(), Collections.singletonList(new Teksti()))),
+        ImmutableMap.of(HAKUKOHDE_OID,
+            new MetaHakukohde(ORGANIZATION_OID, new Teksti(), Collections.singletonList(new Teksti()))),
         ImmutableList.of(hakija),
-        ImmutableMap.of(
-            HAKEMUS_OID,
-            new HakuappHakemusWrapper(
-                new Hakemus(
-                    "type",
-                    "applicationSystemId",
-                    answers,
-                    ImmutableMap.of(),
-                    ImmutableList.of(),
-                    HAKEMUS_OID,
-                    "state",
-                    "personOid"))),
-        ImmutableMap.of(
-            HAKUKOHDE_OID, ImmutableMap.of(HAKEMUS_OID, ImmutableList.of(piste1, piste2))),
-        FETCH_TARGET,
-        APPLICATION_PERIOD,
-        ofNullable(LANGUAGE_CODE),
-        SISALTO,
-        TAG,
-        TEMPLATE_NAME,
-        PALAUTUS_PVM,
-        PALAUTUS_AIKA,
-        korkeakouluMassapostitus,
-        Collections.singletonList(ContentStructureType.letter),
+        ImmutableMap.of(HAKEMUS_OID,
+            new HakuappHakemusWrapper(new Hakemus("type", "applicationSystemId", answers, ImmutableMap.of(),
+                ImmutableList.of(), HAKEMUS_OID, "state", "personOid"))),
+        ImmutableMap.of(HAKUKOHDE_OID, ImmutableMap.of(HAKEMUS_OID, ImmutableList.of(piste1, piste2))),
+        FETCH_TARGET, APPLICATION_PERIOD, ofNullable(LANGUAGE_CODE), SISALTO, TAG, TEMPLATE_NAME, PALAUTUS_PVM,
+        PALAUTUS_AIKA, korkeakouluMassapostitus, Collections.singletonList(ContentStructureType.letter),
         KirjeenVastaanottaja.HAKIJA);
   }
 }

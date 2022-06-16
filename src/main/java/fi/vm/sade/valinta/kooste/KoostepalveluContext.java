@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Configuration
-@Import({KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class, JaxrsConfiguration.class})
+@Import({ KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class, JaxrsConfiguration.class })
 public class KoostepalveluContext {
   static final String TYHJA_ARVO_POIKKEUS = "Reititysta ei voida jatkaa tyhjalle arvolle!";
 
@@ -26,8 +26,7 @@ public class KoostepalveluContext {
 
   @Bean
   public OidProvider getOidProvider(
-      @Value("${valintalaskentakoostepalvelu.organisaatio-service-url}")
-          String organisaatioServiceUrl,
+      @Value("${valintalaskentakoostepalvelu.organisaatio-service-url}") String organisaatioServiceUrl,
       @Value("${root.organisaatio.oid}") String rootOrganisationOid) {
     return new OidProvider(organisaatioServiceUrl, rootOrganisationOid, HttpClients.CALLER_ID);
   }
@@ -38,8 +37,7 @@ public class KoostepalveluContext {
   }
 
   @Bean(name = "authorizer")
-  public Authorizer getAuthorizerImpl(
-      OrganisationHierarchyAuthorizer organisationHierarchyAuthorizer) {
+  public Authorizer getAuthorizerImpl(OrganisationHierarchyAuthorizer organisationHierarchyAuthorizer) {
     return new ThreadLocalAuthorizer();
   }
 
@@ -49,13 +47,10 @@ public class KoostepalveluContext {
 
     @Bean(name = "javaDslCamelContext")
     public static SpringCamelContext getSpringCamelContext(
-        @Value("${valintalaskentakoostepalvelu.camelContext.threadpoolsize:10}")
-            Integer threadPoolSize,
-        ApplicationContext applicationContext,
-        RoutesBuilder[] routes)
-        throws Exception {
+        @Value("${valintalaskentakoostepalvelu.camelContext.threadpoolsize:10}") Integer threadPoolSize,
+        ApplicationContext applicationContext, RoutesBuilder[] routes) throws Exception {
       SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
-      //            camelContext.getTypeConverterRegistry().addTypeConverter(HakemusDTO.class,
+      // camelContext.getTypeConverterRegistry().addTypeConverter(HakemusDTO.class,
       // Hakemus.class, new HakemusToHakemusDTOConverter());
       camelContext.disableJMX();
       camelContext.setAutoStartup(true);

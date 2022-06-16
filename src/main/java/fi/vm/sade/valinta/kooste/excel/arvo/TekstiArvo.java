@@ -40,8 +40,7 @@ public class TekstiArvo extends Arvo {
     if (!nimike) {
       preferoituleveys = Excel.VAKIO_LEVEYS / 2;
     }
-    return new Teksti(
-        teksti, true, false, teksti == null, preferoituleveys, ulottuvuus, editoitava);
+    return new Teksti(teksti, true, false, teksti == null, preferoituleveys, ulottuvuus, editoitava);
     // Excel.VAKIO_LEVEYS
     // / 2);
   }

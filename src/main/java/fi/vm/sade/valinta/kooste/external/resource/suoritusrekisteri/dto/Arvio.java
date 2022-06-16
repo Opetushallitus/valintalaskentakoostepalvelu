@@ -9,7 +9,8 @@ public class Arvio {
   private String asteikko;
   private Integer pisteet;
 
-  public Arvio() {}
+  public Arvio() {
+  }
 
   public void setArvosana(String arvosana) {
     this.arvosana = arvosana;
@@ -47,15 +48,7 @@ public class Arvio {
 
   @Override
   public String toString() {
-    return "Arvio{"
-        + "arvosana='"
-        + arvosana
-        + '\''
-        + ", asteikko='"
-        + asteikko
-        + '\''
-        + ", pisteet="
-        + pisteet
+    return "Arvio{" + "arvosana='" + arvosana + '\'' + ", asteikko='" + asteikko + '\'' + ", pisteet=" + pisteet
         + '}';
   }
 }

@@ -22,10 +22,11 @@ public class KieliUtil {
   public static final String ENGLANTI = "EN";
 
   /**
-   * Kielikoodit pitaisi tulla muodossa "FI","SE", "EN". Kaytannossa voi tulla vaikka "fi,se,en" tai
-   * "fi_FI" tai "ruotsi".
+   * Kielikoodit pitaisi tulla muodossa "FI","SE", "EN". Kaytannossa voi tulla
+   * vaikka "fi,se,en" tai "fi_FI" tai "ruotsi".
    *
-   * @param kielikoodi kielikoodi palveluntarjoajan omalla enkoodauksella
+   * @param kielikoodi
+   *          kielikoodi palveluntarjoajan omalla enkoodauksella
    * @return normalisoitu kielikoodi muotoa "FI","SE","EN"
    */
   public static String normalisoiKielikoodi(String kielikoodi) {

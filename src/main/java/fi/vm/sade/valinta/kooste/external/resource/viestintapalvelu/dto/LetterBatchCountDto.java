@@ -11,15 +11,8 @@ public class LetterBatchCountDto {
   public final boolean readyForEPosti;
   public final Long groupEmailId;
 
-  public LetterBatchCountDto(
-      Long letterBatchId,
-      long letterTotalCount,
-      long letterReadyCount,
-      long letterErrorCount,
-      long letterPublishedCount,
-      boolean readyForPublish,
-      boolean readyForEPosti,
-      Long groupEmailId) {
+  public LetterBatchCountDto(Long letterBatchId, long letterTotalCount, long letterReadyCount, long letterErrorCount,
+      long letterPublishedCount, boolean readyForPublish, boolean readyForEPosti, Long groupEmailId) {
     this.letterBatchId = letterBatchId;
     this.letterTotalCount = letterTotalCount;
     this.letterReadyCount = letterReadyCount;

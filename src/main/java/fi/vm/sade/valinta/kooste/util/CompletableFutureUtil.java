@@ -17,10 +17,7 @@ public class CompletableFutureUtil {
   }
 
   public static <K, V> CompletableFuture<Map<K, V>> sequence(Map<K, CompletableFuture<V>> fs) {
-    return CompletableFuture.allOf(fs.values().toArray(new CompletableFuture[0]))
-        .thenApplyAsync(
-            v ->
-                fs.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().join())));
+    return CompletableFuture.allOf(fs.values().toArray(new CompletableFuture[0])).thenApplyAsync(
+        v -> fs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().join())));
   }
 }

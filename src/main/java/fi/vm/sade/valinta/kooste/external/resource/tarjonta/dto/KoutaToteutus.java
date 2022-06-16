@@ -18,8 +18,7 @@ public class KoutaToteutus {
   }
 
   public String getKoulutuksenAlkamiskausi() {
-    if (this.metadata != null
-        && this.metadata.opetus != null
+    if (this.metadata != null && this.metadata.opetus != null
         && this.metadata.opetus.koulutuksenAlkamiskausi != null
         && this.metadata.opetus.koulutuksenAlkamiskausi.koulutuksenAlkamiskausi != null) {
       return this.metadata.opetus.koulutuksenAlkamiskausi.koulutuksenAlkamiskausi.koodiUri;
@@ -28,8 +27,7 @@ public class KoutaToteutus {
   }
 
   public Integer getKoulutuksenAlkamisvuosi() {
-    if (this.metadata != null
-        && this.metadata.opetus != null
+    if (this.metadata != null && this.metadata.opetus != null
         && this.metadata.opetus.koulutuksenAlkamiskausi != null) {
       return this.metadata.opetus.koulutuksenAlkamiskausi.koulutuksenAlkamisvuosi;
     }
@@ -38,9 +36,7 @@ public class KoutaToteutus {
 
   public Set<String> getOsaamisalaUris() {
     if (this.metadata != null && this.metadata.osaamisalat != null) {
-      return this.metadata.osaamisalat.stream()
-          .map(osaamisala -> osaamisala.koodi)
-          .collect(Collectors.toSet());
+      return this.metadata.osaamisalat.stream().map(osaamisala -> osaamisala.koodi).collect(Collectors.toSet());
     } else {
       return null;
     }

@@ -20,10 +20,7 @@ public class SessionResource {
   @Path("/maxinactiveinterval")
   @PreAuthorize("isAuthenticated()")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(
-      value = "Palauttaa session erääntymisen aikarajan sekunteina",
-      notes = "Tarvitsee HTTP kutsun, jossa on session id",
-      response = String.class)
+  @ApiOperation(value = "Palauttaa session erääntymisen aikarajan sekunteina", notes = "Tarvitsee HTTP kutsun, jossa on session id", response = String.class)
   public String maxInactiveInterval(@Context HttpServletRequest req) {
     return Integer.toString(req.getSession().getMaxInactiveInterval());
   }

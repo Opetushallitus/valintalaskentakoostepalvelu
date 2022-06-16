@@ -17,18 +17,11 @@ public class Arvosana {
   private Arvio arvio = new Arvio();
   private String lisatieto;
 
-  public Arvosana() {}
+  public Arvosana() {
+  }
 
-  public Arvosana(
-      String id,
-      String suoritus,
-      String aine,
-      Boolean valinnainen,
-      String myonnetty,
-      String source,
-      Map<String, String> lahdeArvot,
-      Arvio arvio,
-      String lisatieto) {
+  public Arvosana(String id, String suoritus, String aine, Boolean valinnainen, String myonnetty, String source,
+      Map<String, String> lahdeArvot, Arvio arvio, String lisatieto) {
     this.id = id;
     this.suoritus = suoritus;
     this.aine = aine;
@@ -123,9 +116,7 @@ public class Arvosana {
   }
 
   public Optional<String> getKoetunnus() {
-    return Optional.ofNullable(getLahdeArvot())
-        .map(m -> m.get("koetunnus"))
-        .filter(Objects::nonNull);
+    return Optional.ofNullable(getLahdeArvot()).map(m -> m.get("koetunnus")).filter(Objects::nonNull);
   }
 
   public Map<String, String> getLahdeArvot() {
@@ -138,56 +129,35 @@ public class Arvosana {
 
   @Override
   public String toString() {
-    return "Arvosana{"
-        + "id='"
-        + id
-        + '\''
-        + ", suoritus='"
-        + suoritus
-        + '\''
-        + ", aine='"
-        + aine
-        + '\''
-        + ", valinnainen="
-        + valinnainen
-        + ", myonnetty='"
-        + myonnetty
-        + '\''
-        + ", source='"
-        + source
-        + '\''
-        + ", lahdeArvot="
-        + lahdeArvot
-        + ", arvio="
-        + arvio
-        + ", lisatieto='"
-        + lisatieto
-        + '\''
-        + '}';
+    return "Arvosana{" + "id='" + id + '\'' + ", suoritus='" + suoritus + '\'' + ", aine='" + aine + '\''
+        + ", valinnainen=" + valinnainen + ", myonnetty='" + myonnetty + '\'' + ", source='" + source + '\''
+        + ", lahdeArvot=" + lahdeArvot + ", arvio=" + arvio + ", lisatieto='" + lisatieto + '\'' + '}';
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
 
     Arvosana arvosana = (Arvosana) o;
 
-    if (id != null ? !id.equals(arvosana.id) : arvosana.id != null) return false;
+    if (id != null ? !id.equals(arvosana.id) : arvosana.id != null)
+      return false;
     if (suoritus != null ? !suoritus.equals(arvosana.suoritus) : arvosana.suoritus != null)
       return false;
-    if (aine != null ? !aine.equals(arvosana.aine) : arvosana.aine != null) return false;
-    if (valinnainen != null
-        ? !valinnainen.equals(arvosana.valinnainen)
-        : arvosana.valinnainen != null) return false;
+    if (aine != null ? !aine.equals(arvosana.aine) : arvosana.aine != null)
+      return false;
+    if (valinnainen != null ? !valinnainen.equals(arvosana.valinnainen) : arvosana.valinnainen != null)
+      return false;
     if (myonnetty != null ? !myonnetty.equals(arvosana.myonnetty) : arvosana.myonnetty != null)
       return false;
-    if (source != null ? !source.equals(arvosana.source) : arvosana.source != null) return false;
+    if (source != null ? !source.equals(arvosana.source) : arvosana.source != null)
+      return false;
     if (lahdeArvot != null ? !lahdeArvot.equals(arvosana.lahdeArvot) : arvosana.lahdeArvot != null)
       return false;
-    return !(lisatieto != null
-        ? !lisatieto.equals(arvosana.lisatieto)
-        : arvosana.lisatieto != null);
+    return !(lisatieto != null ? !lisatieto.equals(arvosana.lisatieto) : arvosana.lisatieto != null);
   }
 
   @Override
@@ -221,10 +191,10 @@ public class Arvosana {
         return 1;
       }
 
-      LocalDate firstMyonnetty =
-          LocalDate.parse(first.myonnetty, SuoritusJaArvosanatWrapper.ARVOSANA_PVM_FORMATTER);
-      LocalDate secondMyonnetty =
-          LocalDate.parse(second.myonnetty, SuoritusJaArvosanatWrapper.ARVOSANA_PVM_FORMATTER);
+      LocalDate firstMyonnetty = LocalDate.parse(first.myonnetty,
+          SuoritusJaArvosanatWrapper.ARVOSANA_PVM_FORMATTER);
+      LocalDate secondMyonnetty = LocalDate.parse(second.myonnetty,
+          SuoritusJaArvosanatWrapper.ARVOSANA_PVM_FORMATTER);
       return secondMyonnetty.compareTo(firstMyonnetty);
     }
 

@@ -2,7 +2,8 @@ package fi.vm.sade.valinta.kooste.exception;
 
 public class HakemuspalveluException extends RuntimeException {
 
-  public HakemuspalveluException() {}
+  public HakemuspalveluException() {
+  }
 
   public HakemuspalveluException(String message) {
     super(message);

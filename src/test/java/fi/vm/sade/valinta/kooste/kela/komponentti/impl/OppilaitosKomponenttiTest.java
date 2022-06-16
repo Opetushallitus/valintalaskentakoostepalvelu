@@ -22,21 +22,25 @@ import org.mockito.junit.MockitoJUnitRunner;
 /** @author antto.sierla */
 @RunWith(MockitoJUnitRunner.class)
 public class OppilaitosKomponenttiTest {
-  @Mock private OrganisaatioResource organisaatioResource;
+  @Mock
+  private OrganisaatioResource organisaatioResource;
 
-  @InjectMocks OppilaitosKomponentti oppilaitosKomponentti = new OppilaitosKomponentti();
+  @InjectMocks
+  OppilaitosKomponentti oppilaitosKomponentti = new OppilaitosKomponentti();
 
   @Before
   public void setup() throws Exception {
     /*
-    ValintaperusteetValinnanVaiheDTO valinnanVaihe = new ValintaperusteetValinnanVaiheDTO();
-    valinnanVaihe.setValinnanVaiheOid("valinnanVaiheFoundId");
-
-    ValintaperusteetDTO valintaperusteet = new ValintaperusteetDTO();
-    valintaperusteet.setValinnanVaihe(valinnanVaihe);
-
-    when(valintaperusteetResource.haeValintaperusteet("hakukohdeoid", null)).thenReturn(Lists.newArrayList(valintaperusteet));
-    */
+     * ValintaperusteetValinnanVaiheDTO valinnanVaihe = new
+     * ValintaperusteetValinnanVaiheDTO();
+     * valinnanVaihe.setValinnanVaiheOid("valinnanVaiheFoundId");
+     * 
+     * ValintaperusteetDTO valintaperusteet = new ValintaperusteetDTO();
+     * valintaperusteet.setValinnanVaihe(valinnanVaihe);
+     * 
+     * when(valintaperusteetResource.haeValintaperusteet("hakukohdeoid",
+     * null)).thenReturn(Lists.newArrayList(valintaperusteet));
+     */
 
     OrganisaatioRDTO org = new OrganisaatioRDTO();
     org.setOid("orgoid");
@@ -80,12 +84,10 @@ public class OppilaitosKomponenttiTest {
     childOrg3.setOid("child2Oid");
     childOrg3.setOppilaitosKoodi("oppilaitosNroFromChild");
 
-    when(organisaatioResource.getOrganisaatioByOID("orgWithChildrenOid"))
-        .thenReturn(orgWithChildren);
+    when(organisaatioResource.getOrganisaatioByOID("orgWithChildrenOid")).thenReturn(orgWithChildren);
     when(organisaatioResource.children("orgWithChildrenOid", false))
         .thenReturn(Arrays.asList(childOrg1, childOrgVarh, childOrg2, childOrg3));
-    when(organisaatioResource.children("orgVarhaiskasvatus", false))
-        .thenThrow(new ForbiddenException());
+    when(organisaatioResource.children("orgVarhaiskasvatus", false)).thenThrow(new ForbiddenException());
 
     // For empty oppilaitosnumero
     OrganisaatioRDTO emptyOrg = new OrganisaatioRDTO();

@@ -27,23 +27,20 @@ public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
 
   @Override
   public void configure() throws Exception {
-    from(quartzDocumentServiceFlush)
-        .process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) throws Exception {
-                try {
-                  dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
-                } catch (Exception e) {
-                  LOG.info(
-                      "Dokumenttipalvelun tyhjennys-kutsu epäonnistui! Yritetään uudelleen.", e);
-                  try { // FIXME kill me OK-152
-                    dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
-                  } catch (Exception e2) {
-                    LOG.error("Dokumenttipalvelun tyhjennys-kutsu epäonnistui!", e2);
-                  }
-                }
-              }
-            });
+    from(quartzDocumentServiceFlush).process(new Processor() {
+      @Override
+      public void process(Exchange exchange) throws Exception {
+        try {
+          dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
+        } catch (Exception e) {
+          LOG.info("Dokumenttipalvelun tyhjennys-kutsu epäonnistui! Yritetään uudelleen.", e);
+          try { // FIXME kill me OK-152
+            dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
+          } catch (Exception e2) {
+            LOG.error("Dokumenttipalvelun tyhjennys-kutsu epäonnistui!", e2);
+          }
+        }
+      }
+    });
   }
 }

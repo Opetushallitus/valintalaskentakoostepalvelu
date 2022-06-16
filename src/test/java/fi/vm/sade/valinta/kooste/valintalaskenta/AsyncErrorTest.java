@@ -5,7 +5,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 
-/** @author Jussi Jartamo @Ignore lokaaliin testaukseen. CAS virheen todentamiseen. */
+/**
+ * @author Jussi Jartamo @Ignore lokaaliin testaukseen. CAS virheen
+ *         todentamiseen.
+ */
 @Ignore
 public class AsyncErrorTest {
 
@@ -16,16 +19,13 @@ public class AsyncErrorTest {
     String hakuOid = "1.2.246.562.5.2013080813081926341927";
     String hakukohdeOid = "1.2.246.562.5.25812040993";
 
-    a.getApplicationOids(hakuOid, hakukohdeOid)
-        .subscribe(
-            r -> {
-              // NOP
-              int i = 1 + 1;
-            },
-            e -> {
-              // NOP
-              int i = 1 + 1;
-            });
+    a.getApplicationOids(hakuOid, hakukohdeOid).subscribe(r -> {
+      // NOP
+      int i = 1 + 1;
+    }, e -> {
+      // NOP
+      int i = 1 + 1;
+    });
     Thread.sleep(5000L);
   }
 }

@@ -8,15 +8,15 @@ public class HakukohteenValintatulosUpdateStatuses {
   public String message;
   public List<ValintatulosUpdateStatus> statuses;
 
-  public HakukohteenValintatulosUpdateStatuses() {}
+  public HakukohteenValintatulosUpdateStatuses() {
+  }
 
   public HakukohteenValintatulosUpdateStatuses(List<ValintatulosUpdateStatus> statuses) {
     this.message = null;
     this.statuses = statuses;
   }
 
-  public HakukohteenValintatulosUpdateStatuses(
-      String message, List<ValintatulosUpdateStatus> statuses) {
+  public HakukohteenValintatulosUpdateStatuses(String message, List<ValintatulosUpdateStatus> statuses) {
     this.message = message;
     this.statuses = statuses;
   }

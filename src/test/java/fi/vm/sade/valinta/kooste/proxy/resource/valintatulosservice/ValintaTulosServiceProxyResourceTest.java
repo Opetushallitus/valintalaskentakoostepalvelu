@@ -16,24 +16,19 @@ public class ValintaTulosServiceProxyResourceTest {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   public ValintaTulosServiceProxyResourceTest() {
-    objectMapper.registerModule(
-        new ValintaTulosServiceProxyResource.ValintaTulosServiceSerializersModule());
+    objectMapper.registerModule(new ValintaTulosServiceProxyResource.ValintaTulosServiceSerializersModule());
   }
 
   @Test
-  public void vastaanottoAikarajaMennytDtoSerializesDeadlineNicely()
-      throws JsonProcessingException {
+  public void vastaanottoAikarajaMennytDtoSerializesDeadlineNicely() throws JsonProcessingException {
     VastaanottoAikarajaMennytDTO dto = new VastaanottoAikarajaMennytDTO();
     dto.setHakemusOid(hakemusOid);
     String vastaanottoDeadline = "2016-07-15T12:00:00Z";
     dto.setVastaanottoDeadline(new DateTime(2016, 7, 15, 12, 0, 0, DateTimeZone.UTC));
     dto.setMennyt(true);
     String jsonString = objectMapper.writeValueAsString(dto);
-    Assert.assertEquals(
-        String.format(
-            "{\"hakemusOid\":\"%s\",\"mennyt\":true,\"vastaanottoDeadline\":\"%s\"}",
-            hakemusOid, vastaanottoDeadline),
-        jsonString);
+    Assert.assertEquals(String.format("{\"hakemusOid\":\"%s\",\"mennyt\":true,\"vastaanottoDeadline\":\"%s\"}",
+        hakemusOid, vastaanottoDeadline), jsonString);
   }
 
   @Test
@@ -43,7 +38,6 @@ public class ValintaTulosServiceProxyResourceTest {
     dto.setVastaanottoDeadline(null);
     dto.setMennyt(true);
     String jsonString = objectMapper.writeValueAsString(dto);
-    Assert.assertEquals(
-        String.format("{\"hakemusOid\":\"%s\",\"mennyt\":true}", hakemusOid), jsonString);
+    Assert.assertEquals(String.format("{\"hakemusOid\":\"%s\",\"mennyt\":true}", hakemusOid), jsonString);
   }
 }

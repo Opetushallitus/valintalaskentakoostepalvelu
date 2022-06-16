@@ -33,16 +33,10 @@ import org.springframework.stereotype.Component;
 public class ValintakoeKutsuExcelKomponentti {
   private static final Logger LOG = LoggerFactory.getLogger(ValintakoeKutsuExcelKomponentti.class);
 
-  public InputStream luoTuloksetXlsMuodossa(
-      String haunNimi,
-      String hakukohteenNimi,
-      final Map<String, Koodi> maatJaValtiot1,
-      final Map<String, Koodi> posti,
-      List<HakemusOsallistuminenDTO> tiedotHakukohteelle,
-      Map<String, ValintakoeDTO> valintakokeet,
-      List<HakemusWrapper> haetutHakemukset,
-      Set<String> whiteList)
-      throws Exception {
+  public InputStream luoTuloksetXlsMuodossa(String haunNimi, String hakukohteenNimi,
+      final Map<String, Koodi> maatJaValtiot1, final Map<String, Koodi> posti,
+      List<HakemusOsallistuminenDTO> tiedotHakukohteelle, Map<String, ValintakoeDTO> valintakokeet,
+      List<HakemusWrapper> haetutHakemukset, Set<String> whiteList) throws Exception {
     final Map<String, String> nivelvaiheenKoekutsut = Maps.newHashMap();
     List<ValintakoeNimi> tunnisteet = Lists.newArrayList();
     for (Map.Entry<String, ValintakoeDTO> valintakoeEntry : valintakokeet.entrySet()) {
@@ -53,21 +47,19 @@ public class ValintakoeKutsuExcelKomponentti {
       }
     }
     try {
-      tunnisteet.sort(
-          (o1, o2) -> {
-            if (o1 == null || o2 == null || o1.getNimi() == null || o2.getNimi() == null) {
-              LOG.error("Valintaperusteista palautui null nimisiä hakukohteita!");
-              return 0;
-            }
-            return o1.getNimi().compareTo(o2.getNimi());
-          });
-      Function<String, Boolean> onkoHakemusWhiteListilla =
-          hakemusOid -> whiteList.isEmpty() || whiteList.contains(hakemusOid);
-      Map<String, HakemusWrapper> mapping =
-          haetutHakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, a -> a));
+      tunnisteet.sort((o1, o2) -> {
+        if (o1 == null || o2 == null || o1.getNimi() == null || o2.getNimi() == null) {
+          LOG.error("Valintaperusteista palautui null nimisiä hakukohteita!");
+          return 0;
+        }
+        return o1.getNimi().compareTo(o2.getNimi());
+      });
+      Function<String, Boolean> onkoHakemusWhiteListilla = hakemusOid -> whiteList.isEmpty()
+          || whiteList.contains(hakemusOid);
+      Map<String, HakemusWrapper> mapping = haetutHakemukset.stream()
+          .collect(Collectors.toMap(HakemusWrapper::getOid, a -> a));
       Map<String, ValintakoeRivi> hakemusJaRivi = Maps.newHashMap();
-      BiFunction<ValintakoeRivi, ValintakoeRivi, ValintakoeRivi> remappingFunction =
-          (v1, v2) -> v1.merge(v2);
+      BiFunction<ValintakoeRivi, ValintakoeRivi, ValintakoeRivi> remappingFunction = (v1, v2) -> v1.merge(v2);
       {
         for (HakemusOsallistuminenDTO tieto : tiedotHakukohteelle) {
           if (!onkoHakemusWhiteListilla.apply(tieto.getHakemusOid())) {
@@ -77,9 +69,8 @@ public class ValintakoeKutsuExcelKomponentti {
             continue;
           }
           if (mapping.containsKey(tieto.getHakemusOid())) {
-            final ValintakoeRivi v0 =
-                muodostaValintakoeRivi(
-                    posti, maatJaValtiot1, mapping.get(tieto.getHakemusOid()), tieto, tunnisteet);
+            final ValintakoeRivi v0 = muodostaValintakoeRivi(posti, maatJaValtiot1,
+                mapping.get(tieto.getHakemusOid()), tieto, tunnisteet);
             hakemusJaRivi.merge(tieto.getHakemusOid(), v0, remappingFunction);
           }
         }
@@ -88,28 +79,16 @@ public class ValintakoeKutsuExcelKomponentti {
             if (!onkoHakemusWhiteListilla.apply(hakemus.getOid())) {
               continue;
             }
-            Osoite osoite =
-                OsoiteHakemukseltaUtil.osoiteHakemuksesta(
-                    hakemus, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
-            ValintakoeRivi v =
-                new ValintakoeRivi(
-                    hakemus.getSukunimi(),
-                    hakemus.getEtunimet(),
-                    KoodistoCachedAsyncResource.haeKoodistaArvo(
-                        posti.get(hakemus.getSuomalainenPostinumero()),
-                        KieliUtil.SUOMI,
-                        hakemus.getSuomalainenPostinumero()),
-                    KoodistoCachedAsyncResource.haeKoodistaArvo(
-                        maatJaValtiot1.get(hakemus.getAsuinmaa()),
-                        KieliUtil.ENGLANTI,
-                        hakemus.getAsuinmaa()),
-                    hakemus,
-                    hakemus.getOid(),
-                    null,
-                    nivelvaiheenKoekutsut,
-                    osoite,
-                    Yhteystiedot.yhteystiedotHakemukselta(hakemus),
-                    true);
+            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, Maps.newHashMap(),
+                Maps.newHashMap(), new NimiPaattelyStrategy());
+            ValintakoeRivi v = new ValintakoeRivi(hakemus.getSukunimi(), hakemus.getEtunimet(),
+                KoodistoCachedAsyncResource.haeKoodistaArvo(
+                    posti.get(hakemus.getSuomalainenPostinumero()), KieliUtil.SUOMI,
+                    hakemus.getSuomalainenPostinumero()),
+                KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(hakemus.getAsuinmaa()),
+                    KieliUtil.ENGLANTI, hakemus.getAsuinmaa()),
+                hakemus, hakemus.getOid(), null, nivelvaiheenKoekutsut, osoite,
+                Yhteystiedot.yhteystiedotHakemukselta(hakemus), true);
             hakemusJaRivi.merge(hakemus.getOid(), v, remappingFunction);
           }
         }
@@ -118,33 +97,16 @@ public class ValintakoeKutsuExcelKomponentti {
       Collections.sort(rivit);
 
       List<Object[]> rows = new ArrayList<Object[]>();
-      rows.add(new Object[] {haunNimi});
-      rows.add(new Object[] {hakukohteenNimi});
+      rows.add(new Object[] { haunNimi });
+      rows.add(new Object[] { hakukohteenNimi });
       rows.add(new Object[] {});
 
       LOG.debug("Creating rows for Excel file!");
       ArrayList<String> otsikot = new ArrayList<String>();
-      otsikot.addAll(
-          Arrays.asList(
-              "Sukunimi",
-              "Etunimet",
-              "Henkilötunnus",
-              "Syntymäaika",
-              "Sukupuoli",
-              "Lähiosoite",
-              "Postinumero",
-              "Postitoimipaikka",
-              "Osoite (ulkomaa)",
-              "Postinumero (ulkomaa)",
-              "Kaupunki (ulkomaa)",
-              "Asuinmaa",
-              "Kansalaisuus",
-              "Kansallinen ID",
-              "Passin numero",
-              "Sähköpostiosoite",
-              "Puhelinnumero",
-              "Hakemus",
-              "Laskettu pvm"));
+      otsikot.addAll(Arrays.asList("Sukunimi", "Etunimet", "Henkilötunnus", "Syntymäaika", "Sukupuoli",
+          "Lähiosoite", "Postinumero", "Postitoimipaikka", "Osoite (ulkomaa)", "Postinumero (ulkomaa)",
+          "Kaupunki (ulkomaa)", "Asuinmaa", "Kansalaisuus", "Kansallinen ID", "Passin numero",
+          "Sähköpostiosoite", "Puhelinnumero", "Hakemus", "Laskettu pvm"));
       List<String> oids = Lists.newArrayList();
       for (ValintakoeNimi n : tunnisteet) {
         otsikot.add(n.getNimi());
@@ -176,12 +138,8 @@ public class ValintakoeKutsuExcelKomponentti {
     return StringUtils.EMPTY;
   }
 
-  private ValintakoeRivi muodostaValintakoeRivi(
-      Map<String, Koodi> posti,
-      Map<String, Koodi> maatJaValtiot1,
-      HakemusWrapper h,
-      HakemusOsallistuminenDTO o,
-      List<ValintakoeNimi> tunnisteet) {
+  private ValintakoeRivi muodostaValintakoeRivi(Map<String, Koodi> posti, Map<String, Koodi> maatJaValtiot1,
+      HakemusWrapper h, HakemusOsallistuminenDTO o, List<ValintakoeNimi> tunnisteet) {
     Date date = o.getLuontiPvm();
     Map<String, ValintakoeOsallistuminenDTO> osallistumiset = new HashMap<>();
     for (ValintakoeOsallistuminenDTO v : o.getOsallistumiset()) {
@@ -196,30 +154,19 @@ public class ValintakoeKutsuExcelKomponentti {
         if (OsallistuminenDTO.OSALLISTUU.equals(osallistuminen)) {
           osallistuuEdesYhteen = true;
         }
-        osallistumistiedot.put(
-            tunniste.getSelvitettyTunniste(), suomenna(vodto.getOsallistuminen()));
+        osallistumistiedot.put(tunniste.getSelvitettyTunniste(), suomenna(vodto.getOsallistuminen()));
       } else {
         osallistumistiedot.put(tunniste.getSelvitettyTunniste(), "Määrittelemätön");
       }
     }
-    Osoite osoite =
-        OsoiteHakemukseltaUtil.osoiteHakemuksesta(
-            h, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
-    return new ValintakoeRivi(
-        h.getSukunimi(),
-        h.getEtunimet(),
-        KoodistoCachedAsyncResource.haeKoodistaArvo(
-            posti.get(h.getSuomalainenPostinumero()),
-            KieliUtil.SUOMI,
+    Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, Maps.newHashMap(), Maps.newHashMap(),
+        new NimiPaattelyStrategy());
+    return new ValintakoeRivi(h.getSukunimi(), h.getEtunimet(),
+        KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(h.getSuomalainenPostinumero()), KieliUtil.SUOMI,
             h.getSuomalainenPostinumero()),
-        KoodistoCachedAsyncResource.haeKoodistaArvo(
-            maatJaValtiot1.get(h.getAsuinmaa()), KieliUtil.ENGLANTI, h.getAsuinmaa()),
-        h,
-        h.getOid(),
-        date,
-        osallistumistiedot,
-        osoite,
-        Yhteystiedot.yhteystiedotHakemukselta(h),
+        KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(h.getAsuinmaa()), KieliUtil.ENGLANTI,
+            h.getAsuinmaa()),
+        h, h.getOid(), date, osallistumistiedot, osoite, Yhteystiedot.yhteystiedotHakemukselta(h),
         osallistuuEdesYhteen);
   }
 }

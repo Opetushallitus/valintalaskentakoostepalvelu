@@ -32,41 +32,35 @@ import org.springframework.stereotype.Service;
 public class AuthorityCheckService {
   private static final Logger LOG = LoggerFactory.getLogger(AuthorityCheckService.class);
 
-  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
-  @Autowired private OrganisaatioResource organisaatioResource;
-  @Autowired private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
+  @Autowired
+  private TarjontaAsyncResource tarjontaAsyncResource;
+  @Autowired
+  private OrganisaatioResource organisaatioResource;
+  @Autowired
+  private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 
-  public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
-      Collection<String> roles) {
+  public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(Collection<String> roles) {
     final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
     final Set<String> organizationOids = parseOrganizationOidsFromSecurityRoles(authorities);
     boolean isRootAuthority = organizationOids.stream().anyMatch(oid -> isRootOrganizationOID(oid));
     if (isRootAuthority) {
       return Observable.just((oid) -> true);
     } else {
-      final Set<String> organizationGroupOids =
-          parseOrganizationGroupOidsFromSecurityRoles(authorities);
+      final Set<String> organizationGroupOids = parseOrganizationGroupOidsFromSecurityRoles(authorities);
       if (organizationGroupOids.isEmpty() && organizationOids.isEmpty()) {
-        return Observable.error(
-            new RuntimeException("Unauthorized. User has no organization OIDS"));
+        return Observable.error(new RuntimeException("Unauthorized. User has no organization OIDS"));
       }
-      CompletableFuture<Set<String>> searchByOrganizationOids =
-          Optional.of(organizationOids)
-              .filter(oids -> !oids.isEmpty())
-              .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids)
-              .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
+      CompletableFuture<Set<String>> searchByOrganizationOids = Optional.of(organizationOids)
+          .filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids)
+          .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
-      CompletableFuture<Set<String>> searchByOrganizationGroupOids =
-          Optional.of(organizationGroupOids)
-              .filter(oids -> !oids.isEmpty())
-              .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
-              .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
+      CompletableFuture<Set<String>> searchByOrganizationGroupOids = Optional.of(organizationGroupOids)
+          .filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
+          .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
-      return Observable.fromFuture(
-          searchByOrganizationOids.thenComposeAsync(
-              byOrgs ->
-                  searchByOrganizationGroupOids.thenApplyAsync(
-                      byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid))));
+      return Observable
+          .fromFuture(searchByOrganizationOids.thenComposeAsync(byOrgs -> searchByOrganizationGroupOids
+              .thenApplyAsync(byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid))));
     }
   }
 
@@ -78,25 +72,20 @@ public class AuthorityCheckService {
       return;
     }
 
-    boolean isAuthorized =
-        Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
-            .map(haku -> isAuthorizedForAnyParentOid(haku.tarjoajaOids, userRoles, requiredRoles))
-            .timeout(2, MINUTES)
-            .blockingFirst();
+    boolean isAuthorized = Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
+        .map(haku -> isAuthorizedForAnyParentOid(haku.tarjoajaOids, userRoles, requiredRoles))
+        .timeout(2, MINUTES).blockingFirst();
 
     if (!isAuthorized) {
-      String msg =
-          String.format(
-              "Käyttäjällä ei oikeutta haun %s tarjoajaan tai sen yläorganisaatioihin.", hakuOid);
+      String msg = String.format("Käyttäjällä ei oikeutta haun %s tarjoajaan tai sen yläorganisaatioihin.",
+          hakuOid);
       LOG.error(msg);
       throw new ForbiddenException(msg);
     }
   }
 
-  public boolean isAuthorizedForAnyParentOid(
-      Set<String> organisaatioOids,
-      Collection<? extends GrantedAuthority> userRoles,
-      Collection<String> requiredRoles) {
+  public boolean isAuthorizedForAnyParentOid(Set<String> organisaatioOids,
+      Collection<? extends GrantedAuthority> userRoles, Collection<String> requiredRoles) {
     try {
       for (String organisaatioOid : organisaatioOids) {
         String parentOidsPath = organisaatioResource.parentoids(organisaatioOid);
@@ -107,16 +96,15 @@ public class AuthorityCheckService {
             String organizationRole = role + "_" + oid;
 
             for (GrantedAuthority auth : userRoles) {
-              if (organizationRole.equals(auth.getAuthority())) return true;
+              if (organizationRole.equals(auth.getAuthority()))
+                return true;
             }
           }
         }
       }
     } catch (Exception e) {
-      String msg =
-          String.format(
-              "Organisaatioiden %s parentOids -haku epäonnistui",
-              String.join(", ", organisaatioOids));
+      String msg = String.format("Organisaatioiden %s parentOids -haku epäonnistui",
+          String.join(", ", organisaatioOids));
       LOG.error(msg, e);
       throw new ForbiddenException(msg);
     }
@@ -124,8 +112,7 @@ public class AuthorityCheckService {
     return false;
   }
 
-  public void checkAuthorizationForValintaryhma(
-      String valintaryhmaOid, List<String> requiredRoles) {
+  public void checkAuthorizationForValintaryhma(String valintaryhmaOid, List<String> requiredRoles) {
     Collection<? extends GrantedAuthority> userRoles = getRoles();
 
     boolean isOphUser = containsOphRole(userRoles);
@@ -133,29 +120,22 @@ public class AuthorityCheckService {
       return;
     }
 
-    boolean isAuthorized =
-        valintaperusteetAsyncResource
-            .haeValintaryhmaVastuuorganisaatio(valintaryhmaOid)
-            .map(
-                (vastuuorganisaatioOid) -> {
-                  if (vastuuorganisaatioOid == null) {
-                    LOG.error(
-                        "Valintaryhmän {} vastuuorganisaatio on null; vain OPH:lla oikeus valintaryhmään.",
-                        valintaryhmaOid);
-                    return false;
-                  } else {
-                    return isAuthorizedForAnyParentOid(
-                        Collections.singleton(vastuuorganisaatioOid), userRoles, requiredRoles);
-                  }
-                })
-            .timeout(2, MINUTES)
-            .blockingFirst();
+    boolean isAuthorized = valintaperusteetAsyncResource.haeValintaryhmaVastuuorganisaatio(valintaryhmaOid)
+        .map((vastuuorganisaatioOid) -> {
+          if (vastuuorganisaatioOid == null) {
+            LOG.error("Valintaryhmän {} vastuuorganisaatio on null; vain OPH:lla oikeus valintaryhmään.",
+                valintaryhmaOid);
+            return false;
+          } else {
+            return isAuthorizedForAnyParentOid(Collections.singleton(vastuuorganisaatioOid), userRoles,
+                requiredRoles);
+          }
+        }).timeout(2, MINUTES).blockingFirst();
 
     if (!isAuthorized) {
-      String msg =
-          String.format(
-              "Käyttäjällä ei oikeutta valintaryhmän %s vastuuorganisaatioon tai sen yläorganisaatioihin.",
-              valintaryhmaOid);
+      String msg = String.format(
+          "Käyttäjällä ei oikeutta valintaryhmän %s vastuuorganisaatioon tai sen yläorganisaatioihin.",
+          valintaryhmaOid);
       LOG.error(msg);
       throw new ForbiddenException(msg);
     }
@@ -164,8 +144,9 @@ public class AuthorityCheckService {
   /**
    * Käyttöoikeustarkastelun konteksti
    *
-   * <p>Tämän avulla käyttöoikeustarkastelun voi siirtää käyttäjän tunnistaneesta säikeestä toiseen
-   * säikeeseen.
+   * <p>
+   * Tämän avulla käyttöoikeustarkastelun voi siirtää käyttäjän tunnistaneesta
+   * säikeestä toiseen säikeeseen.
    */
   public static class Context {
     protected final SecurityContext securityContext;

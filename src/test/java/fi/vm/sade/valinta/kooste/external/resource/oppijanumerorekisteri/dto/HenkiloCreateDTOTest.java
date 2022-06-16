@@ -22,20 +22,17 @@ public class HenkiloCreateDTOTest {
   @Test
   public void multipleFirstNamesWithHyphen() {
     HenkiloCreateDTO dto = getHenkiloWithFirstname("Henrikki-Aapeli Testi");
-    assertEquals(
-        "Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
+    assertEquals("Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
   }
 
   @Test
   public void multipleFirstNamesWithHyphenTrimming() {
     // testaa konstruktorissa tapahtuvaa nimen trimmausta, huomioi välilyönti edessä
     HenkiloCreateDTO dto = getHenkiloWithFirstname(" Henrikki-Aapeli Testi");
-    assertEquals(
-        "Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
+    assertEquals("Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
 
     dto = getHenkiloWithFirstname(" Henrikki-Aapeli Testi  ");
-    assertEquals(
-        "Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
+    assertEquals("Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
   }
 
   private HenkiloCreateDTO getHenkiloWithFirstname(String firstname) {
@@ -49,16 +46,7 @@ public class HenkiloCreateDTOTest {
     String asiointikieli = "fi";
     String kansalaisuus = "FIN";
 
-    return new HenkiloCreateDTO(
-        aidinkieli,
-        sukupuoli,
-        firstname,
-        sukunimi,
-        hetu,
-        syntymaAika,
-        henkiloOid,
-        henkiloTyyppi,
-        asiointikieli,
-        kansalaisuus);
+    return new HenkiloCreateDTO(aidinkieli, sukupuoli, firstname, sukunimi, hetu, syntymaAika, henkiloOid,
+        henkiloTyyppi, asiointikieli, kansalaisuus);
   }
 }

@@ -23,8 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource
-    implements DokumenttiAsyncResource {
+public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource implements DokumenttiAsyncResource {
   private static final Logger LOG = LoggerFactory.getLogger(DokumenttiAsyncResourceImpl.class);
   private final HttpClient client;
 
@@ -37,34 +36,23 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource
   @Override
   public CompletableFuture<Void> uudelleenNimea(String dokumenttiId, String filename) {
     return this.client
-        .putResponse(
-            getUrl("dokumenttipalvelu-service.dokumentit.uudelleennimea", dokumenttiId),
-            Duration.ofMinutes(1),
-            filename.getBytes(Charset.forName("UTF-8")),
-            "text/plain")
-        .thenApply(
-            response -> {
-              try (InputStream is = response.body()) {
-                is.readAllBytes();
-                return null;
-              } catch (IOException e) {
-                throw new UncheckedIOException(e);
-              }
-            });
+        .putResponse(getUrl("dokumenttipalvelu-service.dokumentit.uudelleennimea", dokumenttiId),
+            Duration.ofMinutes(1), filename.getBytes(Charset.forName("UTF-8")), "text/plain")
+        .thenApply(response -> {
+          try (InputStream is = response.body()) {
+            is.readAllBytes();
+            return null;
+          } catch (IOException e) {
+            throw new UncheckedIOException(e);
+          }
+        });
   }
 
   @Override
-  public Observable<Response> tallenna(
-      String id,
-      String filename,
-      Long expirationDate,
-      List<String> tags,
-      String mimeType,
-      InputStream filedata) {
-    return putAsObservableLazily(
-        getUrl("dokumenttipalvelu-service.dokumentit.tallenna"),
-        Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM),
-        client -> {
+  public Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags,
+      String mimeType, InputStream filedata) {
+    return putAsObservableLazily(getUrl("dokumenttipalvelu-service.dokumentit.tallenna"),
+        Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM), client -> {
           client.query("id", id);
           client.query("filename", filename);
           client.query("expirationDate", expirationDate);
@@ -77,36 +65,24 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource
 
   @Override
   public CompletableFuture<HttpResponse<InputStream>> lataa(String documentId) {
-    return this.client
-        .getResponse(
-            getUrl("dokumenttipalvelu-service.dokumentit.lataa", documentId),
-            Duration.ofMinutes(1),
-            x -> x)
-        .thenApply(
-            response -> {
-              if (response.statusCode() == 404) {
-                LOG.error("Dokumentin " + documentId + " lataus dokumenttipalvelusta epäonnistui.");
-              }
-              return response;
-            });
+    return this.client.getResponse(getUrl("dokumenttipalvelu-service.dokumentit.lataa", documentId),
+        Duration.ofMinutes(1), x -> x).thenApply(response -> {
+          if (response.statusCode() == 404) {
+            LOG.error("Dokumentin " + documentId + " lataus dokumenttipalvelusta epäonnistui.");
+          }
+          return response;
+        });
   }
 
   @Override
   public CompletableFuture<Void> tyhjenna() {
-    return this.client
-        .putResponse(
-            getUrl("dokumenttipalvelu-service.dokumentit.tyhjenna"),
-            Duration.ofMinutes(1),
-            "I wanna be some body".getBytes(),
-            "text/plain")
-        .thenApply(
-            response -> {
-              if (response.statusCode() == 204) {
-                return null;
-              }
-              throw new RuntimeException(
-                  "Dokumenttipalvelun vanhentuneiden dokumenttien tyhjennys epäonnistui: "
-                      + response.statusCode());
-            });
+    return this.client.putResponse(getUrl("dokumenttipalvelu-service.dokumentit.tyhjenna"), Duration.ofMinutes(1),
+        "I wanna be some body".getBytes(), "text/plain").thenApply(response -> {
+          if (response.statusCode() == 204) {
+            return null;
+          }
+          throw new RuntimeException("Dokumenttipalvelun vanhentuneiden dokumenttien tyhjennys epäonnistui: "
+              + response.statusCode());
+        });
   }
 }

@@ -14,11 +14,7 @@ public class Kirje {
     this.koulutus = null;
   }
 
-  public Kirje(
-      Osoite addressLabel,
-      String languageCode,
-      String koulu,
-      String koulutus,
+  public Kirje(Osoite addressLabel, String languageCode, String koulu, String koulutus,
       List<Map<String, String>> tulokset) {
     this.addressLabel = addressLabel;
     this.languageCode = languageCode;

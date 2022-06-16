@@ -7,9 +7,7 @@ import org.joda.time.Interval;
 public class ProsessiJaStatus<T> {
 
   public static enum Status {
-    STARTED,
-    FINISHED,
-    FAILED
+    STARTED, FINISHED, FAILED
   }
 
   private T prosessi;

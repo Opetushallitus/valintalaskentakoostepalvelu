@@ -13,11 +13,7 @@ public class SijoittelunTulosProsessi extends DokumenttiProsessi {
   private final Collection<Valmis> valmiit;
   private final Optional<String> asiointikieli;
 
-  public SijoittelunTulosProsessi(
-      Optional<String> asiointikieli,
-      String resurssi,
-      String toiminto,
-      String hakuOid,
+  public SijoittelunTulosProsessi(Optional<String> asiointikieli, String resurssi, String toiminto, String hakuOid,
       List<String> tags) {
     super(resurssi, toiminto, hakuOid, tags);
     this.asiointikieli = asiointikieli;

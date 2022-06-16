@@ -3,15 +3,14 @@ package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 import io.swagger.annotations.ApiModel;
 import java.util.List;
 
-@ApiModel(
-    value = "valinta.kooste.pistesyotto.dto.HakemusDTO",
-    description = "Yhden hakemuksen tiedot")
+@ApiModel(value = "valinta.kooste.pistesyotto.dto.HakemusDTO", description = "Yhden hakemuksen tiedot")
 public class HakemusDTO {
   private String hakemusOid;
   private String henkiloOid;
   private List<ValintakoeDTO> valintakokeet;
 
-  public HakemusDTO() {}
+  public HakemusDTO() {
+  }
 
   public HakemusDTO(String hakemusOid, String henkiloOid, List<ValintakoeDTO> valintakokeet) {
     this.hakemusOid = hakemusOid;
@@ -45,15 +44,7 @@ public class HakemusDTO {
 
   @Override
   public String toString() {
-    return "HakemusDTO{"
-        + "hakemusOid='"
-        + hakemusOid
-        + '\''
-        + ", henkiloOid='"
-        + henkiloOid
-        + '\''
-        + ", valintakokeet="
-        + valintakokeet
-        + '}';
+    return "HakemusDTO{" + "hakemusOid='" + hakemusOid + '\'' + ", henkiloOid='" + henkiloOid + '\''
+        + ", valintakokeet=" + valintakokeet + '}';
   }
 }

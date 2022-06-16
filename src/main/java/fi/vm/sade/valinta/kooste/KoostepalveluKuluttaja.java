@@ -22,16 +22,15 @@ public class KoostepalveluKuluttaja<IN> implements Processor {
     this.delay = 0;
   }
 
-  public KoostepalveluKuluttaja(
-      Consumer<IN> kuluttaja, BiPredicate<IN, Exception> virhekasittelija) {
+  public KoostepalveluKuluttaja(Consumer<IN> kuluttaja, BiPredicate<IN, Exception> virhekasittelija) {
     this.kuluttaja = kuluttaja;
     this.virhekasittelija = virhekasittelija;
     this.retries = 0;
     this.delay = 0;
   }
 
-  public KoostepalveluKuluttaja(
-      Consumer<IN> kuluttaja, BiPredicate<IN, Exception> virhekasittelija, int retries, int delay) {
+  public KoostepalveluKuluttaja(Consumer<IN> kuluttaja, BiPredicate<IN, Exception> virhekasittelija, int retries,
+      int delay) {
     this.kuluttaja = kuluttaja;
     this.virhekasittelija = virhekasittelija;
     this.retries = retries;

@@ -38,15 +38,8 @@ public abstract class KelaAbstraktiHaku {
 
   public abstract List<String> getPersonOids();
 
-  public abstract Collection<KelaHakijaRivi> createHakijaRivit(
-      Date alkuPvm,
-      Date loppuPvm,
-      String hakuOid,
-      KelaProsessi prosessi,
-      HenkilotietoSource henkilotietoSource,
-      HakukohdeSource hakukohdeSource,
-      LinjakoodiSource linjakoodiSource,
-      OppilaitosSource oppilaitosSource,
-      TutkinnontasoSource tutkinnontasoSource,
-      TilaSource tilaSource);
+  public abstract Collection<KelaHakijaRivi> createHakijaRivit(Date alkuPvm, Date loppuPvm, String hakuOid,
+      KelaProsessi prosessi, HenkilotietoSource henkilotietoSource, HakukohdeSource hakukohdeSource,
+      LinjakoodiSource linjakoodiSource, OppilaitosSource oppilaitosSource,
+      TutkinnontasoSource tutkinnontasoSource, TilaSource tilaSource);
 }

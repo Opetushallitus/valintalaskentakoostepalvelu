@@ -7,9 +7,7 @@ import javax.ws.rs.core.Response;
 
 public interface EPostiService {
 
-  void lahetaSecurelinkit(
-      EPostiRequest ePostiRequest, Consumer<EPostiResponse> success, Consumer<String> failure);
+  void lahetaSecurelinkit(EPostiRequest ePostiRequest, Consumer<EPostiResponse> success, Consumer<String> failure);
 
-  void esikatseleSecurelinkki(
-      EPostiRequest ePostiRequest, Consumer<Response> success, Consumer<String> failure);
+  void esikatseleSecurelinkki(EPostiRequest ePostiRequest, Consumer<Response> success, Consumer<String> failure);
 }

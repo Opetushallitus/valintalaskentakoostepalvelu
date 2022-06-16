@@ -8,7 +8,8 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 /** XSSFCell -> Solu */
 public class XSSFSolu {
 
-  private XSSFSolu() {}
+  private XSSFSolu() {
+  }
 
   public static Solu asSolu(XSSFCell cell) {
     if (CellType.NUMERIC.equals(cell.getCellTypeEnum())) {

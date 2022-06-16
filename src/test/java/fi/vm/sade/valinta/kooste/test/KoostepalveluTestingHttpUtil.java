@@ -16,8 +16,8 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
 public class KoostepalveluTestingHttpUtil {
-  public static HttpResponse<InputStream> createMockResponse(
-      String fileInClasspath, int statusCode, String contentType) throws Exception {
+  public static HttpResponse<InputStream> createMockResponse(String fileInClasspath, int statusCode,
+      String contentType) throws Exception {
     HttpResponse<InputStream> response = mock(HttpResponse.class);
     when(response.statusCode()).thenReturn(statusCode);
 
@@ -30,8 +30,7 @@ public class KoostepalveluTestingHttpUtil {
     return response;
   }
 
-  public static HttpResponse<InputStream> createMockJsonResponse(String fileInClasspath)
-      throws Exception {
+  public static HttpResponse<InputStream> createMockJsonResponse(String fileInClasspath) throws Exception {
     return createMockResponse(fileInClasspath, 200, "application/json");
   }
 

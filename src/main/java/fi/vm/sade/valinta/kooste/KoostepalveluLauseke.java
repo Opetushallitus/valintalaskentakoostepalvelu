@@ -22,8 +22,7 @@ public class KoostepalveluLauseke<IN, OUT> implements Expression {
     this.vakio = null;
   }
 
-  public KoostepalveluLauseke(
-      Function<IN, OUT> lauseke, BiPredicate<IN, Exception> virhekasittelija, OUT vakio) {
+  public KoostepalveluLauseke(Function<IN, OUT> lauseke, BiPredicate<IN, Exception> virhekasittelija, OUT vakio) {
     this.lauseke = lauseke;
     this.virhekasittelija = virhekasittelija;
     this.virheloggaus = null;

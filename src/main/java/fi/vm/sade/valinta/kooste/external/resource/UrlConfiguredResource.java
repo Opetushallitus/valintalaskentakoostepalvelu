@@ -22,8 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class UrlConfiguredResource implements HttpResource {
   private static final Logger LOGGER = LoggerFactory.getLogger(UrlConfiguredResource.class);
-  public static final String VALINTALASKENTAKOOSTEPALVELU_CALLER_ID =
-      "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
+  public static final String VALINTALASKENTAKOOSTEPALVELU_CALLER_ID = "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu";
   public final HttpResource wrappedHttpResource;
   private final UrlConfiguration urlConfiguration;
 
@@ -38,14 +37,11 @@ public abstract class UrlConfiguredResource implements HttpResource {
   public UrlConfiguredResource(long timeoutMillis, AbstractPhaseInterceptor casInterceptor) {
     this.urlConfiguration = UrlConfiguration.getInstance();
 
-    HttpResourceBuilder builder =
-        new HttpResourceBuilder(VALINTALASKENTAKOOSTEPALVELU_CALLER_ID)
-            .gson(createGson())
-            .timeoutMillis(timeoutMillis);
+    HttpResourceBuilder builder = new HttpResourceBuilder(VALINTALASKENTAKOOSTEPALVELU_CALLER_ID).gson(createGson())
+        .timeoutMillis(timeoutMillis);
 
     if (casInterceptor != null) {
-      builder.jaxrsClientFactoryBean(
-          installCasFilter(casInterceptor, HttpResource.getJaxrsClientFactoryBean()));
+      builder.jaxrsClientFactoryBean(installCasFilter(casInterceptor, HttpResource.getJaxrsClientFactoryBean()));
     }
     this.wrappedHttpResource = builder.build();
   }
@@ -58,8 +54,8 @@ public abstract class UrlConfiguredResource implements HttpResource {
     return urlConfiguration.url(key, params);
   }
 
-  private JAXRSClientFactoryBean installCasFilter(
-      AbstractPhaseInterceptor casInterceptor, JAXRSClientFactoryBean bean) {
+  private JAXRSClientFactoryBean installCasFilter(AbstractPhaseInterceptor casInterceptor,
+      JAXRSClientFactoryBean bean) {
     if ("default".equalsIgnoreCase(System.getProperty("spring.profiles.active", "default"))) {
       List<Interceptor<? extends Message>> interceptors = Lists.newArrayList();
       interceptors.add(casInterceptor);
@@ -80,8 +76,8 @@ public abstract class UrlConfiguredResource implements HttpResource {
   }
 
   @Override
-  public Observable<Response> getAsObservableLazily(
-      String path, Function<WebClient, WebClient> paramsHeadersAndStuff) {
+  public Observable<Response> getAsObservableLazily(String path,
+      Function<WebClient, WebClient> paramsHeadersAndStuff) {
     return wrappedHttpResource.getAsObservableLazily(path, paramsHeadersAndStuff);
   }
 
@@ -101,24 +97,21 @@ public abstract class UrlConfiguredResource implements HttpResource {
   }
 
   @Override
-  public <T> Observable<T> getAsObservableLazily(
-      String path, Type type, Function<WebClient, WebClient> paramsHeadersAndStuff) {
+  public <T> Observable<T> getAsObservableLazily(String path, Type type,
+      Function<WebClient, WebClient> paramsHeadersAndStuff) {
     return wrappedHttpResource.getAsObservableLazily(path, type, paramsHeadersAndStuff);
   }
 
   @Override
-  public <T> Observable<T> getAsObservableLazily(
-      String path,
-      Function<String, T> extractor,
+  public <T> Observable<T> getAsObservableLazily(String path, Function<String, T> extractor,
       Function<WebClient, WebClient> paramsHeadersAndStuff) {
     return wrappedHttpResource.getAsObservableLazily(path, extractor, paramsHeadersAndStuff);
   }
 
   @Override
-  public <T> Observable<T> getAsObservableLazilyWithInputStream(
-      String path, Type type, Function<WebClient, WebClient> paramsHeadersAndStuff) {
-    return wrappedHttpResource.getAsObservableLazilyWithInputStream(
-        path, type, paramsHeadersAndStuff);
+  public <T> Observable<T> getAsObservableLazilyWithInputStream(String path, Type type,
+      Function<WebClient, WebClient> paramsHeadersAndStuff) {
+    return wrappedHttpResource.getAsObservableLazilyWithInputStream(path, type, paramsHeadersAndStuff);
   }
 
   @Override
@@ -127,10 +120,7 @@ public abstract class UrlConfiguredResource implements HttpResource {
   }
 
   @Override
-  public <A, B> Observable<B> postAsObservableLazily(
-      String path,
-      Type type,
-      Entity<A> entity,
+  public <A, B> Observable<B> postAsObservableLazily(String path, Type type, Entity<A> entity,
       Function<WebClient, WebClient> paramsHeadersAndStuff) {
     return wrappedHttpResource.postAsObservableLazily(path, type, entity, paramsHeadersAndStuff);
   }
@@ -141,8 +131,8 @@ public abstract class UrlConfiguredResource implements HttpResource {
   }
 
   @Override
-  public <A> Observable<Response> postAsObservableLazily(
-      String path, Entity<A> entity, Function<WebClient, WebClient> paramsHeadersAndStuff) {
+  public <A> Observable<Response> postAsObservableLazily(String path, Entity<A> entity,
+      Function<WebClient, WebClient> paramsHeadersAndStuff) {
     return wrappedHttpResource.postAsObservableLazily(path, entity, paramsHeadersAndStuff);
   }
 
@@ -157,23 +147,20 @@ public abstract class UrlConfiguredResource implements HttpResource {
   }
 
   @Override
-  public <A> Observable<Response> putAsObservableLazily(
-      String path, Entity<A> entity, Function<WebClient, WebClient> paramsHeadersAndStuff) {
+  public <A> Observable<Response> putAsObservableLazily(String path, Entity<A> entity,
+      Function<WebClient, WebClient> paramsHeadersAndStuff) {
     return wrappedHttpResource.putAsObservableLazily(path, entity, paramsHeadersAndStuff);
   }
 
   @Override
-  public <A, B> Observable<B> putAsObservableLazily(
-      String path,
-      Type type,
-      Entity<A> entity,
+  public <A, B> Observable<B> putAsObservableLazily(String path, Type type, Entity<A> entity,
       Function<WebClient, WebClient> paramsHeadersAndStuff) {
     return wrappedHttpResource.putAsObservableLazily(path, type, entity, paramsHeadersAndStuff);
   }
 
   @Override
-  public <A> Observable<A> deleteAsObservableLazily(
-      String path, Type type, Function<WebClient, WebClient> paramsHeadersAndStuff) {
+  public <A> Observable<A> deleteAsObservableLazily(String path, Type type,
+      Function<WebClient, WebClient> paramsHeadersAndStuff) {
     return wrappedHttpResource.deleteAsObservableLazily(path, type, paramsHeadersAndStuff);
   }
 }

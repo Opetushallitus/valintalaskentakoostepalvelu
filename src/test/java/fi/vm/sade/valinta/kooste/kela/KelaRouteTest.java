@@ -49,25 +49,18 @@ import org.slf4j.LoggerFactory;
 public class KelaRouteTest extends CamelTestSupport {
 
   private final Logger LOG = LoggerFactory.getLogger(KelaRouteTest.class);
-  private final TarjontaAsyncResource tarjontaAsyncResource =
-      Mockito.mock(TarjontaAsyncResource.class);
-  private final DokumenttiAsyncResource dokumenttiAsyncResource =
-      Mockito.mock(DokumenttiAsyncResource.class);
-  private final KelaHakijaRiviKomponenttiImpl hkRivi =
-      Mockito.mock(KelaHakijaRiviKomponenttiImpl.class);
-  private final KelaDokumentinLuontiKomponenttiImpl dkRivi =
-      Mockito.mock(KelaDokumentinLuontiKomponenttiImpl.class);
-  private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource =
-      Mockito.mock(ValintaTulosServiceAsyncResource.class);
-  private final HaunTyyppiKomponentti haunTyyppiKomponentti =
-      Mockito.mock(HaunTyyppiKomponentti.class);
+  private final TarjontaAsyncResource tarjontaAsyncResource = Mockito.mock(TarjontaAsyncResource.class);
+  private final DokumenttiAsyncResource dokumenttiAsyncResource = Mockito.mock(DokumenttiAsyncResource.class);
+  private final KelaHakijaRiviKomponenttiImpl hkRivi = Mockito.mock(KelaHakijaRiviKomponenttiImpl.class);
+  private final KelaDokumentinLuontiKomponenttiImpl dkRivi = Mockito.mock(KelaDokumentinLuontiKomponenttiImpl.class);
+  private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource = Mockito
+      .mock(ValintaTulosServiceAsyncResource.class);
+  private final HaunTyyppiKomponentti haunTyyppiKomponentti = Mockito.mock(HaunTyyppiKomponentti.class);
   private final ApplicationResource applicationResource = Mockito.mock(ApplicationResource.class);
-  private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
-      Mockito.mock(OppijanumerorekisteriAsyncResource.class);
-  private final OppilaitosKomponentti oppilaitosKomponentti =
-      Mockito.mock(OppilaitosKomponentti.class);
-  private final LinjakoodiKomponentti linjakoodiKomponentti =
-      Mockito.mock(LinjakoodiKomponentti.class);
+  private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource = Mockito
+      .mock(OppijanumerorekisteriAsyncResource.class);
+  private final OppilaitosKomponentti oppilaitosKomponentti = Mockito.mock(OppilaitosKomponentti.class);
+  private final LinjakoodiKomponentti linjakoodiKomponentti = Mockito.mock(LinjakoodiKomponentti.class);
 
   private final String HAKU1 = "HAKU1OID";
   private final String HAKU2 = "HAKU2OID";
@@ -80,36 +73,23 @@ public class KelaRouteTest extends CamelTestSupport {
   protected ProducerTemplate template;
 
   private TarjontaHakukohde createHakukohdeDTO() {
-    return new TarjontaHakukohde(
-        HAKUKOHDE1,
-        null,
-        new HashMap<>(),
-        null,
-        Collections.emptySet(),
-        new HashSet<>(),
-        null,
-        new HashSet<>(),
-        null,
-        Collections.emptySet(),
-        null);
+    return new TarjontaHakukohde(HAKUKOHDE1, null, new HashMap<>(), null, Collections.emptySet(), new HashSet<>(),
+        null, new HashSet<>(), null, Collections.emptySet(), null);
   }
 
   private List<ValintaTulosServiceDto> createHakijat() {
     ValintaTulosServiceDto vts = new ValintaTulosServiceDto();
     vts.setHakemusOid(HAKEMUS1);
     /*
-    HakijaDTO h = new HakijaDTO();
-    h.setEtunimi("Eero");
-    h.setHakemusOid(HAKEMUS1);
-    TreeSet<HakutoiveDTO> hakutoiveet = new TreeSet<HakutoiveDTO>();
-    HakutoiveDTO htoive = new HakutoiveDTO();
-    HakutoiveenValintatapajonoDTO jono = new HakutoiveenValintatapajonoDTO();
-    jono.setTila(HakemuksenTila.HYVAKSYTTY);
-    jono.setVastaanottotieto(ValintatuloksenTila.VASTAANOTTANUT);
-    htoive.getHakutoiveenValintatapajonot().add(jono);
-    hakutoiveet.add(htoive);
-    h.setHakutoiveet(hakutoiveet);
-    */
+     * HakijaDTO h = new HakijaDTO(); h.setEtunimi("Eero");
+     * h.setHakemusOid(HAKEMUS1); TreeSet<HakutoiveDTO> hakutoiveet = new
+     * TreeSet<HakutoiveDTO>(); HakutoiveDTO htoive = new HakutoiveDTO();
+     * HakutoiveenValintatapajonoDTO jono = new HakutoiveenValintatapajonoDTO();
+     * jono.setTila(HakemuksenTila.HYVAKSYTTY);
+     * jono.setVastaanottotieto(ValintatuloksenTila.VASTAANOTTANUT);
+     * htoive.getHakutoiveenValintatapajonot().add(jono); hakutoiveet.add(htoive);
+     * h.setHakutoiveet(hakutoiveet);
+     */
     return Arrays.asList();
   }
 
@@ -120,62 +100,41 @@ public class KelaRouteTest extends CamelTestSupport {
     Mockito.when(tarjontaAsyncResource.haeHakukohde(Mockito.anyString()))
         .thenReturn(CompletableFuture.completedFuture(createHakukohdeDTO()));
     Mockito.when(tarjontaAsyncResource.haeHaku(Mockito.anyString()))
-        .then(
-            (Answer<CompletableFuture<Haku>>)
-                invocation -> {
-                  String s = invocation.getArguments()[0].toString();
-                  LOG.error("Tarjonnasta haku {}", s);
-                  return CompletableFuture.completedFuture(createHaku(s));
-                });
-    Mockito.when(haunTyyppiKomponentti.haunTyyppi(Mockito.anyString()))
-        .then(
-            new Answer<String>() {
-              @Override
-              public String answer(InvocationOnMock invocation) throws Throwable {
-                LOG.error("Koodistosta haulle {} tyyppi!", invocation.getArguments()[0]);
-                return "03";
-              }
-            });
+        .then((Answer<CompletableFuture<Haku>>) invocation -> {
+          String s = invocation.getArguments()[0].toString();
+          LOG.error("Tarjonnasta haku {}", s);
+          return CompletableFuture.completedFuture(createHaku(s));
+        });
+    Mockito.when(haunTyyppiKomponentti.haunTyyppi(Mockito.anyString())).then(new Answer<String>() {
+      @Override
+      public String answer(InvocationOnMock invocation) throws Throwable {
+        LOG.error("Koodistosta haulle {} tyyppi!", invocation.getArguments()[0]);
+        return "03";
+      }
+    });
 
-    Mockito.when(
-            applicationResource.findApplications(
-                Mockito.anyString(),
-                Mockito.anyListOf(String.class),
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyString(), // hakuOid,
-                Mockito.anyString(),
-                Mockito.anyInt(),
-                Mockito.anyInt()))
-        .then(
-            new Answer<HakemusList>() {
-              @Override
-              public HakemusList answer(InvocationOnMock invocation) throws Throwable {
-                LOG.error("Hakemuslistausta haulle!");
-                return createHakemusList();
-              }
-            });
+    Mockito.when(applicationResource.findApplications(Mockito.anyString(), Mockito.anyListOf(String.class),
+        Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), // hakuOid,
+        Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt())).then(new Answer<HakemusList>() {
+          @Override
+          public HakemusList answer(InvocationOnMock invocation) throws Throwable {
+            LOG.error("Hakemuslistausta haulle!");
+            return createHakemusList();
+          }
+        });
     Mockito.when(applicationResource.getApplicationsByOids(Mockito.anyListOf(String.class)))
-        .then(
-            new Answer<List<Hakemus>>() {
-              @Override
-              public List<Hakemus> answer(InvocationOnMock invocation) throws Throwable {
-                LOG.error("Hakemuslistausta haulle!");
-                return createHakemukset();
-              }
-            });
+        .then(new Answer<List<Hakemus>>() {
+          @Override
+          public List<Hakemus> answer(InvocationOnMock invocation) throws Throwable {
+            LOG.error("Hakemuslistausta haulle!");
+            return createHakemukset();
+          }
+        });
     Collection<String> hakuOids = Arrays.asList(HAKU1, HAKU2);
     KelaProsessi kelaProsessi = new KelaProsessi("luonti", hakuOids);
-    KelaLuonti kelaLuonti =
-        new KelaLuonti(
-            UUID,
-            hakuOids,
-            StringUtils.EMPTY,
-            StringUtils.EMPTY,
-            new KelaCache(tarjontaAsyncResource),
-            kelaProsessi);
-    template.sendBodyAndProperty(
-        kelaLuonti, ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, kelaProsessi);
+    KelaLuonti kelaLuonti = new KelaLuonti(UUID, hakuOids, StringUtils.EMPTY, StringUtils.EMPTY,
+        new KelaCache(tarjontaAsyncResource), kelaProsessi);
+    template.sendBodyAndProperty(kelaLuonti, ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, kelaProsessi);
   }
 
   private List<Hakemus> createHakemukset() {
@@ -202,22 +161,12 @@ public class KelaRouteTest extends CamelTestSupport {
 
   @Override
   protected RouteBuilder createRouteBuilder() throws Exception {
-    return new KelaRouteImpl(
-        DIRECT_KELA,
-        dokumenttiAsyncResource,
-        hkRivi,
-        dkRivi,
-        tarjontaAsyncResource,
-        haunTyyppiKomponentti,
-        oppijanumerorekisteriAsyncResource,
-        oppilaitosKomponentti,
-        linjakoodiKomponentti,
-        valintaTulosServiceAsyncResource,
-        null);
+    return new KelaRouteImpl(DIRECT_KELA, dokumenttiAsyncResource, hkRivi, dkRivi, tarjontaAsyncResource,
+        haunTyyppiKomponentti, oppijanumerorekisteriAsyncResource, oppilaitosKomponentti, linjakoodiKomponentti,
+        valintaTulosServiceAsyncResource, null);
   }
 
   private Haku createHaku(String oid) {
-    return new Haku(
-        oid, new HashMap<>(), new HashSet<>(), null, null, null, null, "ALKKAUSIURI", null);
+    return new Haku(oid, new HashMap<>(), new HashSet<>(), null, null, null, null, "ALKKAUSIURI", null);
   }
 }

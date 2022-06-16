@@ -17,14 +17,12 @@ public class ApplicationAdditionalDataDTO {
   private String lastName;
   private Map<String, String> additionalData = new HashMap<>();
 
-  public ApplicationAdditionalDataDTO() {}
+  public ApplicationAdditionalDataDTO() {
+  }
 
   @JsonCreator
-  public ApplicationAdditionalDataDTO(
-      @JsonProperty("oid") String oid,
-      @JsonProperty("personOid") String personOid,
-      @JsonProperty("firstNames") String firstNames,
-      @JsonProperty("lastName") String lastName,
+  public ApplicationAdditionalDataDTO(@JsonProperty("oid") String oid, @JsonProperty("personOid") String personOid,
+      @JsonProperty("firstNames") String firstNames, @JsonProperty("lastName") String lastName,
       @JsonProperty("additionalData") Map<String, String> additionalData) {
     this.oid = oid;
     this.personOid = personOid;

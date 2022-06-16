@@ -29,8 +29,7 @@ public class ValintalaskentaSpec {
     }
 
     public HakemusOsallistuminenBuilder addOsallistuminen(String tunniste) {
-      fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO v =
-          new fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO();
+      fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO v = new fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO();
       // v.setValintakoeOid(valintakoeOid);
       v.setValintakoeTunniste(tunniste);
       v.setOsallistuminen(OsallistuminenDTO.OSALLISTUU);
@@ -39,8 +38,7 @@ public class ValintalaskentaSpec {
     }
 
     public HakemusOsallistuminenBuilder addOsallistuminen(String tunniste, OsallistuminenDTO o) {
-      fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO v =
-          new fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO();
+      fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO v = new fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO();
       // v.setValintakoeOid(valintakoeOid);
       v.setValintakoeTunniste(tunniste);
       v.setOsallistuminen(o);

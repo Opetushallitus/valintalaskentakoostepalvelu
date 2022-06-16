@@ -16,12 +16,11 @@ public class AtaruHakemusTest {
 
   @Test
   public void testCreatingAtaruHakemusFromJson() throws Exception {
-    AtaruHakemus ataruHakemus =
-        GSON.<AtaruHakemus>fromJson(
-            IOUtils.toString(
-                new ClassPathResource("ataru/postValintalaskentaResponse.json").getInputStream(),
-                Charset.defaultCharset()),
-            new TypeToken<AtaruHakemus>() {}.getType());
+    AtaruHakemus ataruHakemus = GSON.<AtaruHakemus>fromJson(
+        IOUtils.toString(new ClassPathResource("ataru/postValintalaskentaResponse.json").getInputStream(),
+            Charset.defaultCharset()),
+        new TypeToken<AtaruHakemus>() {
+        }.getType());
     assertEquals("1.2.246.562.11.00000000000000196362", ataruHakemus.getHakemusOid());
 
     AtaruHakutoive ataruHakutoive = ataruHakemus.getHakutoiveet().get(0);
