@@ -233,7 +233,10 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public boolean getLupaTulosEmail() {
-    return "Kyllä".equals(StringUtils.trimToEmpty(keyvalues.get("sahkoisen-asioinnin-lupa")));
+    return "Kyllä"
+            .equals(
+                StringUtils.trimToEmpty(keyvalues.get("paatos-opiskelijavalinnasta-sahkopostiin")))
+        || "Kyllä".equals(StringUtils.trimToEmpty(keyvalues.get("sahkoisen-asioinnin-lupa")));
   }
 
   @Override
